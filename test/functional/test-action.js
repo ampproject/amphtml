@@ -21,7 +21,11 @@ import {
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
-import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+  RAW_OBJECT_ARGS_KEY,
+} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
@@ -43,10 +47,11 @@ function actionService() {
 }
 
 
-function createExecElement(id, enqueAction) {
+function createExecElement(id, enqueAction, defaultActionAlias) {
   const execElement = document.createElement('amp-element');
   execElement.setAttribute('id', id);
   execElement.enqueAction = enqueAction;
+  execElement.getDefaultActionAlias = defaultActionAlias;
   return execElement;
 }
 
@@ -109,17 +114,17 @@ describe('ActionService parseAction', () => {
     const a = parseAction('event1:target1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
-    expect(a.method).to.equal('activate');
+    expect(a.method).to.equal(DEFAULT_ACTION);
   });
 
   it('should parse with default method for two different targets', () => {
     const a = parseMultipleActions('event1:target1,target2');
     expect(a[0].event).to.equal('event1');
     expect(a[0].target).to.equal('target1');
-    expect(a[0].method).to.equal('activate');
+    expect(a[0].method).to.equal(DEFAULT_ACTION);
     expect(a[1].event).to.equal('event1');
     expect(a[1].target).to.equal('target2');
-    expect(a[1].method).to.equal('activate');
+    expect(a[1].method).to.equal(DEFAULT_ACTION);
   });
 
   it('should parse with numeric target', () => {
@@ -180,7 +185,7 @@ describe('ActionService parseAction', () => {
     // action definitions for event1
     expect(a['event1'][0].event).to.equal('event1');
     expect(a['event1'][0].target).to.equal('foo');
-    expect(a['event1'][0].method).to.equal('activate');
+    expect(a['event1'][0].method).to.equal(DEFAULT_ACTION);
     expect(a['event1'][0].args).to.be.null;
 
     expect(a['event1'][1].event).to.equal('event1');
@@ -196,7 +201,7 @@ describe('ActionService parseAction', () => {
     // action definitions for event2
     expect(a['event2'][0].event).to.equal('event2');
     expect(a['event2'][0].target).to.equal('bar');
-    expect(a['event2'][0].method).to.equal('activate');
+    expect(a['event2'][0].method).to.equal(DEFAULT_ACTION);
     expect(a['event2'][0].args).to.be.null;
 
     expect(a['event2'][1].event).to.equal('event2');
@@ -641,6 +646,7 @@ describe('Action hasAction', () => {
 describe('Action method', () => {
   let sandbox;
   let action;
+  let getDefaultActionAlias;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
@@ -648,6 +654,7 @@ describe('Action method', () => {
     sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
+    getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -657,7 +664,7 @@ describe('Action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement = createExecElement(id, onEnqueue);
+    execElement = createExecElement(id, onEnqueue, getDefaultActionAlias);
     parent.appendChild(execElement);
   });
 
@@ -780,6 +787,7 @@ describe('installActionHandler', () => {
 describe('Multiple handlers action method', () => {
   let sandbox;
   let action;
+  let getDefaultActionAlias;
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
@@ -788,6 +796,7 @@ describe('Multiple handlers action method', () => {
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
+    getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
     targetElement.setAttribute('on', 'tap:foo.method1,bar.method2');
     parent = document.createElement('parent');
@@ -796,8 +805,8 @@ describe('Multiple handlers action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement1 = createExecElement('foo', onEnqueue1);
-    execElement2 = createExecElement('bar', onEnqueue2);
+    execElement1 = createExecElement('foo', onEnqueue1, getDefaultActionAlias);
+    execElement2 = createExecElement('bar', onEnqueue2, getDefaultActionAlias);
 
     parent.appendChild(execElement1);
     parent.appendChild(execElement2);
@@ -1344,20 +1353,20 @@ describes.realWin('Action whitelisting', {
   let action;
   let target;
   let spy;
-
+  let getDefaultActionAlias;
   beforeEach(() => {
     spy = env.sandbox.spy();
-    target = createExecElement('foo', spy);
+    getDefaultActionAlias = env.sandbox.stub();
+    target = createExecElement('foo', spy, getDefaultActionAlias);
   });
-
   describe('with non-empty whitelist', () => {
     beforeEach(() => {
       const meta = createElementWithAttributes(env.win.document, 'meta', {
         name: 'amp-action-whitelist',
-        content: 'AMP.pushState, AMP.setState, *.show',
+        content: 'AMP.pushState, AMP.setState, *.show, '
+            + 'amp-element.defaultAction',
       });
       env.win.document.head.appendChild(meta);
-
       action = new ActionService(env.ampdoc, env.win.document);
     });
 
@@ -1367,6 +1376,24 @@ describes.realWin('Action whitelisting', {
       action.invoke_(i);
       expect(spy).to.be.calledWithExactly(i);
     });
+
+    it('should allow whitelisted actions case insensitive', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'TAP', 'amp');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should whitelist default actions if alias is registered default',
+        () => {
+          // Given that 'defaultAction' is a registered default action.
+          getDefaultActionAlias.returns('defaultAction');
+          // Expect the 'activate' call to invoke it.
+          const i = new ActionInvocation(target, 'activate', /* args */ null,
+              'source', 'caller', 'event', ActionTrust.HIGH, 'tap', null);
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
 
     it('should allow whitelisted actions with wildcard target', () => {
       const i = new ActionInvocation(target, 'show', /* args */ null,
@@ -1383,7 +1410,8 @@ describes.realWin('Action whitelisting', {
       expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
           '[{"tagOrTarget":"AMP","method":"pushState"},' +
           '{"tagOrTarget":"AMP","method":"setState"},' +
-          '{"tagOrTarget":"*","method":"show"}].');
+          '{"tagOrTarget":"*","method":"show"},' +
+          '{"tagOrTarget":"amp-element","method":"defaultAction"}].');
     });
 
     it('should allow adding actions to the whitelist', () => {
@@ -1402,7 +1430,6 @@ describes.realWin('Action whitelisting', {
     });
     env.win.document.head.appendChild(meta);
     action = new ActionService(env.ampdoc, env.win.document);
-
     const i = new ActionInvocation(target, 'print', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     sandbox.stub(action, 'error_');
@@ -1420,10 +1447,10 @@ describes.realWin('Action whitelisting', {
     allowConsoleError(() => {
       action = new ActionService(env.ampdoc, env.win.document);
     });
-
     const i = new ActionInvocation(target, 'setState', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     action.invoke_(i);
     expect(spy).to.be.calledWithExactly(i);
   });
+
 });
