@@ -20,10 +20,8 @@
  *
  * Example:
  * <code>
- * <amp-mraid
- *   fallback-on="load incomplete"
- *   layout=nodisplay>
- * </amp-mraid>
+ * <script async host-api="amp-mraid"
+ *  fallback-on="load incomplete"></script>
  * </code>
  *
  */
@@ -116,12 +114,13 @@ export class MraidService {
   }
 }
 
-export class AmpMraid extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    console.log("amp-mraid constructor");
+export class AmpMraid {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @private {!Array<string>} */
     this.fallbackOn_ = [];
@@ -131,64 +130,23 @@ export class AmpMraid extends AMP.BaseElement {
 
     /** @private */
     this.mraid_ = null;
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
-
-  /**
-   * @param {string} errorCode
-   */
-  handleError_(errorCode) {
-    if (!this.registeredWithHostServices_ &&
-        this.fallbackOn_.includes(errorCode)) {
-      this.declineService_();
-    }
-    // todo: send error ping
-  }
-
-  mraidReady_() {
-    const mraidService = new MraidService(this.mraid_);
-
-    HostServices.installVisibilityServiceForDoc(
-        this.getAmpDoc(), () => mraidService);
-    HostServices.installFullscreenServiceForDoc(
-        this.getAmpDoc(), () => mraidService);
-    HostServices.installExitServiceForDoc(
-        this.getAmpDoc(), () => mraidService);
-
-    this.registeredWithHostServices_ = true;
-  }
-
-  mraidLoadSuccess_() {
-    const mraid = window['mraid'];
-    if (!mraid || !mraid.getState || !mraid.addEventListener
-        || !mraid.close || !mraid.open || !mraid.expand) {
-      this.handleError_(ErrorCodes.incomplete);
+    const ampMraidScripts = document.querySelectorAll('script[host-api="amp-mraid"]');
+    if (ampMraidScripts.length > 1) {
+      dev().error(TAG, 'Multiple amp-mraid scripts.');
+      return;
+    } else if (ampMraidScripts.length < 1) {
+      dev().error(TAG, 'Missing amp-mraid scripts.');
       return;
     }
-    this.mraid_ = mraid;
-    if (mraid.getState() === 'loading') {
-      mraid.addEventListener('ready', this.mraidReady_);
-    } else {
-      this.mraidReady_();
-    }
-  }
+    const element = ampMraidScripts[0];
 
-  declineService_() {
-    // Needs API change
-  }
-
-  /** @override */
-  buildCallback() {
-    if (getMode(this.win).runtime !== 'inabox' && false /* TODO */) {
+    if (getMode().runtime !== 'inabox' && false /* TODO */) {
       dev().error(TAG, 'Only supported with Inabox');
       return;
     }
 
-    this.fallbackOn_ = (this.element.getAttribute(FALLBACK_ON) || '').split(' ');
+    this.fallbackOn_ = (element.getAttribute(FALLBACK_ON) || '').split(' ');
     for (const errorCode of this.fallbackOn_) {
       if (errorCode && !(errorCode in ErrorCodes)) {
         dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorCode}"`);
@@ -211,6 +169,54 @@ export class AmpMraid extends AMP.BaseElement {
     const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraid_js);
   }
+
+  /**
+   * @param {string} errorCode
+   */
+  handleError_(errorCode) {
+    if (!this.registeredWithHostServices_ &&
+        this.fallbackOn_.includes(errorCode)) {
+      this.declineService_();
+    }
+    // todo: send error ping
+  }
+
+  mraidReady_() {
+    const mraidService = new MraidService(this.mraid_);
+
+    HostServices.installVisibilityServiceForDoc(
+        this.ampdoc_, () => mraidService);
+    HostServices.installFullscreenServiceForDoc(
+        this.ampdoc_, () => mraidService);
+    HostServices.installExitServiceForDoc(
+        this.ampdoc_, () => mraidService);
+
+    this.registeredWithHostServices_ = true;
+  }
+
+  mraidLoadSuccess_() {
+    const mraid = window['mraid'];
+    if (!mraid || !mraid.getState || !mraid.addEventListener
+        || !mraid.close || !mraid.open || !mraid.expand) {
+      this.handleError_(ErrorCodes.incomplete);
+      return;
+    }
+    this.mraid_ = mraid;
+    if (mraid.getState() === 'loading') {
+      mraid.addEventListener('ready', () => {
+        this.mraidReady_()
+      });
+    } else {
+      this.mraidReady_();
+    }
+  }
+
+  declineService_() {
+    // Needs API change
+  }
 }
 
-AMP.registerElement(TAG, AmpMraid);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc(
+      TAG, AmpMraid);
+});
