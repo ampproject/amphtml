@@ -24,8 +24,7 @@ const argv = minimist(
 /* eslint-disable max-len */
 
 /**
- * Logs the given messages to the console when running individual test files
- * with --files commend line argument.
+ * Logs the given messages to the console when --verbose is specified.
  * @param {*} messages
  */
 function log(...messages) {
