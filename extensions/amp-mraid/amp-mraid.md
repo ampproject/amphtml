@@ -37,5 +37,7 @@ When the `amp-mraid` extension is included in an AMPHTML ad it will load
 `amp-analytics`, `amp-ad-exit`, and `amp-lightbox` to operate in mobile app ads.
 
 ## Validation
-The `amp-mraid` extension is only available for [AMPHTML ads](https://www.ampproject.org/docs/ads/amphtml_ads).
-See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mraid/validator-amp-mraid.protoascii) for the AMP validator specification.
+The `amp-mraid` extension is intended for [AMPHTML
+ads](https://www.ampproject.org/docs/ads/amphtml_ads).  It is intended to be
+injected by the ad network after validation, and as such a creative with
+`amp-mraid` will not validate.
