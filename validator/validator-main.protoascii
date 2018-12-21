@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 790
+spec_file_revision: 791
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -864,6 +864,25 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-cta-url"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
+# AMP metadata, name=amp-cta-landing-page-type
+# Specifies the Single Page Story Ad landing page type
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-landing-page-type"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory_oneof: ['AMP', 'NOAMP', 'STORY']
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-landing-page-type"
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
@@ -6150,4 +6169,3 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
 }
-
