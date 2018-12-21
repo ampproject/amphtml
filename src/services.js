@@ -92,6 +92,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/standard-actions-impl.StandardActions}
+   */
+  static standardActionsForDoc(element) {
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (
+      getExistingServiceForDocInEmbedScope(element, 'standard-actions'));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
    */
@@ -158,13 +167,13 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(elementOrAmpDoc) {
+  static bindForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          elementOrAmpDoc, 'bind', 'amp-bind'));
+          element, 'bind', 'amp-bind'));
   }
 
   /**
@@ -469,20 +478,18 @@ export class Services {
    * @return {!./service/timer-impl.Timer}
    */
   static timerFor(window) {
+    // TODO(alabiaga): This will always return the top window's Timer service.
     return /** @type {!./service/timer-impl.Timer} */ (
       getService(window, 'timer'));
   }
 
   /**
-   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
-   * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
-  static urlReplacementsForDoc(nodeOrDoc) {
+  static urlReplacementsForDoc(element) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url-replace'));
   }
 
   /**
@@ -522,13 +529,12 @@ export class Services {
   /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-impl.Url}
    */
-  static urlForDoc(nodeOrDoc) {
+  static urlForDoc(element) {
     return /** @type {!./service/url-impl.Url} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url'));
   }
 
   /**

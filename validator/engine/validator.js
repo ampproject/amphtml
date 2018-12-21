@@ -536,6 +536,11 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
+     * @type {boolean}
+     * @private
+     */
+    this.attrsCanSatisfyExtension_ = false;
+    /**
      * ParsedAttributes keyed by name.
      * @type {!Object<string, number>}
      * @private
@@ -596,6 +601,7 @@ class ParsedTagSpec {
     }
     sortAndUniquify(this.mandatoryOneofs_);
     sortAndUniquify(this.mandatoryAnyofs_);
+    sortAndUniquify(this.mandatoryAttrIds_);
 
     if (tagSpec.extensionSpec !== null) {
       this.expandExtensionSpec();
@@ -665,6 +671,9 @@ class ParsedTagSpec {
       }
       if (spec.valueUrl) {
         this.containsUrl_ = true;
+      }
+      if (spec.requiresExtension.length > 0) {
+        this.attrsCanSatisfyExtension_ = true;
       }
     }
   }
@@ -792,6 +801,11 @@ class ParsedTagSpec {
   /** @return {!ParsedReferencePoints} */
   getReferencePoints() {
     return this.referencePoints_;
+  }
+
+  /** @return {boolean} */
+  attrsCanSatisfyExtension() {
+    return this.attrsCanSatisfyExtension_;
   }
 
   /**
@@ -1591,10 +1605,9 @@ class TagStack {
    * @return {boolean} true if this within <style amp-custom>. Else false.
    */
   isStyleAmpCustomChild() {
-    return (this.parentStackEntry_().tagName === 'STYLE') &&
-        (this.parentStackEntry_().tagSpec !== null) &&
-        (this.parentStackEntry_().tagSpec.getSpec().specName ===
-         'style amp-custom');
+    return (this.parentStackEntry_().tagSpec !== null) &&
+        (this.parentStackEntry_().tagSpec.getSpec().namedId ===
+         amp.validator.TagSpec.NamedId.STYLE_AMP_CUSTOM);
   }
 
   /**
@@ -1898,32 +1911,12 @@ class CdataMatcher {
       if (!context.getRules()
           .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
           .test(cdata)) {
-        // Special Case Hack! The deprecated amp-boilerplate is a <style> tag
-        // with no attributes on it in the document head. The valid
-        // implementation looks like:
-        //
-        // <style>body ?{opacity: ?0}</style>
-        //
-        // If we find ourselves here, it means that we saw a style tag, with the
-        // incorrect CDATA contents. This is *far* more likely to be caused by
-        // the user intending to use <style amp-custom>, so we override the
-        // error selected here.
-        if (this.tagSpec_.specName !== null &&
-            this.tagSpec_.specName ===
-                'head > style[amp-boilerplate] - old variant') {
-          context.addError(
-              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-              context.getLineCol(),
-              /* params */['amp-custom', 'style amp-custom'],
-              context.getRules().getStylesSpecUrl(), validationResult);
-        } else {
-          context.addError(
-              amp.validator.ValidationError.Code
-                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-              context.getLineCol(),
-              /* params */[getTagSpecName(this.tagSpec_)],
-              getTagSpecUrl(this.tagSpec_), validationResult);
-        }
+        context.addError(
+            amp.validator.ValidationError.Code
+                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+            context.getLineCol(),
+            /* params */[getTagSpecName(this.tagSpec_)],
+            getTagSpecUrl(this.tagSpec_), validationResult);
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
@@ -2203,6 +2196,16 @@ class ExtensionsContext {
   }
 
   /**
+   * Records extensions that are used within the document.
+   * @param {!Array<string>} extensions
+   */
+  recordUsedExtensions(extensions) {
+    for (const extension of extensions) {
+      this.extensionsUsed_[extension] = true;
+    }
+  }
+
+  /**
    * Returns a list of unused extensions which produce validation errors
    * when unused.
    * @return {!Array<string>}
@@ -2255,8 +2258,7 @@ class ExtensionsContext {
 
     // Record presence of a tag, such as <amp-foo> which requires the usage
     // of an amp extension.
-    for (const requiredExtension of tagSpec.requiresExtension)
-    {this.extensionsUsed_[requiredExtension] = true;}
+    this.recordUsedExtensions(tagSpec.requiresExtension);
   }
 }
 
@@ -2461,8 +2463,44 @@ class Context {
         encounteredTag, referencePointResult, tagResult, this.getRules(),
         this.getLineCol());
 
+    this.recordAttrRequiresExtension_(encounteredTag, referencePointResult);
+    this.recordAttrRequiresExtension_(encounteredTag, tagResult);
     this.updateFromTagResult_(referencePointResult);
     this.updateFromTagResult_(tagResult);
+  }
+
+  /**
+   * Record when an encountered tag's attribute that requires an extension
+   * that it also satisfies that the requied extension is used.
+   * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+   * @param {!ValidateTagResult} tagResult
+   * @private
+   */
+  recordAttrRequiresExtension_(encounteredTag, tagResult) {
+    if (tagResult.bestMatchTagSpec === null) {
+      return;
+    }
+    const parsedTagSpec = tagResult.bestMatchTagSpec;
+    if (!parsedTagSpec.attrsCanSatisfyExtension()) {
+      return;
+    }
+    const attrsByName = parsedTagSpec.getAttrsByName();
+    const extensionsCtx = this.extensions_;
+    for (const attr of encounteredTag.attrs()) {
+      if (attr.name in attrsByName) {
+        const attrId = attrsByName[attr.name];
+        // negative attr ids are simple attrs (only name set).
+        if (attrId < 0) {
+          continue;
+        }
+        const parsedAttrSpec =
+            this.rules_.getParsedAttrSpecs().getByAttrSpecId(attrId);
+        if (parsedAttrSpec.getSpec().requiresExtension.length > 0) {
+          extensionsCtx.recordUsedExtensions(
+              parsedAttrSpec.getSpec().requiresExtension);
+        }
+      }
+    }
   }
 
   /**
@@ -4092,19 +4130,22 @@ function validateAttributes(
       }
     }
   }
+  let missingAttrs = [];
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
-      context.addError(
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          context.getLineCol(),
-          /* params */
-          [
-            context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
-                mandatory),
-            getTagSpecName(spec),
-          ],
-          getTagSpecUrl(spec), result);
+      missingAttrs.push(
+          context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
+              mandatory));
     }
+  }
+  // Sort this list for stability across implementations.
+  missingAttrs.sort();
+  for (const missingAttr of missingAttrs) {
+    context.addError(
+        amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+        context.getLineCol(),
+        /* params */ [missingAttr, getTagSpecName(spec)],
+        getTagSpecUrl(spec), result);
   }
   // Extension specs mandate the 'src' attribute.
   if (spec.extensionSpec !== null && !seenExtensionSrcAttr) {

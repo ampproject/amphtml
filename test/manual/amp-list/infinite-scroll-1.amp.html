@@ -7,42 +7,40 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-custom>
+
     body {
-      font-family: 'Questrial', Arial;
+      font-family: Roboto, Sans;
     }
+
     article {
       display: block;
       margin: 8px;
     }
-    amp-list {
-      border: 1px solid green;
-    }
-    [load-more-button], [load-more-failed], [load-more-loading], [load-more-end] {
-      background: gray;
-      color: #fff;
-      cursor: pointer;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 2;
-      padding: 16px;
-    }
 
-    .amp-load-more-loading, [load-more-loading] {
-      background: blue;
-    }
-
-    [load-more-end] {
-      background: red;
-    }
-
-    .story-entry {
-      padding: 40px;
-      border: 1px solid gray;
-      text-align: center;
+    .pin-container {
       border-radius: 8px;
+      background-color: #fefefe;
+      padding: 8px;
+      margin: 5px;
+    }
 
+    .pin-container:hover {
+       background-color: #eeeeee;
+    }
+
+    amp-img {
+      border-radius: 8px;
+    }
+
+    .title {
+      font-family: Roboto, Sans;
+      margin: 2px;
+    }
+
+    .description {
+      max-width: 160px;
+      font-size: 12px;
+      margin: 2px;
     }
 
     div[role="list"] {
@@ -50,7 +48,8 @@
       flex-wrap: wrap;
       flex-direction: row;
       align-items: flex-start;
-      justify-content: center;
+      justify-content: flex-start;
+      align-content: flex-start;
     }
 
   </style>
@@ -66,35 +65,29 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=5&latency=3000"
-    load-more
+    src="/infinite-scroll?items=5&left=3"
+    load-more="auto"
     load-more-bookmark="next">
     <template type="amp-mustache">
-      <div class="story-entry">
+      <div class="pin-container">
         <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
-        <div><a href="/link.html">{{title}}</a></div>
+        <div class="title">{{title}}</div>
+        <div class="description">
+          At vero eos et accusamus et iusto odio dignissimos ducimus...
+        </div>
       </div>
     </template>
-    <div load-more-button>
-      <template type="amp-mustache">
-        {{loadMoreButtonText}}
-      </template>
-    </div>
-    <div load-more-failed>
-      FAILED
-    </div>
-    <div load-more-loading>
-      LOADING
+    <div overflow>
+      OVERFLOW
     </div>
     <div load-more-end>
-      <template type="amp-mustache">
-        {{loadMoreEndText}}
-      </template>
+      LOAD ENDED
     </div>
     <div fallback>
-        FALLBACK
+      FALLBACK
     </div>
   </amp-list>
+
 
 </article>
 </body>

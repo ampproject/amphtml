@@ -79,9 +79,13 @@ export class A4AVariableSource extends VariableSource {
    */
   constructor(ampdoc, embedWin) {
     super(ampdoc);
+
+    // Use parent URL replacements service for fallback.
+    const headNode = ampdoc.getHeadNode();
+    const urlReplacements = Services.urlReplacementsForDoc(headNode);
+
     /** @private {VariableSource} global variable source for fallback. */
-    this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
-        .getVariableSource();
+    this.globalVariableSource_ = urlReplacements.getVariableSource();
 
     /** @private {!Window} */
     this.win_ = embedWin;
