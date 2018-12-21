@@ -52,7 +52,6 @@ public class AmpPassTest extends CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
-             "  'hello world';",
              "  console.log('this is preserved');",
             "})()"));
     test(
@@ -96,7 +95,6 @@ public class AmpPassTest extends CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
-             "  \"hello world\";",
              "  console.log('this is preserved');",
             "})()"));
     test(
@@ -112,6 +110,19 @@ public class AmpPassTest extends CompilerTestCase {
              "  var someValue;",
              "  console.log('this is preserved', someValue);",
             "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var a = [function(){}];",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  module$src$log.dev().assert(a.shift())(\"test\");",
+             "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var a = [function(){}];",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  a.shift()(\"test\");",
+             "})()"));
   }
 
   public void testDevAssertPreserveFirstArg() throws Exception {
