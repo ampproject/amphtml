@@ -19,7 +19,7 @@ import {
   composeStoreValue,
   constructConsentInfo,
   getStoredConsentInfo,
-  isConsentInfoStoredValueChanged,
+  isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from '../consent-info';
 import {dict} from '../../../../src/utils/object';
@@ -121,20 +121,15 @@ describes.fakeWin('ConsentInfo', {}, () => {
     });
 
     it('add field only when defined', () => {
+      consentInfo['consentState'] = CONSENT_ITEM_STATE.REJECTED;
+      expect(composeStoreValue(consentInfo)).to.deep.equal(false);
+      consentInfo['idDirty'] = false;
       consentInfo['consentString'] = 'test';
       expect(composeStoreValue(consentInfo)).to.deep.equal({
-        'r': 'test',
-      });
-      consentInfo['idDirty'] = false;
-      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
         'r': 'test',
       });
       consentInfo['isDirty'] = true;
-      expect(composeStoreValue(consentInfo)).to.deep.equal({
-        'r': 'test',
-        'd': 1,
-      });
-      consentInfo['consentState'] = CONSENT_ITEM_STATE.REJECTED;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
         'r': 'test',
@@ -178,9 +173,9 @@ describes.fakeWin('ConsentInfo', {}, () => {
         .to.equal(CONSENT_ITEM_STATE.UNKNOWN);
   });
 
-  it('isConsentInfoStoredValueChanged', () => {
-    expect(isConsentInfoStoredValueChanged(null, null)).to.be.true;
-    expect(isConsentInfoStoredValueChanged({}, null)).to.be.false;
+  it('isConsentInfoStoredValueSame', () => {
+    expect(isConsentInfoStoredValueSame(null, null)).to.be.true;
+    expect(isConsentInfoStoredValueSame({}, null)).to.be.false;
 
     // consentInfo equals when stored value is same
     const infoA = {
@@ -189,24 +184,24 @@ describes.fakeWin('ConsentInfo', {}, () => {
     const infoB = {
       'consentState': CONSENT_ITEM_STATE.NOT_REQUIRED,
     };
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
 
     infoA['consentString'] = '';
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
 
     infoB['isDirty'] = false;
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
 
     // consentInfo not equal
     infoA['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoB['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
     infoB['consentString'] = 'test';
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoA['consentString'] = 'test';
     infoB['isDirty'] = true;
-    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
   });
 });
