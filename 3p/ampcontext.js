@@ -16,7 +16,7 @@
 import {AmpEvents} from '../src/amp-events';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev} from '../src/log';
+import {dev, devAssert} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isExperimentOn, nextTick} from './3p';
 import {isObject} from '../src/types';
@@ -29,7 +29,7 @@ export class AbstractAmpContext {
    *  @param {!Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    dev().assert(!this.isAbstractImplementation_(),
+    devAssert(!this.isAbstractImplementation_(),
         'Should not construct AbstractAmpContext instances directly');
 
     /** @protected {!Window} */
@@ -73,6 +73,9 @@ export class AbstractAmpContext {
 
     /** @type {?number} */
     this.initialConsentState = null;
+
+    /** @type {?string} */
+    this.initialConsentValue = null;
 
     /** @type {?Object} */
     this.initialLayoutRect = null;
@@ -274,7 +277,7 @@ export class AbstractAmpContext {
    */
   setupMetadata_(data) {
     // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
-    const dataObject = dev().assert(
+    const dataObject = devAssert(
         typeof data === 'string' ? tryParseJson(data) : data,
         'Could not setup metadata.');
 
@@ -296,6 +299,7 @@ export class AbstractAmpContext {
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
+    this.initialConsentValue = context.initialConsentValue;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);
@@ -316,7 +320,7 @@ export class AbstractAmpContext {
    */
   getHostWindow_() {
     const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    dev().assert(sentinelMatch, 'Incorrect sentinel format');
+    devAssert(sentinelMatch, 'Incorrect sentinel format');
     const depth = Number(sentinelMatch[2]);
     const ancestors = [];
     for (let win = this.win_; win && win != win.parent; win = win.parent) {

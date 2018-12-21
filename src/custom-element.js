@@ -467,6 +467,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
+    }
+
+    /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
