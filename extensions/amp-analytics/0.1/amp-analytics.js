@@ -17,6 +17,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CSS} from '../../../build/amp-analytics-0.1.css';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
@@ -42,6 +43,7 @@ import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -114,7 +116,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   isAlwaysFixed() {
-    return true;
+    return !isInFie(this.element);
   }
 
   /** @override */
@@ -707,5 +709,5 @@ AMP.extension(TAG, '0.1', AMP => {
   installVariableService(AMP.win);
   installLinkerReaderService(AMP.win);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics);
+  AMP.registerElement(TAG, AmpAnalytics, CSS);
 });

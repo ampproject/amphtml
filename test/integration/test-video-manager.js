@@ -46,7 +46,7 @@ describe.configure().skip('Fake Video Player' +
   });
 });
 
-describe.configure().ifNewChrome().run('VideoManager', function() {
+describe.configure().ifChrome().run('VideoManager', function() {
   describes.fakeWin('VideoManager', {
     amp: {
       ampdoc: 'single',
@@ -259,7 +259,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 });
 
 
-describe.configure().ifNewChrome().run('Autoplay support', () => {
+describe.configure().ifChrome().run('Autoplay support', () => {
   const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
 
   let sandbox;

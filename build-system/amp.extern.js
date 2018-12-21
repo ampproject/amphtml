@@ -198,6 +198,8 @@ window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
 
+window.__AMP_TOP;
+window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
@@ -558,6 +560,8 @@ SomeBaseElementLikeClass.prototype.layoutWidth_;
 SomeBaseElementLikeClass.prototype.inViewport_;
 
 SomeBaseElementLikeClass.prototype.actionMap_;
+
+SomeBaseElementLikeClass.prototype.defaultActionAlias_;
 
 AMP.BaseTemplate;
 

@@ -49,6 +49,7 @@
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
       <option>alexametrics</option>
+      <option>amplitude</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
@@ -88,10 +89,12 @@
       <option>parsely</option>
       <option>permutive</option>
       <option>piano</option>
+      <option>pinpoll</option>
       <option>piStats</option>
       <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
+      <option>retargetly</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
@@ -213,6 +216,47 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Alexa tracking -->
+
+<!-- Amplitude example -->
+<amp-analytics type="amplitude" id="amplitude">
+<script type="application/json">
+  {
+    "vars": {
+      "apiKey": "4dafbafda1cb85d0b3d080a95c4e59f9"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "event",
+        "extraUrlParams": {
+          "event": {
+            "event_type": "click button",
+            "event_properties": {
+              "button id": "test1"
+            }
+          }
+        }
+      },
+      "pageView": {
+        "on": "visible",
+        "request": "event",
+        "extraUrlParams": {
+          "event": {
+            "event_type": "page view",
+            "event_properties": {
+              "page id": "${title}"
+            },
+            "user_properties": {
+              "is amp user": true
+            }
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
 
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">
@@ -1018,6 +1062,18 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Piano example -->
 
+<!-- Start Pinpoll example -->
+<amp-analytics type="pinpoll" id="pinpoll">
+  <script type="application/json">
+  {
+    "vars": {
+      "version": "v1"
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!-- End Pinpoll example -->
+
 <!-- piStats example tracking -->
 <amp-analytics type="piStats" id="piStats">
   <script type="application/json">
@@ -1064,6 +1120,22 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Quantcast example -->
+
+<!-- Retargetly example -->
+<amp-analytics data-credentials="include" type="retargetly" id="retargetly">
+<script type="application/json">
+{
+    "vars": {
+        "accountId": "107",
+        "sourceId": "0"
+    },
+    "extraUrlParams": {
+        "tags": "this,is,just,an,example"
+    }
+}
+</script>
+</amp-analytics>
+<!-- End Retargetly example -->
 
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
