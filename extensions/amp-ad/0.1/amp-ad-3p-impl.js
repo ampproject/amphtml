@@ -352,7 +352,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
-      consentStringPromise]).then(consents => {
+      consentStringPromise
+    ]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
         container: this.container_,
@@ -360,7 +361,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         consentSharedData: consents[2],
       };
       if (isConsentV2Experiment) {
-        opt_context.initialConsentValue = consents[3];
+        opt_context['initialConsentValue'] = consents[3];
       }
 
       // In this path, the request and render start events are entangled,

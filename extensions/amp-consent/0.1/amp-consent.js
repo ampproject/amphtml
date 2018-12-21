@@ -231,6 +231,8 @@ export class AmpConsent extends AMP.BaseElement {
               '%s, treated as undefined', data['info']);
         }
         if (!data['info']) {
+          // TODO (@zhouyx #20010): Decide what's the behavior on receiving
+          // incorrect message.
           user().error(TAG,
               'consent-response info does not allow empty string');
         }

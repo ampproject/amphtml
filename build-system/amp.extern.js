@@ -149,7 +149,6 @@ window.context.sentinel;
 window.context.clientId;
 window.context.initialLayoutRect;
 window.context.initialIntersection;
-window.context.initialConsentValue;
 window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
