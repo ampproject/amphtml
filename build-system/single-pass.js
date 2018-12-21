@@ -89,6 +89,7 @@ exports.getFlags = function(config) {
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
+    use_types_for_optimization: true,
     rewrite_polyfills: false,
     create_source_map: '%outname%.map',
     parse_inline_source_maps: true,
@@ -431,9 +432,11 @@ function transformPathsToTempDir(graph, config) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins(
-            /* isEsmBuild */ config.define.indexOf['ESM_BUILD=true'] !== -1,
-            /* isCommonJsModule */ isCommonJsModule(f)),
+        plugins: conf.plugins({
+          isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
+          isCommonJsModule: isCommonJsModule(f),
+          isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+        }),
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);

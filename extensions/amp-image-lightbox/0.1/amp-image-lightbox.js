@@ -736,12 +736,15 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     /** @private {!Function} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+
+    this.registerDefaultAction(
+        invocation => this.open_(invocation), 'open');
   }
 
   /**
-  * Lazily builds the image-lightbox DOM on the first open.
-  * @private
-  * */
+   * Lazily builds the image-lightbox DOM on the first open.
+   * @private
+   */
   buildLightbox_() {
     if (this.container_) {
       return;
@@ -798,8 +801,11 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  activate(invocation) {
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} invocation
+   * @private
+   */
+  open_(invocation) {
     if (this.active_) {
       return;
     }
@@ -850,6 +856,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   closeOnEscape_(event) {
     if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }

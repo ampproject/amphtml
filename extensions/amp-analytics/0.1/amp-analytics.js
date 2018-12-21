@@ -17,6 +17,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CSS} from '../../../build/amp-analytics-0.1.css';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
@@ -35,13 +36,14 @@ import {
 } from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -114,7 +116,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   isAlwaysFixed() {
-    return true;
+    return !isInFie(this.element);
   }
 
   /** @override */
@@ -486,7 +488,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   initializeLinker_() {
     const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
-        this.config_, type);
+        this.config_, type, this.element);
     this.linkerManager_.init();
   }
 
@@ -570,7 +572,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
-        trigger, expansionOptions)
+        trigger, expansionOptions, this.element)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
@@ -627,7 +629,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel])
         .then(enabled => {
-          dev().assert(enabled.length === 2);
+          devAssert(enabled.length === 2);
           return enabled[0] && enabled[1];
         });
   }
@@ -707,5 +709,5 @@ AMP.extension(TAG, '0.1', AMP => {
   installVariableService(AMP.win);
   installLinkerReaderService(AMP.win);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics);
+  AMP.registerElement(TAG, AmpAnalytics, CSS);
 });

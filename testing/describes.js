@@ -87,6 +87,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
 import {
@@ -113,7 +114,6 @@ import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -344,14 +344,17 @@ function describeEnv(factory) {
 
       afterEach(() => {
         // Tear down all fixtures.
+        let teardown = Promise.resolve();
         fixtures.slice(0).reverse().forEach(fixture => {
-          fixture.teardown(env);
+          teardown = teardown.then(() => fixture.teardown(env));
         });
 
-        // Delete all other keys.
-        for (const key in env) {
-          delete env[key];
-        }
+        return teardown.then(() => {
+          // Delete all other keys.
+          for (const key in env) {
+            delete env[key];
+          }
+        });
       });
 
       describe(SUB, function() {
@@ -459,7 +462,9 @@ class IntegrationFixture {
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
 
-    let url = '/amp4test/compose-doc';
+    let url = this.spec.amp === false
+      ? '/amp4test/compose-html'
+      : '/amp4test/compose-doc';
     if (this.spec.params) {
       url = addParamsToUrl(url, this.spec.params);
     }
@@ -483,6 +488,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    return RequestBank.tearDown();
   }
 }
 
@@ -583,7 +589,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win, class {});
+          installCustomElements(win);
         }
 
         // Intercept event listeners

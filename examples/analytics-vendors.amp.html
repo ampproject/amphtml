@@ -49,6 +49,7 @@
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
       <option>alexametrics</option>
+      <option>amplitude</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
@@ -68,6 +69,7 @@
       <option>ibeatanalytics</option>
       <option>infonline</option>
       <option>iplabel</option>
+      <option>keen</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -85,11 +87,14 @@
       <option>oewadirect</option>
       <option>oracleInfinityAnalytics</option>
       <option>parsely</option>
+      <option>permutive</option>
       <option>piano</option>
+      <option>pinpoll</option>
       <option>piStats</option>
       <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
+      <option>retargetly</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
@@ -211,6 +216,47 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Alexa tracking -->
+
+<!-- Amplitude example -->
+<amp-analytics type="amplitude" id="amplitude">
+<script type="application/json">
+  {
+    "vars": {
+      "apiKey": "4dafbafda1cb85d0b3d080a95c4e59f9"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "event",
+        "extraUrlParams": {
+          "event": {
+            "event_type": "click button",
+            "event_properties": {
+              "button id": "test1"
+            }
+          }
+        }
+      },
+      "pageView": {
+        "on": "visible",
+        "request": "event",
+        "extraUrlParams": {
+          "event": {
+            "event_type": "page view",
+            "event_properties": {
+              "page id": "${title}"
+            },
+            "user_properties": {
+              "is amp user": true
+            }
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
 
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">
@@ -594,6 +640,51 @@ For complete documentation and additional examples please see: https://marketing
 }
 </script>
 </amp-analytics>
+
+<!-- Keen Analytics tracking -->
+<amp-analytics type="keen" id="keen">
+<script type="application/json">
+{
+  "vars": {
+    "projectId": "YOUR_PROJECT_ID",
+    "writeKey": "YOUR_WRITE_KEY"
+  },
+  "extraUrlParams": {
+    "exampleParam": "some general param value"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "extraUrlParams": {
+        "exampleParamForPageviews": "some specific value 123"
+      }
+    },
+    "trackClickOnTestBtn1": {
+      "on": "click",
+      "selector": "#testBtn1",
+      "request": "click",
+      "extraUrlParams": {
+        "exampleParamForClicks": "some click value"
+      }
+    },
+    "trackConversion": {
+      "on": "click",
+      "selector": "#submitOrder",
+      "request": "custom",
+      "vars": {
+        "collection": "conversions"
+      },
+      "extraUrlParams": {
+        "exampleParamForConversion": "some conversion value"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Keen Analytics tracking -->
+
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -931,6 +1022,24 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 
+<!-- Permutive example -->
+<amp-analytics type="permutive" id="permutive">
+<script type="application/json">
+  {
+    "vars": {
+      "namespace": "YOUR_PERMUTIVE_AMP_NAMESPACE",
+      "key": "YOUR_PERMUTIVE_PUBLIC_API_KEY"
+    },
+    "extraUrlParams": {
+      "properties.article.id": "1234",
+      "properties'article.title": "xyz",
+      "properties.article.tags!list": "tag1,tag2,tag3"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Permutive example -->
+
 <!-- Start Piano example -->
 <amp-analytics type="piano" id="piano">
 <script type="application/json">
@@ -952,6 +1061,18 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Piano example -->
+
+<!-- Start Pinpoll example -->
+<amp-analytics type="pinpoll" id="pinpoll">
+  <script type="application/json">
+  {
+    "vars": {
+      "version": "v1"
+    }
+  }
+  </script>
+  </amp-analytics>
+  <!-- End Pinpoll example -->
 
 <!-- piStats example tracking -->
 <amp-analytics type="piStats" id="piStats">
@@ -999,6 +1120,22 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Quantcast example -->
+
+<!-- Retargetly example -->
+<amp-analytics data-credentials="include" type="retargetly" id="retargetly">
+<script type="application/json">
+{
+    "vars": {
+        "accountId": "107",
+        "sourceId": "0"
+    },
+    "extraUrlParams": {
+        "tags": "this,is,just,an,example"
+    }
+}
+</script>
+</amp-analytics>
+<!-- End Retargetly example -->
 
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
@@ -1101,7 +1238,7 @@ For complete documentation and additional examples please see: https://marketing
 <amp-analytics type="teaanalytics" id="teaanalytics">
   <script type="application/json">
     {
-      "vars": {        
+      "vars": {
         "app_id": "APP_ID",
         "channel": "example.com",
         "debug": 0
@@ -1144,7 +1281,7 @@ For complete documentation and additional examples please see: https://marketing
       "request": "pageview",
       "vars": {
         "tealium_event": "screen_view"
-      }     
+      }
     },
     "clickOnTest1Trigger": {
       "on": "click",

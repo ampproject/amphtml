@@ -27,7 +27,7 @@ import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
@@ -513,8 +513,7 @@ export class Bookend {
     }
 
     if (target.hasAttribute('on')) {
-      const ampdoc = getAmpdoc(this.parentEl_);
-      const actionService = Services.actionServiceForDoc(ampdoc);
+      const actionService = Services.actionServiceForDoc(this.parentEl_);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }
@@ -586,7 +585,7 @@ export class Bookend {
 
   /** @private */
   assertBuilt_() {
-    dev().assert(this.isBuilt(), 'Bookend component needs to be built.');
+    devAssert(this.isBuilt(), 'Bookend component needs to be built.');
   }
 
   /**

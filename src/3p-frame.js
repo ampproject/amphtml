@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, user} from './log';
+import {dev, devAssert, user} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
@@ -78,7 +78,7 @@ export function getIframe(
   {disallowCustom, allowFullscreen} = {}) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
-  dev().assert(
+  devAssert(
       parentElement['isConnected'] === undefined ||
       parentElement['isConnected'] === true,
       'Parent element must be in DOM');
@@ -135,7 +135,9 @@ export function getIframe(
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
   }
-  if (isExperimentOn(parentWindow, 'sandbox-ads')) {
+  const excludeFromSandbox = ['facebook'];
+  if (isExperimentOn(parentWindow, 'sandbox-ads')
+      && !excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute('data-amp-3p-sentinel',

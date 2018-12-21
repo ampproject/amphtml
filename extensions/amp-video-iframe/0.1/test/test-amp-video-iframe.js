@@ -35,8 +35,11 @@ function getIntersectionMessage(id) {
 describes.realWin('amp-video-iframe', {
   amp: {
     extensions: ['amp-video-iframe'],
+    experiments: ['amp-video-iframe'],
   },
 }, env => {
+
+  const defaultFixture = 'video-iframe.html';
 
   let win;
   let doc;
@@ -53,10 +56,11 @@ describes.realWin('amp-video-iframe', {
     env.sandbox.stub(Services, 'videoManagerForDoc').returns(videoManagerStub);
   });
 
-  function getIframeSrc() {
+  function getIframeSrc(fixture = null) {
     const {port} = location;
     return (
-      `http://iframe.localhost:${port}/test/fixtures/served/video-iframe.html`);
+      `http://iframe.localhost:${port}/test/fixtures/served/${
+        fixture || defaultFixture}`);
   }
 
   function createVideoIframe(opt_size) {
@@ -337,6 +341,27 @@ describes.realWin('amp-video-iframe', {
               expectedVars).to.not.have.been.called;
         }
       });
+    });
+  });
+
+  describe('#mutatedAttributesCallback', () => {
+    it('updates src', function* () {
+      const videoIframe = createVideoIframe();
+      const {implementation_} = videoIframe;
+
+      yield whenLoaded(videoIframe);
+
+      const {iframe_} = implementation_;
+
+      expect(iframe_.src).to.equal(getIframeSrc(defaultFixture));
+
+      const newSrc = getIframeSrc('video-iframe-2.html');
+
+      videoIframe.setAttribute('src', newSrc);
+
+      implementation_.mutatedAttributesCallback({'src': true});
+
+      expect(iframe_.src).to.equal(newSrc);
     });
   });
 

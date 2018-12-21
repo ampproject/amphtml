@@ -17,7 +17,7 @@
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -148,6 +148,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
@@ -249,12 +255,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-hold-to-pause',
-    name: 'Hold to pause an amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/18714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -331,11 +331,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'linker-meta-opt-in',
-    name: 'Opts-in users that have included the GA client-id meta tag ',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
-  },
-  {
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',
@@ -401,11 +396,29 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
+  },
+  {
+    id: 'amp-list-viewport-resize',
+    name: 'Enables amp-list to resize on viewport resize',
+    spec: 'https://github.com/ampproject/amphtml/issues/19945',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
+  },
 ];
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+    devAssert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
         ' have a `cleanupIssue` field.');
   });
 }
@@ -567,11 +580,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
-  const confirmButton = dev().assert(
+  const container = devAssert(document.getElementById('popup-container'));
+  const messageElement = devAssert(document.getElementById('popup-message'));
+  const confirmButton = devAssert(
       document.getElementById('popup-button-ok'));
-  const cancelButton = dev().assert(
+  const cancelButton = devAssert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {

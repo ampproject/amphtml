@@ -22,7 +22,7 @@ import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {
@@ -335,7 +335,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-      dev().assert(this.iframeLayoutBox_));
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -652,7 +652,7 @@ export class AmpIframe extends AMP.BaseElement {
       const event =
           createCustomEvent(this.win, 'amp-iframe:message',
               dict({'data': sanitized}));
-      const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+      const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };
     // TODO(choumx): Consider using global listener in iframe-helper.

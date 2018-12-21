@@ -25,8 +25,12 @@ const path = require('path');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
+const {
+  gitBranchName,
+  gitBranchPointFromMaster,
+  gitCommitterEmail,
+} = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -79,8 +83,7 @@ function setPercyBranch() {
   if (!process.env['PERCY_BRANCH'] &&
       (!argv.master || !process.env['TRAVIS'])) {
     const userName = gitCommitterEmail();
-    const branchName = process.env['TRAVIS'] ?
-      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
+    const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }
@@ -97,7 +100,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(/* fromMerge */ true);
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPointFromMaster();
   }
 }
 
@@ -150,10 +153,11 @@ async function launchWebServer() {
  */
 async function getBuildStatus(buildId) {
   const statusUri = `${BUILD_STATUS_URL}?build_id=${buildId}`;
-  const {body} = await request(statusUri, {json: true}).catch(error => {
+  try {
+    return (await request(statusUri, {json: true})).body;
+  } catch (error) {
     log('fatal', 'Failed to query Percy build status:', error);
-  });
-  return body;
+  }
 }
 
 /**
@@ -239,8 +243,11 @@ async function launchBrowser() {
     headless: true,
   };
 
-  browser_ = await puppeteer.launch(browserOptions)
-      .catch(err => log('fatal', err));
+  try {
+    browser_ = await puppeteer.launch(browserOptions);
+  } catch (error) {
+    log('fatal', error);
+  }
 
   // Every action on the browser or its pages adds a listener to the
   // Puppeteer.Connection.Events.Disconnected event. This is a temporary
@@ -287,12 +294,15 @@ async function runVisualTests(assetGlobs, webpages) {
         colors.cyan(process.env['PERCY_TARGET_COMMIT']));
   }
 
-  // Take the snapshots.
-  await generateSnapshots(percy, webpages);
+  try {
+    // Take the snapshots.
+    await generateSnapshots(percy, webpages);
+  } finally {
+    // Tell Percy we're finished taking snapshots.
+    await percy.finalizeBuild();
+  }
 
-  // Tell Percy we're finished taking snapshots and check if the build failed
-  // early.
-  await percy.finalizeBuild();
+  // check if the build failed early.
   const status = await getBuildStatus(buildId);
   if (status.state == 'failed') {
     log('fatal', 'Build', colors.cyan(buildId), 'failed!');
@@ -362,7 +372,6 @@ async function generateSnapshots(percy, webpages) {
       (numTests, webpage) => numTests + Object.keys(webpage.tests_).length, 0);
   if (!totalTests) {
     log('fatal', 'No pages left to test!');
-    return;
   } else {
     log('info', 'Executing', colors.cyan(totalTests), 'visual diff tests on',
         colors.cyan(webpages.length), 'pages');
@@ -377,7 +386,9 @@ async function generateSnapshots(percy, webpages) {
   }
 
   log('verbose', 'Generating snapshots...');
-  await snapshotWebpages(percy, browser, webpages);
+  if (!(await snapshotWebpages(percy, browser, webpages))) {
+    log('fatal', 'Some tests have failed locally.');
+  }
 }
 
 /**
@@ -387,9 +398,12 @@ async function generateSnapshots(percy, webpages) {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
+ * @return {boolean} true if all tests passed locally (does not indicate whether
+ *     the tests passed on Percy).
  */
 async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
+  const testErrors = [];
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     const fullUrl = `${BASE_URL}/${webpage.url}`;
@@ -467,10 +481,19 @@ async function snapshotWebpages(percy, browser, webpages) {
             }
 
             await percy.snapshot(name, page, snapshotOptions);
-            await page.close();
             log('travis', colors.cyan('●'));
           })
-          .then(() => delete pagePromises[name]);
+          .catch(testError => {
+            log('travis', colors.red('○'));
+            if (!process.env['TRAVIS']) {
+              log('error', testError);
+            }
+            testErrors.push(testError);
+          })
+          .then(async() => {
+            await page.close();
+            delete pagePromises[name];
+          });
       pagePromises[name] = pagePromise;
     }
   }
@@ -479,6 +502,12 @@ async function snapshotWebpages(percy, browser, webpages) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
+  if (process.env['TRAVIS']) {
+    testErrors.forEach(testError => {
+      log('error', testError);
+    });
+  }
+  return testErrors.length == 0;
 }
 
 /**
@@ -537,13 +566,15 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  if (argv.verify_status) {
-    await performVerifyStatus();
-  } else {
-    await performVisualTests();
+  try {
+    if (argv.verify_status) {
+      await performVerifyStatus();
+    } else {
+      await performVisualTests();
+    }
+  } finally {
+    return await cleanup_();
   }
-
-  return await cleanup_();
 }
 
 async function performVerifyStatus() {
@@ -564,9 +595,11 @@ async function performVisualTests() {
   setDebuggingLevel();
 
   // Launch a local web server.
-  await launchWebServer().catch(reason => {
+  try {
+    await launchWebServer();
+  } catch (reason) {
     log('fatal', `Failed to start a web server: ${reason}`);
-  });
+  }
 
   if (argv.empty) {
     await createEmptyBuild();
@@ -600,7 +633,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
+      {'stdio': 'ignore'});
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;
@@ -619,7 +653,7 @@ async function cleanup_() {
   }
   if (webServerProcess_ && !webServerProcess_.killed) {
     // Explicitly exit the webserver.
-    webServerProcess_.kill();
+    webServerProcess_.kill('SIGKILL');
     // The child node process has an asynchronous stdout. See #10409.
     await sleep(100);
   }

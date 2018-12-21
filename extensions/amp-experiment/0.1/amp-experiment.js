@@ -17,9 +17,8 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Layout} from '../../../src/layout';
 import {allocateVariant} from './variant';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {waitForBodyPromise} from '../../../src/dom';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
@@ -69,7 +68,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-      dev().assert(parseJson(children[0].textContent)));
+      devAssert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -81,11 +80,11 @@ export class AmpExperiment extends AMP.BaseElement {
    * @private
    */
   addToBody_(experiments) {
-    const doc = this.win.document;
-    return waitForBodyPromise(doc).then(() => {
+    const doc = this.getAmpDoc();
+    return doc.whenBodyAvailable().then(body => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name,
+          body.setAttribute(ATTR_PREFIX + name,
               dev().assertString(experiments[name]));
         }
       }

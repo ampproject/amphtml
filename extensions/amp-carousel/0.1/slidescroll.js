@@ -20,7 +20,7 @@ import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
@@ -282,7 +282,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
-          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+          this.getScrollLeftForIndex_(user().assertNumber(this.slideIndex_,
+              'E#19457 this.slideIndex_'));
       this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
   }
@@ -296,7 +297,8 @@ export class AmpSlideScroll extends BaseSlides {
       // it will need to be re-laid-out. This is only needed when the slide
       // does not change (example when browser window size changes,
       // or orientation changes)
-      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
+      this.scheduleLayout(this.slides_[user().assertNumber(this.slideIndex_,
+          'E#19457 this.slideIndex_')]);
     }
     return Promise.resolve();
   }
@@ -311,7 +313,8 @@ export class AmpSlideScroll extends BaseSlides {
   updateViewportState(inViewport) {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(
-          this.slides_[dev().assertNumber(this.slideIndex_)], inViewport);
+          this.slides_[user().assertNumber(this.slideIndex_,
+              'E#19457 this.slideIndex_')], inViewport);
     }
   }
 
@@ -626,7 +629,8 @@ export class AmpSlideScroll extends BaseSlides {
     }
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
-          dev().assertNumber(this.slideIndex_)], false);
+          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')],
+      false);
     }
     const newSlideInView = this.slides_[newIndex];
 

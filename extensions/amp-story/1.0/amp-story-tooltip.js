@@ -25,7 +25,7 @@ import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -126,7 +126,7 @@ export class AmpStoryTooltip {
     this.shadowRoot_ = this.win_.document.createElement('div');
 
     this.tooltipOverlayEl_ =
-      dev().assert(this.buildTemplate_(this.win_.document));
+      devAssert(this.buildTemplate_(this.win_.document));
     createShadowRootWithStyle(this.shadowRoot_, this.tooltipOverlayEl_, CSS);
 
     this.tooltipOverlayEl_
@@ -195,7 +195,7 @@ export class AmpStoryTooltip {
   onUIStateUpdate_(uiState) {
     this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
         () => {
-          uiState === UIType.DESKTOP ?
+          [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
             this.tooltipOverlayEl_.setAttribute('desktop', '') :
             this.tooltipOverlayEl_.removeAttribute('desktop');
         });

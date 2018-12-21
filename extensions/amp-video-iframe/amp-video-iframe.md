@@ -9,7 +9,7 @@
   </tr>
   <tr>
     <td class="col-fourty"><strong>Status</strong></td>
-    <td>Experimental</td>
+    <td>Experimental. You must turn on the <code>amp-video-iframe</code> experiment to use this component.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -60,6 +60,12 @@ not already have a fragment.
 
 Points to an image URL that will be displayed while the video loads.
 
+#### autoplay
+
+If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
@@ -71,6 +77,12 @@ Set this attribute if the document inside the iframe implements the [MediaSessio
 #### implements-rotate-to-fullscreen
 
 Set this attribute if the document inside the iframe implements rotate-to-fullscreen independently.
+
+#### referrerpolicy
+
+The [`referrerpolicy`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy) to be set on the iframe element.
+
+<a name="integration"></a>
 
 ## Integration
 
@@ -113,6 +125,8 @@ function onAmpIntegrationReady(ampIntegration) {
   ampIntegration.listenTo('videojs', myVideo);
 }
 ```
+
+**Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will autoamtically send the necessary signals to your iframe to autoplay for a better user experience.
 
 ### Custom integrations
 
@@ -242,7 +256,7 @@ with other analytics event types.
 
 This method takes an optional `vars` param that should define an object with
 custom variables to log. These are available as `VIDEO_STATE`, keyed by name
-prefixed with `custom_`, i.e. the object `{myVar: 'foo'} will be available as
+prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 `{'custom_myVar': 'foo}`.
 
 #### <a name="getIntersection"></a> `getIntersection(callback)`

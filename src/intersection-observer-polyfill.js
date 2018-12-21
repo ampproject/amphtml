@@ -17,7 +17,7 @@
 import {Pass} from './pass';
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {isArray, isFiniteNumber} from './types';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
@@ -170,6 +170,7 @@ export class IntersectionObserverApi {
    */
   destroy() {
     this.shouldObserve_ = false;
+    this.intersectionObserver_.disconnect();
     this.intersectionObserver_ = null;
     if (this.unlistenOnDestroy_) {
       this.unlistenOnDestroy_();
@@ -210,7 +211,7 @@ export class IntersectionObserverPolyfill {
     }
 
     for (let i = 0; i < threshold.length; i++) {
-      dev().assert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
+      devAssert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
           'finite number or an array of finite numbers');
     }
 
@@ -219,7 +220,7 @@ export class IntersectionObserverPolyfill {
      * @private @const {!Array}
      */
     this.threshold_ = threshold.sort();
-    dev().assert(this.threshold_[0] >= 0 &&
+    devAssert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
     'Threshold should be in the range from "[0, 1]"');
 
@@ -247,6 +248,8 @@ export class IntersectionObserverPolyfill {
   }
 
   /**
+   * Function to unobserve all elements.
+   * and clean up the polyfill.
    */
   disconnect() {
     this.observeEntries_.length = 0;
@@ -261,7 +264,7 @@ export class IntersectionObserverPolyfill {
    */
   observe(element) {
     // Check the element is an AMP element.
-    dev().assert(element.getLayoutBox);
+    devAssert(element.getLayoutBox);
 
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {

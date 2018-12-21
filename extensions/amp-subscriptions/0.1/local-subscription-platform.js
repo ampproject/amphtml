@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 
@@ -172,7 +172,7 @@ export class LocalSubscriptionPlatform {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
       if (result) {
-        this.serviceAdapter_.reAuthorizePlatform(this);
+        this.serviceAdapter_.resetPlatforms();
       }
       return !!result;
     });
@@ -200,7 +200,7 @@ export class LocalSubscriptionPlatform {
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+    const pingbackUrl = /** @type {string} */ (devAssert(this.pingbackUrl_,
         'pingbackUrl is null'));
 
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,

@@ -91,6 +91,10 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
     name: "title"
     mandatory: true
   }
@@ -205,6 +209,18 @@ tags: {
     value: "stretch"
   }
   attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
+  }
+  attrs: {
     name: "align-items"
     value: "center"
     value: "end"
@@ -298,6 +314,18 @@ tags: {
     value: "whoosh-in-right"
     value: "zoom-in"
     value: "zoom-out"
+  }
+  attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
   }
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
@@ -449,6 +477,7 @@ descendant_tag_list: {
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-CALL-TRACKING"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
@@ -512,10 +541,12 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
+  tag: "A"
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
@@ -527,6 +558,7 @@ descendant_tag_list: {
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
+  tag: "AMP-TIMEAGO"
   tag: "AMP-VIDEO"
   tag: "ARTICLE"
   tag: "ASIDE"

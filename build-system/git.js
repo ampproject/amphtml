@@ -21,17 +21,23 @@
 
 const {getStdout} = require('./exec');
 
+const commitLogMaxCount = 100;
+
 /**
  * Returns the branch point of the current branch off of master.
- * @param {boolean} fromMerge true if this is a merge commit.
  * @return {string}
  */
-exports.gitBranchPoint = function(fromMerge = false) {
-  if (fromMerge) {
-    return getStdout('git merge-base HEAD^1 HEAD^2').trim();
-  } else {
-    return getStdout('git merge-base master HEAD^').trim();
-  }
+exports.gitBranchPointFromMaster = function() {
+  return getStdout('git merge-base master HEAD').trim();
+};
+
+/**
+ * Returns the point at which the PR branch was forked from master. Used during
+ * Travis PR builds to print the range of commits included in a PR check.
+ */
+exports.gitPrBranchPoint = function() {
+  const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
+  return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`).trim();
 };
 
 /**
@@ -40,7 +46,7 @@ exports.gitBranchPoint = function(fromMerge = false) {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -50,8 +56,25 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
+};
+
+/**
+ * Returns a detailed log of commits included in a PR check, starting with (and
+ * including) the branch point off of master. Limited to at most 100 commits to
+ * keep the output sane.
+ *
+ * @return {string}
+ */
+exports.gitDiffCommitLog = function() {
+  const branchPoint = process.env.TRAVIS ?
+    exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
+  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
+"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) \
+%C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
+--abbrev-commit ${branchPoint}^...HEAD \
+--max-count=${commitLogMaxCount}`).trim();
 };
 
 /**
@@ -60,7 +83,7 @@ exports.gitDiffStatMaster = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
@@ -74,19 +97,14 @@ exports.gitDiffColor = function() {
 };
 
 /**
- * Returns the URL of the origin (upstream) repository.
- * @return {string}
- */
-exports.gitOriginUrl = function() {
-  return getStdout('git remote get-url origin').trim();
-};
-
-/**
- * Returns the name of the local branch.
+ * Returns the name of the branch from which the PR originated. On Travis, this
+ * is exposed via TRAVIS_PULL_REQUEST_BRANCH.
  * @return {string}
  */
 exports.gitBranchName = function() {
-  return getStdout('git rev-parse --abbrev-ref HEAD').trim();
+  return process.env.TRAVIS ?
+    process.env.TRAVIS_PULL_REQUEST_BRANCH :
+    getStdout('git rev-parse --abbrev-ref HEAD').trim();
 };
 
 /**
@@ -94,6 +112,9 @@ exports.gitBranchName = function() {
  * @return {string}
  */
 exports.gitCommitHash = function() {
+  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
+    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  }
   return getStdout('git rev-parse --verify HEAD').trim();
 };
 

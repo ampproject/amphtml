@@ -16,6 +16,7 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
+  getMatchedContentResponsiveHeight,
 } from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
@@ -33,7 +34,7 @@ import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
   from '../../../src/ad-helper';
@@ -219,8 +220,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'Ad units with data-full-width must have width="100vw".');
     user().assert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
-    user().assert(!!this.config.mcFullWidthHeightRatio,
-        'Ad network does not support matched content full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
     return true;
@@ -324,7 +323,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-      dev().assert(this.iframeLayoutBox_));
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -436,9 +435,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   getFullWidthHeight_(width, maxHeight) {
+    // TODO(google a4a eng): remove this once adsense switches fully to
+    // fast fetch.
     if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
-      return Math.max(MIN_FULL_WIDTH_HEIGHT,
-          Math.round(width / this.config.mcFullWidthHeightRatio));
+      return getMatchedContentResponsiveHeight(width);
     }
     return clamp(Math.round(width / this.config.fullWidthHeightRatio),
         MIN_FULL_WIDTH_HEIGHT, maxHeight);

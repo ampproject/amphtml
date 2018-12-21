@@ -198,6 +198,8 @@ window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
 
+window.__AMP_TOP;
+window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
@@ -328,9 +330,6 @@ window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes
 
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.implementation_ = {};
 Element.prototype.signals;
 window.whenSignal;
 
@@ -533,31 +532,6 @@ AMP.AmpAdUIHandler = class {
    */
   constructor(baseInstance) {}
 };
-
-/*
-     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
- \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
-  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
-   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
-    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
-
-  Any private property for BaseElement should be declared in
-  build-system/amp.extern.js, this is so closure compiler doesn't rename
-  the private properties of BaseElement since if it did there is a
-  possibility that the private property's new symbol in the core compilation
-  unit would collide with a renamed private property in the inheriting class
-  in extensions.
- */
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {number} */
-SomeBaseElementLikeClass.prototype.layoutWidth_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
