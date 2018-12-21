@@ -160,6 +160,7 @@ function getSrcs() {
   }).then(files => {
     // Write all the entry modules into a single file so they can be processed
     // together.
+    fs.mkdirpSync('./.amp-build');
     const filename = './.amp-build/gulp-dep-check-collection.js';
     fs.writeFileSync(filename, files.map(file => {
       return `import '../${file}';`;
