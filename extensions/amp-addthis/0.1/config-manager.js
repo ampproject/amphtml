@@ -96,6 +96,7 @@ export class ConfigManager {
         shareConfig,
         atConfig,
         productCode,
+        containerClassName,
       } = iframeDatum;
       this.sendConfiguration_({
         iframe,
@@ -104,6 +105,7 @@ export class ConfigManager {
         shareConfig,
         atConfig,
         productCode,
+        containerClassName,
       });
     });
   }
@@ -116,6 +118,7 @@ export class ConfigManager {
    * @param {!Object} [input.shareConfig]
    * @param {!Object} [input.atConfig]
    * @param {string} [input.productCode]
+   * @param {string} [input.containerClassName]
    * @private
    */
   sendConfiguration_({
@@ -125,6 +128,7 @@ export class ConfigManager {
     shareConfig,
     atConfig,
     productCode,
+    containerClassName,
   }) {
     const pubData = this.dataForPubId_[pubId];
     const {
@@ -138,6 +142,7 @@ export class ConfigManager {
       'pubId': pubId,
       'widgetId': widgetId,
       'productCode': productCode,
+      'containerClassName': containerClassName,
       'configRequestStatus': configRequestStatus,
       'dashboardConfig': dashboardConfig,
     });
@@ -190,6 +195,7 @@ export class ConfigManager {
    * activeToolsMonitor: Object<string,string>,
    * atConfig: Object<string,string>,
    * widgetId: string,
+   * containerClassName: string,
    * productCode: string,
    * iframe: !Element,
    * iframeLoadPromise: !Promise,
@@ -200,6 +206,7 @@ export class ConfigManager {
     pubId,
     widgetId,
     productCode,
+    containerClassName,
     iframe,
     iframeLoadPromise,
     shareConfig,
@@ -230,6 +237,7 @@ export class ConfigManager {
       atConfig,
       widgetId,
       productCode,
+      containerClassName,
     });
 
     iframeLoadPromise.then(() => this.sendConfiguration_({
@@ -239,6 +247,7 @@ export class ConfigManager {
       shareConfig,
       atConfig,
       productCode,
+      containerClassName,
     }));
   }
 

@@ -59,7 +59,9 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {getMode, isProductCode, isPubId, isWidgetId} from './addthis-utils/mode';
+import {
+  getMode, isProductCode, isPubId, isWidgetId,
+} from './addthis-utils/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -122,6 +124,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {string} */
     this.widgetType_ = '';
+
+    /** @private {string} */
+    this.containerClassName_ = '';
   }
 
   /**
@@ -154,6 +159,9 @@ class AmpAddThis extends AMP.BaseElement {
         );
       }
     }
+
+    this.containerClassName_ =
+      this.element.getAttribute('data-class-name') || '';
 
     // Required attributes (at least one or more of the following is required)
     this.pubId_ = pubId;
@@ -269,6 +277,7 @@ class AmpAddThis extends AMP.BaseElement {
           'src': `${ORIGIN}/dc/amp-addthis.html`,
           'id': this.widgetId_,
           'pco': this.productCode_,
+          'containerClassName': this.containerClassName_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
@@ -284,6 +293,7 @@ class AmpAddThis extends AMP.BaseElement {
       productCode: this.productCode_,
       shareConfig: this.shareConfig_,
       atConfig: this.atConfig_,
+      containerClassName: this.containerClassName_,
       iframe,
       iframeLoadPromise,
       activeToolsMonitor,
