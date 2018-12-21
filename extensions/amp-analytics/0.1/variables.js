@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
@@ -167,7 +167,7 @@ export class VariableService {
    * @param {*} macro
    */
   register_(name, macro) {
-    dev().assert(!this.macros_[name], 'Macro "' + name
+    devAssert(!this.macros_[name], 'Macro "' + name
         + '" already registered.');
     this.macros_[name] = macro;
   }

@@ -31,7 +31,7 @@ import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -336,7 +336,7 @@ export class SubscriptionService {
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
         viewerPlatform.getEntitlements().then(entitlement => {
-          dev().assert(entitlement, 'Entitlement is null');
+          devAssert(entitlement, 'Entitlement is null');
           // Viewer authorization is redirected to use local platform instead.
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
@@ -474,7 +474,7 @@ export class SubscriptionService {
    * @return {!PageConfig}
    */
   getPageConfig() {
-    const pageConfig = dev().assert(this.pageConfig_,
+    const pageConfig = devAssert(this.pageConfig_,
         'Page config is not yet fetched');
     return /** @type {!PageConfig} */(pageConfig);
   }
@@ -522,7 +522,7 @@ export class SubscriptionService {
   delegateActionToService(action, serviceId) {
     return new Promise(resolve => {
       this.platformStore_.onPlatformResolves(serviceId, platform => {
-        dev().assert(platform, 'Platform is not registered');
+        devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
             SubscriptionAnalyticsEvents.ACTION_DELEGATED,
             dict({
@@ -544,7 +544,7 @@ export class SubscriptionService {
    */
   decorateServiceAction(element, serviceId, action, options) {
     this.platformStore_.onPlatformResolves(serviceId, platform => {
-      dev().assert(platform, 'Platform is not registered');
+      devAssert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });
   }
