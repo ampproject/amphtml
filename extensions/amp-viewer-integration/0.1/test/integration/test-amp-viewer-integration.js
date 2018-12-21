@@ -180,7 +180,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
         });
 
-       it('should initiate window resize handler with capability', () => {
+        it('should initiate window resize handler with capability', () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
