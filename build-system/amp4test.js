@@ -30,7 +30,7 @@ const argv = minimist(
  */
 function log(...messages) {
   if (argv.files) {
-    console.log(messages);
+    console.log.apply(console, messages);
   }
 }
 
