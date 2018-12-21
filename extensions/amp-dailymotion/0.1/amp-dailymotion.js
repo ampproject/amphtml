@@ -28,7 +28,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -164,7 +164,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
 
     this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 

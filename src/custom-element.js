@@ -471,7 +471,7 @@ function createBaseCustomElementClass(win) {
      * @return {?string}
      */
     getDefaultActionAlias() {
-      dev().assert(
+      devAssert(
           this.isUpgraded(),
           'Cannot get default action alias of unupgraded element');
       return this.implementation_.getDefaultActionAlias();

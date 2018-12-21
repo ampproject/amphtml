@@ -18,7 +18,7 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
 describe.configure().run('amp-analytics', function() {
-  this.timeout(15000);
+  this.timeout(10000);
 
   describes.integration('basic pageview', {
     body: `
