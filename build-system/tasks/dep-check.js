@@ -162,10 +162,10 @@ function getSrcs() {
     // together.
     const filename = './.amp-build/gulp-dep-check-collection.js';
     fs.writeFileSync(filename, files.map(file => {
-      return `import '../${file}';`
+      return `import '../${file}';`;
     }).join('\n'));
     return [filename];
-  })
+  });
 }
 
 /**
