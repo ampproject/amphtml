@@ -28,7 +28,8 @@ amp-live-list > [update]                                                 |   100
 amp-image-lightbox                                                       |   1000         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 .i-amphtml-image-lightbox-trans                                          |   1001         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 .i-amphtml-lbv                                                           |   2147483642   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.i-amphtml-sidebar-mask                                                  |   2147483646   |   extensions/amp-sidebar/1.0/amp-sidebar.css
+.i-amphtml-consent-ui-mask                                               |   2147483644   |   extensions/amp-consent/1.0/amp-consent.css
+.amp-consent                                                             |   2147483645   |   extensions/amp-consent/1.0/amp-consent.css
 .i-amphtml-sidebar-mask                                                  |   2147483646   |   extensions/amp-sidebar/0.1/amp-sidebar.css
 amp-sidebar                                                              |   2147483647   |   extensions/amp-sidebar/0.1/amp-sidebar.css
 amp-sidebar                                                              |   2147483647   |   extensions/amp-sidebar/1.0/amp-sidebar.css

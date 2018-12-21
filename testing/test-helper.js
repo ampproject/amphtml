@@ -205,6 +205,48 @@ export class BrowserController {
     });
   }
 
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementBuild(selector, timeout = 5000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to build`,
+        () => {
+          const someNotBuilt = [].some.call(elements,
+              e => e.classList.contains('i-amphtml-notbuilt'));
+          return !someNotBuilt;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementLayout(selector, timeout = 10000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to layout`,
+        () => {
+          // AMP elements set `readyState` to complete when their
+          // layoutCallback() promise is resolved.
+          const someNotReady = [].some.call(elements,
+              e => e.readyState !== 'complete');
+          return !someNotReady;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
   click(selector) {
     const element = this.doc_.querySelector(selector);
     if (element) {
