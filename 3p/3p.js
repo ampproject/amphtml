@@ -22,7 +22,7 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {dev, rethrowAsync, user} from '../src/log';
+import {devAssert, rethrowAsync, user} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
 
@@ -56,7 +56,7 @@ export function getRegistrations() {
  */
 export function register(id, draw) {
   const registrations = getRegistrations();
-  dev().assert(!registrations[id], 'Double registration %s', id);
+  devAssert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }
 

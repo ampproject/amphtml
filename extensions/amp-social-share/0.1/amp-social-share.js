@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
@@ -154,7 +154,7 @@ class AmpSocialShare extends AMP.BaseElement {
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      dev().assert(navigator.share !== undefined,
+      devAssert(navigator.share !== undefined,
           'navigator.share disappeared.');
       // navigator.share() fails 'gulp check-types' validation on Travis
       navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));

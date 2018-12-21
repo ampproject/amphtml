@@ -15,7 +15,7 @@
  */
 
 import {Renderer} from './amp-ad-type-defs';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -46,8 +46,8 @@ export class FriendlyFrameRenderer extends Renderer {
     const {size, adUrl} = context;
     const {creativeMetadata} = creativeData;
 
-    dev().assert(size, 'missing creative size');
-    dev().assert(adUrl, 'missing ad request url');
+    devAssert(size, 'missing creative size');
+    devAssert(adUrl, 'missing ad request url');
 
     return renderCreativeIntoFriendlyFrame(
         adUrl, size, element, creativeMetadata);

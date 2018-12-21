@@ -21,7 +21,7 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
@@ -45,7 +45,7 @@ export class RequestHandler {
     this.win = this.ampdoc_.win;
 
     /** @const {string} */
-    this.baseUrl = dev().assert(request['baseUrl']);
+    this.baseUrl = devAssert(request['baseUrl']);
 
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
@@ -280,7 +280,7 @@ export class RequestHandler {
    * Schedule sending request regarding to batchInterval
    */
   refreshBatchInterval_() {
-    dev().assert(this.batchIntervalPointer_ != null,
+    devAssert(this.batchIntervalPointer_ != null,
         'Should not start batchInterval without pointer');
     const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
       this.batchInterval_[this.batchIntervalPointer_++] :

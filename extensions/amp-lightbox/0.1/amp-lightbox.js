@@ -33,7 +33,7 @@ import {
 } from '../../../src/style';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -181,7 +181,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   takeOwnershipOfDescendants_() {
-    dev().assert(this.isScrollable_);
+    devAssert(this.isScrollable_);
     this.getComponentDescendants_(/* opt_refresh */ true).forEach(child => {
       this.setAsOwner(child);
     });
@@ -661,7 +661,7 @@ AMP.extension(TAG, '0.1', AMP => {
   // getMode check
   if (getMode().runtime == 'inabox') {
     setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
-      dev().assert(document.body)));
+      devAssert(document.body)));
   }
 
   AMP.registerElement(TAG, AmpLightbox, CSS);
