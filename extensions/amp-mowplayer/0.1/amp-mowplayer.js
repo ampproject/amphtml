@@ -214,7 +214,7 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     const eventData = getData(event);
-	
+
     if (!isJsonOrObj(eventData)) {
       return;
     }
@@ -231,7 +231,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const {element} = this;
 
     if (eventType === 'set_aspect_ratio') {
-      element.querySelector('i-amphtml-sizer').style.paddingTop = info.padding_top + '%';
+      this.attemptChangeHeight(info.new_height).catch(() => {});
     }
 
     const playerState = info['playerState'];
