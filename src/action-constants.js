@@ -28,6 +28,9 @@
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
+/** @const {string} Identifier for an element's default action. */
+export const DEFAULT_ACTION = 'activate';
+
 /**
  * Trust level of an action.
  *

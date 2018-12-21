@@ -16,17 +16,20 @@
 'use strict';
 
 const app = module.exports = require('express').Router();
+const minimist = require('minimist');
+const argv = minimist(
+    process.argv.slice(2), {boolean: ['strictBabelTransform']});
+
 
 /* eslint-disable max-len */
 
 /**
- * Logs the given messages to the console in local dev mode, but not while
- * running automated tests.
+ * Logs the given messages to the console when --verbose is specified.
  * @param {*} messages
  */
 function log(...messages) {
-  if (!process.env.AMP_TEST) {
-    console.log(messages);
+  if (argv.verbose) {
+    console.log.apply(console, messages);
   }
 }
 
@@ -160,21 +163,6 @@ app.get('/a4a/:bid', (req, res) => {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   const {bid} = req.params;
-
-  const extensions = [
-    'amp-accordion',
-    'amp-analytics',
-    'amp-anim',
-    'amp-audio',
-    'amp-carousel',
-    'amp-fit-text',
-    'amp-font',
-    'amp-form',
-    'amp-social-share',
-  ];
-
-  const css = 'body { background-color: #f4f4f4; }';
-
   const body = `
   <a href=https://ampbyexample.com target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
@@ -210,8 +198,8 @@ app.get('/a4a/:bid', (req, res) => {
   const doc = composeDocument({
     spec: 'amp4ads',
     body,
-    css,
-    extensions,
+    css: 'body { background-color: #f4f4f4; }',
+    extensions: ['amp-analytics'],
     mode: 'cdn',
   });
   res.send(doc);
@@ -264,11 +252,13 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions.map(extension => {
+      const tuple = extension.split(':');
+      const name = tuple[0];
+      const version = tuple[1] || '0.1';
       const src = (cdn)
-        ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
-        // TODO: Version 0.1 is hard-coded. Use '-latest'?
-        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`;
-      return `<script async custom-element="${extension}" src="${src}"></script>`;
+        ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
+        : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
+      return `<script async custom-element="${name}" src="${src}"></script>`;
     }).join('\n');
   }
 
