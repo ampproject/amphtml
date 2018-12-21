@@ -15,7 +15,7 @@
  */
 
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -65,7 +65,7 @@ class AmpIzlesene extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
     let src = 'https://www.izlesene.com/embedplayer/' + encodeURIComponent(this.videoid_ || '') + '/?';
 
     const params = getDataParamsFromAttributes(this.element);

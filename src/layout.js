@@ -19,7 +19,7 @@
  * details.
  */
 
-import {dev, user} from './log';
+import {dev, devAssert, user} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles, toggle} from './style';
@@ -266,7 +266,7 @@ export function hasNaturalDimensions(tagName) {
  */
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
-  dev().assert(naturalDimensions_[tagName] !== undefined);
+  devAssert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
@@ -326,7 +326,7 @@ export function applyStaticLayout(element) {
   // please take care in making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (dev().assert(
+    const layout = /** @type {!Layout} */ (devAssert(
         parseLayout(completedLayoutAttr)));
     if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
