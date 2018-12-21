@@ -396,6 +396,25 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
+   */
+  static storyAnalyticsServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
+      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService}
+   */
+  static storyAnalyticsService(win) {
+    return getService(win, 'story-analytics');
+  }
+
+
+  /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}

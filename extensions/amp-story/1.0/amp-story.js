@@ -72,6 +72,7 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {StoryAnalyticsService} from './story-analytics';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -226,7 +227,9 @@ export class AmpStory extends AMP.BaseElement {
         new NavigationState(this.win, () => this.hasBookend_());
 
     /** @private {!AmpStoryAnalytics} */
-    this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
+    this.analyticsService_ = new StoryAnalyticsService(this.win, this.element);
+    registerServiceBuilder(
+        this.win, 'story-analytics', () => this.analyticsService_);
 
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forElement(this);
@@ -386,7 +389,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.navigationState_.observe(stateChangeEvent => {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analytics_.onNavigationStateChange(stateChangeEvent);
+      this.analyticsService_.onNavigationStateChange(stateChangeEvent);
     });
 
     // Removes title in order to prevent incorrect titles appearing on link
@@ -537,7 +540,7 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       // We do not want to trigger an analytics event for the initialization of
       // the muted state.
-      this.analytics_.onMutedStateChange(isMuted);
+      this.analyticsService_.onMutedStateChange(isMuted);
     }, false /** callToInitialize */);
 
     this.storeService_.subscribe(
