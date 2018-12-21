@@ -19,7 +19,7 @@ import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 
 
@@ -150,7 +150,7 @@ export class PlatformStore {
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
-    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
+    devAssert(platform, `Platform for id ${serviceId} is not resolved`);
     return platform;
   }
 
@@ -220,7 +220,7 @@ export class PlatformStore {
    * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
-    dev().assert(this.entitlements_[serviceId],
+    devAssert(this.entitlements_[serviceId],
         `Platform ${serviceId} has not yet resolved with entitlements`);
     return this.entitlements_[serviceId];
   }
@@ -231,7 +231,7 @@ export class PlatformStore {
    * @return {!Promise<!./entitlement.Entitlement>} entitlement
    */
   getEntitlementPromiseFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
+    devAssert(this.entitlementDeferredMap_[serviceId],
         `Platform ${serviceId} is not declared`);
     return this.entitlementDeferredMap_[serviceId].promise;
   }
@@ -415,7 +415,7 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatform_() {
-    dev().assert(this.areAllPlatformsResolved_(),
+    devAssert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
     // Subscriber wins immediately.

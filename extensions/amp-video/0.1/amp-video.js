@@ -29,7 +29,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {
@@ -335,7 +335,7 @@ class AmpVideo extends AMP.BaseElement {
    * Propagate sources that are cached by the CDN.
    */
   propagateCachedSources_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -367,7 +367,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   propagateLayoutChildren_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -383,7 +383,7 @@ class AmpVideo extends AMP.BaseElement {
 
     sources.forEach(source => {
       // Cached sources should have been moved from <amp-video> to <video>.
-      dev().assert(!this.isCachedByCDN_(source));
+      devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
     });

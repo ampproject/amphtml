@@ -41,7 +41,7 @@ import {
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
 import {dashToCamelCase, startsWith} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -313,7 +313,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
    * @private
    */
   applyMargins_(rect) {
-    dev().assert(rect);
+    devAssert(rect);
     rect = layoutRectLtwh(
         rect.left,
         (rect.top + this.topMargin_),
@@ -394,7 +394,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * Initializes the players but does not change the state.
    */
   init() {
-    dev().assert(!this.players_);
+    devAssert(!this.players_);
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
@@ -433,7 +433,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * @override
    */
   pause() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
@@ -446,7 +446,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * @override
    */
   resume() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     const oldRunnerPlayState = this.playState_;
     if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
@@ -466,7 +466,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * @override
    */
   reverse() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach(player => {
       player.reverse();
@@ -478,7 +478,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * @param {time} time
    */
   seekTo(time) {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       player.pause();
@@ -493,7 +493,7 @@ export class WebAnimationRunner extends AnimationRunner {
    * @param {number} percent between 0 and 1
    */
   seekToPercent(percent) {
-    dev().assert(percent >= 0 && percent <= 1);
+    devAssert(percent >= 0 && percent <= 1);
     const totalDuration = this.getTotalDuration_();
     const time = totalDuration * percent;
     this.seekTo(time);
@@ -1608,7 +1608,7 @@ class CssContextImpl {
    * @private
    */
   getElement_(selector, selectionMethod) {
-    dev().assert(
+    devAssert(
         selectionMethod == null || selectionMethod == 'closest',
         'Unknown selection method: %s', selectionMethod);
     let element;

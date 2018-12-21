@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {dev, rethrowAsync} from './log';
+import {dev, devAssert, rethrowAsync} from './log';
 import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
@@ -241,7 +241,7 @@ export function setBodyMadeVisibleForTesting(value) {
  * @param {!Document} doc The document who's body we should make visible.
  */
 export function makeBodyVisible(doc) {
-  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
   const set = () => {
     bodyMadeVisible = true;
@@ -275,7 +275,7 @@ export function makeBodyVisible(doc) {
  * @param {!Document} doc The document who's body we should make visible.
  */
 export function makeBodyVisibleRecovery(doc) {
-  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   if (bodyMadeVisible) {
     return;
   }

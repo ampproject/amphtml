@@ -20,7 +20,7 @@ import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 
@@ -68,7 +68,7 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    dev().assert(this.currentProductId_, 'Current product is not set');
+    devAssert(this.currentProductId_, 'Current product is not set');
 
     const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
         'auth',

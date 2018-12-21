@@ -209,6 +209,7 @@ describe('getErrorReportData', () => {
     sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
+    self.AMP_MODE = undefined;
   });
 
   afterEach(() => {

@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {dev} from './log';
+import {devAssert} from './log';
 import {getServicePromise} from './service';
 
 /**
@@ -83,7 +83,7 @@ export function hasRenderDelayingServices(win) {
 export function includedServices(win) {
   /** @const {!Document} */
   const doc = win.document;
-  dev().assert(doc.body);
+  devAssert(doc.body);
 
   return Object.keys(SERVICES).filter(service => {
     return doc.querySelector(SERVICES[service]);

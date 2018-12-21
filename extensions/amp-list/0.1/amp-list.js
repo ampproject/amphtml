@@ -33,7 +33,7 @@ import {
 } from '../../../src/batched-json';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
@@ -498,7 +498,7 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
-    dev().assert(current && current.data, 'Nothing to render.');
+    devAssert(current && current.data, 'Nothing to render.');
     dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.

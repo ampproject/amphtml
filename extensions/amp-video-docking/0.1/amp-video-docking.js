@@ -44,7 +44,7 @@ import {
   listen,
   listenOnce,
 } from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
@@ -551,7 +551,7 @@ export class VideoDocking {
    * @private
    */
   getDockedVideo_() {
-    return dev().assert(this.currentlyDocked_).video;
+    return devAssert(this.currentlyDocked_).video;
   }
 
   /**
@@ -768,7 +768,7 @@ export class VideoDocking {
 
     if (this.isCurrentlyDocked_(video) &&
         !isElement(this.currentlyDocked_.target)) {
-      const {posY} = dev().assert(this.currentlyDocked_).target;
+      const {posY} = devAssert(this.currentlyDocked_).target;
       return /** @type {!RelativeY} */ (dev().assertNumber(posY));
     }
 
@@ -1701,7 +1701,7 @@ export class VideoDocking {
 
     const step = 0;
 
-    const {target} = dev().assert(this.currentlyDocked_);
+    const {target} = devAssert(this.currentlyDocked_);
     const {x, y, scale} = this.getDims_(video, target, step);
 
     return this.placeAt_(video, x, y, scale, step)

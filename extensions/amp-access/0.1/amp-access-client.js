@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 
@@ -137,7 +137,7 @@ export class AccessClientAdapter {
 
   /** @override */
   pingback() {
-    const promise = this.context_.buildUrl(dev().assert(this.pingbackUrl_),
+    const promise = this.context_.buildUrl(devAssert(this.pingbackUrl_),
         /* useAuthData */ true);
     return promise.then(url => {
       dev().fine(TAG, 'Pingback URL: ', url);

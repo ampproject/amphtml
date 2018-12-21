@@ -28,7 +28,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 
@@ -99,7 +99,7 @@ export class ConsentStateManager {
    * @return {Promise<!ConsentInfoDef>}
    */
   getConsentInstanceInfo(instanceId) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].get();
   }
@@ -110,7 +110,7 @@ export class ConsentStateManager {
    * @param {function(CONSENT_ITEM_STATE)} handler
    */
   onConsentStateChange(instanceId, handler) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
 
     const unlistener = this.consentChangeObservables_[instanceId].add(handler);
@@ -131,7 +131,7 @@ export class ConsentStateManager {
    * @param {Promise<?Object>} sharedDataPromise
    */
   setConsentInstanceSharedData(instanceId, sharedDataPromise) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
   }
@@ -144,7 +144,7 @@ export class ConsentStateManager {
    * @return {?Promise<?Object>}
    */
   getConsentInstanceSharedData(instanceId) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].sharedDataPromise;
   }

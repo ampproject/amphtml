@@ -16,7 +16,7 @@
 
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {
@@ -173,7 +173,7 @@ export class History {
    * @return {!Promise}
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     const previousHash = this.ampdoc_.win.location.hash;
     return this.push(() => {
       this.ampdoc_.win.location.replace(previousHash || '#');
@@ -632,7 +632,7 @@ export class HistoryBindingNatural_ {
 
   /** @private */
   assertReady_() {
-    dev().assert(!this.waitingState_,
+    devAssert(!this.waitingState_,
         'The history must not be in the waiting state');
   }
 
@@ -715,7 +715,7 @@ export class HistoryBindingNatural_ {
    * @override
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
       // location.replace will fire a popstate event which is not a history
       // event, so temporarily remove the event listener and re-add it after.
@@ -835,7 +835,7 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.win.location.replace(target);
   }
 

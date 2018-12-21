@@ -34,7 +34,7 @@ import {LocalizedStringId} from '../localization';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
-import {dev, user} from '../../../../src/log';
+import {dev, devAssert, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
@@ -485,7 +485,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /** @private */
   assertBuilt_() {
-    dev().assert(this.isBuilt(), 'Bookend component needs to be built.');
+    devAssert(this.isBuilt(), 'Bookend component needs to be built.');
   }
 
   /**

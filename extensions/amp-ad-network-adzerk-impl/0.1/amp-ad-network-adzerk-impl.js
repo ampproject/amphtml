@@ -21,7 +21,7 @@ import {
 } from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
 import {tryResolve} from '../../../src/utils/promise';
@@ -91,7 +91,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const data = this.element.getAttribute('data-r');
-    dev().assert(data, 'Expected data-r attribte on amp-ad tag');
+    devAssert(data, 'Expected data-r attribte on amp-ad tag');
     if (getMode(this.win).localDev) {
       return `http://ads.localhost:${this.win.location.port}` +
           '/adzerk/' + data;

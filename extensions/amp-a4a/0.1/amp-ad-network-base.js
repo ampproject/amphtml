@@ -19,7 +19,7 @@ import {
   RecoveryModeType,
 } from './amp-ad-type-defs';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {map} from '../../../src/utils/object';
 import {sendXhrRequest} from './amp-ad-utils';
@@ -77,7 +77,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    dev().assert(this.adResponsePromise_,
+    devAssert(this.adResponsePromise_,
         'layoutCallback invoked before XHR request!');
     return this.adResponsePromise_
         .then(response => this.invokeValidator_(response))
@@ -167,7 +167,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     return response.arrayBuffer().then(unvalidatedBytes => {
       const validatorType = response.headers.get('AMP-Ad-Response-Type')
           || 'default';
-      dev().assert(this.validators_[validatorType],
+      devAssert(this.validators_[validatorType],
           'Validator never registered!');
       return this.validators_[validatorType].validate(
           this.context_, unvalidatedBytes, response.headers)
@@ -183,7 +183,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   invokeRenderer_(validatorOutput) {
     const renderer = this.renderers_[validatorOutput.type];
-    dev().assert(renderer, 'Renderer for AMP creatives never registered!');
+    devAssert(renderer, 'Renderer for AMP creatives never registered!');
     return renderer.render(
         this.context_, this.element, validatorOutput.creativeData)
         .catch(err =>

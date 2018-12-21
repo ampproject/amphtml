@@ -18,7 +18,7 @@ import {AmpEvents} from '../amp-events';
 import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
@@ -94,7 +94,7 @@ export class Resource {
    */
   static forElement(element) {
     return /** @type {!Resource} */ (
-      dev().assert(Resource.forElementOptional(element),
+      devAssert(Resource.forElementOptional(element),
           'Missing resource prop on %s', element));
   }
 
@@ -113,7 +113,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev().assert(owner.contains(element), 'Owner must contain the element');
+    devAssert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
       Resource.forElementOptional(element).updateOwner(owner);
     }
@@ -670,7 +670,7 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
-    dev().assert(viewport !== false);
+    devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
@@ -857,9 +857,9 @@ export class Resource {
       return Promise.reject(this.lastLayoutError_);
     }
 
-    dev().assert(this.state_ != ResourceState.NOT_BUILT,
+    devAssert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
-    dev().assert(this.isDisplayed(),
+    devAssert(this.isDisplayed(),
         'Not displayed for layout: %s', this.debugid);
 
     // Unwanted re-layouts are ignored.

@@ -34,7 +34,7 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {
@@ -106,7 +106,7 @@ export class AmpAdXOriginIframeHandler {
    * @return {!Promise} awaiting render complete promise
    */
   init(iframe, opt_isA4A) {
-    dev().assert(
+    devAssert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
@@ -439,7 +439,7 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
-      dev().assert(position,
+      devAssert(position,
           'element clientRect should intersects with root clientRect');
       const viewport = this.viewport_.getRect();
       return dict({

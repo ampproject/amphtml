@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {devAssert} from '../log';
 
 
 /**
@@ -102,7 +102,7 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    dev().assert(
+    devAssert(
         !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;

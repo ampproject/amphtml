@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LogLevel, dev} from '../../../src/log';
+import {LogLevel, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {tryResolve} from '../../../src/utils/promise';
@@ -160,10 +160,10 @@ const LogType = {
  */
 function getLogType(logTypeKey) {
   const logType = LogType[logTypeKey];
-  dev().assert(logType, `There is no log type "${logTypeKey}".`);
-  dev().assert(logType.message,
+  devAssert(logType, `There is no log type "${logTypeKey}".`);
+  devAssert(logType.message,
       `Log type "${logTypeKey}" has no associated message.`);
-  dev().assert(logType.level,
+  devAssert(logType.level,
       `Log type "${logTypeKey}" has no associated log level.`);
 
   return logType;

@@ -54,7 +54,7 @@ import {
 } from '../sra-utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dev} from '../../../../src/log';
+import {devAssert} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
@@ -387,8 +387,8 @@ describes.realWin('Doubleclick SRA', config , env => {
 
     function generateSraXhrMockCall(
       validInstances, networkId, responses, opt_xhrFail, opt_allInvalid) {
-      dev().assert(validInstances.length > 1);
-      dev().assert(!(opt_xhrFail && opt_allInvalid));
+      devAssert(validInstances.length > 1);
+      devAssert(!(opt_xhrFail && opt_allInvalid));
       // Start with nameframe method, SRA will override to use safeframe.
       const headers = {};
       headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
@@ -495,7 +495,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         if (typeof network == 'number') {
           network = {networkId: network, instances: 1};
         }
-        dev().assert(network.instances || network.invalidInstances);
+        devAssert(network.instances || network.invalidInstances);
         const createInstances = (instanceCount, invalid) => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);

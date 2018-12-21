@@ -70,7 +70,7 @@ import {
 } from './sra-utils';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   extractUrlExperimentId,
@@ -433,7 +433,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
-    dev().assert(!isCdnProxy(this.win));
+    devAssert(!isCdnProxy(this.win));
     return true;
   }
 
@@ -463,8 +463,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
-    dev().assert(this.initialSize_);
-    dev().assert(this.jsonTargeting);
+    devAssert(this.initialSize_);
+    devAssert(this.jsonTargeting);
     const tfcd = this.jsonTargeting && this.jsonTargeting[TFCD];
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
@@ -901,12 +901,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
-      dev().assert(this.iframe);
+      devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
-      dev().assert(!this.ampAnalyticsElement_);
+      devAssert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
             this.win,
@@ -920,7 +920,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
     if (this.isRefreshing) {
-      dev().assert(this.refreshManager_);
+      devAssert(this.refreshManager_);
       this.refreshManager_.initiateRefreshCycle();
       this.isRefreshing = false;
       this.isRelayoutNeededFlag = false;
@@ -1153,10 +1153,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           checkStillCurrent();
           const sraRequestPromises = [];
           Object.keys(groupIdToBlocksAry).forEach(networkId => {
-            const blocks = dev().assert(groupIdToBlocksAry[networkId]);
+            const blocks = devAssert(groupIdToBlocksAry[networkId]);
             // TODO: filter blocks with SRA disabled?
             sraRequestPromises.push(Promise.all(blocks).then(instances => {
-              dev().assert(instances.length);
+              devAssert(instances.length);
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
               // indicates they were invalid.
@@ -1300,7 +1300,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     const creativeSize = this.getCreativeSize();
-    dev().assert(creativeSize, 'this.getCreativeSize returned null');
+    devAssert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
             this, this.isFluidRequest_,
@@ -1321,7 +1321,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
       return null;
     }
-    dev().assert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
+    devAssert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
     return this.troubleshootData_.adUrl.then(adUrl => {
       const slotId = this.troubleshootData_.slotId + '_' +
           this.troubleshootData_.slotIndex;
@@ -1425,7 +1425,7 @@ export function getNetworkId(element) {
  */
 function constructSRARequest_(a4a, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
-  dev().assert(instances && instances.length);
+  devAssert(instances && instances.length);
   const startTime = Date.now();
   return Promise.all(
       instances.map(instance => instance.getAdUrlDeferred.promise))

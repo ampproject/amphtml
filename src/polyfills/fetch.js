@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {hasOwn, map} from '../utils/object';
 import {isArray, isObject} from '../types';
 import {parseJson} from '../json';
@@ -157,7 +157,7 @@ class FetchResponse {
    * @return {!FetchResponse}
    */
   clone() {
-    dev().assert(!this.bodyUsed, 'Body already used');
+    devAssert(!this.bodyUsed, 'Body already used');
     return new FetchResponse(this.xhr_);
   }
 
@@ -167,7 +167,7 @@ class FetchResponse {
    * @private
    */
   drainText_() {
-    dev().assert(!this.bodyUsed, 'Body already used');
+    devAssert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
@@ -212,7 +212,7 @@ function normalizeMethod(method) {
     return 'GET';
   }
   method = method.toUpperCase();
-  dev().assert(
+  devAssert(
       allowedMethods.includes(method),
       'Only one of %s is currently allowed. Got %s',
       allowedMethods.join(', '),

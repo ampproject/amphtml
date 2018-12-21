@@ -15,7 +15,7 @@
  */
 
 import {computedStyle, setStyles} from '../../../../src/style';
-import {dev, user} from '../../../../src/log';
+import {devAssert, user} from '../../../../src/log';
 
 export const Presets = {
   'parallax': {
@@ -30,7 +30,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
       if (!top || top > fxElement.adjustedViewportHeight) {
@@ -65,7 +65,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top - (fxElement.viewportHeight *
@@ -115,7 +115,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -163,7 +163,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -211,7 +211,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top + (fxElement.viewportHeight *
@@ -261,7 +261,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -299,7 +299,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
       if (!top || (top > (1 - fxElement.getMarginStart()) *

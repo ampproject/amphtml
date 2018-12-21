@@ -22,7 +22,7 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -1127,8 +1127,8 @@ export class VideoEventTracker extends EventTracker {
         const normalizedPercentage = details['normalizedPercentage'];
         const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
 
-        dev().assert(isFiniteNumber(normalizedPercentageInt));
-        dev().assert((normalizedPercentageInt % percentageInterval) == 0);
+        devAssert(isFiniteNumber(normalizedPercentageInt));
+        devAssert((normalizedPercentageInt % percentageInterval) == 0);
 
         if (lastPercentage == normalizedPercentageInt) {
           return;

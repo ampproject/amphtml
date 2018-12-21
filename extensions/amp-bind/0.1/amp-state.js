@@ -21,7 +21,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
@@ -80,7 +80,7 @@ export class AmpState extends AMP.BaseElement {
     const {element} = this;
     if (element.hasAttribute('overridable')) {
       Services.bindForDocOrNull(element).then(bind => {
-        dev().assert(bind, 'Bind service can not be found.');
+        devAssert(bind, 'Bind service can not be found.');
         bind.makeStateKeyOverridable(element.getAttribute('id'));
       });
     }
@@ -173,7 +173,7 @@ export class AmpState extends AMP.BaseElement {
     const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {
-      dev().assert(bind, 'Bind service can not be found.');
+      devAssert(bind, 'Bind service can not be found.');
       bind.setState(state,
           /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });

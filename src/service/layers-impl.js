@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {computedStyle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
@@ -565,7 +565,7 @@ export class LayoutElement {
    * @return {!LayoutElement}
    */
   static for(element) {
-    return /** @type {!LayoutElement} */ (dev().assert(
+    return /** @type {!LayoutElement} */ (devAssert(
         LayoutElement.forOptional(element)));
   }
 
@@ -601,7 +601,7 @@ export class LayoutElement {
       }
     }
 
-    let win = /** @type {!Window } */ (dev().assert(
+    let win = /** @type {!Window } */ (devAssert(
         node.ownerDocument.defaultView));
     let el = node;
     let op = node;
@@ -663,13 +663,13 @@ export class LayoutElement {
         op = el;
         // Update our window reference if we crossed a FIE boundary.
         if (el) {
-          win = /** @type {!Window } */ (dev().assert(
+          win = /** @type {!Window } */ (devAssert(
               el.ownerDocument.defaultView));
         }
       }
     }
 
-    dev().assert(last.nodeType === Node.DOCUMENT_NODE,
+    devAssert(last.nodeType === Node.DOCUMENT_NODE,
         'node not in the DOM tree');
     return null;
   }
@@ -727,8 +727,8 @@ export class LayoutElement {
    * @param {!LayoutElement} child
    */
   add(child) {
-    dev().assert(this.isLayer());
-    dev().assert(this.contains(child));
+    devAssert(this.isLayer());
+    devAssert(this.contains(child));
 
     // Parents track the children, but not all children are aware of their
     // parents. When a child finds its parent, it adds itself to the parent.
@@ -767,7 +767,7 @@ export class LayoutElement {
    * @param {boolean} scrollsLikeViewport
    */
   declareLayer(isRootLayer, scrollsLikeViewport) {
-    dev().assert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
+    devAssert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
       ' scroll like a viewport.');
 
     if (this.isLayer_) {
@@ -804,7 +804,7 @@ export class LayoutElement {
       return;
     }
 
-    const win = /** @type {!Window } */ (dev().assert(
+    const win = /** @type {!Window } */ (devAssert(
         element.ownerDocument.defaultView));
     // If it remains fixed, it will still be a layer.
     if (computedStyle(win, element).position === 'fixed') {
@@ -816,7 +816,7 @@ export class LayoutElement {
     // layer).
     const parent = this.getParentLayer() ||
         LayoutElement.getParentLayer(element, true);
-    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(parent)));
+    this.transfer_(/** @type {!LayoutElement} */ (devAssert(parent)));
   }
 
   /**
@@ -1155,7 +1155,7 @@ export class LayoutElement {
     // layer.
     let isActive = activeLayer === this ||
         (!!activeLayer && activeLayer.contains(this));
-    dev().assert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
+    devAssert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
 
     let layer = this;
     while (layer) {
@@ -1289,7 +1289,7 @@ function sameDocument(element, other) {
  * @return {?Element}
  */
 function frameParent(node) {
-  dev().assert(node.nodeType === Node.DOCUMENT_NODE);
+  devAssert(node.nodeType === Node.DOCUMENT_NODE);
   try {
     const {defaultView} = node;
     const frameElement = defaultView && defaultView.frameElement;

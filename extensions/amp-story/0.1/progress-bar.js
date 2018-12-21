@@ -15,7 +15,7 @@
  */
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom';
 import {hasOwn, map} from '../../../src/utils/object';
 import {scale, setImportantStyles} from '../../../src/style';
@@ -82,7 +82,7 @@ export class ProgressBar {
     }
 
     const segmentCount = segmentIds.length;
-    dev().assert(segmentCount > 0);
+    devAssert(segmentCount > 0);
 
     this.isBuilt_ = true;
     this.segmentCount_ = segmentCount;
@@ -139,7 +139,7 @@ export class ProgressBar {
    * @private
    */
   assertVaildSegmentId_(segmentId) {
-    dev().assert(hasOwn(this.segmentIdMap_, segmentId),
+    devAssert(hasOwn(this.segmentIdMap_, segmentId),
         'Invalid segment-id passed to progress-bar');
   }
 

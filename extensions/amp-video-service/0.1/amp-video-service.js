@@ -30,7 +30,7 @@ import {
   VideoServiceSignals,
 } from '../../../src/service/video-service-interface';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isFiniteNumber} from '../../../src/types';
 
@@ -99,7 +99,7 @@ export class VideoService {
         video);
 
     if (this.getEntryOrNull(element)) {
-      return dev().assert(this.getEntryOrNull(element));
+      return devAssert(this.getEntryOrNull(element));
     }
 
     if (!video.supportsPlatform()) {

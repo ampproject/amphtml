@@ -24,7 +24,7 @@ import {
 import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
-  dev,
+  dev, devAssert,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -930,7 +930,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
       `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
-  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+  devAssert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
   if (!scriptInHead) {
     return false;

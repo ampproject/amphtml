@@ -23,7 +23,7 @@ import {
 } from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
@@ -213,7 +213,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
-      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
       this.storeService_ = storeService;
 
       if (!this.isAutomaticAdInsertionAllowed_()) {

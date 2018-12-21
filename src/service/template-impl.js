@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
@@ -377,7 +377,7 @@ export class Templates {
    * @visibleForTesting
    */
   unregisterTemplate(type) {
-    dev().assert(getMode().test, 'Should only be used in test mode.');
+    devAssert(getMode().test, 'Should only be used in test mode.');
     delete this.templateClassMap_[type];
     delete this.templateClassResolvers_[type];
   }

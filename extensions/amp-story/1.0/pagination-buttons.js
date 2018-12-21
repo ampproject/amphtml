@@ -19,7 +19,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -138,7 +138,7 @@ class PaginationButton {
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.win_, this.element, dev().assert(this.state_.triggers),
+      dispatch(this.win_, this.element, devAssert(this.state_.triggers),
           /* payload */ undefined, {bubbles: true});
       return;
     }

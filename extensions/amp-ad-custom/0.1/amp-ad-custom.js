@@ -23,7 +23,7 @@ import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 import {addParamToUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 // These have no side-effects, and so may be reused between all instances.
@@ -45,7 +45,7 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
     /** @const {string} */
     this.baseRequestUrl_ = this.element.getAttribute('src');
-    dev().assert(this.baseRequestUrl_,
+    devAssert(this.baseRequestUrl_,
         'Invalid network configuration: no request URL specified');
 
     this.getContext().win = this.win;

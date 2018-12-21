@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle, setStyles} from '../../../src/style';
@@ -290,7 +290,7 @@ export class SafeframeHostApi {
    * that as well.
    */
   registerSafeframeHost() {
-    dev().assert(this.sentinel_);
+    devAssert(this.sentinel_);
     safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
     if (!safeframeListenerCreated_) {
       safeframeListenerCreated_ = true;
@@ -307,7 +307,7 @@ export class SafeframeHostApi {
     // Set the iframe here, because when class is first created the iframe
     // element does not yet exist on this.baseInstance_. The first time
     // we receive a message we know that it now exists.
-    dev().assert(this.baseInstance_.iframe);
+    devAssert(this.baseInstance_.iframe);
     this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
     this.setupGeom_();
@@ -326,7 +326,7 @@ export class SafeframeHostApi {
    * @private
    */
   setupGeom_() {
-    dev().assert(this.iframe_.contentWindow,
+    devAssert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
     const throttledUpdate = throttle(
         this.win_, this.updateGeometry_.bind(this), 1000);
