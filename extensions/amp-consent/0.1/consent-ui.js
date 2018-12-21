@@ -41,6 +41,7 @@ export const consentUiClasses = {
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
+  mask: 'i-amphtml-consent-ui-mask',
 };
 
 export class ConsentUI {
@@ -72,6 +73,9 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.ui_ = null;
+
+    /** @private {boolean} */
+    this.overlayEnabled_ = false;
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;
@@ -136,6 +140,8 @@ export class ConsentUI {
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
     }
+
+    this.overlayEnabled_ = !!config['overlay'];
   }
 
   /**
@@ -159,6 +165,11 @@ export class ConsentUI {
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
+
+          if (this.overlayEnabled_) {
+            this.showOverlay_();
+          }
+
           this.showIframe_();
         });
       });
@@ -167,6 +178,11 @@ export class ConsentUI {
         if (!this.ui_) {
           return;
         }
+
+        if (this.overlayEnabled_) {
+          this.showOverlay_();
+        }
+
         toggle(this.ui_, true);
         if (!this.isPostPrompt_) {
           // scheduleLayout is required everytime because some AMP element may
@@ -208,11 +224,15 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
+      if (this.overlayEnabled_) {
+        this.hideOverlay_();
+      }
+
+      this.enableScroll_();
+
       toggle(dev().assertElement(this.ui_), false);
       this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
-
-      this.enableScroll_();
     });
   }
 
@@ -328,9 +348,6 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
-
-        // TODO (torch2424): Show mask if publisher provides the option
-        // this.showMaskElement_();
       });
     });
   }
@@ -353,9 +370,32 @@ export class ConsentUI {
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     removeElement(dev().assertElement(this.ui_));
+  }
 
-    // TODO (torch2424): Hide mask if publisher provides the option
-    // this.hideMaskElement_();
+  /**
+   * Shows the overlay (mask element, and lock scrolling)
+   * @private
+   */
+  showOverlay_() {
+    if (!this.maskElement_) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add(consentUiClasses.mask);
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+    this.disableScroll_();
+  }
+
+  /**
+   * Hides the overlay (mask element, and lock scrolling)
+   * @private
+   */
+  hideOverlay_() {
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+    this.enableScroll_();
   }
 
   /**
@@ -379,31 +419,6 @@ export class ConsentUI {
       this.scrollEnabled_ = true;
     }
   }
-
-  /**
-   * Shows the mask element
-   * @private
-   */
-  showMaskElement_() {
-    if (!this.maskElement_) {
-      const mask = this.win_.document.createElement('div');
-      mask.classList.add('i-amphtml-consent-ui-mask');
-      this.parent_.ownerDocument.body.appendChild(mask);
-      this.maskElement_ = mask;
-    }
-    toggle(this.maskElement_, /* display */true);
-  }
-
-  /**
-   * Shows the mask element
-   * @private
-   */
-  hideMaskElement_() {
-    if (this.maskElement_) {
-      toggle(this.maskElement_, /* display */false);
-    }
-  }
-
 
   /**
    * Listen to iframe messages and handle events.
