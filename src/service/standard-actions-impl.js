@@ -157,7 +157,7 @@ export class StandardActions {
   /**
    * Handles the `navigateTo` action.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
+   * @return {!Promise}
    */
   handleNavigateTo(invocation) {
     const {node, caller, method, args} = invocation;
@@ -188,12 +188,11 @@ export class StandardActions {
    * Window can be closed only from top-level documents that have an opener.
    * Without an opener or if embedded, it will deny the close method.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
+   * @return {!Promise}
    */
   handleCloseOrNavigateTo(invocation) {
     const {node} = invocation;
     const win = (node.ownerDocument || node).defaultView;
-    let result = Promise.resolve();
 
     // Don't allow closing if embedded in iframe or does not have an opener or
     // embedded in a multi-doc shadowDOM case.
@@ -211,10 +210,10 @@ export class StandardActions {
     }
 
     if (!wasClosed) {
-      result = this.handleNavigateTo(invocation);
+      return this.handleNavigateTo(invocation);
     }
 
-    return result;
+    return Promise.resolve();
   }
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to
