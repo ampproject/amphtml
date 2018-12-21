@@ -306,12 +306,16 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     if (getprop == null) {
       return;
     }
+    if (parent.isExprResult()) {
+      // Nobody cares about the first arg, remove the whole thing.
+      removeExpression(call, parent);
+      return;
+    }
     Node firstArg = getprop.getNext();
     if (firstArg == null) {
       removeExpression(call, parent);
       return;
     }
-
     firstArg.detachFromParent();
     parent.replaceChild(call, firstArg);
     compiler.reportChangeToEnclosingScope(parent);
