@@ -352,7 +352,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
-      consentStringPromise
+      consentStringPromise,
     ]).then(consents => {
       const opt_context = {
         clientId: consents[0] || null,
