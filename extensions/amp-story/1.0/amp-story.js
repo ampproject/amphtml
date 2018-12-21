@@ -1644,10 +1644,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   setHistoryState_(stateName, value) {
     const {history} = this.win;
-    const newHistory = Object.assign({}, getState(history) || {},
+    const state = getState(history) || {};
+    const newHistory = Object.assign({}, /** @type {!Object} */ (state),
         {[stateName]: value});
 
-    history.replaceState(newHistory);
+    history.replaceState(newHistory, '');
   }
 
   /**
