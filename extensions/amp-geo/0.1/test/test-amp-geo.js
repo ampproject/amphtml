@@ -62,7 +62,6 @@ describes.realWin('amp-geo', {
   let el;
   let userErrorStub;
 
-
   beforeEach(() => {
     userErrorStub = sandbox.stub(user(), 'error');
     win = env.win;
@@ -379,6 +378,20 @@ describes.realWin('amp-geo', {
     })).to.throw();
 
     return expect(Services.geoForDocOrNull(el)).to.eventually.equal(null);
+  });
+
+  it('geo should log an error if unpatched in production. ', () => {
+    expectAsyncConsoleError(/GEONOTPATCHED/);
+    sandbox.stub(win.AMP_MODE, 'localDev').value(false);
+    addConfigElement('script');
+
+    geo.buildCallback();
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expectBodyHasClass([
+        'amp-geo-error',
+      ], true);
+    });
   });
 
   it('should throw if it has multiple script child elements', () => {
