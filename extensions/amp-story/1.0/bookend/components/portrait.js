@@ -58,7 +58,7 @@ export class PortraitComponent {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in portraitJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Portrait component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +

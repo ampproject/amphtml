@@ -26,7 +26,7 @@ import {getAdNetworkConfig} from './ad-network-config';
 import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -39,14 +39,14 @@ export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-auto-ads'),
+    userAssert(isExperimentOn(this.win, 'amp-auto-ads'),
         'Experiment is off');
 
     const type = this.element.getAttribute('type');
-    user().assert(type, 'Missing type attribute');
+    userAssert(type, 'Missing type attribute');
 
     const adNetwork = getAdNetworkConfig(type, this.element);
-    user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
+    userAssert(adNetwork, 'No AdNetworkConfig for type: ' + type);
 
     if (!adNetwork.isEnabled(this.win)) {
       return;

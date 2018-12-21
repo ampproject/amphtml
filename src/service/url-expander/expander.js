@@ -15,7 +15,7 @@
  */
 
 import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user} from '../../log';
+import {rethrowAsync, user, userAssert} from '../../log';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -188,7 +188,7 @@ export class Expander {
           if (!ignoringChars) {
             ignoringChars = true;
             nextArgShouldBeRaw = true;
-            user().assert(builder.trim() === '',
+            userAssert(builder.trim() === '',
                 `The substring "${builder}" was lost during url-replacement. ` +
                 'Please ensure the url syntax is correct');
             builder = '';

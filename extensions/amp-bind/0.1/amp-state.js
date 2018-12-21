@@ -21,7 +21,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
@@ -169,7 +169,7 @@ export class AmpState extends AMP.BaseElement {
     if (json === undefined || json === null) {
       return;
     }
-    const id = user().assert(this.element.id, '<amp-state> must have an id.');
+    const id = userAssert(this.element.id, '<amp-state> must have an id.');
     const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {

@@ -46,7 +46,7 @@ export class ArticleComponent {
     const requiredFields = ['title', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in articleJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Small article component must contain ' +
             requiredFields.map(field => '`' + field + '`').join(', ') +

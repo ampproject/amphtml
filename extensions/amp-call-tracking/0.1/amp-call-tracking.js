@@ -17,7 +17,7 @@
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 
 /**
@@ -85,7 +85,7 @@ export class AmpCallTracking extends AMP.BaseElement {
         .expandUrlAsync(user().assertString(this.configUrl_))
         .then(url => fetch_(this.win, url))
         .then(data => {
-          user().assert('phoneNumber' in data,
+          userAssert('phoneNumber' in data,
               'Response must contain a non-empty phoneNumber field %s',
               this.element);
 

@@ -20,11 +20,11 @@ import {devAssert, user} from '../../../../src/log';
 export const Presets = {
   'parallax': {
     userAsserts(element) {
-      const factorValue = user().assert(
+      const factorValue = userAssert(
           element.getAttribute('data-parallax-factor'),
           'data-parallax-factor=<number> attribute must be provided for: %s',
           element);
-      user().assert(parseFloat(factorValue) > 0,
+      userAssert(parseFloat(factorValue) > 0,
           'data-parallax-factor must be a number and greater than 0 for: %s',
           element);
     },
@@ -59,7 +59,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -109,7 +109,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -157,7 +157,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -205,7 +205,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -255,7 +255,7 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
@@ -286,14 +286,14 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd <= 100,
+      userAssert(marginEnd >= 0 && marginEnd <= 100,
           'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
-      user().assert(marginEnd > marginStart,
+      userAssert(marginEnd > marginStart,
           'data-margin-end must be greater than data-margin-start for: %s',
           element);
     },

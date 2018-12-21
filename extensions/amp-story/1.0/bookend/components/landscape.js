@@ -58,7 +58,7 @@ export class LandscapeComponent {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in landscapeJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Landscape component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +

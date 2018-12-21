@@ -34,7 +34,7 @@ export function timeStrToMillis(time) {
   const num = match[1];
   const units = match[2];
 
-  user().assert(
+  userAssert(
       match &&
           match.length == 3 &&
           (units == 's' || units == 'ms'),
@@ -199,7 +199,7 @@ export function removeAttributeInMutate(elementImpl, name) {
  * @param {string|!Location} url
  */
 export function userAssertValidProtocol(element, url) {
-  user().assert(Services.urlForDoc(element).isProtocolValid(url),
+  userAssert(Services.urlForDoc(element).isProtocolValid(url),
       'Unsupported protocol for URL %s', url);
 }
 
