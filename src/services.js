@@ -407,12 +407,12 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService}
+   * @return {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService}
    */
   static storyAnalyticsService(win) {
-    return getService(win, 'story-analytics');
+    return (/** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
+      (getExistingServiceOrNull(win, 'story-analytics')));
   }
-
 
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.

@@ -72,7 +72,6 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {StoryAnalyticsService} from './story-analytics';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -98,6 +97,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
+import {getAnalyticsService} from './story-analytics';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -227,9 +227,7 @@ export class AmpStory extends AMP.BaseElement {
         new NavigationState(this.win, () => this.hasBookend_());
 
     /** @private {!AmpStoryAnalytics} */
-    this.analyticsService_ = new StoryAnalyticsService(this.win, this.element);
-    registerServiceBuilder(
-        this.win, 'story-analytics', () => this.analyticsService_);
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forElement(this);

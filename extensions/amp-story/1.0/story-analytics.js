@@ -16,6 +16,7 @@
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
+import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
@@ -38,9 +39,28 @@ export const AdvancementMode = {
 };
 
 /**
+ * Util function to retrieve the analytics service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {!StoryAnalyticsService}
+ */
+export const getAnalyticsService = (win, el) => {
+  let service = Services.storyAnalyticsService(win);
+
+  if (!service) {
+    service = new StoryAnalyticsService(win, el);
+    registerServiceBuilder(win, 'story-analytics', () => service);
+  }
+
+  return service;
+};
+
+/**
  * Intermediate handler for amp-story specific analytics.
  */
-export class StoryAnalyticsService {
+class StoryAnalyticsService {
   /**
    * @param {!Window} win
    * @param {!Element} element
