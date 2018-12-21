@@ -155,6 +155,7 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
   for (const id in b) {
     const callback = b[id];
     if (typeof callback === 'function') {
+      // Respond 404 to pending request.
       callback();
     }
     delete b[id];
