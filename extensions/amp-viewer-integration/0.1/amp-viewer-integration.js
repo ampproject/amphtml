@@ -22,7 +22,6 @@ import {
   getHighlightParam,
 } from './highlight-handler';
 import {KeyboardHandler} from './keyboard-handler';
-import {WindowResizeHandler} from './window-resize-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -30,6 +29,7 @@ import {
 } from './messaging/messaging';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
+import {WindowResizeHandler} from './window-resize-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {

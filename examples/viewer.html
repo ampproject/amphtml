@@ -449,8 +449,6 @@
           return Promise.reject({error: 'source amp component is not valid'})
         }
         case 'resize':
-          log('window resize!', data);
-          return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':

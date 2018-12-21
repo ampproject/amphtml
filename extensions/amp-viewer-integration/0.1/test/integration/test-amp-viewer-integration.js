@@ -179,6 +179,21 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             expect(initFocusHandlerStub).to.be.called;
           });
         });
+
+       it('should initiate window resize handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('windowResize')
+              .returns(true);
+          const initWindowResizeHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initWindowResizeHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initWindowResizeHandlerStub).to.be.called;
+          });
+        });
       });
     });
   });
