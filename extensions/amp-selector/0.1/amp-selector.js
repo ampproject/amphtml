@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
@@ -98,7 +98,7 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
-      user().assert(
+      userAssert(
           !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
           '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
@@ -128,8 +128,8 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction('toggle', invocation => {
       const {args} = invocation;
-      user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
-      user().assert(args['index'] < this.elements_.length, '\'index\' must ' +
+      userAssert(args['index'] >= 0, '\'index\' must be greater than 0');
+      userAssert(args['index'] < this.elements_.length, '\'index\' must ' +
         'be less than the length of options in the <amp-selector>');
       if (args && args['index'] !== undefined) {
         this.toggle_(args['index'], args['value']);

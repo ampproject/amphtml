@@ -31,7 +31,7 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -115,7 +115,7 @@ export class AmpConsent extends AMP.BaseElement {
   buildCallback() {
     this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
 
-    user().assert(this.element.getAttribute('id'),
+    userAssert(this.element.getAttribute('id'),
         'amp-consent should have an id');
 
     const config = new ConsentConfig(this.element);
@@ -406,7 +406,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   getConsentRequiredPromise_(instanceId, config) {
-    user().assert(config['checkConsentHref'] ||
+    userAssert(config['checkConsentHref'] ||
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
@@ -457,7 +457,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   isConsentRequiredGeo_(geoGroup) {
     return Services.geoForDocOrNull(this.element).then(geo => {
-      user().assert(geo,
+      userAssert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
@@ -509,7 +509,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} consentId
    */
   handlePostPrompt_(consentId) {
-    user().assert(this.consentConfig_[consentId],
+    userAssert(this.consentConfig_[consentId],
         'consent with id %s not found', consentId);
     // toggle the UI for this consent
     this.scheduleDisplay_(consentId);

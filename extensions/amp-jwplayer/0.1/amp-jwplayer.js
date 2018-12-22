@@ -16,7 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
 
@@ -52,14 +52,14 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.contentid_ = user().assert(
+    this.contentid_ = userAssert(
         (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
         'Either the data-media-id or the data-playlist-id ' +
       'attributes must be specified for <amp-jwplayer> %s',
         this.element);
 
-    this.playerid_ = user().assert(
+    this.playerid_ = userAssert(
         this.element.getAttribute('data-player-id'),
         'The data-player-id attribute is required for <amp-jwplayer> %s',
         this.element);
