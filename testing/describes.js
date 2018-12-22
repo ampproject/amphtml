@@ -450,10 +450,10 @@ class IntegrationFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    const defaultTimeout =
-        Math.max(window.ampTestRuntimeConfig.mochaTimeout, 5000);
-    this.spec.timeout = spec.timeout || defaultTimeout;
+    if (this.spec.timeout === undefined) {
+      this.spec.timeout =
+          Math.max(window.ampTestRuntimeConfig.mochaTimeout, 5000);
+    }
     if (this.spec.retryOnSaucelabs === undefined) {
       this.spec.retryOnSaucelabs = 4;
     }
