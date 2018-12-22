@@ -48,7 +48,7 @@ import {
   listenOnce,
   listenOncePromise,
 } from '../event-helper';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
@@ -181,7 +181,7 @@ export class VideoManager {
 
   /** @override */
   register(video) {
-    dev().assert(video);
+    devAssert(video);
 
     this.registerCommonActions_(video);
 
@@ -1419,7 +1419,7 @@ export class AnalyticsPercentageTracker {
     const normalizedPercentage =
       Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
 
-    dev().assert(isFiniteNumber(normalizedPercentage));
+    devAssert(isFiniteNumber(normalizedPercentage));
 
     this.maybeTrigger_(normalizedPercentage);
 

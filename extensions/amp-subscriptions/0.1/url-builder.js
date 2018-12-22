@@ -24,10 +24,10 @@ export class UrlBuilder {
    * @param {!Promise<string>} readerIdPromise
    */
   constructor(ampdoc, readerIdPromise) {
-    const {documentElement} = ampdoc.win.document;
+    const headNode = ampdoc.getHeadNode();
 
     /** @private @const {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(documentElement);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(headNode);
 
     /** @private @const {!Promise<string>} */
     this.readerIdPromise_ = readerIdPromise;

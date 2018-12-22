@@ -36,7 +36,7 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
@@ -128,17 +128,19 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
+    this.set('CANONICAL_URL', () => this.getDocInfo_().canonicalUrl);
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
+    this.set('CANONICAL_HOST', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).host);
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
-        'hostname'));
+    this.set('CANONICAL_HOSTNAME', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).hostname);
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
+    this.set('CANONICAL_PATH', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).pathname);
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -189,7 +191,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the Source URL for this AMP document.
     const expandSourceUrl = () => {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      const docInfo = this.getDocInfo_();
       return removeFragment(this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
     };
     this.setBoth('SOURCE_URL',
@@ -197,18 +199,21 @@ export class GlobalVariableSource extends VariableSource {
         () => getTrackImpressionPromise().then(() => expandSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
+    this.set('SOURCE_HOST', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).host);
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
+    this.set('SOURCE_HOSTNAME', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).hostname);
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
+    this.set('SOURCE_PATH', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).pathname);
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
+    this.set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -575,7 +580,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
-    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    /** @type {!Object} */ (this.getDocInfo_());
     if (!replaceParams) {
       return orig;
     }
@@ -583,18 +588,11 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Resolves the value via one of document info's urls.
-   * @param {string} field A field on the docInfo
-   * @param {string=} opt_urlProp A subproperty of the field
-   * @return {T}
-   * @template T
+   * Return the document info for the current ampdoc.
+   * @return {./document-info-impl.DocumentInfoDef}
    */
-  getDocInfoUrl_(field, opt_urlProp) {
-    return () => {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      const value = docInfo[field];
-      return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
-    };
+  getDocInfo_() {
+    return Services.documentInfoForDoc(this.ampdoc);
   }
 
   /**
@@ -640,7 +638,7 @@ export class GlobalVariableSource extends VariableSource {
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
     const key = user().assertString(param);
-    const {replaceParams} = Services.documentInfoForDoc(this.ampdoc);
+    const {replaceParams} = this.getDocInfo_();
     if (typeof params[key] !== 'undefined') {
       return params[key];
     }
@@ -875,7 +873,7 @@ export class UrlReplacements {
    * @return {string|!Promise<string>}
    */
   expandInputValue_(element, opt_sync) {
-    dev().assert(element.tagName == 'INPUT' &&
+    devAssert(element.tagName == 'INPUT' &&
         (element.getAttribute('type') || '').toLowerCase() == 'hidden',
     'Input value expansion only works on hidden input fields: %s', element);
 
@@ -962,7 +960,7 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element, defaultUrlParams) {
-    dev().assert(element.tagName == 'A');
+    devAssert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,

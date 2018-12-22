@@ -18,7 +18,8 @@ import {
   RefreshIntersectionObserverWrapper,
 } from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -167,10 +168,10 @@ export function getRefreshManager(a4a, opt_predicate) {
   if (!refreshInterval || (opt_predicate && !opt_predicate())) {
     return null;
   }
-  return new RefreshManager(a4a, {
-    visiblePercentageMin: 50,
-    continuousTimeMin: 1,
-  }, refreshInterval);
+  return new RefreshManager(a4a, dict({
+    'visiblePercentageMin': 50,
+    'continuousTimeMin': 1,
+  }), refreshInterval);
 }
 
 
@@ -178,7 +179,7 @@ export class RefreshManager {
 
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
-   * @param {!RefreshConfig} config
+   * @param {!JsonObject} config
    * @param {number} refreshInterval
    */
   constructor(a4a, config, refreshInterval) {
@@ -201,7 +202,7 @@ export class RefreshManager {
     /** @const @private {?number} */
     this.refreshInterval_ = refreshInterval;
 
-    /** @const @private {!RefreshConfig} */
+    /** @const @private {!JsonObject} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
@@ -246,7 +247,7 @@ export class RefreshManager {
   ioCallback_(entries) {
     entries.forEach(entry => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
-      dev().assert(refreshManagerId);
+      devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
       if (entry.target != refreshManager.element_) {
         return;
@@ -260,20 +261,20 @@ export class RefreshManager {
           // viewability conditions have been met, and we can begin the refresh
           // timer.
           if (entry.intersectionRatio >=
-              refreshManager.config_.visiblePercentageMin) {
+              refreshManager.config_['visiblePercentageMin']) {
             refreshManager.state_ = RefreshLifecycleState.VIEW_PENDING;
             refreshManager.visibilityTimeoutId_ = refreshManager.timer_.delay(
                 () => {
                   refreshManager.state_ = RefreshLifecycleState.REFRESH_PENDING;
                   refreshManager.startRefreshTimer_();
-                }, refreshManager.config_.continuousTimeMin);
+                }, refreshManager.config_['continuousTimeMin']);
           }
           break;
         case RefreshLifecycleState.VIEW_PENDING:
           // If the element goes off screen before the minimum on screen time
           // duration elapses, place it back into INITIAL state.
           if (entry.intersectionRatio <
-              refreshManager.config_.visiblePercentageMin) {
+              refreshManager.config_['visiblePercentageMin']) {
             refreshManager.timer_.cancel(refreshManager.visibilityTimeoutId_);
             refreshManager.visibilityTimeoutId_ = null;
             refreshManager.state_ = RefreshLifecycleState.INITIAL;
@@ -294,7 +295,7 @@ export class RefreshManager {
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
         this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).observe(this.element_);
+            this.config_['visiblePercentageMin']).observe(this.element_);
         break;
       case RefreshLifecycleState.REFRESH_PENDING:
       case RefreshLifecycleState.VIEW_PENDING:
@@ -324,11 +325,11 @@ export class RefreshManager {
   /**
    * Converts config to appropriate units, modifying the argument in place. This
    * also ensures that visiblePercentageMin is in the range of [0, 100].
-   * @param {!RefreshConfig} config
-   * @return {!RefreshConfig}
+   * @param {!JsonObject} config
+   * @return {!JsonObject}
    */
   convertAndSanitizeConfiguration_(config) {
-    dev().assert(config['visiblePercentageMin'] >= 0 &&
+    devAssert(config['visiblePercentageMin'] >= 0 &&
         config['visiblePercentageMin'] <= 100,
     'visiblePercentageMin for refresh must be in the range [0, 100]');
     // Convert seconds to milliseconds.
@@ -342,7 +343,7 @@ export class RefreshManager {
    */
   unobserve() {
     this.getIntersectionObserverWithThreshold_(
-        this.config_.visiblePercentageMin).unobserve(this.element_);
+        this.config_['visiblePercentageMin']).unobserve(this.element_);
   }
 }
 

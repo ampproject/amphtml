@@ -328,13 +328,14 @@ export class Log {
       const first = splitMessage.shift();
       let formatted = first;
       const messageArray = [];
+      let i = 2;
       pushIfNonEmpty(messageArray, first);
-      for (let i = 2; i < arguments.length; i++) {
-        const val = arguments[i];
+      while (splitMessage.length > 0) {
+        const nextConstant = splitMessage.shift();
+        const val = arguments[i++];
         if (val && val.tagName) {
           firstElement = val;
         }
-        const nextConstant = splitMessage.shift();
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
         formatted += toString(val) + nextConstant;
@@ -675,4 +676,75 @@ export function isFromEmbed(win, opt_element) {
     return false;
   }
   return opt_element.ownerDocument.defaultView != win;
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {*=} opt_1 Optional argument (Var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ * eslint "google-camelcase/google-camelcase": 0
+ */
+export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
+  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
+  if (getMode().minified) {
+    return shouldBeTrueish;
+  }
+  return dev()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
+      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {*=} opt_1 Optional argument (Var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ * eslint "google-camelcase/google-camelcase": 0
+ */
+export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
+  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
+  return user().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
+      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }

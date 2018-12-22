@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-/**
- * Analytics tags should never be visible. keep them hidden.
- */
-amp-analytics {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
-}
+const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
 
-html.i-amphtml-fie > amp-analytics {
-  /* Remove position fixed if it's in iframe.
-   * So runtime can measure layoutBox correctly
-   */
-  position: initial !important;
-}
+module.exports = {
+  'tapping on sidebar control button should show sidebar ': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#cover[active]');
+    await page.tap('.i-amphtml-story-sidebar-control');
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ ['amp-sidebar[side][open]']);
+  },
+ };

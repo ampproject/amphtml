@@ -190,6 +190,10 @@ class TestConfig {
     });
   }
 
+  skipWindows() {
+    return this.skip(() => this.platform.isWindows());
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -236,12 +240,12 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs() {
+  retryOnSaucelabs(times = 4) {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
-      mocha.retries(4);
+      mocha.retries(times);
     });
     return this;
   }

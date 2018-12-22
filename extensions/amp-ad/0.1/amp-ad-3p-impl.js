@@ -16,6 +16,7 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
+  getMatchedContentResponsiveHeight,
 } from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
@@ -33,7 +34,8 @@ import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
   from '../../../src/ad-helper';
@@ -43,10 +45,12 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -219,8 +223,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'Ad units with data-full-width must have width="100vw".');
     user().assert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
-    user().assert(!!this.config.mcFullWidthHeightRatio,
-        'Ad network does not support matched content full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
     return true;
@@ -324,7 +326,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-      dev().assert(this.iframeLayoutBox_));
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -339,18 +341,29 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
+    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
+    const consentStringPromise = (consentPolicyId && isConsentV2Experiment)
+      ? getConsentPolicyInfo(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
       : Promise.resolve(null);
 
-    this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
-      const opt_context = {
-        clientId: consents[0] || null,
-        container: this.container_,
-        initialConsentState: consents[1],
-        consentSharedData: consents[2],
-      };
+    this.layoutPromise_ = Promise.all([
+      getAdCid(this),
+      consentPromise,
+      sharedDataPromise,
+      consentStringPromise,
+    ]).then(consents => {
+      const opt_context = dict({
+        'clientId': consents[0] || null,
+        'container': this.container_,
+        'initialConsentState': consents[1],
+        'consentSharedData': consents[2],
+      });
+      if (isConsentV2Experiment) {
+        opt_context['initialConsentValue'] = consents[3];
+      }
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
@@ -436,9 +449,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   getFullWidthHeight_(width, maxHeight) {
+    // TODO(google a4a eng): remove this once adsense switches fully to
+    // fast fetch.
     if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
-      return Math.max(MIN_FULL_WIDTH_HEIGHT,
-          Math.round(width / this.config.mcFullWidthHeightRatio));
+      return getMatchedContentResponsiveHeight(width);
     }
     return clamp(Math.round(width / this.config.fullWidthHeightRatio),
         MIN_FULL_WIDTH_HEIGHT, maxHeight);
