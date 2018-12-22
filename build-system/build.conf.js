@@ -57,6 +57,9 @@ module.exports = {
         require.resolve(
             './babel-plugins/babel-plugin-is_dev-constant-transformer'
         ),
+        require.resolve(
+            './babel-plugins/babel-plugin-amp-mode-transformer'
+        ),
       ]);
     }
     return pluginsToApply;
