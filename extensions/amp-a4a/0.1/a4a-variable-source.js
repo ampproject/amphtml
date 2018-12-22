@@ -81,8 +81,8 @@ export class A4AVariableSource extends VariableSource {
     super(ampdoc);
 
     // Use parent URL replacements service for fallback.
-    const {documentElement} = ampdoc.win.document;
-    const urlReplacements = Services.urlReplacementsForDoc(documentElement);
+    const headNode = ampdoc.getHeadNode();
+    const urlReplacements = Services.urlReplacementsForDoc(headNode);
 
     /** @private {VariableSource} global variable source for fallback. */
     this.globalVariableSource_ = urlReplacements.getVariableSource();

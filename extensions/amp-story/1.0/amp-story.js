@@ -84,7 +84,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -164,6 +164,13 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
+/**
+ * CSS class for the opacity layer that separates the amp-sidebar and the rest
+ * of the story when the amp-sidebar is entering the screen.
+ * @const {string}
+ */
+const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -182,10 +189,10 @@ const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
 /**
- * The default light gray for chrome supported theme color.
+ * The default dark gray for chrome supported theme color.
  * @const {string}
  */
-const DEFAULT_THEME_COLOR = '#F1F3F4';
+const DEFAULT_THEME_COLOR = '#202125';
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -302,6 +309,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?Array<string>} */
     this.supportedOrientations_ = null;
 
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -358,7 +368,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
-    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -438,14 +447,17 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
     // The theme color should be copied from the story's primary accent color
-    // if possible, with the fall back being default light gray.
+    // if possible, with the fall back being default dark gray.
     const meta = this.win.document.createElement('meta');
-    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
-    const styles = computedStyle(this.win, ampStoryEl);
+    const ampStoryPageEl = this.element.querySelector('amp-story-page');
     meta.name = 'theme-color';
-    meta.content = styles.getPropertyValue('--primary-color') ||
-        DEFAULT_THEME_COLOR;
-    this.win.document.getElementsByTagName('head')[0].appendChild(meta);
+    meta.content =
+      computedStyle(
+          this.win, this.element).getPropertyValue('--primary-color') ||
+      computedStyle(this.win, dev().assertElement(ampStoryPageEl))
+          .getPropertyValue('background-color') ||
+      DEFAULT_THEME_COLOR;
+    this.win.document.head.appendChild(meta);
   }
 
   /**
@@ -616,6 +628,7 @@ export class AmpStory extends AMP.BaseElement {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
           this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
           !this.storeService_
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
@@ -731,6 +744,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeBookend_();
     this.initializeSidebar_();
+    this.setThemeColor_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => {
@@ -934,7 +948,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   next_(opt_isAutomaticAdvance) {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
@@ -955,7 +969,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   previous_() {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to previous page.');
     activePage.previous();
   }
@@ -1463,8 +1477,9 @@ export class AmpStory extends AMP.BaseElement {
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
-        /* source */ null, /* caller */ null, /* event */ null,
+            /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
+        this.openOpacityMask_();
       } else {
         this.sidebarObserver_.disconnect();
       }
@@ -1472,7 +1487,45 @@ export class AmpStory extends AMP.BaseElement {
       actions.execute(this.sidebar_, 'open', /* args */ null,
           /* source */ null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
+      this.openOpacityMask_();
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
+    }
+  }
+
+  /**
+   * @private
+   */
+  openOpacityMask_() {
+    if (!this.maskElement_) {
+      const maskEl = this.win.document.createElement('div');
+      maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
+      maskEl.addEventListener('click', () => {
+        const actions = Services.actionServiceForDoc(this.element);
+        if (this.sidebar_) {
+          actions.execute(this.sidebar_, 'close', /* args */ null,
+              /* source */ null, /* caller */ null, /* event */ null,
+              ActionTrust.HIGH);
+          this.closeOpacityMask_();
+        }
+      });
+      this.maskElement_ = maskEl;
+      this.mutateElement(() => {
+        this.element.appendChild(this.maskElement_);
+      });
+    }
+    this.mutateElement(() => {
+      toggle(dev().assertElement(this.maskElement_), /* display */true);
+    });
+  }
+
+  /**
+   * @private
+   */
+  closeOpacityMask_() {
+    if (this.maskElement_) {
+      this.mutateElement(() => {
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
+      });
     }
   }
 
@@ -1810,7 +1863,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getPageById(id) {
     const pageIndex = this.getPageIndexById(id);
-    return dev().assert(this.pages_[pageIndex],
+    return devAssert(this.pages_[pageIndex],
         'Page at index %s exists, but is missing from the array.', pageIndex);
   }
 

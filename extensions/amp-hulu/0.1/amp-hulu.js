@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -78,7 +78,7 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @return {string} */
   getVideoIframeSrc_() {
-    dev().assert(this.eid_);
+    devAssert(this.eid_);
     return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
   }
 }

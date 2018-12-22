@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../src/log';
+import {dev, devAssert, user} from '../src/log';
 import {validateData} from '../3p/3p';
 
 /**
@@ -43,7 +43,7 @@ export function _ping_(global, data) {
   });
 
   if (data.ad_container) {
-    dev().assert(
+    devAssert(
         global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid && data.valid == 'true') {
@@ -87,6 +87,10 @@ export function _ping_(global, data) {
     if (global.context.consentSharedData) {
       const TAG = 'consentSharedData';
       dev().info(TAG, global.context.consentSharedData);
+    }
+    if (global.context.initialConsentValue) {
+      const TAG = 'consentStringValue';
+      dev().info(TAG, global.context.initialConsentValue);
     }
   } else {
     global.setTimeout(() => {
