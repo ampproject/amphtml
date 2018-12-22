@@ -17,7 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Layout} from '../../../src/layout';
 import {allocateVariant} from './variant';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-experiment';
@@ -68,7 +68,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-      dev().assert(parseJson(children[0].textContent)));
+      devAssert(parseJson(children[0].textContent)));
   }
 
   /**
