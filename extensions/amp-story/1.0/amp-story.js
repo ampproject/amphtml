@@ -1641,6 +1641,7 @@ export class AmpStory extends AMP.BaseElement {
    * Updates the value for a given state in the window history.
    * @param {string} stateName
    * @param {string|boolean} value
+   * @private
    */
   setHistoryState_(stateName, value) {
     const {history} = this.win;
@@ -1654,6 +1655,8 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Returns the value of a given state of the window history.
    * @param {string} stateName
+   * @return {?string}
+   * @private
    */
   getHistoryState_(stateName) {
     const {history} = this.win;
@@ -1662,7 +1665,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     return null;
   }
-
 
   /**
    * Toggles content when bookend is opened/closed.
