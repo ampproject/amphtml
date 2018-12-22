@@ -40,6 +40,14 @@ describe('amp-list (integration)', function() {
       doc = win.document;
     });
 
+    it('should build', function*() {
+      const list = doc.querySelector('amp-list');
+      expect(list).to.exist;
+      yield browser.waitForElementBuild('amp-list', TIMEOUT);
+      const container = list.querySelector('div[role="list"]');
+      expect(container).to.exist;
+    });
+
     it('should render items', function*() {
       const list = doc.querySelector('amp-list');
       expect(list).to.exist;
