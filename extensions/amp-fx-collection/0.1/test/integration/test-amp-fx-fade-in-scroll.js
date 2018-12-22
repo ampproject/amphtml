@@ -46,7 +46,7 @@ config.run('amp-fx-collection', function() {
     body: defaultBody,
     css,
     extensions,
-    timeout: 15000,
+    timeout: 20000,
   }, env => {
 
     let win;
@@ -96,7 +96,7 @@ config.run('amp-fx-collection', function() {
     body: marginSpecifiedBody,
     css,
     extensions,
-    timeout: 10000,
+    timeout: 15000,
   }, env => {
 
     let win;
@@ -135,7 +135,7 @@ config.run('amp-fx-collection', function() {
     body: repeatSpecifiedBody,
     css,
     extensions,
-    timeout: 15000,
+    timeout: 20000,
   }, env => {
 
     let win;
