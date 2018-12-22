@@ -230,6 +230,9 @@ export const realWin = describeEnv(spec => [
  *   body: string,
  *   css: (string|undefined),
  *   hash: (string|undefined),
+ *   amp: (boolean),
+ *   timeout: (number),
+ *   retryOnSaucelabs: (number)
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -357,7 +360,14 @@ function describeEnv(factory) {
         });
       });
 
-      describe(SUB, function() {
+      let d = describe.configure();
+      if (spec.retryOnSaucelabs) {
+        d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
+      }
+      d.run(SUB, function() {
+        if (spec.timeout) {
+          this.timeout(spec.timeout);
+        }
         fn.call(this, env);
       });
     });
@@ -440,6 +450,13 @@ class IntegrationFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+
+    const defaultTimeout =
+        Math.max(window.ampTestRuntimeConfig.mochaTimeout, 5000);
+    this.spec.timeout = spec.timeout || defaultTimeout;
+    if (this.spec.retryOnSaucelabs === undefined) {
+      this.spec.retryOnSaucelabs = 4;
+    }
 
     /** @const {string} */
     this.hash = spec.hash || '';
