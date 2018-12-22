@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {user} from '../src/log';
+import {userAssert} from '../src/log';
 import {writeScript} from './3p';
 
 /**
@@ -39,7 +39,7 @@ function getGistJs(global, scriptSource, cb) {
  * @param {!Object} data
  */
 export function github(global, data) {
-  user().assert(
+  userAssert(
       data.gistid,
       'The data-gistid attribute is required for <amp-gist> %s',
       data.element);

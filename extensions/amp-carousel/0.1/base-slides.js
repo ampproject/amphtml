@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {
 
@@ -62,7 +62,7 @@ export class BaseSlides extends BaseCarousel {
     const autoplayVal = this.element.getAttribute('autoplay');
     if (autoplayVal) {
       this.autoplayLoops_ = parseInt(autoplayVal, 10);
-      user().assert(isFiniteNumber(this.autoplayLoops_));
+      userAssert(isFiniteNumber(this.autoplayLoops_));
     }
     this.buildSlides();
 

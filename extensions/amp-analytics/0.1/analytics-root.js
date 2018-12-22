@@ -25,7 +25,7 @@ import {
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
@@ -226,7 +226,7 @@ export class AnalyticsRoot {
           found = this.getRoot().querySelector(selector);
         }
       } catch (e) {
-        user().assert(false, `Invalid query selector ${selector}`);
+        userAssert(false, `Invalid query selector ${selector}`);
       }
 
       // DOM search can "look" outside the boundaries of the root, thus make
@@ -251,7 +251,7 @@ export class AnalyticsRoot {
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      user().assert(
+      userAssert(
           element.classList.contains('i-amphtml-element'),
           'Element "%s" is required to be an AMP element', selector);
       return element;

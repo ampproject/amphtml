@@ -29,7 +29,7 @@ import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 export class AmpVk extends AMP.BaseElement {
 
@@ -146,7 +146,7 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.embedType_ = user().assert(this.element.getAttribute('data-embedtype'),
+    this.embedType_ = userAssert(this.element.getAttribute('data-embedtype'),
         'The data-embedtype attribute is required for <amp-vk> %s',
         this.element);
 
@@ -161,26 +161,26 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   postBuildCallback_() {
-    this.ownerId_ = user().assert(this.element.getAttribute('data-owner-id'),
+    this.ownerId_ = userAssert(this.element.getAttribute('data-owner-id'),
         'The data-owner-id attribute is required for <amp-vk> Post %s',
         this.element);
 
-    this.postId_ = user().assert(this.element.getAttribute('data-post-id'),
+    this.postId_ = userAssert(this.element.getAttribute('data-post-id'),
         'The data-post-id attribute is required for <amp-vk> Post %s',
         this.element);
 
-    this.hash_ = user().assert(this.element.getAttribute('data-hash'),
+    this.hash_ = userAssert(this.element.getAttribute('data-hash'),
         'The data-hash attribute is required for <amp-vk> Post %s',
         this.element);
   }
 
   /** @private */
   pollBuildCallback_() {
-    this.apiId_ = user().assert(this.element.getAttribute('data-api-id'),
+    this.apiId_ = userAssert(this.element.getAttribute('data-api-id'),
         'The data-api-id attribute is required for <amp-vk> Poll %s',
         this.element);
 
-    this.pollId_ = user().assert(this.element.getAttribute('data-poll-id'),
+    this.pollId_ = userAssert(this.element.getAttribute('data-poll-id'),
         'The data-poll-id attribute is required for <amp-vk> Poll %s',
         this.element);
   }

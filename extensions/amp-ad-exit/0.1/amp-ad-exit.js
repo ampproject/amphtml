@@ -23,7 +23,7 @@ import {
 import {Services} from '../../../src/services';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -90,8 +90,8 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   exit({args, event}) {
     const target = this.targets_[args['target']];
-    user().assert(target, `Exit target not found: '${args['target']}'`);
-    user().assert(event, 'Unexpected null event');
+    userAssert(target, `Exit target not found: '${args['target']}'`);
+    userAssert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
 
@@ -246,10 +246,10 @@ export class AmpAdExit extends AMP.BaseElement {
             makeInactiveElementSpec('.amp-carousel-button'), this));
 
     const {children} = this.element;
-    user().assert(children.length == 1,
+    userAssert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
-    user().assert(
+    userAssert(
         isJsonScriptTag(child),
         'The amp-ad-exit config should ' +
         'be inside a <script> tag with type="application/json"');
@@ -386,18 +386,18 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   assertValidResponseMessage_(responseMessage, eventOrigin) {
-    user().assert(responseMessage['message'],
+    userAssert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
-    user().assert(
+    userAssert(
         responseMessage['creativeId'],
         'Received malformed message from 3p analytics frame: ' +
         'creativeId missing');
-    user().assert(responseMessage['vendor'],
+    userAssert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
     const vendorURL = parseUrlDeprecated(assertVendor(
         responseMessage['vendor']));
-    user().assert(vendorURL && vendorURL.origin == eventOrigin,
+    userAssert(vendorURL && vendorURL.origin == eventOrigin,
         'Invalid origin for vendor ' +
         `${responseMessage['vendor']}: ${eventOrigin}`);
   }

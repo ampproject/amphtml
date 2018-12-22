@@ -15,7 +15,7 @@
  */
 import {LayoutPriority} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';
@@ -27,7 +27,7 @@ export class AmpActionMacro extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-action-macro'),
+    userAssert(isExperimentOn(this.win, 'amp-action-macro'),
         'Experiment is off');
   }
 

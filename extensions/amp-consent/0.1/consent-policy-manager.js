@@ -17,7 +17,7 @@
 import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -334,7 +334,7 @@ export class ConsentPolicyInstance {
       } else {
         timeoutSecond = timeoutConfig;
       }
-      user().assert(isFiniteNumber(timeoutSecond),
+      userAssert(isFiniteNumber(timeoutSecond),
           'invalid timeout value %s', timeoutSecond);
     }
 

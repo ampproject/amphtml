@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
 import {childElementByAttr} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 
 /**
@@ -186,17 +186,17 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
-    this.updateSlot_ = user().assert(
+    this.updateSlot_ = userAssert(
         this.getUpdateSlot_(this.element),
         'amp-live-list must have an "update" slot.');
 
-    this.itemsSlot_ = user().assert(
+    this.itemsSlot_ = userAssert(
         this.getItemsSlot_(this.element),
         'amp-live-list must have an "items" slot.');
 
     this.paginationSlot_ = this.getPaginationSlot_(this.element);
 
-    this.liveListId_ = user().assert(this.element.getAttribute('id'),
+    this.liveListId_ = userAssert(this.element.getAttribute('id'),
         'amp-live-list must have an id.');
 
     this.pollInterval_ = getNumberMaxOrDefault(
@@ -204,7 +204,7 @@ export class AmpLiveList extends AMP.BaseElement {
         LiveListManager.getMinDataPollInterval());
 
     const maxItems = this.element.getAttribute('data-max-items-per-page');
-    user().assert(Number(maxItems) > 0,
+    userAssert(Number(maxItems) > 0,
         'amp-live-list # %s must have data-max-items-per-page attribute with'
         + ' numeric value. Found %s.',
         this.liveListId_,
@@ -802,7 +802,7 @@ export class AmpLiveList extends AMP.BaseElement {
       }
       numItems++;
     });
-    user().assert(!foundInvalid,
+    userAssert(!foundInvalid,
         'All amp-live-list-items under amp-live-list#%s children must '
         + 'have id and data-sort-time attributes. data-sort-time must be a '
         + 'Number greater than 0.',
@@ -896,7 +896,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // we can't for data-update-time since we always have to evaluate if it
     // changed or not if it exists.
     const time = Number(elem.getAttribute(attr));
-    user().assert(time > 0,
+    userAssert(time > 0,
         '%s attribute must exist and value must be a number greater than 0.'
         + ' Found %s on %s instead.',
         attr, time, elem.getAttribute('id'));

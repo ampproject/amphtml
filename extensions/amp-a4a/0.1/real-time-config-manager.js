@@ -16,7 +16,7 @@
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -471,15 +471,15 @@ export class RealTimeConfigManager {
 
     let timeout;
     try {
-      user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
+      userAssert(rtcConfig['vendors'] || rtcConfig['urls'],
           'RTC Config must specify vendors or urls');
       Object.keys(rtcConfig).forEach(key => {
         switch (key) {
           case 'vendors':
-            user().assert(isObject(rtcConfig[key]), 'RTC invalid vendors');
+            userAssert(isObject(rtcConfig[key]), 'RTC invalid vendors');
             break;
           case 'urls':
-            user().assert(isArray(rtcConfig[key]), 'RTC invalid urls');
+            userAssert(isArray(rtcConfig[key]), 'RTC invalid urls');
             break;
           case 'timeoutMillis':
             timeout = parseInt(rtcConfig[key], 10);

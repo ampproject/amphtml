@@ -15,7 +15,7 @@
  */
 
 import {addParamsToUrl} from '../../../src/url';
-import {devAssert, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -53,7 +53,7 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
+    this.videoid_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-izlesene> %s',
         this.element);

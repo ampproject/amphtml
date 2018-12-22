@@ -37,7 +37,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
@@ -742,7 +742,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
-      user().assert(target,
+      userAssert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
     this.openLightboxGallery_(dev().assertElement(target)).then(() => {

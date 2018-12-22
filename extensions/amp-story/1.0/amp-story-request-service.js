@@ -20,7 +20,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
 import {registerServiceBuilder} from '../../../src/service';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
@@ -93,7 +93,7 @@ export class AmpStoryRequestService {
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => this.xhr_.fetchJson(url, opts))
         .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response');
+          userAssert(response.ok, 'Invalid HTTP response');
           return response.json();
         });
   }

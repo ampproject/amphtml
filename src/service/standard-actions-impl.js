@@ -18,7 +18,7 @@ import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
-import {dev, user} from '../log';
+import {dev, user, userAssert} from '../log';
 import {
   getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
 } from '../service';
@@ -117,7 +117,7 @@ export class StandardActions {
         const element = (node.nodeType === Node.DOCUMENT_NODE)
           ? node.documentElement : node;
         return Services.bindForDocOrNull(element).then(bind => {
-          user().assert(bind, 'AMP-BIND is not installed.');
+          userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
 
@@ -128,7 +128,7 @@ export class StandardActions {
         return this.handleCloseOrNavigateTo(invocation);
 
       case 'scrollTo':
-        user().assert(args['id'],
+        userAssert(args['id'],
             'AMP.scrollTo must provide element ID');
         invocation.node = dev().assertElement(
             getAmpdoc(node).getElementById(args['id']),

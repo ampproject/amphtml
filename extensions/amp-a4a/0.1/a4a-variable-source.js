@@ -21,7 +21,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 
 const WHITELISTED_VARIABLES = [
@@ -94,14 +94,14 @@ export class A4AVariableSource extends VariableSource {
   /** @override */
   initialize() {
     this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataSync(
           this.win_,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataAsync(
           this.win_,

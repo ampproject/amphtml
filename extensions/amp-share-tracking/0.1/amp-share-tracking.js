@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {isExperimentOn} from '../../../src/experiments';
@@ -65,7 +65,7 @@ export class AmpShareTracking extends AMP.BaseElement {
       registerServiceBuilder(this.win, 'share-tracking', function() {
         return Promise.reject(user().createError('%s disabled', TAG));
       });
-      user().assert(false, '%s experiment is disabled', TAG);
+      userAssert(false, '%s experiment is disabled', TAG);
     }
 
     this.vendorHref_ = this.element.getAttribute('data-href');

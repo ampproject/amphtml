@@ -19,7 +19,7 @@ import {TextMask} from './text-mask';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;
@@ -29,7 +29,7 @@ export class AmpInputmaskService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    user().assert(
+    userAssert(
         isExperimentOn(ampdoc.win, 'amp-inputmask'),
         'Experiment amp-inputmask is disabled');
 

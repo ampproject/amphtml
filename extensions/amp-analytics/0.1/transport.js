@@ -30,7 +30,7 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
@@ -189,7 +189,7 @@ export class Transport {
     }
 
     assertHttpsUrl(request, 'amp-analytics request');
-    user().assert(
+    userAssert(
         parseUrlDeprecated(request).origin !=
         parseUrlDeprecated(this.win_.location.href).origin,
         'Origin of iframe request must not be equal to the document origin.' +

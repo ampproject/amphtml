@@ -53,7 +53,7 @@ import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * @enum {number}
@@ -147,7 +147,7 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * resolves geoDeferred with null if not shouldBeTrueish and then calls
-   * user().assert() to deal with the error as normal.
+   * userAssert() to deal with the error as normal.
    * @param {T} shouldBeTrueish The value to assert.
    *  The assert fails if it does not evaluate to true.
    * @param {string=} opt_message The assertion message
@@ -158,7 +158,7 @@ export class AmpGeo extends AMP.BaseElement {
   assertWithErrorReturn_(shouldBeTrueish, opt_message) {
     if (!shouldBeTrueish) {
       geoDeferred.resolve(null);
-      return user().assert(shouldBeTrueish, opt_message);
+      return userAssert(shouldBeTrueish, opt_message);
     }
     return shouldBeTrueish;
   }

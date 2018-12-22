@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, user} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';
@@ -28,7 +28,7 @@ export class ClickDelayFilter extends Filter {
    */
   constructor(name, spec, win) {
     super(name, spec.type);
-    user().assert(spec.type == FilterType.CLICK_DELAY &&
+    userAssert(spec.type == FilterType.CLICK_DELAY &&
       typeof spec.delay == 'number' && spec.delay > 0,
     'Invalid ClickDelay spec');
 

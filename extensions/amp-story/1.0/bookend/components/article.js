@@ -21,7 +21,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -46,7 +46,7 @@ export class ArticleComponent {
     const requiredFields = ['title', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in articleJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Small article component must contain ' +
             requiredFields.map(field => '`' + field + '`').join(', ') +

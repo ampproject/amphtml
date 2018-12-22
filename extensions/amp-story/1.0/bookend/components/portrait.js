@@ -21,7 +21,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -58,7 +58,7 @@ export class PortraitComponent {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in portraitJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Portrait component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +

@@ -18,7 +18,7 @@ import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpYotpo extends AMP.BaseElement {
 
@@ -43,10 +43,10 @@ export class AmpYotpo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.getAttribute('data-app-key'),
+    userAssert(this.element.getAttribute('data-app-key'),
         'The data-app-key attribute is required for <amp-yotpo> %s',
         this.element);
-    user().assert(this.element.getAttribute('data-widget-type'),
+    userAssert(this.element.getAttribute('data-widget-type'),
         'The data-widget-type attribute is required for <amp-yotpo> %s',
         this.element);
     const iframe = getIframe(this.win, this.element, 'yotpo');

@@ -20,7 +20,7 @@ import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -268,7 +268,7 @@ export class NextPageService {
             // Update AMP URL in case we were redirected.
             documentRef.ampUrl = response.url;
             const url = this.urlService_.parse(response.url);
-            user().assert(url.origin === this.origin_,
+            userAssert(url.origin === this.origin_,
                 'ampUrl resolved to a different origin from the origin of the '
                 + 'current document');
             return response.text();

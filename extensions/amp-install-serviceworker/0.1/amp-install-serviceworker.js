@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -66,7 +66,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = urlService.parse(docInfo.sourceUrl);
         const canonicalUrl = urlService.parse(docInfo.canonicalUrl);
-        user().assert(
+        userAssert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -138,7 +138,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     // Check the url-rewrite config is valid.
-    user().assert(urlMatch && shellUrl,
+    userAssert(urlMatch && shellUrl,
         'Both, "%s" and "%s" must be specified for url-rewrite',
         'data-no-service-worker-fallback-url-match',
         'data-no-service-worker-fallback-shell-url');
@@ -150,7 +150,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(urlService.getSourceOrigin(winUrl) ==
+    userAssert(urlService.getSourceOrigin(winUrl) ==
       urlService.parse(shellUrl).origin,
     'Shell source origin "%s" must be the same as source origin "%s"',
     shellUrl, winUrl.href);

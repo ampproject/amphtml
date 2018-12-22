@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';
 
@@ -51,7 +51,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
         .then(manager => manager.getNotification(
             config['consentNotificationId']))
         .then(userNotification => {
-          user().assert(userNotification,
+          userAssert(userNotification,
               `Notification not found: ${config['consentNotificationId']}`);
           return userNotification.isDismissed();
         });
@@ -87,7 +87,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
  */
 function validateConfig(config) {
   const variants = config['variants'];
-  user().assert(isObject(variants) && Object.keys(variants).length > 0,
+  userAssert(isObject(variants) && Object.keys(variants).length > 0,
       'Missing experiment variants config.');
   if (config['group']) {
     assertName(config['group']);
@@ -97,7 +97,7 @@ function validateConfig(config) {
     if (hasOwn(variants, variantName)) {
       assertName(variantName);
       const percentage = variants[variantName];
-      user().assert(
+      userAssert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
           'Invalid percentage %s:%s.'
               + ' Has to be greater than 0 and less than 100',
@@ -105,7 +105,7 @@ function validateConfig(config) {
       totalPercentage += percentage;
     }
   }
-  user().assert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
+  userAssert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
       'Total percentage is bigger than 100: ' + totalPercentage);
 }
 
@@ -139,6 +139,6 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
  * @param {string} name
  */
 function assertName(name) {
-  user().assert(nameValidator.test(name),
+  userAssert(nameValidator.test(name),
       'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].', name);
 }

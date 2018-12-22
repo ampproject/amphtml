@@ -16,7 +16,7 @@
 
 import {BookendComponentInterface} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -37,7 +37,7 @@ export class HeadingComponent {
    * @override
    * */
   assertValidity(headingJson) {
-    user().assert('text' in headingJson, 'Heading component must contain ' +
+    userAssert('text' in headingJson, 'Heading component must contain ' +
       '`text` field, skipping invalid.');
   }
 

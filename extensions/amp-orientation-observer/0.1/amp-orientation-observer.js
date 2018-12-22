@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
 const DEVICE_REST_ORIENTATION_ALPHA_VALUE = 180;
@@ -71,7 +71,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * @private
    */
   init_() {
-    user().assert(this.win.DeviceOrientationEvent,
+    userAssert(this.win.DeviceOrientationEvent,
         'The current browser doesn\'t support the ' +
       '`window.DeviceOrientationEvent`');
 

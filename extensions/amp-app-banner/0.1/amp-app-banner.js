@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 
@@ -99,7 +99,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @private */
   getStorageKey_() {
-    const elementId = user().assert(this.element.id,
+    const elementId = userAssert(this.element.id,
         'amp-app-banner should have an id.');
     return 'amp-app-banner:' + elementId;
   }
@@ -234,7 +234,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    this.openButton_ = user().assert(
+    this.openButton_ = userAssert(
         this.element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, this.element);
 
@@ -286,7 +286,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
 
     if (openUrl) {
-      user().assert(Services.urlForDoc(this.element).isProtocolValid(openUrl),
+      userAssert(Services.urlForDoc(this.element).isProtocolValid(openUrl),
           'The url in app-argument has invalid protocol: %s', openUrl);
     } else {
       user().error(TAG,
@@ -374,7 +374,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     url.assertHttpsUrl(this.manifestHref_, element, 'manifest href');
 
-    this.openButton_ = user().assert(
+    this.openButton_ = userAssert(
         element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, element);
 

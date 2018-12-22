@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, devAssert, user} from '../src/log';
+import {dev, devAssert, userAssert} from '../src/log';
 import {validateData} from '../3p/3p';
 
 /**
@@ -30,7 +30,7 @@ export function _ping_(global, data) {
 
   validateData(data, ['url'],
       ['valid', 'adHeight', 'adWidth', 'enableIo']);
-  user().assert(!data['error'], 'Fake user error!');
+  userAssert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 

@@ -37,7 +37,7 @@
 import {FontLoader} from './fontloader';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-font';
 
@@ -100,7 +100,7 @@ export class AmpFont extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.fontFamily_ = user().assert(this.element.getAttribute('font-family'),
+    this.fontFamily_ = userAssert(this.element.getAttribute('font-family'),
         'The font-family attribute is required for <amp-font> %s',
         this.element);
     this.fontWeight_ =

@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {FxProvider} from './providers/fx-provider';
 import {Services} from '../../../src/services';
-import {devAssert, rethrowAsync, user} from '../../../src/log';
+import {devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
@@ -139,7 +139,7 @@ export class AmpFxCollection {
         .toLowerCase()
         .split(/\s+/);
 
-    user().assert(fxTypes.length, 'No value provided for `amp-fx` attribute');
+    userAssert(fxTypes.length, 'No value provided for `amp-fx` attribute');
 
     // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {

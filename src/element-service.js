@@ -26,7 +26,7 @@ import {
   getTopWindow,
 } from './service';
 import {toWin} from './types';
-import {user} from './log';
+import {userAssert} from './log';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects an
@@ -174,7 +174,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @private
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (user().assert(service,
+  return /** @type {!Object} */ (userAssert(service,
       'Service %s was requested to be provided through %s, ' +
       'but %s is not loaded in the current page. To fix this ' +
       'problem load the JavaScript file for %s in this page.',

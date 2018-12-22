@@ -37,7 +37,7 @@ import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../src/experiments';
-import {user} from '../../src/log';
+import {user, userAssert} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;
@@ -293,7 +293,7 @@ describe('getErrorReportData', () => {
   it('reportError mark asserts', () => {
     let e = '';
     try {
-      user().assert(false, 'XYZ');
+      userAssert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
@@ -308,7 +308,7 @@ describe('getErrorReportData', () => {
   it('reportError mark asserts without error object', () => {
     let e = '';
     try {
-      user().assert(false, 'XYZ');
+      userAssert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
@@ -474,7 +474,7 @@ describe('getErrorReportData', () => {
     nextRandomNumber = 0.2;
     let e = '';
     try {
-      user().assert(false, 'XYZ');
+      userAssert(false, 'XYZ');
     } catch (error) {
       e = error;
     }

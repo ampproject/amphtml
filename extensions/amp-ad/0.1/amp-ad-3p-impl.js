@@ -34,7 +34,7 @@ import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
@@ -198,7 +198,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     this.config = adConfig[this.type_];
-    user().assert(
+    userAssert(
         this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
@@ -219,9 +219,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!hasFullWidth) {
       return false;
     }
-    user().assert(this.element.getAttribute('width') == '100vw',
+    userAssert(this.element.getAttribute('width') == '100vw',
         'Ad units with data-full-width must have width="100vw".');
-    user().assert(!!this.config.fullWidthHeightRatio,
+    userAssert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
@@ -335,7 +335,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    user().assert(!this.isInFixedContainer_,
+    userAssert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 

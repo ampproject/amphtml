@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 
@@ -59,7 +59,7 @@ export class LocalSubscriptionPlatform {
 
     /** @private @const {string} */
     this.authorizationUrl_ = assertHttpsUrl(
-        user().assert(
+        userAssert(
             this.serviceConfig_['authorizationUrl'],
             'Service config does not have authorization Url'
         ),
@@ -74,7 +74,7 @@ export class LocalSubscriptionPlatform {
     /** @private {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = subscriptionAnalytics;
 
-    user().assert(this.serviceConfig_['actions'],
+    userAssert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
 
     /** @private {!Actions} */
@@ -107,9 +107,9 @@ export class LocalSubscriptionPlatform {
    * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
-    user().assert(actionMap['login'],
+    userAssert(actionMap['login'],
         'Action "login" is not present in action map');
-    user().assert(actionMap['subscribe'],
+    userAssert(actionMap['subscribe'],
         'Action "subscribe" is not present in action map');
     return actionMap;
   }

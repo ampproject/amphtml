@@ -44,7 +44,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -91,7 +91,7 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.shortcode_ = user().assert(
+    this.shortcode_ = userAssert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',

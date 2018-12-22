@@ -18,7 +18,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
 
@@ -51,7 +51,7 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.partnerId_ = user().assert(
+    this.partnerId_ = userAssert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);

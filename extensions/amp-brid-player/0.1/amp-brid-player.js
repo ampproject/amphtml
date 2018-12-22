@@ -24,7 +24,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -128,16 +128,16 @@ class AmpBridPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    this.partnerID_ = user().assert(
+    this.partnerID_ = userAssert(
         element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         element);
 
-    this.playerID_ = user().assert(element.getAttribute('data-player'),
+    this.playerID_ = userAssert(element.getAttribute('data-player'),
         'The data-player attribute is required for <amp-brid-player> %s',
         element);
 
-    this.feedID_ = user().assert(
+    this.feedID_ = userAssert(
         (element.getAttribute('data-video') ||
             element.getAttribute('data-playlist') ||
             element.getAttribute('data-outstream')),

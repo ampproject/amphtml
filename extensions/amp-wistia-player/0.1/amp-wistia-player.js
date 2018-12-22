@@ -25,7 +25,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -86,7 +86,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const {element} = this;
-    const mediaId = user().assert(
+    const mediaId = userAssert(
         element.getAttribute('data-media-hashed-id'),
         'The data-media-hashed-id attribute is required ' +
             'for <amp-wistia-player> %s',
