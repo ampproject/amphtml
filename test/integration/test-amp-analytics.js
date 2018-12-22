@@ -26,6 +26,8 @@ describe.configure().run('amp-analytics', function() {
         // initialize _cid cookie with a CLIENT_ID
         document.cookie='_cid=amp-12345';
       </script>
+      <!-- put amp-analytics > 3 viewports away from viewport -->
+      <div style="height: 400vh"></div>
       <amp-analytics>
         <script type="application/json">
         {
