@@ -277,7 +277,7 @@ describe('amp-analytics', function() {
         expect(timerStart + 1000).to.be.at.most(parseInt(q['timestamp'], 10));
         // Verify that timerStart is about current time
         expect(timerStart - startTime).to.be.above(-1000).and.below(1000);
-        expect(parseFloat(q['timerDuration'])).to.be.at.least(1000).below(1100);
+        expect(parseFloat(q['timerDuration'])).to.be.at.least(950).below(1100);
       });
     });
   });
