@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
 
 export class ClickLocationFilter extends Filter {
   /**
@@ -25,7 +25,7 @@ export class ClickLocationFilter extends Filter {
    */
   constructor(name, spec, adExitElement) {
     super(name, spec.type);
-    user().assert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
+    userAssert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
 
     /** @private {number} */
     this.leftBorder_ = spec.left || 0;
@@ -84,7 +84,7 @@ export class ClickLocationFilter extends Filter {
       if (this.relativeTo_) {
         const relativeElement = win.document.querySelector(
             this.relativeTo_);
-        user().assert(relativeElement,
+        userAssert(relativeElement,
             `relativeTo element ${this.relativeTo_} not found.`);
         const rect = relativeElement./*OK*/getBoundingClientRect();
         this.allowedRect_.left = rect.left;
