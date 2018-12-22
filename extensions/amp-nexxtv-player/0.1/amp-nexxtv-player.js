@@ -23,7 +23,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -92,12 +92,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   resolveVideoIframeSrc_() {
     const {element: el} = this;
 
-    const mediaId = user().assert(
+    const mediaId = userAssert(
         el.getAttribute('data-mediaid'),
         'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
         el);
 
-    const client = user().assert(el.getAttribute('data-client'),
+    const client = userAssert(el.getAttribute('data-client'),
         'The data-client attribute is required for <amp-nexxtv-player> %s',
         el);
 

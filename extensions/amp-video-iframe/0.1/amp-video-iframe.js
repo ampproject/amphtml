@@ -27,7 +27,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
@@ -280,7 +280,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      user().assert(false, 'Unknown method `%s`.', methodReceived);
+      userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
 
@@ -319,7 +319,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     user().assertString(eventType, '`eventType` missing in analytics event');
 
-    user().assert(
+    userAssert(
         getAnalyticsEventTypePrefixRegex().test(eventType),
         'Invalid analytics `eventType`. Value must start with `%s`.',
         ANALYTICS_EVENT_TYPE_PREFIX);

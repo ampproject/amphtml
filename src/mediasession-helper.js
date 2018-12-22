@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from './services';
-import {devAssert, user} from './log';
+import {devAssert, userAssert} from './log';
 import {isArray, isObject} from './types';
 import {tryParseJson} from './json';
 
@@ -147,7 +147,7 @@ function validateMetadata(element, metadata) {
     artwork.forEach(item => {
       if (item) {
         const src = isObject(item) ? item.src : item;
-        user().assert(urlService.isProtocolValid(src));
+        userAssert(urlService.isProtocolValid(src));
       }
     });
   }

@@ -28,7 +28,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
 
@@ -85,7 +85,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('noautoplay');
     this.renderer_ = this.element.getAttribute('renderer') || 'svg';
-    user().assert(this.element.hasAttribute('src'),
+    userAssert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     const deferred = new Deferred();

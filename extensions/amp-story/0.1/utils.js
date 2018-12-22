@@ -16,7 +16,7 @@
 
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -32,7 +32,7 @@ export function timeStrToMillis(time) {
   const num = match[1];
   const units = match[2];
 
-  user().assert(
+  userAssert(
       match &&
           match.length == 3 &&
           (units == 's' || units == 'ms'),

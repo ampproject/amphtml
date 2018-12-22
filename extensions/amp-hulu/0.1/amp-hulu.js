@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -70,7 +70,7 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.eid_ = user().assert(
+    this.eid_ = userAssert(
         this.element.getAttribute('data-eid'),
         'The data-eid attribute is required for <amp-hulu> %s',
         this.element);

@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
@@ -85,11 +85,11 @@ export class ExpansionOptions {
 function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let {length} = str;
-  user().assert(isFiniteNumber(start),
+  userAssert(isFiniteNumber(start),
       'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {
     length = Number(opt_l);
-    user().assert(isFiniteNumber(length),
+    userAssert(isFiniteNumber(length),
         'Length ' + length + ' in substr macro should be a number');
   }
 
@@ -265,7 +265,7 @@ export function getNameArgs(key) {
     return {name: '', argList: ''};
   }
   const match = key.match(VARIABLE_ARGS_REGEXP);
-  user().assert(match, 'Variable with invalid format found: ' + key);
+  userAssert(match, 'Variable with invalid format found: ' + key);
 
   return {name: match[1] || match[0], argList: match[2] || ''};
 }

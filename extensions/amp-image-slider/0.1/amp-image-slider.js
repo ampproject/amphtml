@@ -21,7 +21,7 @@ import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -134,7 +134,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }
 
-    user().assert(this.leftAmpImage_ && this.rightAmpImage_,
+    userAssert(this.leftAmpImage_ && this.rightAmpImage_,
         '2 <amp-img>s must be provided for comparison');
 
     // TODO(kqian): remove this after layer launch

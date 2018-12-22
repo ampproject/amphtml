@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   getTrackerKeyName,
   getTrackerTypesForParentType,
@@ -66,7 +66,7 @@ export class AnalyticsGroup {
 
     const tracker = this.root_.getTrackerForWhitelist(
         trackerKey, trackerWhitelist);
-    user().assert(!!tracker,
+    userAssert(!!tracker,
         'Trigger type "%s" is not allowed in the %s', eventType,
         this.root_.getType());
     const unlisten = tracker.add(this.analyticsElement_, eventType, config,

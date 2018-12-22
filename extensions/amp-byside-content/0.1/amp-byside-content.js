@@ -41,7 +41,7 @@ import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -134,14 +134,14 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.webcareId_ = user().assert(
+    this.webcareId_ = userAssert(
         this.element.getAttribute('data-webcare-id'),
         'The data-webcare-id attribute is required for <%s> %s',
         TAG_,
         this.element
     );
 
-    this.label_ = user().assert(
+    this.label_ = userAssert(
         this.element.getAttribute('data-label'),
         'The data-label attribute is required for <%s> %s',
         TAG_,

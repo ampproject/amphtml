@@ -22,7 +22,7 @@ import {
   isProxyOrigin,
 } from './url';
 import {Services} from './services';
-import {dev, user} from './log';
+import {dev, user, userAssert} from './log';
 import {isExtensionScriptInNode} from './element-service';
 
 /**
@@ -77,7 +77,7 @@ export function onDocumentFormSubmit_(e) {
 
   const inputs = form.elements;
   for (let i = 0; i < inputs.length; i++) {
-    user().assert(!inputs[i].name ||
+    userAssert(!inputs[i].name ||
         inputs[i].name != SOURCE_ORIGIN_PARAM,
     'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
@@ -88,19 +88,19 @@ export function onDocumentFormSubmit_(e) {
 
   if (actionXhr) {
     assertHttpsUrl(actionXhr, form, 'action-xhr');
-    user().assert(!isProxyOrigin(actionXhr),
+    userAssert(!isProxyOrigin(actionXhr),
         'form action-xhr should not be on AMP CDN: %s', form);
     checkCorsUrl(actionXhr);
   }
   if (action) {
     assertHttpsUrl(action, form, 'action');
-    user().assert(!isProxyOrigin(action),
+    userAssert(!isProxyOrigin(action),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
   }
 
   if (method == 'GET') {
-    user().assert(actionXhr || action,
+    userAssert(actionXhr || action,
         'form action-xhr or action attribute is required for method=GET: %s',
         form);
   } else if (method == 'POST') {
@@ -112,7 +112,7 @@ export function onDocumentFormSubmit_(e) {
 
     if (!actionXhr) {
       e.preventDefault();
-      user().assert(false,
+      userAssert(false,
           'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',
           form);
@@ -121,7 +121,7 @@ export function onDocumentFormSubmit_(e) {
 
   const target = form.getAttribute('target');
   if (target) {
-    user().assert(target == '_blank' || target == '_top',
+    userAssert(target == '_blank' || target == '_top',
         'form target=%s is invalid can only be _blank or _top: %s',
         target, form);
   } else {

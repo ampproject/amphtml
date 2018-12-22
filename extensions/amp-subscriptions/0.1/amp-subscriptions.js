@@ -31,7 +31,7 @@ import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -178,7 +178,7 @@ export class SubscriptionService {
       const matchedServices = this.platformConfig_['services'].filter(
           service => (service.serviceId || 'local') === serviceId);
 
-      const matchedServiceConfig = user().assert(matchedServices[0],
+      const matchedServiceConfig = userAssert(matchedServices[0],
           'No matching services for the ID found');
 
       const subscriptionPlatform = subscriptionPlatformFactory(
@@ -265,7 +265,7 @@ export class SubscriptionService {
       this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
 
-      user().assert(this.pageConfig_, 'Page config is null');
+      userAssert(this.pageConfig_, 'Page config is null');
 
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
@@ -278,7 +278,7 @@ export class SubscriptionService {
         return;
       }
 
-      user().assert(this.platformConfig_['services'],
+      userAssert(this.platformConfig_['services'],
           'Services not configured in service config');
 
       const serviceIds = this.platformConfig_['services'].map(service =>

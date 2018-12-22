@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {setStyle} from '../src/style';
-import {user} from '../src/log';
+import {userAssert} from '../src/log';
 import {writeScript} from './3p';
 
 /**
@@ -39,7 +39,7 @@ function getMathmlJs(global, scriptSource, cb) {
  * @param {!Object} data
  */
 export function mathml(global, data) {
-  user().assert(
+  userAssert(
       data.formula,
       'The formula attribute is required for <amp-mathml> %s',
       data.element);

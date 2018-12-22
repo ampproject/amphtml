@@ -15,7 +15,7 @@
  */
 
 import {parseQueryString} from '../../../src/url';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * @typedef {{ancestorOrigin: function(string, string):string, fragmentParam: function(string, string):string}}
@@ -55,10 +55,10 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getFragmentParamData_(param, defaultValue) {
-    user().assert(param,
+    userAssert(param,
         'The first argument to FRAGMENT_PARAM, the fragment string ' +
         'param is required');
-    user().assert(typeof param == 'string', 'param should be a string');
+    userAssert(typeof param == 'string', 'param should be a string');
     const hash = this.ampdoc_.win.location.originalHash;
     const params = parseQueryString(hash);
     return (params[param] === undefined) ? defaultValue : params[param];

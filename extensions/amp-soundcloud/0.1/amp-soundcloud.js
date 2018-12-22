@@ -30,7 +30,7 @@
 
 import {Layout} from '../../../src/layout';
 import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -64,7 +64,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     const url = 'https://api.soundcloud.com/' + (
       this.element.hasAttribute('data-trackid') ? 'tracks' : 'playlists'
     ) + '/';
-    const mediaid = user().assert(
+    const mediaid = userAssert(
         (this.element.getAttribute('data-trackid')
          || this.element.getAttribute('data-playlistid')),
         'data-trackid or data-playlistid is required for <amp-soundcloud> %s',

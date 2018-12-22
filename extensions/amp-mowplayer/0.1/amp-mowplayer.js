@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -105,7 +105,7 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.mediaid_ = user().assert(
+    this.mediaid_ = userAssert(
         (this.element.getAttribute('data-mediaid')),
         '/The data-mediaid attribute is required for <amp-mowplayer> %s',
         this.element);

@@ -20,7 +20,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -88,12 +88,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
-    this.videoId_ = user().assert(
+    this.videoId_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-viqeo-player> %s',
         this.element);
 
-    user().assert(
+    userAssert(
         this.element.getAttribute('data-profileid'),
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);

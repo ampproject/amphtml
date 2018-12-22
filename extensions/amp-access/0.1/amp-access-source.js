@@ -26,7 +26,7 @@ import {
   assertHttpsUrl,
   parseQueryString,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr} from '../../../src/json';
@@ -253,7 +253,7 @@ export class AccessSource {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      user().assert(false,
+      userAssert(false,
           '"login" must be either a single URL or a map of URLs');
     }
 
@@ -416,10 +416,10 @@ export class AccessSource {
    * @return {!Promise}
    */
   loginWithType(type) {
-    user().assert(this.loginConfig_[type],
+    userAssert(this.loginConfig_[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = user().assert(this.loginUrlMap_[type],
+    const loginUrl = userAssert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
     return this.login_(loginUrl, type);
   }

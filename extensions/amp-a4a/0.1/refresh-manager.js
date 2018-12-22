@@ -18,7 +18,7 @@ import {
   RefreshIntersectionObserverWrapper,
 } from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -66,7 +66,7 @@ export function getPublisherSpecifiedRefreshInterval(element, win) {
   const networkIntervalPairs = metaTagContent.split(',');
   for (let i = 0; i < networkIntervalPairs.length; i++) {
     const pair = networkIntervalPairs[i].split('=');
-    user().assert(pair.length == 2, 'refresh metadata config must be of ' +
+    userAssert(pair.length == 2, 'refresh metadata config must be of ' +
         'the form `network_type=refresh_interval`');
     if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
       return checkAndSanitizeRefreshInterval(pair[1]);

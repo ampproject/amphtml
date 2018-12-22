@@ -29,7 +29,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
@@ -124,11 +124,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
-    user().assert(
+    userAssert(
         children.length == 1,
         '%s should have its target element as its one and only child',
         TAG);
-    user().assert(
+    userAssert(
         this.elementIsSupported_(children[0]),
         '%s is not supported by %s',
         children[0].tagName,

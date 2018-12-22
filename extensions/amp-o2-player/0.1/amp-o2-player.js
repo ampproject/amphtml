@@ -16,7 +16,7 @@
 
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
 
@@ -55,12 +55,12 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.pid_ = user().assert(
+    this.pid_ = userAssert(
         this.element.getAttribute('data-pid'),
         'data-pid attribute is required for <amp-o2-player> %s',
         this.element);
 
-    this.bcid_ = user().assert(
+    this.bcid_ = userAssert(
         this.element.getAttribute('data-bcid'),
         'data-bcid attribute is required for <amp-o2-player> %s',
         this.element);
@@ -93,11 +93,11 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    user().assert(
+    userAssert(
         this.pid_,
         'data-pid attribute is required for <amp-o2-player> %s',
         this.element);
-    user().assert(
+    userAssert(
         this.bcid_,
         'data-bcid attribute is required for <amp-o2-player> %s',
         this.element);

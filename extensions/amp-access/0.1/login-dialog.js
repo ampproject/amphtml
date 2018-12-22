@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -162,7 +162,7 @@ export class WebLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    user().assert(!this.resolve_, 'Dialog already opened');
+    userAssert(!this.resolve_, 'Dialog already opened');
     return new Promise((resolve, reject) => {
       this.resolve_ = resolve;
       this.reject_ = reject;

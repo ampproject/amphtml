@@ -52,7 +52,7 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 
@@ -103,14 +103,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
   buildCallback() {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    user().assert(isExperimentOn(this.win, 'amp-playbuzz'),
+    userAssert(isExperimentOn(this.win, 'amp-playbuzz'),
         'Enable amp-playbuzz experiment');
 
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');
 
-    user().assert(src || itemId,
+    userAssert(src || itemId,
         'Either src or data-item attribute is required for <amp-playbuzz> %s',
         this.element);
 

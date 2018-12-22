@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {
   getSourceOrigin,
   isProtocolValid,
@@ -59,7 +59,7 @@ function buildArticleFromJson_(articleJson) {
   }
 
   const articleUrl = devAssert(articleJson['url']);
-  user().assert(isProtocolValid(articleUrl),
+  userAssert(isProtocolValid(articleUrl),
       `Unsupported protocol for article URL ${articleUrl}`);
 
   let domain;
@@ -77,7 +77,7 @@ function buildArticleFromJson_(articleJson) {
   };
 
   if (articleJson['image']) {
-    user().assert(isProtocolValid(articleJson['image']),
+    userAssert(isProtocolValid(articleJson['image']),
         `Unsupported protocol for article image URL ${articleJson['image']}`);
     article.image = devAssert(articleJson['image']);
   }

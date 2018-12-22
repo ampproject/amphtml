@@ -28,7 +28,7 @@
  */
 
 import {addParamToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -74,7 +74,7 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
+    userAssert(
         this.element.getAttribute('src'),
         'The src attribute is required for <amp-google-document-embed> %s',
         this.element);

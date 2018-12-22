@@ -21,7 +21,7 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
 
@@ -51,12 +51,12 @@ export let AmpNextPageItem;
  * @return {!AmpNextPageConfig}
  */
 export function assertConfig(context, config, documentUrl) {
-  user().assert(config, 'amp-next-page config must be specified');
-  user().assert(isArray(config.pages), 'pages must be an array');
+  userAssert(config, 'amp-next-page config must be specified');
+  userAssert(isArray(config.pages), 'pages must be an array');
   assertRecos(context, config.pages, documentUrl);
 
   if ('hideSelectors' in config) {
-    user().assert(isArray(config['hideSelectors']),
+    userAssert(isArray(config['hideSelectors']),
         'amp-next-page hideSelectors should be an array');
     assertSelectors(config['hideSelectors']);
   }
@@ -87,7 +87,7 @@ function assertSelectors(selectors) {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
       user().assertString(selector,
           'amp-next-page hideSelector value should be a string');
-      user().assert(!pattern.test(selector),
+      userAssert(!pattern.test(selector),
           'amp-next-page hideSelector %s not allowed', selector);
     });
   });
@@ -110,7 +110,7 @@ function assertReco(context, reco, documentUrl) {
   const {origin} = urlService.parse(documentUrl);
   const sourceOrigin = getSourceOrigin(documentUrl);
 
-  user().assert(
+  userAssert(
       url.origin === origin || url.origin === sourceOrigin
       || isValidAdSenseURL(context, url, origin),
       'pages must be from the same origin as the current document');

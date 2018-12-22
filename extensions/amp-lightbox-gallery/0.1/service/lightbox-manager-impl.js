@@ -28,7 +28,7 @@ import {
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {dev, devAssert, user} from '../../../../src/log';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
@@ -243,7 +243,7 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element),
+    userAssert(this.baseElementIsSupported_(element),
         'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {

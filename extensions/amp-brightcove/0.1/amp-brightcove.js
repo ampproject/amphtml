@@ -25,7 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -240,7 +240,7 @@ class AmpBrightcove extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-    const account = user().assert(
+    const account = userAssert(
         el.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         el);

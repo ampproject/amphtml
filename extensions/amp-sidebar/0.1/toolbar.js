@@ -15,7 +15,7 @@
  */
 
 import {toggle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Class representing toolbar behavior in sidebar
@@ -77,7 +77,7 @@ export class Toolbar {
    */
   buildCallback_() {
     this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
-    const targetId = user().assert(this.toolbarDomElement_
+    const targetId = userAssert(this.toolbarDomElement_
         .getAttribute('toolbar-target'), '"toolbar-target" is required',
     this.toolbarDomElement_);
     // Set the target element to the toolbar clone if it exists.

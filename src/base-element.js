@@ -17,7 +17,7 @@
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {devAssert, user} from './log';
+import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -641,7 +641,7 @@ export class BaseElement {
     this.initActionMap_();
     const holder = this.actionMap_[method];
     const {tagName} = this.element;
-    user().assert(holder, `Method not found: ${method} in ${tagName}`);
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);

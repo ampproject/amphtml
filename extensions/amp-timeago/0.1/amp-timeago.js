@@ -16,7 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
 
@@ -42,7 +42,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.textContent.length > 0,
+    userAssert(this.element.textContent.length > 0,
         'Content cannot be empty. Found in: %s', this.element);
 
     this.datetime_ = this.element.getAttribute('datetime');

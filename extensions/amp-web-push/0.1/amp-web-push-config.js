@@ -15,7 +15,7 @@
  */
 
 import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -75,7 +75,7 @@ export class WebPushConfig extends AMP.BaseElement {
 
     for (const attribute in WebPushConfigAttributes) {
       const value = WebPushConfigAttributes[attribute];
-      user().assert(
+      userAssert(
           this.element.getAttribute(value),
           `The ${value} attribute is required for <${CONFIG_TAG}>`
       );

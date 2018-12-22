@@ -17,7 +17,7 @@
 import {BookendComponentInterface} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -37,7 +37,7 @@ export class TextBoxComponent {
    * @override
    * */
   assertValidity(textboxJson) {
-    user().assert('text' in textboxJson && isArray(textboxJson['text']) &&
+    userAssert('text' in textboxJson && isArray(textboxJson['text']) &&
       textboxJson['text'].length > 0, 'Textbox component must contain ' +
       '`text` array and at least one element inside it, ' +
       'skipping invalid.');

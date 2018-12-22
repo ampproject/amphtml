@@ -16,7 +16,7 @@
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert, user} from '../src/log';
+import {dev, devAssert, user, userAssert} from '../src/log';
 import {tryParseJson} from '../src/json';
 
 /** @private @const {string} */
@@ -127,7 +127,7 @@ export class IframeTransportContext {
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    user().assert(win['onNewContextInstance'] &&
+    userAssert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
     'Must implement onNewContextInstance in ' + win.location.href);
     win['onNewContextInstance'](this);

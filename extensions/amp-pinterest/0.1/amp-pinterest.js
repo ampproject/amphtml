@@ -41,7 +41,7 @@ import {PinItButton} from './pinit-button';
 
 import {PinWidget} from './pin-widget';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * AMP Pinterest
@@ -67,7 +67,7 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const selector = user().assert(this.element.getAttribute('data-do'),
+    const selector = userAssert(this.element.getAttribute('data-do'),
         'The data-do attribute is required for <amp-pinterest> %s',
         this.element);
 

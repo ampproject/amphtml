@@ -17,7 +17,7 @@
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
@@ -44,7 +44,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-google-vrview-image'),
+    userAssert(isExperimentOn(this.win, 'amp-google-vrview-image'),
         'TAG amp-google-vrview-image disabled');
 
     this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
