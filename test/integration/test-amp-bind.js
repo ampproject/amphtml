@@ -24,7 +24,6 @@ import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
 describe.configure().skipEdge().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
-  this.timeout(TIMEOUT);
 
   function poll(desc, condition, onError) {
     return classicPoll(desc, condition, onError, TIMEOUT);

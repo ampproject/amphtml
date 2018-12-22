@@ -18,8 +18,7 @@ import {RequestBank} from '../../testing/test-helper';
 import {addParamsToUrl, parseQueryString} from '../../src/url';
 import {poll} from '../../testing/iframe';
 
-describe.configure().run('A4A', function() {
-  this.timeout(15000);
+describe('A4A', function() {
 
   describes.integration('AMPHTML ads rendered on AMP page', {
     body: `
