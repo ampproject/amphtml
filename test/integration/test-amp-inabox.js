@@ -17,8 +17,7 @@
 import {RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe.configure().run('inabox', function() {
-  this.timeout(15000);
+describe('inabox', function() {
 
   describes.integration('AMPHTML ads rendered on non-AMP page ATF', {
     amp: false,

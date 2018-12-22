@@ -17,7 +17,6 @@
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
 describe.skip('amp-fx-collection', function() {
-  this.timeout(100000);
 
   const css = `
     .spacer {
