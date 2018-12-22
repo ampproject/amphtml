@@ -30,26 +30,46 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {setImportantStyles} from '../../../src/style';
+import {setImportantStyles, toggle} from '../../../src/style';
 
 /**
  * Enum of elements that can be expanded.
  * @enum {string}
  */
-export const EXPANDABLE_COMPONENTS = {
+const EXPANDABLE_COMPONENTS = {
   TWITTER: 'amp-twitter',
 };
 
 /**
- * Selectors that should delegate to the tooltip.
+ * Enum containing all interactive components.
+ * @enum {string}
  */
-export function tooltipDelegatableSelectors() {
-  return Object.assign({}, EXPANDABLE_COMPONENTS, {
-    EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
-      '.i-amphtml-expanded-view-close-button',
-    LINK: 'a[href]',
-  });
+const interactiveComponents = Object.assign({}, EXPANDABLE_COMPONENTS, {
+  EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
+    '.i-amphtml-expanded-view-close-button',
+  LINK: 'a[href]',
+});
+
+/**
+ * Selectors that should delegate to AmpStoryEmbeddedComponent.
+ */
+export function embeddedComponentSelectors() {
+  // Using indirect invocation to prevent no-export-side-effect issue.
+  return interactiveComponents;
 }
+
+/**
+ * Builds expanded view overlay for expandable components.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildExpandedViewOverlay = element => htmlFor(element)`
+    <div class="i-amphtml-story-expanded-view-overflow
+        i-amphtml-story-system-reset">
+      <span class="i-amphtml-expanded-view-close-button" role="button">
+        &times;
+      </span>
+    </div>`;
 
 /**
  * Minimum vertical space needed to position tooltip.
@@ -80,12 +100,18 @@ const DEFAULT_ICON_SRC =
  */
 let tooltipElementsDef;
 
-const TAG = 'amp-story-tooltip';
+const TAG = 'amp-story-embedded-component';
+
+const ComponentState = {
+  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
+  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
+  EXPANDED: 2, // Component is in expanded mode.
+};
 
 /**
- * Tooltip element triggered by clickable elements in the amp-story-grid-layer.
+ * Embedded components found in amp-story.
  */
-export class AmpStoryTooltip {
+export class AmpStoryEmbeddedComponent {
   /**
    * @param {!Window} win
    * @param {!Element} storyEl
@@ -97,14 +123,11 @@ export class AmpStoryTooltip {
     /** @private {!Element} */
     this.storyEl_ = storyEl;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private {?Element} */
     this.shadowRoot_ = null;
 
     /** @private {?Element} */
-    this.tooltipOverlayEl_ = null;
+    this.focusedStateOverlay_ = null;
 
     /** @private {?Element} */
     this.tooltip_ = null;
@@ -118,6 +141,9 @@ export class AmpStoryTooltip {
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
+    /** @private {?Element} */
+    this.expandedViewOverlay_ = null;
+
     /**
      * Target producing the tooltip. Used to avoid building the same
      * element twice.
@@ -127,25 +153,103 @@ export class AmpStoryTooltip {
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
-    this.storeService_.subscribe(StateProperty.TOOLTIP_ELEMENT, el => {
-      this.onTooltipStateUpdate_(el);
+    this.storeService_.subscribe(StateProperty.EMBEDDED_COMPONENT, target => {
+      this.onEmbeddedComponentUpdate_(target);
     });
+
+    this.state_ = ComponentState.HIDDEN;
+  }
+
+  /**
+   * Reacts to embedded component updates.
+   * @param {?Element} target
+   */
+  onEmbeddedComponentUpdate_(target) {
+    switch (this.state_) {
+      case ComponentState.FOCUSED:
+      case ComponentState.HIDDEN:
+        if (target) {
+          // Target is hidden and going into focused mode.
+          this.state_ = ComponentState.FOCUSED;
+
+        } else {
+          // Target is focused and click was outside the tooltip.
+          this.state_ = ComponentState.HIDDEN;
+        }
+        this.onFocusedStateUpdate_(target);
+        break;
+      case ComponentState.EXPANDED:
+        if (target && matches(target,
+            embeddedComponentSelectors().EXPANDED_VIEW_OVERLAY)) {
+          if (matches(target, '.i-amphtml-expanded-view-close-button')) {
+            // Target is expanded and going into hidden mode.
+            this.state_ = ComponentState.HIDDEN;
+            this.toggleExpandedView_(null);
+            this.tooltip_.removeEventListener('click',
+                this.expandComponentHandler_, true);
+          }
+        }
+        else {
+          this.onFocusedStateUpdate_(null);
+          this.toggleExpandedView_(target);
+        }
+        break;
+      default:
+        dev().warn(TAG, `ComponentState ${this.state_} does not exist`);
+        break;
+    }
+  }
+
+  /**
+   * Toggles expanded view for interactive components that support it.
+   * @param {?Element} targetToExpand
+   * @private
+   */
+  toggleExpandedView_(targetToExpand) {
+    const storyPage = devAssert(
+        this.storyEl_.querySelector('amp-story-page[active]'));
+
+    if (!targetToExpand) {
+      this.expandedViewOverlay_ &&
+        this.resources_.mutateElement(this.expandedViewOverlay_, () => {
+          storyPage.classList.toggle('i-amphtml-expanded-mode', false);
+          toggle(dev().assertElement(this.expandedViewOverlay_), false);
+        });
+      return;
+    }
+
+    if (!this.expandedViewOverlay_) {
+      this.buildAndAppendExpandedViewOverlay_(storyPage);
+    }
+    this.resources_.mutateElement(devAssert(this.expandedViewOverlay_), () => {
+      toggle(devAssert(this.expandedViewOverlay_), true);
+      storyPage.classList.toggle('i-amphtml-expanded-mode', true);
+    });
+  }
+
+  /**
+   * Builds the expanded view overlay element and appends it to the page.
+   * @param {!Element} storyPage
+   * @private
+   */
+  buildAndAppendExpandedViewOverlay_(storyPage) {
+    this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
+    this.resources_.mutateElement(storyPage, () => storyPage.appendChild(
+        this.expandedViewOverlay_));
   }
 
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
    */
-  build_() {
-    this.isBuilt_ = true;
-
+  buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
 
-    this.tooltipOverlayEl_ =
-      devAssert(this.buildTemplate_(this.win_.document));
-    createShadowRootWithStyle(this.shadowRoot_, this.tooltipOverlayEl_, CSS);
+    this.focusedStateOverlay_ =
+      dev().assert(this.buildFocusedStateTemplate_(this.win_.document));
+    createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
-    this.tooltipOverlayEl_
+    this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
     this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
@@ -155,8 +259,8 @@ export class AmpStoryTooltip {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
-      if (this.storeService_.get(StateProperty.TOOLTIP_ELEMENT)) {
-        this.closeTooltip_();
+      if (this.storeService_.get(StateProperty.EMBEDDED_COMPONENT)) {
+        this.closeFocusedState_();
       }
     });
 
@@ -167,33 +271,30 @@ export class AmpStoryTooltip {
    * Hides the tooltip layer.
    * @private
    */
-  closeTooltip_() {
-    this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, null);
+  closeFocusedState_() {
+    this.clearTooltip_();
+    this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
   }
 
   /**
-   * Reacts to store updates related to tooltip active status.
-   * @param {!Element} target
+   * Reacts to store updates related to the focused state, when a tooltip is
+   * active.
+   * @param {?Element} target
    * @private
    */
-  onTooltipStateUpdate_(target) {
+  onFocusedStateUpdate_(target) {
     if (!target) {
-      this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
+      this.resources_.mutateElement(
+          dev().assertElement(this.focusedStateOverlay_),
           () => {
-            this.tooltipOverlayEl_
+            this.focusedStateOverlay_
                 .classList.toggle('i-amphtml-hidden', true);
           });
       return;
     }
 
-    if (!this.isBuilt_) {
-      this.storyEl_.appendChild(this.build_());
-    }
-
-    if (matches(target,
-        tooltipDelegatableSelectors().EXPANDED_VIEW_OVERLAY)) {
-      this.closeExpandedView_();
-      return;
+    if (!this.focusedStateOverlay_) {
+      this.storyEl_.appendChild(this.buildFocusedState_());
     }
 
     this.updateTooltipBehavior_(target);
@@ -203,24 +304,12 @@ export class AmpStoryTooltip {
     }
     this.previousTarget_ = target;
 
-    this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
+    this.resources_.mutateElement(
+        dev().assertElement(this.focusedStateOverlay_),
         () => {
-          this.tooltipOverlayEl_
+          this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
         });
-  }
-
-  /**
-   * Closes expanded view and resets properties of elements affected by it.
-   * @private
-   */
-  closeExpandedView_() {
-    this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
-    // Re-add click shield to expandable element and close overlay.
-    this.previousTarget_.classList
-        .toggle('i-amphtml-remove-click-shield', false);
-    this.tooltip_.removeEventListener('click',
-        this.expandComponentHandler_, true);
   }
 
   /**
@@ -230,11 +319,12 @@ export class AmpStoryTooltip {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
+    this.resources_.mutateElement(
+        dev().assertElement(this.focusedStateOverlay_),
         () => {
           [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
-            this.tooltipOverlayEl_.setAttribute('desktop', '') :
-            this.tooltipOverlayEl_.removeAttribute('desktop');
+            this.focusedStateOverlay_.setAttribute('desktop', '') :
+            this.focusedStateOverlay_.removeAttribute('desktop');
         });
   }
 
@@ -255,7 +345,7 @@ export class AmpStoryTooltip {
    * @param {!Element} target
    */
   updateTooltipBehavior_(target) {
-    if (matches(target, tooltipDelegatableSelectors().LINK)) {
+    if (matches(target, embeddedComponentSelectors().LINK)) {
       addAttributesToElement(dev().assertElement(this.tooltip_),
           dict({'href': this.getElementHref_(target)}));
       return;
@@ -263,8 +353,8 @@ export class AmpStoryTooltip {
 
     if (Object.values(EXPANDABLE_COMPONENTS)
         .includes(target.tagName.toLowerCase())) {
-      this.tooltip_.addEventListener('click',
-          this.expandComponentHandler_, true);
+      this.tooltip_.addEventListener('click', this.expandComponentHandler_,
+          true);
     }
   }
 
@@ -277,11 +367,11 @@ export class AmpStoryTooltip {
     event.preventDefault();
     event.stopPropagation();
 
-    this.closeTooltip_();
-    this.previousTarget_.classList
-        .toggle('i-amphtml-remove-click-shield', true);
+    this.state_ = ComponentState.EXPANDED;
+
     this.storeService_.dispatch(
         Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
+    this.onEmbeddedComponentUpdate_(this.previousTarget_);
   }
 
   /**
@@ -431,15 +521,13 @@ export class AmpStoryTooltip {
     if (!closest(dev().assertElement(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
-      this.clearTooltip_();
-      this.closeTooltip_();
+      this.closeFocusedState_();
     }
   }
 
   /**
    * Clears any attributes or handlers that may have been added to the tooltip,
-   * but weren't used. E.g. when user clicks on an expandable target but then
-   * clicks away.
+   * but weren't used because the user dismissed the tooltip.
    * @private
    */
   clearTooltip_() {
@@ -449,27 +537,27 @@ export class AmpStoryTooltip {
   }
 
   /**
-   * Builds the template and adds corresponding listeners to nav buttons.
+   * Builds the focused state template.
    * @param {!Document} doc
    * @return {!Element}
    * @private
    */
-  buildTemplate_(doc) {
+  buildFocusedStateTemplate_(doc) {
     const html = htmlFor(doc);
     const tooltipOverlay =
         html`
-        <section class="i-amphtml-story-tooltip-layer i-amphtml-hidden">
-          <div class="i-amphtml-story-tooltip-layer-nav-button-container
+        <section class="i-amphtml-story-focused-state-layer i-amphtml-hidden">
+          <div class="i-amphtml-story-focused-state-layer-nav-button-container
               i-amphtml-story-tooltip-nav-button-left">
             <button role="button" ref="buttonLeft"
-                class="i-amphtml-story-tooltip-layer-nav-button
+                class="i-amphtml-story-focused-state-layer-nav-button
                 i-amphtml-story-tooltip-nav-button-left">
             </button>
           </div>
-          <div class="i-amphtml-story-tooltip-layer-nav-button-container
+          <div class="i-amphtml-story-focused-state-layer-nav-button-container
               i-amphtml-story-tooltip-nav-button-right">
             <button role="button" ref="buttonRight"
-                class="i-amphtml-story-tooltip-layer-nav-button
+                class="i-amphtml-story-focused-state-layer-nav-button
                     i-amphtml-story-tooltip-nav-button-right">
             </button>
           </div>

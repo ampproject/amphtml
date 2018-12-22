@@ -312,6 +312,7 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
+/** Apply click shield on embedded components on initial load. */
 amp-story-grid-layer amp-twitter::after {
   content: "" !important;
   position: absolute !important;
@@ -321,24 +322,19 @@ amp-story-grid-layer amp-twitter::after {
   left: 0 !important;
 }
 
-amp-twitter.i-amphtml-remove-click-shield::after {
+.i-amphtml-expanded-mode amp-twitter::after {
   height: 0px !important;
   width: 0px !important;
 }
 
-.i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer,
-.i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer * {
+.i-amphtml-expanded-mode amp-story-grid-layer,
+.i-amphtml-expanded-mode amp-story-grid-layer * {
   contain: none !important;
   z-index: auto !important;
 }
 
-amp-story-page.i-amphtml-story-grid-layer-z-index-reset[active] {
-  contain: none !important;
-  z-index: 100001 !important; /* On top of i-amphtml-story-system-layer. */
-}
-
-amp-twitter.i-amphtml-increment-z-index {
-  z-index: 2 !important;
+.i-amphtml-expanded-mode amp-twitter {
+  z-index: 1 !important;
   position: absolute !important;
   top: 15% !important;
   left: 0 !important;
@@ -732,7 +728,6 @@ amp-story .amp-video-eq,
   width: 100% !important;
   height: 100% !important;
   background-color: rgba(0, 0, 0, 1) !important;
-  z-index: 1 !important;
   position: absolute !important;
 }
 

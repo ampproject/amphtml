@@ -41,11 +41,11 @@ import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -92,7 +92,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
-import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
@@ -204,20 +203,6 @@ const HIDE_ON_BOOKEND_SELECTOR =
 const DEFAULT_THEME_COLOR = '#202125';
 
 /**
- * Builds expanded view overlay for expandable components.
- * @param {!Element} element
- * @return {!Element}
- */
-const buildExpandedViewOverlay = element =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-expanded-view-overflow
-          i-amphtml-story-system-reset">
-        <span class="i-amphtml-expanded-view-close-button" role="button">
-          &times;
-        </span>
-      </div>`;
-
-/**
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
@@ -257,8 +242,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
-    /** Instantiates the tooltip in case its needed. */
-    new AmpStoryTooltip(this.win, this.element);
+    /** Instantiate in case there are embedded components. */
+    new AmpStoryEmbeddedComponent(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -331,12 +316,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
-
-    /** @private {?Element} */
-    this.expandedViewOverlay_ = null;
-
-    /** @private {?Element} */
-    this.expandableTarget_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -642,10 +621,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.EXPANDED_COMPONENT, target => {
-      this.toggleExpandedView_(target);
-    });
-
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
@@ -666,55 +641,6 @@ export class AmpStory extends AMP.BaseElement {
     this.installGestureRecognizers_();
   }
 
-  /**
-   * Toggles expanded view for interactive components that support it.
-   * @param {?Element} targetToExpand
-   * @private
-   */
-  toggleExpandedView_(targetToExpand) {
-    if (!targetToExpand) {
-      this.expandedViewOverlay_ &&
-          this.mutateElement(() => {
-            this.arrangeZindexesForExpandedView_(false);
-            toggle(dev().assertElement(this.expandedViewOverlay_), false);
-          });
-      return;
-    }
-
-    if (!this.expandedViewOverlay_) {
-      this.buildAndAppendExpandedViewOverlay_();
-    }
-
-    this.mutateElement(() => {
-      this.expandableTarget_ = targetToExpand;
-      toggle(dev().assertElement(this.expandedViewOverlay_), true);
-      this.arrangeZindexesForExpandedView_(true);
-    });
-  }
-
-  /**
-   * When active, resets the z-indexes on the grid layers of this page to auto,
-   * and increases the component's z-index so that it's on top of other
-   * elements in the page.
-   * @param {boolean} isActive
-   */
-  arrangeZindexesForExpandedView_(isActive) {
-    this.activePage_.element.classList.toggle(
-        'i-amphtml-story-grid-layer-z-index-reset', isActive);
-    this.expandableTarget_.classList.toggle(
-        'i-amphtml-increment-z-index', isActive);
-  }
-
-  /**
-   * Builds the expanded view overlay element and appends it to the page.
-   * @private
-   */
-  buildAndAppendExpandedViewOverlay_() {
-    this.expandedViewOverlay_ = buildExpandedViewOverlay(this.element);
-    this.mutateElement(() =>
-      this.activePage_.element.appendChild(this.expandedViewOverlay_));
-  }
-
   /** @private */
   installGestureRecognizers_() {
     const {element} = this;
@@ -725,7 +651,7 @@ export class AmpStory extends AMP.BaseElement {
       const {deltaX, deltaY} = gesture.data;
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
+          this.storeService_.get(StateProperty.EMBEDDED_COMPONENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||

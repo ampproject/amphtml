@@ -81,7 +81,7 @@ export const UIType = {
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    tooltipElement: ?Element,
+ *    embeddedComponent: ?Element,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -124,7 +124,7 @@ export const StateProperty = {
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
-  TOOLTIP_ELEMENT: 'tooltipElement',
+  EMBEDDED_COMPONENT: 'embeddedComponent',
   UI_STATE: 'uiState',
   EXPANDED_COMPONENT: 'expandedComponent',
 
@@ -141,6 +141,7 @@ export const StateProperty = {
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
+  TOGGLE_EMBEDDED_COMPONENT: 'toggleEmbeddedComponent',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
@@ -160,7 +161,6 @@ export const Action = {
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
-  TOGGLE_TOOLTIP: 'toggleTooltip',
   TOGGLE_UI: 'toggleUi',
 };
 
@@ -270,16 +270,17 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
-    case Action.TOGGLE_TOOLTIP:
+    case Action.TOGGLE_EMBEDDED_COMPONENT:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
+            [StateProperty.EMBEDDED_COMPONENT]: data,
             [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.TOOLTIP_ELEMENT]: data,
           }));
     case Action.TOGGLE_EXPANDED_COMPONENT:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !data,
             [StateProperty.EXPANDED_COMPONENT]: data,
           }));
     case Action.TOGGLE_UI:
@@ -416,7 +417,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.TOOLTIP_ELEMENT]: null,
+      [StateProperty.EMBEDDED_COMPONENT]: null,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.

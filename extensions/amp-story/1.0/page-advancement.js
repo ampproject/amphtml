@@ -23,9 +23,9 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {embeddedComponentSelectors} from './amp-story-embedded-component';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
-import {tooltipDelegatableSelectors} from './amp-story-tooltip';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -36,8 +36,8 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
-const TOOLTIP_DELEGATABLE_SELECTORS = Object.values(
-    tooltipDelegatableSelectors()).join(',');
+const EMBEDDED_COMPONENT_SELECTORS = Object.values(
+    embeddedComponentSelectors()).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -375,7 +375,8 @@ class ManualAdvancement extends AdvancementConfig {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
-    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
+        !this.storeService_.get(StateProperty.EXPANDED_COMPONENT)) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -469,11 +470,11 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.canShowTooltip_(event) &&
-      matches(target, TOOLTIP_DELEGATABLE_SELECTORS)) {
+      matches(target, EMBEDDED_COMPONENT_SELECTORS)) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
-      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
+      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, target);
       return;
     }
 
