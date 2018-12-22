@@ -35,6 +35,7 @@ import {
   setStyle,
 } from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
   from '../../../src/ad-helper';
@@ -354,12 +355,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       sharedDataPromise,
       consentStringPromise,
     ]).then(consents => {
-      const opt_context = {
-        clientId: consents[0] || null,
-        container: this.container_,
-        initialConsentState: consents[1],
-        consentSharedData: consents[2],
-      };
+      const opt_context = dict({
+        'clientId': consents[0] || null,
+        'container': this.container_,
+        'initialConsentState': consents[1],
+        'consentSharedData': consents[2],
+      });
       if (isConsentV2Experiment) {
         opt_context['initialConsentValue'] = consents[3];
       }

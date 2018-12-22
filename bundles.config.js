@@ -58,12 +58,7 @@ exports.extensionBundles = [
   {name: 'amp-ad-network-gmossp-impl', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-exit', version: '0.1', type: TYPES.AD},
   {name: 'amp-addthis', version: '0.1', type: TYPES.MISC},
-  {
-    name: 'amp-analytics',
-    version: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
+  {name: 'amp-analytics', version: '0.1', type: TYPES.MISC},
   {name: 'amp-anim', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-animation', version: '0.1', type: TYPES.MISC},
   {
