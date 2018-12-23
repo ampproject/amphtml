@@ -17,7 +17,7 @@
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -98,12 +98,12 @@ export class ConsentConfig {
         (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
 
     const consents = config['consents'];
-    user().assert(consents, '%s: consents config is required', TAG);
-    user().assert(Object.keys(consents).length != 0,
+    userAssert(consents, '%s: consents config is required', TAG);
+    userAssert(Object.keys(consents).length != 0,
         '%s: can\'t find consent instance', TAG);
     if (!this.isMultiSupported_) {
       // Assert single consent instance
-      user().assert(Object.keys(consents).length <= 1,
+      userAssert(Object.keys(consents).length <= 1,
           '%s: only single consent instance is supported', TAG);
       if (config['policy']) {
         // Only respect 'default' consent policy;
@@ -157,7 +157,7 @@ export class ConsentConfig {
     if (!type) {
       return null;
     }
-    user().assert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
+    userAssert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
     const importConfig = CMP_CONFIG[type];
     this.validateCMPConfig_(importConfig);
     const constentInstance = importConfig['consentInstanceId'];
@@ -182,7 +182,7 @@ export class ConsentConfig {
         ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
-      dev().assert(config[attribute], 'CMP config must specify %s', attribute);
+      devAssert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
 }

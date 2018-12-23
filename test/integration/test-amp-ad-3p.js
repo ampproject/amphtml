@@ -26,8 +26,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-// TODO: unskip this test for single pass #20002
-describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
+describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
@@ -77,9 +76,8 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
 
       // make sure the context.data is the same instance as the data param
       // passed into the vendor function. see #10628
-      // TODO(lannka,16825): unmute it.
-      // expect(context.data).to.equal(
-      //    iframe.contentWindow.networkIntegrationDataParamForTesting);
+      expect(context.data).to.equal(
+          iframe.contentWindow.networkIntegrationDataParamForTesting);
 
       expect(context.domFingerprint).to.be.ok;
       expect(context.hidden).to.be.false;
@@ -162,7 +160,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
     }).then(() => {
       return poll('wait for attemptChangeSize', () => {
         return iframe.contentWindow.ping.resizeSuccess != undefined;
-      });
+      }, null, 5000);
     }).then(() => {
       lastIO = null;
       iframe.contentWindow.context.observeIntersection(changes => {
