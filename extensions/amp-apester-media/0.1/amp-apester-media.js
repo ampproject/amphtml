@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
@@ -296,25 +297,19 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /**
    * @param {JsonObject} publisher
-   * @return {Element}
    */
-  constructAmpPixel_(publisher) {
+  report3rdPartyPixel_(publisher) {
     if (publisher && publisher['trackingPixel']) {
       const affiliateId = publisher['trackingPixel']['affiliateId'];
       const publisherId = publisher['publisherId'];
       if (affiliateId) {
-        const pixelElement =
-          this.element.ownerDocument.createElement('amp-pixel');
-
-        const pixelUrl = generatePixelURL(publisherId, affiliateId);
-
-        pixelElement.setAttribute('src', pixelUrl);
-        pixelElement.setAttribute('layout', 'nodisplay');
-
-        return pixelElement;
+        const eventName = 'interactionLoaded';
+        const builder = new CustomEventReporterBuilder(this.element);
+        builder.track(eventName, generatePixelURL(publisherId, affiliateId));
+        const reporter = builder.build();
+        reporter.trigger(eventName);
       }
     }
-    return null;
   }
 
   /** @override */
@@ -353,10 +348,6 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const overflow = this.constructOverflow_();
                 this.element.appendChild(overflow);
                 this.element.appendChild(iframe);
-                const ampPixel = this.constructAmpPixel_(media['publisher']);
-                if (ampPixel) {
-                  this.element.appendChild(ampPixel);
-                }
               })
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
@@ -375,6 +366,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                       }
                     }
                     this.togglePlaceholder(false);
+                    this.report3rdPartyPixel_(media['publisher']);
                     this.ready_ = true;
                     let height = 0;
                     if (media && media['data'] && media['data']['size']) {
