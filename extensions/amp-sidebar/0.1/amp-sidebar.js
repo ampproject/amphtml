@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {removeFragment} from '../../../src/url';
@@ -32,6 +33,12 @@ const TAG = 'amp-sidebar toolbar';
 
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
+
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
 
 /**
   * For browsers with bottom nav bars the content towards the bottom
@@ -115,8 +122,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(element);
 
-    if (this.side_ != 'left' && this.side_ != 'right') {
-      this.side_ = isRTL(this.document_) ? 'right' : 'left';
+    if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
+      this.side_ = this.setSideAttribute_(
+          isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
       element.setAttribute('side', this.side_);
     }
 
@@ -169,9 +177,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.close_();
     });
     element.appendChild(screenReaderCloseButton);
-
+    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
     this.registerAction('toggle', this.toggle_.bind(this));
-    this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
     element.addEventListener('click', e => {
@@ -194,11 +201,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     }, true);
 
-  }
-
-  /** @override */
-  activate(invocation) {
-    this.open_(invocation);
   }
 
   /** @override */
@@ -356,7 +358,19 @@ export class AmpSidebar extends AMP.BaseElement {
       tryFocus(this.openerElement_);
     }
   }
-
+  /**
+   * Sidebars within <amp-story> should be 'flipped'.
+   * @param {!Side} side
+   * @return {Side}
+   * @private
+   */
+  setSideAttribute_(side) {
+    if (!descendsFromStory(this.element)) {
+      return side;
+    } else {
+      return side == Side.LEFT ? Side.RIGHT : Side.LEFT;
+    }
+  }
   /**
    * @private
    */

@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -176,7 +176,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       epoch = Date.now();
     } else if (this.datetime_) {
       epoch = Date.parse(this.datetime_);
-      user().assert(
+      userAssert(
           !isNaN(epoch),
           `Invalid date: '${this.datetime_}'`
       );
@@ -186,7 +186,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       epoch = this.timestampSeconds_ * 1000;
     }
 
-    user().assert(
+    userAssert(
         epoch !== undefined,
         'One of datetime, timestamp-ms, or timestamp-seconds is required'
     );

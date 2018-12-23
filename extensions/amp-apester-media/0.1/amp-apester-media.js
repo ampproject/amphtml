@@ -19,7 +19,7 @@ import {
 } from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
@@ -138,7 +138,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.width_ = getLengthNumeral(width);
     this.height_ = getLengthNumeral(height);
     this.random_ = false;
-    this.mediaAttribute_ = user().assert(
+    this.mediaAttribute_ = userAssert(
         this.element.getAttribute('data-apester-media-id') ||
         (this.random_ = this.element.getAttribute(
             'data-apester-channel-token'

@@ -42,6 +42,10 @@ const preTestTasks = argv.nobuild ? [] : (
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 const batchSize = 4; // Number of Sauce Lab browsers
 
+const chromeBase = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
+
+const formattedFlagList = [];
+
 let saucelabsBrowsers = [];
 /**
  * Read in and process the configuration settings for karma
@@ -59,6 +63,25 @@ function getConfig() {
   }
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
+  }
+  if (argv.chrome_canary && !argv.chrome_flags) {
+    return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
+  }
+  if (argv.chrome_flags) {
+    const flagList = argv.chrome_flags.split(',');
+    flagList.forEach(flag => {
+      formattedFlagList.push('--'.concat(flag));
+    });
+    const config = Object.assign({}, karmaDefault, {
+      browsers: ['Chrome_flags'],
+      customLaunchers: {
+        Chrome_flags: { // eslint-disable-line google-camelcase/google-camelcase
+          base: chromeBase,
+          flags: formattedFlagList,
+        },
+      },
+    });
+    return config;
   }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
@@ -149,6 +172,7 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -170,6 +194,10 @@ function printArgvMessages() {
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
+  if (argv.chrome_flags) {
+    log(green('Launching'), cyan(chromeBase), green('with flags'),
+        cyan(formattedFlagList));
+  }
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
@@ -516,8 +544,6 @@ async function runTests() {
     };
   }
 
-  // Run fake-server to test XHR responses.
-  process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 8081,
     host: 'localhost',
@@ -726,6 +752,9 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'firefox': '  Runs tests on Firefox',
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
+    'chrome_canary': 'Runs tests on Chrome Canary',
+    'chrome_flags':
+      'Uses the given flags to launch Chrome',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +

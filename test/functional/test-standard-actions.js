@@ -321,7 +321,9 @@ describes.sandboxed('StandardActions', {}, () => {
     let invocation;
 
     beforeEach(() => {
-      win = {};
+      win = {
+        close: () => {},
+      };
       invocation = {
         node: {
           ownerDocument: {
@@ -419,6 +421,88 @@ describes.sandboxed('StandardActions', {}, () => {
       });
     });
 
+    describe('closeOrNavigateTo', () => {
+      let navigateToStub;
+      let closeOrNavigateToSpy;
+      let winCloseStub;
+
+      beforeEach(() => {
+        navigateToStub = sandbox.stub(standardActions, 'handleNavigateTo')
+            .returns(Promise.resolve());
+
+        closeOrNavigateToSpy = sandbox.spy(standardActions,
+            'handleCloseOrNavigateTo');
+
+        winCloseStub = sandbox.stub(win, 'close');
+        winCloseStub.callsFake(() => {
+          win.closed = true;
+        });
+        // Fake ActionInvocation.
+        invocation.method = 'closeOrNavigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
+        };
+        invocation.caller = {tagName: 'DIV'};
+      });
+
+      it('should be implemented', async() => {
+        await standardActions.handleAmpTarget(invocation);
+        expect(closeOrNavigateToSpy).to.be.calledOnce;
+        expect(closeOrNavigateToSpy).to.be.calledWithExactly(invocation);
+      });
+
+      it('should close window if allowed', async() => {
+        win.opener = {};
+        win.parent = win;
+        await standardActions.handleAmpTarget(invocation);
+        expect(winCloseStub).to.be.calledOnce;
+        expect(navigateToStub).to.be.not.called;
+
+      });
+
+      it('should NOT close if no opener', async() => {
+        win.opener = null;
+        win.parent = win;
+        await standardActions.handleAmpTarget(invocation);
+        expect(winCloseStub).to.be.not.called;
+      });
+
+      it('should NOT close if has a parent', async() => {
+        win.opener = {};
+        win.parent = {};
+        await standardActions.handleAmpTarget(invocation);
+        expect(winCloseStub).to.be.not.called;
+      });
+
+      it('should NOT close if in multi-doc', async() => {
+        win.opener = {};
+        win.parent = win;
+        sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+        await standardActions.handleAmpTarget(invocation);
+        expect(winCloseStub).to.be.not.called;
+
+      });
+
+      it('should navigate if not allowed to close', async() => {
+        win.opener = null;
+        win.parent = win;
+        sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+        await standardActions.handleAmpTarget(invocation);
+        expect(winCloseStub).to.be.not.called;
+        expect(navigateToStub).to.be.called;
+      });
+
+      it('should navigate if win.close rejects', async() => {
+        win.opener = {};
+        win.parent = win;
+        winCloseStub.callsFake(() => {
+          win.closed = false;
+        });
+        await standardActions.handleAmpTarget(invocation);
+        expect(navigateToStub).to.be.called;
+      });
+    });
+
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
       const history = Services.historyForDoc(ampdoc);
@@ -437,7 +521,6 @@ describes.sandboxed('StandardActions', {}, () => {
       yield macroTask();
       expect(optoutStub).to.be.calledOnce;
     });
-
 
     it('should implement setState()', () => {
       const element = createElement();

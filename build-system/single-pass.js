@@ -89,6 +89,7 @@ exports.getFlags = function(config) {
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
+    use_types_for_optimization: true,
     rewrite_polyfills: false,
     create_source_map: '%outname%.map',
     parse_inline_source_maps: true,

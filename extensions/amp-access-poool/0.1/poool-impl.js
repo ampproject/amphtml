@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
@@ -145,8 +145,8 @@ export class PooolVendor {
    * @private
    */
   checkMandatoryParams_() {
-    user().assert(this.bundleID_, 'BundleID is incorrect or not provided.');
-    user().assert(this.itemID_, 'ItemID is not provided.');
+    userAssert(this.bundleID_, 'BundleID is incorrect or not provided.');
+    userAssert(this.itemID_, 'ItemID is not provided.');
   }
 
   /**

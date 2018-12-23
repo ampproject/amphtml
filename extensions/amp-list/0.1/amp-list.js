@@ -33,7 +33,7 @@ import {
 } from '../../../src/batched-json';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
@@ -371,14 +371,14 @@ export class AmpList extends AMP.BaseElement {
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
         }
-        user().assert(typeof items !== 'undefined',
+        userAssert(typeof items !== 'undefined',
             'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
         if (this.element.hasAttribute('single-item') && !isArray(items)) {
           items = [items];
         }
         // TODO (cathyxz): add assertArray function
-        user().assert(isArray(items),
+        userAssert(isArray(items),
             'Response must contain an array at "%s". %s',
             itemsExpr, this.element);
         items = /** @type {!Array} */ (items);
@@ -498,7 +498,7 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
-    dev().assert(current && current.data, 'Nothing to render.');
+    devAssert(current && current.data, 'Nothing to render.');
     dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
@@ -732,7 +732,7 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     // TODO (#18875): cleanup resizable-children experiment
-    user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
+    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
         'Experiment amp-list-resizable-children is disabled');
 
     const previousLayout = this.element.getAttribute('layout');
@@ -864,8 +864,7 @@ export class AmpList extends AMP.BaseElement {
     });
   }
   /**
-   * Toggles the visibility of the load-more-loading element, the
-   * amp-load-more-loading CSS class, and the active state of the loader.
+   * Toggles the visibility of the load-more-loading element.
    * @param {boolean} state
    * @private
    */
@@ -878,7 +877,8 @@ export class AmpList extends AMP.BaseElement {
           this.loadMoreEndElement_.classList.toggle('amp-visible', false);
         }
       }
-      this.loadMoreButton_.classList.toggle('amp-load-more-loading', state);
+      this.loadMoreButton_.classList.toggle('amp-visible', !state);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
     });
   }
 

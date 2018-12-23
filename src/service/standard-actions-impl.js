@@ -18,7 +18,7 @@ import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
-import {dev, user} from '../log';
+import {dev, user, userAssert} from '../log';
 import {
   getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
 } from '../service';
@@ -109,7 +109,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const {node, caller, method, args} = invocation;
+    const {node, method, args} = invocation;
     const win = (node.ownerDocument || node).defaultView;
     switch (method) {
       case 'pushState':
@@ -117,30 +117,18 @@ export class StandardActions {
         const element = (node.nodeType === Node.DOCUMENT_NODE)
           ? node.documentElement : node;
         return Services.bindForDocOrNull(element).then(bind => {
-          user().assert(bind, 'AMP-BIND is not installed.');
+          userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
 
       case 'navigateTo':
-        // Some components have additional constraints on allowing navigation.
-        let permission = Promise.resolve();
-        if (startsWith(caller.tagName, 'AMP-')) {
-          permission = caller.getImpl().then(impl => {
-            if (typeof impl.throwIfCannotNavigate == 'function') {
-              impl.throwIfCannotNavigate();
-            }
-          });
-        }
-        return permission.then(() => {
-          Services.navigationForDoc(this.ampdoc).navigateTo(
-              win, args['url'], `AMP.${method}`,
-              {target: args['target'], opener: args['opener']});
-        }, /* onrejected */ e => {
-          user().error(TAG, e.message);
-        });
+        return this.handleNavigateTo(invocation);
+
+      case 'closeOrNavigateTo':
+        return this.handleCloseOrNavigateTo(invocation);
 
       case 'scrollTo':
-        user().assert(args['id'],
+        userAssert(args['id'],
             'AMP.scrollTo must provide element ID');
         invocation.node = dev().assertElement(
             getAmpdoc(node).getElementById(args['id']),
@@ -166,6 +154,67 @@ export class StandardActions {
     throw user().createError('Unknown AMP action ', method);
   }
 
+  /**
+   * Handles the `navigateTo` action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {!Promise}
+   */
+  handleNavigateTo(invocation) {
+    const {node, caller, method, args} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
+    // Some components have additional constraints on allowing navigation.
+    let permission = Promise.resolve();
+    if (startsWith(caller.tagName, 'AMP-')) {
+      permission = caller.getImpl().then(impl => {
+        if (typeof impl.throwIfCannotNavigate == 'function') {
+          impl.throwIfCannotNavigate();
+        }
+      });
+    }
+    return permission.then(() => {
+      Services.navigationForDoc(this.ampdoc).navigateTo(
+          win, args['url'], `AMP.${method}`,
+          {target: args['target'], opener: args['opener']});
+    }, /* onrejected */ e => {
+      user().error(TAG, e.message);
+    });
+  }
+
+  /**
+   * Handles the `handleCloseOrNavigateTo` action.
+   * This action tries to close the requesting window if allowed, otherwise
+   * navigates the window.
+   *
+   * Window can be closed only from top-level documents that have an opener.
+   * Without an opener or if embedded, it will deny the close method.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {!Promise}
+   */
+  handleCloseOrNavigateTo(invocation) {
+    const {node} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
+
+    // Don't allow closing if embedded in iframe or does not have an opener or
+    // embedded in a multi-doc shadowDOM case.
+    // Note that browser denies win.close in some of these cases already anyway,
+    // so not every check here is strictly needed but works as a short-circuit.
+    const hasParent = win.parent != win;
+    const canBeClosed = win.opener && this.ampdoc.isSingleDoc() && !hasParent;
+
+    let wasClosed = false;
+    if (canBeClosed) {
+      // Browser may still deny win.close() call, that would be reflected
+      // synchronously in win.closed
+      win.close();
+      wasClosed = win.closed;
+    }
+
+    if (!wasClosed) {
+      return this.handleNavigateTo(invocation);
+    }
+
+    return Promise.resolve();
+  }
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to
    * it with the given animation duraiton

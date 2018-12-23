@@ -27,7 +27,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
@@ -280,7 +280,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      user().assert(false, 'Unknown method `%s`.', methodReceived);
+      userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
 
@@ -289,7 +289,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     this.canPlay_ = this.canPlay_ || isCanPlayEvent;
 
-    const {reject, resolve} = dev().assert(this.readyDeferred_);
+    const {reject, resolve} = devAssert(this.readyDeferred_);
 
     if (isCanPlayEvent) {
       return resolve();
@@ -300,7 +300,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (eventReceived == 'analytics') {
-      const spec = dev().assert(data['analytics']);
+      const spec = devAssert(data['analytics']);
 
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
@@ -319,7 +319,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     user().assertString(eventType, '`eventType` missing in analytics event');
 
-    user().assert(
+    userAssert(
         getAnalyticsEventTypePrefixRegex().test(eventType),
         'Invalid analytics `eventType`. Value must start with `%s`.',
         ANALYTICS_EVENT_TYPE_PREFIX);
