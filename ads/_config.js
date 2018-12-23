@@ -875,6 +875,8 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  'speakol': {},
+
   'spotx': {
     preconnect: 'https://js.spotx.tv',
     renderStartImplemented: true,
@@ -1069,8 +1071,6 @@ export const adConfig = {
     ],
   },
 
-  'speakol': {},
-  
   'baidu': {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
