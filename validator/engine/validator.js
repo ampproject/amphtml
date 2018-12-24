@@ -4130,7 +4130,7 @@ function validateAttributes(
       }
     }
   }
-  const missingAttrs = [];
+  let missingAttrs = [];
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       missingAttrs.push(
