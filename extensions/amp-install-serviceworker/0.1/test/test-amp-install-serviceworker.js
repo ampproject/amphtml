@@ -126,13 +126,16 @@ describes.realWin('amp-install-serviceworker', {
         },
       });
     };
+    const postMessageStub = sandbox.stub();
     const fakeRegistration = {
       installing: {
         addEventListener: sandbox.spy(eventListener),
       },
+      active: {
+        postMessage: postMessageStub,
+      },
     };
     const p = Promise.resolve(fakeRegistration);
-    const postMessageStub = sandbox.stub();
     implementation.win = {
       complete: true,
       location: {
@@ -142,9 +145,6 @@ describes.realWin('amp-install-serviceworker', {
         serviceWorker: {
           register: () => {
             return p;
-          },
-          controller: {
-            postMessage: postMessageStub,
           },
         },
       },
