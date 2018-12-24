@@ -297,7 +297,10 @@ class UrlRewriter_ {
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src, element) {
-  return win.navigator.serviceWorker.register(src).then(function(registration) {
+  const scope = element.getAttribute('data-scope') || '/';
+  return win.navigator.serviceWorker.register(src, {
+    scope,
+  }).then(function(registration) {
     if (getMode().development) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);

@@ -84,8 +84,51 @@ describes.realWin('amp-install-serviceworker', {
       },
       navigator: {
         serviceWorker: {
-          register: src => {
+          register: (src, options) => {
             expect(calledSrc).to.be.undefined;
+            expect(options.scope).to.be.equal('/');
+            calledSrc = src;
+            return p;
+          },
+        },
+      },
+    };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
+    implementation.buildCallback();
+    expect(calledSrc).to.be.undefined;
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
+  });
+
+  it('should install for custom scope', () => {
+    const install = doc.createElement('div');
+    container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
+    install.setAttribute('src', 'https://example.com/sw.js');
+    install.setAttribute('data-scope', '/profile');
+    const implementation = new AmpInstallServiceWorker(install);
+    let calledSrc;
+    const p = new Promise(() => {});
+    implementation.win = {
+      complete: true,
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: (src, options) => {
+            expect(calledSrc).to.be.undefined;
+            expect(options.scope).to.be.equal('/profile');
             calledSrc = src;
             return p;
           },
