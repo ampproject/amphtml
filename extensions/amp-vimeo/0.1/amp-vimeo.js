@@ -34,7 +34,7 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 
 
@@ -133,7 +133,7 @@ class AmpVimeo extends AMP.BaseElement {
    */
   buildIframe_(isAutoplay) {
     const {element} = this;
-    const vidId = user().assert(
+    const vidId = userAssert(
         element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         element);

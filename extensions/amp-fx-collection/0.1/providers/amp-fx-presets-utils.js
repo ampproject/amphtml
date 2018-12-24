@@ -22,7 +22,7 @@
 import {Services} from '../../../../src/services';
 import {mapRange} from '../../../../src/utils/math';
 import {startsWith} from '../../../../src/string';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;
@@ -44,7 +44,7 @@ export function convertEasingKeyword(keyword) {
     case 'ease-out':
       return 'cubic-bezier(0.40, 0.00, 0.40, 1.00)';
     default:
-      user().assert(startsWith(keyword, 'cubic-bezier'),
+      userAssert(startsWith(keyword, 'cubic-bezier'),
           'All custom bezier curves should be specified by following the ' +
             '`cubic-bezier()` function notation.');
       return keyword;

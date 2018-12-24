@@ -30,7 +30,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -812,7 +812,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
-    user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    userAssert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;

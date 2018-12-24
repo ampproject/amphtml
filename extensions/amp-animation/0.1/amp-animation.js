@@ -30,7 +30,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -79,7 +79,7 @@ export class AmpAnimation extends AMP.BaseElement {
     // Trigger.
     const trigger = this.element.getAttribute('trigger');
     if (trigger) {
-      this.triggerOnVisibility_ = user().assert(
+      this.triggerOnVisibility_ = userAssert(
           trigger == 'visibility',
           'Only allowed value for "trigger" is "visibility": %s',
           this.element);
@@ -87,7 +87,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
     if (trigger == 'visibility') {
-      user().assert(
+      userAssert(
           this.element.parentNode == this.element.ownerDocument.body ||
           this.element.parentNode == ampdoc.getBody(),
           '%s is only allowed as a direct child of <body> element when trigger'
@@ -95,7 +95,7 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     // Parse config.
-    const scriptElement = user().assert(
+    const scriptElement = userAssert(
         childElementByTag(this.element, 'script'),
         '"<script type=application/json>" must be present');
     this.configJson_ = tryParseJson(scriptElement.textContent, error => {
