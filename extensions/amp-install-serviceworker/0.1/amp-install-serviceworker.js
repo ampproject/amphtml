@@ -332,7 +332,7 @@ function install(win, src, element) {
  * @param {Element} element
  */
 function performServiceWorkerOptimizations(registration, win, element) {
-  sendAmpScriptToSwOnFirstVisit(win);
+  sendAmpScriptToSwOnFirstVisit(win, registration);
   // prefetching outgoing links should be opt in.
   if (element.hasAttribute('data-prefetch')) {
     prefetchOutgoingLinks(registration, win);
@@ -343,20 +343,23 @@ function performServiceWorkerOptimizations(registration, win, element) {
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
  * @param {!Window} win
+ * @param {ServiceWorkerRegistration} registration
  */
-function sendAmpScriptToSwOnFirstVisit(win) {
+function sendAmpScriptToSwOnFirstVisit(win, registration) {
   if ('performance' in win) {
     // Fetch all AMP-scripts used on the page
     const ampScriptsUsed = win.performance.getEntriesByType('resource')
         .filter(item => item.initiatorType === 'script' &&
           startsWith(item.name, urls.cdn))
         .map(script => script.name);
-    const controllerSw = win.navigator.serviceWorker.controller;
+    const activeSW = registration.active;
     // using convention from https://github.com/redux-utilities/flux-standard-action.
-    controllerSw.postMessage(JSON.stringify(dict({
-      'type': 'AMP__FIRST-VISIT-CACHING',
-      'payload': ampScriptsUsed,
-    })));
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__FIRST-VISIT-CACHING',
+        'payload': ampScriptsUsed,
+      })));
+    }
   }
 }
 
@@ -378,10 +381,13 @@ function prefetchOutgoingLinks(registration, win) {
       document.head.appendChild(linkTag);
     });
   } else {
-    registration.active.postMessage(JSON.stringify(dict({
-      'type': 'AMP__LINK-PREFETCH',
-      'payload': links,
-    })));
+    const activeSW = registration.active;
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__LINK-PREFETCH',
+        'payload': links,
+      })));
+    }
   }
 }
 
