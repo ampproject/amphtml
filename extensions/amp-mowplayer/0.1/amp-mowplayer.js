@@ -214,7 +214,7 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     const eventData = getData(event);
-	
+
     if (!isJsonOrObj(eventData)) {
       return;
     }
