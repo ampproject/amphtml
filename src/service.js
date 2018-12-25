@@ -24,7 +24,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Deferred} from './utils/promise';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {toWin} from './types';
 
 
@@ -63,18 +63,17 @@ export class Disposable {
 
 
 /**
- * This interface provides a `adoptEmbedWindow` method that will be called by
- * runtime for a new embed window.
+ * Services must implement this interface to be embeddable in FIEs.
  * @interface
  */
 export class EmbeddableService {
 
   /**
-   * Instructs the service to adopt the embed window and add any necessary
-   * listeners and resources.
+   * Installs a new instance of the service in the given FIE window.
    * @param {!Window} unusedEmbedWin
+   * @param {!./service/ampdoc-impl.AmpDoc} unusedAmpDoc
    */
-  adoptEmbedWindow(unusedEmbedWin) {}
+  static installInEmbedWindow(unusedEmbedWin, unusedAmpDoc) {}
 }
 
 
@@ -119,9 +118,9 @@ export function getExistingServiceForDocInEmbedScope(
  */
 export function installServiceInEmbedScope(embedWin, id, service) {
   const topWin = getTopWindow(embedWin);
-  dev().assert(embedWin != topWin,
+  devAssert(embedWin != topWin,
       'Service override can only be installed in embed window: %s', id);
-  dev().assert(!isServiceRegistered(embedWin, id),
+  devAssert(!isServiceRegistered(embedWin, id),
       'Service override has already been installed: %s', id);
   registerServiceInternal(embedWin, embedWin, id, () => service);
   getServiceInternal(embedWin, id); // Force service to build.
@@ -380,15 +379,15 @@ function getAmpdocService(win) {
  * @template T
  */
 function getServiceInternal(holder, id) {
-  dev().assert(isServiceRegistered(holder, id),
+  devAssert(isServiceRegistered(holder, id),
       `Expected service ${id} to be registered`);
   const services = getServices(holder);
   const s = services[id];
   if (!s.obj) {
-    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
-    dev().assert(s.context, `Service ${id} registered without context.`);
+    devAssert(s.ctor, `Service ${id} registered without ctor nor impl.`);
+    devAssert(s.context, `Service ${id} registered without context.`);
     s.obj = new s.ctor(s.context);
-    dev().assert(s.obj, `Service ${id} constructed to null.`);
+    devAssert(s.obj, `Service ${id} constructed to null.`);
     s.ctor = null;
     s.context = null;
     // The service may have been requested already, in which case we have a
@@ -519,7 +518,7 @@ export function isDisposable(service) {
  * @return {!Disposable}
  */
 export function assertDisposable(service) {
-  dev().assert(isDisposable(service), 'required to implement Disposable');
+  devAssert(isDisposable(service), 'required to implement Disposable');
   return /** @type {!Disposable} */ (service);
 }
 
@@ -585,49 +584,22 @@ function disposeServiceInternal(id, service) {
 
 
 /**
- * Whether the specified service implements `EmbeddableService` interface.
- * @param {!Object} service
- * @return {boolean}
- */
-export function isEmbeddable(service) {
-  return typeof service.adoptEmbedWindow == 'function';
-}
-
-
-/**
  * Adopts an embeddable (implements `EmbeddableService` interface) service
  * in embed scope.
  * @param {!Window} embedWin
- * @param {string} serviceId
- * @visibleForTesting
- */
-export function adoptServiceForEmbed(embedWin, serviceId) {
-  const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
-      'or doesn\'t implement EmbeddableService.');
-}
-
-
-/**
- * Adopts an embeddable (implements `EmbeddableService` interface) service
- * in embed scope.
- * @param {!Window} embedWin
- * @param {string} serviceId
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} serviceClass
  * @return {boolean}
  */
-export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
+export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
+  const isEmbeddableService =
+      typeof serviceClass.installInEmbedWindow === 'function';
+  if (!isEmbeddableService) {
+    return false;
+  }
   const frameElement = dev().assertElement(embedWin.frameElement,
       'frameElement not found for embed');
   const ampdoc = getAmpdoc(frameElement);
-  const holder = getAmpdocServiceHolder(ampdoc);
-  if (!isServiceRegistered(holder, serviceId)) {
-    return false;
-  }
-  const service = getServiceForDoc(frameElement, serviceId);
-  if (!isEmbeddable(service)) {
-    return false;
-  }
-  service.adoptEmbedWindow(embedWin);
+  serviceClass.installInEmbedWindow(embedWin, ampdoc);
   return true;
 }
 

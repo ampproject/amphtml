@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -69,7 +69,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = urlService.parse(docInfo.sourceUrl);
         const canonicalUrl = urlService.parse(docInfo.canonicalUrl);
-        user().assert(
+        userAssert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -146,7 +146,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     // Check the url-rewrite config is valid.
-    user().assert(urlMatch && shellUrl,
+    userAssert(urlMatch && shellUrl,
         'Both, "%s" and "%s" must be specified for url-rewrite',
         'data-no-service-worker-fallback-url-match',
         'data-no-service-worker-fallback-shell-url');
@@ -158,7 +158,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(urlService.getSourceOrigin(winUrl) ==
+    userAssert(urlService.getSourceOrigin(winUrl) ==
       urlService.parse(shellUrl).origin,
     'Shell source origin "%s" must be the same as source origin "%s"',
     shellUrl, winUrl.href);
@@ -304,7 +304,10 @@ class UrlRewriter_ {
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src, element) {
-  return win.navigator.serviceWorker.register(src).then(function(registration) {
+  const scope = element.getAttribute('data-scope') || '/';
+  return win.navigator.serviceWorker.register(src, {
+    scope,
+  }).then(function(registration) {
     if (getMode().development) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
@@ -339,7 +342,7 @@ function install(win, src, element) {
  * @param {Element} element
  */
 function performServiceWorkerOptimizations(registration, win, element) {
-  sendAmpScriptToSwOnFirstVisit(win);
+  sendAmpScriptToSwOnFirstVisit(win, registration);
   // prefetching outgoing links should be opt in.
   if (element.hasAttribute('data-prefetch')) {
     prefetchOutgoingLinks(registration, win);
@@ -350,20 +353,23 @@ function performServiceWorkerOptimizations(registration, win, element) {
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
  * @param {!Window} win
+ * @param {ServiceWorkerRegistration} registration
  */
-function sendAmpScriptToSwOnFirstVisit(win) {
+function sendAmpScriptToSwOnFirstVisit(win, registration) {
   if ('performance' in win) {
     // Fetch all AMP-scripts used on the page
     const ampScriptsUsed = win.performance.getEntriesByType('resource')
         .filter(item => item.initiatorType === 'script' &&
           startsWith(item.name, urls.cdn))
         .map(script => script.name);
-    const controllerSw = win.navigator.serviceWorker.controller;
+    const activeSW = registration.active;
     // using convention from https://github.com/redux-utilities/flux-standard-action.
-    controllerSw.postMessage(JSON.stringify(dict({
-      'type': 'AMP__FIRST-VISIT-CACHING',
-      'payload': ampScriptsUsed,
-    })));
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__FIRST-VISIT-CACHING',
+        'payload': ampScriptsUsed,
+      })));
+    }
   }
 }
 
@@ -385,10 +391,13 @@ function prefetchOutgoingLinks(registration, win) {
       document.head.appendChild(linkTag);
     });
   } else {
-    registration.active.postMessage(JSON.stringify(dict({
-      'type': 'AMP__LINK-PREFETCH',
-      'payload': links,
-    })));
+    const activeSW = registration.active;
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__LINK-PREFETCH',
+        'payload': links,
+      })));
+    }
   }
 }
 

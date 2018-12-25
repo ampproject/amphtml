@@ -17,54 +17,55 @@
 import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
-const body =
-    '<amp-list id="list" width=300 height=100 ' +
-        'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
-      '<template type="amp-mustache">' +
-        '{{name}} : {{quantity}} @ ${{unitPrice}}' +
-      '</template>' +
-    '</amp-list>';
+const TIMEOUT = 15000;
 
-const extensions = ['amp-list', 'amp-mustache', 'amp-bind'];
+describe('amp-list (integration)', function() {
+  const basicBody =
+    `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+      <template type="amp-mustache">
+        {{name}} : {{quantity}} @ {{unitPrice}}
+      </template>
+    '</amp-list>`;
 
-describe('amp-list', function() {
-  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
-  this.timeout(TIMEOUT);
-
-  describes.integration('(integration)', {
-    body, extensions,
-  }, env => {
+  const basicTests = env => {
     it('should render items', function*() {
-      const list = env.win.document.getElementById('list');
+      const list = env.win.document.querySelector('amp-list');
       expect(list).to.exist;
 
       let children;
       yield poll('#list render', () => {
         children = list.querySelectorAll('div[role=list] > div');
         return children.length > 0;
-      }, undefined, /* opt_timeout */ TIMEOUT);
+      }, /* onError */ undefined, TIMEOUT);
 
       expect(children.length).to.equal(3);
-      expect(children[0].textContent.trim()).to.equal('apple : 47 @ $0.33');
-      expect(children[1].textContent.trim()).to.equal('pear : 538 @ $0.54');
-      expect(children[2].textContent.trim()).to.equal('tomato : 0 @ $0.23');
+      expect(children[0].textContent.trim()).to.equal('apple : 47 @ 0.33');
+      expect(children[1].textContent.trim()).to.equal('pear : 538 @ 0.54');
+      expect(children[2].textContent.trim()).to.equal('tomato : 0 @ 0.23');
     });
-  });
+  };
 
-  const body2 =
-  '<button id="button" on="tap:list.changeToLayoutContainer()">+</button>' +
-  '<amp-list id="list" width=300 height=100 ' +
-      'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
-    '<template type="amp-mustache">' +
-      '{{name}} : {{quantity}} @ ${{unitPrice}}' +
-    '</template>' +
-  '</amp-list>';
+  describes.integration('basic (mustache-0.1)', {
+    body: basicBody,
+    extensions: ['amp-list', 'amp-mustache:0.1'],
+  }, basicTests);
 
-  describes.integration('with changeToLayoutContainer', {
-    body: body2, extensions,
-    experiments: ['amp-list-resizable-children']},
-  env => {
+  describes.integration('basic (mustache-0.2)', {
+    body: basicBody,
+    extensions: ['amp-list', 'amp-mustache:0.2'],
+  }, basicTests);
 
+  describes.integration('"changeToLayoutContainer" action', {
+    body: `
+      <button on="tap:list.changeToLayoutContainer()">+</button>
+      <amp-list id=list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+        <template type="amp-mustache">
+          {{name}} : {{quantity}} @ {{unitPrice}}
+        </template>
+      </amp-list>`,
+    extensions: ['amp-list', 'amp-mustache'],
+    experiments: ['amp-list-resizable-children'],
+  }, env => {
     let win, doc;
 
     beforeEach(() => {
@@ -75,40 +76,37 @@ describe('amp-list', function() {
     it('should change to layout container as action', function*() {
       expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
-      const button = doc.getElementById('button');
-      const list = doc.getElementById('list');
+      const button = doc.querySelector('button');
+      const list = doc.querySelector('amp-list');
       button.click();
 
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
-        return layout == 'container';
-      }, undefined, /* opt_timeout */ TIMEOUT);
+        return layout === 'container';
+      }, /* onError */ undefined, TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });
   });
 
-  const body3 =
-  '<amp-state id="state">' +
-    '<script type="application/json">' +
-      'false' +
-    '</script>' +
-  '</amp-state>' +
-    '<button id="button" on="tap:AMP.setState({state: true})">+</button>' +
-    '<amp-list id="list" width=300 height=100 ' +
-      '[is-layout-container]="state" ' +
-      'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
-      '<template type="amp-mustache">' +
-        '{{name}} : {{quantity}} @ ${{unitPrice}}' +
-      '</template>' +
-    '</amp-list>';
-
-  // TODO(cathyxz, #19647): Fix test on Chrome 71.
-  describes.integration.skip('with bindable is-layout-container', {
-    body: body3, extensions,
-    experiments: ['amp-list-resizable-children']},
-  env => {
-
+  // TODO(cathyxz, #19647): Fix test on Chrome 71. Might be because
+  // amp-bind isn't ready by the time the button is clicked.
+  describes.integration.skip('[is-layout-container]', {
+    body: `
+    <amp-state id="state">
+      <script type="application/json">
+        false
+      </script>
+    </amp-state>
+    <button on="tap:AMP.setState({state: true})">+</button>
+    <amp-list width=300 height=100 [is-layout-container]="state" src="http://localhost:9876/list/fruit-data/get?cors=0">
+      <template type="amp-mustache">
+        {{name}} : {{quantity}} @ {{unitPrice}}
+      </template>
+    </amp-list>`,
+    extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
+    experiments: ['amp-list-resizable-children'],
+  }, env => {
     let win, doc;
 
     beforeEach(() => {
@@ -116,21 +114,19 @@ describe('amp-list', function() {
       doc = win.document;
     });
 
-    it.configure().skipChromeDev().run(
-        'should change to layout container as on bind', function*() {
-          expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
+    it('should change to layout container as on bind', function*() {
+      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
-          const button = doc.getElementById('button');
-          const list = doc.getElementById('list');
-          button.click();
+      const button = doc.querySelector('button');
+      const list = doc.querySelector('amp-list');
+      button.click();
 
-          yield poll('changes to layout container', () => {
-            const layout = list.getAttribute('layout');
-            return layout == 'container';
-          }, undefined, /* opt_timeout */ TIMEOUT);
+      yield poll('changes to layout container', () => {
+        const layout = list.getAttribute('layout');
+        return layout == 'container';
+      }, /* onError */ undefined, TIMEOUT);
 
-          expect(list.classList.contains('i-amphtml-layout-container'))
-              .to.be.true;
-        });
+      expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
+    });
   });
 });

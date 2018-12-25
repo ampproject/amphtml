@@ -19,7 +19,7 @@ import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {closestBySelector, escapeHtml} from './dom';
-import {dev, rethrowAsync, user} from './log';
+import {dev, rethrowAsync, userAssert} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
@@ -516,7 +516,7 @@ export class FriendlyIframeEmbed {
     const ampAdParent = dev().assertElement(this.iframe.parentNode);
 
     // Security assertion. Otherwise any 3p frame could request lighbox mode.
-    user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
+    userAssert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
         'Only <amp-ad> is allowed to enter lightbox mode.');
 
     let bodyStyle;

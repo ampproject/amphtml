@@ -21,6 +21,10 @@
     "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
     "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
   },
+  "amplitude": {
+    "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
+    "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
+  },
   "atinternet": {
     "base": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
@@ -319,6 +323,9 @@
     "basePrefix": "/api/v3",
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid",
     "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=!contentCreated&content_author=!contentAuthor&content_section=!contentSection&timezone_offset=_timezone_&tags=!tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid"
+  },
+  "pinpoll": {
+    "pageview": "https://pa.pinpoll.com/v1?url=_source_url_&sourceHost=_source_host_&sourceHostname=_source_hostname_&sourcePath=_source_path_&canonicalUrl=_canonical_url_&platform=AMP&title=_title_&referrer=_document_referrer_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&ua=_user_agent_&clientId=_client_id_"
   },
   "pressboard": {
     "host": "https://adserver.pressboard.ca",

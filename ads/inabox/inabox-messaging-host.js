@@ -21,7 +21,7 @@ import {
   serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {PositionObserver} from './position-observer';
-import {dev} from '../../src/log';
+import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
 import {layoutRectFromDomRect} from '../../src/layout-rect';
@@ -162,7 +162,7 @@ export class InaboxMessagingHost {
       'targetRect': targetRect,
     }));
 
-    dev().assert(this.iframeMap_[request.sentinel]);
+    devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
         this.iframeMap_[request.sentinel].observeUnregisterFn ||
         this.positionObserver_.observe(iframe, data =>
@@ -178,7 +178,7 @@ export class InaboxMessagingHost {
    * @param {?JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
-    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/postMessage(
         serializeMessage(MessageType.POSITION, request.sentinel, data),
         origin);
