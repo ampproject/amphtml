@@ -1202,4 +1202,27 @@ describes.realWin('amp-story', {
           });
     });
   });
+  describe('amp-story branching', () => {
+    it('should navigate to the target page when a goToPage action is executed',
+      () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2']);
+      const actionButton = win.document.createElement('button');
+      actionButton.setAttribute('id', 'actionButton');
+      actionButton.setAttribute('on', 'tap:cover.goToPage(targetPageId=page-2');
+                // 'button', {
+                //   'id': 'actionButton',
+                //   'on': 'tap:cover.goToPage(targetPageId=page-2'});
+      story.getPageById('cover').appendChild(actionButton);
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            // Click on the actionButton to trigger the goToPage action.
+            const clickEvent = new MouseEvent('click');
+            story.activePage.querySelector("#actionButton")
+                .dispatchEvent(clickEvent);
+            expect(story.activePage_.element.id).to.equal('page-2');
+          });
+    });
+  });
 });
