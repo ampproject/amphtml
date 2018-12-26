@@ -77,15 +77,13 @@ exports.gitDiffCommitLog = function() {
 --abbrev-commit ${branchPoint}^...HEAD \
 --max-count=${commitLogMaxCount}`).trim();
   if (commitLog.split('\n').length >= commitLogMaxCount) {
-    commitLog += '\n' + colors.yellow('WARNING: ') +
-        'Commit log is longer than ' +
-        colors.cyan(commitLogMaxCount) + ' commits. Branch ' +
-        colors.cyan(exports.gitBranchName()) +
-        ' may not have been forked from ' +
-        colors.cyan('master') + '.';
-    commitLog += '\n' + colors.yellow('WARNING: ') + 'See ' +
-        colors.cyan('https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md') +
-        ' for how to fix this.';
+    commitLog += `\n${colors.yellow('WARNING:')} Commit log is longer than \
+${colors.cyan(commitLogMaxCount)} commits. \
+Branch ${colors.cyan(exports.gitBranchName())} may not have been forked from \
+${colors.cyan('master')}.`;
+    commitLog += `\n${colors.yellow('WARNING:')} See \
+${colors.cyan('https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md')} \
+for how to fix this.`;
   }
   return commitLog;
 };
