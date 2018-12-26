@@ -85,15 +85,18 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src, this.element);
       });
-    } else if (this.isSafari_) {
-      // https://webkit.org/blog/8090/workers-at-your-service/
-      this.user().error(TAG,
-          'Did not install ServiceWorker because of safari double keyring ' +
-          'caching as it will not have any effect');
     } else {
       this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
+    }
+
+    if ((urlService.isProxyOrigin(src) ||
+    urlService.isProxyOrigin(win.location.href)) && this.isSafari_) {
+      // https://webkit.org/blog/8090/workers-at-your-service/
+      this.user().error(TAG,
+          'Did not install ServiceWorker because of safari double keyring ' +
+          'caching as it will not have any effect');
     }
   }
 
