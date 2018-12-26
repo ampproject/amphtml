@@ -949,6 +949,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         targetImgRect: undefined,
         styles: {
           'animationDuration': `${motionDuration}ms`,
+          // Matches z-index for `.i-amphtml-lbg`.
           'zIndex': 2147483642,
         },
         keyframesNamespace: undefined,

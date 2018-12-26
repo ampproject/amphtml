@@ -96,6 +96,12 @@ amp-lightbox-gallery .amp-carousel-button {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
+  /* 
+   * The highest z-index supported by most browsers, - 5.
+   * Note: Since the lightbox gallery may not be the last thing in the DOM,
+   * this may fail to correctly stack on top of elements with the same z-index.
+   * It will also fail to stack on top of things with a higher z-index.
+   */
   z-index: 2147483642;
 }
 
