@@ -32,7 +32,9 @@ describe('amp-list (integration)', function() {
 
   const basicTests = env => {
 
-    let browser, win, doc;
+    let browser;
+    let doc;
+    let win;
 
     beforeEach(() => {
       win = env.win;
@@ -84,7 +86,9 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
-    let browser, win, doc;
+    let browser;
+    let doc;
+    let win;
 
     beforeEach(() => {
       win = env.win;
@@ -125,7 +129,9 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
-    let browser, win, doc;
+    let browser;
+    let doc;
+    let win;
 
     beforeEach(() => {
       win = env.win;
