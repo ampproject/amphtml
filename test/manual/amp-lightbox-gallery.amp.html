@@ -21,6 +21,20 @@
     .object-fit-none  img {
       object-fit: none;
     }
+
+    footer {
+      position: fixed;
+      position: sticky;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 48px;
+      background-color: #fafafa;
+    }
   </style>
 <body>
   <h2>Test SSR with single src</h2>
@@ -77,5 +91,9 @@
     lightbox
     src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
   </amp-img>
+
+  <footer>
+    Sticky footer
+  </footer>
 </body>
 </html>
