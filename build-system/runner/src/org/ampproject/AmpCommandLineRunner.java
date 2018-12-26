@@ -52,7 +52,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev", ImmutableSet.of(
           "assert", "fine", "assertElement", "assertString",
-          "assertNumber", "assertBoolean"),
+          "assertNumber", "assertBoolean", "assertArray"),
       "module$src$log.user", ImmutableSet.of("fine"));
 
 

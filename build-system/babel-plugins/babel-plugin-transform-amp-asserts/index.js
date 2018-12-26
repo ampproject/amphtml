@@ -28,6 +28,7 @@ const typeMap = {
   'assertString': 'string',
   'assertNumber': 'number',
   'assertBoolean': 'boolean',
+  'assertArray': '!Array',
 };
 
 const removableDevAsserts = [
@@ -37,6 +38,7 @@ const removableDevAsserts = [
   'assertString',
   'assertNumber',
   'assertBoolean',
+  'assertArray',
 ];
 
 const removableUserAsserts = ['fine'];
