@@ -932,8 +932,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   runImgTransition_(srcImg, targetImg, enter) {
     const carousel = dev().assertElement(this.carousel_);
     const container = dev().assertElement(this.container_);
-    const transLayer = this.element.ownerDocument.createElement('div');
-    transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
 
     let duration;
     let motionDuration;
@@ -944,7 +942,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
       imageAnimation = prepareImageAnimation({
-        transitionContainer: transLayer,
         styleContainer: this.getAmpDoc().getHeadNode(),
         srcImg,
         targetImg,
@@ -952,6 +949,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         targetImgRect: undefined,
         styles: {
           'animationDuration': `${motionDuration}ms`,
+          'zIndex': 2147483642,
         },
         keyframesNamespace: undefined,
         curve: TRANSITION_CURVE,
@@ -960,12 +958,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     const mutate = () => {
       toggle(carousel, enter);
-      // Make sure the background, image stack correctly.
-      setStyles(this.element, {
-        position: 'relative',
-        zIndex: 1,
-        opacity: 1,
-      });
+      // Undo opacity 0 from `openLightboxGallery_`
+      setStyle(this.element, 'opacity', 1);
       // Fade in/out the background in sync with the motion.
       setStyles(container, {
         animationName: enter ? 'fadeIn' : 'fadeOut',
@@ -984,22 +978,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
       imageAnimation.applyAnimation();
-      this.getAmpDoc().getBody().appendChild(transLayer);
     };
 
     const cleanup = () => {
       toggle(this.element, enter);
-      setStyles(this.element, {
-        position: '',
-        zIndex: '',
-        opacity: '',
-      });
+      setStyle(this.element, 'opacity', '');
       setStyle(container, 'animationName', '');
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
       imageAnimation.cleanupAnimation();
-      this.getAmpDoc().getBody().removeChild(transLayer);
     };
 
     return this.measureMutateElement(measure, mutate)
