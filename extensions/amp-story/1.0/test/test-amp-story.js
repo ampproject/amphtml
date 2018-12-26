@@ -1214,7 +1214,7 @@ describes.realWin('amp-story', {
                     win.document,
                     'button',
                     {'id': 'actionButton',
-                      'on': 'tap:cover.goToPage(targetPageId=page-2)'});
+                      'on': 'tap:cover.goToPage(id=page-2)'});
                 element.querySelector('#cover').appendChild(actionButton);
                 // Click on the actionButton to trigger the goToPage action.
                 actionButton.click();

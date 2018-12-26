@@ -215,7 +215,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.registerAction('goToPage', invocation => {
       const {args} = invocation;
       if (args) {
-        this.switchTo_(args['targetPageId']);
+        this.switchTo_(args['id']);
       }
     });
   }
