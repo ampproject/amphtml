@@ -960,7 +960,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const mutate = () => {
       toggle(carousel, enter);
       // Undo opacity 0 from `openLightboxGallery_`
-      setStyle(this.element, 'opacity', 1);
+      setStyle(this.element, 'opacity', '');
       // Fade in/out the background in sync with the motion.
       setStyles(container, {
         animationName: enter ? 'fadeIn' : 'fadeOut',
@@ -983,7 +983,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     const cleanup = () => {
       toggle(this.element, enter);
-      setStyle(this.element, 'opacity', '');
       setStyle(container, 'animationName', '');
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
