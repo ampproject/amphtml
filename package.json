@@ -44,7 +44,7 @@
     "@babel/runtime-corejs2": "7.2.0",
     "@octokit/rest": "16.2.0",
     "acorn-globals": "4.3.0",
-    "ajv": "6.5.4",
+    "ajv": "6.6.2",
     "ajv-keywords": "3.2.0",
     "ansi-colors": "3.2.3",
     "ast-replace": "1.1.3",
