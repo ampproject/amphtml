@@ -410,7 +410,7 @@ describes.realWin('amp-install-serviceworker', {
       });
     });
 
-    function testIframe() {
+    function testIframe(callCount = 1) {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       let iframe;
@@ -437,12 +437,13 @@ describes.realWin('amp-install-serviceworker', {
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
           () => {
-            expect(mutateElement).to.have.been.calledOnce;
+            expect(mutateElement).to.have.been.callCount(callCount);
           });
     }
 
-    it('should inject iframe on proxy if provided (valid canonical)',
-        testIframe);
+    it('should inject iframe on proxy if provided (valid canonical)', () => {
+      return testIframe();
+    });
 
     it('should inject iframe on proxy if provided (valid source)', () => {
       docInfo = {
@@ -466,6 +467,11 @@ describes.realWin('amp-install-serviceworker', {
       allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
       }).to.throw(/https/); });
+    });
+
+    it('should not inject iframe on proxy if safari', () => {
+      implementation.isSafari_ = true;
+      return allowConsoleError(() => testIframe(0));
     });
   });
 });

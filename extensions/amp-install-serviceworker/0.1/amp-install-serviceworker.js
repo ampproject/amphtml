@@ -44,6 +44,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
+
+    /** @private @const {boolean}*/
+    this.isSafari_ = Services.platformFor(this.win).isSafari();
   }
 
   /** @override */
@@ -57,8 +60,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     urlService.assertHttpsUrl(src, this.element);
 
-    if (urlService.isProxyOrigin(src) ||
-        urlService.isProxyOrigin(win.location.href)) {
+    if ((urlService.isProxyOrigin(src) ||
+        urlService.isProxyOrigin(win.location.href)) && !this.isSafari_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         urlService.assertHttpsUrl(iframeSrc, this.element);
@@ -86,6 +89,14 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
+    }
+
+    if ((urlService.isProxyOrigin(src) ||
+    urlService.isProxyOrigin(win.location.href)) && this.isSafari_) {
+      // https://webkit.org/blog/8090/workers-at-your-service/
+      this.user().error(TAG,
+          'Did not install ServiceWorker because of safari double keyring ' +
+          'caching as it will not have any effect');
     }
   }
 
@@ -287,7 +298,6 @@ class UrlRewriter_ {
         `${tgtLoc.pathname}${tgtLoc.search}${tgtLoc.hash}`);
   }
 }
-
 
 /**
  * Installs the service worker at src via direct service worker installation.
