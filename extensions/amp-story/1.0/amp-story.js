@@ -938,6 +938,8 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then(pages => {
       this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
+          [{tagOrTarget: 'AMP-STORY-PAGE', method: 'goToPage'}]);
     });
   }
 
