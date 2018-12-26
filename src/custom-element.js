@@ -31,7 +31,7 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
-import {dev, rethrowAsync, user} from './log';
+import {dev, devAssert, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
@@ -254,7 +254,7 @@ function createBaseCustomElementClass(win) {
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
-      dev().assert(Ctor);
+      devAssert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
@@ -327,9 +327,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getAmpDoc() {
-      return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_,
-            'no ampdoc yet, since element is not attached'));
+      return devAssert(this.ampdoc_,
+          'no ampdoc yet, since element is not attached');
     }
 
     /**
@@ -340,9 +339,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getResources() {
-      return /** @type {!./service/resources-impl.Resources} */ (
-        dev().assert(this.resources_,
-            'no resources yet, since element is not attached'));
+      return devAssert(this.resources_,
+          'no resources yet, since element is not attached');
     }
 
     /**
@@ -353,9 +351,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getLayers() {
-      return /** @type {!./service/layers-impl.LayoutLayers} */ (
-        dev().assert(this.layers_,
-            'no layers yet, since element is not attached'));
+      return devAssert(this.layers_,
+          'no layers yet, since element is not attached');
     }
 
     /**
@@ -464,9 +461,21 @@ function createBaseCustomElementClass(win) {
      * @return {number} @this {!Element}
      */
     getLayoutPriority() {
-      dev().assert(
+      devAssert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
     }
 
     /**
@@ -480,7 +489,7 @@ function createBaseCustomElementClass(win) {
      */
     build() {
       assertNotTemplate(this);
-      dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
+      devAssert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
@@ -838,7 +847,7 @@ function createBaseCustomElementClass(win) {
      */
     tryUpgrade_() {
       const impl = this.implementation_;
-      dev().assert(!isStub(impl), 'Implementation must not be a stub');
+      devAssert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
@@ -1088,7 +1097,7 @@ function createBaseCustomElementClass(win) {
      */
     layoutCallback() {
       assertNotTemplate(this);
-      dev().assert(this.isBuilt(),
+      devAssert(this.isBuilt(),
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0); // First layout is "load".
@@ -1116,9 +1125,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-          // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1358,7 +1365,7 @@ function createBaseCustomElementClass(win) {
         if (this.actionQueue_ === undefined) {
           this.actionQueue_ = [];
         }
-        dev().assert(this.actionQueue_).push(invocation);
+        devAssert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
       }
@@ -1374,7 +1381,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      const actionQueue = dev().assert(this.actionQueue_);
+      const actionQueue = devAssert(this.actionQueue_);
       this.actionQueue_ = null;
 
       // Notice, the actions are currently not de-duped.
@@ -1583,7 +1590,8 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (!this.loadingContainer_) {
-        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
+        const doc = this.ownerDocument;
+        devAssert(doc);
 
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
@@ -1745,7 +1753,7 @@ function isInputPlaceholder(element) {
 
 /** @param {!Element} element */
 function assertNotTemplate(element) {
-  dev().assert(!element.isInTemplate_, 'Must never be called in template');
+  devAssert(!element.isInTemplate_, 'Must never be called in template');
 }
 
 

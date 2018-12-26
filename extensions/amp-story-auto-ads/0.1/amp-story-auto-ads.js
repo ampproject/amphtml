@@ -23,9 +23,10 @@ import {
 } from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
+import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -101,6 +102,13 @@ const ALLOWED_AD_TYPES = map({
   'custom': true,
   'doubleclick': true,
 });
+
+/** @enum {boolean} */
+const DISALLOWED_AD_ATTRS = {
+  'height': true,
+  'layout': true,
+  'width': true,
+};
 
 /** @enum {string} */
 const Events = {
@@ -205,7 +213,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
-      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
       this.storeService_ = storeService;
 
       if (!this.isAutomaticAdInsertionAllowed_()) {
@@ -213,7 +221,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
 
       const ampStoryElement = this.element.parentElement;
-      user().assert(ampStoryElement.tagName === 'AMP-STORY',
+      userAssert(ampStoryElement.tagName === 'AMP-STORY',
           `<${TAG}> should be child of <amp-story>`);
 
       const ampdoc = this.getAmpDoc();
@@ -271,7 +279,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   readConfig_() {
     const child = this.element.children[0];
-    user().assert(
+    userAssert(
         isJsonScriptTag(child),
         `The <${TAG}> config should ` +
         'be inside a <script> tag with type="application/json"');
@@ -304,11 +312,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   validateConfig_() {
     const adAttributes = this.config_['ad-attributes'];
-    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
+    userAssert(adAttributes, `<${TAG}>: Error reading config.` +
       'Top level JSON should have an "ad-attributes" key');
 
     const {type} = adAttributes;
-    user().assert(type, `<${TAG}>: Error reading config.` +
+    userAssert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
   }
 
@@ -423,14 +431,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const configAttrs = this.config_['ad-attributes'];
 
-    ['height', 'width', 'layout'].forEach(attr => {
-      if (configAttrs[attr] !== undefined) {
-        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+    for (const attr in configAttrs) {
+      const value = configAttrs[attr];
+      if (isObject(value)) {
+        configAttrs[attr] = JSON.stringify(value);
+      }
+      if (DISALLOWED_AD_ATTRS[attr]) {
+        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
         delete configAttrs[attr];
       }
-    });
+    }
 
-    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
+    userAssert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
       `"${configAttrs.type}" ad type is not supported`);
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},

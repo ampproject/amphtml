@@ -21,7 +21,7 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
@@ -45,7 +45,7 @@ export class RequestHandler {
     this.win = this.ampdoc_.win;
 
     /** @const {string} */
-    this.baseUrl = dev().assert(request['baseUrl']);
+    this.baseUrl = devAssert(request['baseUrl']);
 
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
@@ -207,7 +207,7 @@ export class RequestHandler {
         }
         // TODO: iframePing will not work with batch. Add a config validation.
         if (trigger['iframePing']) {
-          user().assert(trigger['on'] == 'visible',
+          userAssert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
           this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
@@ -243,10 +243,10 @@ export class RequestHandler {
 
     for (let i = 0; i < this.batchInterval_.length; i++) {
       let interval = this.batchInterval_[i];
-      user().assert(isFiniteNumber(interval),
+      userAssert(isFiniteNumber(interval),
           'Invalid batchInterval value: %s', this.batchInterval_);
       interval = Number(interval) * 1000;
-      user().assert(interval >= BATCH_INTERVAL_MIN,
+      userAssert(interval >= BATCH_INTERVAL_MIN,
           'Invalid batchInterval value: %s, ' +
           'interval value must be greater than %s ms.',
           this.batchInterval_, BATCH_INTERVAL_MIN);
@@ -280,7 +280,7 @@ export class RequestHandler {
    * Schedule sending request regarding to batchInterval
    */
   refreshBatchInterval_() {
-    dev().assert(this.batchIntervalPointer_ != null,
+    devAssert(this.batchIntervalPointer_ != null,
         'Should not start batchInterval without pointer');
     const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
       this.batchInterval_[this.batchIntervalPointer_++] :

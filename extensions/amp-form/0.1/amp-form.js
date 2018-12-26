@@ -44,7 +44,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -192,7 +192,7 @@ export class AmpForm {
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
       const {name} = inputs[i];
-      user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
+      userAssert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
           'Illegal input name, %s found: %s', name, inputs[i]);
     }
 
@@ -229,7 +229,7 @@ export class AmpForm {
     if (url) {
       const urlService = Services.urlForDoc(this.form_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
-      user().assert(!urlService.isProxyOrigin(url),
+      userAssert(!urlService.isProxyOrigin(url),
           'form %s should not be on AMP CDN: %s',
           attribute,
           this.form_);
@@ -881,7 +881,7 @@ export class AmpForm {
   /** @private */
   handleNonXhrPost_() {
     // non-XHR POST requests are not supported.
-    user().assert(false,
+    userAssert(false,
         'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
         this.form_);
@@ -908,7 +908,7 @@ export class AmpForm {
    */
   assertSsrTemplate_(value, msg) {
     const supported = this.ssrTemplateHelper_.isSupported();
-    user().assert(
+    userAssert(
         supported === value, '[amp-form]: viewerRenderTemplate | %s', msg);
   }
 
@@ -920,7 +920,7 @@ export class AmpForm {
   assertNoSensitiveFields_() {
     const fields = this.form_.querySelectorAll(
         'input[type=password],input[type=file]');
-    user().assert(fields.length == 0,
+    userAssert(fields.length == 0,
         'input[type=password] or input[type=file] ' +
         'may only appear in form[method=post]');
   }
@@ -955,7 +955,7 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      user().assert(this.target_ != '_blank',
+      userAssert(this.target_ != '_blank',
           'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
           'not supported, use target=_top instead. %s', this.form_);
       try {
@@ -963,7 +963,7 @@ export class AmpForm {
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
-        user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
+        userAssert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);
       }
       const navigator = Services.navigationForDoc(this.form_);

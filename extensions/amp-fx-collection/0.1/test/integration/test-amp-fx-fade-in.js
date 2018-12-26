@@ -16,7 +16,6 @@
 
 const config = describe.configure().ifChrome();
 config.run('amp-fx-collection', function() {
-  this.timeout(100000);
 
   const css = `
     .spacer {

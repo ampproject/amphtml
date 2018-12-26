@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {dev, user} from '../log';
+import {dev, devAssert, userAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
@@ -263,9 +263,9 @@ export class Templates {
    */
   findTemplate(parent, opt_querySelector) {
     const templateElement = this.maybeFindTemplate(parent, opt_querySelector);
-    user().assert(templateElement, 'Template not found for %s', parent);
+    userAssert(templateElement, 'Template not found for %s', parent);
     const templateTagName = templateElement.tagName;
-    user().assert(
+    userAssert(
         (templateTagName == 'TEMPLATE' || (templateTagName == 'SCRIPT'
             && templateElement.getAttribute('type') === 'text/plain')),
         'Template must be defined in a <template> or '
@@ -315,7 +315,7 @@ export class Templates {
     } else if (tagName == 'SCRIPT') {
       type = element.getAttribute('template');
     }
-    user().assert(type, 'Type must be specified: %s', element);
+    userAssert(type, 'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
     if (promise) {
@@ -365,7 +365,7 @@ export class Templates {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
-      user().assert(resolver, 'Duplicate template type: %s', type);
+      userAssert(resolver, 'Duplicate template type: %s', type);
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
@@ -377,7 +377,7 @@ export class Templates {
    * @visibleForTesting
    */
   unregisterTemplate(type) {
-    dev().assert(getMode().test, 'Should only be used in test mode.');
+    devAssert(getMode().test, 'Should only be used in test mode.');
     delete this.templateClassMap_[type];
     delete this.templateClassResolvers_[type];
   }

@@ -230,7 +230,7 @@ export class BrowserController {
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForElementLayout(selector, timeout = 5000) {
+  waitForElementLayout(selector, timeout = 10000) {
     const elements = this.doc_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);

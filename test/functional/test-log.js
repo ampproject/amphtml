@@ -19,12 +19,14 @@ import {
   LogLevel,
   USER_ERROR_SENTINEL,
   dev,
+  devAssert,
   duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
   setReportError,
   user,
+  userAssert,
 } from '../../src/log';
 
 describe('Logging', () => {
@@ -314,6 +316,46 @@ describe('Logging', () => {
       log.assert(true, 'True!');
       log.assert(1, '1');
       log.assert('abc', 'abc');
+    });
+
+    it('should not fail direct dev', () => {
+      devAssert(true, 'True!');
+      devAssert(1, '1');
+      devAssert('abc', 'abc');
+    });
+
+    it('should not fail direct user', () => {
+      userAssert(true, 'True!');
+      userAssert(1, '1');
+      userAssert('abc', 'abc');
+    });
+
+    it('should fail direct dev', () => {
+      expect(function() {
+        devAssert(false, 'xyz');
+      }).to.throw(/xyz/);
+      try {
+        devAssert(false, '123');
+      } catch (e) {
+        expect(e.message).to.equal('123');
+        return;
+      }
+      // Unreachable
+      expect(false).to.be.true;
+    });
+
+    it('should fail direct user', () => {
+      expect(function() {
+        userAssert(false, 'xyz');
+      }).to.throw(/xyz/);
+      try {
+        userAssert(false, '123');
+      } catch (e) {
+        expect(e.message).to.equal('123' + USER_ERROR_SENTINEL);
+        return;
+      }
+      // Unreachable
+      expect(false).to.be.true;
     });
 
     it('should substitute', () => {
