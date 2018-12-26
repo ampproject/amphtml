@@ -29,7 +29,7 @@ import {
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -64,12 +64,12 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       return;
     }
 
-    this.sitekey_ = user().assert(
+    this.sitekey_ = userAssert(
         this.element.getAttribute('data-sitekey'),
         'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
         this.element);
 
-    this.action_ = user().assert(
+    this.action_ = userAssert(
         this.element.getAttribute('data-action'),
         'The data-action attribute is required for <amp-recaptcha-input> %s',
         this.element);

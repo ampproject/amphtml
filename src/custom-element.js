@@ -467,6 +467,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
+    }
+
+    /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
@@ -1113,9 +1125,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-          // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not

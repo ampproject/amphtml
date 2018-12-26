@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
@@ -98,7 +98,7 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
-      user().assert(
+      userAssert(
           !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
           '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
@@ -128,8 +128,8 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction('toggle', invocation => {
       const {args} = invocation;
-      user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
-      user().assert(args['index'] < this.elements_.length, '\'index\' must ' +
+      userAssert(args['index'] >= 0, '\'index\' must be greater than 0');
+      userAssert(args['index'] < this.elements_.length, '\'index\' must ' +
         'be less than the length of options in the <amp-selector>');
       if (args && args['index'] !== undefined) {
         this.toggle_(args['index'], args['value']);
@@ -339,18 +339,7 @@ export class AmpSelector extends AMP.BaseElement {
       }
       // Newly picked option should always have focus.
       this.updateFocus_(el);
-
-      // Trigger 'select' event with two data params:
-      // 'targetOption' - option value of the selected or deselected element.
-      // 'selectedOptions' - array of option values of selected elements.
-      const name = 'select';
-      const selectEvent =
-          createCustomEvent(this.win, `amp-selector.${name}`, dict({
-            'targetOption': el.getAttribute('option'),
-            'selectedOptions': this.selectedOptions_(),
-          }));
-      this.action_.trigger(this.element, name, selectEvent,
-          ActionTrust.HIGH);
+      this.fireSelectEvent_(el);
     });
   }
 
@@ -393,7 +382,8 @@ export class AmpSelector extends AMP.BaseElement {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    const indexCurrentStatus = this.elements_[index].hasAttribute('selected');
+    const el = this.elements_[index];
+    const indexCurrentStatus = el.hasAttribute('selected');
     const indexFinalStatus =
       opt_value !== undefined ? opt_value : !indexCurrentStatus;
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
@@ -404,11 +394,30 @@ export class AmpSelector extends AMP.BaseElement {
 
     // There is a change of the `selected` attribute for the element
     if (selectedIndex !== index) {
-      this.setSelection_(this.elements_[index]);
+      this.setSelection_(el);
       this.clearSelection_(this.elements_[selectedIndex]);
     } else {
-      this.clearSelection_(this.elements_[index]);
+      this.clearSelection_(el);
     }
+
+    this.fireSelectEvent_(el);
+  }
+
+  /**
+   * Triggers a 'select' event with two data params:
+   * 'targetOption' - option value of the selected or deselected element.
+   * 'selectedOptions' - array of option values of selected elements.
+   * @param {!Element} el The element that was selected or deslected.
+   * @private
+   */
+  fireSelectEvent_(el) {
+    const name = 'select';
+    const selectEvent =
+        createCustomEvent(this.win, `amp-selector.${name}`, dict({
+          'targetOption': el.getAttribute('option'),
+          'selectedOptions': this.selectedOptions_(),
+        }));
+    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
   /**

@@ -16,7 +16,7 @@
 
 import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -733,7 +733,7 @@ export function escapeCssSelectorIdent(ident) {
 export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
   // Ensure it doesn't close the nth-child psuedo class.
-  dev().assert(escaped.indexOf(')') === -1);
+  devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }
 
@@ -800,7 +800,7 @@ export function isAmpElement(element) {
  * @return {!Promise<!Element>}
  */
 export function whenUpgradedToCustomElement(element) {
-  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(element);

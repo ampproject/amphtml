@@ -69,6 +69,8 @@ const forbiddenTerms = {
   },
   'describe\\.only': '',
   'describes.*\\.only': '',
+  'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
+  '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'gulp-util': {

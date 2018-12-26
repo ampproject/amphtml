@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-/**
- * Analytics tags should never be visible. keep them hidden.
- */
-amp-analytics {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
-}
+import { getMode } from '../../../../../../../src/mode';
 
-html.i-amphtml-fie > amp-analytics {
-  /* Remove position fixed if it's in iframe.
-   * So runtime can measure layoutBox correctly
-   */
-  position: initial !important;
-}
+const test = getMode().test;
+const localDev = getMode().localDev;
+const minified = getMode().minified;
