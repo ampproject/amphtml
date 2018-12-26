@@ -564,6 +564,30 @@ describe('Logging', () => {
     });
   });
 
+  describe('assertArray', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return the array value', () => {
+      const array = [1, 2, 3];
+      expect(log.assertArray(array)).to.equal(array);
+    });
+
+    it('should return empty array', () => {
+      expect(log.assertArray([])).to.deep.equal([]);
+    });
+
+    it('should fail with non-array values', () => {
+      expect(() => log.assertArray('a')).to.throw(
+          'Array expected: a');
+      expect(() => log.assertArray(1)).to.throw(
+          'Array expected: 1');
+    });
+  });
+
   describe('error', () => {
     let log;
     let reportedError;

@@ -377,12 +377,7 @@ export class AmpList extends AMP.BaseElement {
         if (this.element.hasAttribute('single-item') && !isArray(items)) {
           items = [items];
         }
-        // TODO (cathyxz): add assertArray function
-        userAssert(isArray(items),
-            'Response must contain an array at "%s". %s',
-            itemsExpr, this.element);
-        items = /** @type {!Array} */ (items);
-
+        items = user().assertArray(items);
         if (this.element.hasAttribute('max-items')) {
           items = this.truncateToMaxLen_(items);
         }
