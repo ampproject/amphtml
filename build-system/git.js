@@ -19,6 +19,7 @@
  * @fileoverview Provides functions for executing various git commands.
  */
 
+const colors = require('ansi-colors');
 const {getStdout} = require('./exec');
 
 const commitLogMaxCount = 100;
@@ -70,11 +71,21 @@ exports.gitDiffStatMaster = function() {
 exports.gitDiffCommitLog = function() {
   const branchPoint = process.env.TRAVIS ?
     exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
-  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
-"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) \
-%C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
+  let commitLog = getStdout(`git -c color.ui=always log --graph \
+--pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
+-%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
 --abbrev-commit ${branchPoint}^...HEAD \
 --max-count=${commitLogMaxCount}`).trim();
+  if (commitLog.split('\n').length >= commitLogMaxCount) {
+    commitLog += `\n${colors.yellow('WARNING:')} Commit log is longer than \
+${colors.cyan(commitLogMaxCount)} commits. \
+Branch ${colors.cyan(exports.gitBranchName())} may not have been forked from \
+${colors.cyan('master')}.`;
+    commitLog += `\n${colors.yellow('WARNING:')} See \
+${colors.cyan('https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md')} \
+for how to fix this.`;
+  }
+  return commitLog;
 };
 
 /**
