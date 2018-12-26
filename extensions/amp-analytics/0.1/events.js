@@ -22,7 +22,7 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -385,7 +385,7 @@ export class ClickEventTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    const selector = user().assert(config['selector'],
+    const selector = userAssert(config['selector'],
         'Missing required selector on click trigger');
     const selectionMethod = config['selectionMethod'] || null;
     return this.clickObservable_.add(this.root.createSelectiveListener(
@@ -693,17 +693,17 @@ class TimerEventHandler {
     /** @private {number|undefined} */
     this.intervalId_ = undefined;
 
-    user().assert('interval' in timerSpec,
+    userAssert('interval' in timerSpec,
         'Timer interval specification required');
     /** @private @const {number} */
     this.intervalLength_ = Number(timerSpec['interval']) || 0;
-    user().assert(this.intervalLength_ >= MIN_TIMER_INTERVAL_SECONDS,
+    userAssert(this.intervalLength_ >= MIN_TIMER_INTERVAL_SECONDS,
         'Bad timer interval specification');
 
     /** @private @const {number} */
     this.maxTimerLength_ = 'maxTimerLength' in timerSpec ?
       Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
-    user().assert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
+    userAssert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
     this.maxTimerInSpec_ = 'maxTimerLength' in timerSpec;
@@ -899,13 +899,13 @@ export class TimerEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const timerSpec = config['timerSpec'];
-    user().assert(timerSpec && typeof timerSpec == 'object',
+    userAssert(timerSpec && typeof timerSpec == 'object',
         'Bad timer specification');
     const timerStart = 'startSpec' in timerSpec ? timerSpec['startSpec'] : null;
-    user().assert(!timerStart || typeof timerStart == 'object',
+    userAssert(!timerStart || typeof timerStart == 'object',
         'Bad timer start specification');
     const timerStop = 'stopSpec' in timerSpec ? timerSpec['stopSpec'] : null;
-    user().assert((!timerStart && !timerStop) || typeof timerStop == 'object',
+    userAssert((!timerStart && !timerStop) || typeof timerStop == 'object',
         'Bad timer stop specification');
 
     const timerId = this.generateTimerId_();
@@ -913,14 +913,14 @@ export class TimerEventTracker extends EventTracker {
     let stopBuilder;
     if (timerStart) {
       const startTracker = this.getTracker_(timerStart);
-      user().assert(startTracker, 'Cannot track timer start');
+      userAssert(startTracker, 'Cannot track timer start');
       startBuilder = startTracker.add.bind(startTracker, context,
           timerStart['on'], timerStart,
           this.handleTimerToggle_.bind(this, timerId, eventType, listener));
     }
     if (timerStop) {
       const stopTracker = this.getTracker_(timerStop);
-      user().assert(stopTracker, 'Cannot track timer stop');
+      userAssert(stopTracker, 'Cannot track timer stop');
       stopBuilder = stopTracker.add.bind(stopTracker, context,
           timerStop['on'], timerStop,
           this.handleTimerToggle_.bind(this, timerId, eventType, listener));
@@ -1127,8 +1127,8 @@ export class VideoEventTracker extends EventTracker {
         const normalizedPercentage = details['normalizedPercentage'];
         const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
 
-        dev().assert(isFiniteNumber(normalizedPercentageInt));
-        dev().assert((normalizedPercentageInt % percentageInterval) == 0);
+        devAssert(isFiniteNumber(normalizedPercentageInt));
+        devAssert((normalizedPercentageInt % percentageInterval) == 0);
 
         if (lastPercentage == normalizedPercentageInt) {
           return;
@@ -1189,7 +1189,7 @@ export class VisibilityTracker extends EventTracker {
     let createReportReadyPromiseFunc = null;
 
     if (reportWhenSpec) {
-      user().assert(!visibilitySpec['repeat'],
+      userAssert(!visibilitySpec['repeat'],
           'reportWhen and repeat are mutually exclusive.');
     }
 
@@ -1209,7 +1209,7 @@ export class VisibilityTracker extends EventTracker {
       createReportReadyPromiseFunc =
           this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
-      user().assert(!reportWhenSpec, 'reportWhen value "%s" not supported.',
+      userAssert(!reportWhenSpec, 'reportWhen value "%s" not supported.',
           reportWhenSpec);
     }
 
@@ -1334,7 +1334,7 @@ export class VisibilityTracker extends EventTracker {
     }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');
-    user().assert(waitForSpec == 'none' ||
+    userAssert(waitForSpec == 'none' ||
         trackerWhitelist[waitForSpec] !== undefined,
     'waitFor value %s not supported', waitForSpec);
 

@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
@@ -296,13 +296,13 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
   // Assert that optouts are allowed only in predefined configs.
   // The last expression adds an exception of known, safe optout function
   // that is already being used in the wild.
-  user().assert(opt_predefinedConfig
+  userAssert(opt_predefinedConfig
       || !from || !from['optout']
       || from['optout'] == '_gaUserPrefs.ioo',
   'optout property is only available to vendor config.');
 
   for (const property in from) {
-    user().assert(opt_predefinedConfig || property != 'iframePing',
+    userAssert(opt_predefinedConfig || property != 'iframePing',
         'iframePing config is only available to vendor config.');
     // Only deal with own properties.
     if (hasOwn(from, property)) {

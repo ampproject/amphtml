@@ -691,6 +691,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'onnetwork': {
+    renderStartImplemented: true,
+  },
+
   'openadstream': {},
 
   'openx': {

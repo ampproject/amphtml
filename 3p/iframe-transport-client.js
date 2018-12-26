@@ -16,7 +16,7 @@
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev, user} from '../src/log';
+import {dev, devAssert, user, userAssert} from '../src/log';
 import {tryParseJson} from '../src/json';
 
 /** @private @const {string} */
@@ -45,7 +45,7 @@ export class IframeTransportClient {
     // Note: amp-ad-exit will validate the vendor name before performing
     // variable substitution, so if the vendor name is not a valid one from
     // vendors.js, then its response messages will have no effect.
-    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in ' +
+    devAssert(this.vendor_.length, 'Vendor name cannot be empty in ' +
         this.win_.location.href);
 
     /** @protected {!IframeMessagingClient} */
@@ -64,13 +64,13 @@ export class IframeTransportClient {
            *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
            */
           (eventData['events']);
-          dev().assert(events,
+          devAssert(events,
               'Received malformed events list in ' + this.win_.location.href);
-          dev().assert(events.length,
+          devAssert(events.length,
               'Received empty events list in ' + this.win_.location.href);
           events.forEach(event => {
             try {
-              dev().assert(event.creativeId,
+              devAssert(event.creativeId,
                   'Received malformed event in ' + this.win_.location.href);
               this.contextFor_(event.creativeId).dispatch(event.message);
             } catch (e) {
@@ -127,7 +127,7 @@ export class IframeTransportContext {
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    user().assert(win['onNewContextInstance'] &&
+    userAssert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
     'Must implement onNewContextInstance in ' + win.location.href);
     win['onNewContextInstance'](this);

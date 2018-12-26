@@ -18,7 +18,7 @@ import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
 import {Services} from '../../../src/services';
 import {iterateCursor} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 
@@ -80,7 +80,7 @@ export class TextMask {
       const hiddenName = `${name}-unmasked`;
       iterateCursor(this.element_.form.elements, element => {
         const {name} = element;
-        user().assert(name != hiddenName,
+        userAssert(name != hiddenName,
             'Illegal input name, %s found: %s', name, element);
       });
 

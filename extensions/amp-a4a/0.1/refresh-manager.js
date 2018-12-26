@@ -18,7 +18,7 @@ import {
   RefreshIntersectionObserverWrapper,
 } from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -66,7 +66,7 @@ export function getPublisherSpecifiedRefreshInterval(element, win) {
   const networkIntervalPairs = metaTagContent.split(',');
   for (let i = 0; i < networkIntervalPairs.length; i++) {
     const pair = networkIntervalPairs[i].split('=');
-    user().assert(pair.length == 2, 'refresh metadata config must be of ' +
+    userAssert(pair.length == 2, 'refresh metadata config must be of ' +
         'the form `network_type=refresh_interval`');
     if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
       return checkAndSanitizeRefreshInterval(pair[1]);
@@ -247,7 +247,7 @@ export class RefreshManager {
   ioCallback_(entries) {
     entries.forEach(entry => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
-      dev().assert(refreshManagerId);
+      devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
       if (entry.target != refreshManager.element_) {
         return;
@@ -329,7 +329,7 @@ export class RefreshManager {
    * @return {!JsonObject}
    */
   convertAndSanitizeConfiguration_(config) {
-    dev().assert(config['visiblePercentageMin'] >= 0 &&
+    devAssert(config['visiblePercentageMin'] >= 0 &&
         config['visiblePercentageMin'] <= 100,
     'visiblePercentageMin for refresh must be in the range [0, 100]');
     // Convert seconds to milliseconds.

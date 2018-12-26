@@ -16,7 +16,7 @@
 import {AbstractAmpContext} from './ampcontext';
 import {adConfig} from '../ads/_config';
 import {computeInMasterFrame} from './3p';
-import {dev, user} from '../src/log';
+import {dev, user, userAssert} from '../src/log';
 import {dict} from '../src/utils/object';
 
 
@@ -102,7 +102,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {number} height
    */
   updateDimensions(width, height) {
-    user().assert(this.updateDimensionsEnabled_(), 'Not available.');
+    userAssert(this.updateDimensionsEnabled_(), 'Not available.');
     this.requestResize(width, height);
   }
 

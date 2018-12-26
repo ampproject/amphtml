@@ -23,7 +23,7 @@ import {
 import {Services} from '../../../src/services';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -90,8 +90,8 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   exit({args, event}) {
     const target = this.targets_[args['target']];
-    user().assert(target, `Exit target not found: '${args['target']}'`);
-    user().assert(event, 'Unexpected null event');
+    userAssert(target, `Exit target not found: '${args['target']}'`);
+    userAssert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
 
@@ -113,7 +113,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!NavigationTargetDef} target
+   * @param {!JsonObject} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
@@ -127,13 +127,13 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
     };
-    if (target.vars) {
-      for (const customVarName in target.vars) {
+    if (target['vars']) {
+      for (const customVarName in target['vars']) {
         if (customVarName[0] != '_') {
           continue;
         }
         const customVar =
-        /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
+        /** @type {!./config.VariableDef} */ (target['vars'][customVarName]);
         if (!customVar) {
           continue;
         }
@@ -246,46 +246,47 @@ export class AmpAdExit extends AMP.BaseElement {
             makeInactiveElementSpec('.amp-carousel-button'), this));
 
     const {children} = this.element;
-    user().assert(children.length == 1,
+    userAssert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const child = children[0];
-    user().assert(
+    userAssert(
         isJsonScriptTag(child),
         'The amp-ad-exit config should ' +
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
       let defaultClickStartTimingEvent;
-      if (isObject(config.options) &&
-          typeof config.options.startTimingEvent === 'string') {
-        defaultClickStartTimingEvent = config.options.startTimingEvent;
+      if (isObject(config['options']) &&
+          typeof config['options']['startTimingEvent'] === 'string') {
+        defaultClickStartTimingEvent = config['options']['startTimingEvent'];
         this.defaultFilters_.splice(0, 1, createFilter('minDelay',
-            makeClickDelaySpec(1000, config.options.startTimingEvent), this));
+            makeClickDelaySpec(1000, config['options']['startTimingEvent']),
+            this));
       }
-      for (const name in config.filters) {
-        const spec = config.filters[name];
+      for (const name in config['filters']) {
+        const spec = config['filters'][name];
         if (spec.type == FilterType.CLICK_DELAY) {
           spec.startTimingEvent =
               spec.startTimingEvent || defaultClickStartTimingEvent;
         }
         this.userFilters_[name] = createFilter(name, spec, this);
       }
-      for (const name in config.targets) {
-        const target = config.targets[name];
+      for (const name in config['targets']) {
+        const /** !JsonObject */ target = config['targets'][name];
         this.targets_[name] = {
-          finalUrl: target.finalUrl,
-          trackingUrls: target.trackingUrls || [],
-          vars: target.vars || {},
+          finalUrl: target['finalUrl'],
+          trackingUrls: target['trackingUrls'] || [],
+          vars: target['vars'] || {},
           filters:
-              (target.filters || []).map(
+              (target['filters'] || []).map(
                   f => this.userFilters_[f]).filter(f => f),
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
-        for (const customVar in target.vars) {
-          if (!target.vars[customVar].iframeTransportSignal) {
+        for (const customVar in target['vars']) {
+          if (!target['vars'][customVar].iframeTransportSignal) {
             continue;
           }
-          const matches = target.vars[customVar].iframeTransportSignal.match(
+          const matches = target['vars'][customVar].iframeTransportSignal.match(
               /IFRAME_TRANSPORT_SIGNAL\(([^,]+)/);
           if (!matches || matches.length < 2) {
             continue;
@@ -296,8 +297,10 @@ export class AmpAdExit extends AMP.BaseElement {
               this.expectedOriginToVendor_[origin] || vendor;
         }
       }
-      this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
-      this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
+      this.transport_.beacon = config['transport'][TransportMode.BEACON]
+          !== false;
+      this.transport_.image = config['transport'][TransportMode.IMAGE]
+          !== false;
     } catch (e) {
       this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
@@ -353,7 +356,7 @@ export class AmpAdExit extends AMP.BaseElement {
           'not in inabox case.');
       return;
     }
-    dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
+    devAssert(!this.unlisten_, 'Unlistener should not already exist.');
     this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {
           // We shouldn't deserialize just any message...it would be too
@@ -383,18 +386,18 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   assertValidResponseMessage_(responseMessage, eventOrigin) {
-    user().assert(responseMessage['message'],
+    userAssert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
-    user().assert(
+    userAssert(
         responseMessage['creativeId'],
         'Received malformed message from 3p analytics frame: ' +
         'creativeId missing');
-    user().assert(responseMessage['vendor'],
+    userAssert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
     const vendorURL = parseUrlDeprecated(assertVendor(
         responseMessage['vendor']));
-    user().assert(vendorURL && vendorURL.origin == eventOrigin,
+    userAssert(vendorURL && vendorURL.origin == eventOrigin,
         'Invalid origin for vendor ' +
         `${responseMessage['vendor']}: ${eventOrigin}`);
   }

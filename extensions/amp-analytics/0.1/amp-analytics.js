@@ -17,7 +17,6 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
-import {CSS} from '../../../build/amp-analytics-0.1.css';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
@@ -36,7 +35,7 @@ import {
 } from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
@@ -632,7 +631,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel])
         .then(enabled => {
-          dev().assert(enabled.length === 2);
+          devAssert(enabled.length === 2);
           return enabled[0] && enabled[1];
         });
   }
@@ -713,5 +712,5 @@ AMP.extension(TAG, '0.1', AMP => {
   installVariableServiceForDoc(AMP.ampdoc);
   installLinkerReaderService(AMP.win);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics, CSS);
+  AMP.registerElement(TAG, AmpAnalytics);
 });
