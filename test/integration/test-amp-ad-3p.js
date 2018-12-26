@@ -26,8 +26,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-// TODO: unskip this test for single pass #20002
-describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
+describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {

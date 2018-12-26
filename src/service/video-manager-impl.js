@@ -48,7 +48,7 @@ import {
   listenOnce,
   listenOncePromise,
 } from '../event-helper';
-import {dev, devAssert, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
@@ -548,7 +548,7 @@ class VideoEntry {
         !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
       return false;
     }
-    return user().assert(this.video.isInteractive(),
+    return userAssert(this.video.isInteractive(),
         'Only interactive videos are allowed to enter fullscreen on rotate. ' +
         'Set the `controls` attribute on %s to enable.',
         element);

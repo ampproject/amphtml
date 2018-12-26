@@ -759,6 +759,6 @@ export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
  */
 export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
   opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
-  return user().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
-      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+  return user()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
+      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }
