@@ -102,6 +102,17 @@
     load-more="manual"
     load-more-bookmark="next"></amp-list>
   </amp-list>
+  <!-- Valid amp-list with custom children -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next">
+    <div load-more-button></div>
+    <div load-more-loading></div>
+    <div load-more-failed></div>
+    <div load-more-end></div>
+  </amp-list>
+  </amp-list>
   <!-- Invalid: unsupported "binding" attribute value -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -133,5 +144,10 @@
     load-more="gibberish"
     load-more-bookmark="next"></amp-list>
   </amp-list>
+  <!-- Invalid load-more attributes -->
+  <div load-more-button></div>
+  <div load-more-loading></div>
+  <div load-more-failed></div>
+  <div load-more-end></div>
 </body>
 </html>

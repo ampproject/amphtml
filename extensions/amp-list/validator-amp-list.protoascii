@@ -105,6 +105,33 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+tags: { # amp-list load-more children
+  html_format: AMP
+  spec_name: "AMP-LIST LOAD-MORE CHILDREN"
+  tag_name: "DIV"
+  mandatory_parent: "AMP-LIST"
+  attrs: {
+    name: "load-more-button"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-failed"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-loading"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+
+  }
+  attrs: {
+    name: "load-more-end"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+}
 # AMP4EMAIL disallows mustache in src attribute.
 tags: {  # <amp-list>
   html_format: AMP4EMAIL
