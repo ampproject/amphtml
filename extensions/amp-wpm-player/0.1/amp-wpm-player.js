@@ -82,6 +82,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
    */
   parseOptions_() {
     const output = {};
+    output.id = this.parseAttribute_('id');
     output.ampnoaudio = this.parseAttribute_(VideoAttributes.NO_AUDIO);
     output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY);
     output.dock = this.parseAttribute_(VideoAttributes.DOCK);
@@ -162,7 +163,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.container_ = null;
     this.element = element;
 
-    this.iframeUrl_ = 'https://std.wpcdn.pl/mbartoszewicz/frame.html?wpplayer=mobile-autoplay&disabledLiteEmbed=1&ampnoaudio=1&_aa=0';
+    this.iframeUrl_ = 'https://std.wpcdn.pl/mbartoszewicz/frame.html?wpplayer=mobile-autoplay&disabledLiteEmbed=1&ampnoaudio=1';
     this.iframe_ = null;
 
     this.options = this.parseOptions_();
@@ -178,22 +179,33 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       this.videoId = this.options.clip;
     }
 
-    const getScreenshot = videoID => {
+    const getScreenshot = videoID => new Promise(res => {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', `https://video.wp.pl/api/v1/embed/${videoID}`, false);
+      xhr.open('GET', `https://video.wp.pl/api/v1/embed/${videoID}`, true);
       xhr.send(null);
-      if (xhr.status == 200) {
-        return JSON.parse(xhr.responseText).clip.screenshot;
-      } else {
-        return 'https://via.placeholder.com/800x500'; // TODO: uniwersalny placeholder
-      }
-    };
+      xhr.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (xhr.status === 200) {
+            res(JSON.parse(xhr.responseText).clip.screenshot);
+          } else {
+            res('https://via.placeholder.com/800x500'); // TODO: uniwersalny placeholder
+          }
+        }
+      };
+    });
 
     this.screenshot = this.parseAttribute_('screenshot');
     if (!this.screenshot) {
       this.screenshot = getScreenshot(this.videoId);
     }
+
+    if (this.options.autoplay) {
+      this.playingState = PlayingStates.PLAYING_AUTO;
+    } else {
+      this.playingState = PlayingStates.PAUSED;
+    }
     console.log('constructor done');
+    // setInterval(() => {console.log(this.playingState);}, 1000);
   }
 
   /**
@@ -203,13 +215,36 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   sendCommand_(message) {
     console.log('component -> sent', message);
     if (this.playerReady_ || message.startsWith('init')) {
-      const HEADER = 'WP.AMP.PLAYER.';
-      console.log('asdfasdf');
+      const HEADER = `WP.AMP.PLAYER.${this.options.id}.`;
       this.contentWindow_.postMessage(HEADER + message, '*');
     } else {
       console.warn('Added ', message, ' to queue');
       this.toSend_.push(message);
     }
+  }
+
+  /**
+   * @private
+   * @param {*} messageName
+   * @param {*} callback
+   */
+  addMessageListener_(messageName, callback) {
+    const HEADER = `WP.AMP.PLAYER.${this.options.id}.${messageName}`;
+    const HEADER1 = `WP.AMP.PLAYER.${messageName}`;
+    console.log('asdf');
+
+    const that = this;
+    this.eventListeners_.push(data => {
+      if (data.startsWith(HEADER) || data.startsWith(HEADER1)) {
+        callback(data.replace(HEADER, '').replace(HEADER1, ''));
+      } else {
+        if (data == '__xx_gplayer_vischeck_xx__') {
+
+        } else {
+          console.log('not for me 2', data); // tutaj header jest zły
+        }
+      }
+    });
   }
 
   /** @override */
@@ -225,6 +260,69 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.eventListeners_ = [];
     const that = this;
 
+    this.addMessageListener_('FRAME.READY', () => {
+      console.log('FRAME.READY');
+    });
+
+    this.addMessageListener_('PLAYER.READY', () => {
+      console.log('PLAYER.READY');
+      that.playerReady_ = true;
+
+      that.element.dispatchCustomEvent(VideoEvents.LOAD);
+
+      while (that.toSend_.length) {
+        that.sendCommand_(that.toSend_.shift());
+      }
+
+      that.togglePlaceholder(false);
+    });
+
+    this.addMessageListener_('START_MOVIE', data => {
+      console.log('START_MOVIE');
+      that.metadata_ = JSON.parse(data);
+      that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: sprawdzic czy wszystko
+      that.element.dispatchCustomEvent(VideoEvents.RELOAD); // TODO: sprawdzic czy wszystko
+      that.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA); // TODO: sprawdzic czy wszystko
+    });
+
+    this.addMessageListener_('PLAY', () => {
+      console.log('PLAY');
+      that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: dokończyc to, autoplay
+      if (!that.playingState === PlayingStates.PLAYING_AUTO) {
+        that.playingState = PlayingStates.PLAYING_MANUAL;
+      }
+    });
+
+    this.addMessageListener_('PAUSE', () => {
+      console.log('PAUSE');
+      that.element.dispatchCustomEvent(VideoEvents.PAUSE); // TODO: dokończyc to, autoplay
+      that.playingState = PlayingStates.PAUSED;
+    });
+
+    this.addMessageListener_('END_MOVIE', () => {
+      console.log('END_MOVIE');
+      that.element.dispatchCustomEvent(VideoEvents.ENDED); // TODO: dokończyc to, pause + to + src change pewnie
+
+    });
+
+    this.addMessageListener_('START_ADV_QUEUE', () => {
+      console.log('START_ADV_QUEUE');
+      that.element.dispatchCustomEvent(VideoEvents.AD_START);
+
+    });
+
+    this.addMessageListener_('END_ADV_QUEUE', () => {
+      console.log('END_ADV_QUEUE');
+      that.element.dispatchCustomEvent(VideoEvents.AD_END); // TODO: czy to moze byc jako adstart i adend ++ czy end beak moze byc tak samo jak end queue
+
+    });
+
+    this.addMessageListener_('USER.ACTION', () => {
+      console.log('USER.ACTION');
+      that.playingState = PlayingStates.PLAYING_MANUAL;
+
+    });
+
     this.eventListeners_.push(function(data) {
       const HEADER = 'WP.AMP.PLAYER.';
 
@@ -237,74 +335,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       }
     });
 
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data === `${HEADER}PLAYER.READY`) {
-        that.playerReady_ = true;
-
-        that.element.dispatchCustomEvent(VideoEvents.LOAD);
-
-        while (that.toSend_.length) {
-          that.sendCommand_(that.toSend_.shift());
-        }
-
-        that.togglePlaceholder(false);
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}START_MOVIE`)) {
-        that.metadata_ = JSON.parse(data.replace(`${HEADER}START_MOVIE`, ''));
-        that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: sprawdzic czy wszystko
-        that.element.dispatchCustomEvent(VideoEvents.RELOAD); // TODO: sprawdzic czy wszystko
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}PLAY`)) {
-        that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: dokończyc to, autoplay
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}PAUSE`)) {
-        that.element.dispatchCustomEvent(VideoEvents.PAUSE); // TODO: dokończyc to, autoplay
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}END_MOVIE`)) {
-        that.element.dispatchCustomEvent(VideoEvents.ENDED); // TODO: dokończyc to, pause + to + src change pewnie
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}START_ADV_QUEUE`)) {
-        that.element.dispatchCustomEvent(VideoEvents.AD_START);
-      }
-    });
-
-    this.eventListeners_.push(function(data) {
-      const HEADER = 'WP.AMP.PLAYER.';
-
-      if (data.startsWith(`${HEADER}END_ADV_QUEUE`)) {
-        that.element.dispatchCustomEvent(VideoEvents.AD_END); // TODO: czy to moze byc jako adstart i adend ++ czy end beak moze byc tak samo jak end queue
-      }
-    });
-
-    // TODO: event listenery do kupy
-
     this.createPosterForAndroidBug_();
     this.registerAction('showControls', () => {this.showControls();});
     this.registerAction('hideControls', () => {this.hideControls();});
@@ -316,7 +346,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     // return layout == Layout.RESPONSIVE;
     return isLayoutSizeDefined(layout);
   }
-
 
   /** @override */
   isInteractive() {
@@ -339,7 +368,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     const iframe = this.win.document.createElement('amp-iframe');
     iframe.setAttribute('layout', 'fill');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
     iframe.setAttribute('src', this.iframeUrl_);
     iframe.setAttribute('frameborder', 0);
     iframe.setAttribute('allowfullscreen', true);
@@ -347,8 +376,10 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('src', this.screenshot);
     placeholder.setAttribute('placeholder', 'true');
+    this.screenshot.then(url => {
+      placeholder.setAttribute('src', url);
+    });
 
     iframe.appendChild(placeholder);
     this.iframe_ = iframe;
@@ -388,15 +419,20 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     this.preconnect.url(this.iframeUrl_, onLayout); // TODO: url playera
     this.preconnect.url(this.options.url, onLayout);
-    this.preconnect.url(this.screenshot, onLayout); // TODO: na pewno?
     this.preconnect.url('https://std.wpcdn.pl/wpjslib/wpjslib-inline.js', onLayout);
+    this.preconnect.url('https://std.wpcdn.pl/player/mobile-autoplay/wpjslib_player.js', onLayout);
   }
 
   /** @override */
-  pauseCallback() {
+  pauseCallback() { // TODO: tf is this?
     if (this.video_) {
       this.video_.pause();
     }
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {inViewport});
   }
 
   /**
@@ -491,7 +527,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    console.log(this.metadata_);
     return this.metadata_;
   }
 
