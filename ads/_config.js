@@ -643,7 +643,6 @@ export const adConfig = {
   },
 
   'mox': {
-    preconnect: 'https://ad.mox.tv',
     prefetch: [
       'https://ad.mox.tv/js/amp.min.js',
       'https://ad.mox.tv/mox/mwayss_invocation.min.js',
