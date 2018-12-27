@@ -104,8 +104,7 @@ export class ConsentPolicyManager {
    * Example policy config format:
    * {
    *   "waitFor": {
-   *     "consentABC": [], // Can't support array now.
-   *                       // All items will be treated as an empty array
+   *     "consentABC": []
    *   }
    *   "timeout": {
    *     "seconds": 1,
@@ -157,7 +156,8 @@ export class ConsentPolicyManager {
   }
 
   /**
-   *
+   * Helper method to register to listen to consent instance value change
+   * and get the initial consent value
    */
   init_() {
     // Set up handler to listen to consent instance value change.
@@ -183,7 +183,7 @@ export class ConsentPolicyManager {
   }
 
   /**
-   *
+   * Handle initial consent instance value and following consent value change
    * @param {!ConsentInfoDef} info
    */
   consentStateChangeHandler_(info) {
@@ -247,7 +247,7 @@ export class ConsentPolicyManager {
     }
     return this.whenPolicyInstanceReady_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].shouldUnblock();
+        return this.instances_[policyId].shouldEnable();
       });
     });
   }
@@ -370,6 +370,8 @@ export class ConsentPolicyInstance {
   }
 
   /**
+   * Evaluate the incoming consent state and determine if the policy instance
+   * should be resolved and what the policy state should be.
    * @param {CONSENT_ITEM_STATE} state
    * @param {boolean} isFallback
    */
@@ -422,7 +424,7 @@ export class ConsentPolicyInstance {
    * Caller need to make sure that policy status has resolved
    * @return {boolean}
    */
-  shouldUnblock() {
+  shouldEnable() {
     return (this.unblockStateLists_.indexOf(this.status_) > -1);
   }
 }
