@@ -86,6 +86,21 @@
     src="https://data.com/articles.json?ref=CANONICAL_URL"
     auto-resize>
   <div></div>
+  <!-- Valid amp-list with load-more="auto" attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="auto"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with load-more="manual" attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with load-more and optional load-more-bookmark attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next"></amp-list>
   </amp-list>
   <!-- Invalid: unsupported "binding" attribute value -->
   <amp-list width=10 height=10
@@ -106,6 +121,17 @@
        which isn't supported. -->
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
+  </amp-list>
+  <!-- Invalid amp-list with load-more attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more></amp-list>
+  </amp-list>
+  <!-- Invalid amp-list with bad load-more attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="gibberish"
+    load-more-bookmark="next"></amp-list>
   </amp-list>
 </body>
 </html>

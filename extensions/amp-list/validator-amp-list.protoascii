@@ -55,6 +55,17 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
+  attrs: {
+    name: "load-more"
+    value: "auto"
+    value: "manual"
+   }
+  attrs: {
+    name: "load-more-bookmark"
+    trigger: {
+    also_requires_attr: "load-more"
+    }
+  }
   attrs: { name: "max-items" }
   attrs: {
     name: "reset-on-refresh"
