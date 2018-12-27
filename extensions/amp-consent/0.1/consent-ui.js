@@ -208,8 +208,8 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
-      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
 
       this.enableScroll_();
