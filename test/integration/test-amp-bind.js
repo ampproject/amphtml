@@ -24,6 +24,7 @@ import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
 describe.configure().skipEdge().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
 
   function poll(desc, condition, onError) {
     return classicPoll(desc, condition, onError, TIMEOUT);
@@ -39,25 +40,28 @@ describe.configure().skipEdge().run('amp-bind', function() {
     /* eslint-enable max-len */
     extensions: ['amp-bind'],
   }, env => {
-    let doc, text;
+    let browser;
+    let doc;
+    let text;
 
     beforeEach(() => {
       doc = env.win.document;
       text = doc.querySelector('p');
+      browser = new BrowserController(env.win);
     });
 
-    it('[text]', () => {
+    it('[text]', function*() {
       expect(text.textContent).to.equal('before_text');
-      const button = doc.getElementById('changeText');
-      button.click();
-      return poll('[text]', () => text.textContent === 'after_text');
+      yield browser.wait(200);
+      browser.click('#changeText');
+      yield poll('[text]', () => text.textContent === 'after_text');
     });
 
-    it('[class]', () => {
+    it('[class]', function*() {
       expect(text.className).to.equal('before_class');
-      const button = doc.getElementById('changeClass');
-      button.click();
-      return poll('[class]', () => text.className === 'after_class');
+      yield browser.wait(200);
+      browser.click('#changeClass');
+      yield poll('[class]', () => text.className === 'after_class');
     });
   });
 
@@ -247,23 +251,25 @@ describe.configure().skipEdge().run('amp-bind', function() {
   /* eslint-enable max-len */
 
   const listTests = env => {
-    let doc, list, button;
+    let doc;
+    let list;
+    let browser;
 
     beforeEach(() => {
       doc = env.win.document;
       list = doc.querySelector('amp-list');
-      button = doc.querySelector('button');
+      browser = new BrowserController(env.win);
     });
 
     it('[src]', () => {
       expect(list.getAttribute('src')).to.equal('/list/fruit-data/get?cors=0');
-      button.click();
+      browser.click('button');
       poll('[src]', () =>
         list.getAttribute('src') === 'https://example.com/data');
     });
 
     it('evaluate bindings in children', function*() {
-      yield poll('render', () => list.querySelectorAll('p').length > 0);
+      yield browser.waitForElementLayout('amp-list');
       const children = list.querySelectorAll('p');
       expect(children.length).to.equal(3);
       children.forEach(span => {
