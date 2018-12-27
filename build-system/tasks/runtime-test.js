@@ -639,7 +639,6 @@ async function runTests() {
   function createKarmaServer(configBatch) {
     let resolver;
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
-    const startTime = Date.now();
     const karmaServer = new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
         if (process.env.TRAVIS) {
@@ -654,12 +653,7 @@ async function runTests() {
           log(green('INFO:'), 'Uploading code coverage report to',
               cyan('https://codecov.io/gh/ampproject/amphtml'), 'by running',
               cyan(codecovCmd + flags) + '...');
-
-          log(cyan('----esth debug mode---- codecovCmd start: ' +
-            Math.floor((Date.now() - startTime) / 1000)));
           const output = getStdout(codecovCmd + flags);
-          log(cyan('----esth debug mode---- codecovCmd end: ' +
-            Math.floor((Date.now() - startTime) / 1000)));
           const viewReportPrefix = 'View report at: ';
           const viewReport = output.match(`${viewReportPrefix}.*`);
           if (viewReport && viewReport.length > 0) {
@@ -678,8 +672,6 @@ async function runTests() {
           opn(coverageReportUrl, {wait: false});
         }
       }
-      log(cyan('----esth debug mode---- resolve: ' +
-            Math.floor((Date.now() - startTime) / 1000)));
       resolver(exitCode);
     }).on('run_start', function() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {

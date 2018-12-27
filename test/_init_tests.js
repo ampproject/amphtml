@@ -41,6 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
@@ -366,11 +367,11 @@ function warnForConsoleError() {
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
-  // const helpMessage =
-  //     'The test "' + testName + '" called "expectAsyncConsoleError", ' +
-  //     'but there were no call(s) to console.error with these message(s): ' +
-  //     '"' + expectedAsyncErrors.join('", "') + '"';
-  //throw new Error(helpMessage);
+    const helpMessage =
+        'The test "' + testName + '" called "expectAsyncConsoleError", ' +
+        'but there were no call(s) to console.error with these message(s): ' +
+        '"' + expectedAsyncErrors.join('", "') + '"';
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
@@ -452,6 +453,7 @@ afterEach(function() {
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
+  that = this;
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
