@@ -29,9 +29,6 @@ describe.configure().skipEdge().run('amp-bind', function() {
     return classicPoll(desc, condition, onError, TIMEOUT);
   }
 
-  // It seems like sometimes these tests fail because the register AmpWorker
-  // ww promise doesn't return. In these cases, there are always two requests
-  // to fetch a browserify.js file which seems to be the compiled AMP Runtime.
   describes.integration('basic', {
     /* eslint-disable max-len */
     body: `
@@ -43,6 +40,8 @@ describe.configure().skipEdge().run('amp-bind', function() {
     extensions: ['amp-bind'],
   }, env => {
     let browser, doc, text;
+
+    this.timeout(TIMEOUT);
 
     beforeEach(() => {
       doc = env.win.document;
@@ -251,6 +250,8 @@ describe.configure().skipEdge().run('amp-bind', function() {
   /* eslint-enable max-len */
 
   const listTests = env => {
+    this.timeout(TIMEOUT);
+
     let doc, list, browser;
 
     beforeEach(() => {
