@@ -41,6 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
@@ -370,7 +371,7 @@ function restoreConsoleError() {
         'The test "' + testName + '" called "expectAsyncConsoleError", ' +
         'but there were no call(s) to console.error with these message(s): ' +
         '"' + expectedAsyncErrors.join('", "') + '"';
-    throw new Error(helpMessage);
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
@@ -449,6 +450,7 @@ function beforeTest() {
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
 afterEach(function() {
+  that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
