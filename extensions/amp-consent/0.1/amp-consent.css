@@ -87,6 +87,10 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   padding: 0px !important;
   margin: 0px !important;
 
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+
   transform: translate3d(0px, 100%, 0px) !important;
 }
 
