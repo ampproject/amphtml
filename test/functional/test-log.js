@@ -19,12 +19,14 @@ import {
   LogLevel,
   USER_ERROR_SENTINEL,
   dev,
+  devAssert,
   duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
   setReportError,
   user,
+  userAssert,
 } from '../../src/log';
 
 describe('Logging', () => {
@@ -316,6 +318,46 @@ describe('Logging', () => {
       log.assert('abc', 'abc');
     });
 
+    it('should not fail direct dev', () => {
+      devAssert(true, 'True!');
+      devAssert(1, '1');
+      devAssert('abc', 'abc');
+    });
+
+    it('should not fail direct user', () => {
+      userAssert(true, 'True!');
+      userAssert(1, '1');
+      userAssert('abc', 'abc');
+    });
+
+    it('should fail direct dev', () => {
+      expect(function() {
+        devAssert(false, 'xyz');
+      }).to.throw(/xyz/);
+      try {
+        devAssert(false, '123');
+      } catch (e) {
+        expect(e.message).to.equal('123');
+        return;
+      }
+      // Unreachable
+      expect(false).to.be.true;
+    });
+
+    it('should fail direct user', () => {
+      expect(function() {
+        userAssert(false, 'xyz');
+      }).to.throw(/xyz/);
+      try {
+        userAssert(false, '123');
+      } catch (e) {
+        expect(e.message).to.equal('123' + USER_ERROR_SENTINEL);
+        return;
+      }
+      // Unreachable
+      expect(false).to.be.true;
+    });
+
     it('should substitute', () => {
       expect(function() {
         log.assert(false, 'should fail %s', 'XYZ');
@@ -519,6 +561,30 @@ describe('Logging', () => {
       const enum1 = {a: 'value1', b: 'value2'};
       expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
           'Unknown enum value: "VALUE1"');
+    });
+  });
+
+  describe('assertArray', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return the array value', () => {
+      const array = [1, 2, 3];
+      expect(log.assertArray(array)).to.equal(array);
+    });
+
+    it('should return empty array', () => {
+      expect(log.assertArray([])).to.deep.equal([]);
+    });
+
+    it('should fail with non-array values', () => {
+      expect(() => log.assertArray('a')).to.throw(
+          'Array expected: a');
+      expect(() => log.assertArray(1)).to.throw(
+          'Array expected: 1');
     });
   });
 

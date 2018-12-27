@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 
 /**
  * Maintains state in between different AdSense slots on the same page. This
@@ -46,7 +46,7 @@ export class AdsenseSharedState {
   addNewSlot(format, id, client, slotname) {
     const result = {pv: 2, prevFmts: '', prevSlotnames: ''};
     this.previousSlots_.forEach(slot => {
-      dev().assert(slot.id != id);
+      devAssert(slot.id != id);
       result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
       if (slot.slotname) {
         result.prevSlotnames +=

@@ -24,7 +24,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Deferred} from './utils/promise';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {toWin} from './types';
 
 
@@ -118,9 +118,9 @@ export function getExistingServiceForDocInEmbedScope(
  */
 export function installServiceInEmbedScope(embedWin, id, service) {
   const topWin = getTopWindow(embedWin);
-  dev().assert(embedWin != topWin,
+  devAssert(embedWin != topWin,
       'Service override can only be installed in embed window: %s', id);
-  dev().assert(!isServiceRegistered(embedWin, id),
+  devAssert(!isServiceRegistered(embedWin, id),
       'Service override has already been installed: %s', id);
   registerServiceInternal(embedWin, embedWin, id, () => service);
   getServiceInternal(embedWin, id); // Force service to build.
@@ -379,15 +379,15 @@ function getAmpdocService(win) {
  * @template T
  */
 function getServiceInternal(holder, id) {
-  dev().assert(isServiceRegistered(holder, id),
+  devAssert(isServiceRegistered(holder, id),
       `Expected service ${id} to be registered`);
   const services = getServices(holder);
   const s = services[id];
   if (!s.obj) {
-    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
-    dev().assert(s.context, `Service ${id} registered without context.`);
+    devAssert(s.ctor, `Service ${id} registered without ctor nor impl.`);
+    devAssert(s.context, `Service ${id} registered without context.`);
     s.obj = new s.ctor(s.context);
-    dev().assert(s.obj, `Service ${id} constructed to null.`);
+    devAssert(s.obj, `Service ${id} constructed to null.`);
     s.ctor = null;
     s.context = null;
     // The service may have been requested already, in which case we have a
@@ -518,7 +518,7 @@ export function isDisposable(service) {
  * @return {!Disposable}
  */
 export function assertDisposable(service) {
-  dev().assert(isDisposable(service), 'required to implement Disposable');
+  devAssert(isDisposable(service), 'required to implement Disposable');
   return /** @type {!Disposable} */ (service);
 }
 

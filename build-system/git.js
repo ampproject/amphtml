@@ -19,7 +19,10 @@
  * @fileoverview Provides functions for executing various git commands.
  */
 
+const colors = require('ansi-colors');
 const {getStdout} = require('./exec');
+
+const commitLogMaxCount = 100;
 
 /**
  * Returns the branch point of the current branch off of master.
@@ -30,16 +33,12 @@ exports.gitBranchPointFromMaster = function() {
 };
 
 /**
- * When running on Travis, this returns the branch point of the current branch
- * off of master, as merged by Travis. When not running on Travis, returns the
- * common ancestor of the parent commit and `master`.
- * // TODO(rsimha): Revisit this logic, used by bundle-size and visual tests.
+ * Returns the point at which the PR branch was forked from master. Used during
+ * Travis PR builds to print the range of commits included in a PR check.
  */
-exports.gitTravisCommitRangeStart = function() {
-  if (process.env.TRAVIS_COMMIT_RANGE) {
-    return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
-  }
-  return getStdout('git merge-base master HEAD^').trim();
+exports.gitPrBranchPoint = function() {
+  const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
+  return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`).trim();
 };
 
 /**
@@ -63,6 +62,33 @@ exports.gitDiffStatMaster = function() {
 };
 
 /**
+ * Returns a detailed log of commits included in a PR check, starting with (and
+ * including) the branch point off of master. Limited to at most 100 commits to
+ * keep the output sane.
+ *
+ * @return {string}
+ */
+exports.gitDiffCommitLog = function() {
+  const branchPoint = process.env.TRAVIS ?
+    exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
+  let commitLog = getStdout(`git -c color.ui=always log --graph \
+--pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
+-%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
+--abbrev-commit ${branchPoint}^...HEAD \
+--max-count=${commitLogMaxCount}`).trim();
+  if (commitLog.split('\n').length >= commitLogMaxCount) {
+    commitLog += `\n${colors.yellow('WARNING:')} Commit log is longer than \
+${colors.cyan(commitLogMaxCount)} commits. \
+Branch ${colors.cyan(exports.gitBranchName())} may not have been forked from \
+${colors.cyan('master')}.`;
+    commitLog += `\n${colors.yellow('WARNING:')} See \
+${colors.cyan('https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md')} \
+for how to fix this.`;
+  }
+  return commitLog;
+};
+
+/**
  * Returns the list of files added by the local branch relative to the branch
  * point off of master, one on each line.
  * @return {!Array<string>}
@@ -82,11 +108,14 @@ exports.gitDiffColor = function() {
 };
 
 /**
- * Returns the name of the local branch.
+ * Returns the name of the branch from which the PR originated. On Travis, this
+ * is exposed via TRAVIS_PULL_REQUEST_BRANCH.
  * @return {string}
  */
 exports.gitBranchName = function() {
-  return getStdout('git rev-parse --abbrev-ref HEAD').trim();
+  return process.env.TRAVIS ?
+    process.env.TRAVIS_PULL_REQUEST_BRANCH :
+    getStdout('git rev-parse --abbrev-ref HEAD').trim();
 };
 
 /**
