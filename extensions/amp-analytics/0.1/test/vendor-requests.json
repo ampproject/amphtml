@@ -407,11 +407,11 @@
   },
   "upscore":{
       "host":"https://hit-pool.upscore.com/amp?",
-      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time",
-      "initialHit":"author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_",
-      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=final",
-      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=pulse",
-      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_&type=init"
+      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
+      "initialHit":"author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
+      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
+      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
+      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",
