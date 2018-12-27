@@ -1151,6 +1151,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      this.getViewport().leaveLightboxMode();
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1161,7 +1162,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
-          this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
