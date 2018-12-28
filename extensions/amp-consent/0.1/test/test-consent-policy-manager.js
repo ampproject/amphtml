@@ -31,9 +31,6 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 
-
-
-
 describes.realWin('ConsentPolicyManager', {
   amp: {
     extensions: ['amp-consent'],
