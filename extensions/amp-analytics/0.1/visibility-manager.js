@@ -375,8 +375,26 @@ export class VisibilityManager {
           'elementHeight': layoutBox.height,
         }));
       }
+
+      // If spec includes initial scroll depth, set it
+      if (spec.initialScrollDepth) {
+        model.maybeSetInitialScrollDepth(this.ampdoc.win.scrollY);
+        state['initialScrollDepth'] = model.getInitialScrollDepth();
+      }
+
+      if (spec.maxScrollDepth) {
+        state['maxScrollDepth'] = model.getMaxScrollDepth();
+      }
+
       callback(state);
     });
+
+    // If spec includes max scroll depth, add scroll listener
+    if (spec.maxScrollDepth) {
+      this.ampdoc.win.addEventListener('scroll', () => {
+        model.maybeUpdateMaxScrollDepth(this.ampdoc.win.scrollY);
+      });
+    }
 
     this.models_.push(model);
     model.unsubscribe(() => {

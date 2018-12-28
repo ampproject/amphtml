@@ -136,6 +136,19 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
+    /** @private {number} Scroll position at ini-load time */
+    this.initialScrollDepth_ = 0;
+
+    /**
+     * @private {number} Whether scroll position at ini-load time has
+     * been set
+     */
+    this.initialScrollDepthAlreadySet_ = false;
+    console.log('Initializing'); // DO NOT SUBMIT
+
+    /** @private {number} Maximum scroll position attained */
+    this.maxScrollDepth_ = 0;
+
     /** @private {boolean} */
     this.waitToReset_ = false;
 
@@ -288,6 +301,10 @@ export class VisibilityModel {
       'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
+
+      // Scroll depths
+      'initialScrollDepth': this.initialScrollDepth_,
+      'maxScrollDepth': this.maxScrollDepth_,
     });
   }
 
@@ -438,6 +455,46 @@ export class VisibilityModel {
         (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
         (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
         (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
+  }
+
+  /**
+   * Set the amount that the user had scrolled down the page at the time of
+   * page loading.
+   * @param {number} depth
+   */
+  maybeSetInitialScrollDepth(depth) {
+    if (!this.initialScrollDepthAlreadySet_) {
+      this.initialScrollDepth_ = depth;
+      this.initialScrollDepthAlreadySet_ = true;
+    }
+    this.maybeUpdateMaxScrollDepth(depth);
+  }
+
+  /**
+   * Gets the amount that the user had scrolled down the page, at the time of
+   * ini-load.
+   * @return {number} depth
+   */
+  getInitialScrollDepth() {
+    return this.initialScrollDepth_;
+  }
+
+  /**
+   * Update the maximum amount that the user has scrolled down the page.
+   * @param {number} depth
+   */
+  maybeUpdateMaxScrollDepth(depth) {
+    if (depth > this.maxScrollDepth_) {
+      this.maxScrollDepth_ = depth;
+    }
+  }
+
+  /**
+   * Gets the maximum amount that the user has scrolled down the page.
+   * @return {number} depth
+   */
+  getMaxScrollDepth() {
+    return this.maxScrollDepth_;
   }
 
   /**
