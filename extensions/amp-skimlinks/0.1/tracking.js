@@ -206,6 +206,11 @@ export class Tracking {
    * @private
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
+    if (numberAffiliateLinks === 0) {
+      // Nothing to send.
+      return;
+    }
+
     const data = /** @type {!JsonObject} */ (Object.assign(
         dict({
           'dl': urls,

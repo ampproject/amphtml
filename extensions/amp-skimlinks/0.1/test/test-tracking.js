@@ -69,7 +69,6 @@ describes.fakeWin(
         return [
           createAnchorReplacementObj('http://merchant1.com/', false),
           createAnchorReplacementObj('http://merchant2.com/', false),
-          createAnchorReplacementObj('http://non-merchant.com/', true),
           createAnchorReplacementObj('http://merchant1.com/', false),
         ];
       }
@@ -128,7 +127,24 @@ describes.fakeWin(
           });
         });
 
-        it('Should call both page and link impressions analytics', () => {
+        it('Should call both page and link impressions analytics ' +
+        'if AE links', () => {
+          const urls = {
+            'https://merchants.com/product': {'ae': 1, 'count': 1},
+          };
+          trackingService = helpers.createTrackingWithStubAnalytics();
+          env.sandbox
+              .stub(trackingService, 'extractAnchorTrackingInfo_')
+              .returns({numberAffiliateLinks: 1, urls});
+
+          trackingService.sendImpressionTracking([]);
+          const stub = trackingService.analytics_.trigger;
+          expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
+          expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
+        });
+
+        it('Should only call page impressions analytics ' +
+        'if no AE links', () => {
           trackingService = helpers.createTrackingWithStubAnalytics();
           env.sandbox
               .stub(trackingService, 'extractAnchorTrackingInfo_')
@@ -137,7 +153,7 @@ describes.fakeWin(
           trackingService.sendImpressionTracking([]);
           const stub = trackingService.analytics_.trigger;
           expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
-          expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
+          expect(stub.withArgs('link-impressions').called).to.be.false;
         });
 
         it('Should not call page nor link impressions if skimOptions ' +
@@ -244,8 +260,10 @@ describes.fakeWin(
               tz: 'TIMEZONE',
               uuid: 'page-impressions-id',
               guid: 'user-guid',
-              dl: {},
-              hae: 0,
+              dl: {
+                'http://merchant1.com/': {ae: 1, count: 1},
+              },
+              hae: 1,
               typ: 'l',
               jv: PLATFORM_NAME,
             };
@@ -253,7 +271,9 @@ describes.fakeWin(
               pageImpressionId: expectedData.uuid,
               guid: expectedData.guid,
             });
-            trackingService.sendImpressionTracking([]);
+            trackingService.sendImpressionTracking([
+              createAnchorReplacementObj('http://merchant1.com/', false),
+            ]);
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
                 'link-impressions'
@@ -280,7 +300,6 @@ describes.fakeWin(
           expect(trackingData.dl).to.deep.equal({
             'http://merchant1.com/': {count: 2, ae: 1},
             'http://merchant2.com/': {count: 1, ae: 1},
-            // NA links should not be in the list.
           });
 
           expect(trackingData.hae).to.equal(1);
@@ -316,11 +335,9 @@ describes.fakeWin(
         it('Should not send NA links', () => {
           const trackingService = helpers.createTrackingWithStubAnalytics({});
           trackingService.sendImpressionTracking(
-              [
+              createFakeAnchorReplacementList().concat([
                 createAnchorReplacementObj('http://non-merchant.com/', true),
-                createAnchorReplacementObj('http://non-merchant.com/', true),
-                createAnchorReplacementObj('http://non-merchant2.com/', true),
-              ]
+              ])
           );
           const urlVars = helpers.getAnalyticsUrlVars(
               trackingService,
@@ -329,9 +346,12 @@ describes.fakeWin(
 
           expect(urlVars.data).to.be.a.string;
           const trackingData = JSON.parse(urlVars.data);
-          expect(trackingData.dl).to.deep.equal({});
+          expect(trackingData.dl).to.deep.equal({
+            'http://merchant1.com/': {count: 2, ae: 1},
+            'http://merchant2.com/': {count: 1, ae: 1},
+          });
 
-          expect(trackingData.hae).to.equal(0);
+          expect(trackingData.hae).to.equal(1);
         });
 
       });
