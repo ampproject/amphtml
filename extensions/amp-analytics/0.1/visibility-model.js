@@ -144,7 +144,6 @@ export class VisibilityModel {
      * been set
      */
     this.initialScrollDepthAlreadySet_ = false;
-    console.log('Initializing'); // DO NOT SUBMIT
 
     /** @private {number} Maximum scroll position attained */
     this.maxScrollDepth_ = 0;
