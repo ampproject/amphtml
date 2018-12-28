@@ -208,8 +208,14 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
+      // NOTE (torch2424): This is very sensitive. Fixed layer applies
+      // a `top: calc(0px)` in order to fix some bugs, thus
+      // We should be careful in moving this around as
+      // `removeFromFixedLayer` will remove the `top` styling.
+      // This will preserve The animation,
+      // and prevent element flashing.
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
-      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
 
       this.enableScroll_();

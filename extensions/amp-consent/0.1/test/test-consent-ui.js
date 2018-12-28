@@ -57,7 +57,7 @@ describes.realWin('consent-ui', {
       getViewport: () => {
         return {
           addToFixedLayer: () => {},
-          updateFixedLayer: () => {},
+          removeFromFixedLayer: () => {},
         };
       },
       getVsync: () => {
