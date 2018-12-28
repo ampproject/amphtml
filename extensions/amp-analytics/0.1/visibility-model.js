@@ -140,7 +140,7 @@ export class VisibilityModel {
     this.initialScrollDepth_ = 0;
 
     /**
-     * @private {number} Whether scroll position at ini-load time has
+     * @private {boolean} Whether scroll position at ini-load time has
      * been set
      */
     this.initialScrollDepthAlreadySet_ = false;
