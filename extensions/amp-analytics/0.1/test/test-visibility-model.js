@@ -269,6 +269,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.loadTimeVisibility_ = 0.1;
       vh.minVisiblePercentage_ = 0.2;
       vh.maxVisiblePercentage_ = 0.3;
+      vh.initialScrollDepth_ = 123;
+      vh.maxScrollDepth_ = 456;
       expect(vh.getState(1)).to.deep.equal({
         // Base times:
         firstSeenTime: 1,
@@ -282,6 +284,9 @@ describes.sandboxed('VisibilityModel', {}, () => {
         loadTimeVisibility: 10,
         minVisiblePercentage: 20,
         maxVisiblePercentage: 30,
+        // Scroll Depth:
+        initialScrollDepth: 123,
+        maxScrollDepth: 456,
       });
     });
 
