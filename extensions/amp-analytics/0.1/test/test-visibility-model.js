@@ -171,7 +171,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
   });
 
-  describe('structure', () => { let visibility;
+  describe('structure', () => {
+    let visibility;
     let calcVisibility;
 
     beforeEach(() => {
@@ -316,8 +317,38 @@ describes.sandboxed('VisibilityModel', {}, () => {
       });
       expect(vh.eventResolver_).to.not.be.null;
     });
-  });
 
+    it('should not reset scroll depths on repeat', () => {
+      const vh = new VisibilityModel(NO_SPEC, calcVisibility);
+      vh.firstSeenTime_ = 2;
+      vh.lastSeenTime_ = 3;
+      vh.lastVisibleTime_ = 4;
+      vh.firstVisibleTime_ = 5;
+      vh.maxContinuousVisibleTime_ = 10;
+      vh.totalVisibleTime_ = 11;
+      vh.loadTimeVisibility_ = 0.1;
+      vh.minVisiblePercentage_ = 0.2;
+      vh.maxVisiblePercentage_ = 0.3;
+      vh.eventResolver_ = null;
+      vh.initialScrollDepth_ = 123;
+      vh.maxScrollDepth_ = 456;
+      vh.reset_();
+      expect(vh.getState(0)).to.contains({
+        firstSeenTime: 0,
+        lastSeenTime: 0,
+        lastVisibleTime: 0,
+        firstVisibleTime: 0,
+        maxContinuousVisibleTime: 0,
+        totalVisibleTime: 0,
+        loadTimeVisibility: 10,
+        minVisiblePercentage: 0,
+        maxVisiblePercentage: 0,
+        initialScrollDepth: 123,
+        maxScrollDepth: 456,
+      });
+      expect(vh.eventResolver_).to.not.be.null;
+    });
+  });
 
   describe('update monitor', () => {
     let vh;
@@ -1170,6 +1201,38 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.update();
       yield vh.eventPromise_;
       expect(spy).to.be.calledTwice;
+    });
+  });
+
+  describe('scroll depth', () => {
+    let visibility;
+    let calcVisibility;
+
+    beforeEach(() => {
+      visibility = 0;
+      calcVisibility = () => visibility;
+    });
+
+    it('with initialScrollDepth', () => {
+      const vh = new VisibilityModel({
+        initialScrollDepth: true,
+        repeat: true,
+      }, calcVisibility);
+      vh.maybeSetInitialScrollDepth(200);
+      vh.maybeSetInitialScrollDepth(100);
+      vh.maybeSetInitialScrollDepth(400);
+      expect(vh.getInitialScrollDepth()).to.equal(200);
+    });
+
+    it('with maxScrollDepth', () => {
+      const vh = new VisibilityModel({
+        maximumScrollDepth: true,
+        repeat: true,
+      }, calcVisibility);
+      vh.maybeUpdateMaxScrollDepth(200);
+      vh.maybeUpdateMaxScrollDepth(400);
+      vh.maybeUpdateMaxScrollDepth(100);
+      expect(vh.getMaxScrollDepth()).to.equal(400);
     });
   });
 });
