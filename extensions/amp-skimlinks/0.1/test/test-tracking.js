@@ -26,6 +26,7 @@ import {
   XCUST_ATTRIBUTE_NAME,
 } from '../constants';
 
+
 describes.fakeWin(
     'test-tracking',
     {
@@ -35,8 +36,20 @@ describes.fakeWin(
     },
     env => {
       let helpers;
+      let createAnchorReplacementObj;
+
       beforeEach(() => {
         helpers = helpersFactory(env);
+
+        createAnchorReplacementObj = (initialUrl, setNull) => {
+          const anchor = helpers.createAnchor(initialUrl);
+          const replacementUrl = setNull
+            ? null
+            : `https://goredirectingat.com/url=${initialUrl}`;
+
+          return {anchor, replacementUrl};
+        };
+
       });
 
       function setupTrackingService(skimOptions, trackingInfo) {
@@ -53,20 +66,11 @@ describes.fakeWin(
       }
 
       function createFakeAnchorReplacementList() {
-        const createObj = (initialUrl, setNull) => {
-          const anchor = helpers.createAnchor(initialUrl);
-          const replacementUrl = setNull
-            ? null
-            : `https://goredirectingat.com/url=${initialUrl}`;
-
-          return {anchor, replacementUrl};
-        };
-
         return [
-          createObj('http://merchant1.com/', false),
-          createObj('http://merchant2.com/', false),
-          createObj('http://non-merchant.com/', true),
-          createObj('http://merchant1.com/', false),
+          createAnchorReplacementObj('http://merchant1.com/', false),
+          createAnchorReplacementObj('http://merchant2.com/', false),
+          createAnchorReplacementObj('http://non-merchant.com/', true),
+          createAnchorReplacementObj('http://merchant1.com/', false),
         ];
       }
 
@@ -276,7 +280,7 @@ describes.fakeWin(
           expect(trackingData.dl).to.deep.equal({
             'http://merchant1.com/': {count: 2, ae: 1},
             'http://merchant2.com/': {count: 1, ae: 1},
-            'http://non-merchant.com/': {count: 1, ae: 0},
+            // NA links should not be in the list.
           });
 
           expect(trackingData.hae).to.equal(1);
@@ -306,10 +310,32 @@ describes.fakeWin(
           expect(trackingData.dl).to.deep.equal({
             'http://merchant1.com/': {count: 2, ae: 1},
             'http://merchant2.com/': {count: 1, ae: 1},
-            'http://non-merchant.com/': {count: 1, ae: 0},
           });
         });
+
+        it('Should not send NA links', () => {
+          const trackingService = helpers.createTrackingWithStubAnalytics({});
+          trackingService.sendImpressionTracking(
+              [
+                createAnchorReplacementObj('http://non-merchant.com/', true),
+                createAnchorReplacementObj('http://non-merchant.com/', true),
+                createAnchorReplacementObj('http://non-merchant2.com/', true),
+              ]
+          );
+          const urlVars = helpers.getAnalyticsUrlVars(
+              trackingService,
+              'link-impressions'
+          );
+
+          expect(urlVars.data).to.be.a.string;
+          const trackingData = JSON.parse(urlVars.data);
+          expect(trackingData.dl).to.deep.equal({});
+
+          expect(trackingData.hae).to.equal(0);
+        });
+
       });
+
 
       describe('sendNaClickTracking', () => {
         it('Should send non-affiliate click tracking', () => {

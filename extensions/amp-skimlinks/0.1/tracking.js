@@ -258,10 +258,12 @@ export class Tracking {
    * Extract the information about links on the page
    * in order to send it to the tracking API:
    * - Number of affiliate links on the pages
-   * - A map of each url seen on the page associated with some information:
-   *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
+   * - A map of each AE url seen on the page associated with some information:
+   *   i.e: {url1: { count: 1, ae: 1 }, url2: { count: 4, ae: 1}}
    *
-   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
+   * Note: NA links are now excluded from the tracking info.
+   *
+   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - List of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {!{numberAffiliateLinks: number, urls: !JsonObject}}
    * @private
@@ -271,20 +273,20 @@ export class Tracking {
     const urls = dict({});
 
     anchorReplacementList.forEach(({replacementUrl, anchor}) => {
-      if (isExcludedAnchorUrl(anchor, this.skimOptions_)) {
+      const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
+      const isAffiliate = Boolean(replacementUrl);
+      // Do not track na-links since the backend doesn't use them.
+      if (!isAffiliate || isExcluded) {
         return;
       }
 
       urls[anchor.href] = urls[anchor.href] || dict({
-        'ae': replacementUrl ? 1 : 0,
+        'ae': 1, // 1 means affiliated link.
         'count': 0,
       });
 
       urls[anchor.href]['count'] += 1;
-
-      if (urls[anchor.href]['ae'] === 1) {
-        numberAffiliateLinks += 1;
-      }
+      numberAffiliateLinks += 1;
     });
 
     return {
