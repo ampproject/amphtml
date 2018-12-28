@@ -1,0 +1,3 @@
+[submodule "test/manual/teads/amp-sample"]
+	path = test/manual/teads/amp-sample
+	url = git@github.com:ebuzzing/amp-sample.git

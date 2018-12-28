@@ -79,6 +79,33 @@ const serverFiles = globby.sync([
 
 // Used to enable / disable lazy building.
 let lazyBuild = false;
+//const ip = require('ip');
+
+// const host = argv.host || ip.address();
+// const port = argv.port || process.env.PORT || 8000;
+// const useHttps = argv.https != undefined;
+// const quiet = argv.quiet != undefined;
+// const sendCachingHeaders = argv.cache != undefined;
+// const noCachingExtensions = argv.noCachingExtensions != undefined;
+
+// /**
+//  * Logs the server's mode (based on command line arguments).
+//  */
+// function logServeMode() {
+//   switch (getServeMode()) {
+//     case 'compiled':
+//       log(green('Serving'), cyan('minified'), green('JS'));
+//       break;
+//     case 'cdn':
+//       log(green('Serving'), cyan('current prod'), green('JS'));
+//       break;
+//     case 'rtv':
+//       log(green('Serving JS from RTV'), cyan(`${argv.rtv}`));
+//       break;
+//     default:
+//       log(green('Serving'), cyan('unminified'), green('JS'));
+//   }
+// }
 
 /**
  * Returns a list of middleware handler functions to use while serving
