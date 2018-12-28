@@ -226,7 +226,7 @@ export class ConsentPolicyManager {
         'only predefined policies are supported', policyId);
       return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
     }
-    return this.whenPolicyInstanceReady_(policyId).then(() => {
+    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
         return this.instances_[policyId].getCurrentPolicyStatus();
       });
@@ -245,9 +245,9 @@ export class ConsentPolicyManager {
         'only predefined policies are supported', policyId);
       return Promise.resolve(false);
     }
-    return this.whenPolicyInstanceReady_(policyId).then(() => {
+    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].shouldEnable();
+        return this.instances_[policyId].shouldUnblock();
       });
     });
   }
@@ -287,7 +287,7 @@ export class ConsentPolicyManager {
    * @param {string} policyId
    * @return {!Promise}
    */
-  whenPolicyInstanceReady_(policyId) {
+  whenPolicyInstanceRegistered_(policyId) {
     if (this.instances_[policyId]) {
       return Promise.resolve();
     }
@@ -424,7 +424,7 @@ export class ConsentPolicyInstance {
    * Caller need to make sure that policy status has resolved
    * @return {boolean}
    */
-  shouldEnable() {
+  shouldUnblock() {
     return (this.unblockStateLists_.indexOf(this.status_) > -1);
   }
 }
