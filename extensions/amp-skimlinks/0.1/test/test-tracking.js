@@ -45,7 +45,7 @@ describes.fakeWin(
           const anchor = helpers.createAnchor(initialUrl);
           const replacementUrl = setNull
             ? null
-            : `https://goredirectingat.com/url=${initialUrl}`;
+            : `https://goredirectingat.com/?url=${initialUrl}`;
 
           return {anchor, replacementUrl};
         };
