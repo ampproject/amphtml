@@ -333,6 +333,8 @@ export class VisibilityManager {
       });
     }
 
+    const viewport = Services.viewportForDoc(this.ampdoc);
+
     // Process the event.
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
@@ -352,7 +354,7 @@ export class VisibilityManager {
         layoutBox =
             resource ?
               resource.getLayoutBox() :
-              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
         Object.assign(state, dict({
@@ -378,7 +380,7 @@ export class VisibilityManager {
 
       // If spec includes initial scroll depth, set it
       if (spec['initialScrollDepth']) {
-        model.maybeSetInitialScrollDepth(this.ampdoc.win.scrollY);
+        model.maybeSetInitialScrollDepth(viewport.getScrollTop());
         state['initialScrollDepth'] = model.getInitialScrollDepth();
       }
 
@@ -391,8 +393,8 @@ export class VisibilityManager {
 
     // If spec includes max scroll depth, add scroll listener
     if (spec['maxScrollDepth']) {
-      this.ampdoc.win.addEventListener('scroll', () => {
-        model.maybeUpdateMaxScrollDepth(this.ampdoc.win.scrollY);
+      viewport.onScroll(() => {
+        model.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
       });
     }
 
