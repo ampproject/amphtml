@@ -103,6 +103,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object<string, Promise<?JsonObject>>} */
     this.remoteConfigPromises_ = map();
+
+    /** @private {?string} */
+    this.consentInstanceId_ = null;
   }
 
   /** @override */
@@ -127,6 +130,10 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentConfig_ = config.getConsentConfig();
 
+    // ConsentConfig has verified that there's one and only one consent instance
+    this.consentInstanceId_ =
+        Object.keys(/** @type {!Object} */ (this.consentConfig_))[0];
+
     const policyConfig = config.getPolicyConfig();
 
     this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentConfig_);
@@ -144,6 +151,8 @@ export class AmpConsent extends AMP.BaseElement {
             .then(manager => {
               this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
                 manager);
+              this.consentPolicyManager_.setLegacyConsentInstanceId(
+                  /** @type {string} */ (this.consentInstanceId_));
               const policyKeys =
                   Object.keys(/** @type {!Object} */ (this.policyConfig_));
               for (let i = 0; i < policyKeys.length; i++) {
