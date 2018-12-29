@@ -1122,6 +1122,41 @@ describes.realWin('amp-ima-video', {
         .to.eql('none');
   });
 
+  it('shows controls on hover while playing after hidden', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    imaVideoObj.hideControls();
+
+    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+        .to.eql('none');
+
+    const clickEvent = new Event('click');
+    const videoPlayerElement = imaVideoObj
+        .getPropertiesForTesting().videoPlayer;
+
+    imaVideoObj.setPlayerStateForTesting(
+        imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
+    imaVideoObj.addHoverEventToElement(
+        videoPlayerElement,
+        imaVideoObj.showControls
+    );
+    videoPlayerElement.dispatchEvent(clickEvent);
+
+    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+        .to.eql('flex');
+    expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
+        .not.to.be.undefined;
+  });
+
   it('suppresses IMA load with unknown consent', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');

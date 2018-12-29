@@ -178,6 +178,9 @@ let adsActive;
 // Flag tracking if playback has started.
 let playbackStarted;
 
+// Boolean tracking if controls are hidden or shown
+let controlsVisible;
+
 // Timer used to hide controls after user action.
 let hideControlsTimeout;
 
@@ -274,6 +277,8 @@ export function imaVideo(global, data) {
     'user-select': 'none',
     'z-index': '1',
   });
+  controlsVisible = false;
+
   // Ad progress
   countdownWrapperDiv = global.document.createElement('div');
   countdownWrapperDiv.id = 'ima-countdown';
@@ -508,6 +513,29 @@ export function imaVideo(global, data) {
 }
 
 /**
+ * Adds the appropriate event listener to an element
+ * to represent a hover state. And adds an appropriate
+ * throttler.
+ * @param {!Element} element
+ * @param {!Function} callback
+ */
+export function addHoverEventToElement(element, callback) {
+  element.addEventListener(interactEvent, callback);
+  element.addEventListener(mouseMoveEvent, callback);
+}
+
+/**
+ * Removess the appropriate event listener from an element
+ * that represented a hover state.
+ * @param {!Element} element
+ * @param {!Function} callback
+ */
+export function removeHoverEventFromElement(element, callback) {
+  element.removeEventListener(interactEvent, callback);
+  element.removeEventListener(mouseMoveEvent, callback);
+}
+
+/**
  * @param {!Object} global
  * @param {!Object} data
  */
@@ -579,7 +607,7 @@ function onImaLoadSuccess(global, data) {
 function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(videoPlayer, showControls);
   imaLoadAllowed = false;
   postMessage({event: VideoEvents.LOAD});
 }
@@ -786,7 +814,7 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(videoPlayer, showControls);
   if (playbackStarted) {
     playVideo();
   }
@@ -803,7 +831,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(videoPlayer, showControls);
   playVideo();
 }
 
@@ -850,7 +878,7 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   postMessage({event: VideoEvents.AD_START});
-  videoPlayer.removeEventListener(interactEvent, showControls);
+  removeHoverEventFromElement(videoPlayer, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   showAdControls();
@@ -864,7 +892,7 @@ export function onContentPauseRequested(global) {
  */
 export function onContentResumeRequested() {
   adsActive = false;
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(videoPlayer, showControls);
   postMessage({event: VideoEvents.AD_END});
   resetControlsAfterAd();
   if (!contentComplete) {
@@ -1278,7 +1306,11 @@ export function resetControlsAfterAd() {
  * @visibleForTesting
  */
 export function showControls() {
-  setStyle(controlsDiv, 'display', 'flex');
+  if (!controlsVisible) {
+    setStyle(controlsDiv, 'display', 'flex');
+    controlsVisible = true;
+  }
+
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
@@ -1293,8 +1325,9 @@ export function showControls() {
  * @visibleForTesting
  */
 export function hideControls() {
-  if (!adsActive) {
+  if (controlsVisible && !adsActive) {
     setStyle(controlsDiv, 'display', 'none');
+    controlsVisible = false;
   }
 }
 
