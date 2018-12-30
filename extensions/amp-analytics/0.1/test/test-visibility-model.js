@@ -271,7 +271,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.minVisiblePercentage_ = 0.2;
       vh.maxVisiblePercentage_ = 0.3;
       vh.initialScrollDepth_ = 123;
-      vh.maxScrollDepth_ = 456;
       expect(vh.getState(1)).to.deep.equal({
         // Base times:
         firstSeenTime: 1,
@@ -287,7 +286,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         maxVisiblePercentage: 30,
         // Scroll Depth:
         initialScrollDepth: 123,
-        maxScrollDepth: 456,
       });
     });
 
@@ -331,7 +329,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.maxVisiblePercentage_ = 0.3;
       vh.eventResolver_ = null;
       vh.initialScrollDepth_ = 123;
-      vh.maxScrollDepth_ = 456;
       vh.reset_();
       expect(vh.getState(0)).to.contains({
         firstSeenTime: 0,
@@ -344,7 +341,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         minVisiblePercentage: 0,
         maxVisiblePercentage: 0,
         initialScrollDepth: 123,
-        maxScrollDepth: 456,
       });
       expect(vh.eventResolver_).to.not.be.null;
     });
@@ -1213,26 +1209,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
       calcVisibility = () => visibility;
     });
 
-    it('with initialScrollDepth', () => {
+    it('should correctly update initialScrollDepth', () => {
       const vh = new VisibilityModel({
-        initialScrollDepth: true,
         repeat: true,
       }, calcVisibility);
       vh.maybeSetInitialScrollDepth(200);
       vh.maybeSetInitialScrollDepth(100);
       vh.maybeSetInitialScrollDepth(400);
       expect(vh.getInitialScrollDepth()).to.equal(200);
-    });
-
-    it('with maxScrollDepth', () => {
-      const vh = new VisibilityModel({
-        maximumScrollDepth: true,
-        repeat: true,
-      }, calcVisibility);
-      vh.maybeUpdateMaxScrollDepth(200);
-      vh.maybeUpdateMaxScrollDepth(400);
-      vh.maybeUpdateMaxScrollDepth(100);
-      expect(vh.getMaxScrollDepth()).to.equal(400);
     });
   });
 });

@@ -84,9 +84,17 @@ export class VisibilityManager {
     /** @const @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
+    /** @private {number} Maximum scroll position attained */
+    this.maxScrollDepth_ = 0;
+
     if (this.parent) {
       this.parent.addChild_(this);
     }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    viewport.onChanged(() => {
+      this.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
+    });
   }
 
   /**
@@ -203,6 +211,24 @@ export class VisibilityManager {
         this.children_[i].updateModels_();
       }
     }
+  }
+
+  /**
+   * Update the maximum amount that the user has scrolled down the page.
+   * @param {number} depth
+   */
+  maybeUpdateMaxScrollDepth(depth) {
+    if (depth > this.maxScrollDepth_) {
+      this.maxScrollDepth_ = depth;
+    }
+  }
+
+  /**
+   * Gets the maximum amount that the user has scrolled down the page.
+   * @return {number} depth
+   */
+  getMaxScrollDepth() {
+    return this.maxScrollDepth_;
   }
 
   /** @private */
@@ -325,15 +351,18 @@ export class VisibilityManager {
       model.setReportReady(createReportPromiseFunc);
     }
 
+    const viewport = Services.viewportForDoc(this.ampdoc);
+
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
+        const scrollDepth = viewport.getScrollTop();
+        model.maybeSetInitialScrollDepth(scrollDepth);
+        this.maybeUpdateMaxScrollDepth(scrollDepth);
         model.setReady(true);
       });
     }
-
-    const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Process the event.
     model.onTriggerEvent(() => {
@@ -378,25 +407,11 @@ export class VisibilityManager {
         }));
       }
 
-      // If spec includes initial scroll depth, set it
-      if (spec['initialScrollDepth']) {
-        model.maybeSetInitialScrollDepth(viewport.getScrollTop());
-        state['initialScrollDepth'] = model.getInitialScrollDepth();
-      }
-
-      if (spec['maxScrollDepth']) {
-        state['maxScrollDepth'] = model.getMaxScrollDepth();
-      }
+      state['initialScrollDepth'] = model.getInitialScrollDepth();
+      state['maxScrollDepth'] = this.getMaxScrollDepth();
 
       callback(state);
     });
-
-    // If spec includes max scroll depth, add scroll listener
-    if (spec['maxScrollDepth']) {
-      viewport.onScroll(() => {
-        model.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
-      });
-    }
 
     this.models_.push(model);
     model.unsubscribe(() => {

@@ -145,9 +145,6 @@ export class VisibilityModel {
      */
     this.initialScrollDepthAlreadySet_ = false;
 
-    /** @private {number} Maximum scroll position attained */
-    this.maxScrollDepth_ = 0;
-
     /** @private {boolean} */
     this.waitToReset_ = false;
 
@@ -301,9 +298,8 @@ export class VisibilityModel {
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
 
-      // Scroll depths
+      // Scroll depth (max scroll depth will be added by VisibilityManager)
       'initialScrollDepth': this.initialScrollDepth_,
-      'maxScrollDepth': this.maxScrollDepth_,
     });
   }
 
@@ -466,7 +462,6 @@ export class VisibilityModel {
       this.initialScrollDepth_ = depth;
       this.initialScrollDepthAlreadySet_ = true;
     }
-    this.maybeUpdateMaxScrollDepth(depth);
   }
 
   /**
@@ -476,24 +471,6 @@ export class VisibilityModel {
    */
   getInitialScrollDepth() {
     return this.initialScrollDepth_;
-  }
-
-  /**
-   * Update the maximum amount that the user has scrolled down the page.
-   * @param {number} depth
-   */
-  maybeUpdateMaxScrollDepth(depth) {
-    if (depth > this.maxScrollDepth_) {
-      this.maxScrollDepth_ = depth;
-    }
-  }
-
-  /**
-   * Gets the maximum amount that the user has scrolled down the page.
-   * @return {number} depth
-   */
-  getMaxScrollDepth() {
-    return this.maxScrollDepth_;
   }
 
   /**
