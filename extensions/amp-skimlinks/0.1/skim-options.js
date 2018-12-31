@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import {GLOBAL_DOMAIN_BLACKLIST} from './constants';
+import {getChildJsonConfig} from '../../../src/json';
 import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
+
+import {
+  GLOBAL_DOMAIN_BLACKLIST,
+  LINKS_IMPRESSIONS_TRACKING_URL,
+  NA_CLICK_TRACKING_URL,
+  PAGE_IMPRESSION_TRACKING_URL,
+} from './constants';
 
 const errors = {
   INVALID_PUBCODE: '"publisher-code" is required.',
@@ -48,6 +55,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
     linkSelector: getLinkSelector_(element),
+    config: getConfig_(element),
   };
 }
 
@@ -145,4 +153,23 @@ function getInternalDomains_(docInfo) {
   }
 
   return internalDomains;
+}
+
+
+/**
+ * @param {!Element} element
+ */
+function getConfig_(element) {
+  const defaultConfig = {
+    'pageTrackingUrl': PAGE_IMPRESSION_TRACKING_URL,
+  };
+
+  try {
+    return {
+      ...defaultConfig,
+      ...getChildJsonConfig(element),
+    };
+  } catch (err) {
+    return defaultConfig;
+  }
 }
