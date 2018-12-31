@@ -231,7 +231,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const {element} = this;
 
     if (eventType === 'set_aspect_ratio') {
-      this.attemptChangeHeight(info.new_height).catch(() => {});
+      this.attemptChangeHeight(info['new_height']).catch(() => {});
     }
 
     const playerState = info['playerState'];
