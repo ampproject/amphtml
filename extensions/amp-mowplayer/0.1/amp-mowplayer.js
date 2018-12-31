@@ -266,11 +266,12 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
 
-    this.sendCommand_('listening', {
-      href: window.location.href,
-      origin: window.location.origin,
-      isAmp: true,
-    });
+    this.sendCommand_('listening', [
+      'amp',
+      window.location.href,
+      window.location.origin,
+      true,
+    ]);
 
   }
 
