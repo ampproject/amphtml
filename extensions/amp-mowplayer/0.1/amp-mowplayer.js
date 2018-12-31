@@ -200,7 +200,7 @@ class AmpMowplayer extends AMP.BaseElement {
           'func': command,
           'args': opt_args || '',
         }));
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        this.iframe_.contentWindow./*OK*/postMessage(message, 'https://cdn.mowplayer.com');
       }
     });
   }
@@ -214,11 +214,13 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     const eventData = getData(event);
+
     if (!isJsonOrObj(eventData)) {
       return;
     }
 
     const data = objOrParseJson(eventData);
+
     if (data == null) {
       return; // We only process valid JSON.
     }
@@ -227,6 +229,10 @@ class AmpMowplayer extends AMP.BaseElement {
     const info = data['info'] || {};
 
     const {element} = this;
+
+    if (eventType === 'set_aspect_ratio') {
+      this.attemptChangeHeight(info['new_height']).catch(() => {});
+    }
 
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
@@ -259,9 +265,14 @@ class AmpMowplayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-      'event': 'listening',
-    })), '*');
+
+    this.sendCommand_('listening', [
+      'amp',
+      window.location.href,
+      window.location.origin,
+      true,
+    ]);
+
   }
 
   /** @override */
@@ -361,7 +372,6 @@ class AmpMowplayer extends AMP.BaseElement {
     return [];
   }
 }
-
 
 AMP.extension('amp-mowplayer', '0.1', AMP => {
   AMP.registerElement('amp-mowplayer', AmpMowplayer);
