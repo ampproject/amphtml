@@ -19,10 +19,8 @@ import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {
-
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from './constants';
@@ -233,10 +231,11 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
+    const pageImpressionUrl = this.skimOptions_.config.pageTrackingUrl;
     // Configure analytics to send POST request when receiving
     // 'page-impressions' event.
     analyticsBuilder.track(PAGE_IMPRESSIONS,
-        PAGE_IMPRESSION_TRACKING_URL);
+        pageImpressionUrl);
     analyticsBuilder.track(LINK_IMPRESSIONS,
         LINKS_IMPRESSIONS_TRACKING_URL);
     analyticsBuilder.track(NON_AFFILIATE_CLICK,
