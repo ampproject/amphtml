@@ -35,7 +35,6 @@ function getIntersectionMessage(id) {
 describes.realWin('amp-video-iframe', {
   amp: {
     extensions: ['amp-video-iframe'],
-    experiments: ['amp-video-iframe'],
   },
 }, env => {
 
