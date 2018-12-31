@@ -225,12 +225,14 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Element Y](#element-y) | N/A | `${elementY}` |
 | [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
 | [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
+| [Initial Scroll Depth](#initial-scroll-depth) | N/A | `${initialScrollDepth}` |
 | [Intersection Ratio](#intersection-ratio) | N/A | `${intersectionRatio}` |
 | [Intersection Rect](#intersection-rect) | N/A | `${intersectionRect}` |
 | [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
 | [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
 | [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
 | [Max Continuous Visible Time](#max-continuous-visible-time) | N/A | `${maxContinuousVisibleTime}` |
+| [Max Scroll Depth](#max-scroll-depth) | N/A | `${maxScrollDepth}` |
 | [Max Visible Percentage](#max-visible-percentage) | N/A | `${maxVisiblePercentage}` |
 | [Min Visible Percentage](#min-visible-percentage) | N/A | `${minVisiblePercentage}` |
 | [Total Time](#total-time) | N/A | `${totalTime}` |
@@ -683,6 +685,12 @@ requested attribute names and the object values are the elements' values for tho
 * The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods.
 [Issue #14252](https://github.com/ampproject/amphtml/issues/14252) has been created to address potential future demand for more complex CSS selectors.
 
+#### Initial Scroll Depth
+
+Provides the scroll depth at the time the element was loaded.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${initialScrollDepth}`
 
 #### Intersection Ratio
 
@@ -730,6 +738,13 @@ Provides the maximum amount of continuous time an element has met the `visibilit
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${maxContinuousVisibleTime}`
+
+#### Max Scroll Depth
+
+Provides the maximum amount that the user has scrolled down the page.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${maxScrollDepth}`
 
 #### Max Visible Percentage
 
