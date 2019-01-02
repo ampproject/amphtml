@@ -611,6 +611,14 @@ export class AmpStory extends AMP.BaseElement {
       this.onKeyDown_(e);
     }, true);
 
+    this.win.document.addEventListener('contextmenu', e => {
+      const uiState = this.storeService_.get(StateProperty.UI_STATE);
+      if (uiState === UIType.MOBILE) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
     // on document visibility change (eg: user switches tab).
     this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
