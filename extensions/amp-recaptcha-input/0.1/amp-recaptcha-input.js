@@ -77,7 +77,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         'The data-action attribute is required for <amp-recaptcha-input> %s',
         this.element);
 
-    user().assert(
+    userAssert(
         this.element.getAttribute(AsyncInputAttributes.NAME),
         'The %s attribute is required for <amp-recaptcha-input> %s',
         AsyncInputAttributes.NAME,
