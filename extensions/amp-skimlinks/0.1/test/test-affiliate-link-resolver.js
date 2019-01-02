@@ -46,7 +46,15 @@ describes.fakeWin(
 
       beforeEach(() => {
         trackingService = helpers.createTrackingWithStubAnalytics();
-        waypoint = new Waypoint(env.ampdoc, trackingService, 'referrer');
+        const skimOptions = {
+          config: {waypointUrl: 'https://go.skimresources.com/'},
+        };
+        waypoint = new Waypoint(
+            env.ampdoc,
+            skimOptions,
+            trackingService,
+            'referrer'
+        );
       });
 
       afterEach(() => {

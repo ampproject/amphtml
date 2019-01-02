@@ -19,6 +19,7 @@ import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
 
 import {
+  AFFILIATION_API,
   GLOBAL_DOMAIN_BLACKLIST,
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
@@ -31,6 +32,13 @@ const errors = {
     '"custom-tracking-id" should be <=50 characters and only contain upper ' +
     'and lowercase characters, numbers, underscores and pipes.',
   INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
+};
+
+export const defaultConfig = {
+  'pageTrackingUrl': PAGE_IMPRESSION_TRACKING_URL,
+  'linksTrackingUrl': LINKS_IMPRESSIONS_TRACKING_URL,
+  'nonAffiliateTrackingUrl': NA_CLICK_TRACKING_URL,
+  'waypointUrl': AFFILIATION_API,
 };
 
 /**
@@ -160,10 +168,6 @@ function getInternalDomains_(docInfo) {
  * @param {!Element} element
  */
 function getConfig_(element) {
-  const defaultConfig = {
-    'pageTrackingUrl': PAGE_IMPRESSION_TRACKING_URL,
-  };
-
   try {
     return {
       ...defaultConfig,
