@@ -18,6 +18,7 @@ import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {Services} from '../../../../src/services';
 import {Tracking} from '../tracking';
+import {defaultConfig} from '../skim-options';
 import {pubcode} from './constants';
 
 const helpersFactory = env => {
@@ -61,6 +62,7 @@ const helpersFactory = env => {
           {
             tracking: true,
             pubcode,
+            config: defaultConfig,
           },
           skimOptions
       );
