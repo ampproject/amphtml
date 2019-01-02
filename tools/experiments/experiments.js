@@ -271,6 +271,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
+  },
+  {
     id: 'no-sync-xhr-in-ads',
     name: 'Disables syncronous XHR requests in 3p iframes.',
     spec: 'TODO',
