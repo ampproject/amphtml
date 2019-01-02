@@ -297,7 +297,7 @@ We've introduced the `amp-list-load-more` experiment as an implementation for pa
 
 ### Attributes
 #### load-more (mandatory)
-This attribute accepts two values: "auto" or "manual". Adding this attribute with the value "manual" to `<amp-list>` will show a "load-more" button at the end of `<amp-list>`. Adding this attribute with the value of "auto" will cause `<amp-list>` to automatically load more elements three viewports down for an infinite scroll effect.
+This attribute accepts two values: "auto" or "manual". Setting the value of this attribute to manual "manual" will show a "load-more" button at the end of `<amp-list>`. Setting the value of this attribute to "auto" will cause `<amp-list>` to automatically load more elements three viewports down for an infinite scroll effect.
 
 #### load-more-bookmark (optional)
 This attribute specifies an field name in the returned data that will give the url of the next items to load. If this attribute is not specified, `<amp-list>` expects the json payload to have the `load-more-src` field, which corresponds to the next url to load. In the case where this field is called something else, you can specify the name of that field via the `load-more-bookmark` field.E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
