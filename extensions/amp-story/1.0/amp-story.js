@@ -609,8 +609,11 @@ export class AmpStory extends AMP.BaseElement {
     }, true);
 
     this.win.document.addEventListener('contextmenu', e => {
-      e.preventDefault();
-      e.stopPropagation();
+      const uiState = this.storeService_.get(StateProperty.UI_STATE);
+      if (uiState === UIType.MOBILE) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     });
 
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
