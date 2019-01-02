@@ -261,7 +261,7 @@ async function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
-    const testsToRun = unitTestsToRun();
+    const testsToRun = unitTestsToRun(config.unitTestPaths);
     if (testsToRun.length == 0) {
       log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
