@@ -107,6 +107,15 @@ export const RTC_VENDORS = {
     macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
     disableKeyAppend: true,
   },
+  sonobi: {
+    url: 'https://apex.go.sonobi.com/trinity.json?key_maker=%7B%22ATTR(data-slot)%7C1%22%3A%22ATTR(width)xATTR(height)%2CATTR(data-multi-size)%22%7D&ref=CANONICAL_URL&lib_name=amp&lib_v=0.1&pv=PAGEVIEWID&amp=1',
+    disableKeyAppend: true,
+  },
+  sonobipi: {
+    url: 'https://apex.go.sonobi.com/trinity.json?key_maker=%7B%221%22%3A%22PLACEMENT_ID%7CATTR(width)xATTR(height)%2CATTR(data-multi-size)%22%7D&ref=CANONICAL_URL&lib_name=amp&lib_v=0.1&pv=PAGEVIEWID&amp=1',
+    macros: ['PLACEMENT_ID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
