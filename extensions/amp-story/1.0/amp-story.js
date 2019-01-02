@@ -255,6 +255,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
+    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    this.storyPath_ = [];
+
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
@@ -745,6 +748,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
+    storyPath_.push(getPageById(initialPageId));
 
     this.initializeSidebar_();
     this.setThemeColor_();
@@ -1040,6 +1044,13 @@ export class AmpStory extends AMP.BaseElement {
 
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
+
+    //Check to see if this is a navigation to the previous page.
+    if (this.storyPath_[this.storypath_.length -2] == targetPage) {
+      this.storyPath_.pop();
+    } else {
+      storypath_.push(this.activePage_);
+    }
 
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
