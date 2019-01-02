@@ -42,7 +42,8 @@ export let AmpAdExitConfig;
  *   finalUrl: string,
  *   trackingUrls: (!Array<string>|undefined),
  *   vars: (VariablesDef|undefined),
- *   filters: (!Array<string>|undefined)
+ *   filters: (!Array<string>|undefined),
+ *   properties: (PropertiesDef|undefined)
  * }}
  */
 export let NavigationTargetConfig;
@@ -59,6 +60,18 @@ export let VariableDef;
  * @typedef {!Object<string, !VariableDef>}
  */
 export let VariablesDef;
+
+/**
+ * @typedef {{
+ *   clickTarget: (string|undefined)
+ * }}
+ */
+ export let PropertyDef;
+
+ /**
+ * @typedef {!Object<string, !PropertyDef>}
+ */
+ export let PropertiesDef;
 
 /**
  * @typedef {{
