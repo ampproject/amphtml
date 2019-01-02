@@ -131,7 +131,7 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 /** @enum {string} */
 const Attributes = {
   STANDALONE: 'standalone',
-  ADVANCE_TO: 'i-amphtml-advance-to',
+  ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   AD_SHOWING: 'ad-showing',
