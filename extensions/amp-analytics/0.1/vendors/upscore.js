@@ -34,7 +34,6 @@ export const UPSCORE_CONFIG = /**@type {!JsonObject} */({
             'section=${section}&' +
             'url=${ampdocUrl}&' +
             'agent=${userAgent}&' +
-            'u_id=${clientId(upscore)}&' +
             'location=${ampGeo(ISOCountry)}',
     'finalbeat': '${host}${basePrefix}&type=final',
     'heartbeat': '${host}${basePrefix}&type=pulse',
