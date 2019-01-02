@@ -212,12 +212,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
-    this.registerAction('goToPage', invocation => {
-      const {args} = invocation;
-      if (args) {
-        this.switchTo_(args['id']);
-      }
-    });
   }
 
   /**

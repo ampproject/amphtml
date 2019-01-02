@@ -1210,11 +1210,12 @@ describes.realWin('amp-story', {
           story.buildCallback();
           return story.layoutCallback()
               .then(() => {
+                story.element.setAttribute('id', 'story');
                 const actionButton = createElementWithAttributes(
                     win.document,
                     'button',
                     {'id': 'actionButton',
-                      'on': 'tap:cover.goToPage(id=page-2)'});
+                      'on': 'tap:story.goToPage(id=page-2)'});
                 element.querySelector('#cover').appendChild(actionButton);
                 // Click on the actionButton to trigger the goToPage action.
                 actionButton.click();

@@ -378,6 +378,12 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
+    this.registerAction('goToPage', invocation => {
+      const {args} = invocation;
+      if (args) {
+        this.switchTo_(args['id']);
+      }
+    });
   }
 
   /** @override */
@@ -939,7 +945,7 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
       this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
-          [{tagOrTarget: 'AMP-STORY-PAGE', method: 'goToPage'}]);
+          [{tagOrTarget: 'AMP-STORY', method: 'goToPage'}]);
     });
   }
 
