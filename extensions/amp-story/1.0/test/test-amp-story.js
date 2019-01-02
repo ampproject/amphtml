@@ -24,6 +24,7 @@ import {
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
@@ -355,6 +356,42 @@ describes.realWin('amp-story', {
               '',
           );
         });
+  });
+
+  it('should update bookend status in browser history', () => {
+    const pageCount = 1;
+    createPages(story.element, pageCount, ['last-page']);
+
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+
+          return expect(replaceStateStub).to.have.been.calledWith(
+              {ampStoryBookendActive: true}, '',
+          );
+        });
+  });
+
+
+  it('should not block layoutCallback when bookend xhr fails', () => {
+    createPages(story.element, 1, ['page-1']);
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    const bookendXhr = sandbox
+        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
+        .returns(Promise.reject());
+
+    story.buildCallback();
+
+    return story.layoutCallback().then(() => {
+      expect(bookendXhr).to.have.been.calledOnce;
+    }).catch(error => {
+      expect(error).to.be.undefined;
+    });
   });
 
   it('should NOT update page id in browser history if ad', () => {

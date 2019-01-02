@@ -63,27 +63,32 @@ const BOOKEND_VERSION_KEY = 'bookendVersion';
  */
 const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
-/** @private @const {!../simple-template.ElementDef} */
-const ROOT_TEMPLATE = {
-  tag: 'section',
-  attrs: dict({
-    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
-        HIDDEN_CLASSNAME}),
-  children: [
-    // Overflow container that gets pushed to the bottom when content height is
-    // smaller than viewport.
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
-      children: [
-        // Holds bookend content.
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
-        },
-      ],
-    },
-  ],
+/**
+ * @param {string} hidden
+ * @return {!../simple-template.ElementDef}
+ */
+const buildRootTemplate = hidden => {
+  return /** @type {!../simple-template.ElementDef} */ ({
+    tag: 'section',
+    attrs: dict({
+      'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+          hidden}),
+    children: [
+      // Overflow container that gets pushed to the bottom when content height
+      // is smaller than viewport.
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+        children: [
+          // Holds bookend content.
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
+          },
+        ],
+      },
+    ],
+  });
 };
 
 /** @private @const {!../simple-template.ElementDef} */
@@ -211,15 +216,18 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * Builds the bookend components and appends it to the provided story.
+   * @param {boolean} skipAnimation Skips opening animation of the bookend.
    */
-  build() {
+  build(skipAnimation = false) {
     if (this.isBuilt_) {
       return;
     }
 
     this.isBuilt_ = true;
 
-    this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
+    this.bookendEl_ =
+        renderAsElement(this.win.document, buildRootTemplate(skipAnimation ?
+          '' : HIDDEN_CLASSNAME));
 
     createShadowRootWithStyle(this.element, this.bookendEl_, CSS);
 
