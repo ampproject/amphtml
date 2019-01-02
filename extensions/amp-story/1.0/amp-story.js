@@ -378,7 +378,7 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
-    if (isExperimentOn(this.win 'amp-story-branching')) {
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
@@ -946,7 +946,7 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then(pages => {
       this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
-      if (isExperimentOn(this.win 'amp-story-branching')) {
+      if (isExperimentOn(this.win, 'amp-story-branching')) {
         this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
             [{tagOrTarget: 'AMP-STORY', method: 'goToPage'}]);
       }
