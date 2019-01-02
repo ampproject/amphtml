@@ -224,6 +224,7 @@ import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
+import {jubna} from '../ads/jubna';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
@@ -278,6 +279,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   taboola: true,
+  jubna: true,
   zen: true,
   zergnet: true,
   runative: true,
@@ -453,6 +455,7 @@ register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
+register('jubna', jubna);
 register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
