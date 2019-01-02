@@ -867,6 +867,28 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
+# AMP metadata, name=amp-cta-landing-page-type
+# Specifies the Single Page Story Ad landing page type
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-landing-page-type"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "amp"
+    value_casei: "nonamp"
+    value_casei: "story"
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-landing-page-type"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet for AMP
@@ -6150,4 +6172,3 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
 }
-
