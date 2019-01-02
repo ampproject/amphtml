@@ -1470,21 +1470,27 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
 <!--UpScore Analytics Example -->
-<amp-geo layout="nodisplay"></amp-geo>
 <amp-analytics type="upscore" id="upscore">
   <script type="application/json">
-{
-  "vars": {
-  "object_id": "foo",
-  "object_type":"bar",
-  "section":"sport",
-  "author":"john suran",
-  "creator":"john suran",
-  "domain":"clientDomain",
-  "pubDate":"01/01/0001"
+  {
+    "vars": {
+      "object_id": "foo",
+      "object_type":"bar",
+      "section":"sport",
+      "author":"john suran",
+      "creator":"john suran",
+      "domain":"clientDomain",
+      "pubdate":"2015-01-01 00:00:00"
+    },
+    "triggers": {
+      "event": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "finalbeat"
+      }
+    }
   }
-}
-</script>
+  </script>
 </amp-analytics>
 <!-- End Upscore Analytics example -->
 <!-- Umeng+ Analytics Example -->
