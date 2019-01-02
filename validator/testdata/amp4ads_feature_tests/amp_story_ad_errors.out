@@ -37,6 +37,8 @@ amp4ads_feature_tests/amp_story_ad_errors.html:31:4 The mandatory attribute 'con
 |
 |      <!-- Should fail due to invalid content choice. -->
 |      <meta name="amp-cta-landing-page-type" content="GAME">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/amp_story_ad_errors.html:34:4 The attribute 'content' in tag 'meta name=amp-cta-landing-page-type' is set to the invalid value 'GAME'. [DISALLOWED_HTML]
 |
 |      <style amp4ads-boilerplate>body{visibility:hidden}</style>
 |      <style amp-custom>

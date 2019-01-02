@@ -877,7 +877,10 @@ tags: {
   unique: true
   attrs: {
     name: "content"
-    mandatory_oneof: "['amp', 'nonamp', 'story']"
+    mandatory: true
+    value_casei: "amp"
+    value_casei: "nonamp"
+    value_casei: "story"
   }
   attrs: {
     name: "name"
