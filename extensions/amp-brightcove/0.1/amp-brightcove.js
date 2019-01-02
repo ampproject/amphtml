@@ -198,14 +198,14 @@ class AmpBrightcove extends AMP.BaseElement {
       this.playing_ = false;
     }
 
-    if (data.ct) {
-      this.currentTime_ = data.ct;
+    if (data['ct']) {
+      this.currentTime_ = data['ct'];
     }
-    if (data.pr) {
-      this.playedRanges_ = data.pr;
+    if (data['pr']) {
+      this.playedRanges_ = data['pr'];
     }
-    if (data.dur) {
-      this.duration_ = data.dur;
+    if (data['dur']) {
+      this.duration_ = data['dur'];
     }
 
     if (redispatch(element, eventType, {
