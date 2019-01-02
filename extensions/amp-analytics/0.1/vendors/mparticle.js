@@ -39,9 +39,10 @@ export const MPARTICLE_CONFIG = /** @type {!JsonObject} */ ({
         'av=${appVersion}',
     'pageview': '${host}${endpointPath}?' +
         'dt=ScreenView&' +
-        'n=${canonicalPath}&' +
+        'n=${pageName}&' +
         'hn=${ampdocUrl}&' +
         'ttl=${title}&' +
+        'path=${canonicalPath}&' +
         '${baseParams}',
     'event': '${host}${endpointPath}?' +
         'dt=AppEvent&' +
