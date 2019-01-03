@@ -17,30 +17,31 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../../config');
 const deglob = require('globs-to-files');
-const findImports = require('find-imports');
-const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
-const karmaDefault = require('./karma.conf');
+const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
-const {app} = require('../test-server');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {exec, getStdout} = require('../exec');
-const {gitDiffNameOnlyMaster} = require('../git');
+const {app} = require('../../test-server');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
+const {getAdTypes, unitTestsToRun} = require('./helpers');
+const {getStdout} = require('../../exec');
 
 const {green, yellow, cyan, red} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
-const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
+
 const batchSize = 4; // Number of Sauce Lab browsers
+
+const chromeBase = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
+
+const formattedFlagList = [];
 
 let saucelabsBrowsers = [];
 /**
@@ -60,6 +61,25 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
+  if (argv.chrome_canary && !argv.chrome_flags) {
+    return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
+  }
+  if (argv.chrome_flags) {
+    const flagList = argv.chrome_flags.split(',');
+    flagList.forEach(flag => {
+      formattedFlagList.push('--'.concat(flag));
+    });
+    const config = Object.assign({}, karmaDefault, {
+      browsers: ['Chrome_flags'],
+      customLaunchers: {
+        Chrome_flags: { // eslint-disable-line google-camelcase/google-camelcase
+          base: chromeBase,
+          flags: formattedFlagList,
+        },
+      },
+    });
+    return config;
+  }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
         {browsers: ['Chrome_no_extensions_headless']});
@@ -72,6 +92,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
 
+    // Browser names are defined in `karma.conf.js`.
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
@@ -80,15 +101,14 @@ function getConfig() {
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
         'SL_Edge_17',
-        // TODO(amp-infra): Restore these two once tests are stable again.
-        // 'SL_Chrome_Dev',
-        // 'SL_Firefox_Dev',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
         //'SL_IE_11',
+        'SL_Chrome_Beta',
+        'SL_Firefox_Beta',
       ] : [
       // With --saucelabs_lite, a subset of the unit tests are run.
       // Only browsers that support chai-as-promised may be included below.
@@ -105,50 +125,6 @@ function getConfig() {
 }
 
 /**
- * Returns an array of ad types.
- * @return {!Array<string>}
- */
-function getAdTypes() {
-  const namingExceptions = {
-    // We recommend 3P ad networks use the same string for filename and type.
-    // Write exceptions here in alphabetic order.
-    // filename: [type1, type2, ... ]
-    adblade: ['adblade', 'industrybrains'],
-    mantis: ['mantis-display', 'mantis-recommend'],
-    weborama: ['weborama-display'],
-  };
-
-  // Start with Google ad types
-  const adTypes = ['adsense'];
-
-  // Add all other ad types
-  const files = fs.readdirSync('./ads/');
-  for (let i = 0; i < files.length; i++) {
-    if (path.extname(files[i]) == '.js'
-        && files[i][0] != '_' && files[i] != 'ads.extern.js') {
-      const adType = path.basename(files[i], '.js');
-      const expanded = namingExceptions[adType];
-      if (expanded) {
-        for (let j = 0; j < expanded.length; j++) {
-          adTypes.push(expanded[j]);
-        }
-      } else {
-        adTypes.push(adType);
-      }
-    }
-  }
-  return adTypes;
-}
-
-/**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
-}
-
-/**
  * Prints help messages for args if tests are being run for local development.
  */
 function printArgvMessages() {
@@ -157,6 +133,7 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -178,6 +155,10 @@ function printArgvMessages() {
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
+  if (argv.chrome_flags) {
+    log(green('Launching'), cyan(chromeBase), green('with flags'),
+        cyan(formattedFlagList));
+  }
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
@@ -205,179 +186,10 @@ function printArgvMessages() {
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
-        log(yellow('--' + arg + ':'), green(message));
+        log(yellow(`--${arg}:`), green(message));
       }
     });
   }
-}
-
-/**
- * Returns true if the given file is a unit test.
- *
- * @param {string} file
- * @return {boolean}
- */
-function isUnitTest(file) {
-  return config.unitTestPaths.some(pattern => {
-    return minimatch(file, pattern);
-  });
-}
-
-/**
- * Returns the list of files imported by a JS file
- *
- * @param {string} jsFile
- * @return {!Array<string>}
- */
-function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
-  const files = [];
-  const rootDir = path.dirname(path.dirname(__dirname));
-  const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function(file) {
-    const fullPath = path.resolve(jsFileDir, file) + '.js';
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(rootDir, fullPath);
-      files.push(relativePath);
-    }
-  });
-  return files;
-}
-
-/**
- * Returns true if the test file should be run for any one of the source files.
- *
- * @param {string} testFile
- * @param {!Array<string>} srcFiles
- * @return {boolean}
- */
-function shouldRunTest(testFile, srcFiles) {
-  const filesImported = getImports(testFile);
-  return filesImported.filter(function(file) {
-    return srcFiles.includes(file);
-  }).length > 0;
-}
-
-/**
- * Retrieves the set of unit tests that should be run for a set of source files.
- *
- * @param {!Array<string>} srcFiles
- * @return {!Array<string>}
- */
-function getTestsFor(srcFiles) {
-  const rootDir = path.dirname(path.dirname(__dirname));
-  const allUnitTests = deglob.sync(config.unitTestPaths);
-  return allUnitTests.filter(testFile => {
-    return shouldRunTest(testFile, srcFiles);
-  }).map(fullPath => path.relative(rootDir, fullPath));
-}
-
-/**
- * Adds an entry that maps a CSS file to a JS file
- *
- * @param {!Object} cssData
- * @param {string} cssBinaryName
- * @param {!Object<string, string>} cssJsFileMap
- */
-function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-  const cssFilePath = 'extensions/' + cssData['name'] + '/' +
-      cssData['version'] + '/' + cssBinaryName + '.css';
-  const jsFilePath = 'build/' + cssBinaryName + '-' +
-      cssData['version'] + '.css.js';
-  cssJsFileMap[cssFilePath] = jsFilePath;
-}
-
-/**
- * Extracts a mapping from CSS files to JS files from a well known file
- * generated during `gulp css`.
- *
- * @return {!Object<string, string>}
- */
-function extractCssJsFileMap() {
-  if (!fs.existsSync(extensionsCssMapPath)) {
-    log(red('ERROR:'), 'Could not find the file',
-        cyan(extensionsCssMapPath) + '.');
-    log('Make sure', cyan('gulp css'), 'was run prior to this.');
-    process.exit();
-  }
-  const extensionsCssMap = fs.readFileSync(extensionsCssMapPath, 'utf8');
-  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
-  const extensions = Object.keys(extensionsCssMapJson);
-  const cssJsFileMap = {};
-  extensions.forEach(extension => {
-    const cssData = extensionsCssMapJson[extension];
-    if (cssData['hasCss']) {
-      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
-      if (cssData.hasOwnProperty('cssBinaries')) {
-        const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach(cssBinary => {
-          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
-        });
-      }
-    }
-  });
-  return cssJsFileMap;
-}
-
-/**
- * Retrieves the set of JS source files that import the given CSS file.
- *
- * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
- * @return {!Array<string>}
- */
-function getJsFilesFor(cssFile, cssJsFileMap) {
-  const jsFiles = [];
-  if (cssJsFileMap.hasOwnProperty(cssFile)) {
-    const cssFileDir = path.dirname(cssFile);
-    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
-      return path.extname(file) == '.js';
-    });
-    jsFilesInDir.forEach(jsFile => {
-      const jsFilePath = cssFileDir + '/' + jsFile;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
-        jsFiles.push(jsFilePath);
-      }
-    });
-  }
-  return jsFiles;
-}
-
-/**
- * Extracts the list of unit tests to run based on the changes in the local
- * branch.
- *
- * @return {!Array<string>}
- */
-function unitTestsToRun() {
-  const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
-  let srcFiles = [];
-  filesChanged.forEach(file => {
-    if (isUnitTest(file)) {
-      testsToRun.push(file);
-    } else if (path.extname(file) == '.js') {
-      srcFiles = srcFiles.concat([file]);
-    } else if (path.extname(file) == '.css') {
-      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
-    }
-  });
-  if (srcFiles.length > 0) {
-    log(green('INFO: ') + 'Determining which unit tests to run...');
-    const moreTestsToRun = getTestsFor(srcFiles);
-    moreTestsToRun.forEach(test => {
-      if (!testsToRun.includes(test)) {
-        testsToRun.push(test);
-      }
-    });
-  }
-  return testsToRun;
 }
 
 /**
@@ -417,7 +229,7 @@ async function runTests() {
   }
 
   if (argv.saucelabs && !argv.integration) {
-    log(red('ERROR:'), 'Only integration tests may be run on the full set of ' +
+    log(red('ERROR:'), 'Only integration tests may be run on the full set of',
         'Sauce Labs browsers');
     log('Use', cyan('--saucelabs'), 'with', cyan('--integration'));
     process.exit();
@@ -449,13 +261,13 @@ async function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
-    const testsToRun = unitTestsToRun();
+    const testsToRun = unitTestsToRun(config.unitTestPaths);
     if (testsToRun.length == 0) {
-      log(green('INFO: ') +
+      log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
       return Promise.resolve();
     } else {
-      log(green('INFO: ') + 'Running the following unit tests:');
+      log(green('INFO:'), 'Running the following unit tests:');
       testsToRun.forEach(test => {
         log(cyan(test));
       });
@@ -525,8 +337,6 @@ async function runTests() {
     };
   }
 
-  // Run fake-server to test XHR responses.
-  process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 8081,
     host: 'localhost',
@@ -540,9 +350,6 @@ async function runTests() {
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
-
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
 
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
@@ -567,31 +374,77 @@ async function runTests() {
   if (processExitCode != 0) {
     log(
         red('ERROR:'),
-        yellow('Karma test failed with exit code ' + processExitCode));
+        yellow(`Karma test failed with exit code ${processExitCode}`));
     process.exitCode = processExitCode;
   }
 
   /**
-   * Runs tests in batches
+   * Runs tests in batches.
+   *
+   * Splits stable and beta browsers to separate batches. Test failures in any
+   * of the stable browsers will return an exit code of 1, whereas test failures
+   * in any of the beta browsers will only print error messages, but will return
+   * an exit code of 0.
+   *
    * @return {number} processExitCode
    */
   async function runTestInBatches() {
+    const browsers = {stable: [], beta: []};
+    for (const browserId of saucelabsBrowsers) {
+      browsers[browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable']
+          .push(browserId);
+    }
+    if (browsers.stable.length) {
+      const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+          'stable', browsers.stable);
+      if (allBatchesExitCodes) {
+        log(yellow('Some tests have failed on'), cyan('stable'),
+            yellow('browsers, so skipping running them on'), cyan('beta'),
+            yellow('browsers.'));
+        return allBatchesExitCodes;
+      }
+    }
+
+    if (browsers.beta.length) {
+      const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+          'beta', browsers.beta);
+      if (allBatchesExitCodes) {
+        log(yellow('Some tests have failed on'), cyan('beta'),
+            yellow('browsers.'));
+        log(yellow('This is not currently a fatal error, but will become an'),
+            yellow('error once the beta browsers are released as next stable'),
+            yellow('version!'));
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Runs tests in named batch(es), with the specified browsers.
+   *
+   * @param {string} batchName a human readable name for the batch.
+   * @param {!Array{string}} browsers list of SauceLabs browsers as
+   *     customLaunchers IDs.
+   * @return {number} processExitCode
+   */
+  async function runTestInBatchesWithBrowsers(batchName, browsers) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
     const batchExitCodes = [];
 
-    log(green('Running tests on ' + saucelabsBrowsers.length +
-      ' Sauce Lab browser(s) in total...'));
+    log(green('Running tests on'), cyan(browsers.length),
+        green('Sauce Labs'), cyan(batchName), green('browser(s)...'));
     while (startIndex < endIndex) {
       const configBatch = Object.assign({}, c);
-      configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
-      log(green('Batch #' + batch + ': Running tests on ' +
-        configBatch.browsers.length + ' Sauce Labs browser(s)...'));
+      configBatch.browsers = browsers.slice(startIndex, endIndex);
+      log(green('Batch'), cyan(`#${batch}`) + green(': Running tests on'),
+          cyan(configBatch.browsers.length), green('Sauce Labs browser(s)...'));
       batchExitCodes.push(await createKarmaServer(configBatch));
       startIndex = batch * batchSize;
       batch++;
-      endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
+      endIndex = Math.min(batch * batchSize, browsers.length);
     }
 
     return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
@@ -616,24 +469,24 @@ async function runTests() {
           } else if (argv.integration) {
             flags = ' --flags=integration_tests';
           }
-          log(green('INFO: ') + 'Uploading code coverage report to ' +
-              cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+          log(green('INFO:'), 'Uploading code coverage report to',
+              cyan('https://codecov.io/gh/ampproject/amphtml'), 'by running',
               cyan(codecovCmd + flags) + '...');
           const output = getStdout(codecovCmd + flags);
           const viewReportPrefix = 'View report at: ';
-          const viewReport = output.match(viewReportPrefix + '.*');
+          const viewReport = output.match(`${viewReportPrefix}.*`);
           if (viewReport && viewReport.length > 0) {
-            log(green('INFO: ') + viewReportPrefix +
+            log(green('INFO:'), viewReportPrefix +
                 cyan(viewReport[0].replace(viewReportPrefix, '')));
           } else {
-            log(yellow('WARNING: ') +
-                'Code coverage report upload may have failed:\n' +
+            log(yellow('WARNING:'),
+                'Code coverage report upload may have failed:\n',
                 yellow(output));
           }
         } else {
           const coverageReportUrl =
               'file://' + path.resolve('test/coverage/index.html');
-          log(green('INFO: ') + 'Generated code coverage report at ' +
+          log(green('INFO:'), 'Generated code coverage report at',
               cyan(coverageReportUrl));
           opn(coverageReportUrl, {wait: false});
         }
@@ -653,9 +506,9 @@ async function runTests() {
         }
       }
       // Print a summary for each browser as soon as tests complete.
-      let message = browser.name + ': ';
-      message += 'Executed ' + (result.success + result.failed) +
-          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      let message = `${browser.name}: Executed ` +
+          `${result.success + result.failed} of ${result.total} ` +
+          `(Skipped ${result.skipped}) `;
       if (result.failed === 0) {
         message += green('SUCCESS');
       } else {
@@ -692,6 +545,9 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'firefox': '  Runs tests on Firefox',
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
+    'chrome_canary': 'Runs tests on Chrome Canary',
+    'chrome_flags':
+      'Uses the given flags to launch Chrome',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +

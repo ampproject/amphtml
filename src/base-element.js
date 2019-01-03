@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-constants';
+import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {dev, user} from './log';
+import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -129,9 +129,9 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
-    same symbol it would use in the core compilation unit for the private
-    property in the extensions compilation unit's private properties.
+    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
+    reuse the same symbol it would use in the core compilation unit for the
+    private property in the extensions compilation unit's private properties.
      */
 
     /** @package {!Layout} */
@@ -154,6 +154,9 @@ export class BaseElement {
      *   minTrust: ActionTrust,
      * }>} */
     this.actionMap_ = null;
+
+    /** @private {?string} */
+    this.defaultActionAlias_ = null;
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
@@ -178,6 +181,14 @@ export class BaseElement {
    */
   signals() {
     return this.element.signals();
+  }
+
+  /**
+   * The element's default action alias.
+   * @return {?string}
+   */
+  getDefaultActionAlias() {
+    return this.defaultActionAlias_;
   }
 
   /**
@@ -586,14 +597,29 @@ export class BaseElement {
    * The handler is only invoked by events with trust equal to or greater than
    * `minTrust`. Otherwise, a user error is logged.
    *
-   * @param {string} method
+   * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
-    this.actionMap_[method] = {handler, minTrust};
+    this.actionMap_[alias] = {handler, minTrust};
+  }
+
+  /**
+   * Registers the default action for this component.
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {string=} alias
+   * @param {ActionTrust=} minTrust
+   * @public
+   */
+  registerDefaultAction(
+    handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
+    devAssert(!this.defaultActionAlias_,
+        'Default action "%s" already registered.', this.defaultActionAlias_);
+    this.registerAction(alias, handler, minTrust);
+    this.defaultActionAlias_ = alias;
   }
 
   /**
@@ -601,25 +627,24 @@ export class BaseElement {
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
    * @param {!./service/action-impl.ActionInvocation} invocation The invocation data.
-   * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
+   * @param {boolean=} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
    */
   executeAction(invocation, unusedDeferred) {
-    if (invocation.method == 'activate') {
-      if (invocation.satisfiesTrust(this.activationTrust())) {
-        return this.activate(invocation);
-      }
-    } else {
-      this.initActionMap_();
-      const holder = this.actionMap_[invocation.method];
-      user().assert(holder, `Method not found: ${invocation.method} in %s`,
-          this);
-      const {handler, minTrust} = holder;
-      if (invocation.satisfiesTrust(minTrust)) {
-        return handler(invocation);
-      }
+    let {method} = invocation;
+    // If the default action has an alias, the handler will be stored under it.
+    if (method === DEFAULT_ACTION) {
+      method = this.defaultActionAlias_ || method;
+    }
+    this.initActionMap_();
+    const holder = this.actionMap_[method];
+    const {tagName} = this.element;
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
+    const {handler, minTrust} = holder;
+    if (invocation.satisfiesTrust(minTrust)) {
+      return handler(invocation);
     }
   }
 
@@ -1057,11 +1082,12 @@ export class BaseElement {
    * @param {!Element=} opt_element
    */
   declareLayer(opt_element) {
-    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+    devAssert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
         ' to declare layer.');
     if (opt_element) {
-      dev().assert(this.element.contains(opt_element));
+      devAssert(this.element.contains(opt_element));
     }
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
+
 }

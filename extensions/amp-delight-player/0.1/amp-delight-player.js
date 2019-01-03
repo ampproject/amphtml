@@ -28,7 +28,7 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 
@@ -135,7 +135,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.contentID_ = user().assert(
+    this.contentID_ = userAssert(
         this.element.getAttribute('data-content-id'),
         'The data-content-id attribute is required'
     );

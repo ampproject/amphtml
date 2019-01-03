@@ -44,7 +44,7 @@ import {
   listen,
   listenOnce,
 } from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
@@ -424,7 +424,7 @@ export class VideoDocking {
 
     dev().assertElement(video);
 
-    user().assert(video.signals().get(VideoEvents.REGISTERED),
+    userAssert(video.signals().get(VideoEvents.REGISTERED),
         '`dock` attribute can only be set on video components.');
 
     const slotSelector = video.getAttribute('dock').trim();
@@ -436,7 +436,7 @@ export class VideoDocking {
     const el = root.querySelector(slotSelector);
 
     if (el) {
-      user().assert(el.tagName.toLowerCase() == 'amp-layout',
+      userAssert(el.tagName.toLowerCase() == 'amp-layout',
           'Dock slot must be an <amp-layout> element.');
     }
 
@@ -450,7 +450,7 @@ export class VideoDocking {
 
   /** @param {!../../../src/video-interface.VideoOrBaseElementDef} video */
   register(video) {
-    user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
+    userAssert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock`.');
 
     this.install_();
@@ -551,7 +551,7 @@ export class VideoDocking {
    * @private
    */
   getDockedVideo_() {
-    return dev().assert(this.currentlyDocked_).video;
+    return devAssert(this.currentlyDocked_).video;
   }
 
   /**
@@ -768,7 +768,7 @@ export class VideoDocking {
 
     if (this.isCurrentlyDocked_(video) &&
         !isElement(this.currentlyDocked_.target)) {
-      const {posY} = dev().assert(this.currentlyDocked_).target;
+      const {posY} = devAssert(this.currentlyDocked_).target;
       return /** @type {!RelativeY} */ (dev().assertNumber(posY));
     }
 
@@ -1701,7 +1701,7 @@ export class VideoDocking {
 
     const step = 0;
 
-    const {target} = dev().assert(this.currentlyDocked_);
+    const {target} = devAssert(this.currentlyDocked_);
     const {x, y, scale} = this.getDims_(video, target, step);
 
     return this.placeAt_(video, x, y, scale, step)

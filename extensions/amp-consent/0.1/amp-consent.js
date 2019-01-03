@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE} from './consent-info';
+import {CONSENT_ITEM_STATE, hasStoredValue} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentConfig, expandPolicyConfig} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
@@ -31,7 +31,7 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -103,6 +103,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object<string, Promise<?JsonObject>>} */
     this.remoteConfigPromises_ = map();
+
+    /** @private {?string} */
+    this.consentInstanceId_ = null;
   }
 
   /** @override */
@@ -115,7 +118,7 @@ export class AmpConsent extends AMP.BaseElement {
   buildCallback() {
     this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
 
-    user().assert(this.element.getAttribute('id'),
+    userAssert(this.element.getAttribute('id'),
         'amp-consent should have an id');
 
     const config = new ConsentConfig(this.element);
@@ -126,6 +129,10 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentConfig_ = config.getConsentConfig();
+
+    // ConsentConfig has verified that there's one and only one consent instance
+    this.consentInstanceId_ =
+        Object.keys(/** @type {!Object} */ (this.consentConfig_))[0];
 
     const policyConfig = config.getPolicyConfig();
 
@@ -144,6 +151,8 @@ export class AmpConsent extends AMP.BaseElement {
             .then(manager => {
               this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
                 manager);
+              this.consentPolicyManager_.setLegacyConsentInstanceId(
+                  /** @type {string} */ (this.consentInstanceId_));
               const policyKeys =
                   Object.keys(/** @type {!Object} */ (this.policyConfig_));
               for (let i = 0; i < policyKeys.length; i++) {
@@ -229,6 +238,12 @@ export class AmpConsent extends AMP.BaseElement {
         if (typeof data['info'] != 'string') {
           user().error(TAG, 'consent-response info only supports string, ' +
               '%s, treated as undefined', data['info']);
+        }
+        if (!data['info']) {
+          // TODO (@zhouyx #20010): Decide what's the behavior on receiving
+          // incorrect message.
+          user().error(TAG,
+              'consent-response info does not allow empty string');
         }
         consentString = data['info'];
       }
@@ -346,7 +361,8 @@ export class AmpConsent extends AMP.BaseElement {
           CONSENT_ITEM_STATE.REJECTED,
           consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
-      // dismiss
+      // TODO (@zhouyx #20010): Consider it a user error if
+      // consentString is undefined, but has value before.
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_,
           CONSENT_ITEM_STATE.DISMISSED,
@@ -399,7 +415,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   getConsentRequiredPromise_(instanceId, config) {
-    user().assert(config['checkConsentHref'] ||
+    userAssert(config['checkConsentHref'] ||
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
@@ -450,7 +466,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   isConsentRequiredGeo_(geoGroup) {
     return Services.geoForDocOrNull(this.element).then(geo => {
-      user().assert(geo,
+      userAssert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
       return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
     });
@@ -502,7 +518,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} consentId
    */
   handlePostPrompt_(consentId) {
-    user().assert(this.consentConfig_[consentId],
+    userAssert(this.consentConfig_[consentId],
         'consent with id %s not found', consentId);
     // toggle the UI for this consent
     this.scheduleDisplay_(consentId);
@@ -532,25 +548,25 @@ export class AmpConsent extends AMP.BaseElement {
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo(instanceId)
         .then(info => {
-          const state = info['consentState'];
-          if (state == CONSENT_ITEM_STATE.ACCEPTED ||
-              state == CONSENT_ITEM_STATE.REJECTED) {
-            // Need to display post prompt ui if user previous made a decision
+          if (hasStoredValue(info)) {
+            // Has user stored value, no need to prompt
             this.isPostPromptUIRequired_ = true;
+            return;
           }
-          if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-            if (!this.consentRequired_[instanceId]) {
-              this.consentStateManager_.updateConsentInstanceState(
-                  instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
-              return;
-            }
-            this.isPostPromptUIRequired_ = true;
-            // TODO(@zhouyx):
-            // 1. Race condition on consent state change between schedule to
-            //    display and display. Add one more check before display
-            // 2. Should not schedule display with DISMISSED UNKNOWN state
-            this.scheduleDisplay_(instanceId);
+          if (!this.consentRequired_[instanceId]) {
+            // no need to prompt if remote reponse say so
+            // Also no need to display postPromptUI
+            this.consentStateManager_.updateConsentInstanceState(
+                instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
+            return;
           }
+          // Prompt
+          this.isPostPromptUIRequired_ = true;
+          this.scheduleDisplay_(instanceId);
+
+          // TODO(@zhouyx):
+          // Race condition on consent state change between schedule to
+          // display and display. Add one more check before display
         });
   }
 

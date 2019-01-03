@@ -28,7 +28,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -150,7 +150,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
+    this.videoid_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
         this.element);
@@ -168,7 +168,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
 
     this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 

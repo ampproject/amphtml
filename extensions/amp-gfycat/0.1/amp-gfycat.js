@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {
@@ -113,7 +113,7 @@ class AmpGfycat extends AMP.BaseElement {
    * @private
    */
   getVideoId_() {
-    return user().assert(
+    return userAssert(
         this.element.getAttribute('data-gfyid'),
         'The data-gfyid attribute is required for <amp-gfycat> %s',
         this.element);

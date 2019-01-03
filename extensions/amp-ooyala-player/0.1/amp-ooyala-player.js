@@ -22,7 +22,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -79,15 +79,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element: el} = this;
 
-    this.embedCode_ = user().assert(
+    this.embedCode_ = userAssert(
         el.getAttribute('data-embedcode'),
         'The data-embedcode attribute is required for %s', el);
 
-    this.pCode_ = user().assert(
+    this.pCode_ = userAssert(
         el.getAttribute('data-pcode'),
         'The data-pcode attribute is required for %s', el);
 
-    this.playerId_ = user().assert(
+    this.playerId_ = userAssert(
         el.getAttribute('data-playerid'),
         'The data-playerid attribute is required for %s', el);
 
