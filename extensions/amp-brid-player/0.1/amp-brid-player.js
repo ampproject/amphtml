@@ -38,6 +38,8 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+const TAG = 'amp-brid-player';
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -379,9 +381,14 @@ class AmpBridPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-brid-player', '0.1', AMP => {
-  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpBridPlayer);
 });

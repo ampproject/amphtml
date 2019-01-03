@@ -35,6 +35,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+const TAG = 'amp-ooyala-player';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpOoyalaPlayer extends AMP.BaseElement {
@@ -301,9 +302,14 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-ooyala-player', '0.1', AMP => {
-  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpOoyalaPlayer);
 });

@@ -739,6 +739,11 @@ class AmpVideo extends AMP.BaseElement {
       posterImg.src = poster;
     }
   }
+
+  /** @override */
+  seekTo(timeSeconds) {
+    this.video_.currentTime = timeSeconds;
+  }
 }
 
 
