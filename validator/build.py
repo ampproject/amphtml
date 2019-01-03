@@ -325,8 +325,6 @@ def RunSmokeTest(out_dir):
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  print stdout
-  print stderr
   if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '', p.returncode
      ) != (stdout, stderr, 0):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -342,8 +340,6 @@ def RunSmokeTest(out_dir):
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  print stdout
-  print stderr
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
   if not stderr.startswith('testdata/feature_tests/empty.html:1:0 '
