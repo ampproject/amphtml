@@ -256,9 +256,10 @@ export class AmpConsent extends AMP.BaseElement {
 
     if (this.consentUIPending_) {
       // Already pending to be shown. Do nothing.
-      // This is to prevent postPromptUI trying to prompt the dialog, but
+      // This is to prevent postPromptUI trying to prompt the dialog, while
       // the prompt is waiting for previous amp-user-notification prompt to be
       // resolved first.
+      // So prompt window won't be added to notificationUI queue duplicately.
       return;
     }
 
@@ -273,13 +274,13 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Show prompt UI
-   * Do not invoke the function excpet in scheduleDisplay_
+   * Do not invoke the function except in scheduleDisplay_
    * @return {!Promise}
    */
   show_() {
     if (this.isPromptUIOn_) {
       dev().error(TAG,
-          'Attempt to show an alreayd displayed prompt UI');
+          'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {

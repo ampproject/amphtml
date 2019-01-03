@@ -22,7 +22,7 @@ import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
 } from '../consent-policy-manager';
-import {dict, map} from '../../../../src/utils/object';
+import {dict} from '../../../../src/utils/object';
 import {expandPolicyConfig} from '../consent-config';
 import {macroTask} from '../../../../testing/yield';
 
