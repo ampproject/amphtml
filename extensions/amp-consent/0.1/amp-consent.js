@@ -116,6 +116,27 @@ export class AmpConsent extends AMP.BaseElement {
           new ConsentUI(this, dict({}), config.getPostPromptUI());
     }
 
+    /**
+     * TODO (@zhouyx): Migrate to the new consent config format.
+     * Need to support the deprecated format as well.
+     * Have ConsentConfig.getConsentConfig auto convert configuration format.
+     *
+     * Deprecated Format
+     * {
+     *   'consentInstanceId': {
+     *     'checkConsentHref': ...,
+     *     'promptUI': ...
+     *   }
+     * }
+     *
+     * New proposed Format
+     * {
+     *   'storageKey': ...
+     *   'checkConsentHref': ...
+     *   'promptUI': ...
+     *   'postPromptUI': ...
+     * }
+     */
     const consentConfigDepr = config.getConsentConfig();
 
     // ConsentConfig has verified that there's one and only one consent instance
