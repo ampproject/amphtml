@@ -104,7 +104,7 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 
 ### Building on MacOS
 
-*Note: This is for buiulding the validator from source. If you are simply running validator tests for extensions, see the Installtion steps instead.*
+*Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead.*
 
 * Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
 * Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
