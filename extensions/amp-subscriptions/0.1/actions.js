@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
 
@@ -83,10 +83,10 @@ export class Actions {
    * @return {!Promise<string>}
    */
   execute(action) {
-    user().assert(this.actionsConfig_[action],
+    userAssert(this.actionsConfig_[action],
         'Action URL is not configured: %s', action);
     // URL should always be available at this time.
-    const url = user().assert(this.builtActionUrlMap_[action],
+    const url = userAssert(this.builtActionUrlMap_[action],
         'Action URL is not ready: %s', action);
     return this.execute_(url, 'subscriptions-action-' + action);
   }

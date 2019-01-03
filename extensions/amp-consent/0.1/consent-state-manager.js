@@ -21,14 +21,14 @@ import {
   composeStoreValue,
   constructConsentInfo,
   getStoredConsentInfo,
-  isConsentInfoStoredValueChanged,
+  isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 
@@ -89,7 +89,16 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance %s not registered', instanceId);
       return;
     }
-    this.consentChangeObservables_[instanceId].fire(state);
+    if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      if (consentStr) {
+        user().error(TAG,
+            'Consent string value %s will be ignored on user dismiss',
+            consentStr);
+        consentStr = undefined;
+      }
+    }
+    this.consentChangeObservables_[instanceId].fire(
+        constructConsentInfo(state, consentStr));
     this.instances_[instanceId].update(state, consentStr);
   }
 
@@ -99,7 +108,7 @@ export class ConsentStateManager {
    * @return {Promise<!ConsentInfoDef>}
    */
   getConsentInstanceInfo(instanceId) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].get();
   }
@@ -107,16 +116,16 @@ export class ConsentStateManager {
   /**
    * Register the handler for every consent state change.
    * @param {string} instanceId
-   * @param {function(CONSENT_ITEM_STATE)} handler
+   * @param {function(!ConsentInfoDef)} handler
    */
   onConsentStateChange(instanceId, handler) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
 
     const unlistener = this.consentChangeObservables_[instanceId].add(handler);
     // Fire first consent instance state.
     this.getConsentInstanceInfo(instanceId).then(info => {
-      handler(info['consentState']);
+      handler(info);
     });
 
     return unlistener;
@@ -131,7 +140,7 @@ export class ConsentStateManager {
    * @param {Promise<?Object>} sharedDataPromise
    */
   setConsentInstanceSharedData(instanceId, sharedDataPromise) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
   }
@@ -144,7 +153,7 @@ export class ConsentStateManager {
    * @return {?Promise<?Object>}
    */
   getConsentInstanceSharedData(instanceId) {
-    dev().assert(this.instances_[instanceId],
+    devAssert(this.instances_[instanceId],
         '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].sharedDataPromise;
   }
@@ -218,17 +227,22 @@ export class ConsentInstance {
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
     const calculatedState =
         recalculateConsentStateValue(state, localStateValue);
-    if (consentString === undefined && localConsentStr) {
-      consentString = localConsentStr;
-    }
+
+    // TODO(@zhouyx) Make consentString init value to null
+    consentString = consentString || localConsentStr || undefined;
     const newConsentInfo = constructConsentInfo(calculatedState, consentString);
     const oldConsentInfo = this.localConsentInfo_;
     this.localConsentInfo_ = newConsentInfo;
 
-    if (!isConsentInfoStoredValueChanged(newConsentInfo, oldConsentInfo)) {
-      this.updateStoredValue_(newConsentInfo);
-      // TODO(@zhouyx): Need force update to update timestamp
+    if (state === CONSENT_ITEM_STATE.DISMISSED ||
+        isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
+      // Only update/save to localstorage if it's not dismiss
+      // And the value is different from what is stored.
+      return;
     }
+
+    // TODO(@zhouyx): Need force update to update timestamp
+    this.updateStoredValue_(newConsentInfo);
   }
 
   /**
@@ -237,7 +251,7 @@ export class ConsentInstance {
    */
   updateStoredValue_(consentInfo) {
     this.storagePromise_.then(storage => {
-      if (!isConsentInfoStoredValueChanged(
+      if (!isConsentInfoStoredValueSame(
           consentInfo, this.localConsentInfo_)) {
         // If state has changed. do not store outdated value.
         return;

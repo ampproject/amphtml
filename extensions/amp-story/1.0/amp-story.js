@@ -84,7 +84,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -140,6 +140,12 @@ const Attributes = {
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
+};
+
+/** @enum {string} */
+const HistoryStates = {
+  PAGE_ID: 'ampStoryPageId',
+  BOOKEND_ACTIVE: 'ampStoryBookendActive',
 };
 
 /**
@@ -305,9 +311,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
-
-    /** @private {?Array<string>} */
-    this.supportedOrientations_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -608,6 +611,14 @@ export class AmpStory extends AMP.BaseElement {
       this.onKeyDown_(e);
     }, true);
 
+    this.win.document.addEventListener('contextmenu', e => {
+      const uiState = this.storeService_.get(StateProperty.UI_STATE);
+      if (uiState === UIType.MOBILE) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
     // on document visibility change (eg: user switches tab).
     this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
@@ -740,9 +751,9 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
+    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
+        firstPageEl.id;
 
-    this.initializeBookend_();
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -757,6 +768,18 @@ export class AmpStory extends AMP.BaseElement {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
+        })
+        .then(() => this.initializeBookend_())
+        .then(() => {
+          const bookendInHistory =
+              !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
+          if (bookendInHistory) {
+            return this.hasBookend_().then(hasBookend => {
+              if (hasBookend) {
+                this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+              }
+            });
+          }
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.updateViewportSizeStyles_())
@@ -948,7 +971,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   next_(opt_isAutomaticAdvance) {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
@@ -969,7 +992,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   previous_() {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to previous page.');
     activePage.previous();
   }
@@ -1264,36 +1287,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    * */
   onCurrentPageIdUpdate_(pageId) {
-    this.setHistoryStatePageId_(pageId);
-  }
-
-  /**
-   * Save page id using history API.
-   * @param {string} pageId page id to be saved
-   * @private
-   */
-  setHistoryStatePageId_(pageId) {
     // Never save ad pages to history as they are unique to each visit.
     const page = this.getPageById(pageId);
     if (page.isAd()) {
       return;
     }
 
-    const {history} = this.win;
-    if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
-      history.replaceState({
-        ampStoryPageId: pageId,
-      }, '');
-    }
-  }
-
-  /**
-   * @private
-   * @return {?string}
-   */
-  getHistoryStatePageId_() {
-    const state = getState(this.win.history);
-    return state ? state.ampStoryPageId : null;
+    this.setHistoryState_(HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1642,6 +1642,36 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+    this.setHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
+  }
+
+  /**
+   * Updates the value for a given state in the window history.
+   * @param {string} stateName
+   * @param {string|boolean} value
+   * @private
+   */
+  setHistoryState_(stateName, value) {
+    const {history} = this.win;
+    const state = getState(history) || {};
+    const newHistory = Object.assign({}, /** @type {!Object} */ (state),
+        {[stateName]: value});
+
+    history.replaceState(newHistory, '');
+  }
+
+  /**
+   * Returns the value of a given state of the window history.
+   * @param {string} stateName
+   * @return {?string}
+   * @private
+   */
+  getHistoryState_(stateName) {
+    const {history} = this.win;
+    if (history && getState(history)) {
+      return getState(history)[stateName];
+    }
+    return null;
   }
 
   /**
@@ -1778,6 +1808,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Initializes bookend.
+   * @return {!Promise}
    * @private
    */
   initializeBookend_() {
@@ -1788,7 +1819,7 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(bookendEl);
     }
 
-    bookendEl.getImpl().then(
+    return bookendEl.getImpl().then(
         bookendImpl => {
           this.bookend_ = bookendImpl;
         });
@@ -1816,7 +1847,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build();
+    this.bookend_.build(!!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE));
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
@@ -1863,7 +1894,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getPageById(id) {
     const pageIndex = this.getPageIndexById(id);
-    return dev().assert(this.pages_[pageIndex],
+    return devAssert(this.pages_[pageIndex],
         'Page at index %s exists, but is missing from the array.', pageIndex);
   }
 

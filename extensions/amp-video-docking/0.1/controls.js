@@ -28,7 +28,7 @@ import {
   createCustomEvent,
   listen,
 } from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {once} from '../../../src/utils/function';
 import {
@@ -260,7 +260,7 @@ export class Controls {
    * @private
    */
   isPlaying_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
     return this.manager_().getPlayingState(this.video_) != PlayingStates.PAUSED;
   }
 

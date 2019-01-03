@@ -17,7 +17,7 @@
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {dev, user} from './log';
+import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -129,9 +129,9 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
-    same symbol it would use in the core compilation unit for the private
-    property in the extensions compilation unit's private properties.
+    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
+    reuse the same symbol it would use in the core compilation unit for the
+    private property in the extensions compilation unit's private properties.
      */
 
     /** @package {!Layout} */
@@ -616,7 +616,7 @@ export class BaseElement {
    */
   registerDefaultAction(
     handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
-    dev().assert(!this.defaultActionAlias_,
+    devAssert(!this.defaultActionAlias_,
         'Default action "%s" already registered.', this.defaultActionAlias_);
     this.registerAction(alias, handler, minTrust);
     this.defaultActionAlias_ = alias;
@@ -641,7 +641,7 @@ export class BaseElement {
     this.initActionMap_();
     const holder = this.actionMap_[method];
     const {tagName} = this.element;
-    user().assert(holder, `Method not found: ${method} in ${tagName}`);
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
@@ -1082,10 +1082,10 @@ export class BaseElement {
    * @param {!Element=} opt_element
    */
   declareLayer(opt_element) {
-    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+    devAssert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
         ' to declare layer.');
     if (opt_element) {
-      dev().assert(this.element.contains(opt_element));
+      devAssert(this.element.contains(opt_element));
     }
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }

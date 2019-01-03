@@ -54,3 +54,22 @@ export function getConsentPolicySharedData(element, policyId) {
             /** @type {string} */ (policyId));
       });
 }
+
+/**
+ * TODO (zhouyx@)
+ * Combine with getConsentPolicyState and return a consentInfo object.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} policyId
+ * @return {!Promise<string>}
+ */
+export function getConsentPolicyInfo(ampdoc, policyId) {
+  // Return the stored consent string.
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return null;
+        }
+        return consentPolicy.getConsentStringInfo(
+            /** @type {string} */ (policyId));
+      });
+}

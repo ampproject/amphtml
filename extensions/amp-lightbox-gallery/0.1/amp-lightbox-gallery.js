@@ -37,7 +37,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
@@ -303,7 +303,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   findOrBuildCarousel_(lightboxGroupId) {
-    dev().assert(this.container_);
+    devAssert(this.container_);
     const existingCarousel = this.element.querySelector(
         `amp-carousel[amp-lightbox-group=${
           escapeCssSelectorIdent(lightboxGroupId)
@@ -505,7 +505,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   nextSlide_() {
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionNext();
     });
   }
@@ -514,7 +514,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   prevSlide_() {
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionPrev();
     });
   }
@@ -546,7 +546,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildTopBar_() {
-    dev().assert(this.container_);
+    devAssert(this.container_);
     this.topBar_ = this.doc_.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
 
@@ -577,7 +577,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildButton_(label, className, action) {
-    dev().assert(this.topBar_);
+    devAssert(this.topBar_);
 
     const button = htmlFor(this.doc_)`
     <div role="button" class="i-amphtml-lbg-button">
@@ -662,7 +662,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   setupEventListeners_() {
-    dev().assert(this.container_);
+    devAssert(this.container_);
     const onToggleControls = this.onToggleControls_.bind(this);
     this.unlistenClick_ = listen(dev().assertElement(this.container_),
         'click', onToggleControls);
@@ -708,7 +708,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   getCurrentElement_() {
     const lbgId = this.currentLightboxGroupId_;
-    const currentElement = dev().assert(
+    const currentElement = devAssert(
         this.elementsMetadata_[lbgId][this.currentElemId_]
     );
     return currentElement;
@@ -742,7 +742,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
-      user().assert(target,
+      userAssert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
     this.openLightboxGallery_(dev().assertElement(target)).then(() => {
@@ -807,7 +807,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
-    dev().assert(this.carousel_).getImpl()
+    devAssert(this.carousel_).getImpl()
         .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
     this.updateDescriptionBox_();
     return this.enter_();
@@ -932,8 +932,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   runImgTransition_(srcImg, targetImg, enter) {
     const carousel = dev().assertElement(this.carousel_);
     const container = dev().assertElement(this.container_);
-    const transLayer = this.element.ownerDocument.createElement('div');
-    transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
 
     let duration;
     let motionDuration;
@@ -944,7 +942,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
       imageAnimation = prepareImageAnimation({
-        transitionContainer: transLayer,
         styleContainer: this.getAmpDoc().getHeadNode(),
         srcImg,
         targetImg,
@@ -952,6 +949,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         targetImgRect: undefined,
         styles: {
           'animationDuration': `${motionDuration}ms`,
+          // Matches z-index for `.i-amphtml-lbg`.
+          'zIndex': 2147483642,
         },
         keyframesNamespace: undefined,
         curve: TRANSITION_CURVE,
@@ -960,12 +959,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     const mutate = () => {
       toggle(carousel, enter);
-      // Make sure the background, image stack correctly.
-      setStyles(this.element, {
-        position: 'relative',
-        zIndex: 1,
-        opacity: 1,
-      });
+      // Undo opacity 0 from `openLightboxGallery_`
+      setStyle(this.element, 'opacity', '');
       // Fade in/out the background in sync with the motion.
       setStyles(container, {
         animationName: enter ? 'fadeIn' : 'fadeOut',
@@ -984,22 +979,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
       imageAnimation.applyAnimation();
-      this.getAmpDoc().getBody().appendChild(transLayer);
     };
 
     const cleanup = () => {
       toggle(this.element, enter);
-      setStyles(this.element, {
-        position: '',
-        zIndex: '',
-        opacity: '',
-      });
       setStyle(container, 'animationName', '');
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
       imageAnimation.cleanupAnimation();
-      this.getAmpDoc().getBody().removeChild(transLayer);
     };
 
     return this.measureMutateElement(measure, mutate)
@@ -1132,7 +1120,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const targetSlide = dev().assertElement(
           closestBySelector(target, slideSelector));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
-      dev().assert(parentCarousel).getImpl()
+      devAssert(parentCarousel).getImpl()
           .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
     }
   }
@@ -1163,6 +1151,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      this.getViewport().leaveLightboxMode();
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1173,7 +1162,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
-          this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
@@ -1218,7 +1206,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (isGalleryView) {
       return;
     }
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.goCallback(direction, /* animate */ true, /* autoplay */ false);
     });
   }
@@ -1384,7 +1372,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     event.stopPropagation();
     Promise.all([
       this.closeGallery_(),
-      dev().assert(this.carousel_).getImpl(),
+      devAssert(this.carousel_).getImpl(),
     ]).then(values => {
       this.currentElemId_ = id;
       values[1].showSlideWhenReady(this.currentElemId_);

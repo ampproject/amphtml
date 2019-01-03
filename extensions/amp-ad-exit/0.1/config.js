@@ -18,7 +18,7 @@ import {FilterType} from './filters/filter';
 import {
   IFRAME_TRANSPORTS,
 } from '../../amp-analytics/0.1/iframe-transport-vendors';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -105,7 +105,7 @@ export const TransportMode = {
  * @return {!JsonObject}
  */
 export function assertConfig(config) {
-  user().assert(typeof config == 'object');
+  userAssert(typeof config == 'object');
   if (config['filters']) {
     assertFilters(config['filters']);
   } else {
@@ -126,9 +126,9 @@ export function assertConfig(config) {
  */
 function assertTransport(transport) {
   for (const t in transport) {
-    user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
+    userAssert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
         `Unknown transport option: '${t}'`);
-    user().assert(typeof transport[t] == 'boolean');
+    userAssert(typeof transport[t] == 'boolean');
   }
 }
 
@@ -143,9 +143,9 @@ function assertFilters(filters) {
     FilterType.INACTIVE_ELEMENT,
   ];
   for (const name in filters) {
-    user().assert(typeof filters[name] == 'object',
+    userAssert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
-    user().assert(validFilters.indexOf(filters[name].type) != -1,
+    userAssert(validFilters.indexOf(filters[name].type) != -1,
         'Supported filters: ' + validFilters.join(', '));
   }
 }
@@ -157,7 +157,7 @@ function assertFilters(filters) {
  * @param {!JsonObject} config
  */
 function assertTargets(targets, config) {
-  user().assert(typeof targets == 'object', '\'targets\' must be an object');
+  userAssert(typeof targets == 'object', '\'targets\' must be an object');
   for (const target in targets) {
     assertTarget(target, targets[target], config);
   }
@@ -171,19 +171,19 @@ function assertTargets(targets, config) {
  * @param {!JsonObject} config
  */
 function assertTarget(name, target, config) {
-  user().assert(
+  userAssert(
       typeof target['finalUrl'] == 'string',
       'finalUrl of target \'%s\' must be a string', name);
   if (target['filters']) {
     target['filters'].forEach(filter => {
-      user().assert(
+      userAssert(
           config['filters'][filter], 'filter \'%s\' not defined', filter);
     });
   }
   if (target['vars']) {
     const pattern = /^_[a-zA-Z0-9_-]+$/;
     for (const variable in target['vars']) {
-      user().assert(
+      userAssert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
     }

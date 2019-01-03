@@ -20,6 +20,7 @@ import {
 } from '../consent-ui';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -56,7 +57,7 @@ describes.realWin('consent-ui', {
       getViewport: () => {
         return {
           addToFixedLayer: () => {},
-          updateFixedLayer: () => {},
+          removeFromFixedLayer: () => {},
         };
       },
       getVsync: () => {
@@ -142,6 +143,31 @@ describes.realWin('consent-ui', {
       expect(elementByTag(parent, 'iframe')).to.not.be.null;
       consentUI.hide();
       expect(elementByTag(parent, 'iframe')).to.be.null;
+    });
+
+    it('should not lock scrolling', () => {
+
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.show();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.hide();
+      expect(consentUI.scrollEnabled_).to.be.true;
+
+      consentUI.show();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.disableScroll_();
+      expect(consentUI.scrollEnabled_).to.be.false;
+      consentUI.enableScroll_();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.disableScroll_();
+      consentUI.hide();
+      expect(consentUI.scrollEnabled_).to.be.true;
     });
   });
 
@@ -270,5 +296,41 @@ describes.realWin('consent-ui', {
       });
     });
 
+    it('should disable scrolling', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+
+        expect(consentUI.scrollEnabled_).to.be.true;
+
+        consentUI.enterFullscreen_();
+
+        expect(consentUI.scrollEnabled_).to.be.false;
+      });
+    });
+
+    // TODO (torch2424): Unskip/Update in follow PR to #19125
+    it.skip('append/hide/show mask', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+      // Mock out load Iframe_
+      consentUI.loadIframe_ = () => {
+        return Promise.resolve();
+      };
+      expect(consentUI.maskElement_).to.be.null;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_).to.not.be.null;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.not.be.ok;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+    });
   });
 });

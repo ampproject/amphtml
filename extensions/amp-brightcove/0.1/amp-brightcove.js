@@ -25,7 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -60,6 +60,15 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.muted_ = false;
+
+    /** @private {?number}  */
+    this.currentTime_ = null;
+
+    /** @private {?number}  */
+    this.duration_ = null;
+
+    /** @private {Array}  */
+    this.playedRanges_ = [];
 
     /** @private {?boolean}  */
     this.hasAmpSupport_ = false;
@@ -189,6 +198,16 @@ class AmpBrightcove extends AMP.BaseElement {
       this.playing_ = false;
     }
 
+    if (data['ct']) {
+      this.currentTime_ = data['ct'];
+    }
+    if (data['pr']) {
+      this.playedRanges_ = data['pr'];
+    }
+    if (data['dur']) {
+      this.duration_ = data['dur'];
+    }
+
     if (redispatch(element, eventType, {
       'ready': VideoEvents.LOAD,
       'playing': VideoEvents.PLAYING,
@@ -240,7 +259,7 @@ class AmpBrightcove extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-    const account = user().assert(
+    const account = userAssert(
         el.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         el);
@@ -424,20 +443,17 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return this.currentTime_;
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return this.duration_;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playedRanges_;
   }
 
 }

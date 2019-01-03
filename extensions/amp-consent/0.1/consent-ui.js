@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
 } from '../../../src/url';
@@ -72,8 +73,17 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
+    /** @private {boolean} */
+    this.scrollEnabled_ = true;
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -198,9 +208,17 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
+      // NOTE (torch2424): This is very sensitive. Fixed layer applies
+      // a `top: calc(0px)` in order to fix some bugs, thus
+      // We should be careful in moving this around as
+      // `removeFromFixedLayer` will remove the `top` styling.
+      // This will preserve The animation,
+      // and prevent element flashing.
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
-      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
+
+      this.enableScroll_();
     });
   }
 
@@ -214,6 +232,8 @@ export class ConsentUI {
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
+
+    this.disableScroll_();
 
     this.isFullscreen_ = true;
   }
@@ -314,6 +334,9 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
+
+        // TODO (torch2424): Show mask if publisher provides the option
+        // this.showMaskElement_();
       });
     });
   }
@@ -336,7 +359,57 @@ export class ConsentUI {
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     removeElement(dev().assertElement(this.ui_));
+
+    // TODO (torch2424): Hide mask if publisher provides the option
+    // this.hideMaskElement_();
   }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  disableScroll_() {
+    if (this.scrollEnabled_) {
+      this.viewport_.enterOverlayMode();
+      this.scrollEnabled_ = false;
+    }
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  enableScroll_() {
+    if (!this.scrollEnabled_) {
+      this.viewport_.leaveOverlayMode();
+      this.scrollEnabled_ = true;
+    }
+  }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  showMaskElement_() {
+    if (!this.maskElement_) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add('i-amphtml-consent-ui-mask');
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+  }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  hideMaskElement_() {
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+  }
+
 
   /**
    * Listen to iframe messages and handle events.
