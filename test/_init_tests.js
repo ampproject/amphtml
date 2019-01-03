@@ -59,13 +59,6 @@ global.describes = describes;
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
-// Latest stable version numbers of browsers as of 12/3/2018
-const latestVersion = {
-  chrome: 71,
-  firefox: 64,
-  safari: 12,
-};
-
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
@@ -142,13 +135,6 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipChromeDev() {
-    return this.skip(() => {
-      return this.platform.isChrome() &&
-        this.platform.getMajorVersion() > latestVersion.chrome;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
@@ -157,22 +143,8 @@ class TestConfig {
     return this.skip(this.runOnFirefox);
   }
 
-  skipFirefoxDev() {
-    return this.skip(() => {
-      return this.platform.isFirefox() &&
-        this.platform.getMajorVersion() > latestVersion.firefox;
-    });
-  }
-
   skipSafari() {
     return this.skip(this.runOnSafari);
-  }
-
-  skipSafariLatest() {
-    return this.skip(() => {
-      return this.platform.isSafari() &&
-        this.platform.getMajorVersion() === latestVersion.safari;
-    });
   }
 
   skipIos() {
