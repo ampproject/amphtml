@@ -20,14 +20,12 @@ tags: {  # amp-recaptcha-input
     name: "amp-recaptcha-input"
     version: "0.1"
     version: "latest"
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-form> <amp-recaptcha-input>
   html_format: AMP
   tag_name: "AMP-RECAPTCHA-INPUT"
-  spec_name: "amp-form amp-recaptcha-input"
   mandatory_ancestor: "FORM"
   requires_extension: "amp-form"
   requires_extension: "amp-recaptcha-input"
