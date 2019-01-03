@@ -40,7 +40,7 @@ export class Services {
 
   /**
    * Returns a promise for the Access service.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDoc(element) {
@@ -51,7 +51,7 @@ export class Services {
   /**
    * Returns a promise for the Access service or a promise for null if the
    * service is not available on the current page.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDocOrNull(element) {
@@ -62,7 +62,7 @@ export class Services {
 
   /**
    * Returns a promise for the Subscriptions service.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!SubscriptionService>}
    */
   static subscriptionsServiceForDoc(element) {
@@ -73,7 +73,7 @@ export class Services {
 
   /**
    * Returns a promise for the Subscriptions service.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?SubscriptionService>}
    */
   static subscriptionsServiceForDocOrNull(element) {
@@ -101,7 +101,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
    */
   static activityForDoc(element) {
@@ -131,7 +131,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @param {boolean=} loadAnalytics
    * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
@@ -148,7 +148,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(element) {
@@ -272,7 +272,7 @@ export class Services {
 
   /**s
    * Returns a promise for the Inputmask service.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>}
    */
   static inputmaskServiceForDocOrNull(element) {
@@ -446,7 +446,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */
   static webAnimationServiceFor(element) {
@@ -456,12 +456,12 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
-  static storageForDoc(element) {
+  static storageForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
-      getServicePromiseForDoc(element, 'storage'));
+      getServicePromiseForDoc(elementOrAmpDoc, 'storage'));
   }
 
   /**
@@ -493,7 +493,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
    */
   static userNotificationManagerForDoc(element) {
@@ -505,7 +505,7 @@ export class Services {
   /**
    * Returns a promise for the consentPolicy Service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
    */
   static consentPolicyServiceForDocOrNull(element) {
@@ -517,7 +517,7 @@ export class Services {
   /**
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-geo/0.1/amp-geo.GeoDef>}
    */
   static geoForDocOrNull(element) {

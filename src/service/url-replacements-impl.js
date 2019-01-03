@@ -114,6 +114,7 @@ export class GlobalVariableSource extends VariableSource {
   /** @override */
   initialize() {
     const {win} = this.ampdoc;
+    const element = this.ampdoc.getHeadNode();
 
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
@@ -262,7 +263,7 @@ export class GlobalVariableSource extends VariableSource {
       // If no `opt_userNotificationId` argument is provided then
       // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = Services.userNotificationManagerForDoc(this.ampdoc)
+        consent = Services.userNotificationManagerForDoc(element)
             .then(service => {
               return service.get(opt_userNotificationId);
             });
@@ -482,7 +483,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return Services.activityForDoc(this.ampdoc).then(activity => {
+      return Services.activityForDoc(element).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -490,7 +491,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the incremental engaged time since the last push under the
     // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
-      return Services.activityForDoc(this.ampdoc).then(activity => {
+      return Services.activityForDoc(element).then(activity => {
         return activity.getIncrementalEngagedTime(/** @type {string} */ (name),
             reset !== 'false');
       });
@@ -605,9 +606,10 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getAccessValue_(getter, expr) {
+    const element = this.ampdoc.getHeadNode();
     return Promise.all([
-      Services.accessServiceForDocOrNull(this.ampdoc),
-      Services.subscriptionsServiceForDocOrNull(this.ampdoc),
+      Services.accessServiceForDocOrNull(element),
+      Services.subscriptionsServiceForDocOrNull(element),
     ]).then(services => {
       const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
         services[0] || services[1]);
@@ -677,7 +679,8 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForDocOrNull(this.ampdoc)
+    const element = this.ampdoc.getHeadNode();
+    return Services.geoForDocOrNull(element)
         .then(geo => {
           user().assert(geo,
               'To use variable %s, amp-geo should be configured',

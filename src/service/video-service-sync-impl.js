@@ -82,18 +82,20 @@ export class VideoServiceSync {
 
   /**
    * @param {!Window} win
-   * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @return {!Promise<!VideoServiceDef>}
    * @visibleForTesting
    */
-  static videoServiceFor(win, nodeOrDoc) {
+  static videoServiceFor(win, ampdoc) {
     // Not exposed in ../services.js since we don't want other modules to
     // instantiate or access the service.
     const extensions = Services.extensionsFor(win);
-    const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
-        .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(ampdoc, 'video-service', EXTENSION)));
+        .then(() => {
+          const element = ampdoc.getHeadNode();
+          return /** @type {!Promise<!VideoServiceDef>} */ (
+            getElementServiceForDoc(element, 'video-service', EXTENSION));
+        });
   }
 
   /** @override */

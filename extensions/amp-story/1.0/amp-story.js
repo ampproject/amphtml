@@ -834,7 +834,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   pauseStoryUntilConsentIsResolved_() {
     const policyId = this.getConsentPolicy() || 'default';
-    const consentPromise = getConsentPolicyState(this.getAmpDoc(), policyId);
+    const consentPromise = getConsentPolicyState(this.element, policyId);
 
     if (!consentPromise) {
       return;

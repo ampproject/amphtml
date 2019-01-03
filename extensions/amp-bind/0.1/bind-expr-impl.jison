@@ -366,6 +366,10 @@ key:
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, $NAME);
       %}
+  | ' NAME '
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $NAME);
+      }%
   | primitive
       %{
         $$ = $primitive;

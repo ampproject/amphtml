@@ -339,7 +339,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
     const sharedDataPromise = consentPolicyId
-      ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
 
     this.layoutPromise_ = Promise.all(
@@ -398,7 +398,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   getConsentState() {
     const consentPolicyId = super.getConsentPolicy();
     return consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicyState(this.element, consentPolicyId)
       : Promise.resolve(null);
   }
 
