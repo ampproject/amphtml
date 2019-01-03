@@ -19,7 +19,6 @@ import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
 import {VideoServiceSignals} from './video-service-interface';
 import {dev} from '../log';
-import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
 import {isExperimentOn} from '../experiments';
 import {listen, listenOncePromise} from '../event-helper';
