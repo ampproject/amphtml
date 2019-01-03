@@ -112,7 +112,7 @@ amp-list/0.1/test/validator-amp-list.html:85:2 The attribute 'auto-resize' in ta
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      load-more="manual"
 |      load-more-bookmark="next">
-|      <div load-more-button></div>
+|      <button load-more-button></button>
 |      <div load-more-loading></div>
 |      <div load-more-failed></div>
 |      <div load-more-end></div>
