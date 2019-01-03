@@ -13,3 +13,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
+tags: {  # amp-recaptcha-input
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-recaptcha-input"
+    version: "0.1"
+    version: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-form
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-form"
+    version: "0.1"
+    version: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-form amp-recaptcha-input
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-RECAPTCHA-INPUT"
+  spec_name: "amp-form amp-recaptcha-input"
+  mandatory_parent: "FORM"
+  requires_extension: "amp-form"
+  requires_extension: "amp-recaptcha-input"
+  attrs: {
+    name: "name"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-sitekey"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-action"
+    mandatory: true
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+

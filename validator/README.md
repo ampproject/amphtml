@@ -71,8 +71,8 @@ Dependencies:
   * protobuf
     ```sh
     brew install protobuf
-    mkdir -p /Users/USERNAME/Library/Python/2.7/lib/python/site-packages
-    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/USERNAME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
+    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
     ```
 
   * openjdk-7-jre
