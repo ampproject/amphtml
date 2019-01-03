@@ -19,6 +19,7 @@ import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
+import {throttle} from '../../src/utils/rate-limit';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -57,6 +58,10 @@ const icons = {
 };
 
 /*eslint-enable */
+
+// Throttle for the showControls() function
+// Timeout is 1s, because showControls will hide after 3s
+const showControlsThrottled = throttle(window, showControls, 1000);
 
 const bigPlayDivDisplayStyle = 'table-cell';
 
@@ -514,8 +519,14 @@ export function imaVideo(global, data) {
 
 /**
  * Adds the appropriate event listener to an element
- * to represent a hover state. And adds an appropriate
- * throttler.
+ * to represent a hover state.
+ *
+ * NOTE: This does not add a throttler,
+ * since this is applied per element,
+ * and would require wrapping the callback.
+ * Thus, the callback passed should be,
+ * appropriately throttled. See showControlsThrottled.
+ *
  * @param {!Element} element
  * @param {!Function} callback
  */
@@ -525,7 +536,7 @@ export function addHoverEventToElement(element, callback) {
 }
 
 /**
- * Removess the appropriate event listener from an element
+ * Removes the appropriate event listener from an element
  * that represented a hover state.
  * @param {!Element} element
  * @param {!Function} callback
@@ -607,7 +618,7 @@ function onImaLoadSuccess(global, data) {
 function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
-  addHoverEventToElement(/** @type !Element*/(videoPlayer), showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   imaLoadAllowed = false;
   postMessage({event: VideoEvents.LOAD});
 }
@@ -814,7 +825,7 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
-  addHoverEventToElement(/** @type !Element*/(videoPlayer), showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   if (playbackStarted) {
     playVideo();
   }
@@ -831,7 +842,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
-  addHoverEventToElement(/** @type !Element*/(videoPlayer), showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   playVideo();
 }
 
@@ -878,7 +889,7 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   postMessage({event: VideoEvents.AD_START});
-  removeHoverEventFromElement(/** @type !Element*/(videoPlayer), showControls);
+  removeHoverEventFromElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   showAdControls();
@@ -892,7 +903,7 @@ export function onContentPauseRequested(global) {
  */
 export function onContentResumeRequested() {
   adsActive = false;
-  addHoverEventToElement(/** @type !Element*/(videoPlayer), showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   postMessage({event: VideoEvents.AD_END});
   resetControlsAfterAd();
   if (!contentComplete) {
@@ -1314,6 +1325,7 @@ export function showControls() {
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
+    // Be sure to keep the timer greater than showControlsThrottled.
     clearInterval(hideControlsTimeout);
     hideControlsTimeout = setTimeout(hideControls, 3000);
   }
