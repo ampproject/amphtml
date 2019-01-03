@@ -22,7 +22,7 @@ import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
 } from '../consent-policy-manager';
-import {dict, map} from '../../../../src/utils/object';
+import {dict} from '../../../../src/utils/object';
 import {expandPolicyConfig} from '../consent-config';
 import {macroTask} from '../../../../testing/yield';
 
@@ -40,20 +40,19 @@ describes.realWin('ConsentPolicyManager', {
   let win;
   let ampdoc;
   let consentManagerOnChangeSpy;
-  let consentInfoMap;
+  let consentInfo;
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
     consentManagerOnChangeSpy = sandbox.spy();
-    consentInfoMap = map();
 
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
       return Promise.resolve({
         whenConsentReady: () => {return Promise.resolve();},
-        onConsentStateChange: (id, handler) => {
-          consentManagerOnChangeSpy(id, handler);
-          handler(consentInfoMap[id]);
+        onConsentStateChange: handler => {
+          consentManagerOnChangeSpy(handler);
+          handler(consentInfo);
         },
         getConsentInstanceSharedData: () => {
           return Promise.resolve(dict({
@@ -65,14 +64,14 @@ describes.realWin('ConsentPolicyManager', {
   });
 
   afterEach(() => {
-    consentInfoMap = null;
+    consentInfo = null;
   });
 
   describe('Consent Policy Manager', () => {
     let manager;
     beforeEach(() => {
       manager = new ConsentPolicyManager(ampdoc);
-      consentInfoMap['ABC'] =
+      consentInfo =
           constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
       manager.setLegacyConsentInstanceId('ABC');
     });
@@ -80,7 +79,6 @@ describes.realWin('ConsentPolicyManager', {
     it('Initiate consent value', function* () {
       yield macroTask();
       expect(consentManagerOnChangeSpy).to.be.called;
-      expect(consentManagerOnChangeSpy.args[0][0]).to.equal('ABC');
       expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
       expect(manager.consentString_).to.equal('test');
     });
@@ -99,7 +97,7 @@ describes.realWin('ConsentPolicyManager', {
       });
 
       it('Invalid consent policy', function* () {
-        consentInfoMap['invalid'] =
+        consentInfo =
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED);
         expectAsyncConsoleError('[consent-policy-manager] ' +
             'invalid waitFor value, consent policy will never resolve');
@@ -187,16 +185,10 @@ describes.realWin('ConsentPolicyManager', {
       let policy;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfoMap['ABC'] =
+        consentInfo =
             constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
         manager.setLegacyConsentInstanceId('ABC');
-        const defaultConfig = dict({
-          'ABC': {
-            'checkConsentHref': 'https://response1',
-          },
-        });
-
-        policy = expandPolicyConfig(dict({}), defaultConfig);
+        policy = expandPolicyConfig(dict({}), 'ABC');
         const keys = Object.keys(policy);
         for (let i = 0; i < keys.length; i++) {
           manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
@@ -500,7 +492,7 @@ describes.realWin('ConsentPolicyManager', {
       manager = new ConsentPolicyManager(ampdoc);
       sandbox.stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
           .callsFake(() => {return Promise.resolve();});
-      consentInfoMap['ABC'] = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+      consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
       manager.setLegacyConsentInstanceId('ABC');
     });
 

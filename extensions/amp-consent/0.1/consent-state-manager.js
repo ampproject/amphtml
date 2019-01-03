@@ -25,7 +25,6 @@ import {
   recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
@@ -44,17 +43,20 @@ export class ConsentStateManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ConsentInstance>} */
-    this.instances_ = {};
+    /** @private {?string} */
+    this.instanceId_ = null;
 
-    /** @private {!Object<string, ?Observable>}*/
-    this.consentChangeObservables_ = {};
+    /** @private {?ConsentInstance} */
+    this.instance_ = null;
 
-    /** @private {!Object<string, ?function()>} */
-    this.consentReadyResolvers_ = {};
+    /** @private {?function(!ConsentInfoDef)} */
+    this.consentChangeHandler_ = null;
 
-    /** @private {!Object<string, ?Promise>} */
-    this.consentReadyPromises_ = {};
+    /** @private {?Promise} */
+    this.consentReadyPromise_ = null;
+
+    /** @private {?function()} */
+    this.consentReadyResolver_ = null;
   }
 
   /**
@@ -63,32 +65,34 @@ export class ConsentStateManager {
    * @param {!Object} config
    */
   registerConsentInstance(instanceId, config) {
-    if (this.instances_[instanceId]) {
-      dev().error(TAG, 'instance %s already registered', instanceId);
+    if (this.instance_) {
+      dev().error(TAG, 'Cannot register consent instance %s, ' +
+          'instance %s has already been registered.',
+      instanceId, this.instanceId_);
       return;
     }
-    this.instances_[instanceId] = new ConsentInstance(
-        this.ampdoc_, instanceId, config);
-    this.consentChangeObservables_[instanceId] = new Observable();
-    if (this.consentReadyResolvers_[instanceId]) {
-      this.consentReadyResolvers_[instanceId]();
-      this.consentReadyPromises_[instanceId] = null;
-      this.consentReadyResolvers_[instanceId] = null;
+
+    this.instanceId_ = instanceId;
+
+    this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
+
+    if (this.consentReadyResolver_) {
+      this.consentReadyResolver_();
+      this.consentReadyResolver_ = null;
     }
   }
 
   /**
    * Update consent instance state
-   * @param {string} instanceId
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
    */
-  updateConsentInstanceState(instanceId, state, consentStr) {
-    if (!this.instances_[instanceId] ||
-        !this.consentChangeObservables_[instanceId]) {
-      dev().error(TAG, 'instance %s not registered', instanceId);
+  updateConsentInstanceState(state, consentStr) {
+    if (!this.instance_) {
+      dev().error(TAG, 'instance not registered');
       return;
     }
+
     if (state == CONSENT_ITEM_STATE.DISMISSED) {
       if (consentStr) {
         user().error(TAG,
@@ -97,38 +101,41 @@ export class ConsentStateManager {
         consentStr = undefined;
       }
     }
-    this.consentChangeObservables_[instanceId].fire(
-        constructConsentInfo(state, consentStr));
-    this.instances_[instanceId].update(state, consentStr);
+
+    this.instance_.update(state, consentStr);
+
+    if (this.consentChangeHandler_) {
+      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
+    }
   }
 
   /**
    * Get local consent instance state
-   * @param {string} instanceId
    * @return {Promise<!ConsentInfoDef>}
    */
-  getConsentInstanceInfo(instanceId) {
-    devAssert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    return this.instances_[instanceId].get();
+  getConsentInstanceInfo() {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    return this.instance_.get();
   }
 
   /**
    * Register the handler for every consent state change.
-   * @param {string} instanceId
    * @param {function(!ConsentInfoDef)} handler
    */
-  onConsentStateChange(instanceId, handler) {
-    devAssert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
+  onConsentStateChange(handler) {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
 
-    const unlistener = this.consentChangeObservables_[instanceId].add(handler);
+    devAssert(!this.consentChangeHandler_,
+        '%s: Duplicate consent change handler, will be ignored', TAG);
+
+    this.consentChangeHandler_ = handler;
+
     // Fire first consent instance state.
-    this.getConsentInstanceInfo(instanceId).then(info => {
+    this.getConsentInstanceInfo().then(info => {
       handler(info);
     });
-
-    return unlistener;
   }
 
 
@@ -136,42 +143,39 @@ export class ConsentStateManager {
    * Sets a promise which resolves to a shareData object that is to be returned
    * from the remote endpoint.
    *
-   * @param {string} instanceId
    * @param {Promise<?Object>} sharedDataPromise
    */
-  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
-    devAssert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  setConsentInstanceSharedData(sharedDataPromise) {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    this.instance_.sharedDataPromise = sharedDataPromise;
   }
 
   /**
    * Returns a promise that resolves to a shareData object that is returned
    * from the remote endpoint.
    *
-   * @param {string} instanceId
    * @return {?Promise<?Object>}
    */
-  getConsentInstanceSharedData(instanceId) {
-    devAssert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    return this.instances_[instanceId].sharedDataPromise;
+  getConsentInstanceSharedData() {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    return this.instance_.sharedDataPromise;
   }
 
   /**
    * Returns a promise that's resolved when consent instance is ready.
-   * @param {string} instanceId
    */
-  whenConsentReady(instanceId) {
-    if (this.instances_[instanceId]) {
+  whenConsentReady() {
+    if (this.instance_) {
       return Promise.resolve();
     }
-    if (!this.consentReadyPromises_[instanceId]) {
+    if (!this.consentReadyPromise_) {
       const deferred = new Deferred();
-      this.consentReadyPromises_[instanceId] = deferred.promise;
-      this.consentReadyResolvers_[instanceId] = deferred.resolve;
+      this.consentReadyPromise_ = deferred.promise;
+      this.consentReadyResolver_ = deferred.resolve;
     }
-    return this.consentReadyPromises_[instanceId];
+    return this.consentReadyPromise_;
   }
 }
 
