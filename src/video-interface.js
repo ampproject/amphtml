@@ -157,6 +157,12 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
+
+  /**
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
+   */
+  seekTo(unusedTimeSeconds) {}
 }
 
 

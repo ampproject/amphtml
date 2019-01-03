@@ -857,4 +857,27 @@ describes.realWin('amp-video', {
       });
     });
   });
+
+  describe('seekTo', () => {
+    it('changes `currentTime`', () => new Promise(resolve => {
+      getVideo({
+        'src': 'https://example-com.cdn.FAKEampproject.org/m/s/video.mp4',
+        width: 160,
+        height: 90,
+      }, /* children */ null, element => {
+        const {implementation_} = element;
+        const {video_} = implementation_;
+
+        expect(video_.currentTime).to.equal(0);
+
+        [20, 100, 0, 50, 22].forEach(timeSeconds => {
+          implementation_.seekTo(timeSeconds);
+          expect(video_.currentTime).to.equal(timeSeconds);
+        });
+
+        resolve();
+      });
+    }));
+  });
+
 });
