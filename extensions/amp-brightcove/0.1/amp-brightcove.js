@@ -61,6 +61,15 @@ class AmpBrightcove extends AMP.BaseElement {
     /** @private {?boolean}  */
     this.muted_ = false;
 
+    /** @private {?number}  */
+    this.currentTime_ = null;
+
+    /** @private {?number}  */
+    this.duration_ = null;
+
+    /** @private {Array}  */
+    this.playedRanges_ = [];
+
     /** @private {?boolean}  */
     this.hasAmpSupport_ = false;
 
@@ -187,6 +196,16 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     if (eventType === 'pause') {
       this.playing_ = false;
+    }
+
+    if (data['ct']) {
+      this.currentTime_ = data['ct'];
+    }
+    if (data['pr']) {
+      this.playedRanges_ = data['pr'];
+    }
+    if (data['dur']) {
+      this.duration_ = data['dur'];
     }
 
     if (redispatch(element, eventType, {
@@ -424,20 +443,17 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return this.currentTime_;
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return this.duration_;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playedRanges_;
   }
 
 }
