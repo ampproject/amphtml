@@ -17,29 +17,26 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../../config');
 const deglob = require('globs-to-files');
-const findImports = require('find-imports');
-const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
-const karmaDefault = require('./karma.conf');
+const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
-const {app} = require('../test-server');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {getStdout} = require('../exec');
-const {gitDiffNameOnlyMaster} = require('../git');
+const {app} = require('../../test-server');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
+const {getAdTypes, unitTestsToRun} = require('./helpers');
+const {getStdout} = require('../../exec');
 
 const {green, yellow, cyan, red} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
-const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
+
 const batchSize = 4; // Number of Sauce Lab browsers
 
 const chromeBase = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
@@ -128,42 +125,6 @@ function getConfig() {
 }
 
 /**
- * Returns an array of ad types.
- * @return {!Array<string>}
- */
-function getAdTypes() {
-  const namingExceptions = {
-    // We recommend 3P ad networks use the same string for filename and type.
-    // Write exceptions here in alphabetic order.
-    // filename: [type1, type2, ... ]
-    adblade: ['adblade', 'industrybrains'],
-    mantis: ['mantis-display', 'mantis-recommend'],
-    weborama: ['weborama-display'],
-  };
-
-  // Start with Google ad types
-  const adTypes = ['adsense'];
-
-  // Add all other ad types
-  const files = fs.readdirSync('./ads/');
-  for (let i = 0; i < files.length; i++) {
-    if (path.extname(files[i]) == '.js'
-        && files[i][0] != '_' && files[i] != 'ads.extern.js') {
-      const adType = path.basename(files[i], '.js');
-      const expanded = namingExceptions[adType];
-      if (expanded) {
-        for (let j = 0; j < expanded.length; j++) {
-          adTypes.push(expanded[j]);
-        }
-      } else {
-        adTypes.push(adType);
-      }
-    }
-  }
-  return adTypes;
-}
-
-/**
  * Prints help messages for args if tests are being run for local development.
  */
 function printArgvMessages() {
@@ -229,174 +190,6 @@ function printArgvMessages() {
       }
     });
   }
-}
-
-/**
- * Returns true if the given file is a unit test.
- *
- * @param {string} file
- * @return {boolean}
- */
-function isUnitTest(file) {
-  return config.unitTestPaths.some(pattern => {
-    return minimatch(file, pattern);
-  });
-}
-
-/**
- * Returns the list of files imported by a JS file
- *
- * @param {string} jsFile
- * @return {!Array<string>}
- */
-function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
-  const files = [];
-  const rootDir = path.dirname(path.dirname(__dirname));
-  const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function(file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(rootDir, fullPath);
-      files.push(relativePath);
-    }
-  });
-  return files;
-}
-
-/**
- * Returns true if the test file should be run for any one of the source files.
- *
- * @param {string} testFile
- * @param {!Array<string>} srcFiles
- * @return {boolean}
- */
-function shouldRunTest(testFile, srcFiles) {
-  const filesImported = getImports(testFile);
-  return filesImported.filter(function(file) {
-    return srcFiles.includes(file);
-  }).length > 0;
-}
-
-/**
- * Retrieves the set of unit tests that should be run for a set of source files.
- *
- * @param {!Array<string>} srcFiles
- * @return {!Array<string>}
- */
-function getTestsFor(srcFiles) {
-  const rootDir = path.dirname(path.dirname(__dirname));
-  const allUnitTests = deglob.sync(config.unitTestPaths);
-  return allUnitTests.filter(testFile => {
-    return shouldRunTest(testFile, srcFiles);
-  }).map(fullPath => path.relative(rootDir, fullPath));
-}
-
-/**
- * Adds an entry that maps a CSS file to a JS file
- *
- * @param {!Object} cssData
- * @param {string} cssBinaryName
- * @param {!Object<string, string>} cssJsFileMap
- */
-function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-  const cssFilePath = `extensions/${cssData['name']}/${cssData['version']}/` +
-      `${cssBinaryName}.css`;
-  const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
-  cssJsFileMap[cssFilePath] = jsFilePath;
-}
-
-/**
- * Extracts a mapping from CSS files to JS files from a well known file
- * generated during `gulp css`.
- *
- * @return {!Object<string, string>}
- */
-function extractCssJsFileMap() {
-  if (!fs.existsSync(extensionsCssMapPath)) {
-    log(red('ERROR:'), 'Could not find the file',
-        cyan(extensionsCssMapPath) + '.');
-    log('Make sure', cyan('gulp css'), 'was run prior to this.');
-    process.exit();
-  }
-  const extensionsCssMap = fs.readFileSync(extensionsCssMapPath, 'utf8');
-  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
-  const extensions = Object.keys(extensionsCssMapJson);
-  const cssJsFileMap = {};
-  extensions.forEach(extension => {
-    const cssData = extensionsCssMapJson[extension];
-    if (cssData['hasCss']) {
-      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
-      if (cssData.hasOwnProperty('cssBinaries')) {
-        const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach(cssBinary => {
-          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
-        });
-      }
-    }
-  });
-  return cssJsFileMap;
-}
-
-/**
- * Retrieves the set of JS source files that import the given CSS file.
- *
- * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
- * @return {!Array<string>}
- */
-function getJsFilesFor(cssFile, cssJsFileMap) {
-  const jsFiles = [];
-  if (cssJsFileMap.hasOwnProperty(cssFile)) {
-    const cssFileDir = path.dirname(cssFile);
-    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
-      return path.extname(file) == '.js';
-    });
-    jsFilesInDir.forEach(jsFile => {
-      const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
-        jsFiles.push(jsFilePath);
-      }
-    });
-  }
-  return jsFiles;
-}
-
-/**
- * Extracts the list of unit tests to run based on the changes in the local
- * branch.
- *
- * @return {!Array<string>}
- */
-function unitTestsToRun() {
-  const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
-  let srcFiles = [];
-  filesChanged.forEach(file => {
-    if (isUnitTest(file)) {
-      testsToRun.push(file);
-    } else if (path.extname(file) == '.js') {
-      srcFiles = srcFiles.concat([file]);
-    } else if (path.extname(file) == '.css') {
-      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
-    }
-  });
-  if (srcFiles.length > 0) {
-    log(green('INFO:'), 'Determining which unit tests to run...');
-    const moreTestsToRun = getTestsFor(srcFiles);
-    moreTestsToRun.forEach(test => {
-      if (!testsToRun.includes(test)) {
-        testsToRun.push(test);
-      }
-    });
-  }
-  return testsToRun;
 }
 
 /**
@@ -468,7 +261,7 @@ async function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
-    const testsToRun = unitTestsToRun();
+    const testsToRun = unitTestsToRun(config.unitTestPaths);
     if (testsToRun.length == 0) {
       log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
