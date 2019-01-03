@@ -149,7 +149,7 @@ The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 </table>
 ```
 
-Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using the script tag to define your templates.
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using a `<script type="text/plain">` tag to define your templates.
 
 ```html
 <script type="text/plain" template="amp-mustache">
