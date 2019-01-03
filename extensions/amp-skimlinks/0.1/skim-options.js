@@ -169,10 +169,7 @@ function getInternalDomains_(docInfo) {
  */
 function getConfig_(element) {
   try {
-    return {
-      ...defaultConfig,
-      ...getChildJsonConfig(element),
-    };
+    return Object.assign({}, defaultConfig, getChildJsonConfig(element));
   } catch (err) {
     return defaultConfig;
   }
