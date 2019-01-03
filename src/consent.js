@@ -56,15 +56,15 @@ export function getConsentPolicySharedData(element, policyId) {
 }
 
 /**
- * TODO (zhouyx@)
- * Combine with getConsentPolicyState and return a consentInfo object.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * TODO(zhouyx): Combine with getConsentPolicyState and return a consentInfo
+ * object.
+ * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(ampdoc, policyId) {
+export function getConsentPolicyInfo(element, policyId) {
   // Return the stored consent string.
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+  return Services.consentPolicyServiceForDocOrNull(element)
       .then(consentPolicy => {
         if (!consentPolicy) {
           return null;

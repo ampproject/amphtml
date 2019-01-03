@@ -343,7 +343,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const consentPolicyId = super.getConsentPolicy();
     const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
     const consentStringPromise = (consentPolicyId && isConsentV2Experiment)
-      ? getConsentPolicyInfo(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
       : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
