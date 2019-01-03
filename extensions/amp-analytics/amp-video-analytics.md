@@ -26,7 +26,7 @@ AMP video analytics gathers data about how users interact with videos in AMP doc
 | `<amp-video>` | Full support |
 | `<amp-3q-player>` | Partial support<sup>[1]</sup> |
 | `<amp-brid-player>` | Partial support<sup>[1]</sup> |
-| `<amp-brightcove>` | Partial support<sup>[1]</sup> |
+| `<amp-brightcove>` | Full support |
 | `<amp-dailymotion>` | Partial support<sup>[1]</sup> |
 | `<amp-ima-video>` | Partial support<sup>[1]</sup> |
 | `<amp-nexxtv-player>` | Partial support<sup>[1]</sup> |
