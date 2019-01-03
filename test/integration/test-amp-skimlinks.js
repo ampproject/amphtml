@@ -2,9 +2,12 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {PLATFORM_NAME} from '../../extensions/amp-skimlinks/0.1/constants';
 import {parseQueryString} from '../../src/url';
 
-const pageTrackingUrl = `${RequestBank.getUrl('pageTrackingUrl')}/track.php?data=\${data}`;
-const linksTrackingUrl = `${RequestBank.getUrl('linksTrackingUrl')}/link?data=\${data}`;
-const nonAffiliateTrackingUrl = `${RequestBank.getUrl('nonAffiliateTrackingUrl')}?call=track&data=\${data}`;
+const pageTrackingUrl = RequestBank.getUrl('pageTrackingUrl') +
+  '/track.php?data=${data}';
+const linksTrackingUrl = RequestBank.getUrl('linksTrackingUrl') +
+  '/link?data=${data}';
+const nonAffiliateTrackingUrl = RequestBank.getUrl('nonAffiliateTrackingUrl') +
+  '?call=track&data=${data}';
 const waypointUrl = `${RequestBank.getUrl('waypointUrl')}`;
 
 describe('amp-skimlinks', function() {
