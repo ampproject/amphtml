@@ -117,7 +117,7 @@ export class ViewerForTesting {
         // Send handshake confirmation.
         const message = {
           app: APP,
-          requestid: event.data.requestid,
+          requestid: e.data.requestid,
           data: {},
           type: 's',
         };
