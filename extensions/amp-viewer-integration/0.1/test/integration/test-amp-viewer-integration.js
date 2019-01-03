@@ -184,8 +184,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
-          sandbox.stub(viewer, 'hasCapability').withArgs('windowResize')
-              .returns(true);
+          sandbox.stub(viewer, 'hasCapability')
+              .withArgs('win-resize-doc-height-update').returns(true);
           const initWindowResizeHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initWindowResizeHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
