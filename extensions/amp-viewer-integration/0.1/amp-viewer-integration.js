@@ -204,7 +204,7 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('focus-rect')) {
       this.initFocusHandler_(messaging);
     }
-    if (viewer.hasCapability('windowResize')) {
+    if (viewer.hasCapability('win-resize-doc-height-update')) {
       this.initWindowResizeHandler_(messaging);
     }
     if (this.highlightHandler_ != null) {
