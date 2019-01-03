@@ -1045,14 +1045,15 @@ export class AmpForm {
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
-              container.appendChild(rendered);
-              const renderedEvent = createCustomEvent(
-                  this.win_,
-                  AmpEvents.DOM_UPDATE,
-                  /* detail */ null,
-                  {bubbles: true});
-              container.dispatchEvent(renderedEvent);
-              this.resources_.mutateElement(container, () => {});
+              this.resources_.mutateElement(container, () => {
+                container.appendChild(rendered);
+                const renderedEvent = createCustomEvent(
+                    this.win_,
+                    AmpEvents.DOM_UPDATE,
+                    /* detail */ null,
+                    {bubbles: true});
+                container.dispatchEvent(renderedEvent);
+              });
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
