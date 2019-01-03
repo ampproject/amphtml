@@ -225,7 +225,7 @@ This tells the validator that the html tag name is 'AMP-CAT'.
 ```
 
 This tells the validator that the `amp-cat` tag requires the inclusion of the
-matching extension script tag that we defined above. 
+matching extension script tag that we defined above.
 
 ```
   attrs: {
@@ -361,6 +361,49 @@ attrs: {
   }
 }
 ```
+
+### Additional Common Validation Rules
+
+So let's say we want to add some additional rules to our original element validation rules:
+
+```
+tags: {  # <amp-cat>
+  html_format: AMP
+  tag_name: "AMP-CAT"
+  requires_extension: "amp-cat"
+  attrs: {
+    name: "data-selected-cat"
+    value_casei: "bella"
+    value_casei: "chloe"
+    value_casei: "oscar"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+```
+
+#### Mandatory Parent
+
+Let's say we want `<amp-cat>` to ONLY be a valid element if it is a DIRECT child of a div element. We could add:
+
+```
+mandatory_parent: "DIV"
+```
+
+as a key/value of the `tags`. If `<amp-cat>` can be a DIRECT or INDIRECT (nested) child of a div element, we could add:
+
+```
+mandatory_ancestor: "DIV"
+```
+
+as a key/value of the `tags`.
 
 ## Test Files
 
