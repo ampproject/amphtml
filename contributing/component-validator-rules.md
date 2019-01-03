@@ -5,6 +5,16 @@ Extended Component](https://www.ampproject.org/docs/reference/components). It
 does not describe every possible validator feature, but rather goes over some
 of the most common rules used when creating a new AMP Extended Component.
 
+## Getting Started
+
+Before writing any of your `.protoascii` or `validator-*.html` files, please
+[see the Installation and Usage sections of the AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md).
+
+This repo uses a [python script](https://github.com/ampproject/amphtml/blob/master/validator/build.py) to run golden tests using the AMP validator.
+Thus it is a good idea to ensure,
+that your development environment is configured correctly,
+before writing new tests to avoid any confusion.
+
 ## Example
 
 As a concrete example, imagine you are creating an extended component that
