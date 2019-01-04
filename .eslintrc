@@ -117,6 +117,7 @@
     "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
+    "no-restricted-globals": [2, "error", "event"],
     "no-script-url": 2,
     "no-self-compare": 2,
     "no-sequences": 2,
