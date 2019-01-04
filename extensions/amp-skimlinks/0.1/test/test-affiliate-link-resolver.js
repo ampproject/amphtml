@@ -207,7 +207,11 @@ describes.fakeWin(
         describe('Does correct request to domain resolver API', () => {
           beforeEach(() => {
             mock = env.sandbox.mock(xhr);
-            resolver = new AffiliateLinkResolver(xhr, {pubcode}, waypoint);
+            const skimOptions = {
+              pubcode,
+              config: {beaconUrl: DOMAIN_RESOLVER_API_URL},
+            };
+            resolver = new AffiliateLinkResolver(xhr, skimOptions, waypoint);
           });
 
           afterEach(() => {
@@ -281,9 +285,13 @@ describes.fakeWin(
             const stubXhr = helpers.createStubXhr({
               'merchant_domains': ['merchant1.com', 'merchant2.com'],
             });
+            const skimOptions = {
+              excludedDomains: ['excluded-merchant.com'],
+              config: {beaconUrl: DOMAIN_RESOLVER_API_URL},
+            };
             resolver = new AffiliateLinkResolver(
                 stubXhr,
-                {excludedDomains: ['excluded-merchant.com']},
+                skimOptions,
                 waypoint
             );
           });
@@ -414,7 +422,8 @@ describes.fakeWin(
         });
 
         describe('getAnchorDomain_', () => {
-          const resolver = new AffiliateLinkResolver({}, {}, waypoint);
+          const skimOptions = {config: {beaconUrl: DOMAIN_RESOLVER_API_URL}};
+          const resolver = new AffiliateLinkResolver({}, skimOptions, waypoint);
 
           it('Removes  http protocol', () => {
             const anchor = helpers.createAnchor('http://test.com');

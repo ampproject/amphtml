@@ -20,6 +20,7 @@ import {userAssert} from '../../../src/log';
 
 import {
   AFFILIATION_API,
+  DOMAIN_RESOLVER_API_URL,
   GLOBAL_DOMAIN_BLACKLIST,
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
@@ -39,6 +40,7 @@ export const defaultConfig = {
   'linksTrackingUrl': LINKS_IMPRESSIONS_TRACKING_URL,
   'nonAffiliateTrackingUrl': NA_CLICK_TRACKING_URL,
   'waypointUrl': AFFILIATION_API,
+  'beaconUrl': DOMAIN_RESOLVER_API_URL,
 };
 
 /**
