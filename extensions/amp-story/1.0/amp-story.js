@@ -534,7 +534,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.switchTo_(getDetail(e)['targetPageId']);
+      this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
@@ -748,8 +748,8 @@ export class AmpStory extends AMP.BaseElement {
 
     const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
-    storyPath_.push(getPageById(initialPageId));
 
+    this.storyPath_.push(firstPageEl);
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -1014,11 +1014,30 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
+   * @param {string} direction previous or next
    * @return {!Promise}
    */
-  switchTo_(targetPageId) {
-    const targetPage = this.getPageById(targetPageId);
+  switchTo_(targetPageId, direction='') {
+    console.log(this.storyPath_);
+    let targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
+
+    console.log("direction is" + direction);
+    console.log(targetPageId);
+    //Check to see if this is a navigation to the next page.
+    if (direction == 'next') {
+      console.log("in next");
+      this.storyPath_.push(targetPage);
+    // TODO(budnampet): check if we can handle Ids instead of pages
+    } else if (direction == 'previous') {
+        if (this.storyPath_.length > 1) {
+            const pathPrevious = this.storyPath_.pop();
+            if (pathPrevious.id != targetPage.id){
+              console.log("path previous is not the same as the targetPage");
+              targetPage = pathPrevious;
+            }
+        }
+    }
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && (this.activePage_.element.id === targetPageId)) {
@@ -1045,12 +1064,6 @@ export class AmpStory extends AMP.BaseElement {
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
 
-    //Check to see if this is a navigation to the previous page.
-    if (this.storyPath_[this.storypath_.length -2] == targetPage) {
-      this.storyPath_.pop();
-    } else {
-      storypath_.push(this.activePage_);
-    }
 
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.

@@ -742,7 +742,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(targetPageId);
+    this.switchTo_(targetPageId, 'previous');
   }
 
   /**
@@ -757,15 +757,18 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId);
+    this.switchTo_(pageId, 'next');
   }
 
   /**
    * @param {string} targetPageId
+   * @param {string} direction previous or next
    * @private
    */
-  switchTo_(targetPageId) {
-    const payload = dict({'targetPageId': targetPageId});
+  switchTo_(targetPageId, direction) {
+    const payload = dict({
+        'targetPageId': targetPageId,
+        'direction': direction});
     const eventInit = {bubbles: true};
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
