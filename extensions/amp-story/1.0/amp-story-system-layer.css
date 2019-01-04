@@ -42,6 +42,10 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
+.i-amphtml-story-hidden.i-amphtml-story-system-layer * {
+  pointer-events: none !important;
+}
+
 .i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0 !important;
 }
