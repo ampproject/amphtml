@@ -34,6 +34,7 @@ import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -1239,4 +1240,23 @@ describes.realWin('amp-story', {
           });
     });
   });
+  describe('amp-story branching', () => {
+    it('should advanced to specified page with advanced-to attribute', () => {
+      toggleExperiment(win, 'amp-story-branching', true);
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+
+            story.getPageById('cover')
+                .element.setAttribute('advance-to', 'page-3');
+
+            story.activePage_.element.dispatchEvent(
+              new MouseEvent('click', {clientX: 200}));
+            expect(story.activePage_.element.id).to.equal('page-3');
+          });
+    });
+  });
 });
+

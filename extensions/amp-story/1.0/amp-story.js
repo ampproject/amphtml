@@ -129,9 +129,9 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /** @enum {string} */
-const Attributes = {
+let Attributes = {
   STANDALONE: 'standalone',
-  ADVANCE_TO: 'advance-to',
+  ADVANCE_TO: 'i-amphtml-advance-to',
   RETURN_TO: 'i-amphtml-return-to',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   AD_SHOWING: 'ad-showing',
@@ -2141,6 +2141,10 @@ export class AmpStory extends AMP.BaseElement {
 
     if (!nextPage) {
       return false;
+    }
+
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      Attributes[ADVANCE_TO] = 'advance-to';
     }
 
     pageBeforeEl.setAttribute(Attributes.ADVANCE_TO, pageToBeInsertedId);
