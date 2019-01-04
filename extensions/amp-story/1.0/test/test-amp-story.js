@@ -1221,6 +1221,7 @@ describes.realWin('amp-story', {
                 element.querySelector('#cover').appendChild(actionButton);
                 // Click on the actionButton to trigger the goToPage action.
                 actionButton.click();
+                expect(story.activePage_.element.id).to.equal('page-2');
                 toggleExperiment(win, 'amp-story-branching', false);
               });
         });
