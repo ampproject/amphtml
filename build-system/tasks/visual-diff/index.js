@@ -27,8 +27,8 @@ const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {
   gitBranchName,
-  gitBranchPointFromMaster,
   gitCommitterEmail,
+  gitMergeBaseTravisMaster,
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {log, verifyCssElements} = require('./helpers');
@@ -100,7 +100,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPointFromMaster();
+    process.env['PERCY_TARGET_COMMIT'] = gitMergeBaseTravisMaster();
   }
 }
 
