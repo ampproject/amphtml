@@ -44,6 +44,15 @@ exports.gitMergeBaseTravisMaster = function() {
 };
 
 /**
+ * Returns the merge vase of the current branch off of master, regardless of
+ * the running environment.
+ */
+exports.gitMergeBaseMaster = function() {
+  return process.env.TRAVIS ?
+    exports.gitMergeBaseTravisMaster() : exports.gitMergeBaseLocalMaster();
+};
+
+/**
  * Returns the list of files changed on the local branch relative to the branch
  * point off of master, one on each line.
  * @return {!Array<string>}
@@ -71,8 +80,7 @@ exports.gitDiffStatMaster = function() {
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
-  const branchPoint = process.env.TRAVIS ?
-    exports.gitMergeBaseTravisMaster() : exports.gitMergeBaseLocalMaster();
+  const branchPoint = exports.gitMergeBaseMaster();
   let commitLog = getStdout(`git -c color.ui=always log --graph \
 --pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
 -%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
