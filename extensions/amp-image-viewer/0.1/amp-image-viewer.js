@@ -410,12 +410,14 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
+        // eslint-disable-next-line no-restricted-globals
         event.preventDefault();
       }
     });
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+      // eslint-disable-next-line no-restricted-globals
       event.preventDefault();
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = (this.elementBox_.width / 2) - e.data.clientX;
@@ -426,6 +428,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
+      // eslint-disable-next-line no-restricted-globals
       event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
@@ -436,6 +439,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
+      // eslint-disable-next-line no-restricted-globals
       event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
@@ -453,6 +457,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
+          // eslint-disable-next-line no-restricted-globals
           event.preventDefault();
           this.onMove_(e.data.deltaX, e.data.deltaY, false);
           if (e.data.last) {
