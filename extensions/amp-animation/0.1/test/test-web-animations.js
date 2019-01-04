@@ -927,6 +927,16 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[1].timing.delay).to.equal(100);
   });
 
+  it('should resolve length() correctly', () => {
+    const requests = scan({
+      selector: '.target',
+      delay: 'calc(100ms * length())',
+      keyframes: {},
+    });
+    expect(requests).to.have.length(2);
+    expect(requests[1].timing.delay).to.equal(200);
+  });
+
   it('should be able to resolve animation with args', () => {
     const builder = new Builder(win, doc, 'https://acme.org/',
         vsync, /* resources */ null);

@@ -401,7 +401,7 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
  - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
  - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
- - CSS extensions such as [`width()`, `height()`, `num()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
+ - CSS extensions such as [`width()`, `height()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) cannot be used in CSS.
 
 
 #### White listed properties for keyframes
@@ -566,6 +566,17 @@ Among other things, this property can be combined with `calc()` expressions and 
 {
   "selector": ".class-x",
   "delay": "calc(200ms * index())"
+}
+```
+
+#### CSS `length()` extension
+
+The `length()` function returns the number of target elements in the animation effect. This is most relevant when combined with `index()`:
+
+```
+{
+  "selector": ".class-x",
+  "delay": "calc(200ms * (length() - index()))"
 }
 ```
 
