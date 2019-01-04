@@ -32,7 +32,7 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
@@ -68,8 +68,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, !ConsentUI>} */
-    this.consentUI_ = map();
+    /** @private {?ConsentUI} */
+    this.consentUI_ = null;
 
     /** @private {?JsonObject} */
     this.consentConfig_ = null;
@@ -111,9 +111,14 @@ export class AmpConsent extends AMP.BaseElement {
 
     const config = new ConsentConfig(this.element);
 
-    if (config.getPostPromptUI()) {
+    this.consentConfig_ = config.getConsentConfig();
+
+    // ConsentConfig has verified that there's one and only one consent instance
+    this.consentId_ = this.consentConfig_['storageKey'];
+
+    if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ =
-          new ConsentUI(this, dict({}), config.getPostPromptUI());
+          new ConsentUI(this, dict({}), this.consentConfig_['postPromptUI']);
     }
 
     /**
@@ -137,13 +142,6 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-    const consentConfigDepr = config.getConsentConfig();
-
-    // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ =
-        Object.keys(/** @type {!Object} */ (consentConfigDepr))[0];
-
-    this.consentConfig_ = consentConfigDepr[this.consentId_];
 
     const policyConfig = config.getPolicyConfig();
 
@@ -473,6 +471,9 @@ export class AmpConsent extends AMP.BaseElement {
       const request = /** @type {!JsonObject} */ ({
         'consentInstanceId': this.consentId_,
       });
+      if (this.consentConfig_['setting']) {
+        request['setting'] = this.consentConfig_['setting'];
+      }
       const init = {
         credentials: 'include',
         method: 'POST',
@@ -501,7 +502,8 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   initPromptUI_(isConsentRequired) {
-    this.consentUI_ = new ConsentUI(this, this.consentConfig_);
+    this.consentUI_ = new ConsentUI(this, devAssert(this.consentConfig_,
+        'consent config not found'));
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo()

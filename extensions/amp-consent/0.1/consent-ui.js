@@ -20,6 +20,7 @@ import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
   insertAfterOrAtStart,
@@ -94,6 +95,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {?JsonObject} */
+    this.inlineSetting_ = null;
+
     /** @private {?Element} */
     this.placeholder_ = null;
 
@@ -135,6 +139,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
+      this.inlineSetting_ = config['setting'] || null;
     }
   }
 
@@ -286,6 +291,13 @@ export class ConsentUI {
    * @return {!Promise}
    */
   loadIframe_() {
+    const info = dict({});
+    if (this.inlineSetting_) {
+      info['setting'] = this.inlineSetting_;
+    }
+
+    this.ui_.setAttribute('name', JSON.stringify(info));
+
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -358,6 +370,7 @@ export class ConsentUI {
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
+    this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
 
     // TODO (torch2424): Hide mask if publisher provides the option

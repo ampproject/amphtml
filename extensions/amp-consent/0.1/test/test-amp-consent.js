@@ -104,6 +104,9 @@ describes.realWin('amp-consent', {
               'checkConsentHref': '/override',
             },
           },
+          'setting': {
+            'test': 'ABC',
+          },
           'postPromptUI': 'test',
         }));
         const postPromptUI = document.createElement('div');
@@ -116,7 +119,12 @@ describes.realWin('amp-consent', {
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(ampConsent.consentId_).to.equal('test');
         expect(ampConsent.consentConfig_).to.deep.equal(dict({
+          'storageKey': 'test',
           'checkConsentHref': '/override',
+          'postPromptUI': 'test',
+          'setting': {
+            'test': 'ABC',
+          },
         }));
 
         expect(Object.keys(ampConsent.policyConfig_)).to.have.length(4);
