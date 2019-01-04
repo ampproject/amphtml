@@ -16,18 +16,11 @@
 
 import {
   PlayingStates,
-  VideoAttributes, // TODO: docking
+  VideoAttributes,
   VideoEvents, // TODO: registered, visibility
-  VideoInterface, // TODO: played ranges
+  VideoInterface,
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
-import {
-  setInitialDisplay,
-  setStyles,
-} from '../../../src/style';
-
-import {listenOncePromise} from '../../../src/event-helper';
 
 import {
   installVideoManagerForDoc,
@@ -187,19 +180,19 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.element = element;
     this.options = this.parseOptions_();
 
+    this.frameId = this.options.id || `${Math.random() * 10e17}`;
 
-    this.frameId = this.options.id || `${Math.random()}`; // TODO: jakiś random fajny
+    this.frameUrl = new URL('https://std.wpcdn.pl/mbartoszewicz/frame.html');
 
-    this.iframeUrlObject_ = new URL('https://std.wpcdn.pl/mbartoszewicz/frame.html?wpplayer=mobile-autoplay&disabledLiteEmbed=1&ampnoaudio=1');
-    this.iframeUrlObject_.searchParams.set('frameId', this.frameId); // TODO: move somewhere
-    this.iframeUrl_ = `${this.iframeUrlObject_}`; // TODO: usunac to
-    console.log(this.iframeUrl_);
-    this.iframe_ = null;
+    this.frameUrl.searchParams.set('wpplayer', 'mob-auto-master');
+    this.frameUrl.searchParams.set('disabledLiteEmbed', 1);
+    this.frameUrl.searchParams.set('ampnoaudio', 1);
+    this.frameUrl.searchParams.set('frameId', this.frameId);
 
     this.toSend_ = [];
     this.playerReady_ = false;
 
-    this.width = this.parseAttribute_('width', false, 'auto');
+    this.width = this.parseAttribute_('width', false, 'auto'); // TODO: czy to tutaj musi byc?
     this.height = this.parseAttribute_('height', false, 'auto');
 
     if (this.options.url) {
@@ -218,6 +211,8 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     } else {
       this.playingState = PlayingStates.PAUSED;
     }
+
+    this.header = `WP.AMP.PLAYER.${this.frameId}.`;
   }
 
   /**
@@ -226,11 +221,9 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   */
   sendCommand_(message) {
     // console.log('component -> sent', message);
-    if (this.playerReady_ || message.startsWith('init')) { // TODO: co z initami
-      const HEADER = `WP.AMP.PLAYER.${this.options.id}.`;
-      this.contentWindow_.postMessage(HEADER + message, '*');
+    if (this.playerReady_ || message.startsWith('init')) {
+      this.contentWindow_.postMessage(this.header + message, '*');
     } else {
-      console.warn('Added ', message, ' to queue');
       this.toSend_.push(message);
     }
   }
@@ -241,25 +234,26 @@ export class AmpWpmPlayer extends AMP.BaseElement {
    * @param {*} callback
    */
   addMessageListener_(messageName, callback) {
-    const HEADER = `WP.AMP.PLAYER.${this.options.id}.${messageName}`;
-    const HEADER1 = `WP.AMP.PLAYER.${messageName}`; // TODO: co z tym?
-
-    const that = this;
     this.eventListeners_.push(data => {
-      if (data.startsWith(HEADER) || data.startsWith(HEADER1)) {
-        callback(data.replace(HEADER, '').replace(HEADER1, ''));
+      if (data.startsWith(messageName)) {
+        callback(data.replace(messageName, ''));
       }
     });
   }
 
   /** @override */
   buildCallback() {
-    this.win.onmessage = e => {
+    this.win.addEventListener('message', e => {
       // console.log('component -> recived', e.data);
-      this.eventListeners_.forEach(listener => {
-        listener(e.data);
-      });
-    };
+
+      if (e.data.startsWith(this.header)) {
+        const message = e.data.replace(this.header, '');
+
+        this.eventListeners_.forEach(listener => {
+          listener(message);
+        });
+      }
+    });
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.eventListeners_ = [];
@@ -267,7 +261,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('FRAME.READY', () => {
       console.log('FRAME.READY');
-      that.contentWindow_ = that.iframe_
+      that.contentWindow_ = that.iframe
           .querySelector('iframe')
           .contentWindow;
 
@@ -289,14 +283,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('START_MOVIE', () => {
       console.log('START_MOVIE');
-      that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: sprawdzic czy wszystko
-      that.element.dispatchCustomEvent(VideoEvents.RELOAD); // TODO: sprawdzic czy wszystko
+      that.element.dispatchCustomEvent(VideoEvents.PLAYING);
+      that.element.dispatchCustomEvent(VideoEvents.RELOAD);
     });
 
     this.addMessageListener_('METADATA', data => {
       console.log('METADATA');
       that.metadata_ = JSON.parse(data);
-      that.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA); // TODO: sprawdzic czy wszystko
+      console.log('duration', that.getDuration());
+      // that.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA); // TODO: TUTAJ COS NIE DZIALA I WALI BLAD
     });
 
     this.addMessageListener_('PLAY', () => {
@@ -309,7 +304,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('PAUSE', () => {
       console.log('PAUSE');
-      that.element.dispatchCustomEvent(VideoEvents.PAUSE); // TODO: dokończyc to, autoplay
+      that.element.dispatchCustomEvent(VideoEvents.PAUSE);
       that.playingState = PlayingStates.PAUSED;
     });
 
@@ -325,7 +320,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('END_ADV_QUEUE', () => {
       console.log('END_ADV_QUEUE');
-      that.element.dispatchCustomEvent(VideoEvents.AD_END); // TODO: czy to moze byc jako adstart i adend ++ czy end beak moze byc tak samo jak end queue
+      that.element.dispatchCustomEvent(VideoEvents.AD_END);
     });
 
     this.addMessageListener_('USER.ACTION', () => {
@@ -337,7 +332,10 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       that.position = parseInt(data, 10);
     });
 
-    this.createPosterForAndroidBug_();
+    this.addMessageListener_('PLAYED.RANGES', data => {
+      that.playedRanges = JSON.parse(data);
+    });
+
     this.registerAction('showControls', () => {this.showControls();});
     this.registerAction('hideControls', () => {this.hideControls();});
     this.registerAction('getMetadata', () => {this.getMetadata();});
@@ -345,7 +343,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // return layout == Layout.RESPONSIVE;
     return isLayoutSizeDefined(layout);
   }
 
@@ -358,7 +355,11 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * Removes the element.
   * @param {!Element} element
   */
-  removeElement(element) {
+  removeElement(element) { // TODO: czy to wgl trzeba nadpisywac
+    // TODO: send destruct to player
+    console.log('destroy');
+    this.sendCommand_('destroy');
+
     if (element.parentElement) {
       element.parentElement.removeChild(element);
     }
@@ -368,13 +369,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   layoutCallback() {
     this.container_ = this.win.document.createElement('div');
 
-    const iframe = this.win.document.createElement('amp-iframe');
-    iframe.setAttribute('layout', 'fill');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
-    iframe.setAttribute('src', this.iframeUrl_);
-    iframe.setAttribute('frameborder', 0);
-    iframe.setAttribute('allowfullscreen', true);
-    // iframe.setAttribute('resizable', true);
+    this.iframe = this.win.document.createElement('amp-iframe');
+    this.iframe.setAttribute('layout', 'fill');
+    this.iframe.setAttribute(
+        'sandbox',
+        'allow-scripts allow-same-origin allow-popups');
+    this.iframe.setAttribute('src', this.frameUrl.toLocaleString());
+    this.iframe.setAttribute('frameborder', 0);
+    this.iframe.setAttribute('allowfullscreen', true);
+    // this.iframe_.setAttribute('resizable', true);
 
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
@@ -383,10 +386,9 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       placeholder.setAttribute('src', url);
     });
 
-    iframe.appendChild(placeholder);
-    this.iframe_ = iframe;
+    this.iframe.appendChild(placeholder);
 
-    this.container_.appendChild(iframe);
+    this.container_.appendChild(this.iframe);
     this.element.appendChild(this.container_);
     // this.applyFillContent(this.container_, /* replacedContent */ true);
 
@@ -395,7 +397,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
         this.getAmpDoc()
     ).register(this);
 
-    this.element.dispatchCustomEvent(VideoEvents.REGISTERED);5
+    this.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /**
@@ -407,10 +409,9 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    // TODO: send destruct to player
-    if (this.iframe_) {
-      this.removeElement(this.iframe_);
-      this.iframe_ = null;
+    if (this.iframe) {
+      this.removeElement(this.iframe);
+      this.iframe = null;
     }
     return true; // Call layoutCallback again.
   }
@@ -420,7 +421,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.iframeUrl_, onLayout); // TODO: url playera
+    this.preconnect.url(this.frameUrl.toLocaleString(), onLayout); // TODO: url playera
     this.preconnect.url(this.options.url, onLayout);
     this.preconnect.url('https://std.wpcdn.pl/wpjslib/wpjslib-inline.js', onLayout);
     this.preconnect.url('https://std.wpcdn.pl/player/mobile-autoplay/wpjslib_player.js', onLayout);
@@ -439,36 +440,10 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   }
 
   /**
-  * Android will show a blank frame between the poster and the first frame in
-  * some cases. In these cases, the video element is transparent. By setting
-  * a poster layer underneath, the poster is still shown while the first frame
-  * buffers, so no FOUC.
-  * @private
-  */
-  createPosterForAndroidBug_() {
-    if (!Services.platformFor(this.win).isAndroid()) {
-      return;
-    }
-    const {element} = this;
-    if (element.querySelector('i-amphtml-poster')) {
-      return;
-    }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
-    const src = element.getAttribute('poster');
-    setInitialDisplay(poster, 'block');
-    setStyles(poster, {
-      'background-image': `url(${src})`,
-      'background-size': 'cover',
-    });
-    poster.classList.add('i-amphtml-android-poster-bug');
-    this.applyFillContent(poster);
-    element.appendChild(poster);
-  }
-
-  /**
   * @override
   */
-  play() {
+  play(isAutoplay) {
+    console.log('auto', isAutoplay);
     this.sendCommand_('play');
   }
 
@@ -513,19 +488,19 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe_);
+    fullscreenEnter(this.iframe);
   }
 
   /**
   * @override
   */
   fullscreenExit() {
-    fullscreenExit(this.iframe_);
+    fullscreenExit(this.iframe);
   }
 
   /** @override */
   isFullscreen() {
-    return isFullscreenElement(this.iframe_);
+    return isFullscreenElement(this.iframe);
   }
 
   /** @override */
@@ -545,7 +520,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return []; // TODO: implement
+    return this.playedRanges || [];
   }
 
   /** @override */
@@ -564,7 +539,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * Called when video is first loaded.
   * @override
   */
-  firstLayoutCompleted() {}
+  firstLayoutCompleted() {} // TODO: tfisthis?
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    console.log(mutations);
+  }
+
+  /** @override */
+  detachedCallback() {
+    console.warn('DETACHED LOG W KODZIE');
+  }
 }
 
 AMP.extension('amp-wpm-player', '0.1', AMP => {
