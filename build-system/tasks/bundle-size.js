@@ -328,6 +328,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequest()) {
+    const baseSha = gitMergeBaseMaster();
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
@@ -336,6 +337,7 @@ async function reportBundleSize() {
             path.join('commit', commitHash, 'report')),
         json: true,
         body: {
+          baseSha,
           bundleSize,
         },
       });
