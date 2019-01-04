@@ -116,9 +116,13 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.loadMoreButton_ = null;
     /** @private {?Element} */
+    this.loadMoreButtonClickable_ = null;
+    /** @private {?Element} */
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
+    /** @private {?Element} */
+    this.loadMoreFailedClickable_ = null;
     /** @private {?Element} */
     this.loadMoreEndElement_ = null;
     /**@private {?UnlistenDef} */
@@ -181,18 +185,20 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.loadMoreEnabled_) {
-      this.getloadMoreButton_();
+      this.getLoadMoreButton_();
       this.getLoadMoreLoadingElement_();
       this.getLoadMoreFailedElement_();
       this.getLoadMoreEndElement_();
+      this.getLoadMoreButtonClickable_();
+      this.getLoadMoreFailedClickable_();
     }
   }
 
   /**
    * @private
-   * @return {?Element}
+   * @return {!Element}
    */
-  getloadMoreButton_() {
+  getLoadMoreButton_() {
     if (!this.loadMoreButton_) {
       this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
@@ -200,7 +206,7 @@ export class AmpList extends AMP.BaseElement {
       if (!this.loadMoreButton_) {
         this.loadMoreButton_ = htmlFor(this.win.document)`
           <div load-more-button class="i-amphtml-default-ui">
-            <button class="i-amphtml-list-load-more-button">
+            <button load-more-clickable class="i-amphtml-list-load-more-button">
               <label>See More</label>
             </button>
           </div>
@@ -208,6 +214,20 @@ export class AmpList extends AMP.BaseElement {
       }
     }
     return this.loadMoreButton_;
+  }
+
+  /**
+   * @private
+   * @return {!Element}
+   */
+  getLoadMoreButtonClickable_() {
+    if (!this.loadMoreButtonClickable_) {
+      const loadMoreButton = this.getLoadMoreButton_();
+      this.loadMoreButtonClickable_ =
+        childElementByAttr(loadMoreButton, 'load-more-clickable') ||
+        loadMoreButton;
+    }
+    return this.loadMoreButtonClickable_;
   }
 
   /** @override */
@@ -773,8 +793,9 @@ export class AmpList extends AMP.BaseElement {
       if (this.loadMoreEndElement_) {
         this.loadMoreEndElement_.classList.toggle('amp-visible', false);
       }
-      this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
-          () => this.loadMoreCallback_());
+      this.unlistenLoadMore_ = listen(
+          dev().assertElement(this.loadMoreButtonClickable_),
+          'click', () => this.loadMoreCallback_());
       // Guarantees that the height accounts for the newly visible button
       this.attemptToFit_(dev().assertElement(this.container_));
     });
@@ -888,15 +909,16 @@ export class AmpList extends AMP.BaseElement {
     }
     this.mutateElement(() => {
       this.loadMoreFailedElement_.classList.toggle('amp-visible', true);
-      this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
-          () => this.loadMoreCallback_());
+      this.unlistenLoadMore_ = listen(
+          dev().assertElement(this.loadMoreFailedClickable_),
+          'click', () => this.loadMoreCallback_());
       this.loadMoreButton_.classList.toggle('amp-visible', false);
       this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
     });
   }
 
   /**
-   * @return {?Element}
+   * @return {!Element}
    * @private
    */
   getLoadMoreFailedElement_() {
@@ -905,15 +927,15 @@ export class AmpList extends AMP.BaseElement {
           this.element, 'load-more-failed');
 
       if (!this.loadMoreFailedElement_) {
-
         this.loadMoreFailedElement_ = htmlFor(this.win.document)`
           <div load-more-failed class="i-amphtml-default-ui">
             <div class="i-amphtml-list-load-more-message">
               Unable to Load More
             </div>
-            <button class="i-amphtml-list-load-more-button
-                           i-amphtml-list-load-more-button-has-icon
-                           i-amphtml-list-load-more-button-small"
+            <button load-more-clickable
+              class="i-amphtml-list-load-more-button
+                     i-amphtml-list-load-more-button-has-icon
+                     i-amphtml-list-load-more-button-small"
             >
               <div class="i-amphtml-list-load-more-icon"></div>
               <label>Retry</label>
@@ -923,6 +945,20 @@ export class AmpList extends AMP.BaseElement {
       }
     }
     return this.loadMoreFailedElement_;
+  }
+
+  /**
+   * @private
+   * @return {!Element}
+   */
+  getLoadMoreFailedClickable_() {
+    if (!this.loadMoreFailedClickable_) {
+      const loadFailedElement = this.getLoadMoreFailedElement_();
+      this.loadMoreFailedClickable_ = childElementByAttr(
+          loadFailedElement, 'load-more-clickable') ||
+        loadFailedElement;
+    }
+    return this.loadMoreFailedClickable_;
   }
 
   /**

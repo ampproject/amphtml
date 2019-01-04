@@ -65,8 +65,8 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3"
-    load-more="auto"
+    src="/infinite-scroll?items=5&left=10"
+    load-more="manual"
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="pin-container">
@@ -80,8 +80,12 @@
     <div overflow>
       OVERFLOW
     </div>
-    <div load-more-end>
-      LOAD ENDED
+    <div load-more-button>
+      SEE MORE
+      <button load-more-clickable>Click Me!</button>
+    </div>
+    <div load-more-failed>
+      LOAD FAILED
     </div>
     <div fallback>
       FALLBACK
