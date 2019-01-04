@@ -187,9 +187,11 @@ export class AmpStoryEmbeddedComponent {
             this.toggleExpandedView_(null);
             this.tooltip_.removeEventListener('click',
                 this.expandComponentHandler_, true);
+            this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
           }
         }
         else {
+          // Target is hidden and going into expanded view.
           this.onFocusedStateUpdate_(null);
           this.toggleExpandedView_(target);
         }
