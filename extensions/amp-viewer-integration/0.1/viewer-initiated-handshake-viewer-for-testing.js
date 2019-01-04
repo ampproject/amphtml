@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging/messaging';
-import {parseUrlDeprecated, serializeQueryString} from '../../../../src/url';
+import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';
 const MessageType = {
@@ -39,7 +38,7 @@ export class WebviewViewerForTesting {
     /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
-    /** @private {boolean} */
+    /** @visibleForTesting @private {boolean} */
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
@@ -53,8 +52,6 @@ export class WebviewViewerForTesting {
 
     /** @type {Window} */
     this.win = window;
-
-    this.messageHandlers_ = [];
 
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
@@ -75,12 +72,6 @@ export class WebviewViewerForTesting {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
-
-    /** @private @const {!Promise} */
-    this.documentLoadedPromise_ = new Promise(resolve => {
-      /** @private {?function()} */
-      this.documentLoadedResolve_ = resolve;
-    });
   }
 
   /**
@@ -97,8 +88,7 @@ export class WebviewViewerForTesting {
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a',
-      webview: 1,
+      cap: 'foo,a2a,handshakepoll',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
@@ -109,9 +99,11 @@ export class WebviewViewerForTesting {
     const parsedUrl = parseUrlDeprecated(ampdocUrl);
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
+    this.frameOrigin_ = parsedUrl.origin;
 
     this.pollingIntervalIds_[this.intervalCtr] =
         setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000);
+
     this.intervalCtr++;
 
     this.containerEl.appendChild(this.iframe);
@@ -119,109 +111,92 @@ export class WebviewViewerForTesting {
     return this.handshakeReceivedPromise_;
   }
 
+  /**
+   * Fake docs for testing
+   * @param {*} intervalCtr
+   */
   pollAMPDoc_(intervalCtr) {
     this.log('pollAMPDoc_');
-    if (this.iframe) {
-      const channel = new MessageChannel();
-      const message = {
-        app: APP,
-        name: 'handshake-poll',
-      };
-      this.iframe.contentWindow./*OK*/postMessage(
-          JSON.stringify(message), '*', [channel.port2]);
-      channel.port1.onmessage = function(e) {
-        if (this.isChannelOpen_(e)) {
-          window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
-          const data = JSON.parse(e.data);
-          this.completeHandshake_(channel, data.requestid);
-        } else {
-          this.handleMessage_(e);
-        }
-      }.bind(this);
+    if (!this.iframe) {
+      return;
     }
+    const listener = function(e) {
+      if (this.isChannelOpen_(e)) {
+        //stop polling
+        window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
+        window.removeEventListener('message', listener, false);
+        this.completeHandshake_(e.data.requestid);
+      }
+    };
+    window.addEventListener('message', listener.bind(this));
+
+    const message = {
+      app: APP,
+      name: 'handshake-poll',
+    };
+    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
   }
 
+  /**
+   * Fake docs for testing
+   * @param {*} e
+   */
   isChannelOpen_(e) {
-    const data = JSON.parse(e.data);
-    return e.type == 'message' && data.app == APP &&
-      data.name == 'channelOpen';
+    return e.type == 'message' && e.data.app == APP &&
+      e.data.name == 'channelOpen';
   }
 
-
-  completeHandshake_(channel, requestId) {
+  /**
+   * Fake docs for testing
+   * @param {*} requestId
+   */
+  completeHandshake_(requestId) {
     this.log('Viewer ' + this.id + ' messaging established!');
     const message = {
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
     };
+
     this.log('############## viewer posting1 Message', message);
-    channel.port1./*OK*/postMessage(JSON.stringify(message));
 
-    class WindowPortEmulator {
-      constructor(messageHandlers, id, log) {
-        this.messageHandlers_ = messageHandlers;
-        this.id_ = id;
-        this.log_ = log;
-      }
-      addEventListener(messageType, messageHandler) {
-        this.log_('messageHandler', messageHandler);
-        this.messageHandlers_[this.id_] = messageHandler;
-      }
-      postMessage(data) {
-        this.log_('############## viewer posting2 Message', data);
-        channel.port1./*OK*/postMessage(JSON.stringify(data));
-      }
-      start() {}
-    }
-    this.messaging_ = new Messaging(this.win,
-        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
-
-    this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
-      console/*OK*/.log(
-          'viewer receiving message: ', type, payload, awaitResponse);
-      return Promise.resolve();
-    });
+    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
 
     this.sendRequest_('visibilitychange', {
       state: this.visibilityState_,
       prerenderSize: this.prerenderSize,
-    }, true);
+    });
 
     this.handshakeResponseResolve_();
   }
 
-  sendRequest_(type, data, awaitResponse) {
-    this.log('Viewer.prototype.sendRequest_');
-    if (!this.messaging_) {
-      return;
-    }
-    return this.messaging_.sendRequest(type, data, awaitResponse);
-  }
-
-  handleMessage_(e) {
-    if (this.messageHandlers_[this.id]) {
-      this.messageHandlers_[this.id](e);
-    }
-
-    this.log('************** viewer got a message,', e.data);
-    this.processRequest_(e.data);
+  /**
+   * Fake docs for testing
+   * @param {*} eventType
+   * @param {*} payload
+   */
+  sendRequest_(eventType, payload) {
+    const requestId = ++this.requestIdCounter_;
+    const message = {
+      app: APP,
+      requestid: requestId,
+      rsvp: true,
+      name: eventType,
+      data: payload,
+      type: MessageType.REQUEST,
+    };
+    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
   }
 
   /**
-   * This is used in test-amp-viewer-integration to test the handshake and make
-   * sure the test waits for everything to get executed.
+   * Fake docs for testing
+   * @param {*} eventData
+   * @visibleForTesting
    */
-  waitForDocumentLoaded() {
-    return this.documentLoadedPromise_;
-  }
-
   processRequest_(eventData) {
-    const data = JSON.parse(eventData);
+    const data = eventData;
     switch (data.name) {
       case 'documentLoaded':
-        this.log('documentLoaded!');
-        this.documentLoadedResolve_();
       case 'requestFullOverlay':
       case 'cancelFullOverlay':
       case 'pushHistory':
@@ -229,6 +204,7 @@ export class WebviewViewerForTesting {
       case 'broadcast':
       case 'setFlushParams':
       case 'prerenderComplete':
+      case 'documentHeight':
       case 'tick':
       case 'sendCsi':
       case 'scroll':
@@ -241,6 +217,9 @@ export class WebviewViewerForTesting {
     }
   }
 
+  /**
+   * Fake docs for testing
+   */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     console/*OK*/.log.apply(console, var_args);

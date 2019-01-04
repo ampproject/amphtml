@@ -15,7 +15,7 @@
  */
 
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
-import {WebviewViewerForTesting} from '../webview-viewer-for-testing.js';
+import {WebviewViewerForTesting} from '../../webview-viewer-for-testing.js';
 
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {

@@ -20,7 +20,7 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from '../../messaging/messaging';
-import {ViewerForTesting} from '../viewer-for-testing';
+import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
 
