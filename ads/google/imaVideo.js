@@ -59,10 +59,6 @@ const icons = {
 
 /*eslint-enable */
 
-// Throttle for the showControls() function
-// Timeout is 1s, because showControls will hide after 3s
-const showControlsThrottled = throttle(window, showControls, 1000);
-
 const bigPlayDivDisplayStyle = 'table-cell';
 
 // Div wrapping our entire DOM.
@@ -220,6 +216,9 @@ let userTappedAndDragged;
 
 // User consent state.
 let consentState;
+
+// Throttle for the showControls() function
+let showControlsThrottled = throttle(window, showControls, 1000);
 
 /**
  * @param {!Object} global
@@ -491,6 +490,9 @@ export function imaVideo(global, data) {
   muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
   fullscreenDiv.addEventListener(interactEvent,
       toggleFullscreen.bind(null, global));
+
+  // Timeout is 1s, because showControls will hide after 3s
+  showControlsThrottled = throttle(window, showControls, 1000);
 
   const fullScreenEvents = [
     'fullscreenchange',
@@ -1459,6 +1461,7 @@ export function getPropertiesForTesting() {
     bigPlayDiv,
     contentComplete,
     controlsDiv,
+    controlsVisible,
     hideControlsTimeout,
     imaLoadAllowed,
     interactEvent,
@@ -1472,6 +1475,15 @@ export function getPropertiesForTesting() {
     uiTicker,
     videoPlayer,
   };
+}
+
+/**
+ * Gets the throttled show controls
+ * @return {Function}
+ * @visibleForTesting
+ */
+export function getShowControlsThrottledForTesting() {
+  return showControlsThrottled;
 }
 
 /**

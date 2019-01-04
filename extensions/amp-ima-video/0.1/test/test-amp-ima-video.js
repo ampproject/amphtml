@@ -18,7 +18,7 @@ import '../amp-ima-video';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-
+import {Services} from '../../../../src/services';
 
 describes.realWin('amp-ima-video', {
   amp: {
@@ -28,12 +28,13 @@ describes.realWin('amp-ima-video', {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
   const adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=';
 
-  let win, doc;
+  let win, doc, timer;
 
   beforeEach(() => {
     win = env.win;
     win.context = {};
     doc = win.document;
+    timer = Services.timerFor(env.win);
   });
 
   function getVideoPlayerMock() {
@@ -1122,39 +1123,107 @@ describes.realWin('amp-ima-video', {
         .to.eql('none');
   });
 
-  it('shows controls on hover while playing after hidden', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
+  const hoverEventsToTest = ['click', 'mousemove'];
+  hoverEventsToTest.forEach(hoverEvent => {
+    it(`shows controls on ${hoverEvent} (hover)` +
+      ' while playing after hidden', () => {
+      const div = doc.createElement('div');
+      div.setAttribute('id', 'c');
+      doc.body.appendChild(div);
 
-    imaVideoObj.imaVideo(win, {
-      width: 640,
-      height: 360,
-      src: srcUrl,
-      tag: adTagUrl,
+      imaVideoObj.imaVideo(win, {
+        width: 640,
+        height: 360,
+        src: srcUrl,
+        tag: adTagUrl,
+      });
+
+      imaVideoObj.hideControls();
+
+      expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
+      expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+          .to.eql('none');
+
+      const interactEvent = new Event(hoverEvent);
+      const videoPlayerElement = imaVideoObj
+          .getPropertiesForTesting().videoPlayer;
+
+      imaVideoObj.setPlayerStateForTesting(
+          imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
+      imaVideoObj.addHoverEventToElement(
+          videoPlayerElement,
+          imaVideoObj.getShowControlsThrottledForTesting()
+      );
+      videoPlayerElement.dispatchEvent(interactEvent);
+
+      expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.true;
+      expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+          .to.eql('flex');
+      expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
+          .not.to.be.undefined;
     });
 
-    imaVideoObj.hideControls();
+    it(`throttles ${hoverEvent} (hover)` +
+      ' for showing controls', function() {
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-        .to.eql('none');
+      const div = doc.createElement('div');
+      div.setAttribute('id', 'c');
+      doc.body.appendChild(div);
 
-    const clickEvent = new Event('click');
-    const videoPlayerElement = imaVideoObj
-        .getPropertiesForTesting().videoPlayer;
+      imaVideoObj.imaVideo(win, {
+        width: 640,
+        height: 360,
+        src: srcUrl,
+        tag: adTagUrl,
+      });
 
-    imaVideoObj.setPlayerStateForTesting(
-        imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
-    imaVideoObj.addHoverEventToElement(
-        videoPlayerElement,
-        imaVideoObj.showControls
-    );
-    videoPlayerElement.dispatchEvent(clickEvent);
+      imaVideoObj.hideControls();
+      expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
+      expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+          .to.eql('none');
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-        .to.eql('flex');
-    expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
-        .not.to.be.undefined;
+      const interactEvent = new Event(hoverEvent);
+      const videoPlayerElement = imaVideoObj
+          .getPropertiesForTesting().videoPlayer;
+
+      imaVideoObj.setPlayerStateForTesting(
+          imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
+      imaVideoObj.addHoverEventToElement(
+          videoPlayerElement,
+          imaVideoObj.getShowControlsThrottledForTesting()
+      );
+      videoPlayerElement.dispatchEvent(interactEvent);
+
+      expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.true;
+      expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+          .to.eql('flex');
+
+      imaVideoObj.hideControls();
+      expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
+      expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+          .to.eql('none');
+
+      return timer.promise(100).then(() => {
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(
+            imaVideoObj.getPropertiesForTesting().controlsVisible
+        ).to.be.false;
+        expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+            .to.eql('none');
+
+
+        return timer.promise(950);
+      }).then(() => {
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(
+            imaVideoObj.getPropertiesForTesting().controlsVisible
+        ).to.be.true;
+        expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
+            .to.eql('flex');
+      });
+    });
   });
 
   it('suppresses IMA load with unknown consent', () => {
