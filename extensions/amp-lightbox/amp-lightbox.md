@@ -52,7 +52,7 @@ Pressing the escape key on the keyboard closes the lightbox. Alternatively, sett
 ```
 
 {% call callout('Read on', type='read') %}
-For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](https://www.ampproject.org/docs/reference/components/amp-lightbox) component.
+For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](https://www.ampproject.org/docs/reference/components/amp-image-lightbox) component.
 {% endcall %}
 
 
