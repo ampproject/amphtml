@@ -15,37 +15,37 @@
  */
 
 import {
-  RequestBank
+  RequestBank,
 } from '../../testing/test-helper';
 
 // The image ad as seen in examples/inabox.gpt.html,
 // with visibility pings being placeholders that's substituted with calls to the
 // request bank.
 const adBody = __html__['test/fixtures/amp-cupcake-ad.html']
-.replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
-.replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
-.replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
+    .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
+    .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
+    .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
 
 function testVisibilityPings(visibleDelay, activeViewDelay) {
   let viewTime = 0;
   return RequestBank.withdraw('view').then(() => {
     viewTime = Date.now();
   })
-  .then(() => RequestBank.withdraw('visible'))
-  .then(() => {
-    const visibleTime = Date.now();
-    const difference = visibleTime - viewTime;
-    // Add about a 400ms "buffer" to account for possible browser jankiness
-    expect(difference).to.be.above(visibleDelay - 200);
-    expect(difference).to.be.below(visibleDelay + 200);
-  })
-  .then(() => RequestBank.withdraw('activeview'))
-  .then(() => {
-    const activeViewTime = Date.now();
-    const difference = activeViewTime - viewTime;
-    expect(difference).to.be.above(activeViewDelay - 200);
-    expect(difference).to.be.below(activeViewDelay + 200);
-  });
+      .then(() => RequestBank.withdraw('visible'))
+      .then(() => {
+        const visibleTime = Date.now();
+        const difference = visibleTime - viewTime;
+        // Add about a 400ms "buffer" to account for possible browser jankiness
+        expect(difference).to.be.above(visibleDelay - 200);
+        expect(difference).to.be.below(visibleDelay + 200);
+      })
+      .then(() => RequestBank.withdraw('activeview'))
+      .then(() => {
+        const activeViewTime = Date.now();
+        const difference = activeViewTime - viewTime;
+        expect(difference).to.be.above(activeViewDelay - 200);
+        expect(difference).to.be.below(activeViewDelay + 200);
+      });
 }
 
 function writeFriendlyFrame(doc, iframe, adContent) {
@@ -55,8 +55,8 @@ function writeFriendlyFrame(doc, iframe, adContent) {
 }
 
 function writeSafeFrame(doc, iframe, adContent) {
-  iframe.name = `1-0-31;${adBody.length};${adBody}{"uid": "test"}`;
-  iframe.src = "http://tpc.googlesyndication.com/safeframe/1-0-31/html/container.html";
+  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
+  iframe.src = 'http://tpc.googlesyndication.com/safeframe/1-0-31/html/container.html';
   doc.body.appendChild(iframe);
 }
 
@@ -79,9 +79,9 @@ describes.integration('AMP Inabox Rendering', {
 
   it('should properly render ad in a friendly iframe with viewability pings',
       () => {
-    writeFriendlyFrame(doc, iframe, adBody);
-    return testVisibilityPings(0, 1000);
-  });
+        writeFriendlyFrame(doc, iframe, adBody);
+        return testVisibilityPings(0, 1000);
+      });
 
   it('should properly render ad in a safe frame with viewability pings', () => {
     writeSafeFrame(doc, iframe, adBody);
@@ -108,16 +108,16 @@ describes.realWin('AMP Inabox Rendering - No Host Script', {
   it.configure().skipSafari().run(
       'should properly render ad in a friendly iframe with viewability pings',
       () => {
-    writeFriendlyFrame(doc, iframe, adBody);
-    return testVisibilityPings(0, 1000);
-  });
+        writeFriendlyFrame(doc, iframe, adBody);
+        return testVisibilityPings(0, 1000);
+      });
 
   it.configure().skipSafari().run(
       'should properly render ad in a safe frame with viewability pings',
       () => {
-    writeSafeFrame(doc, iframe, adBody);
-    return testVisibilityPings(0, 1000);
-  });
+        writeSafeFrame(doc, iframe, adBody);
+        return testVisibilityPings(0, 1000);
+      });
 
   afterEach(() => {
     doc.body.removeChild(iframe);
@@ -149,16 +149,16 @@ describes.integration('AMP Inabox Rendering BTF', {
   it.configure().skipSafari().run(
       'should properly render ad in a friendly iframe with viewability pings',
       () => {
-    writeFriendlyFrame(doc, iframe, adBody);
-    return testVisibilityPings(2000, 3000);
-  });
+        writeFriendlyFrame(doc, iframe, adBody);
+        return testVisibilityPings(2000, 3000);
+      });
 
   it.configure().skipSafari().run(
       'should properly render ad in a safe frame with viewability pings',
       () => {
-    writeSafeFrame(doc, iframe, adBody);
-    return testVisibilityPings(2000, 3000);
-  });
+        writeSafeFrame(doc, iframe, adBody);
+        return testVisibilityPings(2000, 3000);
+      });
 
   afterEach(() => {
     doc.body.removeChild(iframe);
