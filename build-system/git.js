@@ -25,18 +25,20 @@ const {getStdout} = require('./exec');
 const commitLogMaxCount = 100;
 
 /**
- * Returns the branch point of the current branch off of master.
+ * Returns the merge base of the current branch off of master when running on
+ * a local workspace.
  * @return {string}
  */
-exports.gitBranchPointFromMaster = function() {
+exports.gitMergeBaseLocalMaster = function() {
   return getStdout('git merge-base master HEAD').trim();
 };
 
 /**
- * Returns the point at which the PR branch was forked from master. Used during
- * Travis PR builds to print the range of commits included in a PR check.
+ * Returns the merge base at which the PR branch was forked from master when
+ * running on Travis.
+ * @return {string}
  */
-exports.gitPrBranchPoint = function() {
+exports.gitMergeBaseTravisMaster = function() {
   const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
   return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`).trim();
 };
@@ -47,7 +49,7 @@ exports.gitPrBranchPoint = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPointFromMaster();
+  const branchPoint = exports.gitMergeBaseLocalMaster();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -57,7 +59,7 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = exports.gitBranchPointFromMaster();
+  const branchPoint = exports.gitMergeBaseLocalMaster();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
@@ -70,7 +72,7 @@ exports.gitDiffStatMaster = function() {
  */
 exports.gitDiffCommitLog = function() {
   const branchPoint = process.env.TRAVIS ?
-    exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
+    exports.gitMergeBaseTravisMaster() : exports.gitMergeBaseLocalMaster();
   let commitLog = getStdout(`git -c color.ui=always log --graph \
 --pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
 -%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
@@ -94,7 +96,7 @@ for how to fix this.`;
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPointFromMaster();
+  const branchPoint = exports.gitMergeBaseLocalMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
