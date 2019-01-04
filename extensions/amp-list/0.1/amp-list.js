@@ -205,11 +205,11 @@ export class AmpList extends AMP.BaseElement {
 
       if (!this.loadMoreButton_) {
         this.loadMoreButton_ = htmlFor(this.win.document)`
-          <div load-more-button class="i-amphtml-default-ui">
+          <amp-list-load-more load-more-button class="i-amphtml-default-ui">
             <button load-more-clickable class="i-amphtml-list-load-more-button">
               <label>See More</label>
             </button>
-          </div>
+          </amp-list-load-more>
         `;
       }
     }
@@ -856,9 +856,9 @@ export class AmpList extends AMP.BaseElement {
 
       if (!this.loadMoreLoadingElement_) {
         this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
-          <div load-more-loading class="i-amphtml-default-ui">
+          <amp-list-load-more load-more-loading class="i-amphtml-default-ui">
             <div class="i-amphtml-list-load-more-spinner"></div>
-          </div>
+          </amp-list-load-more>
         `;
       }
     }
@@ -928,7 +928,7 @@ export class AmpList extends AMP.BaseElement {
 
       if (!this.loadMoreFailedElement_) {
         this.loadMoreFailedElement_ = htmlFor(this.win.document)`
-          <div load-more-failed class="i-amphtml-default-ui">
+          <amp-list-load-more load-more-failed class="i-amphtml-default-ui">
             <div class="i-amphtml-list-load-more-message">
               Unable to Load More
             </div>
@@ -940,7 +940,7 @@ export class AmpList extends AMP.BaseElement {
               <div class="i-amphtml-list-load-more-icon"></div>
               <label>Retry</label>
             </button>
-          </div>
+          </amp-list-load-more>
         `;
       }
     }
