@@ -254,7 +254,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
         if (isVisible) {
           effect.localTime = currentTime;
         }
-  
+
       }
     });
     `;
@@ -1031,6 +1031,7 @@ export class MeasureScanner extends Scanner {
         (spec.target || spec.selector) ?
           this.resolveTargets_(spec) :
           [null];
+    this.css_.setTargetLength(targets.length);
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
@@ -1271,6 +1272,9 @@ class CssContextImpl {
     /** @private {!Object<string, ?./css-expr-ast.CssNode>} */
     this.parsedCssCache_ = map();
 
+    /** @private {?number} */
+    this.targetLength_ = null;
+
     /** @private {?Element} */
     this.currentTarget_ = null;
 
@@ -1354,6 +1358,14 @@ class CssContextImpl {
     return startsWith(prop, '--') ?
       styles.getPropertyValue(prop) :
       styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+  }
+
+  /**
+   * @param {number} len
+   * @protected
+   */
+  setTargetLength(len) {
+    this.targetLength_ = len;
   }
 
   /**
@@ -1570,6 +1582,12 @@ class CssContextImpl {
   getCurrentIndex() {
     this.requireTarget_();
     return dev().assertNumber(this.currentIndex_);
+  }
+
+  /** @override */
+  getTargetLength() {
+    this.requireTarget_();
+    return dev().assertNumber(this.targetLength_);
   }
 
   /** @override */

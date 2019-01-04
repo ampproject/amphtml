@@ -76,6 +76,7 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {T}{R}{A}{N}{S}{L}{A}{T}{E}3{D}\(   return 'TRANSLATE_3D_START'
 {R}{A}{N}{D}\(                      return 'RAND_START'
 {I}{N}{D}{E}{X}\(                   return 'INDEX_START'
+{L}{E}{N}{G}{T}{H}\(                return 'LENGTH_START'
 {W}{I}{D}{T}{H}\(                   return 'WIDTH_START'
 {H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
 {C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
@@ -257,6 +258,8 @@ function:
       {$$ = $1;}
   | index_function
       {$$ = $1;}
+  | length_function
+      {$$ = $1;}
   | any_function
       {$$ = $1;}
   ;
@@ -375,6 +378,15 @@ rand_function:
 index_function:
     INDEX_START ')'
       {$$ = new ast.CssIndexNode();}
+  ;
+
+
+/**
+ * AMP-specific `length()` function number of targets in the list.
+ */
+length_function:
+    LENGTH_START ')'
+      {$$ = new ast.CssLengthFuncNode();}
   ;
 
 
