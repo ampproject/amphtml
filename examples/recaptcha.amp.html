@@ -15,6 +15,16 @@
           min-height: 2500px;
         }
 
+        body {
+          width: 100%;
+          max-width: 900px;
+          padding: 10px;
+        }
+
+        .recaptcha-get-value {
+          width: 100%;
+        }
+
         #recaptcha-lightbox {
           background-color: rgba(0,0,0,0.5);
         }
@@ -28,8 +38,15 @@
           margin-right: auto;
         }
 
-        .push-down {
+        div.push-down {
           margin-top: 4000px;
+        }
+
+        .form-container {
+          border: 1px solid black;
+          padding: 5px;
+          margin-top: 50px;
+          margin-bottom: 50px;
         }
 
         form.amp-form-submit-success [submit-success],
@@ -88,11 +105,67 @@
       You can paste the following into a dev tools console to run the amp-recaptcha-input getValue().
       <br />
       <br />
-      document.querySelector('amp-recaptcha-input').implementation_.getValue().then(token =&gt; {console.log('Got Token!');console.log(token);})
+      <input class="recaptcha-get-value"
+        readonly
+        value="document.querySelector('amp-recaptcha-input').implementation_.getValue().then(token =&gt; {console.log('Got Token!');console.log(token);})">
+      </input>
     </p>
 
+
+    <!-- Live / Glitch Example -->
+    <div class="form-container">
+      <h2>amp-recaptcha-input Live / Glitch Example</h2>
+      <div><a href="https://glitch.com/edit/#!/torch2424-amp-glitch-express" target="_blank">Example Server Glitch Project</a></div>
+
+      <!-- Non xhr -->
+      <h4>Search (POST cross origin - current host > https://torch2424-amp-glitch-express.glitch.me/api/recaptcha)</h4>
+      <form
+        method="post"
+        action-xhr="https://torch2424-amp-glitch-express.glitch.me/api/recaptcha"
+        target="_top">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" name="recaptcha_token" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
+
+        <div submit-success>
+          <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+            <h3>Response</h3>
+            <p>action: {{action}}</p>
+            <p>challenge_ts: {{challenge_ts}}</p>
+            <p>hostname: {{hostname}}</p>
+            <p>recaptcha_token: {{recaptcha_token}}</p>
+            <p>score: {{score}}</p>
+            <p>success: {{success}}</p>
+          </template>
+        </div>
+
+        <div submit-error>
+          <template type="amp-mustache">
+            <h1>Error! Please check the JS Console in your dev tools.</h1>
+            <p>{{error}}</p>
+          </template>
+        </div>
+
+      </form>
+    </div>
+
+
     <!-- Lightbox Example -->
-    <div>
+    <div class="form-container">
     <h2>amp-recaptcha-input inside amp-lightbox</h2>
       <button on="tap:recaptcha-lightbox">Open Lightbox</button>
       <amp-lightbox id="recaptcha-lightbox" layout="nodisplay">
@@ -137,14 +210,13 @@
           </form>
         </div>
       </amp-lightbox>
-    <div>
-
-
-
+    </div>
 
     <!-- Standard Example -->
-    <div>
+    <div class="form-container">
       <h2>amp-recaptcha-input Standard Example</h2>
+
+      <!-- Non xhr -->
       <h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
       <form method="get" action="https://httpbin.org/html" target="_blank">
         <fieldset>
@@ -164,6 +236,9 @@
           </div>
         </div>
       </form>
+
+
+      <!-- XHR -->
       <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
       <form method="get"
             action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
@@ -203,12 +278,8 @@
       </form>
     </div>
 
-
-
-
-
     <!-- Scrolled in Example -->
-    <div class="push-down">
+    <div class="push-down form-container">
       <h2>Pushed down amp-recaptcha-input testing layoutCallback()</h2>
 
       <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
