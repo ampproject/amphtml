@@ -860,7 +860,9 @@ describes.repeated('', {
         successContainer.appendChild(successTemplate);
         const renderedTemplate = createElement('div');
 
-        const spy = sandbox.spy(successContainer, 'dispatchEvent');
+        const spyDispatchEvent =
+            sandbox.spy(successContainer, 'dispatchEvent');
+        const spyAppendTemplate = sandbox.spy(successContainer, 'appendChild');
         sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve({
               json() {
@@ -881,11 +883,12 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             return ampForm.renderTemplatePromiseForTesting();
           }).then(() => {
-            expect(spy.calledOnce).to.be.true;
-            expect(spy).calledWithMatch({
+            expect(spyDispatchEvent.calledOnce).to.be.true;
+            expect(spyDispatchEvent).calledWithMatch({
               type: AmpEvents.DOM_UPDATE,
               bubbles: true,
             });
+            sinon.assert.callOrder(spyAppendTemplate, spyDispatchEvent);
           });
         });
       });
