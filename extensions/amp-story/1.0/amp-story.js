@@ -384,6 +384,15 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
+
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      this.registerAction('goToPage', invocation => {
+        const {args} = invocation;
+        if (args) {
+          this.switchTo_(args['id']);
+        }
+      });
+    }
   }
 
   /** @override */
@@ -613,6 +622,14 @@ export class AmpStory extends AMP.BaseElement {
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
+
+    this.win.document.addEventListener('contextmenu', e => {
+      const uiState = this.storeService_.get(StateProperty.UI_STATE);
+      if (uiState === UIType.MOBILE) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
 
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
     // on document visibility change (eg: user switches tab).
@@ -956,6 +973,10 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then(pages => {
       this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
+      if (isExperimentOn(this.win, 'amp-story-branching')) {
+        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
+            [{tagOrTarget: 'AMP-STORY', method: 'goToPage'}]);
+      }
     });
   }
 
