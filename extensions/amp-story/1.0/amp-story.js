@@ -971,7 +971,6 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then(pages => {
       this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
-      //TODO(#20128): Clean up amp-story-branching experiment once launched
       if (isExperimentOn(this.win, 'amp-story-branching')) {
         this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
             [{tagOrTarget: 'AMP-STORY', method: 'goToPage'}]);
@@ -2167,7 +2166,6 @@ export class AmpStory extends AMP.BaseElement {
       return false;
     }
 
-    //TODO(#20128): Clean up amp-story-branching experiment once launched
     const advanceAttr = isExperimentOn(this.win, 'amp-story-branching') ?
       Attributes.PUBLIC_ADVANCE_TO : Attributes.ADVANCE_TO;
 
