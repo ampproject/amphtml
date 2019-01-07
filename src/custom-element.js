@@ -86,7 +86,7 @@ let templateTagSupported;
  * @return {boolean}
  */
 function isTemplateTagSupported() {
-  if (templateTagSupported === undefined) {
+  if (templateTagSupported === undefined || false) {
     const template = self.document.createElement('template');
     templateTagSupported = 'content' in template;
   }

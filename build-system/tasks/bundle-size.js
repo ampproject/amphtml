@@ -329,6 +329,7 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isPullRequest()) {
     const baseSha = gitMergeBaseMaster();
+    log(yellow('DO NOT MERGE'), cyan(baseSha));
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
