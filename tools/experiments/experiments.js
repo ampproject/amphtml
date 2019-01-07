@@ -231,12 +231,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-scaling',
-    name: 'Scale pages dynamically in amp-story by default',
-    spec: 'https://github.com/ampproject/amphtml/issues/12902',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
-  },
-  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
@@ -269,6 +263,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
     id: 'no-sync-xhr-in-ads',

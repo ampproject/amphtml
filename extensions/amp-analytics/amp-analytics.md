@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -661,7 +661,7 @@ indicate which transport methods are acceptable.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
 
-MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration.
+MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. Furthermore, the vendor frame may send a response, to be used by amp-ad-exit. See [analytics-iframe-transport-remote-frame.html](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [fake_amp_ad_with_iframe_transport.html](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html): the former file sends a response JSON object of {'collected-data': 'abc'}, and the latter file uses that object to substitute 'abc' for 'bar_' in finalUrl.
 
 If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 
