@@ -92,7 +92,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
     }, {
       element: this.element,
       viewport: this.getViewport(),
-      storagePromise: Services.storageForDoc(this.element),
+      storagePromise: Services.storageForDoc(this.getAmpDoc()),
       storageKey: this.getStorageKey_(),
     });
   }
@@ -106,7 +106,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   isDismissed() {
-    return Services.storageForDoc(this.element)
+    return Services.storageForDoc(this.getAmpDoc())
         .then(storage => storage.get(this.getStorageKey_()))
         .then(persistedValue => !!persistedValue, reason => {
           dev().error(TAG, 'Failed to read storage', reason);
