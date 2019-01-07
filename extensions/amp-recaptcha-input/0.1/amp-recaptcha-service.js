@@ -253,8 +253,9 @@ export class AmpRecaptchaService {
     if (getMode().localDev || getMode().test) {
       return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
           .then(curlsSubdomain => {
-            return '//' + curlsSubdomain +
-          '.recaptcha.localhost:8000/dist.3p/' +
+            return this.win_.location.protocol + '//' +
+              curlsSubdomain + '.recaptcha.' +
+              this.win_.location.host + '/dist.3p/' +
           (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
             : 'current/recaptcha.max') +
           '.html';
