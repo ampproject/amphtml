@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated, serializeQueryString} from '../../../../src/url';
+import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';
-const MessageType = {
-  REQUEST: 'q',
-  RESPONSE: 's',
-};
 
 /**
  * @fileoverview This is a Viewer file that communicates with ampdocs. It is
  * used for testing of the ampdoc-viewer messaging protocol for the
  * amp-viewer-integration extension.
  */
-export class WebviewViewerForTesting {
+export class ViewerForTesting {
   /**
    * @param {Element} containerEl
    * @param {string} id
@@ -38,7 +34,7 @@ export class WebviewViewerForTesting {
     /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
-    /** @private {boolean} */
+    /** @visibleForTesting @private {boolean} */
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
@@ -49,9 +45,6 @@ export class WebviewViewerForTesting {
 
     /** @type {Element} */
     this.containerEl = containerEl;
-
-    /** @type {Window} */
-    this.win = window;
 
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
@@ -64,21 +57,24 @@ export class WebviewViewerForTesting {
       this.iframe.setAttribute('scrolling', 'no');
     }
 
-    this.pollingIntervalIds_ = [];
-    this.intervalCtr = 0;
-
     /** @private @const {!Promise} */
     this.handshakeReceivedPromise_ = new Promise(resolve => {
       /** @private {?function()} */
-      this.handshakeResponseResolve_ = resolve;
+      this.handshakeReceivedResolve_ = resolve;
+    });
+
+    /** @private @const {!Promise} */
+    this.documentLoadedPromise_ = new Promise(resolve => {
+      /** @private {?function()} */
+      this.documentLoadedResolve_ = resolve;
     });
   }
 
   /**
-   * I'm waiting for the ampdoc to respond to my offer to shake hands.
+   * I'm waiting for the ampdoc to request for us to shake hands.
    * @return {!Promise}
    */
-  waitForHandshakeResponse() {
+  waitForHandshakeRequest() {
     const params = {
       history: 1,
       viewportType: this.viewportType_,
@@ -88,7 +84,7 @@ export class WebviewViewerForTesting {
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a,handshakepoll',
+      cap: 'foo,a2a',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
@@ -100,103 +96,84 @@ export class WebviewViewerForTesting {
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
     this.frameOrigin_ = parsedUrl.origin;
+    this.iframe.style.display = 'none';
 
-    this.pollingIntervalIds_[this.intervalCtr] =
-        setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000);
+    // Listening for messages, hoping that I get a request for a handshake and
+    // a notification that a document was loaded.
+    window.addEventListener('message', e => {
+      this.log('message received', e, e.data);
+      const target = this.iframe.contentWindow;
+      const targetOrigin = this.frameOrigin_;
+      // IMPORTANT: There could be many windows with the same origin!
+      // IMPORTANT: Event.source might not be available in all browsers!?
+      if (e.origin != targetOrigin ||
+          e.source != target ||
+          e.data.app != APP) {
+        this.log('This message is not for us: ', e);
+        return;
+      }
+      if (e.data.name == 'channelOpen' &&
+          this.handshakeReceivedResolve_) {
+        // Send handshake confirmation.
+        const message = {
+          app: APP,
+          requestid: e.data.requestid,
+          data: {},
+          type: 's',
+        };
+        target./*OK*/postMessage(message, targetOrigin);
 
-    this.intervalCtr++;
+        this.log('handshake request received!');
+        this.handshakeReceivedResolve_();
+        this.handshakeReceivedResolve_ = null;
+      }
+      if (e.data.name == 'documentLoaded') {
+        this.log('documentLoaded!');
+        this.documentLoadedResolve_();
+      }
+    }, false);
 
     this.containerEl.appendChild(this.iframe);
 
     return this.handshakeReceivedPromise_;
   }
 
-  pollAMPDoc_(intervalCtr) {
-    this.log('pollAMPDoc_');
-    if (!this.iframe) {
-      return;
-    }
-    const listener = function(e) {
-      if (this.isChannelOpen_(e)) {
-        //stop polling
-        window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
-        window.removeEventListener('message', listener, false);
-        this.completeHandshake_(e.data.requestid);
-      }
-    };
-    window.addEventListener('message', listener.bind(this));
-
-    const message = {
-      app: APP,
-      name: 'handshake-poll',
-    };
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
+  /**
+   * Letting the ampdoc know that I received the handshake request and all is
+   * well.
+   */
+  confirmHandshake() {
+    this.iframe.contentWindow./*OK*/postMessage(
+        'amp-handshake-response', this.frameOrigin_);
   }
 
-  isChannelOpen_(e) {
-    return e.type == 'message' && e.data.app == APP &&
-      e.data.name == 'channelOpen';
+  /**
+   * This is used in test-amp-viewer-integration to test the handshake and make
+   * sure the test waits for everything to get executed.
+   */
+  waitForDocumentLoaded() {
+    return this.documentLoadedPromise_;
   }
 
-  completeHandshake_(requestId) {
-    this.log('Viewer ' + this.id + ' messaging established!');
-    const message = {
-      app: APP,
-      requestid: requestId,
-      type: MessageType.RESPONSE,
-    };
-
-    this.log('############## viewer posting1 Message', message);
-
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
-
-    this.sendRequest_('visibilitychange', {
-      state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
-    });
-
-    this.handshakeResponseResolve_();
+  /**
+   * This is only used for a unit test.
+   */
+  hasCapability() {
+    return false;
   }
 
-  sendRequest_(eventType, payload) {
-    const requestId = ++this.requestIdCounter_;
-    const message = {
-      app: APP,
-      requestid: requestId,
-      rsvp: true,
-      name: eventType,
-      data: payload,
-      type: MessageType.REQUEST,
-    };
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
+  /**
+   * This is only used for a unit test.
+   */
+  setMessageDeliverer() {
   }
 
-  processRequest_(eventData) {
-    const data = eventData;
-    switch (data.name) {
-      case 'documentLoaded':
-      case 'requestFullOverlay':
-      case 'cancelFullOverlay':
-      case 'pushHistory':
-      case 'popHistory':
-      case 'broadcast':
-      case 'setFlushParams':
-      case 'prerenderComplete':
-      case 'documentHeight':
-      case 'tick':
-      case 'sendCsi':
-      case 'scroll':
-      case 'a2aNavigate':
-      case 'unloaded':
-      case 'visibilitychange':
-        return;
-      default:
-        return Promise.reject('request not supported: ' + data.name);
-    }
-  }
-
+  /**
+   * Fake docs for testing
+   */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
+    var_args.unshift('[VIEWER]');
     console/*OK*/.log.apply(console, var_args);
   }
 }

@@ -44,7 +44,7 @@ import {
   listen,
   listenOnce,
 } from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
@@ -424,7 +424,7 @@ export class VideoDocking {
 
     dev().assertElement(video);
 
-    user().assert(video.signals().get(VideoEvents.REGISTERED),
+    userAssert(video.signals().get(VideoEvents.REGISTERED),
         '`dock` attribute can only be set on video components.');
 
     const slotSelector = video.getAttribute('dock').trim();
@@ -436,7 +436,7 @@ export class VideoDocking {
     const el = root.querySelector(slotSelector);
 
     if (el) {
-      user().assert(el.tagName.toLowerCase() == 'amp-layout',
+      userAssert(el.tagName.toLowerCase() == 'amp-layout',
           'Dock slot must be an <amp-layout> element.');
     }
 
@@ -450,7 +450,7 @@ export class VideoDocking {
 
   /** @param {!../../../src/video-interface.VideoOrBaseElementDef} video */
   register(video) {
-    user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
+    userAssert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock`.');
 
     this.install_();

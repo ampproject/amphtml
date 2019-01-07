@@ -149,7 +149,7 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * resolves geoDeferred with null if not shouldBeTrueish and then calls
-   * user().assert() to deal with the error as normal.
+   * userAssert() to deal with the error as normal.
    * @param {T} shouldBeTrueish The value to assert.
    *  The assert fails if it does not evaluate to true.
    * @param {string=} opt_message The assertion message

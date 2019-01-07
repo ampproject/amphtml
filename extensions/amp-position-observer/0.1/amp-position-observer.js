@@ -31,7 +31,7 @@ import {
   parseLength,
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getServiceForDoc} from '../../../src/service';
 import {
@@ -362,7 +362,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (!num) {
       return 0;
     }
-    user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
+    userAssert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
       'as units for exclusion margins: ' + val);
 
     if (unit == 'vh') {
@@ -379,7 +379,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   validateAndResolveRatio_(val) {
     const num = parseFloat(val);
-    user().assert(num >= 0 && num <= 1,
+    userAssert(num >= 0 && num <= 1,
         'Ratios must be a decimal between 0 and 1: ' + val);
     return num;
   }

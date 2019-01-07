@@ -22,7 +22,7 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {devAssert, rethrowAsync, user} from '../src/log';
+import {devAssert, rethrowAsync, userAssert} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
 
@@ -68,7 +68,7 @@ export function register(id, draw) {
  */
 export function run(id, win, data) {
   const fn = registrations[id];
-  user().assert(fn, 'Unknown 3p: ' + id);
+  userAssert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
@@ -231,7 +231,7 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       validateExactlyOne(data, field);
       allowedFields = allowedFields.concat(field);
     } else {
-      user().assert(data[field],
+      userAssert(data[field],
           'Missing attribute for %s: %s.', data.type, field);
       allowedFields.push(field);
     }
@@ -248,7 +248,7 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
  * @param {!Array<string>} alternativeFields
  */
 function validateExactlyOne(data, alternativeFields) {
-  user().assert(alternativeFields.filter(field => data[field]).length === 1,
+  userAssert(alternativeFields.filter(field => data[field]).length === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));

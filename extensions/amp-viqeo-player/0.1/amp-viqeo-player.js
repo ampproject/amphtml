@@ -20,7 +20,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -32,6 +32,8 @@ import {getIframe} from '../../../src/3p-frame';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+
+const TAG = 'amp-viqeo-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -88,12 +90,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
-    this.videoId_ = user().assert(
+    this.videoId_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-viqeo-player> %s',
         this.element);
 
-    user().assert(
+    userAssert(
         this.element.getAttribute('data-profileid'),
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);
@@ -337,10 +339,15 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     }
     contentWindow./*OK*/postMessage(command, '*');
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-AMP.extension('amp-viqeo-player', '0.1', AMP => {
-  AMP.registerElement('amp-viqeo-player', AmpViqeoPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpViqeoPlayer);
 });
 
 export default AmpViqeoPlayer;

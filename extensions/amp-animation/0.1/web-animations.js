@@ -41,7 +41,7 @@ import {
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
 import {dashToCamelCase, startsWith} from '../../../src/string';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -254,7 +254,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
         if (isVisible) {
           effect.localTime = currentTime;
         }
-  
+
       }
     });
     `;
@@ -548,7 +548,7 @@ export class WebAnimationRunner extends AnimationRunner {
     for (let i = 0; i < this.requests_.length; i++) {
       const {timing} = this.requests_[i];
 
-      user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
+      userAssert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +
       'timeline. Use "time" for seekTo or remove infinite iterations');
 
@@ -865,7 +865,7 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onCompAnimation(spec) {
-    user().assert(this.path_.indexOf(spec.animation) == -1,
+    userAssert(this.path_.indexOf(spec.animation) == -1,
         `Recursive animations are not allowed: "${spec.animation}"`);
     const newPath = this.path_.concat(spec.animation);
     const animationElement = user().assertElement(
@@ -873,7 +873,7 @@ export class MeasureScanner extends Scanner {
         `Animation not found: "${spec.animation}"`);
     // Currently, only `<amp-animation>` supplies animations. In the future
     // this could become an interface.
-    user().assert(animationElement.tagName == 'AMP-ANIMATION',
+    userAssert(animationElement.tagName == 'AMP-ANIMATION',
         `Element is not an animation: "${spec.animation}"`);
     const otherSpecPromise = animationElement.getImpl().then(impl => {
       return impl.getAnimationSpec();
@@ -923,7 +923,7 @@ export class MeasureScanner extends Scanner {
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
       const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
-      user().assert(keyframes,
+      userAssert(keyframes,
           `Keyframes not found in stylesheet: "${specKeyframes}"`);
       specKeyframes = keyframes;
     }
@@ -1007,7 +1007,7 @@ export class MeasureScanner extends Scanner {
     if (SERVICE_PROPS[prop]) {
       return;
     }
-    user().assert(isWhitelistedProp(prop),
+    userAssert(isWhitelistedProp(prop),
         'Property is not whitelisted for animation: %s', prop);
   }
 
@@ -1031,6 +1031,7 @@ export class MeasureScanner extends Scanner {
         (spec.target || spec.selector) ?
           this.resolveTargets_(spec) :
           [null];
+    this.css_.setTargetLength(targets.length);
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
@@ -1062,7 +1063,7 @@ export class MeasureScanner extends Scanner {
   resolveTargets_(spec) {
     let targets;
     if (spec.selector) {
-      user().assert(!spec.target,
+      userAssert(!spec.target,
           'Both "selector" and "target" are not allowed');
       targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
@@ -1114,7 +1115,7 @@ export class MeasureScanner extends Scanner {
     if (spec.matcher) {
       return spec.matcher;
     }
-    user().assert(
+    userAssert(
         (spec.index !== undefined || spec.selector !== undefined) &&
         (spec.index === undefined || spec.selector === undefined),
         'Only one "index" or "selector" must be specified');
@@ -1202,9 +1203,9 @@ export class MeasureScanner extends Scanner {
     this.validateTime_(duration, newTiming.duration, 'duration');
     this.validateTime_(delay, newTiming.delay, 'delay', /* negative */ true);
     this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
-    user().assert(iterations != null && iterations >= 0,
+    userAssert(iterations != null && iterations >= 0,
         '"iterations" is invalid: %s', newTiming.iterations);
-    user().assert(iterationStart != null &&
+    userAssert(iterationStart != null &&
         iterationStart >= 0 && isFinite(iterationStart),
     '"iterationStart" is invalid: %s', newTiming.iterationStart);
     user().assertEnumValue(WebAnimationTimingDirection,
@@ -1232,7 +1233,7 @@ export class MeasureScanner extends Scanner {
    */
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
-    user().assert(
+    userAssert(
         value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
@@ -1270,6 +1271,9 @@ class CssContextImpl {
 
     /** @private {!Object<string, ?./css-expr-ast.CssNode>} */
     this.parsedCssCache_ = map();
+
+    /** @private {?number} */
+    this.targetLength_ = null;
 
     /** @private {?Element} */
     this.currentTarget_ = null;
@@ -1354,6 +1358,14 @@ class CssContextImpl {
     return startsWith(prop, '--') ?
       styles.getPropertyValue(prop) :
       styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+  }
+
+  /**
+   * @param {number} len
+   * @protected
+   */
+  setTargetLength(len) {
+    this.targetLength_ = len;
   }
 
   /**
@@ -1523,7 +1535,7 @@ class CssContextImpl {
 
   /** @override */
   getVar(varName) {
-    user().assert(
+    userAssert(
         this.varPath_.indexOf(varName) == -1,
         `Recursive variable: "${varName}"`);
     this.varPath_.push(varName);
@@ -1570,6 +1582,12 @@ class CssContextImpl {
   getCurrentIndex() {
     this.requireTarget_();
     return dev().assertNumber(this.currentIndex_);
+  }
+
+  /** @override */
+  getTargetLength() {
+    this.requireTarget_();
+    return dev().assertNumber(this.targetLength_);
   }
 
   /** @override */

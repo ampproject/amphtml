@@ -16,7 +16,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
 
@@ -45,7 +45,7 @@ class AmpVine extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const vineid = user().assert(this.element.getAttribute('data-vineid'),
+    const vineid = userAssert(this.element.getAttribute('data-vineid'),
         'The data-vineid attribute is required for <amp-vine> %s',
         this.element);
 

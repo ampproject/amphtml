@@ -37,7 +37,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
@@ -742,7 +742,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
-      user().assert(target,
+      userAssert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
     this.openLightboxGallery_(dev().assertElement(target)).then(() => {
@@ -932,8 +932,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   runImgTransition_(srcImg, targetImg, enter) {
     const carousel = dev().assertElement(this.carousel_);
     const container = dev().assertElement(this.container_);
-    const transLayer = this.element.ownerDocument.createElement('div');
-    transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
 
     let duration;
     let motionDuration;
@@ -944,7 +942,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
       imageAnimation = prepareImageAnimation({
-        transitionContainer: transLayer,
         styleContainer: this.getAmpDoc().getHeadNode(),
         srcImg,
         targetImg,
@@ -952,6 +949,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         targetImgRect: undefined,
         styles: {
           'animationDuration': `${motionDuration}ms`,
+          // Matches z-index for `.i-amphtml-lbg`.
+          'zIndex': 2147483642,
         },
         keyframesNamespace: undefined,
         curve: TRANSITION_CURVE,
@@ -960,12 +959,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     const mutate = () => {
       toggle(carousel, enter);
-      // Make sure the background, image stack correctly.
-      setStyles(this.element, {
-        position: 'relative',
-        zIndex: 1,
-        opacity: 1,
-      });
+      // Undo opacity 0 from `openLightboxGallery_`
+      setStyle(this.element, 'opacity', '');
       // Fade in/out the background in sync with the motion.
       setStyles(container, {
         animationName: enter ? 'fadeIn' : 'fadeOut',
@@ -984,22 +979,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
       imageAnimation.applyAnimation();
-      this.getAmpDoc().getBody().appendChild(transLayer);
     };
 
     const cleanup = () => {
       toggle(this.element, enter);
-      setStyles(this.element, {
-        position: '',
-        zIndex: '',
-        opacity: '',
-      });
       setStyle(container, 'animationName', '');
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
       imageAnimation.cleanupAnimation();
-      this.getAmpDoc().getBody().removeChild(transLayer);
     };
 
     return this.measureMutateElement(measure, mutate)
@@ -1163,6 +1151,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      this.getViewport().leaveLightboxMode();
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1173,7 +1162,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
-          this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;

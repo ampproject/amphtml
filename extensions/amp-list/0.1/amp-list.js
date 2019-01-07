@@ -33,7 +33,7 @@ import {
 } from '../../../src/batched-json';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
@@ -371,18 +371,13 @@ export class AmpList extends AMP.BaseElement {
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
         }
-        user().assert(typeof items !== 'undefined',
+        userAssert(typeof items !== 'undefined',
             'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
         if (this.element.hasAttribute('single-item') && !isArray(items)) {
           items = [items];
         }
-        // TODO (cathyxz): add assertArray function
-        user().assert(isArray(items),
-            'Response must contain an array at "%s". %s',
-            itemsExpr, this.element);
-        items = /** @type {!Array} */ (items);
-
+        items = user().assertArray(items);
         if (this.element.hasAttribute('max-items')) {
           items = this.truncateToMaxLen_(items);
         }
@@ -732,7 +727,7 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     // TODO (#18875): cleanup resizable-children experiment
-    user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
+    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
         'Experiment amp-list-resizable-children is disabled');
 
     const previousLayout = this.element.getAttribute('layout');
