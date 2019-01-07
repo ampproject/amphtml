@@ -14,10 +14,12 @@
 * limitations under the License.
 */
 
+// TODO: parametry jakos tam ogarnac
+
 import {
   PlayingStates,
   VideoAttributes,
-  VideoEvents, // TODO: registered, visibility
+  VideoEvents, //TODO: registered, visibility
   VideoInterface,
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
@@ -36,7 +38,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 export class AmpWpmPlayer extends AMP.BaseElement {
-
   /**
    * @description Method that parses attributes,
    * and ensures that all of the required parameters are present
@@ -66,10 +67,59 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   }
 
   /**
+   * @description Method that parses attributes,
+   * and ensures that all of the required parameters are present
+   * @function
+   * @private
+   *
+   * @return {Object}
+   */
+  parseAttributes_() {
+    const output = {};
+    output.id = this.parseAttribute_('id');
+    output.ampnoaudio = this.parseAttribute_(VideoAttributes.NO_AUDIO);
+    output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY);
+    output.dock = this.parseAttribute_(VideoAttributes.DOCK);
+    output.rotateToFullscreen = this.parseAttribute_(
+        VideoAttributes.ROTATE_TO_FULLSCREEN
+    );
+
+    output.ampcontrols = true;
+    output.forceUrl4stat = this.win.location.href;
+
+    output.target = 'playerTarget';
+    output.adv = this.parseAttribute_('adv', false, true);
+    output.url = this.parseAttribute_('url', true);
+    // output.clip = this.parseAttribute_('clip');
+    // output.forcerelated = this.parseAttribute_('forcerelated');
+    output.forcesound = this.parseAttribute_('forcesound', false, false);
+    output.hideendscreen = this.parseAttribute_(
+        'hideendscreen',
+        false,
+        false);
+    output.mediaEmbed = this.parseAttribute_(
+        'mediaEmbed',
+        false,
+        'portalowy');
+    output.extendedrelated = this.parseAttribute_(
+        'extendedrelated',
+        false,
+        true);
+    output.getAppUserInfo = this.parseAttribute_(
+        'getAppUserInfo',
+        false,
+        function() {});
+    output.screenshott = this.parseAttribute_('screenshot'); // TODO: check
+
+    return output;
+  }
+
+  /**
    * @private
    * @param {*} videoID
    */
   getScreenshot_(videoID) {
+    //TODO: Make sure not to request external resources in the pre-render phase. Requests to the publisher's origin itself are OK. If in doubt, please flag this in review.
     return new Promise(res => {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `https://video.wp.pl/api/v1/embed/${videoID}`, true);
@@ -86,91 +136,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @description Method that parses attributes,
-   * and ensures that all of the required parameters are present
-   * @function
-   * @private
-   *
-   * @return {Object}
-   */
-  parseOptions_() {
-    const output = {};
-    output.id = this.parseAttribute_('id');
-    output.ampnoaudio = this.parseAttribute_(VideoAttributes.NO_AUDIO);
-    output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY);
-    output.dock = this.parseAttribute_(VideoAttributes.DOCK);
-    output.rotateToFullscreen = this.parseAttribute_(
-        VideoAttributes.ROTATE_TO_FULLSCREEN
-    );
-
-    output.ampcontrols = true;
-    output.target = 'playerTarget';
-    output.adv = this.parseAttribute_('adv', false, true);
-    output.url = this.parseAttribute_('url', true);
-    output.title = this.parseAttribute_('title');
-    output.floatingplayer = this.parseAttribute_( // TODO: to wgl będzie obsługiwane?
-        'floatingplayer',
-        false,
-        true);
-    output.clip = this.parseAttribute_('clip');
-    output.forcerelated = this.parseAttribute_('forcerelated');
-    output.forceliteembed = this.parseAttribute_(
-        'forceliteembed',
-        false,
-        true);
-    output.forceautoplay = this.parseAttribute_(
-        'forceautoplay',
-        false,
-        false);
-    output.forcesound = this.parseAttribute_('forcesound', false, false);
-    output.hiderelated = this.parseAttribute_(
-        'hiderelated',
-        false,
-        false);
-    output.hideendscreen = this.parseAttribute_(
-        'hideendscreen',
-        false,
-        false);
-    output.mediaEmbed = this.parseAttribute_(
-        'mediaEmbed',
-        false,
-        'portalowy');
-    output.extendedrelated = this.parseAttribute_(
-        'extendedrelated',
-        false,
-        true);
-    output.skin = this.parseAttribute_('skin', false, null);
-    output.showlogo = this.parseAttribute_('showlogo', false, true);
-    output.watermark = this.parseAttribute_('watermark', false, false);
-    output.getAppUserInfo = this.parseAttribute_(
-        'getAppUserInfo',
-        false,
-        function() {});
-    output.qoeEventsConfig = this.parseAttribute_(
-        'qoeEventsConfig',
-        false,
-        null);
-    output.advVastDuration = this.parseAttribute_(
-        'advVastDuration',
-        false,
-        2);
-    output.vastTag = this.parseAttribute_('vastTag', false, null);
-    output.embedTrackings = this.parseAttribute_(
-        'embedTrackings',
-        false,
-        null);
-    output.destroyAfterAd = this.parseAttribute_('destroyAfterAd',
-        false,
-        false);
-    output.forceUrl4stat = this.parseAttribute_(
-        'forceUrl4stat',
-        false,
-        null);
-
-    return output;
-  }
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -178,53 +143,58 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
     this.element = element;
-    this.options = this.parseOptions_();
+    this.attributes = this.parseAttributes_(); // TODO: rename options
 
-    this.frameId = this.options.id || `${Math.random() * 10e17}`;
+    console.log('initPlayer1', this.attributes);
+
+    this.frameId = this.attributes.id || `${Math.random() * 10e17}`;
 
     this.frameUrl = new URL('https://std.wpcdn.pl/mbartoszewicz/frame.html');
 
-    this.frameUrl.searchParams.set('wpplayer', 'mob-auto-master');
-    this.frameUrl.searchParams.set('disabledLiteEmbed', 1);
-    this.frameUrl.searchParams.set('ampnoaudio', 1);
+    // this.frameUrl.searchParams.set('wpplayer', 'mob-auto-master');
+    // this.frameUrl.searchParams.set('disabledLiteEmbed', 1);
+    // this.frameUrl.searchParams.set('ampnoaudio', 1);
     this.frameUrl.searchParams.set('frameId', this.frameId);
 
-    this.toSend_ = [];
-    this.playerReady_ = false;
+    this.messageQueue = [];
+    this.frameReady = false;
 
-    this.width = this.parseAttribute_('width', false, 'auto'); // TODO: czy to tutaj musi byc?
-    this.height = this.parseAttribute_('height', false, 'auto');
-
-    if (this.options.url) {
-      this.videoId = /mid=(\d*)/g.exec(this.options.url)[1];
+    if (this.attributes.url) {
+      this.videoId = /mid=(\d*)/g.exec(this.attributes.url)[1];
     } else {
-      this.videoId = this.options.clip;
+      this.videoId = this.attributes.clip;
     }
 
-    this.screenshot = this.parseAttribute_('screenshot');
-    if (!this.screenshot) {
-      this.screenshot = this.getScreenshot_(this.videoId);
-    }
-
-    if (this.options.autoplay) {
-      this.playingState = PlayingStates.PLAYING_AUTO;
-    } else {
-      this.playingState = PlayingStates.PAUSED;
-    }
-
+    this.playingState = PlayingStates.PAUSED;
     this.header = `WP.AMP.PLAYER.${this.frameId}.`;
   }
 
   /**
-  * @private
-  * @param {TODO} message
-  */
-  sendCommand_(message) {
-    // console.log('component -> sent', message);
-    if (this.playerReady_ || message.startsWith('init')) {
-      this.contentWindow_.postMessage(this.header + message, '*');
+   *
+   * @private
+   * @param {*} name
+   * @param {*} data
+   * @param {*} skipQueue
+   */
+  sendCommand_(name, data, skipQueue = false) {
+    console.log('component -> sent', name, ' with data ', data);
+    if (this.frameReady || skipQueue) {
+      this.contentWindow_.postMessage(data
+        ? `${this.header}${name}@PAYLOAD@${data}`
+        : `${this.header}${name}`, '*');
     } else {
-      this.toSend_.push(message);
+      this.messageQueue.push({name, data});
+    }
+  }
+
+  /**
+   * @private
+   */
+  runQueue_() {
+    while (this.messageQueue.length) {
+      const command = this.messageQueue.shift();
+
+      this.sendCommand_(command.name, command.data);
     }
   }
 
@@ -235,14 +205,19 @@ export class AmpWpmPlayer extends AMP.BaseElement {
    */
   addMessageListener_(messageName, callback) {
     this.eventListeners_.push(data => {
-      if (data.startsWith(messageName)) {
-        callback(data.replace(messageName, ''));
+      const message = data.split('@PAYLOAD@');
+      if (messageName === message[0]) {
+        callback(message[1]);
       }
     });
   }
 
   /** @override */
   buildCallback() {
+    // setInterval(() => {console.log('state', this.playingState);}, 1000);
+
+
+
     this.win.addEventListener('message', e => {
       // console.log('component -> recived', e.data);
 
@@ -265,19 +240,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
           .querySelector('iframe')
           .contentWindow;
 
-      that.sendCommand_(`init ${JSON.stringify(that.options)}`);
+      console.log('initPlayer3', that.attributes);
+
+      that.sendCommand_('init', JSON.stringify(that.attributes), true);
     });
 
     this.addMessageListener_('PLAYER.READY', () => {
       console.log('PLAYER.READY');
-      that.playerReady_ = true;
+      that.frameReady = true;
 
       that.element.dispatchCustomEvent(VideoEvents.LOAD);
-
-      while (that.toSend_.length) {
-        that.sendCommand_(that.toSend_.shift());
-      }
-
+      this.runQueue_();
       that.togglePlaceholder(false);
     });
 
@@ -285,6 +258,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       console.log('START_MOVIE');
       that.element.dispatchCustomEvent(VideoEvents.PLAYING);
       that.element.dispatchCustomEvent(VideoEvents.RELOAD);
+      that.playingState = PlayingStates.PLAYING_AUTO; // TODO: a co tutaj za stan?
     });
 
     this.addMessageListener_('METADATA', data => {
@@ -297,9 +271,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.addMessageListener_('PLAY', () => {
       console.log('PLAY');
       that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: dokończyc to, autoplay
-      if (!that.playingState === PlayingStates.PLAYING_AUTO) {
-        that.playingState = PlayingStates.PLAYING_MANUAL;
-      }
     });
 
     this.addMessageListener_('PAUSE', () => {
@@ -308,9 +279,21 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       that.playingState = PlayingStates.PAUSED;
     });
 
+    this.addMessageListener_('USERPLAY', () => {
+      console.log('USERPLAY');
+      that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: dokończyc to, autoplay
+    });
+
+    this.addMessageListener_('USERPAUSE', () => {
+      console.log('USERPAUSE');
+      that.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      that.playingState = PlayingStates.PAUSED;
+    });
+
     this.addMessageListener_('END_MOVIE', () => {
       console.log('END_MOVIE');
       that.element.dispatchCustomEvent(VideoEvents.ENDED); // TODO: dokończyc to, pause + to + src change pewnie
+      that.playingState = PlayingStates.PAUSED; // TODO: tutaj cos ogarnac
     });
 
     this.addMessageListener_('START_ADV_QUEUE', () => {
@@ -334,7 +317,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('PLAYED.RANGES', data => {
       that.playedRanges = JSON.parse(data);
-    });
+    }); // TODO: user play powinno zmieniac stan
 
     this.registerAction('showControls', () => {this.showControls();});
     this.registerAction('hideControls', () => {this.hideControls();});
@@ -365,6 +348,23 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     }
   }
 
+  // /**
+  //  * @override
+  //  */
+  // createPlaceholderCallback() {
+  //   if (!this.attributes.screenshott) {
+  //     this.attributes.screenshott = this.getScreenshot_(this.videoId);
+  //   }
+
+  //   const placeholder = this.win.document.createElement('amp-img');
+  //   placeholder.setAttribute('layout', 'fill');
+  //   placeholder.setAttribute('placeholder', 'true');
+  //   // this.attributes.screenshot.then(url => {
+  //   placeholder.setAttribute('src', 'https://via.placeholder.com/300x200.jpg');
+  //   // });
+
+  // }
+
   /** @override */
   layoutCallback() {
     this.container_ = this.win.document.createElement('div');
@@ -377,14 +377,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.iframe.setAttribute('src', this.frameUrl.toLocaleString());
     this.iframe.setAttribute('frameborder', 0);
     this.iframe.setAttribute('allowfullscreen', true);
-    // this.iframe_.setAttribute('resizable', true);
+    // this.iframe.setAttribute('resizable', true); // TODO: wtedy trzeba overflow, problematyczne
 
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', 'true');
-    this.screenshot.then(url => {
-      placeholder.setAttribute('src', url);
-    });
+    placeholder.setAttribute('src', 'https://via.placeholder.com/300x200.jpg');
+    // if (!this.attributes.screenshott) {
+    //   this.attributes.screenshott = this.getScreenshot_(this.videoId);
+    // }
+    // this.attributes.screenshott.then(url => {
+    // });
 
     this.iframe.appendChild(placeholder);
 
@@ -421,10 +424,10 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.frameUrl.toLocaleString(), onLayout); // TODO: url playera
-    this.preconnect.url(this.options.url, onLayout);
+    this.preconnect.url(this.frameUrl.toLocaleString(), onLayout);
+    this.preconnect.url(this.attributes.url, onLayout);
     this.preconnect.url('https://std.wpcdn.pl/wpjslib/wpjslib-inline.js', onLayout);
-    this.preconnect.url('https://std.wpcdn.pl/player/mobile-autoplay/wpjslib_player.js', onLayout);
+    this.preconnect.url('https://std.wpcdn.pl/player/mobile-autoplay/wpjslib_player.js', onLayout); // TODO: url playera
   }
 
   /** @override */
@@ -435,7 +438,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  viewportCallback(inViewport) { // TODO: czy mozna tego nie nadpisywac, a moze jakies zliczenia?
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {inViewport});
   }
 
@@ -443,8 +446,12 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   play(isAutoplay) {
-    console.log('auto', isAutoplay);
+    console.log('auto', isAutoplay); // TODO: set autoplay // TODO: playing states naprawic
     this.sendCommand_('play');
+
+    this.playingState = isAutoplay
+      ? PlayingStates.PLAYING_AUTO
+      : PlayingStates.PLAYING_MANUAL; // TODO: ten stan jeszcze musi sie zmieniac na 100% gdzies
   }
 
   /**
@@ -452,6 +459,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   */
   pause() {
     this.sendCommand_('pause');
+    this.playingState = PlayingStates.PAUSED;
   }
 
   /**
@@ -474,7 +482,11 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   showControls() {
-    this.sendCommand_('showControls');
+    if (this.playingState === PlayingStates.PLAYING_AUTO) {
+      this.sendCommand_('popupControls');
+    } else {
+      this.sendCommand_('showControls');
+    }
   }
 
   /**
@@ -488,7 +500,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * @override
   */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe);
+    fullscreenEnter(this.iframe); // TODO: resize iframe
   }
 
   /**
@@ -505,7 +517,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    return this.metadata_;
+    return this.metadata_; // TODO: odpowiedni format danych
   }
 
   /** @override */
@@ -515,7 +527,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getDuration() {
-    return this.metadata_ ? this.metadata_.duration : undefined; // TODO: duration
+    return this.metadata_ ? this.metadata_.duration : undefined; // TODO: duration do innej zmiennej
   }
 
   /** @override */
@@ -525,12 +537,12 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsAutoFullscreen() {
-    return true; // TODO: nie wiem
+    return true; // TODO: check
   }
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    return false; // TODO: nie wiem
+    return false; // TODO: check
   }
 
   // TODO: zaimplementować video element actions z: https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events
@@ -543,7 +555,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    console.log(mutations);
+    console.log('mutations', mutations);
   }
 
   /** @override */
