@@ -389,7 +389,7 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
-          this.switchTo_(args['id']);
+          this.switchTo_(args['id'], 'next');
         }
       });
     }
