@@ -60,6 +60,10 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controlsList',
 ];
 
+// TESTING DO NOT MERGE
+const a = '2';
+
+
 /**
  * @note Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
@@ -82,7 +86,7 @@ class AmpVideo extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-
+   
     /** @private {?Element} */
     this.video_ = null;
 
