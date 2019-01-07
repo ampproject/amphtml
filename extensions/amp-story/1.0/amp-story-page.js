@@ -718,8 +718,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute('i-amphtml-advance-to')) {
-      return this.element.getAttribute('i-amphtml-advance-to');
+    if (this.element.hasAttribute('advance-to')) {
+      return this.element.getAttribute('advance-to');
     }
 
     const nextElement = this.element.nextElementSibling;
@@ -766,9 +766,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
+    console.log(direction);
     const payload = dict({
-        'targetPageId': targetPageId,
-        'direction': direction});
+      'targetPageId': targetPageId,
+      'direction': direction});
     const eventInit = {bubbles: true};
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);

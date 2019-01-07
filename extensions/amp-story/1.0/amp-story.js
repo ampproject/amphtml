@@ -131,7 +131,7 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 /** @enum {string} */
 const Attributes = {
   STANDALONE: 'standalone',
-  ADVANCE_TO: 'i-amphtml-advance-to',
+  ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   AD_SHOWING: 'ad-showing',
@@ -749,7 +749,6 @@ export class AmpStory extends AMP.BaseElement {
     const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
 
-    this.storyPath_.push(firstPageEl);
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -777,7 +776,7 @@ export class AmpStory extends AMP.BaseElement {
             });
           }
         })
-        .then(() => this.switchTo_(initialPageId))
+        .then(() => this.switchTo_(initialPageId,'next'))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -932,7 +931,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (nextPage) {
       this.navigateToPageAfterAccess_ = null;
-      this.switchTo_(nextPage.element.id);
+      this.switchTo_(nextPage.element.id, 'next');
     }
 
     this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
@@ -1017,27 +1016,10 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} direction previous or next
    * @return {!Promise}
    */
-  switchTo_(targetPageId, direction='') {
-    console.log(this.storyPath_);
-    let targetPage = this.getPageById(targetPageId);
+  switchTo_(targetPageId, direction = '') {
+    console.log(this.storyPath_)
+    const targetPage = this.updateStoryPath_(targetPageId, direction);
     const pageIndex = this.getPageIndex(targetPage);
-
-    console.log("direction is" + direction);
-    console.log(targetPageId);
-    //Check to see if this is a navigation to the next page.
-    if (direction == 'next') {
-      console.log("in next");
-      this.storyPath_.push(targetPage);
-    // TODO(budnampet): check if we can handle Ids instead of pages
-    } else if (direction == 'previous') {
-        if (this.storyPath_.length > 1) {
-            const pathPrevious = this.storyPath_.pop();
-            if (pathPrevious.id != targetPage.id){
-              console.log("path previous is not the same as the targetPage");
-              targetPage = pathPrevious;
-            }
-        }
-    }
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && (this.activePage_.element.id === targetPageId)) {
@@ -1175,6 +1157,23 @@ export class AmpStory extends AMP.BaseElement {
         unqueueStepInRAF();
       });
     });
+  }
+
+  updateStoryPath_(targetId, direction) {
+    const targetPage = this.getPageById(targetId);
+    if (direction == 'previous') {
+      this.storyPath_.pop()
+      if (this.storyPath_.length > 0) {
+        const pathPrevious =
+            this.storyPath_[this.storyPath_.length-1] || this.storyPath_[0]
+        if (pathPrevious.element.id != targetId) {
+          return pathPrevious;
+        }
+      }
+    } else if (direction == 'next') {
+        this.storyPath_.push(targetPage);
+    }
+    return targetPage;
   }
 
   /**
@@ -2092,8 +2091,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
+    this.storyPath_.length = 0;
     const switchPromise = this.switchTo_(
-        dev().assertElement(this.pages_[0].element).id);
+        dev().assertElement(this.pages_[0].element).id, 'next');
 
     // Reset all pages so that they are offscreen to right instead of left in
     // desktop view.
