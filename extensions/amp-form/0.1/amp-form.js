@@ -44,7 +44,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -1029,9 +1029,6 @@ export class AmpForm {
 
   /**
    * Renders a template based on the form state and its presence in the form.
-   * @suppress {checkTypes} closure compiler thinks container can be null for
-   *     reason when the dispatch event for rendering the template is inside
-   *     the mutateElement call.
    * @param {!JsonObject} data
    * @return {!Promise}
    */
@@ -1048,15 +1045,16 @@ export class AmpForm {
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
-              this.resources_.mutateElement(container, () => {
-                container.appendChild(rendered);
-                const renderedEvent = createCustomEvent(
-                    this.win_,
-                    AmpEvents.DOM_UPDATE,
-                    /* detail */ null,
-                    {bubbles: true});
-                container.dispatchEvent(renderedEvent);
-              });
+              return this.resources_.mutateElement(devAssert(container),
+                  () => {
+                    container.appendChild(rendered);
+                    const renderedEvent = createCustomEvent(
+                        this.win_,
+                        AmpEvents.DOM_UPDATE,
+                        /* detail */ null,
+                        {bubbles: true});
+                    container.dispatchEvent(renderedEvent);
+                  });
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
