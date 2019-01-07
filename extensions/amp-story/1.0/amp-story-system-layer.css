@@ -52,7 +52,6 @@
 
 .i-amphtml-story-system-layer-buttons {
   margin-top: 8px; /* 6px progress bar + 2px margin */
-  pointer-events: auto !important;
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
