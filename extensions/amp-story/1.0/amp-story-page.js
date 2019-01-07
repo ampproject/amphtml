@@ -58,11 +58,11 @@ import {
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
-import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -720,8 +720,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     const advanceAttr =
-      isExperimentOn(
-        this.win, 'amp-story-branching')? 'advance-to' : 'i-amphtml-advance-to';
+      isExperimentOn(this.win, 'amp-story-branching') ?
+        'advance-to' : 'i-amphtml-advance-to';
 
     if (this.element.hasAttribute(advanceAttr)) {
       return this.element.getAttribute(advanceAttr);

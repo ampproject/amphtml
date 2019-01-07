@@ -1253,7 +1253,7 @@ describes.realWin('amp-story', {
                 .element.setAttribute('advance-to', 'page-3');
 
             story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200}));
+                new MouseEvent('click', {clientX: 200}));
             expect(story.activePage_.element.id).to.equal('page-3');
           });
     });
