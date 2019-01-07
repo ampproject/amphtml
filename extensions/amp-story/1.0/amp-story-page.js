@@ -762,11 +762,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * @param {string} targetPageId
-   * @param {string} direction previous or next
+   * @param {string} direction
    * @private
    */
   switchTo_(targetPageId, direction) {
-    console.log(direction);
     const payload = dict({
       'targetPageId': targetPageId,
       'direction': direction});
