@@ -429,7 +429,9 @@ describes.realWin('amp-geo', {
   it('should error if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw(/JSON/);
   });
 
