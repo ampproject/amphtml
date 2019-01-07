@@ -187,7 +187,9 @@ export class AmpGeo extends AMP.BaseElement {
       this.country_ = getMode(this.win).geoOverride.toLowerCase();
     } else if (preRenderMatch &&
         !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
-      // pre-rendered by a cache case
+      // pre-rendered by a publisher case, if we're a cache we ignore that
+      // When caches start pre-rendering geo we'll need to add specifc code
+      // to handle that.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else if (trimmedCountry.length == 2) {
