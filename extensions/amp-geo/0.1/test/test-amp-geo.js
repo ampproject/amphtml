@@ -319,6 +319,10 @@ describes.realWin('amp-geo', {
     });
   });
 
+  /**
+   * pre-rendered geo is the the case where a publisher uss their own
+   * infrastructure to add a country tag to the body.
+   */
   it('should respect pre-rendered geo tags', () => {
     addConfigElement('script');
     doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
