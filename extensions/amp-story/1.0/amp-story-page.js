@@ -718,8 +718,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute('advance-to')) {
-      return this.element.getAttribute('advance-to');
+    if (this.element.hasAttribute('i-amphtml-advance-to')) {
+      return this.element.getAttribute('i-amphtml-advance-to');
     }
 
     const nextElement = this.element.nextElementSibling;

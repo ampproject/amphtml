@@ -131,7 +131,7 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 /** @enum {string} */
 const Attributes = {
   STANDALONE: 'standalone',
-  ADVANCE_TO: 'advance-to',
+  ADVANCE_TO: 'i-amphtml-advance-to',
   RETURN_TO: 'i-amphtml-return-to',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   AD_SHOWING: 'ad-showing',
@@ -1034,12 +1034,15 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
-   * @param {string} direction previous or next
+   * @param {string} direction
    * @return {!Promise}
    */
   switchTo_(targetPageId, direction = '') {
-    console.log(this.storyPath_)
-    const targetPage = this.updateStoryPath_(targetPageId, direction);
+    const targetPage =
+        (isExperimentOn(this.win, 'amp-story-branching')) ?
+          this.updateStoryPath_(targetPageId, direction) :
+          this.getPageById(targetPageId);
+
     const pageIndex = this.getPageIndex(targetPage);
 
     // Step out if trying to navigate to the currently active page.
@@ -1180,19 +1183,26 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-  updateStoryPath_(targetId, direction) {
-    const targetPage = this.getPageById(targetId);
+  /**
+   * Update the story level stack and check for navigation adherence
+   * to the path a user takes.
+   * @param {string} targetPageId
+   * @param {direction} direction
+   * @private
+   */
+  updateStoryPath_(targetPageId, direction) {
+    const targetPage = this.getPageById(targetPageId);
     if (direction == 'previous') {
-      this.storyPath_.pop()
+      this.storyPath_.pop();
       if (this.storyPath_.length > 0) {
         const pathPrevious =
-            this.storyPath_[this.storyPath_.length-1] || this.storyPath_[0]
-        if (pathPrevious.element.id != targetId) {
+            this.storyPath_[this.storyPath_.length - 1] || this.storyPath_[0];
+        if (pathPrevious.element.id != targetPageId) {
           return pathPrevious;
         }
       }
     } else if (direction == 'next') {
-        this.storyPath_.push(targetPage);
+      this.storyPath_.push(targetPage);
     }
     return targetPage;
   }

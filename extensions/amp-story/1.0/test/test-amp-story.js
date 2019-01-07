@@ -1261,58 +1261,59 @@ describes.realWin('amp-story', {
                 expect(story.activePage_.element.id).to.equal('page-2');
                 toggleExperiment(win, 'amp-story-branching', false);
               });
-    });
+        });
 
     it('should navigate back to the correct previous page after goToPage',
-      () => {
-        toggleExperiment(win, 'amp-story-branching', true);
-        createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-        story.buildCallback();
-        return story.layoutCallback()
-            .then (() => {
-              story.element.setAttribute('id', 'story');
+        () => {
+          toggleExperiment(win, 'amp-story-branching', true);
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
 
-              const actionButton = createElementWithAttributes(
-                      win.document,
-                      'button',
-                      {'id': 'actionButton',
-                        'on': 'tap:story.goToPage(id=page-2)'});
-              element.querySelector('#cover').appendChild(actionButton);
-              // Click on the actionButton to trigger the goToPage action.
-              actionButton.click();
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
 
-              //Move backwards
-              story.activePage_.element.dispatchEvent(
-                  new MouseEvent('click', {clientX: 0}));
-              expect(story.activePage_.element.id).to.equal('cover');
-              toggleExperiment(win, 'amp-story-branching', false);
-            });
-    });
+                //Move backwards
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
+                toggleExperiment(win, 'amp-story-branching', false);
+              });
+        });
 
     it('should navigate back to the correct previous page after advance-to',
-    () => {
-      toggleExperiment(win, 'amp-story-branching', true);
-      createPages(
-        story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-      story.buildCallback();
-      return story.layoutCallback()
-          .then (() => {
-            story.getPageById('cover')
-                .element.setAttribute('advance-to', 'page-3');
+        () => {
+          toggleExperiment(win, 'amp-story-branching', true);
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
 
-            expect(story.activePage_.element.id).to.equal('cover');
-            // Move forwards
-            story.activePage_.element.dispatchEvent(
-                new MouseEvent('click', {clientX: 200}))
-            expect(story.activePage_.element.id).to.equal('page-3');
+                expect(story.activePage_.element.id).to.equal('cover');
+                // Move forwards
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+                expect(story.activePage_.element.id).to.equal('page-3');
 
-            // Move backwards
-            story.activePage_.element.dispatchEvent(
-                new MouseEvent('click', {clientX: 0}))
-            expect(story.activePage_.element.id).to.equal('cover');
+                // Move backwards
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
 
-            toggleExperiment(win, 'amp-story-branching', false);
-          });
-    });
+                toggleExperiment(win, 'amp-story-branching', false);
+              });
+        });
   });
 });
