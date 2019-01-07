@@ -969,6 +969,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const lastPage = this.pages_[this.getPageCount() - 1];
     if (activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
+        activePage.element.hasAttribute(Attributes.PUBLIC_ADVANCE_TO) ||
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
