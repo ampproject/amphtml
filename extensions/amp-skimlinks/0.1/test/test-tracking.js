@@ -26,7 +26,6 @@ import {
   XCUST_ATTRIBUTE_NAME,
 } from '../constants';
 
-
 describes.fakeWin(
     'test-tracking',
     {
@@ -353,9 +352,7 @@ describes.fakeWin(
 
           expect(trackingData.hae).to.equal(1);
         });
-
       });
-
 
       describe('sendNaClickTracking', () => {
         it('Should send non-affiliate click tracking', () => {
