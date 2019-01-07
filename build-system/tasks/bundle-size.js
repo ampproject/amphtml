@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitMergeBaseMaster} = require('../git');
+const {gitCommitHash, gitMergeBaseMaster, gitMergeBaseTravisMaster, gitMergeBaseLocalMaster} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -329,7 +329,14 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isPullRequest()) {
     const baseSha = gitMergeBaseMaster();
-    log(yellow('DO NOT MERGE'), cyan(baseSha));
+    log(yellow('DO NOT MERGE'), 'gitMergeBaseMaster:',
+        cyan(baseSha));
+    log(yellow('DO NOT MERGE'), 'gitMergeBaseLocalMaster:',
+        cyan(gitMergeBaseLocalMaster()));
+    log(yellow('DO NOT MERGE'), 'gitMergeBaseTravisMaster:',
+        cyan(gitMergeBaseTravisMaster()));
+    log(yellow('DO NOT MERGE'), 'process.env.TRAVIS_COMMIT_RANGE:',
+        cyan(process.env.TRAVIS_COMMIT_RANGE));
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
