@@ -1467,7 +1467,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.have.not.been.called;
+        expect(expectedErrorStub).to.have.not.been.called;
       });
     });
 
@@ -1481,7 +1481,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.have.not.been.called;
+        expect(expectedErrorStub).to.have.not.been.called;
       });
     });
 
@@ -1496,8 +1496,8 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.be.calledOnce;
-        expect(errorStub.calledWith('Viewer',
+        expect(expectedErrorStub).to.be.calledOnce;
+        expect(expectedErrorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
             }))).to.be.true;
@@ -1515,8 +1515,8 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.be.calledOnce;
-        expect(errorStub.calledWith('Viewer',
+        expect(expectedErrorStub).to.be.calledOnce;
+        expect(expectedErrorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
             }))).to.be.true;
@@ -1534,8 +1534,8 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.be.calledOnce;
-        expect(errorStub.calledWith('Viewer',
+        expect(expectedErrorStub).to.be.calledOnce;
+        expect(expectedErrorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
             }))).to.be.true;
@@ -1554,7 +1554,7 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl())
             .to.equal('https://acme.org/viewer');
-        expect(errorStub).to.have.not.been.called;
+        expect(expectedErrorStub).to.have.not.been.called;
       });
     });
 
@@ -1570,7 +1570,7 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl())
             .to.equal('https://acme.org/viewer');
-        expect(errorStub).to.have.not.been.called;
+        expect(expectedErrorStub).to.have.not.been.called;
       });
     });
 
@@ -1584,7 +1584,7 @@ describe('Viewer', () => {
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-        expect(errorStub).to.have.not.been.called;
+        expect(expectedErrorStub).to.have.not.been.called;
       });
     });
   });
