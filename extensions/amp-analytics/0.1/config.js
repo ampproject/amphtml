@@ -17,8 +17,8 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
@@ -71,56 +71,6 @@ export class AnalyticsConfig {
   }
 
   /**
-   * Returns a promise that resolves when configuration is re-written if
-   * configRewriter is configured by a vendor.
-   *
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_()['url'];
-
-    const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
-    this.validateTransport_(inlineConfig);
-    mergeObjects(inlineConfig, config);
-    mergeObjects(this.remoteConfig_, config);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
-      // use default configuration merge.
-      return Promise.resolve();
-    }
-
-    assertHttpsUrl(configRewriterUrl, this.element_);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
-
-    const fetchConfig = {
-      method: 'POST',
-      body: config,
-      requireAmpResponseSourceOrigin: false,
-    };
-    if (this.element_.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element_.getAttribute('data-credentials');
-    }
-    return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(configRewriterUrl)
-        .then(expandedUrl => {
-          return Services.xhrFor(toWin(this.win_)).fetchJson(
-              expandedUrl, fetchConfig);
-        })
-        .then(res => res.json())
-        .then(jsonValue => {
-          this.config_ = this.mergeConfigs_(jsonValue);
-          dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-        }, err => {
-          user().error(TAG,
-              'Error rewriting configuration: ', configRewriterUrl, err);
-        });
-  }
-
-  /**
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
@@ -155,6 +105,111 @@ export class AnalyticsConfig {
           user().error(TAG,
               'Error loading remote config: ', remoteConfigUrl, err);
         });
+  }
+
+  /**
+   * Returns a promise that resolves when configuration is re-written if
+   * configRewriter is configured by a vendor.
+   *
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  processConfigs_() {
+    const configRewriterUrl = this.getConfigRewriter_()['url'];
+
+    const config = dict({});
+    const inlineConfig = this.getInlineConfigNoInline();
+    this.validateTransport_(inlineConfig);
+    mergeObjects(inlineConfig, config);
+    mergeObjects(this.remoteConfig_, config);
+
+    if (!configRewriterUrl || this.isSandbox_) {
+      this.config_ = this.mergeConfigs_(config);
+      // use default configuration merge.
+      return Promise.resolve();
+    }
+
+    return this.handleConfigRewriter_(config, configRewriterUrl);
+  }
+
+  /**
+   * Handles logic if configRewriter is enabled.
+   * @param {*} config
+   * @param {string} configRewriterUrl
+   */
+  handleConfigRewriter_(config, configRewriterUrl) {
+    assertHttpsUrl(configRewriterUrl, this.element_);
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
+
+    const urlReplacements = Services.urlReplacementsForDoc(this.element_);
+
+    const allPromises = [];
+    const varGroups = config['configRewriter']['varGroups'];
+
+    if (varGroups) {
+      // Merge varGroups to see what has been enabled.
+      deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
+      // Create object that will later hold all the resolved variables.
+      config['configRewriter']['vars'] = {};
+
+      Object.keys(varGroups).forEach(groupName => {
+        const group = varGroups[groupName];
+        if (!group['enabled']) {
+          // Pubs must explicity enable any var groups.
+          return;
+        }
+
+        const varNames = [];
+        const valuePromises = [];
+
+        Object.keys(group).forEach(varName => {
+          if (varName === 'enabled') {
+            return;
+          }
+          varNames.push(varName);
+          const expanded = urlReplacements.expandStringAsync(group[varName]);
+          valuePromises.push(expanded);
+        });
+
+        const groupPromise = Promise.all(valuePromises).then(resolvedValues => {
+          varNames.forEach((name, i) =>
+            config['configRewriter']['vars'][name] = resolvedValues[i]);
+        });
+
+        allPromises.push(groupPromise);
+      });
+    }
+
+    return Promise.all(allPromises).then(() => {
+      // Don't send var groups config in payload, only the resolved vars.
+      if (config['configRewriter'] && config['configRewriter']['varGroups']) {
+        delete config['configRewriter']['varGroups'];
+      }
+    }).then(() => {
+      const fetchConfig = {
+        method: 'POST',
+        body: config,
+        requireAmpResponseSourceOrigin: false,
+      };
+      if (this.element_.hasAttribute('data-credentials')) {
+        fetchConfig.credentials = this.element_
+            .getAttribute('data-credentials');
+      }
+      return urlReplacements.expandUrlAsync(configRewriterUrl)
+          .then(expandedUrl => {
+            return Services.xhrFor(toWin(this.win_)).fetchJson(
+                expandedUrl, fetchConfig);
+          })
+          .then(res => res.json())
+          .then(jsonValue => {
+            this.config_ = this.mergeConfigs_(jsonValue);
+            dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
+          }, err => {
+            user().error(TAG,
+                'Error rewriting configuration: ', configRewriterUrl, err);
+          });
+    });
   }
 
   /**
