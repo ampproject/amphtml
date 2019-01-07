@@ -1277,7 +1277,7 @@ describes.realWin('amp-story', {
                 expect(story.activePage_.element.id).to.equal('page-2');
                 toggleExperiment(win, 'amp-story-branching', false);
               });
-    });
+        });
   });
 });
 
