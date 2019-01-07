@@ -42,6 +42,11 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
+
+    // fit|truncate|truncate-js
+    // this.overflowMethod_ = 'fit';
+    this.overflowMethod_ = this.element.getAttribute('overflow') || 'fit';
+    // this.overflowMode
   }
 
   /** @override */
@@ -57,7 +62,9 @@ class AmpFitText extends AMP.BaseElement {
     setStyles(this.content_, {zIndex: 2});
 
     this.contentWrapper_ = this.element.ownerDocument.createElement('div');
-    setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
+    if (this.overflowMethod_ === 'fit') {
+      setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
+    }
     this.content_.appendChild(this.contentWrapper_);
 
     this.measurer_ = this.element.ownerDocument.createElement('div');
@@ -68,7 +75,7 @@ class AmpFitText extends AMP.BaseElement {
       left: 0,
       zIndex: 1,
       visibility: 'hidden',
-      lineHeight: `${LINE_HEIGHT_EM_}em`,
+      // lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
     this.getRealChildNodes().forEach(node => {
@@ -78,11 +85,18 @@ class AmpFitText extends AMP.BaseElement {
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
-    this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
-        'min-font-size')) || 6;
+    if (this.overflowMethod_ === 'fit') {
+      setStyles(this.measurer_, {
+        lineHeight: `${LINE_HEIGHT_EM_}em`,
+      });
+      this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
+          'min-font-size')) || 6;
 
-    this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
-        'max-font-size')) || 72;
+      this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
+          'max-font-size')) || 72;
+    } else {
+      this.fontSize_ = getLengthNumeral(this.element.getAttribute('font-size'));
+    }
   }
 
   /** @override */
@@ -97,7 +111,11 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.updateFontSize_();
+    if (this.overflowMethod_ === 'fit') {
+      this.updateFontSize_();
+    } else {
+      this.updateText_();
+    }
     return Promise.resolve();
   }
 
@@ -109,10 +127,54 @@ class AmpFitText extends AMP.BaseElement {
         this.minFontSize_, this.maxFontSize_);
     setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
-        fontSize);
+        fontSize, this.overflowMethod_);
+  }
+
+  updateText_() {
+    const maxHeight = this.element./*OK*/offsetHeight;
+    const fontSize = this.fontSize_;
+    if (fontSize) {
+      // clamp ...
+      console.log(fontSize, px(fontSize));
+      setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
+      updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
+          fontSize, this.overflowMethod_);
+    } else {
+      truncate_(this.contentWrapper_, this.measurer_, maxHeight);
+    }
   }
 }
 
+function truncate_(content, measurer, height) {
+  const overflown = measurer./*OK*/offsetHeight > height;
+  if (!overflown) {
+    return;
+  }
+  const children = measurer.childNodes;
+  console.log(children);
+  let index = children.length - 1;
+  while (index > 0 && children[0].nodeType !== Node.TEXT_NODE) {
+    index--;
+  }
+  console.log(index);
+  if (index < 0) {
+    return;
+  }
+  const node = children[index];
+  // console.log(node, node.textContent;);
+  const chars = node.textContent.split('');
+  // console.log(node, chars);
+  // console.log(height);
+  while (measurer./*OK*/offsetHeight > height) {
+    // console.log(measurer.offsetHeight);
+    chars.pop();
+    // console.log(w);
+    node.textContent = chars.join('') + '…';
+  }
+  // console.log(chars);
+  content.childNodes[index].textContent = chars.join('') + '…';
+  // console.log(content.offsetHeight);
+}
 
 /**
  * @param {Element} measurer
@@ -141,6 +203,22 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
   return minFontSize;
 }
 
+export function calculateWordTruncation_(content, measurer, expectedHeight) {
+  const words = measurer.textContent.trim().split(' ');
+  const height = measurer./*OK*/offsetHeight;
+  console.log(words, expectedHeight, height);
+  // let length = words.length - 1;
+  // let index = maxIndex;
+
+  while (measurer./*OK*/offsetHeight > expectedHeight) {
+    // index--;
+    words.pop();
+    measurer.textContent = words.join(' ') + '...';
+  }
+
+  console.log(words, measurer.textContent);
+  return measurer.textContent;
+}
 
 /**
  * @param {Element} content
@@ -154,6 +232,7 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/offsetHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
+
   content.classList.toggle('i-amphtml-fit-text-content-overflown', overflown);
   setStyles(content, {
     lineClamp: overflown ? numberOfLines : '',
