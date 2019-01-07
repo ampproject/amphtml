@@ -188,6 +188,7 @@ export class AmpGeo extends AMP.BaseElement {
     } else if (preRenderMatch &&
         !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
       // pre-rendered by a publisher case, if we're a cache we ignore that
+      // since there is no way the publisher could know the geo of the client.
       // When caches start pre-rendering geo we'll need to add specifc code
       // to handle that.
       this.mode_ = mode.GEO_PRERENDER;
