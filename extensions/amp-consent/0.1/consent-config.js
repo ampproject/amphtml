@@ -39,11 +39,32 @@ export class ConsentConfig {
   }
 
   /**
-   * Return the consents config
+   * Read the config and return the formatted consent config
    * @return {!JsonObject}
    */
   getConsentConfig() {
-    return this.getConfig_()['consents'];
+    const id = Object.keys(this.getConfig_()['consents'])[0];
+    const consentConfig = this.getConfig_()['consents'][id];
+
+    const config = dict({
+      'storageKey': id,
+    });
+
+    // TODO(zhouyx@): Assert validness.
+    const keys = Object.keys(consentConfig);
+    for (let i = 0; i < keys.length; i++) {
+      config[keys[i]] = consentConfig[keys[i]];
+    }
+
+    if (this.getConfig_()['postPromptUI']) {
+      config['postPromptUI'] = this.getConfig_()['postPromptUI'];
+    }
+
+    if (this.getConfig_()['clientConfig']) {
+      config['clientConfig'] = this.getConfig_()['clientConfig'];
+    }
+
+    return config;
   }
 
   /**
@@ -52,14 +73,6 @@ export class ConsentConfig {
    */
   getPolicyConfig() {
     return this.getConfig_()['policy'] || dict({});
-  }
-
-  /**
-   * Return the postPromptUI config
-   * @return {string|undefined}
-   */
-  getPostPromptUI() {
-    return this.getConfig_()['postPromptUI'];
   }
 
   /**
