@@ -44,7 +44,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -1045,21 +1045,22 @@ export class AmpForm {
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
-              container.appendChild(rendered);
-              const renderedEvent = createCustomEvent(
-                  this.win_,
-                  AmpEvents.DOM_UPDATE,
-                  /* detail */ null,
-                  {bubbles: true});
-              container.dispatchEvent(renderedEvent);
+              return this.resources_.mutateElement(devAssert(container),
+                  () => {
+                    container.appendChild(rendered);
+                    const renderedEvent = createCustomEvent(
+                        this.win_,
+                        AmpEvents.DOM_UPDATE,
+                        /* detail */ null,
+                        {bubbles: true});
+                    container.dispatchEvent(renderedEvent);
+                  });
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
         // This will be unnecessary when the AMP Layers implementation is
-        // complete. We call mutateElement here and not where the template is
-        // made visible so that we don't do redundant layout work when a
-        // template is rendered too.
+        // complete.
         this.resources_.mutateElement(container, () => {});
       }
     }
