@@ -1203,17 +1203,16 @@ const generateResults = (category, count = 2) => {
   }
 
   r.items = items;
+  r['load-more-src'] =
+      `/infinite-scroll-random/${category}?${randInt(10000)}`;
+
   return r;
 };
 
 app.get('/infinite-scroll-random/:category', function(request, response) {
   const {category} = request.params;
   const result = generateResults(category);
-  result['load-more-src'] =
-      `/infinite-scroll-random/${category}?${randInt(10000)}`;
-
   response.json(result);
-  response.end();
 });
 
 app.get('/infinite-scroll-faulty', function(req, res) {
