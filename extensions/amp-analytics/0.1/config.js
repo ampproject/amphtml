@@ -142,11 +142,12 @@ export class AnalyticsConfig {
     dev().fine(TAG, 'Rewriting config', configRewriterUrl);
 
     let varGroupsPromise = Promise.resolve();
-    const varGroups = config['configRewriter']['varGroups'];
+    const rewriterConfig = config['configRewriter'];
+    const varGroups = rewriterConfig && rewriterConfig['varGroups'];
 
     if (varGroups) {
       varGroupsPromise = this.handleVarGroups_(varGroups,
-          config['configRewriter']);
+          rewriterConfig);
     }
 
     return varGroupsPromise.then(() => {
