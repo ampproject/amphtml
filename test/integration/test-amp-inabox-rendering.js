@@ -35,16 +35,14 @@ function testVisibilityPings(visibleDelay, activeViewDelay) {
       .then(() => {
         const visibleTime = Date.now();
         const difference = visibleTime - viewTime;
-        // Add about a 400ms "buffer" to account for possible browser jankiness
+        // Add about a 200ms "buffer" to account for possible browser jankiness
         expect(difference).to.be.above(visibleDelay - 200);
-        expect(difference).to.be.below(visibleDelay + 200);
       })
       .then(() => RequestBank.withdraw('activeview'))
       .then(() => {
         const activeViewTime = Date.now();
         const difference = activeViewTime - viewTime;
         expect(difference).to.be.above(activeViewDelay - 200);
-        expect(difference).to.be.below(activeViewDelay + 200);
       });
 }
 
