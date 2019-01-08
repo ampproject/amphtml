@@ -666,3 +666,5 @@ AMP.extension(TAG, '0.1', AMP => {
 
   AMP.registerElement(TAG, AmpLightbox, CSS);
 });
+
+// world

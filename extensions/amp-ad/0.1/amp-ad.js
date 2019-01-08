@@ -111,3 +111,5 @@ AMP.extension('amp-ad', '0.1', AMP => {
   AMP.registerElement('amp-ad', AmpAd, CSS);
   AMP.registerElement('amp-embed', AmpAd);
 });
+
+// foo
