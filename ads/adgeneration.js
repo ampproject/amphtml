@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -39,7 +39,7 @@ export function adgeneration(global, data) {
       '&tagver=2.0.0' +
       (data.targetid ? '&targetID=' + encodeURIComponent(data.targetid) : '') +
       (option ? '&' + option : '');
-  loadScript(global, url);
+  writeScript(global, url);
 }
 
 /**
