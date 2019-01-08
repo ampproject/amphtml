@@ -522,14 +522,23 @@ describes.fakeWin('Viewport', {}, env => {
     expect(resizeEvent).to.equal(null);
   });
 
-  it('should send documentHeight msg to viewer on resize', () => {
+  it('should send documentHeight msg to viewer on width resize', () => {
     const getContentHeight = sandbox.spy(binding, 'getContentHeight');
     viewport.size_ = {width: 200, height: 200};
-    viewportSize.width = 200;
-    viewportSize.height = 200;
+    viewportSize.width = 112;
     viewport.resize_();
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(getContentHeight).to.have.been.called;
+  });
+
+  it('should not send documentHeight msg to viewer on height resize', () => {
+    const getContentHeight = sandbox.spy(binding, 'getContentHeight');
+    viewport.size_ = {width: 200, height: 200};
+    viewportSize.height = 112;
+    viewportSize.width = 200;
+    viewport.resize_();
+    expect(viewer.sendMessage).to.not.have.been.called;
+    expect(getContentHeight).to.not.have.been.called;
   });
 
   it('should not do anything if padding is not changed', () => {

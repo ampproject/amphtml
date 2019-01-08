@@ -1144,12 +1144,14 @@ export class Viewport {
           width: newSize.width,
           height: newSize.height,
         });
+        if (widthChanged) {
+          // Update the viewer of a possible document height change.
+          this.viewer_.sendMessage(
+              'documentHeight',
+              dict({'height': this.binding_.getContentHeight()}),
+              /* cancelUnsent */true);
+        }
       }
-      // Update the viewer of a possible document height change.
-      this.viewer_.sendMessage(
-          'documentHeight',
-          dict({'height': this.binding_.getContentHeight()}),
-          /* cancelUnsent */true);
     });
   }
 }
