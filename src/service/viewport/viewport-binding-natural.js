@@ -196,8 +196,9 @@ export class ViewportBindingNatural_ {
   /** @override */
   getContentHeight() {
     const scrollingElement = this.getScrollingElement();
+    const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = getComputedStyle(scrollingElement);
-    return scrollingElement./*OK*/scrollHeight
+    return rect.height
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }
