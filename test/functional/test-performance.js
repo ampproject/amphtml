@@ -596,7 +596,7 @@ describes.realWin('performance', {amp: true}, env => {
           return whenFirstVisiblePromise.then(() => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
-            expect(getPerformanceMarks()).to.deep.equal(
+            expect(getPerformanceMarks()).to.have.members(
                 ['ol', 'pc', 'ofv']);
           });
         });
