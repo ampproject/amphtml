@@ -162,8 +162,8 @@ export class ConsentPolicyManager {
   init_() {
     // Set up handler to listen to consent instance value change.
     this.ConsentStateManagerPromise_.then(manager => {
-      manager.whenConsentReady(this.consentInstanceIdDepr_).then(() => {
-        manager.onConsentStateChange(this.consentInstanceIdDepr_, info => {
+      manager.whenConsentReady().then(() => {
+        manager.onConsentStateChange(info => {
           this.consentStateChangeHandler_(info);
           if (this.consentValueInitiatedResolver_) {
             this.consentValueInitiatedResolver_();
@@ -265,8 +265,7 @@ export class ConsentPolicyManager {
     return this.whenPolicyResolved(policyId)
         .then(() => this.ConsentStateManagerPromise_)
         .then(manager => {
-          return manager.getConsentInstanceSharedData(
-              this.consentInstanceIdDepr_);
+          return manager.getConsentInstanceSharedData();
         });
   }
 

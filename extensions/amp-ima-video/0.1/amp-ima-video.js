@@ -363,6 +363,11 @@ class AmpImaVideo extends AMP.BaseElement {
   getPlayedRanges() {
     return this.playerData_.playedRanges;
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
