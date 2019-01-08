@@ -65,7 +65,9 @@ or like this:
 <!--
 Using the script tag
 
-The template type is defined in the `template` attribute.
+The template type is defined in the `template` attribute. The template
+tag is preferred but using the script tag can be helpful when working with
+tables or server-side rendering.
 -->
 <script type="text/plain" template="amp-mustache">
   Hello {{world}}!
