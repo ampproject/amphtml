@@ -28,21 +28,19 @@ const adBody = __html__['test/fixtures/amp-cupcake-ad.html'] // eslint-disable-l
 
 function testVisibilityPings(visibleDelay, activeViewDelay) {
   let viewTime = 0;
-  return RequestBank.withdraw('view').then(() => {
-    viewTime = Date.now();
-  })
-      .then(() => RequestBank.withdraw('visible'))
+  let visibleTime = 0;
+  let activeViewTime = 0;
+  const viewPromise = RequestBank.withdraw('view')
+      .then(() => viewTime = Date.now());
+  const visiblePromise = RequestBank.withdraw('visible')
+      .then(() => visibleTime = Date.now());
+  const activeViewPromise = RequestBank.withdraw('activeview')
+      .then(() => activeViewTime = Date.now());
+  return Promise.all([viewPromise, visiblePromise, activeViewPromise])
       .then(() => {
-        const visibleTime = Date.now();
-        const difference = visibleTime - viewTime;
         // Add about a 200ms "buffer" to account for possible browser jankiness
-        expect(difference).to.be.above(visibleDelay - 200);
-      })
-      .then(() => RequestBank.withdraw('activeview'))
-      .then(() => {
-        const activeViewTime = Date.now();
-        const difference = activeViewTime - viewTime;
-        expect(difference).to.be.above(activeViewDelay - 200);
+        expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
+        expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
       });
 }
 
