@@ -376,7 +376,7 @@ describes.fakeWin('Viewport', {}, env => {
     expect(binding.disconnect).to.be.calledOnce;
   });
 
-  it('should resize only after size has been initialed', () => {
+  it('should resize only after size has been initialized', () => {
     binding.connect = sandbox.spy();
     binding.disconnect = sandbox.spy();
     viewer.isVisible = () => true;
@@ -520,6 +520,16 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.height = 200;
     viewport.resize_();
     expect(resizeEvent).to.equal(null);
+  });
+
+  it('should send documentHeight msg to viewer on resize', () => {
+    const getContentHeight = sandbox.spy(binding, 'getContentHeight');
+    viewport.size_ = {width: 200, height: 200};
+    viewportSize.width = 200;
+    viewportSize.height = 200;
+    viewport.resize_();
+    expect(viewer.sendMessage).to.have.been.calledOnce;
+    expect(getContentHeight).to.have.been.called;
   });
 
   it('should not do anything if padding is not changed', () => {

@@ -1145,6 +1145,11 @@ export class Viewport {
           height: newSize.height,
         });
       }
+      // Update the viewer of a possible document height change.
+      this.viewer_.sendMessage(
+          'documentHeight',
+          dict({'height': this.binding_.getContentHeight()}),
+          /* cancelUnsent */true);
     });
   }
 }
