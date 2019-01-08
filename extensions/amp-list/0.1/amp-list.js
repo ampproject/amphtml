@@ -1023,7 +1023,7 @@ export class AmpList extends AMP.BaseElement {
           this.getAmpDoc(),
           'position-observer'
       );
-      this.positionObserver_.observe(this.loadMoreButton_,
+      this.positionObserver_.observe(this.container_,
           PositionObserverFidelity.LOW,
           ({positionRect, viewportRect}) => {
             const ratio = 3;
