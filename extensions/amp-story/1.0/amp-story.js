@@ -92,6 +92,7 @@ import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
@@ -760,7 +761,9 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
+    const initialPageId =
+        this.getPageFragment_() ||
+        this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
 
     this.initializeSidebar_();
@@ -815,6 +818,13 @@ export class AmpStory extends AMP.BaseElement {
     return storyLayoutPromise;
   }
 
+  getPageFragment_(){
+    const maybePageId = parseQueryString(this.win.location.hash)['page'];
+
+    if (this.getPageById(maybePageId)) {
+      return maybePageId;
+    }
+  }
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
