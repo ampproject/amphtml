@@ -1187,7 +1187,7 @@ export class AmpStory extends AMP.BaseElement {
    * Update the story level stack and check for navigation adherence
    * to the path a user takes.
    * @param {string} targetPageId
-   * @param {direction} direction
+   * @param {string} direction
    * @private
    */
   updateStoryPath_(targetPageId, direction) {
