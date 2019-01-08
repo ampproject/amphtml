@@ -62,6 +62,7 @@ describes.repeated('', {
     let timer;
     let createElement;
     let createTextNode;
+    let mutateElementStub;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -73,7 +74,7 @@ describes.repeated('', {
 
       // Force sync mutateElement to make testing easier.
       const resources = Services.resourcesForDoc(env.ampdoc);
-      sandbox.stub(resources, 'mutateElement').callsArg(1);
+      mutateElementStub = sandbox.stub(resources, 'mutateElement').callsArg(1);
 
       // This needs to be stubbed to stop the function from,
       // hanging and timing out on tests that make proper XHR requests
@@ -266,9 +267,6 @@ describes.repeated('', {
               .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
               .onSecondCall().returns(Promise.resolve({html: template}));
 
-          sandbox.stub(
-              ampForm.ssrTemplateHelper_, 'verifySsrResponse');
-
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
               .then(() => {
@@ -293,7 +291,6 @@ describes.repeated('', {
       return getAmpForm(form).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
-
 
         const event = {
           stopImmediatePropagation: sandbox.spy(),
@@ -739,6 +736,7 @@ describes.repeated('', {
           expect(ampForm.xhrSubmitPromiseForTesting())
               .to.eventually.be.rejected;
           return ampForm.xhrSubmitPromiseForTesting().catch(() => {
+            expect(mutateElementStub).to.have.been.calledOnce;
             expect(findTemplateStub).to.be.called;
             // Template should have rendered an error
             expect(findTemplateStub).to.have.been.calledWith(
@@ -791,6 +789,7 @@ describes.repeated('', {
           expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
           expect(ampForm.templates_.findAndRenderTemplate.calledWith(
               messageContainer, {'name': 'John Smith'})).to.be.true;
+          expect(mutateElementStub).to.have.been.calledOnce;
           expect(messageContainer.firstChild).to.equal(renderedTemplate);
 
           return submitEventPromise;
@@ -836,6 +835,7 @@ describes.repeated('', {
         return whenCalled(findAndRenderTemplateStub).then(() => {
           return ampForm.renderTemplatePromiseForTesting();
         }).then(() => {
+          expect(mutateElementStub).to.have.been.calledOnce;
           expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
           expect(ampForm.templates_.findAndRenderTemplate.calledWith(
               successContainer, {'message': 'What What'})).to.be.true;
@@ -860,7 +860,9 @@ describes.repeated('', {
         successContainer.appendChild(successTemplate);
         const renderedTemplate = createElement('div');
 
-        const spy = sandbox.spy(successContainer, 'dispatchEvent');
+        const spyDispatchEvent =
+            sandbox.spy(successContainer, 'dispatchEvent');
+        const spyAppendTemplate = sandbox.spy(successContainer, 'appendChild');
         sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve({
               json() {
@@ -881,11 +883,12 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             return ampForm.renderTemplatePromiseForTesting();
           }).then(() => {
-            expect(spy.calledOnce).to.be.true;
-            expect(spy).calledWithMatch({
+            expect(spyDispatchEvent.calledOnce).to.be.true;
+            expect(spyDispatchEvent).calledWithMatch({
               type: AmpEvents.DOM_UPDATE,
               bubbles: true,
             });
+            sinon.assert.callOrder(spyAppendTemplate, spyDispatchEvent);
           });
         });
       });
