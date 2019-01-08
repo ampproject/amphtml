@@ -1311,10 +1311,10 @@ export class VideoDocking {
       return;
     }
 
-    // Don't allow dragging videos that are too early in their transition phase.
+    // Don't allow dragging videos that are transitioning.
     // This allows the user to keep scrolling while touching the inline/almost
     // inline video area.
-    if (!this.isTransitioning_) {
+    if (this.isTransitioning_) {
       return;
     }
 
@@ -1697,6 +1697,10 @@ export class VideoDocking {
     dev().info(TAG, 'undock', {video});
 
     this.getControls_().disable();
+
+    // Prevents ghosting
+    this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
+
     this.trigger_(Actions.UNDOCK);
 
     const step = 0;

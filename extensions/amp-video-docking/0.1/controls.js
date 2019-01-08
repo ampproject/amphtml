@@ -27,6 +27,7 @@ import {closestBySelector} from '../../../src/dom';
 import {
   createCustomEvent,
   listen,
+  listenOnce,
 } from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -55,8 +56,8 @@ const BREAKPOINTS = [
 ];
 
 
-const TIMEOUT = 1000;
-const TIMEOUT_AFTER_INTERACTION = 1000;
+const TIMEOUT = 1200;
+const TIMEOUT_AFTER_INTERACTION = 800;
 
 
 /**
@@ -175,11 +176,15 @@ export class Controls {
     this.isSticky_ = false;
 
     /** @private {function():!Timeout} */
-    this.getHideTimeout_ =
-        once(() => new Timeout(this.ampdoc_.win, () => this.hide()));
+    this.getHideTimeout_ = once(() => new Timeout(this.ampdoc_.win, () => {
+      this.hide(/* respectSticky */ true);
+    }));
 
     /** @private @const {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
+    this.videoUnlisteners_ = [];
+
+    /** @private {?UnlistenDef} */
+    this.mouseMoveUnlistener_ = null;
 
     /** @private {?../../../src/video-interface.VideoOrBaseElementDef} */
     this.video_ = null;
@@ -219,7 +224,7 @@ export class Controls {
 
     const {element} = video;
 
-    this.unlisteners_.push(
+    this.videoUnlisteners_.push(
         this.listenWhenEnabled_(this.dismissButton_, click, () => {
           this.container.dispatchEvent(
               createCustomEvent(this.ampdoc_.win,
@@ -308,8 +313,8 @@ export class Controls {
 
   /** @private */
   unlisten_() {
-    while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop().call();
+    while (this.videoUnlisteners_.length > 0) {
+      this.videoUnlisteners_.pop().call();
     }
   }
 
@@ -320,11 +325,19 @@ export class Controls {
 
   /** @private */
   showOnTapOrHover_() {
-    const onTapOrHover = () => this.show_();
     const {overlay} = this;
 
-    this.listenWhenEnabled_(overlay, 'mouseup', onTapOrHover);
-    this.listenWhenEnabled_(overlay, 'mouseover', onTapOrHover);
+    this.listenWhenEnabled_(overlay, 'click', () => {
+      this.show_();
+    });
+
+    this.listenWhenEnabled_(overlay, 'mouseover', () => {
+      // Show on hover only on mouse devices to prevent click/hover passthru.
+      if (!this.ampdoc_.getBody().classList.contains('amp-mode-mouse')) {
+        return;
+      }
+      this.show_();
+    });
   }
 
   /** @private */
@@ -341,6 +354,8 @@ export class Controls {
     toggle(container, true);
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
+
+    this.listenToMouseMove_();
 
     if (this.isPlaying_()) {
       swap(playButton, pauseButton);
@@ -404,7 +419,8 @@ export class Controls {
    * @private
    */
   isControlsTarget_(target) {
-    return !!closestBySelector(target, '.amp-video-docked-controls');
+    return target == this.overlay ||
+      !!closestBySelector(target, '.amp-video-docked-controls');
   }
 
   /**
@@ -427,6 +443,26 @@ export class Controls {
     }
     overlay.classList.remove('amp-video-docked-controls-bg');
     container.classList.remove(ampVideoDockedControlsShown);
+  }
+
+  /** @private */
+  listenToMouseMove_() {
+    if (this.mouseMoveUnlistener_) {
+      return;
+    }
+    this.mouseMoveUnlistener_ = listen(this.overlay, 'mousemove', () => {
+      this.show_();
+    });
+
+    listenOnce(this.overlay, 'mouseout', () => this.unlistenToMouseMove_());
+  }
+
+  /** @private */
+  unlistenToMouseMove_() {
+    if (this.mouseMoveUnlistener_) {
+      this.mouseMoveUnlistener_();
+      this.mouseMoveUnlistener_ = null;
+    }
   }
 
   /** @public */
