@@ -107,6 +107,11 @@ export const RTC_VENDORS = {
     macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
     disableKeyAppend: true,
   },
+  navegg: {
+    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    macros: ['NVG_ACC'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
