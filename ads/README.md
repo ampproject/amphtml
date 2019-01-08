@@ -339,7 +339,7 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+gulp test --watch --nobuild --files=test/unit/{test-ads-config.js,test-integration.js}
 
 ```
 
