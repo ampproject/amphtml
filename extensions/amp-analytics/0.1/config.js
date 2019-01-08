@@ -110,7 +110,6 @@ export class AnalyticsConfig {
   /**
    * Returns a promise that resolves when configuration is re-written if
    * configRewriter is configured by a vendor.
-   *
    * @private
    * @return {!Promise<undefined>}
    */
@@ -142,51 +141,15 @@ export class AnalyticsConfig {
     const TAG = this.getName_();
     dev().fine(TAG, 'Rewriting config', configRewriterUrl);
 
-    const urlReplacements = Services.urlReplacementsForDoc(this.element_);
-
-    const allPromises = [];
+    let varGroupsPromise = Promise.resolve();
     const varGroups = config['configRewriter']['varGroups'];
 
     if (varGroups) {
-      // Merge varGroups to see what has been enabled.
-      deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
-      // Create object that will later hold all the resolved variables.
-      config['configRewriter']['vars'] = {};
-
-      Object.keys(varGroups).forEach(groupName => {
-        const group = varGroups[groupName];
-        if (!group['enabled']) {
-          // Pubs must explicity enable any var groups.
-          return;
-        }
-
-        const varNames = [];
-        const valuePromises = [];
-
-        Object.keys(group).forEach(varName => {
-          if (varName === 'enabled') {
-            return;
-          }
-          varNames.push(varName);
-          const expanded = urlReplacements.expandStringAsync(group[varName]);
-          valuePromises.push(expanded);
-        });
-
-        const groupPromise = Promise.all(valuePromises).then(resolvedValues => {
-          varNames.forEach((name, i) =>
-            config['configRewriter']['vars'][name] = resolvedValues[i]);
-        });
-
-        allPromises.push(groupPromise);
-      });
+      varGroupsPromise = this.handleVarGroups_(varGroups,
+          config['configRewriter']);
     }
 
-    return Promise.all(allPromises).then(() => {
-      // Don't send var groups config in payload, only the resolved vars.
-      if (config['configRewriter'] && config['configRewriter']['varGroups']) {
-        delete config['configRewriter']['varGroups'];
-      }
-    }).then(() => {
+    return varGroupsPromise.then(() => {
       const fetchConfig = {
         method: 'POST',
         body: config,
@@ -196,7 +159,8 @@ export class AnalyticsConfig {
         fetchConfig.credentials = this.element_
             .getAttribute('data-credentials');
       }
-      return urlReplacements.expandUrlAsync(configRewriterUrl)
+      return Services.urlReplacementsForDoc(this.element_)
+          .expandUrlAsync(configRewriterUrl)
           .then(expandedUrl => {
             return Services.xhrFor(toWin(this.win_)).fetchJson(
                 expandedUrl, fetchConfig);
@@ -209,6 +173,52 @@ export class AnalyticsConfig {
             user().error(TAG,
                 'Error rewriting configuration: ', configRewriterUrl, err);
           });
+    });
+  }
+
+  /**
+   *
+   * @param {*} varGroups
+   * @param {*} rewriterConfig
+   */
+  handleVarGroups_(varGroups, rewriterConfig) {
+    const allPromises = [];
+    // Merge varGroups to see what has been enabled.
+    deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
+    // Create object that will later hold all the resolved variables.
+    rewriterConfig['vars'] = {};
+
+    Object.keys(varGroups).forEach(groupName => {
+      const group = varGroups[groupName];
+      if (!group['enabled']) {
+        // Pubs must explicity enable any var groups.
+        return;
+      }
+
+      const varNames = [];
+      const valuePromises = [];
+
+      Object.keys(group).forEach(varName => {
+        if (varName === 'enabled') {
+          return;
+        }
+        varNames.push(varName);
+        const expanded = Services.urlReplacementsForDoc(this.element_)
+            .expandStringAsync(group[varName]);
+        valuePromises.push(expanded);
+      });
+
+      const groupPromise = Promise.all(valuePromises).then(resolvedValues => {
+        varNames.forEach((name, i) =>
+          rewriterConfig['vars'][name] = resolvedValues[i]);
+      });
+
+      allPromises.push(groupPromise);
+    });
+
+    return Promise.all(allPromises).then(() => {
+      // Don't send varGroups in payload to configRewriter endpoint.
+      delete rewriterConfig['varGroups'];
     });
   }
 

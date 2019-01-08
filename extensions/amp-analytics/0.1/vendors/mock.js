@@ -16,7 +16,7 @@
 
 export const MOCK_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'host': 'https://amp.dev',
+    'host': 'https://www.amp.dev',
     'base': '${host}/analytics',
     'pageview': '${base}/pageview',
   },
@@ -27,7 +27,7 @@ export const MOCK_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
   'configRewriter': {
-    'url': 'https://www.amp.dev',
+    'url': 'https://www.amp.dev/rewriter',
     'varGroups': {
       'feature1': {
         'dr': 'DOCUMENT_REFERRER',
