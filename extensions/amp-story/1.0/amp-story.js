@@ -2175,7 +2175,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
-    pageToBeInsertedEl.setAttribute(Attributes.advanceAttr, nextPageId);
+    pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
     pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
     nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
 
