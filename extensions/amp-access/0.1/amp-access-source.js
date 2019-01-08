@@ -24,10 +24,9 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  getSourceOrigin,
   parseQueryString,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr} from '../../../src/json';
@@ -106,14 +105,8 @@ export class AccessSource {
     /** @const {!AccessTypeAdapterDef} */
     this.adapter_ = this.createAdapter_(configJson);
 
-    /** @const @private {!string} */
-    this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
-
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(accessElement);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
@@ -260,7 +253,7 @@ export class AccessSource {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      user().assert(false,
+      userAssert(false,
           '"login" must be either a single URL or a map of URLs');
     }
 
@@ -423,10 +416,10 @@ export class AccessSource {
    * @return {!Promise}
    */
   loginWithType(type) {
-    user().assert(this.loginConfig_[type],
+    userAssert(this.loginConfig_[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = user().assert(this.loginUrlMap_[type],
+    const loginUrl = userAssert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
     return this.login_(loginUrl, type);
   }

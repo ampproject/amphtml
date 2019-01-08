@@ -25,8 +25,12 @@ const path = require('path');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
+const {
+  gitBranchName,
+  gitCommitterEmail,
+  gitMergeBaseTravisMaster,
+} = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -79,8 +83,7 @@ function setPercyBranch() {
   if (!process.env['PERCY_BRANCH'] &&
       (!argv.master || !process.env['TRAVIS'])) {
     const userName = gitCommitterEmail();
-    const branchName = process.env['TRAVIS'] ?
-      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
+    const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }
@@ -97,7 +100,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(/* fromMerge */ true);
+    process.env['PERCY_TARGET_COMMIT'] = gitMergeBaseTravisMaster();
   }
 }
 
@@ -630,7 +633,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
+      {'stdio': 'ignore'});
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;

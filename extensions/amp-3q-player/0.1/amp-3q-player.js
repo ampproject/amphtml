@@ -22,7 +22,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -73,7 +73,7 @@ class Amp3QPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element: el} = this;
 
-    this.dataId = user().assert(
+    this.dataId = userAssert(
         el.getAttribute('data-id'),
         'The data-id attribute is required for <amp-3q-player> %s',
         el);
@@ -283,6 +283,11 @@ class Amp3QPlayer extends AMP.BaseElement {
   getPlayedRanges() {
     // Not supported.
     return [];
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 

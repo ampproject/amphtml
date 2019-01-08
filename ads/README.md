@@ -343,7 +343,7 @@ gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-int
 
 ```
 
-If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
+If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/unit/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
@@ -351,6 +351,7 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
+- It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
   1. Using a different email address in the git commit.

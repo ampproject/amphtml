@@ -15,7 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';
@@ -35,11 +35,9 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
+    userAssert(
         this.element.getAttribute('value'),
-        `The value attribute is required for <${TAG}> %s`,
-        this.element
-    );
+        'The value attribute is required for <%s>', TAG, this.element);
   }
 
   /** @override */

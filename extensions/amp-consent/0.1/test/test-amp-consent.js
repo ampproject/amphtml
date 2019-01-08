@@ -46,7 +46,6 @@ describes.realWin('amp-consent', {
     doc = env.win.document;
     ampdoc = env.ampdoc;
     win = env.win;
-    toggleExperiment(win, 'multi-consent', true);
     toggleExperiment(win, 'amp-consent-v2', true);
 
 
@@ -115,11 +114,9 @@ describes.realWin('amp-consent', {
         ampConsent.buildCallback();
 
         expect(ampConsent.postPromptUI_).to.not.be.null;
-
+        expect(ampConsent.consentId_).to.equal('test');
         expect(ampConsent.consentConfig_).to.deep.equal(dict({
-          'test': {
-            'checkConsentHref': '/override',
-          },
+          'checkConsentHref': '/override',
         }));
 
         expect(Object.keys(ampConsent.policyConfig_)).to.have.length(4);
@@ -181,8 +178,9 @@ describes.realWin('amp-consent', {
 
     it('read promptIfUnknown from server response', function* () {
       ampConsent.buildCallback();
-      yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
+      return ampConsent.getConsentRequiredPromise_().then(isRequired => {
+        expect(isRequired).to.be.true;
+      });
     });
   });
 
@@ -206,8 +204,9 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown', 'testGroup'];
       ampConsent.buildCallback();
-      yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
+      return ampConsent.getConsentRequiredPromise_().then(isRequired => {
+        expect(isRequired).to.be.true;
+      });
     });
 
     it('not in geo group', function* () {
@@ -215,8 +214,9 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown'];
       ampConsent.buildCallback();
-      yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(false);
+      return ampConsent.getConsentRequiredPromise_().then(isRequired => {
+        expect(isRequired).to.be.false;
+      });
     });
 
     it('geo override promptIfUnknown', function* () {
@@ -232,8 +232,9 @@ describes.realWin('amp-consent', {
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
-      yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(false);
+      return ampConsent.getConsentRequiredPromise_().then(isRequired => {
+        expect(isRequired).to.be.false;
+      });
     });
   });
 
@@ -262,7 +263,7 @@ describes.realWin('amp-consent', {
       iframe = doc.createElement('iframe');
       ampIframe.appendChild(iframe);
       ampConsent.element.appendChild(ampIframe);
-      ampConsent.currentDisplayInstance_ = 'ABC';
+      ampConsent.isPromptUIOn_ = true;
       event = new Event('message');
     });
 
@@ -270,10 +271,38 @@ describes.realWin('amp-consent', {
       event.data = {
         'type': 'consent-response',
         'action': 'accept',
+        'info': 'accept-string',
       };
       event.source = iframe.contentWindow;
       win.dispatchEvent(event);
-      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT,
+          'accept-string');
+    });
+
+    it('ignore info when prompt UI is not displayed', () => {
+      ampConsent.isPromptUIOn_ = false;
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+        'info': 'accept-string',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.not.be.called;
+    });
+
+    it('ignore info w/o amp-consent-v2 flag', () => {
+      // TODO(@zhouyx): Remove with amp-consent-v2 flag
+      toggleExperiment(win, 'amp-consent-v2', false);
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+        'info': 'accept-string',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT,
+          undefined);
     });
 
     it('ignore msg from incorrect source', () => {
@@ -294,18 +323,11 @@ describes.realWin('amp-consent', {
     let updateConsentInstanceStateSpy;
     let consentElement;
     let postPromptUI;
+
     beforeEach(() => {
       defaultConfig = dict({
         'consents': {
           'ABC': {
-            'checkConsentHref': 'https://response1',
-            'promptUI': '123',
-          },
-          'DEF': {
-            'checkConsentHref': 'https://response1',
-            'promptUI': '123',
-          },
-          'GH': {
             'checkConsentHref': 'https://response1',
             'promptUI': '123',
           },
@@ -324,31 +346,28 @@ describes.realWin('amp-consent', {
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
         fn();
       });
+      sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
+        fn();
+      });
     });
 
-    it('update current displaying consent', function* () {
+    it('update current displaying status', function* () {
       ampConsent.buildCallback();
       yield macroTask();
       updateConsentInstanceStateSpy =
           sandbox.spy(ampConsent.consentStateManager_,
               'updateConsentInstanceState');
       yield macroTask();
-      yield macroTask();
+      expect(ampConsent.isPromptUIOn_).to.be.true;
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          'ABC', CONSENT_ITEM_STATE.ACCEPTED);
+          CONSENT_ITEM_STATE.ACCEPTED);
       yield macroTask();
-      ampConsent.handleAction_(ACTION_TYPE.REJECT);
-      expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          'DEF', CONSENT_ITEM_STATE.REJECTED);
-      yield macroTask();
-      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-      expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          'GH', CONSENT_ITEM_STATE.DISMISSED);
+      expect(ampConsent.isPromptUIOn_).to.be.false;
     });
 
-    it('ignore when no consent is displaying', function* () {
+    it('ignore action when no consent prompt is displaying', function* () {
       ampConsent.buildCallback();
       yield macroTask();
       updateConsentInstanceStateSpy =
@@ -356,12 +375,11 @@ describes.realWin('amp-consent', {
               'updateConsentInstanceState');
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-      yield macroTask();
-      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-      yield macroTask();
-      expect(updateConsentInstanceStateSpy).to.be.calledThrice;
+      expect(updateConsentInstanceStateSpy).to.be.calledOnce;
       updateConsentInstanceStateSpy.resetHistory();
+      expect(ampConsent.isPromptUIOn_).to.be.false;
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      yield macroTask();
       expect(updateConsentInstanceStateSpy).to.not.be.called;
     });
 
@@ -369,42 +387,53 @@ describes.realWin('amp-consent', {
       it('should check for pending consent UI', function* () {
         ampConsent.buildCallback();
         yield macroTask();
-        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
-        ampConsent.scheduleDisplay_('ABC');
-        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
+        ampConsent.scheduleDisplay_();
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
         ampConsent.hide_();
         yield macroTask();
-        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
-        ampConsent.scheduleDisplay_('GH');
-        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
-        ampConsent.scheduleDisplay_('ABC');
-        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(0);
+        ampConsent.scheduleDisplay_();
+        ampConsent.scheduleDisplay_();
+        ampConsent.scheduleDisplay_();
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
       });
     });
 
     describe('postPromptUI', () => {
       let postPromptUI;
+
       beforeEach(() => {
         postPromptUI = doc.getElementById('test');
       });
+
       it('handle postPromptUI', function* () {
         storageValue = {
           'amp-consent:ABC': true,
-          'amp-consent:DEF': true,
-          'amp-consent:GH': true,
         };
+
+        // Build the amp consent, and check that everything is
+        // initialized correctly
         ampConsent.buildCallback();
         ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(ampConsent.element).to.have.display('none');
         expect(postPromptUI).to.have.display('none');
-        yield macroTask();
 
+        // Wait for all modifications to the element to be applied.
+        // Then make more assertions.
+        yield macroTask();
         expect(ampConsent.element).to.not.have.display('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
         expect(postPromptUI).to.not.have.display('none');
-        ampConsent.scheduleDisplay_('ABC');
+
+        // Schedule the display of the element
+        ampConsent.scheduleDisplay_();
+
+        // Wait for the element to be displayed,
+        // And the postPrompt to be hidden.
+        yield macroTask();
         expect(postPromptUI).to.have.display('none');
       });
 
@@ -431,8 +460,9 @@ describes.realWin('amp-consent', {
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(postPromptUI).to.not.be.null;
           yield macroTask();
+
+          expect(postPromptUI).to.not.be.null;
           expect(postPromptUI).to.have.display('none');
         });
 
@@ -442,8 +472,9 @@ describes.realWin('amp-consent', {
           };
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(postPromptUI).to.not.be.null;
           yield macroTask();
+
+          expect(postPromptUI).to.not.be.null;
           expect(postPromptUI).to.not.have.display('none');
         });
       });

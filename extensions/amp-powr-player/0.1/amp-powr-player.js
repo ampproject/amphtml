@@ -25,7 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -110,10 +110,9 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const ampdoc = this.getAmpDoc();
-    const deferred = new Deferred();
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
   }
@@ -232,12 +231,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-    const account = user().assert(
+    const account = userAssert(
         el.getAttribute('data-account'),
         'The data-account attribute is required for <amp-powr-player> %s',
         el);
 
-    this.playerId_ = user().assert(
+    this.playerId_ = userAssert(
         el.getAttribute('data-player'),
         'The data-player attribute is required for <amp-powr-player> %s',
         el);
@@ -245,7 +244,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     const video = el.getAttribute('data-video');
     const terms = el.getAttribute('data-terms');
 
-    user().assert(
+    userAssert(
         video || terms,
         'The data-video or data-terms attribute is required for ' +
         '<amp-powr-player> %s',
@@ -426,8 +425,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
     return [];
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-AMP.extension('amp-powr-player', '0.1', AMP => {
-  AMP.registerElement('amp-powr-player', AmpPowrPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpPowrPlayer);
 });

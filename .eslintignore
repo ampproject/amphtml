@@ -17,6 +17,7 @@ validator/node_modules
 validator/nodejs/node_modules
 validator/webui/node_modules
 eslint-rules
+babel.config.js
 karma.conf.js
 testing/local-amp-chrome-extension
 extensions/amp-a4a/0.1/test/testdata

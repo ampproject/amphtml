@@ -36,7 +36,7 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
@@ -113,6 +113,8 @@ export class GlobalVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
+    const {win} = this.ampdoc;
+
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
@@ -126,17 +128,19 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
+    this.set('CANONICAL_URL', () => this.getDocInfo_().canonicalUrl);
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
+    this.set('CANONICAL_HOST', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).host);
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
-        'hostname'));
+    this.set('CANONICAL_HOSTNAME', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).hostname);
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
+    this.set('CANONICAL_PATH', () =>
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).pathname);
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -154,7 +158,7 @@ export class GlobalVariableSource extends VariableSource {
             const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
                 .hostname;
             const currentHostname =
-                WindowInterface.getHostname(this.ampdoc.win);
+                WindowInterface.getHostname(win);
             return referrerHostname === currentHostname ? null : referrer;
           });
     }));
@@ -163,32 +167,31 @@ export class GlobalVariableSource extends VariableSource {
     this.set('TITLE', () => {
       // The environment may override the title and set originalTitle. Prefer
       // that if available.
-      return this.ampdoc.win.document['originalTitle'] ||
-          this.ampdoc.win.document.title;
+      const doc = win.document;
+      return doc['originalTitle'] || doc.title;
     });
 
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
       return removeFragment(
-          this.addReplaceParamsIfMissing_(
-              this.ampdoc.win.location.href));
+          this.addReplaceParamsIfMissing_(win.location.href));
     });
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
+      const url = parseUrlDeprecated(win.location.href);
       return url && url.hostname;
     });
 
     // Returns the Source URL for this AMP document.
     const expandSourceUrl = () => {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      const docInfo = this.getDocInfo_();
       return removeFragment(this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
     };
     this.setBoth('SOURCE_URL',
@@ -196,18 +199,21 @@ export class GlobalVariableSource extends VariableSource {
         () => getTrackImpressionPromise().then(() => expandSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
+    this.set('SOURCE_HOST', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).host);
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
+    this.set('SOURCE_HOSTNAME', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).hostname);
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
+    this.set('SOURCE_PATH', () =>
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).pathname);
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
+    this.set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -294,7 +300,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
-        user().assert(variant !== undefined,
+        userAssert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         // When no variant assigned, use reserved keyword 'none'.
@@ -319,7 +325,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
       return this.getGeo_(geos => {
         if (geoType) {
-          user().assert(geoType === 'ISOCountry',
+          userAssert(geoType === 'ISOCountry',
               'The value passed to AMP_GEO() is not valid name:' + geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
@@ -356,8 +362,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the IANA timezone code
     this.set('TIMEZONE_CODE', () => {
       let tzCode;
-      if ('Intl' in this.ampdoc.win &&
-        'DateTimeFormat' in this.ampdoc.win.Intl) {
+      if ('Intl' in win && 'DateTimeFormat' in win.Intl) {
         // It could be undefined (i.e. IE11)
         tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
       }
@@ -383,8 +388,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the viewport width.
     this.set('VIEWPORT_WIDTH', () => viewport.getWidth());
 
-
-    const {screen} = this.ampdoc.win;
+    const {screen} = win;
     // Returns screen.width.
     this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
@@ -402,21 +406,20 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns document characterset.
     this.set('DOCUMENT_CHARSET', () => {
-      const doc = this.ampdoc.win.document;
+      const doc = win.document;
       return doc.characterSet || doc.charset;
     });
 
     // Returns the browser language.
     this.set('BROWSER_LANGUAGE', () => {
-      const nav = this.ampdoc.win.navigator;
+      const nav = win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
     });
 
     // Returns the user agent.
     this.set('USER_AGENT', () => {
-      const nav = this.ampdoc.win.navigator;
-      return nav.userAgent;
+      return win.navigator.userAgent;
     });
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
@@ -462,7 +465,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Access: data from the authorization response.
     this.setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
-      user().assert(field,
+      userAssert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
@@ -494,28 +497,28 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.set('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataSync(
-          this.ampdoc.win,
+          win,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     });
     this.setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataAsync(
-          this.ampdoc.win,
+          win,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     });
 
     this.set('NAV_TYPE', () => {
-      return getNavigationData(this.ampdoc.win, 'type');
+      return getNavigationData(win, 'type');
     });
 
     this.set('NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.ampdoc.win, 'redirectCount');
+      return getNavigationData(win, 'redirectCount');
     });
 
     // returns the AMP version number
@@ -543,21 +546,23 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint());
+        Services.performanceFor(win).getFirstContentfulPaint());
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
       return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getFirstViewportReady());
+        Services.performanceFor(win).getFirstViewportReady());
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
       return tryResolve(() =>
-        Services.performanceFor(this.ampdoc.win).getMakeBodyVisible());
+        Services.performanceFor(win).getMakeBodyVisible());
     });
 
     this.setAsync('AMP_STATE', key => {
-      return Services.bindForDocOrNull(this.ampdoc).then(bind => {
+      // This is safe since AMP_STATE is not an A4A whitelisted variable.
+      const {documentElement} = win.document;
+      return Services.bindForDocOrNull(documentElement).then(bind => {
         if (!bind) {
           return '';
         }
@@ -575,7 +580,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
-    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    /** @type {!Object} */ (this.getDocInfo_());
     if (!replaceParams) {
       return orig;
     }
@@ -583,18 +588,11 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Resolves the value via one of document info's urls.
-   * @param {string} field A field on the docInfo
-   * @param {string=} opt_urlProp A subproperty of the field
-   * @return {T}
-   * @template T
+   * Return the document info for the current ampdoc.
+   * @return {./document-info-impl.DocumentInfoDef}
    */
-  getDocInfoUrl_(field, opt_urlProp) {
-    return () => {
-      const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      const value = docInfo[field];
-      return opt_urlProp ? parseUrlDeprecated(value)[opt_urlProp] : value;
-    };
+  getDocInfo_() {
+    return Services.documentInfoForDoc(this.ampdoc);
   }
 
   /**
@@ -633,14 +631,14 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getQueryParamData_(param, defaultValue) {
-    user().assert(param,
+    userAssert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
     const key = user().assertString(param);
-    const {replaceParams} = Services.documentInfoForDoc(this.ampdoc);
+    const {replaceParams} = this.getDocInfo_();
     if (typeof params[key] !== 'undefined') {
       return params[key];
     }
@@ -663,7 +661,7 @@ export class GlobalVariableSource extends VariableSource {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
     return this.variants_.then(variants => {
-      user().assert(variants,
+      userAssert(variants,
           'To use variable %s, amp-experiment should be configured',
           expr);
       return getter(variants);
@@ -681,7 +679,7 @@ export class GlobalVariableSource extends VariableSource {
   getGeo_(getter, expr) {
     return Services.geoForDocOrNull(this.ampdoc)
         .then(geo => {
-          user().assert(geo,
+          userAssert(geo,
               'To use variable %s, amp-geo should be configured',
               expr);
           return getter(geo);
@@ -702,7 +700,7 @@ export class GlobalVariableSource extends VariableSource {
           Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
-      user().assert(fragments, 'To use variable %s, ' +
+      userAssert(fragments, 'To use variable %s, ' +
           'amp-share-tracking should be configured',
       expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
@@ -720,7 +718,7 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
       return service.then(storyVariables => {
-        user().assert(storyVariables,
+        userAssert(storyVariables,
             'To use variable %s amp-story should be configured', name);
         return storyVariables[property];
       });
@@ -740,7 +738,7 @@ export class GlobalVariableSource extends VariableSource {
         const service =
             Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
         return service.then(viewerIntegrationVariables => {
-          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+          userAssert(viewerIntegrationVariables, 'To use variable %s ' +
               'amp-viewer-integration must be installed', name);
           return viewerIntegrationVariables[property](param, defaultValue);
         });
@@ -780,8 +778,13 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-      new Expander(this.variableSource_, opt_bindings, opt_collectVars,
-          /* opt_sync */ true, opt_whiteList)./*OK*/expand(source));
+      new Expander(
+          this.variableSource_,
+          opt_bindings,
+          opt_collectVars,
+          /* opt_sync */ true,
+          opt_whiteList,
+          /* opt_noEncode */ true)./*OK*/expand(source));
   }
 
   /**
@@ -870,7 +873,7 @@ export class UrlReplacements {
    * @return {string|!Promise<string>}
    */
   expandInputValue_(element, opt_sync) {
-    dev().assert(element.tagName == 'INPUT' &&
+    devAssert(element.tagName == 'INPUT' &&
         (element.getAttribute('type') || '').toLowerCase() == 'hidden',
     'Input value expansion only works on hidden input fields: %s', element);
 
@@ -957,7 +960,7 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element, defaultUrlParams) {
-    dev().assert(element.tagName == 'A');
+    devAssert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
@@ -1053,21 +1056,13 @@ export class UrlReplacements {
    */
   collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-    const vars = Object.create(null);
-    this.expandStringSync(url, /* opt_bindings */ undefined, vars);
-    const varNames = Object.keys(vars)
-        // Strip arguments from collect_vars to match whitelist api.
-        .map(key => {
-          const argsIndex = key.indexOf('(');
-          return argsIndex === -1 ? key : key.substring(0, argsIndex);
-        });
-
+    const macroNames = new Expander(this.variableSource_).getMacroNames(url);
     const whitelist = this.getWhitelistForElement_(element);
     if (whitelist) {
-      return varNames.filter(v => !whitelist[v]);
+      return macroNames.filter(v => !whitelist[v]);
     } else {
       // All vars are unwhitelisted if the element has no whitelist.
-      return varNames;
+      return macroNames;
     }
   }
 
@@ -1088,7 +1083,7 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user().assert(isProtocolValid(replacement),
+    userAssert(isProtocolValid(replacement),
         'The replacement url has invalid protocol: %s', replacement);
 
     return replacement;

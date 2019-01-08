@@ -155,7 +155,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onLinkComplete_() {
-    this.serviceAdapter_.reAuthorizePlatform(this);
+    this.serviceAdapter_.resetPlatforms();
   }
 
   /** @private */
@@ -182,7 +182,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onSubscribeResponse_(response) {
     response.complete().then(() => {
-      this.serviceAdapter_.reAuthorizePlatform(this);
+      this.serviceAdapter_.resetPlatforms();
     });
   }
 
@@ -218,12 +218,13 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  activate(entitlement) {
+  activate(entitlement, grantEntitlement) {
+    const best = grantEntitlement || entitlement;
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!entitlement.granted) {
+    if (!best.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!entitlement.isSubscriber()) {
+    } else if (!best.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }

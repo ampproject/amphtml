@@ -1,0 +1,140 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+
+    article {
+      display: block;
+      margin: 8px;
+    }
+
+    [load-more-button],
+    [load-more-failed],
+    [load-more-loading],
+    [load-more-end] {
+      background: gray;
+      color: #fff;
+      cursor: pointer;
+      z-index: 2;
+      padding: 16px;
+    }
+
+    .pin-container {
+      border-radius: 8px;
+      background-color: #fefefe;
+      padding: 8px;
+      margin: 5px;
+    }
+
+    .pin-container:hover {
+       background-color: #eeeeee;
+    }
+
+    amp-img {
+      border-radius: 8px;
+    }
+
+    .title {
+      font-family: Roboto, Sans;
+      margin: 2px;
+    }
+
+    .description {
+      max-width: 160px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    div[role="list"] {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      align-content: flex-start;
+    }
+
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+</head>
+<body>
+
+
+  <amp-state id="data">
+    <script type="application/json">
+      {
+        "items": 1,
+        "left": 2,
+        "latency": 0,
+        "url": "/infinite-scroll?items=8&left=2"
+      }
+    </script>
+  </amp-state>
+
+<article>
+  <h1>AMP List</h1>
+  <p>Infinite scroll with amp-bind.</p>
+
+  <input type="text" id="items" placeholder="Items per page"
+         on="change:AMP.setState({data: {items: event.value}})">
+  <input type="text" id="left" placeholder="Pages left"
+         on="change:AMP.setState({data: {left: event.value}})">
+  <input type="text" id="latency" placeholder="Latency"
+         on="change:AMP.setState({data: {latency: event.value}})">
+  <button
+          on="tap:list.changeToLayoutContainer(),AMP.setState({data: {url: '/infinite-scroll?items=' + data.items + '&left=' + data.left + '&latency=' + data.latency}})">
+    Go
+  </button>
+
+  <amp-list width="auto" height="200" id="list"
+    layout="fixed-height"
+    src="/infinite-scroll?items=8&left=2"
+    [src]="data.url"
+    load-more
+    reset-on-refresh
+    load-more-bookmark="next">
+    <template type="amp-mustache">
+      <div class="pin-container">
+        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
+        <div class="title">{{title}}</div>
+        <div class="description">
+          At vero eos et accusamus et iusto odio dignissimos ducimus...
+        </div>
+      </div>
+    </template>
+    <div overflow>
+      OVERFLOW
+    </div>
+    <div load-more-button>
+      SEE MORE
+    </div>
+    <div load-more-loading>
+      LOADING
+    </div>
+    <div load-more-failed>
+      LOAD FAILED
+    </div>
+    <div load-more-end>
+      LOAD ENDED
+    </div>
+    <div fallback>
+      FALLBACK
+    </div>
+  </amp-list>
+
+</article>
+</body>
+</html>

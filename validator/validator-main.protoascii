@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 772
+spec_file_revision: 792
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -259,6 +259,7 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attrs: { name: "async" }
   attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
@@ -866,6 +867,28 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
+# AMP metadata, name=amp-cta-landing-page-type
+# Specifies the Single Page Story Ad landing page type
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-landing-page-type"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "amp"
+    value_casei: "nonamp"
+    value_casei: "story"
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-landing-page-type"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet for AMP
@@ -873,6 +896,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: EXPERIMENTAL
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1534,6 +1558,7 @@ tags: {
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
+      protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
@@ -1548,6 +1573,7 @@ tags: {
       protocol: "viber"
       protocol: "webcal"
       protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "wh"
       protocol: "whatsapp"
       allow_empty: true
     }
@@ -4442,10 +4468,36 @@ tags: {
   tag_name: "LEGEND"
 }
 
+# 4.11 (HTML5.3) Interactive elements
+# 4.11.1 (HTML5.3) The details element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "DETAILS"
+  attrs: {
+    name: "open"
+    value: ""
+  }
+  attrs: { name: "[open]" }
+}
+# 4.11.2 (HTML5.3) The summary element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "SUMMARY"
+  mandatory_parent: "DETAILS"
+}
+
 # 4.11 Scripting
 # 4.11.1 The script element
-# Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed.
+# Only the amphtml script, custom extensions and the LD/JSON or TEXT/PLAIN
+# description are allowed.
+# Note that the type TEXT/PLAIN description is define in
+# validator-amp-mustache.protoascii.
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL
@@ -6120,4 +6172,3 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
 }
-

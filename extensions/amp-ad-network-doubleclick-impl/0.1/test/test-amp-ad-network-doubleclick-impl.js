@@ -383,7 +383,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             exp ? '' : 'immediate');
         expect(impl.ampAnalyticsElement_).to.be.ok;
         // Exact format of amp-analytics element covered in
-        // test/functional/test-analytics.js.
+        // test/unit/test-analytics.js.
         // Just ensure extensions is loaded, and analytics element appended.
       });
     });
@@ -411,6 +411,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           {
             getUpgradeDelayMs: () => 1,
           });
+
+      // Make sure the ad iframe (FIE) has a local URL replacements service.
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(a).returns(urlReplacements);
+
       impl.buildCallback();
       impl.size_ = {width: 123, height: 456};
       impl.onCreativeRender({customElementExtensions: []});
@@ -1095,20 +1101,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
-    });
-
-    it('should force layout to `fixed` if `responsive`', () => {
-      impl.element.setAttribute('layout', 'responsive');
-      impl.element.setAttribute('data-multi-size', '320x50');
-      impl.populateAdUrlState();
-      expect(impl.element.getAttribute('layout')).to.equal('fixed');
-    });
-
-    it('should not change layout if not `responsive`', () => {
-      impl.element.setAttribute('layout', 'not-responsive');
-      impl.element.setAttribute('data-multi-size', '320x50');
-      impl.populateAdUrlState();
-      expect(impl.element.getAttribute('layout')).to.equal('not-responsive');
     });
   });
 

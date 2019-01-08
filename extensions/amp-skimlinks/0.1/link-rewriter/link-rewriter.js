@@ -19,7 +19,7 @@ import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
 
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
@@ -157,8 +157,12 @@ export class LinkRewriter {
           resolve();
         });
       });
-
-      chunk(this.rootNode_, task, ChunkPriority.LOW);
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+        (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+          ? this.rootNode_.documentElement
+          : this.rootNode_
+      );
+      chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }
 
@@ -192,7 +196,7 @@ export class LinkRewriter {
         unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-    user().assert(twoStepsResponse instanceof TwoStepsResponse,
+    userAssert(twoStepsResponse instanceof TwoStepsResponse,
         'Invalid response from provided "resolveUnknownLinks" function.' +
         '"resolveUnknownLinks" should return an instance of TwoStepsResponse');
 

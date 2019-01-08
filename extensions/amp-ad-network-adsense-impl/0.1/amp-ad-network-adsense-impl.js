@@ -24,6 +24,7 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
+  getMatchedContentResponsiveHeight,
 } from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -56,7 +57,7 @@ import {
   setStyle,
   setStyles,
 } from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
@@ -318,7 +319,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
     // But not all tests arrange to call upgradeCallback.
-    // dev().assert(slotId != undefined);
+    // devAssert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
     const slotname = this.element.getAttribute('data-ad-slot');
@@ -467,12 +468,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
-      dev().assert(this.iframe);
+      devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
-      dev().assert(!this.ampAnalyticsElement_);
+      devAssert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
             this.win,
@@ -581,7 +582,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
       case ADSENSE_MCRSPV_TAG:
-        return Math.floor((viewportSize.width * 3.4) + 112);
+        return getMatchedContentResponsiveHeight(viewportSize.width);
       default:
         return 0;
     }

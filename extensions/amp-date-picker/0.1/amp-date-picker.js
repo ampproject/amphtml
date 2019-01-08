@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -92,6 +92,7 @@ const attributesToForward = [
   'month-format',
   'number-of-months',
   'minimum-nights',
+  'maximum-nights',
 ];
 
 /** @enum {string} */
@@ -399,7 +400,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
     if (this.fullscreen_) {
-      user().assert(this.mode_ == DatePickerMode.STATIC,
+      userAssert(this.mode_ == DatePickerMode.STATIC,
           'amp-date-picker mode must be "static" to use fullscreen attribute');
     }
 

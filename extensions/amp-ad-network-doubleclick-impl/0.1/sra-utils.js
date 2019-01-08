@@ -15,7 +15,7 @@
  */
 
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {
   isInManualExperiment,
@@ -37,7 +37,7 @@ export const TFCD = 'tagForChildDirectedTreatment';
 const SRA_JOINERS = [
   combineInventoryUnits, getCookieOptOut, getAdks, getSizes, getTfcd, isAdTest,
   getTargetingAndExclusions, getExperimentIds, getIdentity, getForceSafeframe,
-  getPageOffsets, getContainers];
+  getPageOffsets, getContainers, getIsFluid];
 
 /**
   * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
@@ -85,7 +85,7 @@ export function combineInventoryUnits(impls) {
   let uniqueIuNamesCount = 0;
   const prevIusEncoded = [];
   impls.forEach(instance => {
-    const iu = dev().assert(instance.element.getAttribute('data-slot'));
+    const iu = devAssert(instance.element.getAttribute('data-slot'));
     const componentNames = iu.split('/');
     const encodedNames = [];
     for (let i = 0; i < componentNames.length; i++) {
@@ -127,7 +127,7 @@ export function getCookieOptOut(impls) {
  * @visibleForTesting
  */
 export function getAdks(impls) {
-  return ({'adks': impls.map(impl => dev().assert(impl.adKey)).join()});
+  return ({'adks': impls.map(impl => devAssert(impl.adKey)).join()});
 }
 
 /**
@@ -138,7 +138,7 @@ export function getAdks(impls) {
  */
 export function getSizes(impls) {
   return ({'prev_iu_szs': impls.map(impl =>
-    dev().assert(impl.parameterSize)).join()});
+    devAssert(impl.parameterSize)).join()});
 }
 
 /**
@@ -277,6 +277,26 @@ export function getContainers(impls) {
 }
 
 /**
+ * Combine fluid settings for each block via comma separator.
+ * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
+ * @return {?Object<string,string>}
+ * @visibleForTesting
+ */
+export function getIsFluid(impls) {
+  let hasFluid = false;
+  const result = [];
+  impls.forEach(impl => {
+    if (impl.isFluidRequest()) {
+      hasFluid = true;
+      result.push('height');
+    } else {
+      result.push('0');
+    }
+  });
+  return hasFluid ? {'fluid': result.join()} : null;
+}
+
+/**
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
  * @return {?string}
@@ -360,7 +380,7 @@ export function sraBlockCallbackHandler(
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
   // response is streaming back to the client.
-  dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
+  devAssert(sraRequestAdUrlResolvers.shift())(fetchResponse);
   // If done, expect array to be empty (ensures ad response
   // included data for all slots).
   if (done && sraRequestAdUrlResolvers.length) {

@@ -16,7 +16,7 @@
 
 import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -633,7 +633,7 @@ export function templateContentClone(template) {
 
 /**
  * Iterate over an array-like.
- * Test cases: https://jsbench.github.io/#33a883c12f8c75cd5e62bdf12359b8e0
+ * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
  * @param {!IArrayLike<T>} iterable
  * @param {function(T, number)} cb
  * @template T
@@ -733,7 +733,7 @@ export function escapeCssSelectorIdent(ident) {
 export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
   // Ensure it doesn't close the nth-child psuedo class.
-  dev().assert(escaped.indexOf(')') === -1);
+  devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }
 
@@ -800,7 +800,7 @@ export function isAmpElement(element) {
  * @return {!Promise<!Element>}
  */
 export function whenUpgradedToCustomElement(element) {
-  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(element);

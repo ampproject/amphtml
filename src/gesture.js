@@ -16,7 +16,7 @@
 
 import {Observable} from './observable';
 import {Pass} from './pass';
-import {dev} from './log';
+import {devAssert} from './log';
 import {findIndex} from './utils/array';
 import {toWin} from './types';
 
@@ -405,7 +405,7 @@ export class Gestures {
    * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
-    dev().assert(this.eventing_ == recognizer,
+    devAssert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
