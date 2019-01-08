@@ -144,6 +144,7 @@ process.env.SERVE_MODE;
 window.IS_AMP_ALT;
 
 // Exposed to ads.
+// Preserve these filedNames so they can be accessed by 3p code.
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
@@ -153,6 +154,24 @@ window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
+window.context.ampcontextVersion;
+window.context.ampcontextFilepath
+window.context.canary;
+window.context.canonicalUrl;
+window.context.consentSharedData;
+window.context.container;
+window.context.domFingerprint;
+window.context.hidden;
+window.context.initialConsentState;
+window.context.initialConsentValue;
+window.context.location;
+window.context.mode;
+window.context.pageViewId;
+window.context.referrer;
+window.context.sourceUrl;
+window.context.startTime;
+window.context.tagName;
+
 
 // Service Holder
 window.services;

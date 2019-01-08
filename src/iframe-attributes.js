@@ -55,6 +55,15 @@ export function getContextMetadata(
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
   const layoutRect = element.getPageLayoutBox();
+
+  // Use JsonObject to preserve field names so that ampContext can access
+  // values with name
+  // ampcontext.js and this file are compiled in different compilation unit
+
+  // Note: Field names can by perserved by using JsonObject, or by adding
+  // perserved name to extern. We are doing both right now.
+  // Please also add new introduced variable
+  // name to the extern list.
   attributes['_context'] = dict({
     'ampcontextVersion': '$internalRuntimeVersion$',
     'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
