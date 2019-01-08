@@ -78,8 +78,8 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             'checkConsentHref': '/override',
           },
         },
-        'setting': {
-          'testSetting': 'ABC',
+        'clientConfig': {
+          'test': 'ABC',
         },
         'policy': {
           'default': {
@@ -97,8 +97,8 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             '/test/manual/diy-consent.html',
         'promptIfUnknownForGeoGroup': 'eea',
         'postPromptUI': 'test',
-        'setting': {
-          'testSetting': 'ABC',
+        'clientConfig': {
+          'test': 'ABC',
         },
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({

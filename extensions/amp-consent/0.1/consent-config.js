@@ -60,8 +60,8 @@ export class ConsentConfig {
       config['postPromptUI'] = this.getConfig_()['postPromptUI'];
     }
 
-    if (this.getConfig_()['setting']) {
-      config['setting'] = this.getConfig_()['setting'];
+    if (this.getConfig_()['clientConfig']) {
+      config['clientConfig'] = this.getConfig_()['clientConfig'];
     }
 
     return config;

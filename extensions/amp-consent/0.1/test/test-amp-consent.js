@@ -104,7 +104,7 @@ describes.realWin('amp-consent', {
               'checkConsentHref': '/override',
             },
           },
-          'setting': {
+          'clientConfig': {
             'test': 'ABC',
           },
           'postPromptUI': 'test',
@@ -122,7 +122,7 @@ describes.realWin('amp-consent', {
           'storageKey': 'test',
           'checkConsentHref': '/override',
           'postPromptUI': 'test',
-          'setting': {
+          'clientConfig': {
             'test': 'ABC',
           },
         }));

@@ -229,7 +229,7 @@ describes.realWin('consent-ui', {
     it('should pass the info to the iframe', function* () {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
-        'setting': {
+        'clientConfig': {
           'test': 'ABC',
         },
       });
@@ -238,7 +238,7 @@ describes.realWin('consent-ui', {
       yield macroTask();
 
       expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
-        'setting': {
+        'clientConfig': {
           'test': 'ABC',
         },
       }));

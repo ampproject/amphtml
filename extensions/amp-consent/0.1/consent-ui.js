@@ -96,7 +96,7 @@ export class ConsentUI {
     this.iframeReady_ = null;
 
     /** @private {?JsonObject} */
-    this.inlineSetting_ = null;
+    this.clientConfig_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -139,7 +139,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
-      this.inlineSetting_ = config['setting'] || null;
+      this.clientConfig_ = config['clientConfig'] || null;
     }
   }
 
@@ -292,8 +292,8 @@ export class ConsentUI {
    */
   loadIframe_() {
     const info = dict({});
-    if (this.inlineSetting_) {
-      info['setting'] = this.inlineSetting_;
+    if (this.clientConfig_) {
+      info['clientConfig'] = this.clientConfig_;
     }
 
     this.ui_.setAttribute('name', JSON.stringify(info));

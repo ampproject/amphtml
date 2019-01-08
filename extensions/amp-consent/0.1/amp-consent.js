@@ -471,8 +471,8 @@ export class AmpConsent extends AMP.BaseElement {
       const request = /** @type {!JsonObject} */ ({
         'consentInstanceId': this.consentId_,
       });
-      if (this.consentConfig_['setting']) {
-        request['setting'] = this.consentConfig_['setting'];
+      if (this.consentConfig_['clientConfig']) {
+        request['clientConfig'] = this.consentConfig_['clientConfig'];
       }
       const init = {
         credentials: 'include',
