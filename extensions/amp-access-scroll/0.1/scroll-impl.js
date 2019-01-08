@@ -16,17 +16,11 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
-import {PositionObserverFidelity}
-  from '../../../src/service/position-observer/position-observer-worker';
-import {RelativePositions} from '../../../src/layout-rect';
+import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getServiceForDoc} from '../../../src/service';
-import {installPositionObserverServiceForDoc}
-  from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseQueryString} from '../../../src/url';
 
@@ -166,7 +160,13 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               new ScrollElement(this.ampdoc).handleScrollUser(
                   this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
-              new PositionTracker(this.ampdoc, this.accessSource_);
+              if (response.throttles && response.throttles.readDepth) {
+                new ReadDepthTracker(
+                    this.ampdoc,
+                    this.accessSource_,
+                    connectHostname(config)
+                );
+              }
             }
           } else {
             if (
@@ -371,73 +371,4 @@ function addAnalytics(ampdoc, vendorConfig) {
 
   // Append
   ampdoc.getBody().appendChild(analyticsElem);
-}
-
-class PositionTracker {
-  /**
-   * Sets up tracking of paragraphs in document.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
-   */
-  constructor(ampdoc, accessSource) {
-    this.ampdoc_ = ampdoc;
-    this.lastTopSnippet_ = null;
-    this.accessSource_ = accessSource;
-    this.debouncedUpdateLastRead_ = debounce(
-        ampdoc.win,
-        this.updateLastRead.bind(this),
-        1000
-    );
-
-    installPositionObserverServiceForDoc(ampdoc);
-    const positionObserver = getServiceForDoc(ampdoc, 'position-observer');
-
-    const paragraphs = ampdoc.getBody().getElementsByTagName('p');
-    for (let i = 0; i < paragraphs.length; i++) {
-      const p = paragraphs[i];
-      positionObserver.observe(p, PositionObserverFidelity.HIGH, position =>
-        this.checkPosition(p, position)
-      );
-    }
-  }
-
-  /**
-   * Checks position of a paragraph and decides whether to update server.
-   * @param {Element} paragraph
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} position PositionObserver entry
-   */
-  checkPosition(paragraph, position) {
-    // Ignore if position is not above viewport
-    if (position.relativePos !== RelativePositions.TOP) {
-      return;
-    }
-
-    // Update the snippet representing latest paragraph above viewport
-    const prevSnippet = this.lastTopSnippet_;
-    this.lastTopSnippet_ = paragraph./*OK*/innerText.substring(0, 50);
-    if (prevSnippet && prevSnippet !== this.lastTopSnippet_) {
-      // Send update to server if the latest snippet has changed
-      this.debouncedUpdateLastRead_(prevSnippet);
-    }
-  }
-
-  /**
-   * Sends latest read snippet to server.
-   * @param {...*} arg
-   */
-  updateLastRead(arg) {
-    const snippet = arg[0];
-    const hostname = connectHostname(this.accessSource_.getAdapterConfig());
-    this.accessSource_.buildUrl((
-      `${hostname}/amp/updatedepth`
-      + '?rid=READER_ID'
-      + '&cid=CLIENT_ID(scroll1)'
-      + '&c=CANONICAL_URL'
-      + '&o=AMPDOC_URL'
-      + '&rd=' + snippet
-    ), false).then(url => {
-      Services.xhrFor(this.ampdoc_.win)
-          .fetch(url);
-    });
-  }
 }

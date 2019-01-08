@@ -294,7 +294,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       // Please keep list alphabetically sorted.
-      'extensions/amp-access-scroll/0.1/scroll-impl.js',
+      'extensions/amp-access-scroll/0.1/read-depth-tracker.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
@@ -452,7 +452,7 @@ const forbiddenTerms = {
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
-      'extensions/amp-access-scroll/0.1/scroll-impl.js',
+      'extensions/amp-access-scroll/0.1/read-depth-tracker.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
