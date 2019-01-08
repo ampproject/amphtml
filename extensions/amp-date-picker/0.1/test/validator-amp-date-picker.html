@@ -76,9 +76,13 @@
   <amp-date-picker type="range" layout="fixed-height" height="360"
       first-day-of-week="1">
   </amp-date-picker>
-  <!-- Valid: amp-date-picker with src -->
+  <!-- Valid: amp-date-picker with https src -->
   <amp-date-picker layout="fixed-height" height="360"
       src="https://data.com/dates.json?ref=CANONICAL_URL">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with http src -->
+  <amp-date-picker layout="fixed-height" height="360"
+      src="http://data.com/dates.json?ref=CANONICAL_URL">
   </amp-date-picker>
   <!-- Valid: amp-date-picker with date template -->
   <amp-date-picker layout="fixed-height" height="360">
@@ -120,6 +124,12 @@
   </amp-date-picker>
   <!-- Valid: amp-date-picker with max and min binding -->
   <amp-date-picker [min]="min" [max]="max" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with https [src] binding -->
+  <amp-date-picker [src]="'https://data.com/dates.json?ref=CANONICAL_URL'" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with http [src] binding -->
+  <amp-date-picker [src]="'http://data.com/dates.json?ref=CANONICAL_URL'" layout="fixed-height" height="360">
   </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->

@@ -235,6 +235,7 @@ function createElementRules_() {
     'AMP-DATE-PICKER': {
       'max': null,
       'min': null,
+      'src': null,
     },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,

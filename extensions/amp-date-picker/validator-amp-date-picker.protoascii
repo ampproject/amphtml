@@ -167,6 +167,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
+      protocol: "http"
       protocol: "https"
       allow_relative: false
     }
@@ -174,6 +175,7 @@ attr_lists: {
   }
   attrs: { name: "week-day-format" }
   # amp-bind
+  attrs: { name: "[src]" }
   attrs: { name: "[max]" }
   attrs: { name: "[min]" }
 }
