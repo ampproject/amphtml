@@ -34,6 +34,7 @@ import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -1238,5 +1239,28 @@ describes.realWin('amp-story', {
             expect(story.activePage_.element.id).to.equal('page-1');
           });
     });
+  });
+  describe('amp-story branching', () => {
+    it('should navigate to the target page when a goToPage action is executed',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          toggleExperiment(win, 'amp-story-branching', true);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+                expect(story.activePage_.element.id).to.equal('page-2');
+                toggleExperiment(win, 'amp-story-branching', false);
+              });
+        });
   });
 });
