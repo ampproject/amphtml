@@ -311,7 +311,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             exp ? '' : 'immediate');
         expect(impl.ampAnalyticsElement_).to.be.ok;
         // Exact format of amp-analytics element covered in
-        // test/functional/test-analytics.js.
+        // test/unit/test-analytics.js.
         // Just ensure extensions is loaded, and analytics element appended.
       });
     });

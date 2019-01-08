@@ -343,7 +343,7 @@ gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-int
 
 ```
 
-If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
+If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/unit/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
