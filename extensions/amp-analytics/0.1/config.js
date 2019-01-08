@@ -133,7 +133,7 @@ export class AnalyticsConfig {
 
   /**
    * Handles logic if configRewriter is enabled.
-   * @param {*} config
+   * @param {!JsonObject} config
    * @param {string} configRewriterUrl
    */
   handleConfigRewriter_(config, configRewriterUrl) {
@@ -178,16 +178,17 @@ export class AnalyticsConfig {
   }
 
   /**
-   *
-   * @param {*} varGroups
-   * @param {*} rewriterConfig
+   * Check to see which varGroups are enabled, resolve and merge them into
+   * vars object.
+   * @param {!JsonObject} varGroups
+   * @param {!JsonObject} rewriterConfig
    */
   handleVarGroups_(varGroups, rewriterConfig) {
     const allPromises = [];
     // Merge varGroups to see what has been enabled.
     deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
     // Create object that will later hold all the resolved variables.
-    rewriterConfig['vars'] = {};
+    rewriterConfig['vars'] = dict({});
 
     Object.keys(varGroups).forEach(groupName => {
       const group = varGroups[groupName];
