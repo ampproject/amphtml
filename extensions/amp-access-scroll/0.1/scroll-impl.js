@@ -160,7 +160,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               new ScrollElement(this.ampdoc).handleScrollUser(
                   this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
-              if (response.throttles && response.throttles.readDepth) {
+              if (response.features && response.features.readDepth) {
                 new ReadDepthTracker(
                     this.ampdoc,
                     this.accessSource_,
