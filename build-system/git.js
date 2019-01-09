@@ -25,26 +25,16 @@ const {getStdout} = require('./exec');
 const commitLogMaxCount = 100;
 
 /**
- * Returns the merge base of the current branch off of master when running on
- * a local workspace.
- * @return {string}
- */
-exports.gitMergeBaseLocalMaster = function() {
-  return getStdout('git merge-base master HEAD').trim();
-};
-
-/**
  * Returns the merge base of the current branch off of master, regardless of
  * the running environment.
  * @return {string}
  */
 exports.gitMergeBaseMaster = function() {
   if (process.env.TRAVIS) {
-    const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
-    return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`)
-        .trim();
+    return getStdout(
+        `git merge-base origin/master ${process.env.TRAVIS_COMMIT}`).trim();
   }
-  return exports.gitMergeBaseLocalMaster();
+  return gitMergeBaseLocalMaster();
 };
 
 /**
@@ -52,27 +42,27 @@ exports.gitMergeBaseMaster = function() {
  * @return {string}
  */
 exports.gitTravisMasterBaseline = function() {
-  return process.env.TRAVIS_COMMIT_RANGE.split('...')[0];
+  return getStdout('git rev-parse origin/master').trim();
 };
 
 /**
- * Returns the list of files changed on the local branch relative to the branch
- * point off of master, one on each line.
+ * Returns the list of files changed relative to the branch point off of master,
+ * one on each line.
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = exports.gitMergeBaseLocalMaster();
-  return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
+  const masterBaseline = gitMasterBaseline();
+  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
 };
 
 /**
- * Returns the list of files changed on the local branch relative to the branch
- * point off of master, in diffstat format.
+ * Returns the list of files changed relative to the branch point off of master,
+ * in diffstat format.
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = exports.gitMergeBaseLocalMaster();
-  return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
+  const masterBaseline = gitMasterBaseline();
+  return getStdout(`git -c color.ui=always diff --stat ${masterBaseline}`);
 };
 
 /**
@@ -107,7 +97,7 @@ for how to fix this.`;
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = exports.gitMergeBaseLocalMaster();
+  const branchPoint = gitMergeBaseLocalMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
@@ -168,3 +158,23 @@ exports.gitCommitFormattedTime = function() {
 exports.gitStatusPorcelain = function() {
   return getStdout('git status --porcelain').trim();
 };
+
+/**
+ * Returns the merge base of the current branch off of master when running on
+ * a local workspace.
+ * @return {string}
+ */
+function gitMergeBaseLocalMaster() {
+  return getStdout('git merge-base master HEAD').trim();
+}
+
+/**
+ * Returns the master baseline commit, regardless of running environment.
+ * @return {string}
+ */
+function gitMasterBaseline() {
+  if (process.env.TRAVIS) {
+    return exports.gitTravisMasterBaseline();
+  }
+  return gitMergeBaseLocalMaster();
+}
