@@ -1034,7 +1034,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
-   * @param {string} direction
+   * @param {!NavigationDirection} direction
    * @return {!Promise}
    * @private
    */

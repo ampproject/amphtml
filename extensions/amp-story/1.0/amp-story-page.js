@@ -768,7 +768,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * @param {string} targetPageId
-   * @param {NavigationDirection} direction
+   * @param {!NavigationDirection} direction
    * @private
    */
   switchTo_(targetPageId, direction) {
