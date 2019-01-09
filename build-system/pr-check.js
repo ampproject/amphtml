@@ -36,6 +36,7 @@ const {
   gitDiffCommitLog,
   gitDiffNameOnlyMaster,
   gitDiffStatMaster,
+  gitMasterBaseline,
   gitMergeBaseMaster,
 } = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
@@ -97,6 +98,11 @@ function timedExecOrDie(cmd) {
  * Prints a summary of files changed by, and commits included in the PR.
  */
 function printChangeSummary() {
+  console.log(colors.green('master'), 'merge-base:',
+      colors.cyan(gitMergeBaseMaster()));
+  console.log(colors.green('master'), 'baseline:',
+      colors.cyan(gitMasterBaseline()));
+
   const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
