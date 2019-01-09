@@ -24,6 +24,7 @@ import {
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
@@ -33,6 +34,7 @@ import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -355,6 +357,42 @@ describes.realWin('amp-story', {
               '',
           );
         });
+  });
+
+  it('should update bookend status in browser history', () => {
+    const pageCount = 1;
+    createPages(story.element, pageCount, ['last-page']);
+
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+
+          return expect(replaceStateStub).to.have.been.calledWith(
+              {ampStoryBookendActive: true}, '',
+          );
+        });
+  });
+
+
+  it('should not block layoutCallback when bookend xhr fails', () => {
+    createPages(story.element, 1, ['page-1']);
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    const bookendXhr = sandbox
+        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
+        .returns(Promise.reject());
+
+    story.buildCallback();
+
+    return story.layoutCallback().then(() => {
+      expect(bookendXhr).to.have.been.calledOnce;
+    }).catch(error => {
+      expect(error).to.be.undefined;
+    });
   });
 
   it('should NOT update page id in browser history if ad', () => {
@@ -1202,4 +1240,44 @@ describes.realWin('amp-story', {
           });
     });
   });
+  describe('amp-story branching', () => {
+    it('should advanced to specified page with advanced-to attribute', () => {
+      toggleExperiment(win, 'amp-story-branching', true);
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+
+            story.getPageById('cover')
+                .element.setAttribute('advance-to', 'page-3');
+
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            expect(story.activePage_.element.id).to.equal('page-3');
+          });
+    });
+    it('should navigate to the target page when a goToPage action is executed',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          toggleExperiment(win, 'amp-story-branching', true);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+                expect(story.activePage_.element.id).to.equal('page-2');
+                toggleExperiment(win, 'amp-story-branching', false);
+              });
+        });
+  });
 });
+

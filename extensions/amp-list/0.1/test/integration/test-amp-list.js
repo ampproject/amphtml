@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import {BrowserController} from '../../../../../testing/test-helper';
 import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 15000;
 
 describe('amp-list (integration)', function() {
-  this.timeout(TIMEOUT);
-
   const basicBody =
     `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
       <template type="amp-mustache">
@@ -30,15 +29,32 @@ describe('amp-list (integration)', function() {
     '</amp-list>`;
 
   const basicTests = env => {
+
+    let browser;
+    let doc;
+    let win;
+
+    beforeEach(() => {
+      win = env.win;
+      browser = new BrowserController(win);
+      doc = win.document;
+    });
+
+    it('should build', function*() {
+      const list = doc.querySelector('amp-list');
+      expect(list).to.exist;
+      yield browser.waitForElementBuild('amp-list', TIMEOUT);
+      const container = list.querySelector('div[role="list"]');
+      expect(container).to.exist;
+    });
+
     it('should render items', function*() {
-      const list = env.win.document.querySelector('amp-list');
+      const list = doc.querySelector('amp-list');
       expect(list).to.exist;
 
-      let children;
-      yield poll('#list render', () => {
-        children = list.querySelectorAll('div[role=list] > div');
-        return children.length > 0;
-      }, /* onError */ undefined, TIMEOUT);
+      yield browser.waitForElementLayout('amp-list', TIMEOUT);
+
+      const children = list.querySelectorAll('div[role=list] > div');
 
       expect(children.length).to.equal(3);
       expect(children[0].textContent.trim()).to.equal('apple : 47 @ 0.33');
@@ -68,19 +84,23 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
-    let win, doc;
+    let browser;
+    let doc;
+    let win;
 
     beforeEach(() => {
       win = env.win;
+      browser = new BrowserController(win);
       doc = win.document;
     });
 
     it('should change to layout container as action', function*() {
       expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
-      const button = doc.querySelector('button');
       const list = doc.querySelector('amp-list');
-      button.click();
+
+      yield browser.waitForElementLayout('amp-list', TIMEOUT);
+      browser.click('button');
 
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
@@ -91,9 +111,7 @@ describe('amp-list (integration)', function() {
     });
   });
 
-  // TODO(cathyxz, #19647): Fix test on Chrome 71. Might be because
-  // amp-bind isn't ready by the time the button is clicked.
-  describes.integration.skip('[is-layout-container]', {
+  describes.integration('[is-layout-container]', {
     body: `
     <amp-state id="state">
       <script type="application/json">
@@ -109,19 +127,23 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
-    let win, doc;
+    let browser;
+    let doc;
+    let win;
 
     beforeEach(() => {
       win = env.win;
+      browser = new BrowserController(win);
       doc = win.document;
     });
 
     it('should change to layout container as on bind', function*() {
       expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
-      const button = doc.querySelector('button');
       const list = doc.querySelector('amp-list');
-      button.click();
+
+      yield browser.waitForElementLayout('amp-list', TIMEOUT);
+      browser.click('button');
 
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');

@@ -20,6 +20,7 @@ import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
   insertAfterOrAtStart,
@@ -98,6 +99,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {?JsonObject} */
+    this.clientConfig_ = null;
+
     /** @private {?Element} */
     this.placeholder_ = null;
 
@@ -139,6 +143,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
+      this.clientConfig_ = config['clientConfig'] || null;
     }
 
     this.overlayEnabled_ = !!config['overlay'];
@@ -230,8 +235,14 @@ export class ConsentUI {
 
       this.enableScroll_();
 
+      // NOTE (torch2424): This is very sensitive. Fixed layer applies
+      // a `top: calc(0px)` in order to fix some bugs, thus
+      // We should be careful in moving this around as
+      // `removeFromFixedLayer` will remove the `top` styling.
+      // This will preserve The animation,
+      // and prevent element flashing.
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
-      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
     });
   }
@@ -300,6 +311,13 @@ export class ConsentUI {
    * @return {!Promise}
    */
   loadIframe_() {
+    const info = dict({});
+    if (this.clientConfig_) {
+      info['clientConfig'] = this.clientConfig_;
+    }
+
+    this.ui_.setAttribute('name', JSON.stringify(info));
+
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -369,6 +387,7 @@ export class ConsentUI {
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
+    this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
   }
 

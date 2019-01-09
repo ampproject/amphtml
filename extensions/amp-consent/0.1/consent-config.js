@@ -17,7 +17,7 @@
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -34,19 +34,37 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {boolean} */
-    this.isMultiSupported_ = isExperimentOn(this.win_, 'multi-consent');
-
     /** @private {?JsonObject} */
     this.config_ = null;
   }
 
   /**
-   * Return the consents config
+   * Read the config and return the formatted consent config
    * @return {!JsonObject}
    */
   getConsentConfig() {
-    return this.getConfig_()['consents'];
+    const id = Object.keys(this.getConfig_()['consents'])[0];
+    const consentConfig = this.getConfig_()['consents'][id];
+
+    const config = dict({
+      'storageKey': id,
+    });
+
+    // TODO(zhouyx@): Assert validness.
+    const keys = Object.keys(consentConfig);
+    for (let i = 0; i < keys.length; i++) {
+      config[keys[i]] = consentConfig[keys[i]];
+    }
+
+    if (this.getConfig_()['postPromptUI']) {
+      config['postPromptUI'] = this.getConfig_()['postPromptUI'];
+    }
+
+    if (this.getConfig_()['clientConfig']) {
+      config['clientConfig'] = this.getConfig_()['clientConfig'];
+    }
+
+    return config;
   }
 
   /**
@@ -55,14 +73,6 @@ export class ConsentConfig {
    */
   getPolicyConfig() {
     return this.getConfig_()['policy'] || dict({});
-  }
-
-  /**
-   * Return the postPromptUI config
-   * @return {string|undefined}
-   */
-  getPostPromptUI() {
-    return this.getConfig_()['postPromptUI'];
   }
 
   /**
@@ -98,22 +108,23 @@ export class ConsentConfig {
         (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
 
     const consents = config['consents'];
-    user().assert(consents, '%s: consents config is required', TAG);
-    user().assert(Object.keys(consents).length != 0,
+    userAssert(consents, '%s: consents config is required', TAG);
+    userAssert(Object.keys(consents).length != 0,
         '%s: can\'t find consent instance', TAG);
-    if (!this.isMultiSupported_) {
-      // Assert single consent instance
-      user().assert(Object.keys(consents).length <= 1,
-          '%s: only single consent instance is supported', TAG);
-      if (config['policy']) {
-        // Only respect 'default' consent policy;
-        const keys = Object.keys(config['policy']);
-        for (let i = 0; i < keys.length; i++) {
-          if (keys[i] != 'default') {
-            user().warn(TAG, 'policy %s is currently not supported ' +
-              'and will be ignored', keys[i]);
-            delete config['policy'][keys[i]];
-          }
+
+    // Assert single consent instance
+    userAssert(Object.keys(consents).length <= 1,
+        '%s: only single consent instance is supported', TAG);
+
+    if (config['policy']) {
+      // Only respect 'default' consent policy;
+      const keys = Object.keys(config['policy']);
+      // TODO (@zhouyx): Validate waitFor value
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] != 'default') {
+          user().warn(TAG, 'policy %s is currently not supported ' +
+            'and will be ignored', keys[i]);
+          delete config['policy'][keys[i]];
         }
       }
     }
@@ -157,7 +168,7 @@ export class ConsentConfig {
     if (!type) {
       return null;
     }
-    user().assert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
+    userAssert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
     const importConfig = CMP_CONFIG[type];
     this.validateCMPConfig_(importConfig);
     const constentInstance = importConfig['consentInstanceId'];
@@ -190,17 +201,15 @@ export class ConsentConfig {
 /**
  * Expand the passed in policyConfig and generate predefined policy entires
  * @param {!JsonObject} policyConfig
- * @param {!JsonObject} consentConfig
+ * @param {string} consentId
  * @return {!JsonObject}
  */
-export function expandPolicyConfig(policyConfig, consentConfig) {
+export function expandPolicyConfig(policyConfig, consentId) {
   // Generate default policy
-  const instanceKeys = Object.keys(consentConfig);
   const defaultWaitForItems = {};
-  for (let i = 0; i < instanceKeys.length; i++) {
-    // TODO: Need to support an array.
-    defaultWaitForItems[instanceKeys[i]] = undefined;
-  }
+
+  defaultWaitForItems[consentId] = undefined;
+
   const defaultPolicy = {
     'waitFor': defaultWaitForItems,
   };

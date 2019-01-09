@@ -22,7 +22,7 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from './url';
-import {dev, user} from './log';
+import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
 
@@ -57,7 +57,7 @@ const TRUSTED_REFERRER_HOSTS = [
  * @return {!Promise}
  */
 export function getTrackImpressionPromise() {
-  return user().assert(trackImpressionPromise,
+  return userAssert(trackImpressionPromise,
       'E#19457 trackImpressionPromise');
 }
 

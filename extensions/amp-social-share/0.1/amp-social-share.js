@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
@@ -57,9 +57,9 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-    const typeAttr = user().assert(element.getAttribute('type'),
+    const typeAttr = userAssert(element.getAttribute('type'),
         'The type attribute is required. %s', element);
-    user().assert(!/\s/.test(typeAttr),
+    userAssert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         element);
 
@@ -83,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
       }
     }
     const typeConfig = getSocialConfig(typeAttr) || dict();
-    this.shareEndpoint_ = user().assert(
+    this.shareEndpoint_ = userAssert(
         element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
         'The data-share-endpoint attribute is required. %s', element);
@@ -150,7 +150,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleActivation_() {
-    user().assert(this.href_ && this.target_, 'Clicked before href is set.');
+    userAssert(this.href_ && this.target_, 'Clicked before href is set.');
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {

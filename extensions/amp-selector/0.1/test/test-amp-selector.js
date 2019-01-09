@@ -801,6 +801,31 @@ describes.realWin('amp-selector', {
       expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
     });
 
+    it('should trigger "select" event when an item is toggled', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      const args = {'index': 3, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+
+      expect(triggerSpy).to.be.calledOnce;
+      expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+      const event = triggerSpy.firstCall.args[2];
+      expect(event).to.have.property('detail');
+      expect(event.detail).to.have.property('targetOption', '3');
+      expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+    });
+
     it('should trigger "select" event for multiple selections', function* () {
       const ampSelector = getSelector({
         attributes: {

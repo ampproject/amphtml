@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev, devAssert, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
 import {getCorsUrl,
@@ -130,7 +130,7 @@ export function toStructuredCloneable(input, init) {
  * @private
  */
 export function fromStructuredCloneable(response, responseType) {
-  user().assert(isObject(response), 'Object expected: %s', response);
+  userAssert(isObject(response), 'Object expected: %s', response);
 
   const isDocumentType = responseType == 'document';
   if (!isDocumentType) {
@@ -366,14 +366,14 @@ export function verifyAmpCORSHeaders(win, response, init) {
     const sourceOrigin = getSourceOrigin(win.location.href);
     // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
     // ensure that it's equal to the current source origin.
-    user().assert(allowSourceOriginHeader == sourceOrigin,
+    userAssert(allowSourceOriginHeader == sourceOrigin,
         `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
           ` equal to the current: ${allowSourceOriginHeader}` +
           ` vs ${sourceOrigin}`);
   } else if (init.requireAmpResponseSourceOrigin) {
     // If the `AMP-Access-Control-Allow-Source-Origin` header is not
     // returned but required, return error.
-    user().assert(false, 'Response must contain the' +
+    userAssert(false, 'Response must contain the' +
         ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
   }
   return response;

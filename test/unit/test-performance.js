@@ -544,7 +544,7 @@ describes.realWin('performance', {amp: true}, env => {
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
 
             expect(getPerformanceMarks()).to.have.members(
-                ['ol', 'ofv', 'pc']);
+                ['ol', 'visible', 'ofv', 'pc']);
           });
         });
       });
@@ -596,8 +596,8 @@ describes.realWin('performance', {amp: true}, env => {
           return whenFirstVisiblePromise.then(() => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
-            expect(getPerformanceMarks()).to.deep.equal(
-                ['ol', 'pc', 'ofv']);
+            expect(getPerformanceMarks()).to.have.members(
+                ['ol', 'pc', 'visible', 'ofv']);
           });
         });
       });

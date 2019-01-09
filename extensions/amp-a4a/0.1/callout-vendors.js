@@ -91,8 +91,8 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   aps: {
-    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
-    macros: ['PUB_ID', 'PARAMS'],
+    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
+    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID'],
     disableKeyAppend: true,
   },
   openwrap: {
@@ -105,6 +105,11 @@ export const RTC_VENDORS = {
   criteo: {
     url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF',
     macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
+    disableKeyAppend: true,
+  },
+  navegg: {
+    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    macros: ['NVG_ACC'],
     disableKeyAppend: true,
   },
 };

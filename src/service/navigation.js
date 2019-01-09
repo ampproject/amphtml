@@ -22,7 +22,7 @@ import {
   openWindowDialog,
   tryFocus,
 } from '../dom';
-import {dev, user} from '../log';
+import {dev, user, userAssert} from '../log';
 import {dict} from '../utils/object';
 import {
   getExtraParamsUrl,
@@ -234,7 +234,7 @@ export class Navigation {
       return;
     }
 
-    user().assert(
+    userAssert(
         VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
 
     // If we have a target of "_blank", we will want to open a new window. A

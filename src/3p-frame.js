@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user} from './log';
+import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
@@ -48,7 +48,7 @@ const TAG = '3p-frame';
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
-  user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
+  userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
@@ -315,14 +315,14 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
-  user().assert(url.indexOf('?') == -1,
+  userAssert(url.indexOf('?') == -1,
       '3p iframe url must not include query string %s in element %s.',
       url, meta);
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
   const parsed = parseUrlDeprecated(url);
-  user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
+  userAssert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
   '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
