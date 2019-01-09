@@ -25,5 +25,7 @@ export function adpon(global, data) {
 
   global._adpon = {fid: data['fid']};
 
-  writeScript(global, data['debugScript'] || 'https://ad.adpon.jp/amp.js');
+  writeScript(global, data['debugScript'] || 'https://ad.adpon.jp/amp.js', () => {
+    global.context.renderStart();
+  });
 }
