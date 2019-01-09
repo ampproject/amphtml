@@ -16,6 +16,8 @@
 
 import {
   RequestBank,
+  writeFriendlyFrame,
+  writeSafeFrame,
 } from '../../testing/test-helper';
 
 // The image ad as seen in examples/inabox.gpt.html,
@@ -42,18 +44,6 @@ function testVisibilityPings(visibleDelay, activeViewDelay) {
         expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
         expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
       });
-}
-
-function writeFriendlyFrame(doc, iframe, adContent) {
-  doc.body.appendChild(iframe);
-  iframe.contentDocument.write(adContent);
-  iframe.contentDocument.close();
-}
-
-function writeSafeFrame(doc, iframe, adContent) {
-  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src = 'http://tpc.googlesyndication.com/safeframe/1-0-31/html/container.html';
-  doc.body.appendChild(iframe);
 }
 
 describes.integration('AMP Inabox Rendering', {
