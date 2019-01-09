@@ -36,8 +36,8 @@ const {
   gitDiffCommitLog,
   gitDiffNameOnlyMaster,
   gitDiffStatMaster,
-  gitMasterBaseline,
   gitMergeBaseMaster,
+  gitTravisMasterBaseline,
 } = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
@@ -100,8 +100,10 @@ function timedExecOrDie(cmd) {
 function printChangeSummary() {
   console.log(colors.green('master'), 'merge-base:',
       colors.cyan(gitMergeBaseMaster()));
-  console.log(colors.green('master'), 'baseline:',
-      colors.cyan(gitMasterBaseline()));
+  if (process.env.TRAVIS) {
+    console.log('Travis', colors.green('origin/master'), 'baseline:',
+        colors.cyan(gitTravisMasterBaseline()));
+  }
 
   const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
