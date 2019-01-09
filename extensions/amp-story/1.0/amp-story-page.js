@@ -112,6 +112,12 @@ export const PageState = {
   PAUSED: 2, // Page is currently the main page, but not playing.
 };
 
+/** @const @enum {string}*/
+export const NavigationDirection = {
+  NEXT: 'next',
+  PREVIOUS: 'previous',
+};
+
 /**
  * The <amp-story-page> custom element, which represents a single page of
  * an <amp-story>.
@@ -746,7 +752,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(targetPageId);
+    this.switchTo_(targetPageId, NavigationDirection.PREVIOUS);
   }
 
   /**
@@ -761,15 +767,18 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId);
+    this.switchTo_(pageId, NavigationDirection.NEXT);
   }
 
   /**
    * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
    * @private
    */
-  switchTo_(targetPageId) {
-    const payload = dict({'targetPageId': targetPageId});
+  switchTo_(targetPageId, direction) {
+    const payload = dict({
+      'targetPageId': targetPageId,
+      'direction': direction});
     const eventInit = {bubbles: true};
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
