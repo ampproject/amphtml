@@ -520,7 +520,7 @@ export class AnimationManager {
   createAnimationBuilderPromise_() {
     return Services.extensionsFor(this.ampdoc_.win)
         .installExtensionForDoc(this.ampdoc_, 'amp-animation')
-        .then(() => Services.webAnimationServiceFor(this.ampdoc_))
+        .then(() => Services.webAnimationServiceFor(this.root_))
         .then(webAnimationService => webAnimationService.createBuilder());
   }
 

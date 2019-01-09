@@ -631,7 +631,7 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
-            getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+            getConsentPolicyState(this.element, consentPolicyId)
                 .catch(err => {
                   user().error(TAG, 'Error determining consent state', err);
                   return CONSENT_POLICY_STATE.UNKNOWN;

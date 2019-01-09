@@ -15,11 +15,11 @@
  */
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {Services} from '../../../../src/services';
 import {allocateVariant} from '../variant';
-import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
 
-
-describes.sandboxed('allocateVariant', {}, () => {
+describes.sandboxed('allocateVariant', {}, env => {
+  let fakeHead;
   let fakeWin;
   let ampdoc;
   let getCidStub;
@@ -28,6 +28,8 @@ describes.sandboxed('allocateVariant', {}, () => {
   let getNotificationStub;
 
   beforeEach(() => {
+    const {sandbox} = env;
+
     fakeWin = {
       Math: {
         random: () => {
@@ -42,11 +44,33 @@ describes.sandboxed('allocateVariant', {}, () => {
     fakeWin.document.defaultView = fakeWin;
     ampdoc = new AmpDocSingle(fakeWin);
 
-    getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
-    uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
-    getParamStub = stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getParam');
-    getNotificationStub = stubService(
-        sandbox, fakeWin, 'userNotificationManager', 'getNotification');
+    fakeHead = {};
+
+    getCidStub = sandbox.stub();
+    sandbox.stub(Services, 'cidForDoc').withArgs(ampdoc)
+        .returns(Promise.resolve({
+          get: getCidStub,
+        }));
+
+    uniformStub = sandbox.stub();
+    sandbox.stub(Services, 'cryptoFor').withArgs(fakeWin)
+        .returns({
+          uniform: uniformStub,
+        });
+
+    getNotificationStub = sandbox.stub();
+    sandbox.stub(Services, 'userNotificationManagerForDoc').withArgs(fakeHead)
+        .returns(Promise.resolve({
+          getNotification: getNotificationStub,
+        }));
+
+    getParamStub = sandbox.stub();
+    sandbox.stub(Services, 'viewerForDoc').withArgs(ampdoc)
+        .returns({
+          getParam: getParamStub,
+        });
+
+    sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
   });
 
   it('should throw for invalid config', () => {
