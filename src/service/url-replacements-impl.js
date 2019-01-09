@@ -87,9 +87,6 @@ export class GlobalVariableSource extends VariableSource {
   constructor(ampdoc) {
     super(ampdoc);
 
-    /** @private {?Promise<?Object<string, string>>} */
-    this.variants_ = null;
-
     /** @private {?Promise<?ShareTrackingFragmentsDef>} */
     this.shareTrackingFragments_ = null;
   }
@@ -659,15 +656,12 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getVariantsValue_(getter, expr) {
-    if (!this.variants_) {
-      this.variants_ = Services.variantForOrNull(this.ampdoc.win);
-    }
-    return this.variants_.then(variants => {
+    return Services.variantsForDocOrNull(this.ampdoc).then(variants => {
       userAssert(variants,
           'To use variable %s, amp-experiment should be configured',
           expr);
-      return getter(variants);
-    });
+      return variants.getVariants();
+    }).then(variantsMap => getter(variantsMap));
   }
 
   /**

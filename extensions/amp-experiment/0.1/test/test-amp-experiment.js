@@ -83,40 +83,44 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if it has no child element', () => {
-    allowConsoleError(() => { expect(() => {
-      experiment.buildCallback();
-    }).to.throw(/should contain exactly one/); });
+    expectAsyncConsoleError(/should contain exactly one/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/should contain exactly one/);
   });
 
   it('should throw if it has multiple child elements', () => {
-    allowConsoleError(() => { expect(() => {
-      addConfigElement('script');
-      addConfigElement('script');
-      experiment.buildCallback();
-    }).to.throw(/should contain exactly one/); });
+    addConfigElement('script');
+    addConfigElement('script');
+    expectAsyncConsoleError(/should contain exactly one/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/should contain exactly one/);
   });
 
   it('should throw if the child element is not a <script> element', () => {
-    allowConsoleError(() => { expect(() => {
-      addConfigElement('a');
-      experiment.buildCallback();
-    }).to.throw(/script/); });
+    addConfigElement('a');
+    expectAsyncConsoleError(/script/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/script/);
   });
 
   it('should throw if the child script element is not json typed', () => {
-    allowConsoleError(() => { expect(() => {
-      addConfigElement('script', 'wrongtype');
-      experiment.buildCallback();
-    }).to.throw(/application\/json/); });
+    addConfigElement('script', 'wrongtype');
+    expectAsyncConsoleError(/application\/json/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/application\/json/);
   });
 
   it('should throw if the child script element has non-JSON content', () => {
-    expect(() => {
-      addConfigElement('script', 'application/json', '{not json}');
-      experiment.buildCallback();
-    }).to.throw();
-    return Services.variantForOrNull(win).then(variants => {
-      expect(variants).to.be.null;
+    addConfigElement('script', 'application/json', '{not json}');
+    expectAsyncConsoleError();
+    return experiment.buildCallback().then(() => {
+      throw new Error('must have failed');
+    }, () => {
+      return Services.variantsForDocOrNull(ampdoc)
+          .then(service => service.getVariants())
+          .then(variants => {
+            expect(variants).to.deep.equal({});
+          });
     });
   });
 
@@ -131,7 +135,9 @@ describes.realWin('amp-experiment', {
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    return Services.variantForOrNull(win).then(variants => {
+    return Services.variantsForDocOrNull(ampdoc).then(variantsService => {
+      return variantsService.getVariants();
+    }).then(variants => {
       expect(variants).to.jsonEqual({
         'experiment-1': 'variant-a',
         'experiment-2': 'variant-d',
