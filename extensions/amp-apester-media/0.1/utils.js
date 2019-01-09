@@ -33,6 +33,8 @@ const rules = [
 
 const webviewRegExp = new RegExp('(' + rules.join('|') + ')', 'ig');
 
+const ampPixelURL = 'https://apester.go2cloud.org/aff_i';
+
 /**
  * Returns if ua belongs to a webview
  *
@@ -176,4 +178,25 @@ export function registerEvent(eventName, callback, win, iframe, unlisteners) {
     }
   });
   unlisteners.push(unlisten);
+}
+
+/**
+ * Generates a pixel url
+ * @param {string} publisherId
+ * @param {string} affiliateId
+ */
+export function generatePixelURL(publisherId, affiliateId) {
+  const qsObj = {
+    'offer_id': 2,
+    'aff_id': affiliateId,
+    'aff_sub': publisherId,
+    'aff_sub2': window.location.hostname,
+    'aff_sub3': 'amp',
+  };
+
+  const qs = Object.keys(qsObj)
+      .map(key => `${key}=${qsObj[key]}`)
+      .join('&');
+
+  return `${ampPixelURL}?${qs}`;
 }
