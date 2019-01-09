@@ -473,7 +473,7 @@ export class Controls {
         return;
       }
 
-      this.hide();
+      this.hide(/* respectSticky */ true);
       this.unlistenToMouseMovement_();
     });
   }
