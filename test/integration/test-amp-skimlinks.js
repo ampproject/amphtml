@@ -25,7 +25,6 @@ function clickLinkAndNavigate_(doc, selector) {
   }
 }
 
-
 describe('amp-skimlinks', function() {
   const setupBasic = {
     extensions: ['amp-skimlinks'],
@@ -59,6 +58,7 @@ describe('amp-skimlinks', function() {
         return clickLinkAndNavigate_(env.win.document, selector);
       };
       browser = new BrowserController(env.win);
+
       return browser.waitForElementBuild('amp-skimlinks');
     });
 
@@ -71,10 +71,9 @@ describe('amp-skimlinks', function() {
         const data = JSON.parse(decodeURIComponent(match[1]));
         expect(data.jv).to.equal(PLATFORM_NAME);
         expect(data.pub).to.equal('123X123');
-        // nonblocking.io is the default canonical url
+        // nonblocking.io is the default canonical url.
         expect(data.pag).to.equal('http://nonblocking.io/');
         expect(data.uuid).to.have.lengthOf(32);
-
       });
     });
 
@@ -87,7 +86,7 @@ describe('amp-skimlinks', function() {
         const data = JSON.parse(decodeURIComponent(match[1]));
         expect(data.jv).to.equal(PLATFORM_NAME);
         expect(data.pub).to.equal('123X123');
-        // nonblocking.io is the default canonical url
+        // nonblocking.io is the default canonical url.
         expect(data.pag).to.equal('http://nonblocking.io/');
         expect(data.uuid).to.have.lengthOf(32);
 
@@ -100,7 +99,7 @@ describe('amp-skimlinks', function() {
     });
 
     it('Should send NA-tracking on non-merchant link click ', () => {
-      // Give 500ms for amp-skimlinks to set up
+      // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#non-merchant-link');
 
@@ -119,11 +118,11 @@ describe('amp-skimlinks', function() {
     });
 
     it('Should send merchant links to waypoint on click', () => {
-      // Give 500ms for amp-skimlinks to set up
+      // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#merchant-link');
         return RequestBank.withdraw('waypointUrl').then(req => {
-          // Remove "/?..." in the url
+          // Remove "/?" in the url.
           const queryString = req.url.slice(2);
           const queryParams = parseQueryString(queryString);
           expect(queryParams.id).to.equal('123X123');
@@ -167,9 +166,8 @@ describe('amp-skimlinks', function() {
       return browser.waitForElementBuild('amp-skimlinks');
     });
 
-
     it('Should send merchant links to to waypoint on click', () => {
-      // Give 500ms for amp-skimlinks to set up
+      // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         browser.click('#merchant-link');
         const link = env.win.document.querySelector('#merchant-link');
@@ -217,9 +215,8 @@ describes.integration('Affiliate unknown links', setupUnknownLinks, env => {
     return browser.waitForElementBuild('amp-skimlinks');
   });
 
-
   it('Should send unknown links to waypoint', () => {
-    // Give 500ms for amp-skimlinks to set up
+    // Give 500ms for amp-skimlinks to set up.
     return browser.wait(500).then(() => {
       // beacon API url has been overwritten by a deelay.me URL that will keep
       // the request pending during 2s. When the click happens, beacon API has

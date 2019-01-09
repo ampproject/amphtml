@@ -165,7 +165,6 @@ function getInternalDomains_(docInfo) {
   return internalDomains;
 }
 
-
 /**
  * @param {!Element} element
  */
