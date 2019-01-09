@@ -31,7 +31,7 @@ import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {VideoDockingEvents} from './events';
+import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
 import {
   childElementByTag,
@@ -53,7 +53,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {mapRange} from '../../../src/utils/math';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveLayoutRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
 import {
   px,
@@ -114,6 +114,8 @@ let DockedDef;
 /** @typedef {{posX: !RelativeX, posY: !RelativeY}|!Element} */
 let DockTargetDef;
 
+
+// TODO(alanorozco): Reestructure this to use standard LayoutRects.
 /**
  * @typedef {{
  *   x: number,
@@ -152,20 +154,6 @@ function throttleByAnimationFrame(win, fn) {
       fn.apply(null, args);
       running = false;
     });
-  };
-}
-
-
-/**
- * @param {!MouseEvent|!TouchEvent} e
- * @return {{x: number, y: number}}
- * @private
- */
-function pointerCoords(e) {
-  const coords = (e.touches) ? e.touches[0] : e;
-  return {
-    x: dev().assertNumber(('x' in coords) ? coords.x : coords.clientX),
-    y: dev().assertNumber(('y' in coords) ? coords.y : coords.clientY),
   };
 }
 
@@ -1266,7 +1254,14 @@ export class VideoDocking {
     const previouslyDocked = this.currentlyDocked_;
     this.currentlyDocked_ = {video, target, step};
     if (!previouslyDocked || previouslyDocked.video != video) {
-      this.getControls_().setVideo(video);
+      const {
+        x,
+        y,
+        targetWidth,
+        targetHeight,
+      } = this.getTargetArea_(video, target);
+      const targetRect = layoutRectLtwh(x, y, targetWidth, targetHeight);
+      this.getControls_().setVideo(video, targetRect);
       this.trigger_(Actions.DOCK);
     }
   }
