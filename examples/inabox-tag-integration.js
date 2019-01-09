@@ -19,7 +19,7 @@
  */
 
 const win = window.top;
-initInaboxHost(win, win.useCompiledInabox);
+initInaboxHost(win);
 
 // Enable amp-inabox APIs for all iframes. Normally, the actualy bootstrap
 // script would be more specific about which iframes to support.
@@ -30,15 +30,9 @@ Array.prototype.push.apply(
  * A sample bootstrap script that is to be run in ads tag.
  *
  * @param {!Window} win
- * @param {boolean|undefined} compiled Whether to use the compiled host script
  */
-function initInaboxHost(win, compiled) {
-  let hostScriptUrl;
-  if (compiled) {
-    hostScriptUrl = 'http://localhost:8000/dist/amp4ads-host-v0.js';
-  } else {
-    hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
-  }
+function initInaboxHost(win) {
+  const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
   preloadScript(win, hostScriptUrl);
   // Optional: preload a4a-v0.js as well.
 

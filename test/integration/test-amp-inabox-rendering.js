@@ -59,7 +59,6 @@ function writeSafeFrame(doc, iframe, adContent) {
 describes.integration('AMP Inabox Rendering', {
   amp: false,
   body: `
-    <script>window.top.useCompiledInabox = true;</script>
     <script src="/examples/inabox-tag-integration.js"></script>
     `,
 }, env => {
@@ -86,7 +85,6 @@ describes.integration('AMP Inabox Rendering', {
 
   afterEach(() => {
     doc.body.removeChild(iframe);
-    delete env.win.top.useCompiledInabox;
   });
 });
 
@@ -117,7 +115,6 @@ describes.realWin('AMP Inabox Rendering - No Host Script', {
 
   afterEach(() => {
     doc.body.removeChild(iframe);
-    delete env.win.top.useCompiledInabox;
   });
 });
 
@@ -127,7 +124,6 @@ describes.integration('AMP Inabox Rendering BTF', {
   amp: false,
   body: `
     <div style="height: 100vh"></div>
-    <script>window.top.useCompiledInabox = true;</script>
     <script src="/examples/inabox-tag-integration.js"></script>
     `,
 }, env => {
@@ -158,6 +154,5 @@ describes.integration('AMP Inabox Rendering BTF', {
 
   afterEach(() => {
     doc.body.removeChild(iframe);
-    delete env.win.top.useCompiledInabox;
   });
 });
