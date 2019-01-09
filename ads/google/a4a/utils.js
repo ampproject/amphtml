@@ -811,8 +811,9 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
   // If configured to use amp-consent, delay request until consent state is
   // resolved.
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      (consentPolicyId ? getConsentPolicyState(ampDoc, consentPolicyId) :
-        Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
+      (consentPolicyId
+        ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
+        : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
           .then(consentState =>
             consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
             consentState == CONSENT_POLICY_STATE.UNKNOWN ?

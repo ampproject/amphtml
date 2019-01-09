@@ -91,7 +91,7 @@ export class AmpNextPage extends AMP.BaseElement {
 
         const consentPolicyId = this.getConsentPolicy();
         const consent = consentPolicyId ?
-          getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+          getConsentPolicyState(element, consentPolicyId)
               .catch(err => {
                 user().error(TAG, 'Error determining consent state', err);
                 return CONSENT_POLICY_STATE.UNKNOWN;

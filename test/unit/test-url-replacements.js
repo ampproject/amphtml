@@ -181,6 +181,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     win.document.defaultView = win;
     win.document.documentElement.ownerDocument = win.document;
+    win.document.head = {
+      nodeType: /* element */ 1,
+      // Fake query selectors needed to bypass <meta> tag checks.
+      querySelector: () => null,
+      querySelectorAll: () => [],
+    };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     installDocumentInfoServiceForDoc(ampdoc);
