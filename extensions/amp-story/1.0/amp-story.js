@@ -132,6 +132,7 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 const Attributes = {
   STANDALONE: 'standalone',
   ADVANCE_TO: 'i-amphtml-advance-to',
+  PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   AD_SHOWING: 'ad-showing',
@@ -992,6 +993,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const lastPage = this.pages_[this.getPageCount() - 1];
     if (activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
+        activePage.element.hasAttribute(Attributes.PUBLIC_ADVANCE_TO) ||
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
@@ -2201,13 +2203,16 @@ export class AmpStory extends AMP.BaseElement {
       return false;
     }
 
-    pageBeforeEl.setAttribute(Attributes.ADVANCE_TO, pageToBeInsertedId);
+    const advanceAttr = isExperimentOn(this.win, 'amp-story-branching') ?
+      Attributes.PUBLIC_ADVANCE_TO : Attributes.ADVANCE_TO;
+
+    pageBeforeEl.setAttribute(advanceAttr, pageToBeInsertedId);
     pageBeforeEl.setAttribute(Attributes.AUTO_ADVANCE_TO, pageToBeInsertedId);
     pageToBeInsertedEl.setAttribute(Attributes.RETURN_TO, pageBeforeId);
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
-    pageToBeInsertedEl.setAttribute(Attributes.ADVANCE_TO, nextPageId);
+    pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
     pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
     nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
 

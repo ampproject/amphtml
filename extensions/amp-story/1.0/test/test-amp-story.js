@@ -1245,6 +1245,22 @@ describes.realWin('amp-story', {
     beforeEach(() => {toggleExperiment(win, 'amp-story-branching', true);});
     afterEach(() => {toggleExperiment(win, 'amp-story-branching', false);});
 
+    it('should advance to specified page with advanced-to attribute', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+
+            story.getPageById('cover')
+                .element.setAttribute('advance-to', 'page-3');
+
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            expect(story.activePage_.element.id).to.equal('page-3');
+          });
+    });
+
     it('should navigate to the target page when a goToPage action is executed',
         () => {
           createPages(story.element, 4,
@@ -1314,3 +1330,4 @@ describes.realWin('amp-story', {
         });
   });
 });
+
