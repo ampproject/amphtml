@@ -93,7 +93,6 @@ describe('amp-skimlinks', function() {
         expect(data.hae).to.equal(1);
         expect(data.dl).to.deep.equal({
           'https://nordstrom.com/': {count: 1, ae: 1},
-          'https://google.com/': {count: 1, ae: 0},
         });
       });
     });
@@ -185,56 +184,58 @@ describe('amp-skimlinks', function() {
       });
     });
   });
-});
 
 
-const setupUnknownLinks = {
-  extensions: ['amp-skimlinks'],
-  body: `
-      <amp-skimlinks
-          layout="nodisplay"
-          publisher-code="123X123"
-          tracking="true"
-      >
-        <script type="application/json">
-          {
-              "beaconUrl": "http://deelay.me/2000/fakeBeacon"
-          }
-        </script>
-      </amp-skimlinks>
-      <div>
-          <a id="unknown-link" href="https://google.com"> Test unknown link </a>
-      </div>
-  `,
-};
-describes.integration('Affiliate unknown links', setupUnknownLinks, env => {
-  let browser = null;
+  const setupUnknownLinks = {
+    extensions: ['amp-skimlinks'],
+    body: `
+        <amp-skimlinks
+            layout="nodisplay"
+            publisher-code="123X123"
+            tracking="true"
+        >
+          <script type="application/json">
+            {
+                "beaconUrl": "http://deelay.me/2000/fakeBeacon"
+            }
+          </script>
+        </amp-skimlinks>
+        <div>
+            <a id="unknown-link" href="https://google.com"> Test unknown link </a>
+        </div>
+    `,
+  };
+  describes.integration('Affiliate unknown links', setupUnknownLinks, env => {
+    let browser = null;
 
-  beforeEach(() => {
-    browser = new BrowserController(env.win);
-    return browser.waitForElementBuild('amp-skimlinks');
-  });
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+      return browser.waitForElementBuild('amp-skimlinks');
+    });
 
-  it('Should send unknown links to waypoint', () => {
-    // Give 500ms for amp-skimlinks to set up.
-    return browser.wait(500).then(() => {
-      // beacon API url has been overwritten by a deelay.me URL that will keep
-      // the request pending during 2s. When the click happens, beacon API has
-      // not come back yet with affiliated domain information and the link is
-      // still considered as unknown.
-      browser.click('#unknown-link');
-      const link = env.win.document.querySelector('#unknown-link');
-      const regex = /^https\:\/\/go\.skimresources\.com\/\?(.*)$/;
-      const match = regex.exec(link.href);
-      expect(match).to.be.lengthOf(2);
-      const queryParams = parseQueryString(match[1]);
-      expect(queryParams.id).to.equal('123X123');
-      expect(queryParams.jv).to.equal(PLATFORM_NAME);
-      expect(queryParams.xuuid).to.have.lengthOf(32);
-      expect(queryParams.url).to.equal('https://google.com/');
-      expect(queryParams.sref).to.equal('http://nonblocking.io/');
-      expect(queryParams.pref).to.have.lengthOf.above(1);
-      expect(queryParams.xs).to.equal('1');
+    it('Should send unknown links to waypoint', () => {
+      // Give 500ms for amp-skimlinks to set up.
+      return browser.wait(500).then(() => {
+        // beacon API url has been overwritten by a deelay.me URL that will keep
+        // the request pending during 2s. When the click happens, beacon API has
+        // not come back yet with affiliated domain information and the link is
+        // still considered as unknown.
+        browser.click('#unknown-link');
+        const link = env.win.document.querySelector('#unknown-link');
+        const regex = /^https\:\/\/go\.skimresources\.com\/\?(.*)$/;
+        const match = regex.exec(link.href);
+        expect(match).to.be.lengthOf(2);
+        const queryParams = parseQueryString(match[1]);
+        expect(queryParams.id).to.equal('123X123');
+        expect(queryParams.jv).to.equal(PLATFORM_NAME);
+        expect(queryParams.xuuid).to.have.lengthOf(32);
+        expect(queryParams.url).to.equal('https://google.com/');
+        expect(queryParams.sref).to.equal('http://nonblocking.io/');
+        expect(queryParams.pref).to.have.lengthOf.above(1);
+        expect(queryParams.xs).to.equal('1');
+      });
     });
   });
 });
+
+
