@@ -761,9 +761,7 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId =
-        this.getPageFragment_() ||
-        this.getHistoryState_(HistoryStates.PAGE_ID) ||
+    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
 
     this.initializeSidebar_();
@@ -793,7 +791,7 @@ export class AmpStory extends AMP.BaseElement {
             });
           }
         })
-        .then(() => this.switchTo_(initialPageId))
+        .then(() => this.switchTo_(this.maybeChangeInitial_(initialPageId)))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -818,13 +816,20 @@ export class AmpStory extends AMP.BaseElement {
     return storyLayoutPromise;
   }
 
-  getPageFragment_(){
+  /**
+   * If the URL contains a valid page parameter value, the story's initial page
+   * should be the specified value.
+   * @param {string} initialPageId
+   * @return {string}
+   * @private
+   */
+  maybeChangeInitial_(initialPageId) {
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
-
-    if (this.getPageById(maybePageId)) {
-      return maybePageId;
-    }
+    const isActualPage =
+      this.pages_.findIndex(page => page.element.id === maybePageId) >= 0;
+    return (maybePageId && isActualPage) ? maybePageId : initialPageId;
   }
+
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
