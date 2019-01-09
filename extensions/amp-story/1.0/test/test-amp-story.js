@@ -1279,17 +1279,16 @@ describes.realWin('amp-story', {
               });
         });
     it('should begin at the specified page fragment parameter value', () => {
-      win.location.hash = "page=page-3";
-      console.log(win.location);
-            createPages(story.element, 4,
-              ['cover', 'page-1', 'page-2', 'page-3']);
-          toggleExperiment(win, 'amp-story-branching', true);
-          story.buildCallback();
-          return story.layoutCallback()
-              .then(() => {
-                expect(story.activePage_.element.id).to.equal('page-1');
-                toggleExperiment(win, 'amp-story-branching', false);
-              });
+      win.location.hash = 'page=page-3';
+      createPages(story.element, 4,
+          ['cover', 'page-1', 'page-2', 'page-3']);
+      toggleExperiment(win, 'amp-story-branching', true);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+            toggleExperiment(win, 'amp-story-branching', false);
+          });
     });
 
   });
