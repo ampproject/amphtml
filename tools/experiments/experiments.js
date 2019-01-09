@@ -42,11 +42,12 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
 let ExperimentDef;
 
 /**
- * This experiment is special because it uses a different mechanism that is
+ * These experiments are special because they use a different mechanism that is
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
+const RC_EXPERIMENT_ID = 'rc-channel';
 
 
 /** @const {!Array<!ExperimentDef>} */
@@ -57,6 +58,13 @@ const EXPERIMENTS = [
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'contributing/release-schedule.md#amp-dev-channel',
+  },
+  // Release Candidate (RC Channel)
+  {
+    id: RC_EXPERIMENT_ID,
+    name: 'AMP RC Channel (more info)',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
   {
     id: 'alp',
