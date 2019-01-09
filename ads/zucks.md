@@ -16,7 +16,7 @@ limitations under the License.
 
 # Zucks
 
-## Example
+### Banner
 
 ```html
 <amp-ad width="320" height="50"
@@ -25,9 +25,7 @@ limitations under the License.
 </amp-ad>
 ```
 
-### Other type
-
-#### Native Ad
+### Native Ad
 ```html
 <amp-ad width="320" height="50"
       type="zucks"
@@ -36,7 +34,7 @@ limitations under the License.
 </amp-ad>
 ```
 
-#### Recommended
+### Recommend Widget
 ```html
 <amp-ad width="320" height="600"
       type="zucks"
@@ -45,7 +43,7 @@ limitations under the License.
 </amp-ad>
 ```
 
-##### Multi Ads
+##### Recommend Widget (Multi Ads)
 ```html
 <amp-ad width="320" height="600"
       type="zucks"
