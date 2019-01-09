@@ -320,7 +320,7 @@ describes.realWin('amp-geo', {
   });
 
   /**
-   * pre-rendered geo is the the case where a publisher uss their own
+   * pre-rendered geo is the the case where a publisher uses their own
    * infrastructure to add a country tag to the body.
    */
   it('should respect pre-rendered geo tags', () => {
