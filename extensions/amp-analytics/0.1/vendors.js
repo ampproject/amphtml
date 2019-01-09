@@ -93,6 +93,7 @@ import {
 } from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
+import {UPSCORE_CONFIG} from './vendors/upscore';
 
 /**
  * @const {!JsonObject}
@@ -236,6 +237,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'topmailru': TOPMAILRU_CONFIG,
   'treasuredata': TREASUREDATA_CONFIG,
   'umenganalytics': UMENGANALYTICS_CONFIG,
+  'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
 });

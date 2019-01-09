@@ -231,12 +231,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-scaling',
-    name: 'Scale pages dynamically in amp-story by default',
-    spec: 'https://github.com/ampproject/amphtml/issues/12902',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
-  },
-  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
@@ -269,6 +263,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
     id: 'no-sync-xhr-in-ads',
@@ -395,12 +395,6 @@ const EXPERIMENTS = [
     name: 'Forces min-height on body (fix for #18861 and #8798)',
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'amp-video-iframe',
-    name: 'Allows the use of the amp-video-iframe component.',
-    spec: 'https://github.com/ampproject/amphtml/issues/16252',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
   },
   {
     id: 'amp-date-display',

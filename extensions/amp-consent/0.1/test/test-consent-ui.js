@@ -57,7 +57,7 @@ describes.realWin('consent-ui', {
       getViewport: () => {
         return {
           addToFixedLayer: () => {},
-          updateFixedLayer: () => {},
+          removeFromFixedLayer: () => {},
         };
       },
       getVsync: () => {
@@ -224,6 +224,24 @@ describes.realWin('consent-ui', {
             parent.classList.contains(consentUiClasses.iframeActive)
         ).to.be.true;
       });
+    });
+
+    it('should pass the info to the iframe', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+      });
+      consentUI = new ConsentUI(mockInstance, config);
+      consentUI.show();
+      yield macroTask();
+
+      expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
+        'clientConfig': {
+          'test': 'ABC',
+        },
+      }));
     });
   });
 

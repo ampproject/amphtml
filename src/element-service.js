@@ -26,7 +26,7 @@ import {
   getTopWindow,
 } from './service';
 import {toWin} from './types';
-import {user} from './log';
+import {userAssert} from './log';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects an
@@ -86,7 +86,7 @@ function isElementScheduled(win, elementName) {
  * implementation loaded. Users should typically wrap this as a special purpose
  * function (e.g. Services.viewportForDoc(...)) for type safety and because the
  * factory should not be passed around.
- * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -94,17 +94,17 @@ function isElementScheduled(win, elementName) {
  *     not the extension.
  * @return {!Promise<*>}
  */
-export function getElementServiceForDoc(elementOrAmpDoc, id, extension,
+export function getElementServiceForDoc(element, id, extension,
   opt_element) {
   return getElementServiceIfAvailableForDoc(
-      elementOrAmpDoc, id, extension, opt_element)
+      element, id, extension, opt_element)
       .then(service => assertService(service, id, extension));
 }
 
 /**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
- * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -113,24 +113,23 @@ export function getElementServiceForDoc(elementOrAmpDoc, id, extension,
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-  elementOrAmpDoc, id, extension, opt_element) {
-  const ampdoc = getAmpdoc(elementOrAmpDoc);
-  const s = getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
+  element, id, extension, opt_element
+) {
+  const s = getServicePromiseOrNullForDoc(element, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-
+  const ampdoc = getAmpdoc(element);
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfPresent(
-          ampdoc.win, extension,
-          ampdoc.win.document.head))
+          ampdoc.win, extension, ampdoc.win.document.head))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
         if (opt_element) {
-          return getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
+          return getServicePromiseOrNullForDoc(element, id);
         } else if (isElementScheduled(ampdoc.win, extension)) {
-          return getServicePromiseForDoc(elementOrAmpDoc, id);
+          return getServicePromiseForDoc(element, id);
         }
         return null;
       });
@@ -174,7 +173,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @private
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (user().assert(service,
+  return /** @type {!Object} */ (userAssert(service,
       'Service %s was requested to be provided through %s, ' +
       'but %s is not loaded in the current page. To fix this ' +
       'problem load the JavaScript file for %s in this page.',

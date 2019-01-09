@@ -41,7 +41,7 @@ import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
-  user,
+  userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {parseJson} from '../src/json';
@@ -176,6 +176,7 @@ import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
+import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
@@ -404,6 +405,7 @@ register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
+register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativo', nativo);
@@ -532,11 +534,11 @@ function init(win) {
 export function draw3p(win, data, configCallback) {
   const type = data['type'];
 
-  user().assert(isTagNameAllowed(type, win.context.tagName),
+  userAssert(isTagNameAllowed(type, win.context.tagName),
       'Embed type %s not allowed with tag %s', type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user().assert(data,
+      userAssert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -614,7 +616,7 @@ export function validateParentOrigin(window, parentLocation) {
   if (!ancestors || !ancestors.length) {
     return;
   }
-  user().assert(ancestors[0] == parentLocation.origin,
+  userAssert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
 }
@@ -642,7 +644,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  userAssert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: %s', type);
 }
 

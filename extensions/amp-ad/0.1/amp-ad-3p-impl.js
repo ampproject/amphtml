@@ -34,7 +34,8 @@ import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
   from '../../../src/ad-helper';
@@ -44,10 +45,12 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -195,7 +198,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     this.config = adConfig[this.type_];
-    user().assert(
+    userAssert(
         this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
@@ -216,9 +219,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!hasFullWidth) {
       return false;
     }
-    user().assert(this.element.getAttribute('width') == '100vw',
+    userAssert(this.element.getAttribute('width') == '100vw',
         'Ad units with data-full-width must have width="100vw".');
-    user().assert(!!this.config.fullWidthHeightRatio,
+    userAssert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
@@ -332,24 +335,44 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    user().assert(!this.isInFixedContainer_,
+    userAssert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
+    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
+    const consentStringPromise = (consentPolicyId && isConsentV2Experiment)
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
-      ? getConsentPolicySharedData(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
 
-    this.layoutPromise_ = Promise.all(
-        [getAdCid(this), consentPromise, sharedDataPromise]).then(consents => {
-      const opt_context = {
-        clientId: consents[0] || null,
-        container: this.container_,
-        initialConsentState: consents[1],
-        consentSharedData: consents[2],
-      };
+    this.layoutPromise_ = Promise.all([
+      getAdCid(this),
+      consentPromise,
+      sharedDataPromise,
+      consentStringPromise,
+    ]).then(consents => {
+
+      // Use JsonObject to preserve field names so that ampContext can access
+      // values with name
+      // ampcontext.js and this file are compiled in different compilation unit
+
+      // Note: Field names can by perserved by using JsonObject, or by adding
+      // perserved name to extern. We are doing both right now.
+      // Please also add new introduced variable
+      // name to the extern list.
+      const opt_context = dict({
+        'clientId': consents[0] || null,
+        'container': this.container_,
+        'initialConsentState': consents[1],
+        'consentSharedData': consents[2],
+      });
+      if (isConsentV2Experiment) {
+        opt_context['initialConsentValue'] = consents[3];
+      }
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
@@ -398,7 +421,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   getConsentState() {
     const consentPolicyId = super.getConsentPolicy();
     return consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicyState(this.element, consentPolicyId)
       : Promise.resolve(null);
   }
 

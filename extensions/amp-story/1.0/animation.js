@@ -28,7 +28,7 @@ import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   escapeCssSelectorIdent,
   scopedQuerySelector,
@@ -135,7 +135,7 @@ class AnimationRunner {
         !keyframes[0].offset,
         'First keyframe offset for animation preset should be 0 or undefined'));
 
-    user().assert(
+    userAssert(
         this.delay_ >= 0,
         'Negative delays are not allowed in amp-story entrance animations.');
 
@@ -520,7 +520,7 @@ export class AnimationManager {
   createAnimationBuilderPromise_() {
     return Services.extensionsFor(this.ampdoc_.win)
         .installExtensionForDoc(this.ampdoc_, 'amp-animation')
-        .then(() => Services.webAnimationServiceFor(this.ampdoc_))
+        .then(() => Services.webAnimationServiceFor(this.root_))
         .then(webAnimationService => webAnimationService.createBuilder());
   }
 
@@ -532,7 +532,7 @@ export class AnimationManager {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
     setStyleForPreset(el, name);
 
-    return user().assert(
+    return userAssert(
         PRESETS[name],
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,

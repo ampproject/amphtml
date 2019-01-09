@@ -22,7 +22,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -35,6 +35,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+const TAG = 'amp-ooyala-player';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpOoyalaPlayer extends AMP.BaseElement {
@@ -78,15 +79,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element: el} = this;
 
-    this.embedCode_ = user().assert(
+    this.embedCode_ = userAssert(
         el.getAttribute('data-embedcode'),
         'The data-embedcode attribute is required for %s', el);
 
-    this.pCode_ = user().assert(
+    this.pCode_ = userAssert(
         el.getAttribute('data-pcode'),
         'The data-pcode attribute is required for %s', el);
 
-    this.playerId_ = user().assert(
+    this.playerId_ = userAssert(
         el.getAttribute('data-playerid'),
         'The data-playerid attribute is required for %s', el);
 
@@ -301,9 +302,14 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-ooyala-player', '0.1', AMP => {
-  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpOoyalaPlayer);
 });
