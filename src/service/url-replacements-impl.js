@@ -301,9 +301,12 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
-        userAssert(variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
-                experiment);
+        if (variant === undefined) {
+          user().error(TAG,
+              'The value passed to VARIANT() is ' +
+              'not a valid experiment name:' + experiment);
+          return '';
+        }
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
       }, 'VARIANT');

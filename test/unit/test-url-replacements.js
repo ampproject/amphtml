@@ -598,17 +598,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  // TODO(#16916): Make this test work with synchronous throws.
-  it.skip('should replace VARIANT', () => {
+  it('should replace VARIANT', () => {
+    expectAsyncConsoleError(/not a valid experiment name/);
     return expect(expandUrlAsync(
         '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
         /*opt_bindings*/undefined, {withVariant: true}))
         .to.eventually.equal('?x1=v1&x2=none&x3=');
   });
 
-  // TODO(#16916): Make this test work with synchronous throws.
-  it.skip('should replace VARIANT with empty string if ' +
+  it('should replace VARIANT with empty string if ' +
       'amp-experiment is not configured ', () => {
+    expectAsyncConsoleError(/should be configured/);
     return expect(expandUrlAsync(
         '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
         .to.eventually.equal('?x1=&x2=&x3=');
@@ -619,9 +619,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         {withVariant: true})).to.eventually.equal('?x1.v1!x2.none');
   });
 
-  // TODO(#16916): Make this test work with synchronous throws.
-  it.skip('should replace VARIANTS with empty string if ' +
+  it('should replace VARIANTS with empty string if ' +
       'amp-experiment is not configured ', () => {
+    expectAsyncConsoleError(/should be configured/);
     return expect(expandUrlAsync('?VARIANTS')).to.eventually.equal('?');
   });
 
