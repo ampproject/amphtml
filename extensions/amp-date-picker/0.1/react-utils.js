@@ -37,8 +37,17 @@ function createDeferred_() {
     }
 
     /** @override */
-    shouldComponentUpdate() {
-      return this.state.value == this.props.initial;
+    componentWillReceiveProps(nextProps) {
+      const promise = nextProps['promise'];
+      if (promise) {
+        promise.then(value => this.setState({value}));
+      }
+    }
+
+    /** @override */
+    shouldComponentUpdate(props, state) {
+      return shallowDiffers(this.props, props) ||
+          shallowDiffers(this.state, state);
     }
 
     /** @override */
@@ -59,6 +68,26 @@ function createDeferred_() {
   return DeferredType;
 }
 
+/**
+ * Duplicated from Preact PureComponent implementation.
+ * https://github.com/developit/preact-compat/blob/ae018abb/src/index.js#L402
+ * Shallow compare a and b.
+ * @param {*} a
+ * @param {*} b
+ */
+function shallowDiffers(a, b) {
+  for (const i in a) {
+    if (!(i in b)) {
+      return true;
+    }
+  }
+  for (const i in b) {
+    if (a[i] !== b[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /** @private {?function(new:React.Component, !Object)} */
 let DeferredType_ = null;

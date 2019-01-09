@@ -432,11 +432,11 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>date</code></td>
-<td>Specifies the initially selected date. In a date picker with <code>type="range"</code> this has no effect.</td>
+<td>Specifies the initially selected date. In a date picker with <code>type="range"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected a date.</td>
 </tr>
 <tr>
 <td><code>endDate</code></td>
-<td>Specifies the initially selected end date. In a date picker with <code>type="single"</code> this has no effect.</td>
+<td>Specifies the initially selected end date. In a date picker with <code>type="single"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected an end date.</td>
 </tr>
 <tr>
 <td><code>highlighted</code></td>
@@ -444,7 +444,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>startDate</code></td>
-<td>Specifies the initially selected start date for a date picker with <code>type="range"</code>. In a date picker with <code>type="single"</code> this has no effect.</td>
+<td>Specifies the initially selected start date for a date picker with <code>type="range"</code>. In a date picker with <code>type="single"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected a start date.</td>
 </tr>
 <tr>
 <td><code>templates</code></td>
@@ -452,6 +452,8 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 </tbody>
 </table>
+
+The `src` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ###### template definition objects
 
