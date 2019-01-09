@@ -1279,18 +1279,30 @@ describes.realWin('amp-story', {
               });
         });
     it('should begin at the specified page fragment parameter value', () => {
-      win.location.hash = "page=page-3";
-      console.log(win.location);
-            createPages(story.element, 4,
+      win.location.hash = 'page=page-1';
+      createPages(story.element, 4,
+          ['cover', 'page-1', 'page-2', 'page-3']);
+      toggleExperiment(win, 'amp-story-branching', true);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+            toggleExperiment(win, 'amp-story-branching', false);
+          });
+    });
+    it('should begin at initial page when fragment parameter value is wrong',
+        () => {
+          win.location.hash = 'page=BADVALUE';
+          createPages(story.element, 4,
               ['cover', 'page-1', 'page-2', 'page-3']);
           toggleExperiment(win, 'amp-story-branching', true);
           story.buildCallback();
           return story.layoutCallback()
               .then(() => {
-                expect(story.activePage_.element.id).to.equal('page-1');
+                expect(story.activePage_.element.id).to.equal('cover');
                 toggleExperiment(win, 'amp-story-branching', false);
               });
-    });
+        });
 
   });
 });
