@@ -464,7 +464,7 @@ export class Controls {
     this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', e => {
       devAssert(this.area_);
 
-      const {x, y} = pointerCoords(e);
+      const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));
       const {left, top, right, bottom} = this.area_;
 
       // check bounding box as not to trigger this while mouse hovers over

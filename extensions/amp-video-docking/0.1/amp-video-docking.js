@@ -52,8 +52,8 @@ import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
+import {layoutRectLtwh, moveLayoutRect} from '../../../src/layout-rect';
 import {mapRange} from '../../../src/utils/math';
-import {moveLayoutRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
 import {
   px,
