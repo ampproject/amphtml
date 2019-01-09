@@ -99,7 +99,6 @@ function timedExecOrDie(cmd) {
  */
 function printChangeSummary() {
   if (process.env.TRAVIS) {
-    console.log(`TRAVIS_COMMIT=${process.env.TRAVIS_COMMIT}`);
     console.log('Travis', colors.green('origin/master'), 'baseline:',
         colors.cyan(gitTravisMasterBaseline()));
   }
