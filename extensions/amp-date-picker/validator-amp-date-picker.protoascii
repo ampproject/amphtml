@@ -167,7 +167,6 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      protocol: "http"
       protocol: "https"
       allow_relative: false
     }

@@ -481,21 +481,17 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const min = mutations['min'];
     if (min !== undefined) {
-      this.element.setAttribute('min', min);
       newState['min'] = min;
     }
 
     const max = mutations['max'];
     if (max !== undefined) {
-      this.element.setAttribute('max', max);
       newState['max'] = max;
     }
 
     let p = null;
     const src = mutations['src'];
     if (src !== undefined) {
-      this.element.setAttribute('src', src);
-
       this.clearRenderedTemplates_();
       this.cleanupSrcTemplates_();
 
