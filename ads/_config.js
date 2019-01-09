@@ -875,7 +875,9 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
-  'speakol': {},
+  'speakol': {
+    renderStartImplemented: true,
+  },
 
   'spotx': {
     preconnect: 'https://js.spotx.tv',
