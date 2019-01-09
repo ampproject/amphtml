@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitMergeBaseMaster} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -108,7 +108,7 @@ function isPullRequest() {
  * @return {string} the `master` ancestor's bundle size.
  */
 async function getAncestorBundleSize() {
-  const gitBranchPointSha = gitMergeBaseMaster();
+  const gitBranchPointSha = gitTravisMasterBaseline();
   const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
   log('Branch point from master is', cyan(gitBranchPointShortSha));
   return await octokit.repos.getContents(
@@ -328,7 +328,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequest()) {
-    const baseSha = gitMergeBaseMaster();
+    const baseSha = gitTravisMasterBaseline();
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {

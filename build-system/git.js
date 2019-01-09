@@ -34,22 +34,25 @@ exports.gitMergeBaseLocalMaster = function() {
 };
 
 /**
- * Returns the merge base at which the PR branch was forked from master when
- * running on Travis.
+ * Returns the merge base of the current branch off of master, regardless of
+ * the running environment.
  * @return {string}
  */
-exports.gitMergeBaseTravisMaster = function() {
-  const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
-  return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`).trim();
+exports.gitMergeBaseMaster = function() {
+  if (process.env.TRAVIS) {
+    const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
+    return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`)
+        .trim();
+  }
+  return exports.gitMergeBaseLocalMaster();
 };
 
 /**
- * Returns the merge vase of the current branch off of master, regardless of
- * the running environment.
+ * Returns the `master` parent of the merge commit (current HEAD) on Travis.
+ * @return {string}
  */
-exports.gitMergeBaseMaster = function() {
-  return process.env.TRAVIS ?
-    exports.gitMergeBaseTravisMaster() : exports.gitMergeBaseLocalMaster();
+exports.gitTravisMasterBaseline = function() {
+  return process.env.TRAVIS_COMMIT_RANGE.split('...')[0];
 };
 
 /**
