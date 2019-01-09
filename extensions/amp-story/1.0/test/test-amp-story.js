@@ -1280,6 +1280,7 @@ describes.realWin('amp-story', {
         });
     it('should begin at the specified page fragment parameter value', () => {
       win.location.hash = 'page=page-1';
+
       createPages(story.element, 4,
           ['cover', 'page-1', 'page-2', 'page-3']);
       toggleExperiment(win, 'amp-story-branching', true);
@@ -1303,7 +1304,6 @@ describes.realWin('amp-story', {
                 toggleExperiment(win, 'amp-story-branching', false);
               });
         });
-
   });
 });
 
