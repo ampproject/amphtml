@@ -63,7 +63,6 @@ import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
-
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
@@ -101,6 +100,19 @@ const buildPlayMessageElement = element =>
         <span class="i-amphtml-story-page-play-label"></span>
         <span class='i-amphtml-story-page-play-icon'></span>
       </button>`;
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenAttachmentElement = element =>
+  htmlFor(element)`
+      <div class="
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset">
+        <span class="i-amphtml-story-page-open-attachment-icon"></span>
+        <span class="i-amphtml-story-page-open-attachment-text"
+            role="button">Swipe up</span>
+      </div>`;
 
 /**
  * amp-story-page states.
@@ -142,6 +154,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.playMessageEl_ = null;
+
+    /** @private {?Element} */
+    this.openAttachmentEl_ = null;
 
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
@@ -331,6 +346,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.advancement_.start();
       this.maybeStartAnimations();
       this.checkPageHasAudio_();
+      this.renderAttachmentUI_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -925,6 +941,29 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mutateElement(() =>
       toggle(dev().assertElement(this.playMessageEl_), true));
+  }
+
+  /**
+   * Renders the open attachment UI affordance.
+   * @private
+   */
+  renderAttachmentUI_() {
+    const attachmentEl =
+        this.element.querySelector('amp-story-page-attachment');
+    if (!attachmentEl) {
+      return;
+    }
+
+    if (!this.openAttachmentEl_) {
+      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      this.openAttachmentEl_
+          .querySelector('.i-amphtml-story-page-open-attachment-text')
+          .addEventListener('click', () => {
+            attachmentEl.getImpl().then(attachment => attachment.open());
+          });
+      this.mutateElement(
+          () => this.element.appendChild(this.openAttachmentEl_));
+    }
   }
 
   /**
