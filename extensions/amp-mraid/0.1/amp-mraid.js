@@ -26,6 +26,7 @@
  *
  */
 
+import {HostServices} from '../../../src/inabox/host-services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {MraidService} from './mraid-service';
@@ -42,6 +43,10 @@ const ErrorCodes = {
   incomplete: 'incomplete',
 }
 
+/**
+ * Loads mraid.js if available, and once it's loaded looks good, configures an
+ * MraidService to handle visibility, fullscreen, and exit.
+ */
 export class MraidInitializer {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -145,6 +150,5 @@ export class MraidInitializer {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerServiceForDoc(
-      TAG, MraidInitializer);
+  AMP.registerServiceForDoc(TAG, MraidInitializer);
 });
