@@ -43,7 +43,7 @@ import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, PageState} from './amp-story-page';
+import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
@@ -257,6 +257,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
+    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    this.storyNavigationPath_ = [];
+
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
@@ -388,7 +391,7 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
-          this.switchTo_(args['id']);
+          this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
     }
@@ -542,7 +545,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.switchTo_(getDetail(e)['targetPageId']);
+      this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
@@ -792,7 +795,13 @@ export class AmpStory extends AMP.BaseElement {
             });
           }
         })
-        .then(() => this.switchTo_(this.maybeChangeInitial_(initialPageId)))
+        .then(() => {
+          let maybeInitialPageId = initialPageId;
+          if (isExperimentOn(this.win, 'amp-story-branching')) {
+            maybeInitialPageId = this.maybeChangeInitial_(initialPageId);
+          }
+          this.switchTo_(maybeInitialPageId, NavigationDirection.NEXT);
+        })
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -961,7 +970,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (nextPage) {
       this.navigateToPageAfterAccess_ = null;
-      this.switchTo_(nextPage.element.id);
+      this.switchTo_(nextPage.element.id, NavigationDirection.NEXT);
     }
 
     this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
@@ -1048,10 +1057,16 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
    * @return {!Promise}
+   * @private
    */
-  switchTo_(targetPageId) {
-    const targetPage = this.getPageById(targetPageId);
+  switchTo_(targetPageId, direction) {
+    const targetPage =
+        (isExperimentOn(this.win, 'amp-story-branching')) ?
+          this.updateStoryNavigationPath_(targetPageId, direction) :
+          this.getPageById(targetPageId);
+
     const pageIndex = this.getPageIndex(targetPage);
 
     // Step out if trying to navigate to the currently active page.
@@ -1189,6 +1204,32 @@ export class AmpStory extends AMP.BaseElement {
         unqueueStepInRAF();
       });
     });
+  }
+
+  /**
+   * Update the story level stack and check for navigation adherence
+   * to the path a user takes.
+   * @param {string} targetPageId
+   * @param {string} direction
+   * @return {!./amp-story-page.AmpStoryPage}
+   * @private
+   */
+  updateStoryNavigationPath_(targetPageId, direction) {
+    const targetPage = this.getPageById(targetPageId);
+    if (direction === NavigationDirection.PREVIOUS) {
+      this.storyNavigationPath_.pop();
+      if (this.storyNavigationPath_.length > 0) {
+        const pathPrevious =
+            this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
+            this.storyNavigationPath_[0];
+        if (pathPrevious.element.id != targetPageId) {
+          return pathPrevious;
+        }
+      }
+    } else if (direction === NavigationDirection.NEXT) {
+      this.storyNavigationPath_.push(targetPage);
+    }
+    return targetPage;
   }
 
   /**
@@ -2106,8 +2147,10 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
+    this.storyNavigationPath_.length = 0;
     const switchPromise = this.switchTo_(
-        dev().assertElement(this.pages_[0].element).id);
+        dev().assertElement(
+            this.pages_[0].element).id, NavigationDirection.NEXT);
 
     // Reset all pages so that they are offscreen to right instead of left in
     // desktop view.
