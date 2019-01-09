@@ -882,7 +882,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   pauseStoryUntilConsentIsResolved_() {
     const policyId = this.getConsentPolicy() || 'default';
-    const consentPromise = getConsentPolicyState(this.getAmpDoc(), policyId);
+    const consentPromise = getConsentPolicyState(this.element, policyId);
 
     if (!consentPromise) {
       return;
@@ -920,7 +920,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStoryAccess_() {
-    Services.accessServiceForDocOrNull(this.getAmpDoc()).then(accessService => {
+    Services.accessServiceForDocOrNull(this.element).then(accessService => {
       if (!accessService) {
         return;
       }
