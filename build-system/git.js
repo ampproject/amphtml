@@ -32,7 +32,7 @@ const commitLogMaxCount = 100;
 exports.gitMergeBaseMaster = function() {
   if (process.env.TRAVIS) {
     return getStdout(
-        `git merge-base master ${process.env.TRAVIS_COMMIT}`).trim();
+        `git merge-base master ${process.env.TRAVIS_PULL_REQUEST_SHA}`).trim();
   }
   return gitMergeBaseLocalMaster();
 };
