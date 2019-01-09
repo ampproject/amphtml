@@ -99,11 +99,9 @@ function timedExecOrDie(cmd) {
  */
 function printChangeSummary() {
   if (process.env.TRAVIS) {
-    console.log('Travis', colors.green('origin/master'), 'baseline:',
-        colors.cyan(gitTravisMasterBaseline()));
+    console.log(fileLogPrefix, colors.cyan('origin/master'),
+        'is currently at commit', colors.cyan(gitTravisMasterBaseline()));
   }
-  console.log(colors.green('master'), 'merge-base:',
-      colors.cyan(gitMergeBaseMaster()));
 
   const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
