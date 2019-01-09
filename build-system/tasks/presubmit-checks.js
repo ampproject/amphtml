@@ -452,7 +452,7 @@ const forbiddenTerms = {
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
-      'extensions/amp-access-scroll/0.1/read-depth-tracker.js',
+      'extensions/amp-access-scroll/0.1/scroll-impl.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
