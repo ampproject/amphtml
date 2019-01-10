@@ -92,6 +92,17 @@ const mode = {
 };
 
 
+/**
+  * @typedef {{
+  *   ISOCountry: string,
+  *   matchedISOCountryGroups: !Array<string>,
+  *   allISOCountryGroups: !Array<string>,
+  *   isInCountryGroup: (function(string):GEO_IN_GROUP),
+  * }}
+  */
+export let GeoDef;
+
+
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
