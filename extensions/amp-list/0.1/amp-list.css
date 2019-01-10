@@ -46,7 +46,7 @@ amp-list[load-more] [load-more-button].i-amphtml-default-ui,
   text-align: center;
 }
 
-[load-more-button].i-amphtml-list-load-more-overflow.i-amphtml-default-ui {
+[load-more-button].i-amphtml-list-load-more-overflow {
   position: absolute;
   bottom: 0;
 }
