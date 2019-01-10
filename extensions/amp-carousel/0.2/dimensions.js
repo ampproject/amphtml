@@ -1,5 +1,5 @@
 /**
- * @enum
+ * @enum {number}
  */
 export const Axis = {
   X: 0,
@@ -7,7 +7,7 @@ export const Axis = {
 };
 
 /**
- * @enum
+ * @enum {string}
  */
 export const Alignment = {
   START: 'start',

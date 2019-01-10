@@ -8,7 +8,7 @@ const MIN_AUTO_ADVANCE_INTERVAL = 2000;
  *   advance: function(number),
  * }}
  */
-let AdvanceableDef;
+let AdvanceDef;
 
 /**
  * Handles auto advance for a carousel. This pauses autoadvance whenever a
@@ -22,7 +22,7 @@ export class AutoAdvance {
    * @param {{
    *   win: !Window,
    *   scrollContainer: !Element,
-   *   advanceable: !AdvanceableDef,
+   *   advanceable: !AdvanceDef
    * }} config
    */
   constructor({
@@ -51,14 +51,14 @@ export class AutoAdvance {
     /** @private {boolean} */
     this.paused_ = false;
 
-    /** @private {function()} */
+    /** @private {?function()} */
     this.debouncedAdvance_ = null;
 
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
-        'scroll', e => this.handleScroll_(e), true);
+        'scroll', () => this.handleScroll_(), true);
     this.scrollContainer_.addEventListener(
-        'touchstart', e => this.handleTouchStart_(e), true);
+        'touchstart', () => this.handleTouchStart_(), true);
   }
 
   /**
@@ -109,7 +109,9 @@ export class AutoAdvance {
     listenOnce(window, 'touchend', () => {
       this.paused_ = false;
       this.resetAutoAdvance_();
-    }, true);
+    }, {
+      capture: true,
+    });
   }
 
   /**

@@ -1,6 +1,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -36,28 +37,30 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element} = this;
+    const {element, win} = this;
     // Grab the slides up front so we can place them later.
     this.slides_ = toArray(element.children).filter(c => !isSizer(c));
     // Create the carousel's inner DOM.
     element.appendChild(this.renderContainerDom_());
 
+    const scrollContainer = dev().assertElement(
+        this.element.querySelector('.i-amphtml-carousel-scroll'));
+
     this.carousel_ = new Carousel({
       win,
       element,
-      scrollContainer: this.element.querySelector('.i-amphtml-carousel-scroll'),
+      scrollContainer,
       runMutate: cb => this.mutateElement(cb),
     });
 
     // Handle the initial set of attributes
-    Array.from(this.element.attributes).forEach(attr => {
+    toArray(this.element.attributes).forEach(attr => {
       this.attributeMutated_(attr.name, attr.value);
     });
 
     this.setupActions_();
 
     // Do some manual "slot" distribution
-    const scrollContainer = element.querySelector('.i-amphtml-carousel-scroll');
     this.slides_.forEach(slide => {
       slide.classList.add('i-amphtml-carousel-slotted');
       scrollContainer.appendChild(slide);
@@ -76,6 +79,7 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.carousel_.updateUi();
+    return Promise.resolve();
   }
 
   /** @override */
