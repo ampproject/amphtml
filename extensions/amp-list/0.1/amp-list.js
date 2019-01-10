@@ -65,9 +65,6 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @private {?UnlistenDef} */
-    this.viewportUnlisten_ = null;
-
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
 
@@ -253,14 +250,6 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return this.fetchList_();
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.viewportUnlisten_) {
-      this.viewportUnlisten_();
-    }
-    return true;
   }
 
   /** @override */
@@ -1023,7 +1012,7 @@ export class AmpList extends AMP.BaseElement {
    */
   setupLoadMoreAuto_() {
     const loadMoreButton = dev().assertElement(this.loadMoreButton_);
-    this.viewportUnlisten_ = this.viewport_.onScroll(() => {
+    this.viewport_.onScroll(() => {
       this.viewport_.getClientRectAsync(loadMoreButton)
           .then(positionRect => {
             const vr = this.viewport_.getRect();
