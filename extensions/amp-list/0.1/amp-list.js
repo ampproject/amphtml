@@ -191,6 +191,11 @@ export class AmpList extends AMP.BaseElement {
       this.getLoadMoreEndElement_();
       this.getLoadMoreButtonClickable_();
       this.getLoadMoreFailedClickable_();
+      // Hide overflow element
+      const overflowElement = this.getOverflowElement();
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
     }
   }
 
@@ -692,7 +697,22 @@ export class AmpList extends AMP.BaseElement {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
+        this.attemptChangeHeight(scrollHeight).then(() => {
+          if (this.loadMoreEnabled_) {
+            this.mutateElement(() => {
+              this.loadMoreButton_.classList
+                  .remove('i-amphtml-list-load-more-overflow');
+            });
+          }
+        }).catch(() => {
+          if (this.loadMoreEnabled_) {
+            this.mutateElement(() => {
+              this.loadMoreButton_.classList
+                  .add('i-amphtml-list-load-more-overflow');
+              this.element.appendChild(this.loadMoreButton_);
+            });
+          }
+        });
       }
     });
   }
