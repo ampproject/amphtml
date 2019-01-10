@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {bytesToString, stringToBytes} from './utils/bytes';
-import {getSourceOrigin, parseUrlDeprecated} from './url';
-import {parseJson} from './json';
-import {registerServiceBuilderForDoc} from './service';
+import {Services} from '../services';
+import {bytesToString, stringToBytes} from '../utils/bytes';
+import {getSourceOrigin, parseUrlDeprecated} from '../url';
+import {parseJson} from '../json';
+import {registerServiceBuilderForDoc} from '../service';
+import {user} from '../log';
 
 /** @const {string} */
 const TAG = 'OriginExperiments';
@@ -92,12 +93,13 @@ export class OriginExperiments {
         const meta = metas[i];
         const token = meta.getAttribute('content');
         if (token) {
-          const p = this.tokenMaster_.verifyToken(token, win.location, publicKey).catch(error => {
+          const p = this.tokenMaster_.verifyToken(
+              token, win.location, publicKey).catch(error => {
             user().error(TAG, 'Failed to verify experiment token:' + error);
           });
           promises.push(p);
         } else {
-          user().error(TAG, 'Missing content for experiment token.');
+          user().error(TAG, 'Missing content for experiment token: ', meta);
         }
       }
       return Promise.all(promises);

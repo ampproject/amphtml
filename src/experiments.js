@@ -21,15 +21,9 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {OriginExperiments} from './origin-experiments';
-import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
-import {user} from './log';
-
-/** @const {string} */
-const TAG = 'experiments';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
@@ -42,12 +36,6 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
-
-/** @type {?Promise} */
-let originExperimentsPromise;
-
-/** @private {?OriginExperiments} */
-let originExperiments;
 
 /**
  * @typedef {{
@@ -74,25 +62,6 @@ export function isCanary(win) {
 export function getBinaryType(win) {
   return win.AMP_CONFIG && win.AMP_CONFIG.type ?
     win.AMP_CONFIG.type : 'unknown';
-}
-
-/**
- * Asynchronously checks whether the specified origin experiment is on or off.
- * On the first invocation, triggers scan of origin experiment tokens on page.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} experimentId
- * @param {boolean=} opt_forceScan Forces rescan of page for experiment tokens.
- * @return {!Promise<boolean>}
- */
-export function isOriginExperimentOn(ampdoc, experimentId, opt_forceScan) {
-  const {win} = ampdoc;
-  if (!originExperimentsPromise || opt_forceScan) {
-    originExperimentsPromise =
-        scanForOriginExperimentTokens(ampdoc, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
-  }
-  return originExperimentsPromise.then(() => {
-    return isExperimentOn(win, /*OK*/experimentId);
-  });
 }
 
 /**
