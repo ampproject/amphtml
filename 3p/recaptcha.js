@@ -21,7 +21,13 @@ import ampToolboxCacheUrl from
   '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {
+  dev,
+  devAssert,
+  initLogConstructor,
+  setReportError,
+  user,
+} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
@@ -89,7 +95,7 @@ export function initRecaptcha() {
   }
 
   // Get our sitekey from the iframe name attribute
-  dev().assert(
+  devAssert(
       dataObject.sitekey,
       'The sitekey is required for the <amp-recaptcha-input> iframe'
   );

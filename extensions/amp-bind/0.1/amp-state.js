@@ -21,7 +21,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
@@ -43,15 +43,6 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
-  }
-
-  /** @override */
-  activate(unusedInvocation) {
-    // TODO(choumx): Remove this after a few weeks in production.
-    const TAG = this.getName_();
-    this.user().error(TAG,
-        'Please use AMP.setState() action explicitly, e.g. ' +
-        'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
 
   /** @override */
@@ -89,7 +80,7 @@ export class AmpState extends AMP.BaseElement {
     const {element} = this;
     if (element.hasAttribute('overridable')) {
       Services.bindForDocOrNull(element).then(bind => {
-        dev().assert(bind, 'Bind service can not be found.');
+        devAssert(bind, 'Bind service can not be found.');
         bind.makeStateKeyOverridable(element.getAttribute('id'));
       });
     }
@@ -178,11 +169,11 @@ export class AmpState extends AMP.BaseElement {
     if (json === undefined || json === null) {
       return;
     }
-    const id = user().assert(this.element.id, '<amp-state> must have an id.');
+    const id = userAssert(this.element.id, '<amp-state> must have an id.');
     const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {
-      dev().assert(bind, 'Bind service can not be found.');
+      devAssert(bind, 'Bind service can not be found.');
       bind.setState(state,
           /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });

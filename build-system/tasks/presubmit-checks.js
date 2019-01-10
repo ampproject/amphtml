@@ -69,6 +69,8 @@ const forbiddenTerms = {
   },
   'describe\\.only': '',
   'describes.*\\.only': '',
+  'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
+  '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'gulp-util': {
@@ -916,7 +918,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18) The AMP HTML Authors\\.':
+  'Copyright 20(15|16|17|18|19) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,

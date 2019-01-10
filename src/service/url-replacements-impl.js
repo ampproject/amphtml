@@ -36,7 +36,7 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
@@ -114,6 +114,7 @@ export class GlobalVariableSource extends VariableSource {
   /** @override */
   initialize() {
     const {win} = this.ampdoc;
+    const element = this.ampdoc.getHeadNode();
 
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
@@ -262,7 +263,7 @@ export class GlobalVariableSource extends VariableSource {
       // If no `opt_userNotificationId` argument is provided then
       // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = Services.userNotificationManagerForDoc(this.ampdoc)
+        consent = Services.userNotificationManagerForDoc(element)
             .then(service => {
               return service.get(opt_userNotificationId);
             });
@@ -300,7 +301,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
-        user().assert(variant !== undefined,
+        userAssert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         // When no variant assigned, use reserved keyword 'none'.
@@ -325,7 +326,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
       return this.getGeo_(geos => {
         if (geoType) {
-          user().assert(geoType === 'ISOCountry',
+          userAssert(geoType === 'ISOCountry',
               'The value passed to AMP_GEO() is not valid name:' + geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
@@ -465,7 +466,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Access: data from the authorization response.
     this.setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
-      user().assert(field,
+      userAssert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
@@ -482,7 +483,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return Services.activityForDoc(this.ampdoc).then(activity => {
+      return Services.activityForDoc(element).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -490,14 +491,14 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the incremental engaged time since the last push under the
     // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
-      return Services.activityForDoc(this.ampdoc).then(activity => {
+      return Services.activityForDoc(element).then(activity => {
         return activity.getIncrementalEngagedTime(/** @type {string} */ (name),
             reset !== 'false');
       });
     });
 
     this.set('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataSync(
           win,
@@ -505,7 +506,7 @@ export class GlobalVariableSource extends VariableSource {
           /**@type {string}*/(endAttribute));
     });
     this.setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataAsync(
           win,
@@ -605,9 +606,10 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getAccessValue_(getter, expr) {
+    const element = this.ampdoc.getHeadNode();
     return Promise.all([
-      Services.accessServiceForDocOrNull(this.ampdoc),
-      Services.subscriptionsServiceForDocOrNull(this.ampdoc),
+      Services.accessServiceForDocOrNull(element),
+      Services.subscriptionsServiceForDocOrNull(element),
     ]).then(services => {
       const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
         services[0] || services[1]);
@@ -631,7 +633,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getQueryParamData_(param, defaultValue) {
-    user().assert(param,
+    userAssert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
     const url = parseUrlDeprecated(
@@ -661,7 +663,7 @@ export class GlobalVariableSource extends VariableSource {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
     return this.variants_.then(variants => {
-      user().assert(variants,
+      userAssert(variants,
           'To use variable %s, amp-experiment should be configured',
           expr);
       return getter(variants);
@@ -677,9 +679,10 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getGeo_(getter, expr) {
-    return Services.geoForDocOrNull(this.ampdoc)
+    const element = this.ampdoc.getHeadNode();
+    return Services.geoForDocOrNull(element)
         .then(geo => {
-          user().assert(geo,
+          userAssert(geo,
               'To use variable %s, amp-geo should be configured',
               expr);
           return getter(geo);
@@ -700,7 +703,7 @@ export class GlobalVariableSource extends VariableSource {
           Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
-      user().assert(fragments, 'To use variable %s, ' +
+      userAssert(fragments, 'To use variable %s, ' +
           'amp-share-tracking should be configured',
       expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
@@ -718,7 +721,7 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
       return service.then(storyVariables => {
-        user().assert(storyVariables,
+        userAssert(storyVariables,
             'To use variable %s amp-story should be configured', name);
         return storyVariables[property];
       });
@@ -738,7 +741,7 @@ export class GlobalVariableSource extends VariableSource {
         const service =
             Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
         return service.then(viewerIntegrationVariables => {
-          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+          userAssert(viewerIntegrationVariables, 'To use variable %s ' +
               'amp-viewer-integration must be installed', name);
           return viewerIntegrationVariables[property](param, defaultValue);
         });
@@ -873,7 +876,7 @@ export class UrlReplacements {
    * @return {string|!Promise<string>}
    */
   expandInputValue_(element, opt_sync) {
-    dev().assert(element.tagName == 'INPUT' &&
+    devAssert(element.tagName == 'INPUT' &&
         (element.getAttribute('type') || '').toLowerCase() == 'hidden',
     'Input value expansion only works on hidden input fields: %s', element);
 
@@ -960,7 +963,7 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element, defaultUrlParams) {
-    dev().assert(element.tagName == 'A');
+    devAssert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
@@ -1083,7 +1086,7 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user().assert(isProtocolValid(replacement),
+    userAssert(isProtocolValid(replacement),
         'The replacement url has invalid protocol: %s', replacement);
 
     return replacement;

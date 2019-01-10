@@ -29,7 +29,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
@@ -124,11 +124,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
-    user().assert(
+    userAssert(
         children.length == 1,
         '%s should have its target element as its one and only child',
         TAG);
-    user().assert(
+    userAssert(
         this.elementIsSupported_(children[0]),
         '%s is not supported by %s',
         children[0].tagName,
@@ -398,48 +398,56 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
-    // TODO (#12881): this and the subsequent use of event.preventDefault
-    // is a temporary solution to #12362. We should revisit this problem after
-    // resolving #12881 or change the use of window.event to the specific event
-    // triggering the gesture.
     this.gestures_ = Gestures.get(
         this.element,
         /* opt_shouldNotPreventDefault */true
     );
 
-    this.gestures_.onPointerDown(() => {
+    this.gestures_.onPointerDown(gesture => {
       if (this.motion_) {
         this.motion_.halt();
-        event.preventDefault();
+        gesture.event.preventDefault();
       }
     });
 
     // Zoomable.
-    this.gestures_.onGesture(DoubletapRecognizer, e => {
+    this.gestures_.onGesture(DoubletapRecognizer, gesture => {
+      const {
+        data,
+        event,
+      } = gesture;
       event.preventDefault();
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.width / 2) - e.data.clientX;
-      const deltaY = (this.elementBox_.height / 2) - e.data.clientY;
+      const deltaX = (this.elementBox_.width / 2) - data.clientX;
+      const deltaY = (this.elementBox_.height / 2) - data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
         return this.onZoomRelease_();
       });
     });
 
-    this.gestures_.onGesture(TapzoomRecognizer, e => {
+    this.gestures_.onGesture(TapzoomRecognizer, gesture => {
+      const {
+        data,
+        event,
+      } = gesture;
       event.preventDefault();
-      this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
-          e.data.deltaX, e.data.deltaY);
-      if (e.data.last) {
-        this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
-            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
+      this.onTapZoom_(data.centerClientX, data.centerClientY,
+          data.deltaX, data.deltaY);
+      if (data.last) {
+        this.onTapZoomRelease_(data.centerClientX, data.centerClientY,
+            data.deltaX, data.deltaY, data.velocityY, data.velocityY);
       }
     });
 
-    this.gestures_.onGesture(PinchRecognizer, e => {
+    this.gestures_.onGesture(PinchRecognizer, gesture => {
+      const {
+        data,
+        event,
+      } = gesture;
       event.preventDefault();
-      this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
-          e.data.deltaX, e.data.deltaY, e.data.dir);
-      if (e.data.last) {
+      this.onPinchZoom_(data.centerClientX, data.centerClientY,
+          data.deltaX, data.deltaY, data.dir);
+      if (data.last) {
         this.onZoomRelease_();
       }
     });
@@ -452,11 +460,15 @@ export class AmpImageViewer extends AMP.BaseElement {
   registerPanningGesture_() {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
-        .onGesture(SwipeXYRecognizer, e => {
+        .onGesture(SwipeXYRecognizer, gesture => {
+          const {
+            data,
+            event,
+          } = gesture;
           event.preventDefault();
-          this.onMove_(e.data.deltaX, e.data.deltaY, false);
-          if (e.data.last) {
-            this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+          this.onMove_(data.deltaX, data.deltaY, false);
+          if (data.last) {
+            this.onMoveRelease_(data.velocityX, data.velocityY);
           }
         });
   }

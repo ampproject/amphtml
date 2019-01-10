@@ -17,7 +17,7 @@
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -231,12 +231,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-scaling',
-    name: 'Scale pages dynamically in amp-story by default',
-    spec: 'https://github.com/ampproject/amphtml/issues/12902',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
-  },
-  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
@@ -269,6 +263,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
     id: 'no-sync-xhr-in-ads',
@@ -397,12 +397,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-video-iframe',
-    name: 'Allows the use of the amp-video-iframe component.',
-    spec: 'https://github.com/ampproject/amphtml/issues/16252',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
-  },
-  {
     id: 'amp-date-display',
     name: 'Enables displaying dates',
     spec: 'https://github.com/ampproject/amphtml/issues/10837',
@@ -418,7 +412,7 @@ const EXPERIMENTS = [
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+    devAssert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
         ' have a `cleanupIssue` field.');
   });
 }
@@ -580,11 +574,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
-  const confirmButton = dev().assert(
+  const container = devAssert(document.getElementById('popup-container'));
+  const messageElement = devAssert(document.getElementById('popup-message'));
+  const confirmButton = devAssert(
       document.getElementById('popup-button-ok'));
-  const cancelButton = dev().assert(
+  const cancelButton = devAssert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {

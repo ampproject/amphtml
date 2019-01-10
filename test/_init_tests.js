@@ -41,6 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
@@ -57,13 +58,6 @@ global.describes = describes;
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
-
-// Latest stable version numbers of browsers as of 12/3/2018
-const latestVersion = {
-  chrome: 71,
-  firefox: 64,
-  safari: 12,
-};
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
@@ -141,13 +135,6 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipChromeDev() {
-    return this.skip(() => {
-      return this.platform.isChrome() &&
-        this.platform.getMajorVersion() > latestVersion.chrome;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
@@ -156,22 +143,8 @@ class TestConfig {
     return this.skip(this.runOnFirefox);
   }
 
-  skipFirefoxDev() {
-    return this.skip(() => {
-      return this.platform.isFirefox() &&
-        this.platform.getMajorVersion() > latestVersion.firefox;
-    });
-  }
-
   skipSafari() {
     return this.skip(this.runOnSafari);
-  }
-
-  skipSafariLatest() {
-    return this.skip(() => {
-      return this.platform.isSafari() &&
-        this.platform.getMajorVersion() === latestVersion.safari;
-    });
   }
 
   skipIos() {
@@ -240,12 +213,12 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs() {
+  retryOnSaucelabs(times = 4) {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
-      mocha.retries(4);
+      mocha.retries(times);
     });
     return this;
   }
@@ -370,7 +343,7 @@ function restoreConsoleError() {
         'The test "' + testName + '" called "expectAsyncConsoleError", ' +
         'but there were no call(s) to console.error with these message(s): ' +
         '"' + expectedAsyncErrors.join('", "') + '"';
-    throw new Error(helpMessage);
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
@@ -449,6 +422,7 @@ function beforeTest() {
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
 afterEach(function() {
+  that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();

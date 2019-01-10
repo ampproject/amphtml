@@ -42,13 +42,16 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
+.i-amphtml-story-hidden.i-amphtml-story-system-layer * {
+  pointer-events: none !important;
+}
+
 .i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0 !important;
 }
 
 .i-amphtml-story-system-layer-buttons {
   margin-top: 8px; /* 6px progress bar + 2px margin */
-  pointer-events: auto !important;
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;

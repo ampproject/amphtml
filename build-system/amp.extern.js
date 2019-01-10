@@ -144,6 +144,7 @@ process.env.SERVE_MODE;
 window.IS_AMP_ALT;
 
 // Exposed to ads.
+// Preserve these filedNames so they can be accessed by 3p code.
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
@@ -153,6 +154,24 @@ window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
+window.context.ampcontextVersion;
+window.context.ampcontextFilepath
+window.context.canary;
+window.context.canonicalUrl;
+window.context.consentSharedData;
+window.context.container;
+window.context.domFingerprint;
+window.context.hidden;
+window.context.initialConsentState;
+window.context.initialConsentValue;
+window.context.location;
+window.context.mode;
+window.context.pageViewId;
+window.context.referrer;
+window.context.sourceUrl;
+window.context.startTime;
+window.context.tagName;
+
 
 // Service Holder
 window.services;
@@ -330,9 +349,6 @@ window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes
 
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.implementation_ = {};
 Element.prototype.signals;
 window.whenSignal;
 
@@ -535,31 +551,6 @@ AMP.AmpAdUIHandler = class {
    */
   constructor(baseInstance) {}
 };
-
-/*
-     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
- \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
-  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
-   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
-    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
-
-  Any private property for BaseElement should be declared in
-  build-system/amp.extern.js, this is so closure compiler doesn't rename
-  the private properties of BaseElement since if it did there is a
-  possibility that the private property's new symbol in the core compilation
-  unit would collide with a renamed private property in the inheriting class
-  in extensions.
- */
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {number} */
-SomeBaseElementLikeClass.prototype.layoutWidth_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
