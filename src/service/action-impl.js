@@ -751,7 +751,7 @@ function isActionWhitelisted_(invocation, whitelist) {
   const defaultActionAlias = (typeof node.getDefaultActionAlias == 'function')
       && node.getDefaultActionAlias();
   const calledByDefaultActionAndHasDefaultAlias =
-      method == DEFAULT_ACTION && (node && defaultActionAlias);
+      method == DEFAULT_ACTION && (node && !!defaultActionAlias);
   // If called via default action 'activate', check the whitelist
   // against the default action alias.
   if (calledByDefaultActionAndHasDefaultAlias) {
