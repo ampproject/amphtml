@@ -16,6 +16,7 @@
 
 @import './amp-story-access.css';
 @import './amp-story-desktop-panels.css';
+@import './amp-story-page-attachment.css';
 @import './amp-story-user-overridable.css';
 @import './pagination-buttons.css';
 
@@ -722,4 +723,98 @@ amp-story .amp-video-eq,
   border-radius: 24px !important;
   filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+/** amp-story-page open attachment message. */
+
+@keyframes open-attachment-fly-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes open-attachment-icon {
+  0% {
+    transform: translateY(5px);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes open-attachment-button-explode {
+  0% {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@keyframes open-attachment-text-color {
+  0% {
+    color: #fff;
+    text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36);
+  }
+  to {
+    color: rgba(0, 0, 0, 0.87);
+    text-shadow: none;
+  }
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 0 !important;
+  width: 100% !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-icon {
+  display: block !important;
+  height: 20px !important;
+  width: 24px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+  animation: open-attachment-icon 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text {
+  position: relative !important;
+  padding: 0 24px !important;
+  height: 32px !important;
+  cursor: pointer !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 15px !important;
+  line-height: 32px !important;
+  pointer-events: auto !important;
+  animation: open-attachment-text-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text::after {
+  content: "";
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #fff !important;
+  border-radius: 32px !important;
+  z-index: -1 !important;
+  animation: open-attachment-button-explode 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
 }

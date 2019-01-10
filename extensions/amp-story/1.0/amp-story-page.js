@@ -103,6 +103,19 @@ const buildPlayMessageElement = element =>
       </button>`;
 
 /**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenAttachmentElement = element =>
+  htmlFor(element)`
+      <div class="
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset">
+        <span class="i-amphtml-story-page-open-attachment-icon"></span>
+        <span class="i-amphtml-story-page-open-attachment-text"
+            role="button">Swipe up</span>
+      </div>`;
+
+/**
  * amp-story-page states.
  * @enum {number}
  */
@@ -142,6 +155,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.playMessageEl_ = null;
+
+    /** @private {?Element} */
+    this.openAttachmentEl_ = null;
 
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
@@ -331,6 +347,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.advancement_.start();
       this.maybeStartAnimations();
       this.checkPageHasAudio_();
+      this.renderOpenAttachmentUI_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -925,6 +942,29 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mutateElement(() =>
       toggle(dev().assertElement(this.playMessageEl_), true));
+  }
+
+  /**
+   * Renders the open attachment UI affordance.
+   * @private
+   */
+  renderOpenAttachmentUI_() {
+    const attachmentEl =
+        this.element.querySelector('amp-story-page-attachment');
+    if (!attachmentEl) {
+      return;
+    }
+
+    if (!this.openAttachmentEl_) {
+      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      this.openAttachmentEl_
+          .querySelector('.i-amphtml-story-page-open-attachment-text')
+          .addEventListener('click', () => {
+            attachmentEl.getImpl().then(attachment => attachment.open());
+          });
+      this.mutateElement(
+          () => this.element.appendChild(this.openAttachmentEl_));
+    }
   }
 
   /**
