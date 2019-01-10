@@ -43,16 +43,6 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
-/** @const {!webCrypto.JsonWebKey} */
-const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
-  'alg': 'RS256',
-  'e': 'AQAB',
-  'ext': true,
-  'key_ops': ['verify'],
-  'kty': 'RSA',
-  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
-});
-
 /** @type {?Promise} */
 let originExperimentsPromise;
 
@@ -84,64 +74,6 @@ export function isCanary(win) {
 export function getBinaryType(win) {
   return win.AMP_CONFIG && win.AMP_CONFIG.type ?
     win.AMP_CONFIG.type : 'unknown';
-}
-
-/**
- * Verifies a single origin experiment token and enables the corresponding
- * experiment on success. If token verification fails, a user error is logged.
- * @param {!Window} win
- * @param {string} token
- * @param {!./service/crypto-impl.Crypto} crypto
- * @param {!webCrypto.CryptoKey} publicKey
- * @return {!Promise}
- * @private
- */
-function verifyOriginExperimentToken(win, token, crypto, publicKey) {
-  if (!crypto.isPkcsAvailable()) {
-    user().error(TAG, 'Crypto is unavailable.');
-    return Promise.resolve();
-  }
-  if (!originExperiments) {
-    originExperiments = new OriginExperiments(crypto);
-  }
-  const verify = originExperiments.verifyToken(token, win.location, publicKey);
-  return verify.then(experimentId => {
-    toggleExperiment(win, experimentId, true, /* transientExperiment */ true);
-  }, error => {
-    user().error(TAG, 'Failed to verify experiment token:' + error);
-  });
-}
-
-/**
- * Scan the page for origin experiment tokens, verifies them, and enables
- * the corresponding experiments for verified tokens.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!webCrypto.JsonWebKey} publicJwk
- * @return {!Promise}
- * @private
- */
-function scanForOriginExperimentTokens(ampdoc, publicJwk) {
-  const head = ampdoc.getHeadNode();
-  const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0) {
-    return Promise.resolve();
-  }
-  const {win} = ampdoc;
-  const crypto = Services.cryptoFor(win);
-  return crypto.importPkcsKey(publicJwk).then(publicKey => {
-    const promises = [];
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const token = meta.getAttribute('content');
-      if (token) {
-        const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
-        promises.push(p);
-      } else {
-        user().error(TAG, 'Missing content for experiment token.');
-      }
-    }
-    return Promise.all(promises);
-  });
 }
 
 /**

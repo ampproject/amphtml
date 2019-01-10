@@ -14,25 +14,112 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {bytesToString, stringToBytes} from './utils/bytes';
 import {getSourceOrigin, parseUrlDeprecated} from './url';
 import {parseJson} from './json';
+import {registerServiceBuilderForDoc} from './service';
+
+/** @const {string} */
+const TAG = 'OriginExperiments';
+
+/** @const {!webCrypto.JsonWebKey} */
+const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
+  'alg': 'RS256',
+  'e': 'AQAB',
+  'ext': true,
+  'key_ops': ['verify'],
+  'kty': 'RSA',
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
+});
 
 /**
  * Generates, signs and verifies origin experiments.
  */
 export class OriginExperiments {
   /**
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const @private */
+    this.ampdoc_ = ampdoc;
+
+    /** @const @private {!./service/crypto-impl.Crypto} */
+    this.crypto_ = Services.cryptoFor(ampdoc.win);
+
+    /** @const @private {!TokenMaster} */
+    this.tokenMaster_ = new TokenMaster(this.crypto_);
+
+    /** @private {?Promise} */
+    this.scanPromise_ = null;
+  }
+
+  /**
+   * Async returns array of origin experiment IDs that are enabled.
+   * @param {boolean=} opt_rescan
+   * @param {!webCrypto.JsonWebKey=} publicJwk
+   * @return {!Promise<!Array<string>>}
+   */
+  getExperiments(opt_rescan = false, publicJwk = PUBLIC_JWK) {
+    if (!this.crypto_.isPkcsAvailable()) {
+      user().error(TAG, 'Crypto is unavailable.');
+      return Promise.resolve([]);
+    }
+    if (!this.scanPromise_ || opt_rescan) {
+      this.scanPromise_ = this.scanForTokens_(publicJwk);
+    }
+    return this.scanPromise_;
+  }
+
+  /**
+   * Scan the page for origin experiment tokens, verifies them, and enables
+   * the corresponding experiments for verified tokens.
+   * @param {!webCrypto.JsonWebKey} publicJwk
+   * @return {!Promise}
+   * @private
+   */
+  scanForTokens_(publicJwk) {
+    const head = this.ampdoc_.getHeadNode();
+    const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
+    if (metas.length == 0) {
+      return Promise.resolve();
+    }
+    const {win} = this.ampdoc_;
+    const crypto = Services.cryptoFor(win);
+    return crypto.importPkcsKey(publicJwk).then(publicKey => {
+      const promises = [];
+      for (let i = 0; i < metas.length; i++) {
+        const meta = metas[i];
+        const token = meta.getAttribute('content');
+        if (token) {
+          const p = this.tokenMaster_.verifyToken(token, win.location, publicKey).catch(error => {
+            user().error(TAG, 'Failed to verify experiment token:' + error);
+          });
+          promises.push(p);
+        } else {
+          user().error(TAG, 'Missing content for experiment token.');
+        }
+      }
+      return Promise.all(promises);
+    });
+  }
+}
+
+/**
+ * Handles key generation and token signing/verifying.
+ */
+class TokenMaster {
+  /**
    * @param {!./service/crypto-impl.Crypto} crypto
    */
   constructor(crypto) {
-    /** @private {!./service/crypto-impl.Crypto} */
     this.crypto_ = crypto;
   }
 
   /**
    * Generates an RSA public/private key pair for signing and verifying.
    * @return {!Promise}
+   * @protected
    */
   generateKeys() {
     const generationAlgo = Object.assign({
@@ -51,6 +138,7 @@ export class OriginExperiments {
    * @param {!JsonObject} json
    * @param {!webCrypto.CryptoKey} privateKey
    * @return {!Promise<string>}
+   * @protected
    */
   generateToken(version, json, privateKey) {
     const config = stringToBytes(JSON.stringify(json));
@@ -67,6 +155,7 @@ export class OriginExperiments {
    * @param {!webCrypto.CryptoKey} publicKey
    * @return {!Promise<string>} If token is valid, resolves with the
    *     experiment ID. Otherwise, rejects with validation error.
+   * @protected
    */
   verifyToken(token, location, publicKey) {
     return new Promise(resolve => {
@@ -128,6 +217,7 @@ export class OriginExperiments {
    * @param {number} version
    * @param {!Uint8Array} config
    * @return {!Uint8Array}
+   * @private
    */
   prepend_(version, config) {
     const data = new Uint8Array(config.length + 5);
@@ -143,6 +233,7 @@ export class OriginExperiments {
    * @param {!Uint8Array} data
    * @param {!Uint8Array} signature
    * @return {string}
+   * @private
    */
   append_(data, signature) {
     const string = bytesToString(data) + bytesToString(signature);
@@ -154,6 +245,7 @@ export class OriginExperiments {
    * @param {!Uint8Array} data
    * @param {!webCrypto.CryptoKey} privateKey
    * @return {!Promise}
+   * @private
    */
   sign_(data, privateKey) {
     return this.crypto_.subtle.sign(this.crypto_.pkcsAlgo, privateKey, data);
@@ -165,8 +257,16 @@ export class OriginExperiments {
    * @param {!Uint8Array} data
    * @param {!webCrypto.CryptoKey} publicKey
    * @return {!Promise<boolean>}
+   * @private
    */
   verify_(signature, data, publicKey) {
     return this.crypto_.verifyPkcs(publicKey, signature, data);
   }
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installOriginExperimentsForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'origin-experiments', OriginExperiments);
 }
