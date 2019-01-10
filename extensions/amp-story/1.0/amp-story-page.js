@@ -63,6 +63,7 @@ import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
+
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
@@ -346,7 +347,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.advancement_.start();
       this.maybeStartAnimations();
       this.checkPageHasAudio_();
-      this.renderAttachmentUI_();
+      this.renderOpenAttachmentUI_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -947,7 +948,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Renders the open attachment UI affordance.
    * @private
    */
-  renderAttachmentUI_() {
+  renderOpenAttachmentUI_() {
     const attachmentEl =
         this.element.querySelector('amp-story-page-attachment');
     if (!attachmentEl) {

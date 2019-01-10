@@ -330,7 +330,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      this.element.classList.add('i-amphtml-story-page-attachment-dragging');
       setImportantStyles(
           this.element, {transform: translate, transition: 'none'});
     });
@@ -352,7 +351,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
       this.element.classList.add('i-amphtml-story-page-attachment-open');
-      this.element.classList.remove('i-amphtml-story-page-attachment-dragging');
       toggle(dev().assertElement(this.containerEl_), true);
     });
   }
@@ -373,7 +371,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
       this.element.classList.remove('i-amphtml-story-page-attachment-open');
-      this.element.classList.remove('i-amphtml-story-page-attachment-dragging');
       // Note: if you change the duration here, you'll also have to change the
       // animation duration in the CSS.
       setTimeout(
