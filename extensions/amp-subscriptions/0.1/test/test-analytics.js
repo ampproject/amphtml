@@ -37,4 +37,12 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
       'serviceId': 'service1',
     });
   });
+
+  it('should trigger an action event', () => {
+    const stub = sandbox.stub(analytics, 'event');
+    analytics.actionEvent('service1', 'action1', 'success');
+    expect(stub).to.be.calledOnce.calledWith(
+        'subscriptions-action-action1-success',
+        {'serviceId': 'service1'});
+  });
 });
