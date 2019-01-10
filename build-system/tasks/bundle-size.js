@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -108,22 +108,21 @@ function isPullRequest() {
  * @return {string} the `master` ancestor's bundle size.
  */
 async function getAncestorBundleSize() {
-  const gitBranchPointSha = gitTravisMasterBaseline();
-  const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
-  log('Branch point from master is', cyan(gitBranchPointShortSha));
+  const gitBranchPoint = gitTravisMasterBaseline();
+  log('Branch point from master is', cyan(shortSha(gitBranchPoint)));
   return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
-        path: path.join('bundle-size', gitBranchPointSha),
+        path: path.join('bundle-size', gitBranchPoint),
       })
   ).then(result => {
     const ancestorBundleSize =
         Buffer.from(result.data.content, 'base64').toString().trim();
-    log('Bundle size of', cyan(gitBranchPointShortSha), 'is',
+    log('Bundle size of', cyan(shortSha(gitBranchPoint)), 'is',
         cyan(ancestorBundleSize));
     return ancestorBundleSize;
   }).catch(() => {
-    log(yellow('WARNING: Failed to retrieve bundle size of'),
-        cyan(gitBranchPointShortSha));
+    log(yellow('WARNING: Failed to retrieve bundle size of baseline commit'),
+        cyan(shortSha(gitBranchPoint)));
     log(yellow('Falling back to comparing to the max bundle size only'));
     return null;
   });
