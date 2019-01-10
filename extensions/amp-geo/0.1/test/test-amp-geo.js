@@ -62,7 +62,6 @@ describes.realWin('amp-geo', {
   let el;
   let userErrorStub;
 
-
   beforeEach(() => {
     userErrorStub = sandbox.stub(user(), 'error');
     win = env.win;
@@ -320,6 +319,10 @@ describes.realWin('amp-geo', {
     });
   });
 
+  /**
+   * pre-rendered geo is the the case where a publisher uses their own
+   * infrastructure to add a country tag to the body.
+   */
   it('should respect pre-rendered geo tags', () => {
     addConfigElement('script');
     doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
@@ -381,6 +384,20 @@ describes.realWin('amp-geo', {
     return expect(Services.geoForDocOrNull(el)).to.eventually.equal(null);
   });
 
+  it('geo should log an error if unpatched in production. ', () => {
+    expectAsyncConsoleError(/GEONOTPATCHED/);
+    sandbox.stub(win.AMP_MODE, 'localDev').value(false);
+    addConfigElement('script');
+
+    geo.buildCallback();
+    return Services.geoForDocOrNull(el).then(geo => {
+      expect(geo.ISOCountry).to.equal('unknown');
+      expectBodyHasClass([
+        'amp-geo-error',
+      ], true);
+    });
+  });
+
   it('should throw if it has multiple script child elements', () => {
     expect(() => {
       addConfigElement('script');
@@ -412,7 +429,9 @@ describes.realWin('amp-geo', {
   it('should error if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw(/JSON/);
   });
 
