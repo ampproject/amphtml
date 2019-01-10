@@ -14,13 +14,42 @@
  * limitations under the License.
  */
 
-import {
-  RequestBank,
-  fetchAdContent,
-  writeFriendlyFrame,
-  writeSafeFrame,
-} from '../../testing/test-helper';
+import {RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+
+/**
+ * Returns a promise that fetches the content of the AMP ad at the amp4test url.
+ * This somewhat simulates rendering an ad by getting its content from an ad
+ * server.
+ */
+function fetchAdContent() {
+  const url = '//localhost:9876/amp4test/a4a/' + RequestBank.getBrowserId();
+  return xhrServiceForTesting(window).fetchText(url, {
+    method: 'GET',
+    ampCors: false,
+    credentials: 'omit',
+  }).then(res => res.text());
+}
+
+/**
+ * Write the HTML page into the provided iframe then add it to the document.
+ */
+function writeFriendlyFrame(doc, iframe, adContent) {
+  doc.body.appendChild(iframe);
+  iframe.contentDocument.write(adContent);
+  iframe.contentDocument.close();
+}
+
+/**
+ * Write the HTML page into the provided iframe, turn it into a safe frame
+ * then add it to the document.
+ */
+function writeSafeFrame(doc, iframe, adContent) {
+  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
+  iframe.src = 'http://tpc.googlesyndication.com/safeframe/1-0-31/html/container.html';
+  doc.body.appendChild(iframe);
+}
 
 describe('inabox', function() {
 
@@ -176,6 +205,136 @@ describe('inabox', function() {
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
+    });
+  });
+});
+
+describe('inabox with a complex image ad', function() {
+  // The image ad as seen in examples/inabox.gpt.html,
+  // with visibility pings being placeholders that's substituted with calls to
+  // the request bank.
+  const adBody = __html__['test/fixtures/amp-cupcake-ad.html'] // eslint-disable-line no-undef
+      .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
+      .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
+      .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
+
+  function testVisibilityPings(visibleDelay, activeViewDelay) {
+    let viewTime = 0;
+    let visibleTime = 0;
+    let activeViewTime = 0;
+    const viewPromise = RequestBank.withdraw('view')
+        .then(() => viewTime = Date.now());
+    const visiblePromise = RequestBank.withdraw('visible')
+        .then(() => visibleTime = Date.now());
+    const activeViewPromise = RequestBank.withdraw('activeview')
+        .then(() => activeViewTime = Date.now());
+    return Promise.all([viewPromise, visiblePromise, activeViewPromise])
+        .then(() => {
+          // Add a 200ms "buffer" to account for possible browser jankiness
+          expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
+          expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
+        });
+  }
+
+  describes.integration('AMP Inabox Rendering', {
+    amp: false,
+    body: `
+        <script src="/examples/inabox-tag-integration.js"></script>
+        `,
+  }, env => {
+    let iframe;
+    let doc;
+    beforeEach(() => {
+      doc = env.win.document;
+      iframe = document.createElement('iframe');
+      // we add the iframe here because it's dynamically created, so the
+      // bootstrap script would have missed it.
+      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+    });
+
+    it('should properly render ad in a friendly iframe with viewability pings',
+        () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+    it('should properly render ad in a safe frame with viewability pings',
+        () => {
+          writeSafeFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+    afterEach(() => {
+      doc.body.removeChild(iframe);
+    });
+  });
+
+  // Testing that analytics components use IntersectionObserver properly.
+  describes.realWin('AMP Inabox Rendering - No Host Script', {
+    amp: false,
+  }, env => {
+    let iframe;
+    let doc;
+    beforeEach(() => {
+      doc = env.win.document;
+      iframe = document.createElement('iframe');
+    });
+
+    it.configure().skipSafari().run(
+        'should properly render ad in a friendly iframe with viewability pings',
+        () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+    it.configure().skipSafari().run(
+        'should properly render ad in a safe frame with viewability pings',
+        () => {
+          writeSafeFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+    afterEach(() => {
+      doc.body.removeChild(iframe);
+    });
+  });
+
+  // TODO: Like the BTF test in test-amp-inabox.js, this doesn't quite work
+  // properly due to #14010.
+  describes.integration('AMP Inabox Rendering BTF', {
+    amp: false,
+    body: `
+        <div style="height: 100vh"></div>
+        <script src="/examples/inabox-tag-integration.js"></script>
+        `,
+  }, env => {
+    let iframe;
+    let doc;
+    beforeEach(() => {
+      doc = env.win.document;
+      iframe = document.createElement('iframe');
+      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+      setTimeout(() => {
+        env.win.scrollTo(0, 1000);
+      }, 2000);
+    });
+
+    it.configure().skipSafari().run(
+        'should properly render ad in a friendly iframe with viewability pings',
+        () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(2000, 3000);
+        });
+
+    it.configure().skipSafari().run(
+        'should properly render ad in a safe frame with viewability pings',
+        () => {
+          writeSafeFrame(doc, iframe, adBody);
+          return testVisibilityPings(2000, 3000);
+        });
+
+    afterEach(() => {
+      doc.body.removeChild(iframe);
     });
   });
 });

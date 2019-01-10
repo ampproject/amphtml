@@ -307,37 +307,3 @@ export class ImagePixelVerifier {
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
 }
-
-/**
- * Returns a promise that fetches the content of the AMP ad at the amp4test url.
- * This somewhat simulates rendering an ad by getting its content from an ad
- * server.
- */
-export function fetchAdContent() {
-  const url = '//localhost:9876/amp4test/a4a/' + browserId;
-  return xhrServiceForTesting(window).fetchText(url, {
-    method: 'GET',
-    ampCors: false,
-    credentials: 'omit',
-  }).then(res => res.text());
-}
-
-/**
- * Write the HTML page into the provided iframe then add it to the document.
- */
-
-export function writeFriendlyFrame(doc, iframe, adContent) {
-  doc.body.appendChild(iframe);
-  iframe.contentDocument.write(adContent);
-  iframe.contentDocument.close();
-}
-
-/**
- * Write the HTML page into the provided iframe, turn it into a safe frame
- * then add it to the document.
- */
-export function writeSafeFrame(doc, iframe, adContent) {
-  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src = 'http://tpc.googlesyndication.com/safeframe/1-0-31/html/container.html';
-  doc.body.appendChild(iframe);
-}
