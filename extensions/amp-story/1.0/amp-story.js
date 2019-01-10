@@ -798,9 +798,9 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => {
           let maybeInitialPageId = initialPageId;
           if (isExperimentOn(this.win, 'amp-story-branching')) {
-            maybeInitialPageId = this.maybeChangeInitial_(initialPageId);
+            maybeInitialPageId = this.getInitialPageId_(firstPageEl);
           }
-          this.switchTo_(maybeInitialPageId, NavigationDirection.NEXT);
+          return this.switchTo_(maybeInitialPageId, NavigationDirection.NEXT);
         })
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
@@ -829,11 +829,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * If the URL contains a valid page parameter value, the story's initial page
    * should be the specified value.
-   * @param {string} initialPageId
+   * @param {Element} firstPageEl
    * @return {string}
    * @private
    */
-  maybeChangeInitial_(initialPageId) {
+  getInitialPageId_(firstPageEl) {
+    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
+        firstPageEl.id;
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     const isActualPage =
       findIndex(this.pages_, page => page.element.id === maybePageId) >= 0;

@@ -1328,6 +1328,7 @@ describes.realWin('amp-story', {
                 expect(story.activePage_.element.id).to.equal('cover');
               });
         });
+
     it('should begin at the specified page fragment parameter value', () => {
       win.location.hash = 'page=page-1';
 
@@ -1339,6 +1340,7 @@ describes.realWin('amp-story', {
             expect(story.activePage_.element.id).to.equal('page-1');
           });
     });
+
     it('should begin at initial page when fragment parameter value is wrong',
         () => {
           win.location.hash = 'page=BADVALUE';
