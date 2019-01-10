@@ -59,7 +59,7 @@ describes.integration('AMP Inabox Rendering', {
     iframe = document.createElement('iframe');
     // we add the iframe here because it's dynamically created, so the bootstrap
     // script would have missed it.
-    env.win.top.ampInaboxIframes = [iframe];
+    Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
   });
 
   it('should properly render ad in a friendly iframe with viewability pings',
@@ -122,7 +122,7 @@ describes.integration('AMP Inabox Rendering BTF', {
   beforeEach(() => {
     doc = env.win.document;
     iframe = document.createElement('iframe');
-    env.win.top.ampInaboxIframes = [iframe];
+    Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
     setTimeout(() => {
       env.win.scrollTo(0, 1000);
     }, 2000);
