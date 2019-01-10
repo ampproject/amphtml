@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
