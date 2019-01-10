@@ -213,7 +213,7 @@ export class AmpGeo extends AMP.BaseElement {
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
-      config.ISOCountryGroups);
+      config['ISOCountryGroups']);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
@@ -336,7 +336,7 @@ export class AmpGeo extends AMP.BaseElement {
 
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
-            if (config.AmpBind) {
+            if (config['AmpBind']) {
               const geoState = doc.getElementById(GEO_ID);
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
