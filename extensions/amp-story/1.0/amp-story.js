@@ -836,7 +836,7 @@ export class AmpStory extends AMP.BaseElement {
   maybeChangeInitial_(initialPageId) {
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     const isActualPage =
-      this.pages_.findIndex(page => page.element.id === maybePageId) >= 0;
+      findIndex(this.pages_, page => page.element.id === maybePageId) >= 0;
     return (maybePageId && isActualPage) ? maybePageId : initialPageId;
   }
 
