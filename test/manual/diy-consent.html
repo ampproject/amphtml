@@ -75,6 +75,9 @@ h1 {
         <div class="decision-text animated fadeIn">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor.
         </div>
+        <h1 class="animated fadeIn">Additional consent information</h1>
+        <div id='clientState' class="decision-text animated fadeIn"></div>
+
       </div>
       <div id="learn-more-state">
 
@@ -107,6 +110,19 @@ h1 {
     // Default values for non-3P iframe.
 var sentinel = 'amp';
 var ampWindow = parent;
+
+// Write passed in stored state and client config
+var clientInfo = JSON.parse(window.name);
+var cmpId = clientInfo['clientConfig']['CMP_id'];
+var consentStr = clientInfo['consentString'];
+var consentState = clientInfo['consentState'];
+// TODO: convert consentState to readable value
+
+var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` +
+` '${consentStr}', consent state is ${consentState}`;
+
+document.getElementById('clientState').textContent = text;
+
 
 // Detect 3P sentinel in the location.hash.
 var hashMatch = location.hash.match(/amp-3p-sentinel=((\d+)-\d+)/);

@@ -28,11 +28,15 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
+
 const TAG = 'amp-consent-ui';
+const CONSENT_STATE_MANAGER = 'consentStateManager';
+
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -284,6 +288,23 @@ export class ConsentUI {
     return placeholder;
   }
 
+  /**
+   * Get the client information that needs to be passed to cmp iframe
+   * @return {!Promise<JsonObject>}
+   */
+  getClientInfoPromise_() {
+    const consentStatePromise =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+    return consentStatePromise.then(consentStateManager => {
+      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
+        return dict({
+          'clientConfig': this.clientConfig_,
+          'consentState': consentInfo['consentState'],
+          'consentString': consentInfo['consentString'],
+        });
+      });
+    });
+  }
 
   /**
    * Apply placeholder
@@ -291,13 +312,6 @@ export class ConsentUI {
    * @return {!Promise}
    */
   loadIframe_() {
-    const info = dict({});
-    if (this.clientConfig_) {
-      info['clientConfig'] = this.clientConfig_;
-    }
-
-    this.ui_.setAttribute('name', JSON.stringify(info));
-
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -306,10 +320,15 @@ export class ConsentUI {
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
-    this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-    insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+
+    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
+      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
+      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+    });
 
     return Promise.all([
+      iframePromise,
       this.iframeReady_.promise,
       this.baseInstance_.mutateElement(() => {
         toggle(dev().assertElement(this.placeholder_), true);
