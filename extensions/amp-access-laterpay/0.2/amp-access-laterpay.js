@@ -20,8 +20,10 @@ import {Services} from '../../../src/services';
 AMP.extension('amp-access-laterpay', '0.2', function(AMP) {
   AMP.registerServiceForDoc(
       'laterpay',
+      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
       function(ampdoc) {
-        return Services.accessServiceForDoc(ampdoc).then(accessService => {
+        const element = ampdoc.getHeadNode();
+        return Services.accessServiceForDoc(element).then(accessService => {
           const source = accessService.getVendorSource('laterpay');
           const vendor = new LaterpayVendor(accessService, source);
           const adapter = /** @type {

@@ -498,20 +498,18 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
-              .then(consentPolicy => {
-                if (!consentPolicy) {
-                  return true;
-                }
-                return consentPolicy.whenPolicyUnblock(
-                    /** @type {string} */ (policyId));
-              }).then(shouldUnblock => {
-                if (shouldUnblock == true) {
-                  resolve(this.implementation_.buildCallback());
-                } else {
-                  reject(blockedByConsentError());
-                }
-              });
+          Services.consentPolicyServiceForDocOrNull(this).then(policy => {
+            if (!policy) {
+              return true;
+            }
+            return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
+          }).then(shouldUnblock => {
+            if (shouldUnblock) {
+              resolve(this.implementation_.buildCallback());
+            } else {
+              reject(blockedByConsentError());
+            }
+          });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
