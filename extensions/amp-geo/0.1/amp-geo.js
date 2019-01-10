@@ -91,15 +91,15 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
+
 /**
- * @typedef {{
- *   ISOCountry: string,
- *   matchedISOCountryGroups: !Array<string>,
- *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: GEO_IN_GROUP,
- *   ISOCountryGroups: !Array<string>
- * }}
- */
+  * @typedef {{
+  *   ISOCountry: string,
+  *   matchedISOCountryGroups: !Array<string>,
+  *   allISOCountryGroups: !Array<string>,
+  *   isInCountryGroup: (function(string):GEO_IN_GROUP),
+  * }}
+  */
 export let GeoDef;
 
 
@@ -213,7 +213,7 @@ export class AmpGeo extends AMP.BaseElement {
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
-      config.ISOCountryGroups);
+      config['ISOCountryGroups']);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
@@ -336,7 +336,7 @@ export class AmpGeo extends AMP.BaseElement {
 
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
-            if (config.AmpBind) {
+            if (config['AmpBind']) {
               const geoState = doc.getElementById(GEO_ID);
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
@@ -363,13 +363,6 @@ export class AmpGeo extends AMP.BaseElement {
         allISOCountryGroups: this.definedGroups_,
         /* API */
         isInCountryGroup: this.isInCountryGroup.bind(this),
-        /**
-         * Temp still return old interface to avoid version skew
-         * with consuming extensions.  This will go away don't use it!
-         * replace with matchedISOCountryGroups or use the isInCountryGroup
-         * API
-         */
-        ISOCountryGroups: self.matchedGroups_,
       };
     });
   }
