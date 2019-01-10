@@ -17,7 +17,7 @@
 import {Services} from '../services';
 import {bytesToString, stringToBytes} from '../utils/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, parseUrlDeprecated} from '../url';
+import {getSourceOrigin} from '../url';
 import {parseJson} from '../json';
 import {user} from '../log';
 
@@ -48,8 +48,11 @@ export class OriginExperiments {
     /** @const @private {!./crypto-impl.Crypto} */
     this.crypto_ = Services.cryptoFor(ampdoc.win);
 
+    /** @const @private {!./url-impl.Url} */
+    this.url_ = Services.urlForDoc(ampdoc.getHeadNode());
+
     /** @const @private {!TokenMaster} */
-    this.tokenMaster_ = new TokenMaster(this.crypto_);
+    this.tokenMaster_ = new TokenMaster(this.crypto_, this.url_);
 
     /** @private {?Promise} */
     this.scanPromise_ = null;
@@ -114,9 +117,14 @@ export class OriginExperiments {
 export class TokenMaster {
   /**
    * @param {!./crypto-impl.Crypto} crypto
+   * @param {!./url-impl.Url} url
    */
-  constructor(crypto) {
+  constructor(crypto, url) {
+    /** @const @private */
     this.crypto_ = crypto;
+
+    /** @const @private */
+    this.url_ = url;
   }
 
   /**
@@ -196,7 +204,7 @@ export class TokenMaster {
         const config = parseJson(configStr);
 
         // Check token experiment origin against `location`.
-        const approvedOrigin = parseUrlDeprecated(config['origin']).origin;
+        const approvedOrigin = this.url_.parse(config['origin']).origin;
         const sourceOrigin = getSourceOrigin(location);
         if (approvedOrigin !== sourceOrigin) {
           throw new Error(`Config origin (${approvedOrigin}) does not match ` +

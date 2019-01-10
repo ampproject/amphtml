@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Crypto} from '../../src/service/crypto-impl';
 import {
   OriginExperiments,
   TokenMaster,
 } from '../../src/service/origin-experiments-impl';
 import {Services} from '../../src/services';
 import {bytesToString} from '../../src/utils/bytes';
-import {installCryptoService} from '../../src/service/crypto-impl';
 import {user} from '../../src/log';
 
 describes.fakeWin('OriginExperiments', {amp: true}, env => {
@@ -39,7 +37,6 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
   beforeEach(() => {
     ({win, ampdoc, sandbox} = env);
 
-    installCryptoService(win);
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
 
@@ -111,7 +108,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
 });
 
 
-describe('TokenMaster', () => {
+describes.fakeWin('TokenMaster', {amp: true}, env => {
   let tokenMaster;
 
   let publicKey;
@@ -124,9 +121,10 @@ describe('TokenMaster', () => {
   let tokenWithBadSignature;
 
   // Generate test tokens once since generating keys is slow.
-  before(() => {
-    const crypto = new Crypto(window);
-    tokenMaster = new TokenMaster(crypto);
+  beforeEach(() => {
+    const crypto = Services.cryptoFor(env.win);
+    const url = Services.urlForDoc(env.ampdoc.getHeadNode());
+    tokenMaster = new TokenMaster(crypto, url);
 
     return tokenMaster.generateKeys().then(keyPair => {
       ({publicKey, privateKey} = keyPair);
