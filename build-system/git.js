@@ -46,6 +46,15 @@ exports.gitTravisMasterBaseline = function() {
 };
 
 /**
+ * Shortens a commit SHA to 7 characters for human readability.
+ * @param {string} 40 characters SHA.
+ * @return {string}
+ */
+exports.shortSha = function(sha) {
+  return sha.substr(0, 7);
+};
+
+/**
  * Returns the list of files changed relative to the branch point off of master,
  * one on each line.
  * @return {!Array<string>}
