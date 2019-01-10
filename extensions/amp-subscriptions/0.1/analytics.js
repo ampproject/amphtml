@@ -44,6 +44,7 @@ export const SubscriptionAnalyticsEvents = {
   LINK_CANCELED: 'subscriptions-link-canceled',
 };
 
+
 export class SubscriptionAnalytics {
 
   /**
@@ -55,7 +56,6 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   *
    * @param {string} eventType
    * @param {string} serviceId
    * @param {!JsonObject=} opt_vars
@@ -67,12 +67,22 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   *
    * @param {string} eventType
    * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
     user().info(TAG, eventType, opt_vars || '');
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
+  }
+
+  /**
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {string} status
+   * @param {!JsonObject=} opt_vars
+   */
+  actionEvent(serviceId, action, status, opt_vars) {
+    this.serviceEvent(
+        `subscriptions-action-${action}-${status}`, serviceId, opt_vars);
   }
 }

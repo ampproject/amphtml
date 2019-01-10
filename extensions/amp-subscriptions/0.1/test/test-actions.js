@@ -19,6 +19,9 @@ import {SubscriptionAnalytics} from '../analytics';
 import {UrlBuilder} from '../url-builder';
 import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
 
+const LOCAL = 'local';
+const LOCAL_OPTS = {serviceId: LOCAL};
+
 
 describes.realWin('Actions', {amp: true}, env => {
   let ampdoc;
@@ -75,10 +78,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should open the action popup window synchronously', () => {
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started')
+        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-success')
+        .withExactArgs('subscriptions-action-login-success', LOCAL_OPTS)
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');
@@ -114,10 +117,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should accept success=no', () => {
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started')
+        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-rejected')
+        .withExactArgs('subscriptions-action-login-rejected', LOCAL_OPTS)
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');
@@ -154,10 +157,10 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should handle failures', () => {
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started')
+        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
         .once();
     analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-failed')
+        .withExactArgs('subscriptions-action-login-failed', LOCAL_OPTS)
         .once();
     return actions.build().then(() => {
       const promise = actions.execute('login');

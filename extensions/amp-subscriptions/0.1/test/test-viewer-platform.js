@@ -51,6 +51,9 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     ampdoc = env.ampdoc;
     win = env.win;
     serviceAdapter = new ServiceAdapter(null);
+    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    sandbox.stub(serviceAdapter, 'getAnalytics')
+        .callsFake(() => analytics);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig(currentProductId, true));
     sandbox.stub(serviceAdapter, 'getDialog')
@@ -58,8 +61,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
     viewerPlatform = new ViewerSubscriptionPlatform(
-        ampdoc, serviceConfig, serviceAdapter, origin,
-        new SubscriptionAnalytics(ampdoc.getRootNode()));
+        ampdoc, serviceConfig, serviceAdapter, origin);
     sandbox.stub(viewerPlatform.viewer_,
         'sendMessageAwaitResponse').callsFake(() =>
       Promise.resolve(fakeAuthToken));

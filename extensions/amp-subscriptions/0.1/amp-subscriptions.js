@@ -143,16 +143,14 @@ export class SubscriptionService {
           new LocalSubscriptionPlatform(
               this.ampdoc_,
               serviceConfig,
-              this.serviceAdapter_,
-              this.subscriptionAnalytics_
-          )
+              this.serviceAdapter_)
       );
     }
   }
 
   /**
-   * @private
    * @return {!Promise<!JsonObject>}
+   * @private
    */
   getPlatformConfig_() {
     return new Promise((resolve, reject) => {
@@ -161,6 +159,14 @@ export class SubscriptionService {
       });
       resolve(rawContent);
     });
+  }
+
+  /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionAnalytics_;
   }
 
   /**
@@ -331,9 +337,7 @@ export class SubscriptionService {
             this.ampdoc_,
             service,
             this.serviceAdapter_,
-            origin,
-            this.subscriptionAnalytics_
-        );
+            origin);
         this.platformStore_.resolvePlatform('local', viewerPlatform);
         viewerPlatform.getEntitlements().then(entitlement => {
           devAssert(entitlement, 'Entitlement is null');
