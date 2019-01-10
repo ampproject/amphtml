@@ -4,6 +4,7 @@ import {Carousel} from './carousel.js';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {toArray} from '../../../src/types';
 
 /**
  * @param {!Element} el The Element to check.
@@ -37,9 +38,9 @@ class AmpCarousel extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
     // Grab the slides up front so we can place them later.
-    this.slides_ = Array.from(element.children).filter(c => !isSizer(c));
-    // Create the "Shadow DOM"
-    element.appendChild(this.createDom_());
+    this.slides_ = toArray(element.children).filter(c => !isSizer(c));
+    // Create the carousel's inner DOM.
+    element.appendChild(this.renderContainerDom_());
 
     this.carousel_ = new Carousel({
       win,
@@ -50,7 +51,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Handle the initial set of attributes
     Array.from(this.element.attributes).forEach(attr => {
-      this.attributeChanged_(attr.name, attr.value);
+      this.attributeMutated_(attr.name, attr.value);
     });
 
     this.setupActions_();
@@ -80,15 +81,16 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     for (const key in mutations) {
-      this.attributeChanged_(key, mutations[key]);
+      this.attributeMutated_(key, mutations[key]);
     }
   }
 
   /**
    * @private
    */
-  createDom_() {
-    return htmlFor(this.element)`
+  renderContainerDom_() {
+    const html = htmlFor(this.element);
+    return html`
       <div class="i-amphtml-carousel-scroll"></div>
     `;
   }
@@ -109,7 +111,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {string} newValue The new value of the attribute.
    * @private
    */
-  attributeChanged_(name, newValue) {
+  attributeMutated_(name, newValue) {
     switch (name) {
       case 'auto-advance':
         this.carousel_.updateAutoAdvance(newValue == 'true');
