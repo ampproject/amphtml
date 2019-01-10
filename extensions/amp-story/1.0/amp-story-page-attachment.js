@@ -347,6 +347,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     this.state_ = AttachmentState.OPEN;
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
@@ -367,6 +368,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     this.state_ = AttachmentState.CLOSED;
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
