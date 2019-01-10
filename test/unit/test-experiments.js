@@ -915,7 +915,7 @@ describes.fakeWin('isOriginExperimentOn', {amp: true}, env => {
   let isPkcsAvailable;
 
   beforeEach(() => {
-    ({win, ampdoc} = env.win);
+    ({win, ampdoc} = env);
     installCryptoService(win);
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);

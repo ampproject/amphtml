@@ -15,7 +15,7 @@
  */
 
 import {bytesToString, stringToBytes} from './utils/bytes';
-import {getSourceOrigin, parseUrl} from './url';
+import {getSourceOrigin, parseUrlDeprecated} from './url';
 import {parseJson} from './json';
 
 /**
@@ -104,7 +104,7 @@ export class OriginExperiments {
         const config = parseJson(configStr);
 
         // Check token experiment origin against `location`.
-        const approvedOrigin = parseUrl(config['origin']).origin;
+        const approvedOrigin = parseUrlDeprecated(config['origin']).origin;
         const sourceOrigin = getSourceOrigin(location);
         if (approvedOrigin !== sourceOrigin) {
           throw new Error(`Config origin (${approvedOrigin}) does not match ` +
