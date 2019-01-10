@@ -748,7 +748,8 @@ function isActionWhitelisted_(invocation, whitelist) {
   const {method, node, tagOrTarget} = invocation;
   const tagOrTargetCalled = tagOrTarget.toLowerCase();
   let methodCalled = method.toLowerCase();
-  const defaultActionAlias = node.getDefaultActionAlias();
+  const defaultActionAlias = (typeof node.getDefaultActionAlias == 'function')
+      && node.getDefaultActionAlias();
   const calledByDefaultActionAndHasDefaultAlias =
       method == DEFAULT_ACTION && (node && defaultActionAlias);
   // If called via default action 'activate', check the whitelist
@@ -914,7 +915,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let args = null;
   // Object literal. Format: {...}
   if (peek.type == TokenType.OBJECT) {
-    // Don't parse object literals. Tokenize as a single expression
+    // Don't parse object literalands. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
     const {value} = toks.next();
