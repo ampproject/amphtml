@@ -656,12 +656,13 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getVariantsValue_(getter, expr) {
-    return Services.variantsForDocOrNull(this.ampdoc).then(variants => {
-      userAssert(variants,
-          'To use variable %s, amp-experiment should be configured',
-          expr);
-      return variants.getVariants();
-    }).then(variantsMap => getter(variantsMap));
+    return Services.variantsForDocOrNull(this.ampdoc.getHeadNode())
+        .then(variants => {
+          userAssert(variants,
+              'To use variable %s, amp-experiment should be configured',
+              expr);
+          return variants.getVariants();
+        }).then(variantsMap => getter(variantsMap));
   }
 
   /**

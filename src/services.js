@@ -540,12 +540,12 @@ export class Services {
   /**
    * Returns a promise for the experiment variants or a promise for null if it
    * is not available on the current page.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-experiment/0.1/variant.Variants>}
    */
-  static variantsForDocOrNull(elementOrAmpDoc) {
+  static variantsForDocOrNull(element) {
     return (/** @type {!Promise<?../extensions/amp-experiment/0.1/variant.Variants>} */ (
-      getElementServiceIfAvailableForDoc(elementOrAmpDoc, 'variant',
+      getElementServiceIfAvailableForDoc(element, 'variant',
           'amp-experiment', true)));
   }
 

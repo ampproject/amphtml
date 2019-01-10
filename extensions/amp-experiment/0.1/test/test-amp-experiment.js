@@ -116,7 +116,7 @@ describes.realWin('amp-experiment', {
     return experiment.buildCallback().then(() => {
       throw new Error('must have failed');
     }, () => {
-      return Services.variantsForDocOrNull(ampdoc)
+      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
           .then(service => service.getVariants())
           .then(variants => {
             expect(variants).to.deep.equal({});
@@ -135,20 +135,20 @@ describes.realWin('amp-experiment', {
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    return Services.variantsForDocOrNull(ampdoc).then(variantsService => {
-      return variantsService.getVariants();
-    }).then(variants => {
-      expect(variants).to.jsonEqual({
-        'experiment-1': 'variant-a',
-        'experiment-2': 'variant-d',
-        'experiment-3': null,
-      });
-      expectBodyHasAttributes({
-        'amp-x-experiment-1': 'variant-a',
-        'amp-x-experiment-2': 'variant-d',
-      });
-      expect(doc.body.getAttribute('amp-x-experiment-3'))
-          .to.equal(null);
-    });
+    return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+        .then(variantsService => variantsService.getVariants())
+        .then(variants => {
+          expect(variants).to.jsonEqual({
+            'experiment-1': 'variant-a',
+            'experiment-2': 'variant-d',
+            'experiment-3': null,
+          });
+          expectBodyHasAttributes({
+            'amp-x-experiment-1': 'variant-a',
+            'amp-x-experiment-2': 'variant-d',
+          });
+          expect(doc.body.getAttribute('amp-x-experiment-3'))
+              .to.equal(null);
+        });
   });
 });
