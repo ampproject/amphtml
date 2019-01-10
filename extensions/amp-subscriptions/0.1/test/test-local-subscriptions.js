@@ -59,6 +59,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
+    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig('example.org:basic', true));
     sandbox.stub(serviceAdapter, 'getDialog')
@@ -66,8 +68,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], serviceAdapter,
-        new SubscriptionAnalytics(ampdoc.getRootNode()));
+        serviceConfig.services[0], serviceAdapter);
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {

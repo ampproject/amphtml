@@ -29,8 +29,12 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
+import {SubscriptionAnalytics}
+  from '../../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor}
-  from '../../../amp-subscriptions/0.1/score-factors.js';
+  from '../../../amp-subscriptions/0.1/score-factors';
+
+const PLATFORM_ID = 'subscribe.google.com';
 
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
@@ -39,6 +43,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let platform;
   let serviceAdapter;
   let serviceAdapterMock;
+  let analyticsMock;
   let viewer;
   let xhr;
   let callbacks;
@@ -58,11 +63,16 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = sandbox.mock(serviceAdapter);
     sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
+    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    analyticsMock = sandbox.mock(analytics);
     callbacks = {
       loginRequest:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLoginRequest'),
       linkComplete:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLinkComplete'),
+      flowStarted:
+          sandbox.stub(ConfiguredRuntime.prototype, 'setOnFlowStarted'),
       flowCanceled:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnFlowCanceled'),
       subscribeRequest:
@@ -84,6 +94,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   afterEach(() => {
     serviceAdapterMock.verify();
+    analyticsMock.verify();
   });
 
   function callback(stub) {
@@ -121,7 +132,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
     });
     return platform.getEntitlements().then(ents => {
-      expect(ents.service).to.equal('subscribe.google.com');
+      expect(ents.service).to.equal(PLATFORM_ID);
       expect(fetchStub).to.be.calledOnce;
     });
   });
@@ -180,14 +191,14 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should ignore activate when granted', () => {
-    platform.activate(new Entitlement({service: 'subscribe.google.com',
+    platform.activate(new Entitlement({service: PLATFORM_ID,
       granted: true, grantReason: GrantReason.SUBSCRIBER}));
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show offers on activate when not granted', () => {
-    platform.activate(new Entitlement({service: 'subscribe.google.com',
+    platform.activate(new Entitlement({service: PLATFORM_ID,
       granted: false}));
     expect(methods.showOffers).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
@@ -195,7 +206,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should show abbrv offer on activate when granted non-subscriber', () => {
-    platform.activate(new Entitlement({service: 'subscribe.google.com',
+    platform.activate(new Entitlement({service: PLATFORM_ID,
       granted: true, grantReason: GrantReason.METERING}));
     expect(methods.showAbbrvOffer).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
@@ -203,7 +214,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should override show offers with the grant for subscriber', () => {
-    const entitlement = new Entitlement({service: 'subscribe.google.com',
+    const entitlement = new Entitlement({service: PLATFORM_ID,
       granted: false});
     const grantEntitlement = new Entitlement({service: 'local',
       granted: true, grantReason: GrantReason.SUBSCRIBER});
@@ -213,7 +224,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should override show offers with the grant non-subscriber', () => {
-    const entitlement = new Entitlement({service: 'subscribe.google.com',
+    const entitlement = new Entitlement({service: PLATFORM_ID,
       granted: false});
     const grantEntitlement = new Entitlement({service: 'local',
       granted: true, grantReason: GrantReason.METERING});
@@ -248,18 +259,41 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should reauthorize on complete linking', () => {
+    analyticsMock.expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, 'link', 'success')
+        .once();
     serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.linkComplete)();
   });
 
   it('should reauthorize on canceled linking', () => {
+    analyticsMock.expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, 'link', 'rejected')
+        .once();
     serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
+  it('should log subscribe start', () => {
+    analyticsMock.expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, 'subscribe', 'started')
+        .once();
+    callback(callbacks.flowStarted)({flow: 'subscribe'});
+  });
+
+  it('should log subscribe cancel', () => {
+    analyticsMock.expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, 'subscribe', 'rejected')
+        .once();
+    callback(callbacks.flowCanceled)({flow: 'subscribe'});
+  });
+
   it('should reauthorize on complete subscribe', () => {
+    analyticsMock.expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, 'subscribe', 'success')
+        .once();
     const promise = Promise.resolve();
     const response = new SubscribeResponse(null, null, null, null,
         () => promise);
