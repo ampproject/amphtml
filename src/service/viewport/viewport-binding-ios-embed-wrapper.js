@@ -76,6 +76,9 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private {number} */
+    this.paddingTop_ = 0;
+
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
@@ -165,6 +168,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    this.paddingTop_ = paddingTop;
     setImportantStyles(this.wrapper_, {
       'padding-top': px(paddingTop),
     });
@@ -234,11 +238,11 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getContentHeight() {
-    const scrollingElement = this.wrapper_;
+    const scrollingElement = this.win.document.body;
     const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = getComputedStyle(scrollingElement);
     return rect.height
-        + this.getBorderTop()
+        + this.paddingTop_
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }
