@@ -115,18 +115,22 @@ tags: { # amp-list-load-more
   attrs: {
     name: "load-more-button"
     value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
   }
   attrs: {
     name: "load-more-failed"
     value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
   }
   attrs: {
     name: "load-more-loading"
     value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
   }
   attrs: {
     name: "load-more-end"
     value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
   }
 }
 
