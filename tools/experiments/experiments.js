@@ -539,30 +539,25 @@ function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
     return getCookie(window, 'AMP_CANARY') == '1';
   } else if (id == RC_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_RC') == '1';
+    return getCookie(window, 'AMP_CANARY') == '2';
   }
   return isExperimentOn(window, /*OK*/id);
 }
 
 /**
- * Sets a cookie to opt in to / opt out of the "canary" or "rc" runtime type.
- * Makes sure only one type is opted in to.
- * @param {boolean} on
- * @param {string} cookie Cookie to set / unset
- * @param {string} otherCookie Cookie to unset if the first cookie is being set
+ * Opts in to / out of the "canary" or "rc" runtime types by setting the
+ * AMP_CANARY cookie.
+ * @param {string} cookieState '0' for disabled, '1' for canary, '2' for rc
  */
-function toggleCanaryRcCookies_(on, cookie, otherCookie) {
-  const validUntil = Date.now() + COOKIE_MAX_AGE_MS;
+function setAmpCanaryCookie_(cookieState) {
+  const validUntil =
+      (cookieState != '0') ? (Date.now() + COOKIE_MAX_AGE_MS) : 0;
   const cookieOptions = {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
     allowOnProxyOrigin: true,
   };
-  setCookie(
-      window, cookie, (on ? '1' : '0'), (on ? validUntil : 0), cookieOptions);
-  if (on) {
-    setCookie(window, otherCookie, '0', 0, cookieOptions);
-  }
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
   self.location.reload();
 }
@@ -583,9 +578,9 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      toggleCanaryRcCookies_(on, 'AMP_CANARY', 'AMP_RC');
+      setAmpCanaryCookie_(on ? '1' : '0');
     } else if (id == RC_EXPERIMENT_ID) {
-      toggleCanaryRcCookies_(on, 'AMP_RC', 'AMP_CANARY');
+      setAmpCanaryCookie_(on ? '2' : '0');
     } else {
       toggleExperiment(window, id, on);
     }
@@ -638,7 +633,7 @@ function getAmpConfig() {
   xhr.addEventListener('error', () => {
     reject(new Error(xhr.statusText));
   });
-  // Cache bust, so we immediately reflect AMP_CANARY or AMP_RC cookie changes.
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise.then(text => {
