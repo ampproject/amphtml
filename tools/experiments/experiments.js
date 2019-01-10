@@ -545,18 +545,24 @@ function isExperimentOn_(id) {
 }
 
 /**
- * Sets a cookie to opt in to the "canary" or "rc" runtime type.
+ * Sets a cookie to opt in to / opt out of the "canary" or "rc" runtime type.
+ * Makes sure only one type is opted in to.
  * @param {boolean} on
- * @param {string} cookie
+ * @param {string} cookie Cookie to set / unset
+ * @param {string} otherCookie Cookie to unset if the first cookie is being set
  */
-function setCanaryRcCookie_(on, cookie) {
+function toggleCanaryRcCookies_(on, cookie, otherCookie) {
   const validUntil = Date.now() + COOKIE_MAX_AGE_MS;
-  setCookie(window, cookie,
-      (on ? '1' : '0'), (on ? validUntil : 0), {
-        // Set explicit domain, so the cookie gets send to sub domains.
-        domain: location.hostname,
-        allowOnProxyOrigin: true,
-      });
+  const cookieOptions = {
+    // Set explicit domain, so the cookie gets sent to sub domains.
+    domain: location.hostname,
+    allowOnProxyOrigin: true,
+  };
+  setCookie(
+      window, cookie, (on ? '1' : '0'), (on ? validUntil : 0), cookieOptions);
+  if (on) {
+    setCookie(window, otherCookie, '0', 0, cookieOptions);
+  }
   // Reflect default experiment state.
   self.location.reload();
 }
@@ -577,9 +583,9 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      setCanaryRcCookie_(on, 'AMP_CANARY');
+      toggleCanaryRcCookies_(on, 'AMP_CANARY', 'AMP_RC');
     } else if (id == RC_EXPERIMENT_ID) {
-      setCanaryRcCookie_(on, 'AMP_RC');
+      toggleCanaryRcCookies_(on, 'AMP_RC', 'AMP_CANARY');
     } else {
       toggleExperiment(window, id, on);
     }
