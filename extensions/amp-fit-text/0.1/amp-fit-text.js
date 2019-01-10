@@ -134,8 +134,6 @@ class AmpFitText extends AMP.BaseElement {
     const maxHeight = this.element./*OK*/offsetHeight;
     const fontSize = this.fontSize_;
     if (fontSize) {
-      // clamp ...
-      console.log(fontSize, px(fontSize));
       setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
       updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
           fontSize, this.overflowMethod_);
@@ -145,35 +143,38 @@ class AmpFitText extends AMP.BaseElement {
   }
 }
 
+/**
+ * @param {Element} content
+ * @param {Element} measurer
+ * @param {number} height
+ * @private  Visible for testing only!
+ */
 function truncate_(content, measurer, height) {
   const overflown = measurer./*OK*/offsetHeight > height;
   if (!overflown) {
     return;
   }
+  const originalInnerHtml = measurer./*OK*/innerHTML;
   const children = measurer.childNodes;
-  console.log(children);
-  let index = children.length - 1;
-  while (index > 0 && children[0].nodeType !== Node.TEXT_NODE) {
-    index--;
+  let idx = children.length - 1;
+  while (idx > -1 && measurer./*OK*/offsetHeight > height) {
+    if (children[idx].nodeType === Node.TEXT_NODE) {
+      const node = children[idx];
+      const chars = node.textContent.split('');
+      while (chars.length > 0 && measurer./*OK*/offsetHeight > height) {
+        chars.pop();
+        node.textContent = chars.join('') + '…';
+      }
+      if (chars.length === 0) {
+        content.childNodes[idx].textContent = '';
+      } else {
+        content.childNodes[idx].textContent = node.textContent;
+      }
+    }
+    idx--;
   }
-  console.log(index);
-  if (index < 0) {
-    return;
-  }
-  const node = children[index];
-  // console.log(node, node.textContent;);
-  const chars = node.textContent.split('');
-  // console.log(node, chars);
-  // console.log(height);
-  while (measurer./*OK*/offsetHeight > height) {
-    // console.log(measurer.offsetHeight);
-    chars.pop();
-    // console.log(w);
-    node.textContent = chars.join('') + '…';
-  }
-  // console.log(chars);
-  content.childNodes[index].textContent = chars.join('') + '…';
-  // console.log(content.offsetHeight);
+  // reset the measurer div in case we re-layout.
+  measurer./*OK*/innerHTML = originalInnerHtml;
 }
 
 /**
@@ -201,23 +202,6 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
     }
   }
   return minFontSize;
-}
-
-export function calculateWordTruncation_(content, measurer, expectedHeight) {
-  const words = measurer.textContent.trim().split(' ');
-  const height = measurer./*OK*/offsetHeight;
-  console.log(words, expectedHeight, height);
-  // let length = words.length - 1;
-  // let index = maxIndex;
-
-  while (measurer./*OK*/offsetHeight > expectedHeight) {
-    // index--;
-    words.pop();
-    measurer.textContent = words.join(' ') + '...';
-  }
-
-  console.log(words, measurer.textContent);
-  return measurer.textContent;
 }
 
 /**
