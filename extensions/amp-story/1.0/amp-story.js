@@ -765,6 +765,8 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
+    // TODO(#20128): initialPageId will no longer be necessary here once
+    // branching experiment is live.
     const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
         firstPageEl.id;
 
@@ -827,8 +829,9 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * If the URL contains a valid page parameter value, the story's initial page
-   * should be the specified value.
+   * Retrieves the initial pageId to begin the story with. In order, the
+   * initial page for a story should be the page ID in the history, a valid
+   * page ID in the URL fragment, and then the first page of the story.
    * @param {Element} firstPageEl
    * @return {string}
    * @private
