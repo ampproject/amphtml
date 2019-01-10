@@ -239,7 +239,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.renderInfo = this.renderInfo.bind(this);
 
     /** @const */
-    this.renderDay = this.renderDay.bind(this);
+    this.renderDay = this.renderDay_.bind(this);
 
     /** @private {?Promise<string>} */
     this.infoTemplatePromise_ = null;
@@ -489,7 +489,17 @@ export class AmpDatePicker extends AMP.BaseElement {
       newState['max'] = max;
     }
 
-    this.setState_(newState);
+    let p = null;
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.clearRenderedTemplates_();
+      this.cleanupSrcTemplates_();
+
+      p = this.setupSrcAttributes_();
+      this.setupTemplates_();
+    }
+
+    Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -1477,7 +1487,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Render a day in the calendar view.
    * @param {!moment} date
    */
-  renderDay(date) {
+  renderDay_(date) {
     const key = date.format(DEFAULT_FORMAT);
     const cachedDay = this.renderedTemplates_[key];
     if (cachedDay) {

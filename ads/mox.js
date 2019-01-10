@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-
-
-/** @enum {string} */
-export const VideoDockingEvents = {
-  DISMISS_ON_TAP: 'dock-dismiss-on-tap',
-};
-
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * @param {!MouseEvent|!TouchEvent} e
- * @return {{x: number, y: number}}
- * @private
+ * @param {!Window} global
+ * @param {!Object} config
  */
-export function pointerCoords(e) {
-  const coords = (e.touches) ? e.touches[0] : e;
-  return {
-    x: dev().assertNumber(('x' in coords) ? coords.x : coords.clientX),
-    y: dev().assertNumber(('y' in coords) ? coords.y : coords.clientY),
-  };
+export function mox(global, config) {
+  validateData(config, ['z', 'w', 'h'], ['u']);
+
+  global.config = config;
+
+  loadScript(global, config.u || 'https://ad.mox.tv/js/amp.min.js');
 }

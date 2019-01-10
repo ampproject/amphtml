@@ -47,7 +47,8 @@ export function allocateVariant(ampdoc, experimentName, config) {
   let hasConsentPromise = Promise.resolve(true);
 
   if (sticky && config['consentNotificationId']) {
-    hasConsentPromise = Services.userNotificationManagerForDoc(ampdoc)
+    const element = ampdoc.getHeadNode();
+    hasConsentPromise = Services.userNotificationManagerForDoc(element)
         .then(manager => manager.getNotification(
             config['consentNotificationId']))
         .then(userNotification => {
