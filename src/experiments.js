@@ -55,7 +55,7 @@ export function isCanary(win) {
 }
 
 /**
- * Returns binary type, e.g., canary, control, or production.
+ * Returns binary type, e.g., canary, production, control, or rc.
  * @param {!Window} win
  * @return {string}
  */
