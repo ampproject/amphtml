@@ -96,9 +96,6 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     deprecation: "[src]"
   }
   attr_lists: "extended-amp-global"
-  reference_points: {
-    tag_spec_name: "AMP-LIST [load-more] items"
-  }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -108,10 +105,12 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
-tags: { # amp-list load-more children
+
+tags: { # amp-list-load-more
   html_format: AMP
-  tag_name: "$REFERENCE_POINT"
-  spec_name: "AMP-LIST [load-more] items"
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-LIST-LOAD-MORE"
+  requires_extension: "amp-list"
   mandatory_parent: "AMP-LIST"
   attrs: {
     name: "load-more-button"
@@ -130,6 +129,7 @@ tags: { # amp-list load-more children
     value: ""
   }
 }
+
 # AMP4EMAIL disallows mustache in src attribute.
 tags: {  # <amp-list>
   html_format: AMP4EMAIL

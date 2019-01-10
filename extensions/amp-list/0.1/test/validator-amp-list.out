@@ -112,10 +112,10 @@ amp-list/0.1/test/validator-amp-list.html:85:2 The attribute 'auto-resize' in ta
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      load-more="manual"
 |      load-more-bookmark="next">
-|      <button load-more-button></button>
-|      <div load-more-loading></div>
-|      <div load-more-failed></div>
-|      <div load-more-end></div>
+|      <amp-list-load-more load-more-button></amp-list-load-more>
+|      <amp-list-load-more load-more-loading></amp-list-load-more>
+|      <amp-list-load-more load-more-failed></amp-list-load-more>
+|      <amp-list-load-more load-more-end></amp-list-load-more>
 |    </amp-list>
 |    </amp-list>
 |    <!-- Invalid: unsupported "binding" attribute value -->
@@ -174,5 +174,8 @@ amp-list/0.1/test/validator-amp-list.html:150:2 The attribute 'load-more-failed'
 |    <div load-more-end></div>
 >>   ^~~~~~~~~
 amp-list/0.1/test/validator-amp-list.html:151:2 The attribute 'load-more-end' may not appear in tag 'div'. [DISALLOWED_HTML]
+|    <amp-list-load-more></amp-list-load-more>
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:152:2 The parent tag of tag 'amp-list-load-more' is 'body', but it can only be 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>
