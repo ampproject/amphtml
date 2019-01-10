@@ -42,7 +42,7 @@ let MediaQueriesListAndValueDef;
  */
 export class ResponsiveAttributes {
   /**
-   * @param {!Object<string, function(string)} config A mapping of attribute
+   * @param {!Object<string, function(string)>} config A mapping of attribute
    *    names to functions that should handle them.
    */
   constructor(config) {
@@ -52,7 +52,7 @@ export class ResponsiveAttributes {
     /** @private @const {!Object<string, string>} */
     this.existingValuesMap_ = {};
 
-    /** @private @const {!Object<string, !MediaQueriesListAndValueDef>} */
+    /** @private @const {!Object<string, !Array<!MediaQueriesListAndValueDef>>} */
     this.mediaQueryListsAndValues_ = {};
   }
 
@@ -85,7 +85,7 @@ export class ResponsiveAttributes {
 
   /**
    * @param {string} value
-   * @return {!Array<MediaQueriesListAndValueDef>}
+   * @return {!Array<!MediaQueriesListAndValueDef>}
    * @private
    */
   getMediaQueryListsAndValues_(value) {
@@ -105,7 +105,7 @@ export class ResponsiveAttributes {
   }
 
   /**
-   * @param {!Array<MediaQueriesListAndValueDef>} mediaQueryListsAndValues
+   * @param {!Array<!MediaQueriesListAndValueDef>} mediaQueryListsAndValues
    * @return {string} The value for the first matching MediaQuery, or an empty
    *    string if none match.
    * @private
@@ -144,7 +144,7 @@ export class ResponsiveAttributes {
   /**
    * Sets the onchange for each of the associated MediaQueryLists.
    * @param {!Array<!MediaQueriesListAndValueDef>} mediaQueryListsAndValues
-   * @param {function()} fn
+   * @param {?function()} fn
    * @private
    */
   setOnchange_(mediaQueryListsAndValues, fn) {
