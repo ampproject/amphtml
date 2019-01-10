@@ -272,7 +272,7 @@ amp-story-page[distance="2"] {
  * story.
  * See #14401
  */
-amp-story amp-video::after {
+amp-story-grid-layer amp-video::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
