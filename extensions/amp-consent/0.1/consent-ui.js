@@ -27,6 +27,7 @@ import {
   isAmpElement,
   removeElement,
 } from '../../../src/dom';
+import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
@@ -299,7 +300,7 @@ export class ConsentUI {
       return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
         return dict({
           'clientConfig': this.clientConfig_,
-          'consentState': consentInfo['consentState'],
+          'consentState': getConsentStateValue(consentInfo['consentState']),
           'consentString': consentInfo['consentString'],
         });
       });
