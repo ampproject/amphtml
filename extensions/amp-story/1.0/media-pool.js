@@ -30,9 +30,7 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
-import {
-  VideoServiceSignals,
-} from '../../../src/service/video-service-interface';
+import {VideoSignals} from '../../../src/service/video-manager-impl';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
@@ -865,7 +863,7 @@ export class MediaPool {
     const blessPromises = [];
 
     (this.ampElementsToBless_ || []).forEach(ampEl => {
-      ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
+      ampEl.signals().signal(VideoSignals.USER_INTERACTED);
     });
 
     this.ampElementsToBless_ = null; // GC

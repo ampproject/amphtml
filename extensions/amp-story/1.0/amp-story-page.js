@@ -42,7 +42,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from './localization';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
+import {VideoSignals} from '../../../src/service/video-manager-impl';
 import {
   closestBySelector,
   iterateCursor,
@@ -58,6 +58,7 @@ import {
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
@@ -109,6 +110,12 @@ export const PageState = {
   NOT_ACTIVE: 0, // Page is not displayed. Could still be visible on desktop.
   PLAYING: 1, // Page is currently the main page, and playing.
   PAUSED: 2, // Page is currently the main page, but not playing.
+};
+
+/** @const @enum {string}*/
+export const NavigationDirection = {
+  NEXT: 'next',
+  PREVIOUS: 'previous',
 };
 
 /**
@@ -225,7 +232,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     toArray(videos).forEach(el => {
-      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
+      el.signals().signal(VideoSignals.AUTOPLAY_DELEGATED);
     });
   }
 
@@ -718,10 +725,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute('i-amphtml-advance-to')) {
-      return this.element.getAttribute('i-amphtml-advance-to');
-    }
+    const advanceAttr =
+      isExperimentOn(this.win, 'amp-story-branching') ?
+        'advance-to' : 'i-amphtml-advance-to';
 
+    if (this.element.hasAttribute(advanceAttr)) {
+      return this.element.getAttribute(advanceAttr);
+    }
     const nextElement = this.element.nextElementSibling;
     if (nextElement && nextElement.tagName.toLowerCase() === TAG) {
       return nextElement.id;
@@ -742,7 +752,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(targetPageId);
+    this.switchTo_(targetPageId, NavigationDirection.PREVIOUS);
   }
 
   /**
@@ -757,15 +767,18 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId);
+    this.switchTo_(pageId, NavigationDirection.NEXT);
   }
 
   /**
    * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
    * @private
    */
-  switchTo_(targetPageId) {
-    const payload = dict({'targetPageId': targetPageId});
+  switchTo_(targetPageId, direction) {
+    const payload = dict({
+      'targetPageId': targetPageId,
+      'direction': direction});
     const eventInit = {bubbles: true};
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);

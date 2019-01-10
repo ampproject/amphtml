@@ -150,6 +150,7 @@ exports.rules = [
       'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
+      'ads/**->src/utils/rate-limit.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
@@ -282,12 +283,12 @@ exports.rules = [
           'src/service/notification-ui-manager.js',
       // For autoplay delegation:
       'extensions/amp-story/0.1/amp-story-page.js->' +
-          'src/service/video-service-sync-impl.js',
+          'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/amp-story-page.js->' +
-          'src/service/video-service-sync-impl.js',
+          'src/service/video-manager-impl.js',
       // Accessing USER_INTERACTED constant:
       'extensions/amp-story/1.0/media-pool.js->' +
-          'src/service/video-service-interface.js',
+          'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
           'src/service/action-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +

@@ -34,6 +34,7 @@ import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -1239,4 +1240,94 @@ describes.realWin('amp-story', {
           });
     });
   });
+  describe('amp-story branching', () => {
+
+    beforeEach(() => {toggleExperiment(win, 'amp-story-branching', true);});
+    afterEach(() => {toggleExperiment(win, 'amp-story-branching', false);});
+
+    it('should advance to specified page with advanced-to attribute', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+
+            story.getPageById('cover')
+                .element.setAttribute('advance-to', 'page-3');
+
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            expect(story.activePage_.element.id).to.equal('page-3');
+          });
+    });
+
+    it('should navigate to the target page when a goToPage action is executed',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+                expect(story.activePage_.element.id).to.equal('page-2');
+              });
+        });
+
+    it('should navigate back to the correct previous page after goToPage',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+
+                // Moves backwards.
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it.skip(
+        'should navigate back to the correct previous page after advance-to',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+          return story.layoutCallback()
+              .then(() => {
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+
+                expect(story.activePage_.element.id).to.equal('cover');
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                // Move backwards.
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+  });
 });
+

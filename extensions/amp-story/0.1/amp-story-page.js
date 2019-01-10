@@ -34,7 +34,7 @@ import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
+import {VideoSignals} from '../../../src/service/video-manager-impl';
 import {
   closestBySelector,
   matches,
@@ -178,7 +178,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     toArray(videos).forEach(el => {
-      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
+      el.signals().signal(VideoSignals.AUTOPLAY_DELEGATED);
     });
   }
 

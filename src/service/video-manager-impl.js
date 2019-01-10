@@ -30,14 +30,6 @@ import {
   VideoEvents,
 } from '../video-interface';
 import {Services} from '../services';
-import {
-  VideoServiceInterface,
-  VideoServiceSignals,
-} from './video-service-interface';
-import {
-  VideoServiceSync,
-  setVideoComponentClassname,
-} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
@@ -57,6 +49,7 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
+import {renderOrClone} from './video/utils';
 import {startsWith} from '../string';
 import {toggle} from '../style';
 
@@ -77,8 +70,41 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
  * @private
  */
 function userInteractedWith(video) {
-  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+  video.signals().signal(VideoSignals.USER_INTERACTED);
 }
+
+
+/**
+ * @param {!Element} element
+ * @private
+ */
+function setVideoComponentClassname(element) {
+  element.classList.add('i-amphtml-video-component');
+}
+
+
+/** @enum {string} */
+export const VideoSignals = {
+  USER_INTERACTED: 'user-interacted',
+  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+};
+
+
+/**
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
+ * @return {!Element}
+ */
+const renderOrCloneAutoplayInteractionOverlay =
+    renderOrClone(renderInteractionOverlay);
+
+
+/**
+ * @param {!Window} unusedWin
+ * @param {!Element|!Document} elOrDoc
+ * @return {!Element}
+ */
+const renderOrCloneAutoplayIcon = renderOrClone(renderIcon);
 
 
 /**
@@ -88,7 +114,6 @@ function userInteractedWith(video) {
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {VideoServiceInterface}
  * @implements {../service.Disposable}
  */
 export class VideoManager {
@@ -179,7 +204,7 @@ export class VideoManager {
     }
   }
 
-  /** @override */
+  /** @param {!../video-interface.VideoInterface} video */
   register(video) {
     devAssert(video);
 
@@ -318,7 +343,12 @@ export class VideoManager {
     return null;
   }
 
-  /** @override */
+  /**
+   * Gets the current analytics details for the given video.
+   * Fails silently if the video is not registered.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!VideoAnalyticsDetailsDef>|!Promise<void>}
+   */
   getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
@@ -512,7 +542,7 @@ class VideoEntry {
   /** Listens for signals to delegate autoplay to a different module. */
   listenForAutoplayDelegation_() {
     const signals = this.video.signals();
-    signals.whenSignal(VideoServiceSignals.AUTOPLAY_DELEGATED).then(() => {
+    signals.whenSignal(VideoSignals.AUTOPLAY_DELEGATED).then(() => {
       this.allowAutoplay_ = false;
 
       if (this.isPlaying_) {
@@ -744,11 +774,11 @@ class VideoEntry {
     const {element, win} = this.video;
 
     if (element.hasAttribute(VideoAttributes.NO_AUDIO) ||
-        element.signals().get(VideoServiceSignals.USER_INTERACTED)) {
+        element.signals().get(VideoSignals.USER_INTERACTED)) {
       return;
     }
 
-    const animation = renderIcon(win, element);
+    const animation = renderOrCloneAutoplayIcon(win, element);
 
     /** @param {boolean} isPlaying */
     const toggleAnimation = isPlaying => {
@@ -766,7 +796,7 @@ class VideoEntry {
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
     ];
 
-    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED).then(() => {
+    video.signals().whenSignal(VideoSignals.USER_INTERACTED).then(() => {
       const {video} = this;
       const {element} = video;
       this.firstPlayEventOrNoop_();
@@ -791,7 +821,7 @@ class VideoEntry {
       return;
     }
 
-    const mask = renderInteractionOverlay(win, element);
+    const mask = renderOrCloneAutoplayInteractionOverlay(win, element);
 
     /** @param {boolean} display */
     const setMaskDisplay = display => {
@@ -895,7 +925,7 @@ class VideoEntry {
    */
   userInteracted() {
     return (
-      this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null);
+      this.video.signals().get(VideoSignals.USER_INTERACTED) != null);
   }
 
   /**
@@ -948,11 +978,11 @@ export class AutoFullscreenManager {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!./video-service-interface.VideoServiceInterface} manager
+   * @param {!VideoManager} manager
    */
   constructor(ampdoc, manager) {
 
-    /** @private @const {!./video-service-interface.VideoServiceInterface} */
+    /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc} */
@@ -1003,7 +1033,7 @@ export class AutoFullscreenManager {
     listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
     listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
-    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+    video.signals().whenSignal(VideoSignals.USER_INTERACTED)
         .then(this.boundSelectBestCentered_);
 
     // Set always
@@ -1476,13 +1506,5 @@ function analyticsEvent(entry, eventType, opt_vars) {
 
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
 export function installVideoManagerForDoc(nodeOrDoc) {
-  // TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
-  // TODO(alanorozco, #13674): Rename to `video-service`
-  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
-    const {win} = ampdoc;
-    if (VideoServiceSync.shouldBeUsedIn(win)) {
-      return new VideoServiceSync(ampdoc);
-    }
-    return new VideoManager(ampdoc);
-  });
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
 }
