@@ -110,7 +110,11 @@ export const RTC_VENDORS = {
   navegg: {
     url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
     macros: ['NVG_ACC'],
+  },
+  sonobi: {
+    url: 'https://apex.go.sonobi.com/trinity.json?key_maker=%7B%22_DIVIDER_ATTR(data-slot)%7C1%22%3A%22PLACEMENT_ID_DIVIDER_ATTR(width)xATTR(height)%2CATTR(data-multi-size)%22%7D&ref=CANONICAL_URL&lib_name=amp&lib_v=0.1&pv=PAGEVIEWID&amp=1',
     disableKeyAppend: true,
+    macros: ['PLACEMENT_ID', '_DIVIDER_'],
   },
 };
 
