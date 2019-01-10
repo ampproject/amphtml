@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
+import {ResponsiveAttributes} from './responsive-attributes';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -44,6 +45,50 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.slides_ = [];
+
+    /** @private @const */
+    this.responsiveAttributes_ = new ResponsiveAttributes({
+      'advance-count': newValue => {
+        this.carousel_.updateAdvanceCount(Number(newValue) || 0);
+      },
+      'auto-advance': newValue => {
+        this.carousel_.updateAutoAdvance(newValue == 'true');
+      },
+      'auto-advance-count': newValue => {
+        this.carousel_.updateAutoAdvanceCount(Number(newValue) || 0);
+      },
+      'auto-advance-interval': newValue => {
+        this.carousel_.updateAutoAdvanceInterval(Number(newValue) || 0);
+      },
+      'horizontal': newValue => {
+        this.carousel_.updateHorizontal(newValue == 'true');
+      },
+      'initial-index': newValue => {
+        this.carousel_.updateInitialIndex(Number(newValue) || 0);
+      },
+      'loop': newValue => {
+        this.carousel_.updateLoop(newValue == 'true');
+      },
+      'mixed-length': newValue => {
+        this.carousel_.updateMixedLength(newValue == 'true');
+      },
+      'side-slide-count': newValue => {
+        this.carousel_.updateSideSlideCount(Number(newValue) || 0);
+      },
+      'snap': newValue => {
+        this.carousel_.updateSnap(newValue == 'true');
+      },
+      'snap-align': newValue => {
+        this.carousel_.updateAlignment(newValue);
+      },
+      'snap-by': newValue => {
+        this.carousel_.updateSnapBy(Number(newValue) || 0);
+      },
+      'visible-count': newValue => {
+        this.carousel_.updateVisibleCount(Number(newValue) || 0);
+      },
+    });
+
   }
 
   /** @override */
@@ -132,44 +177,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   attributeMutated_(name, newValue) {
-    switch (name) {
-      case 'auto-advance':
-        this.carousel_.updateAutoAdvance(newValue == 'true');
-        break;
-      case 'auto-advance-count':
-        this.carousel_.updateAutoAdvanceCount(Number(newValue) || 0);
-        break;
-      case 'auto-advance-interval':
-        this.carousel_.updateAutoAdvanceInterval(Number(newValue) || 0);
-        break;
-      case 'horizontal':
-        this.carousel_.updateHorizontal(newValue == 'true');
-        break;
-      case 'initial-index':
-        this.carousel_.updateInitialIndex(Number(newValue) || 0);
-        break;
-      case 'loop':
-        this.carousel_.updateLoop(newValue == 'true');
-        break;
-      case 'mixed-length':
-        this.carousel_.updateMixedLength(newValue == 'true');
-        break;
-      case 'side-slide-count':
-        this.carousel_.updateSideSlideCount(Number(newValue) || 0);
-        break;
-      case 'snap':
-        this.carousel_.updateSnap(newValue == 'true');
-        break;
-      case 'snap-align':
-        this.carousel_.updateAlignment(newValue);
-        break;
-      case 'snap-by':
-        this.carousel_.updateSnapBy(Number(newValue) || 0);
-        break;
-      case 'visible-count':
-        this.carousel_.updateVisibleCount(Number(newValue) || 0);
-        break;
-    }
+    this.responsiveAttributes_.updateAttribute(name, newValue);
   }
 }
 
