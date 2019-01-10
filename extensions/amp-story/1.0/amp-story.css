@@ -24,6 +24,7 @@
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
+  -webkit-touch-callout: none !important;
 }
 
 amp-consent {
