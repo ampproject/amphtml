@@ -1192,6 +1192,29 @@ const generateJson = numberOfItems => {
   return results;
 };
 
+const generateResults = (category, count = 2) => {
+  const r = {};
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const buster = randInt(10000);
+    const item = {};
+    item.src = `https://placeimg.com/600/400/${category}?${buster}`;
+    items.push(item);
+  }
+
+  r.items = items;
+  r['load-more-src'] =
+      `/infinite-scroll-random/${category}?${randInt(10000)}`;
+
+  return r;
+};
+
+app.get('/infinite-scroll-random/:category', function(request, response) {
+  const {category} = request.params;
+  const result = generateResults(category);
+  response.json(result);
+});
+
 app.get('/infinite-scroll-faulty', function(req, res) {
   const {query} = req;
   const code = query['code'];
