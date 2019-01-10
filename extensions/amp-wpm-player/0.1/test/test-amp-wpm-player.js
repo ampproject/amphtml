@@ -50,7 +50,8 @@ describes.realWin('amp-wpm-player', {
     }
 
     const div = document.createElement('div');
-    div.innerHTML = `<amp-wpm-player ${attributeString}></amp-wpm-player>`.trim();
+    div.innerHTML =
+        `<amp-wpm-player ${attributeString}></amp-wpm-player>`.trim();
     const wpmp = div.firstChild;
 
 
