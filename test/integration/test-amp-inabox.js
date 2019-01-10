@@ -102,7 +102,7 @@ describe('inabox', function() {
 
     beforeEach(() => {
       iframe = document.createElement('iframe');
-      env.win.top.ampInaboxIframes.push(iframe);
+      env.win.top.ampInaboxIframes = [iframe];
     });
 
     afterEach(() => {
@@ -159,7 +159,7 @@ describe('inabox', function() {
 
     beforeEach(() => {
       iframe = document.createElement('iframe');
-      env.win.top.ampInaboxIframes.push(iframe);
+      env.win.top.ampInaboxIframes = [iframe];
     });
 
     afterEach(() => {
