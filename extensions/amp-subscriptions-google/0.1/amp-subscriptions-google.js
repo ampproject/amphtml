@@ -336,18 +336,21 @@ class AmpFetcher {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('subscriptions-google', ampdoc => {
-    const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
-    Services.subscriptionsServiceForDoc(ampdoc).then(service => {
-      service.registerPlatform(PLATFORM_ID,
-          (platformConfig, serviceAdapter) => {
-            return platformService.createPlatform(platformConfig,
-                serviceAdapter);
-          }
-      );
-    });
-    return platformService;
-  });
+  AMP.registerServiceForDoc('subscriptions-google',
+      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+      ampdoc => {
+        const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
+        const element = ampdoc.getHeadNode();
+        Services.subscriptionsServiceForDoc(element).then(service => {
+          service.registerPlatform(PLATFORM_ID,
+              (platformConfig, serviceAdapter) => {
+                return platformService.createPlatform(platformConfig,
+                    serviceAdapter);
+              }
+          );
+        });
+        return platformService;
+      });
 });
 
 
