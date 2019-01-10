@@ -50,8 +50,7 @@ const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'ext': true,
   'key_ops': ['verify'],
   'kty': 'RSA',
-  /*eslint "max-len": 0*/
-  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
 });
 
 /** @type {?Promise} */
@@ -116,17 +115,18 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
 /**
  * Scan the page for origin experiment tokens, verifies them, and enables
  * the corresponding experiments for verified tokens.
- * @param {!Window} win
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!webCrypto.JsonWebKey} publicJwk
  * @return {!Promise}
  * @private
  */
-function scanForOriginExperimentTokens(win, publicJwk) {
-  const metas =
-      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
+function scanForOriginExperimentTokens(ampdoc, publicJwk) {
+  const head = ampdoc.getHeadNode();
+  const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
   if (metas.length == 0) {
     return Promise.resolve();
   }
+  const {win} = ampdoc;
   const crypto = Services.cryptoFor(win);
   return crypto.importPkcsKey(publicJwk).then(publicKey => {
     const promises = [];
@@ -147,17 +147,20 @@ function scanForOriginExperimentTokens(win, publicJwk) {
 /**
  * Asynchronously checks whether the specified origin experiment is on or off.
  * On the first invocation, triggers scan of origin experiment tokens on page.
- * @param {!Window} win
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} experimentId
  * @param {boolean=} opt_forceScan Forces rescan of page for experiment tokens.
  * @return {!Promise<boolean>}
  */
-export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
+export function isOriginExperimentOn(ampdoc, experimentId, opt_forceScan) {
+  const {win} = ampdoc;
   if (!originExperimentsPromise || opt_forceScan) {
     originExperimentsPromise =
-        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
+        scanForOriginExperimentTokens(ampdoc, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
   }
-  return originExperimentsPromise.then(() => isExperimentOn(win, experimentId));
+  return originExperimentsPromise.then(() => {
+    return isExperimentOn(win, /*OK*/experimentId);
+  });
 }
 
 /**

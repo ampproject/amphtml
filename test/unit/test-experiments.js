@@ -906,15 +906,16 @@ describe('experiment branch tests', () => {
   });
 });
 
-describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
+describes.fakeWin('isOriginExperimentOn', {amp: true}, env => {
   // Token enables experiment "foo" for origin "https://origin.com".
   const token = 'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY'; // eslint-disable-line max-len
 
   let win;
+  let ampdoc;
   let isPkcsAvailable;
 
   beforeEach(() => {
-    win = env.win;
+    ({win, ampdoc} = env.win);
     installCryptoService(win);
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
@@ -928,21 +929,21 @@ describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
   }
 
   it('should return false if no token is found', () => {
-    return expect(isOriginExperimentOn(win, 'foo', true))
+    return expect(isOriginExperimentOn(ampdoc, 'foo', true))
         .to.eventually.be.false;
   });
 
   it('should return false if crypto is unavailable', () => {
     isPkcsAvailable.returns(false);
 
-    return expect(isOriginExperimentOn(win, 'foo', true))
+    return expect(isOriginExperimentOn(ampdoc, 'foo', true))
         .to.eventually.be.false;
   });
 
   it('should return false for missing token', () => {
     setupMetaTagWith('');
 
-    return expect(isOriginExperimentOn(win, 'foo', true))
+    return expect(isOriginExperimentOn(ampdoc, 'foo', true))
         .to.eventually.be.false;
   });
 
@@ -950,7 +951,7 @@ describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
     setupMetaTagWith(token);
     win.location.href = 'https://not-origin.com';
 
-    return expect(isOriginExperimentOn(win, 'foo', true))
+    return expect(isOriginExperimentOn(ampdoc, 'foo', true))
         .to.eventually.be.false;
   });
 
@@ -958,7 +959,7 @@ describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
     setupMetaTagWith(token);
     win.location.href = 'https://origin.com';
 
-    return expect(isOriginExperimentOn(win, 'foo', true))
+    return expect(isOriginExperimentOn(ampdoc, 'foo', true))
         .to.eventually.be.true;
   });
 
@@ -966,7 +967,7 @@ describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
     setupMetaTagWith(token);
     win.location.href = 'https://origin.com';
 
-    return expect(isOriginExperimentOn(win, 'bar', true))
+    return expect(isOriginExperimentOn(ampdoc, 'bar', true))
         .to.eventually.be.false;
   });
 });
