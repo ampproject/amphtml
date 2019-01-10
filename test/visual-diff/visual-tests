@@ -424,6 +424,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/478011222#L634
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
