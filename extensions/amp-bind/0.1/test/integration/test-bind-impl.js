@@ -478,20 +478,20 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should support binding to Node.textContent', () => {
       const element = createElement(
-          env, container, '[text]="\'a\' + \'b\' + \'c\'"');
+          env, container, '[text]="\'abc\'"');
       expect(element.textContent).to.equal('');
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('abc');
       });
     });
 
-    it('should update value in addition to textContent for TextArea', () => {
+    it('should only set value for <textarea> elements', () => {
       const element = createElement(
-          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'textarea');
-      element.textContent = 'foo';
-      element.value = 'foo';
+          env, container, '[text]="\'abc\'"', 'textarea');
+      expect(element.textContent).to.equal('');
+      expect(element.value).to.equal('');
       return onBindReadyAndSetState(env, bind, {}).then(() => {
-        expect(element.textContent).to.equal('abc');
+        expect(element.textContent).to.equal('');
         expect(element.value).to.equal('abc');
       });
     });
