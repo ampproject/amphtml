@@ -538,8 +538,28 @@ function updateExperimentRow(experiment) {
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
     return getCookie(window, 'AMP_CANARY') == '1';
+  } else if (id == RC_EXPERIMENT_ID) {
+    return getCookie(window, 'AMP_CANARY') == '2';
   }
   return isExperimentOn(window, /*OK*/id);
+}
+
+/**
+ * Opts in to / out of the "canary" or "rc" runtime types by setting the
+ * AMP_CANARY cookie.
+ * @param {string} cookieState '0' for disabled, '1' for canary, '2' for rc
+ */
+function setAmpCanaryCookie_(cookieState) {
+  const validUntil =
+      (cookieState != '0') ? (Date.now() + COOKIE_MAX_AGE_MS) : 0;
+  const cookieOptions = {
+    // Set explicit domain, so the cookie gets sent to sub domains.
+    domain: location.hostname,
+    allowOnProxyOrigin: true,
+  };
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
+  // Reflect default experiment state.
+  self.location.reload();
 }
 
 /**
@@ -558,16 +578,9 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = Date.now() + COOKIE_MAX_AGE_MS;
-
-      setCookie(window, 'AMP_CANARY',
-          (on ? '1' : '0'), (on ? validUntil : 0), {
-            // Set explicit domain, so the cookie gets send to sub domains.
-            domain: location.hostname,
-            allowOnProxyOrigin: true,
-          });
-      // Reflect default experiment state.
-      self.location.reload();
+      setAmpCanaryCookie_(on ? '1' : '0');
+    } else if (id == RC_EXPERIMENT_ID) {
+      setAmpCanaryCookie_(on ? '2' : '0');
     } else {
       toggleExperiment(window, id, on);
     }
@@ -607,7 +620,7 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
- * user has (depends on whether they opted into canary), so that
+ * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
