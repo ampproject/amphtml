@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Styling for the amp-consent
+ * component. This also has a lot of specific
+ * styling for the CMP Modal. Note: this does
+ * specifc percentage vs. viewport based css
+ * for the heights and tranforms of the CMP modal,
+ * to handle URL and Safari Navigation bar transitions.
+ * Please refer to the following, before changing
+ * the viewport or percentage based heights,
+ * to avoid unintentionally breaking the intended
+ * behavior.
+ *
+ * https://developers.google.com/web/updates/2016/12/url-bar-resizing
+ *
+ */
+
 amp-consent {
   /* Fixed to make position independent of page other elements. */
   position: fixed;
@@ -81,13 +97,7 @@ iframe.i-amphtml-consent-ui-fill {
   border: none;
 }
 
-/**
- * CMP Modal class appolied when asking for CMP consent.
- * See: https://developers.google.com/web/updates/2016/12/url-bar-resizing
- * For the reasoning of mixing percentages with viewport units
- */
 amp-consent.i-amphtml-consent-ui-iframe-active {
-  position: fixed !important;
   width: 100vw !important;
   height: 100vh !important;
   padding: 0px !important;
