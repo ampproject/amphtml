@@ -79,6 +79,9 @@ describe('Activity getTotalEngagedTime', () => {
         nodeType: 1,
         style: {},
       },
+      head: {
+        nodeType: /* ELEMENT */ 1,
+      },
     };
 
     fakeWin = {
@@ -96,6 +99,7 @@ describe('Activity getTotalEngagedTime', () => {
       Promise: window.Promise,
     };
     fakeDoc.defaultView = fakeWin;
+    fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
     fakeWin.services['ampdoc'] = {obj: {
@@ -128,7 +132,7 @@ describe('Activity getTotalEngagedTime', () => {
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return Services.activityForDoc(ampdoc).then(a => {
+    return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
       activity = a;
     });
   });
@@ -283,6 +287,9 @@ describe('Activity getIncrementalEngagedTime', () => {
         nodeType: 1,
         style: {},
       },
+      head: {
+        nodeType: /* ELEMENT */ 1,
+      },
     };
 
     fakeWin = {
@@ -300,6 +307,7 @@ describe('Activity getIncrementalEngagedTime', () => {
       Promise: window.Promise,
     };
     fakeDoc.defaultView = fakeWin;
+    fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
     fakeWin.services['ampdoc'] = {obj: {
@@ -332,7 +340,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return Services.activityForDoc(ampdoc).then(a => {
+    return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
       activity = a;
     });
   });

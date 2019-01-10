@@ -20,8 +20,10 @@ import {Services} from '../../../src/services';
 AMP.extension('amp-access-poool', '0.1', function(AMP) {
   AMP.registerServiceForDoc(
       'poool',
+      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
       function(ampdoc) {
-        return Services.accessServiceForDoc(ampdoc).then(accessService => {
+        const element = ampdoc.getHeadNode();
+        return Services.accessServiceForDoc(element).then(accessService => {
           const source = accessService.getVendorSource('poool');
           const vendor = new PooolVendor(accessService, source);
           const adapter = /** @type {
