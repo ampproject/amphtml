@@ -745,23 +745,17 @@ export class ActionService {
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
-  const {method, node, tagOrTarget} = invocation;
-  const tagOrTargetCalled = tagOrTarget.toLowerCase();
-  let methodCalled = method.toLowerCase();
-  const defaultActionAlias = (typeof node.getDefaultActionAlias == 'function')
-      && node.getDefaultActionAlias();
-  const calledByDefaultActionAndHasDefaultAlias =
-      method == DEFAULT_ACTION && (node && !!defaultActionAlias);
-  // If called via default action 'activate', check the whitelist
-  // against the default action alias.
-  if (calledByDefaultActionAndHasDefaultAlias) {
-    methodCalled = defaultActionAlias.toLowerCase();
+  let {method, node, tagOrTarget} = invocation;
+  if (method === DEFAULT_ACTION
+      && (typeof node.getDefaultActionAlias == 'function')) {
+    method = node.getDefaultActionAlias();
   }
-
-  return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*'
-        || tagOrTargetCalled == tagOrTarget.toLowerCase()) &&
-        (methodCalled == method.toLowerCase());
+  const lcMethod = method.toLowerCase();
+  const lcTagOrTarget = tagOrTarget.toLowerCase();
+  return whitelist.some(w => {
+    return (w.tagOrTarget === '*'
+        || w.tagOrTarget.toLowerCase() === lcTagOrTarget) &&
+        (w.method.toLowerCase() === lcMethod);
   });
 }
 
@@ -915,7 +909,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let args = null;
   // Object literal. Format: {...}
   if (peek.type == TokenType.OBJECT) {
-    // Don't parse object literalands. Tokenize as a single expression
+    // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
     const {value} = toks.next();
