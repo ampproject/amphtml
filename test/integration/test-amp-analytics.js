@@ -568,6 +568,33 @@ describe('amp-analytics', function() {
     });
   });
 
+  describes.integration('configRewriter', {
+    body:
+      `<amp-analytics type="_fake_">
+          <script type="application/json">
+          {
+            "vars": {
+              "url" : "${RequestBank.getUrl(0)}"
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
+    it('should should use config from server', () => {
+      return RequestBank.withdraw(0).then(req => {
+        const body = JSON.parse(req.body);
+        expect(body.rewritten).to.be.true;
+        expect(body.testId).to.equal(12358);
+      });
+    });
+  });
+
   describes.integration('type=googleanalytics', {
     body: `
       <script>
