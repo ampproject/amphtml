@@ -1080,7 +1080,7 @@ export class Bind {
         const stringValue = String(newValue);
 
         // textContent on <textarea> only works before interaction.
-        if (tag == 'TEXTAREA') {
+        if (tag === 'TEXTAREA') {
           element.value = stringValue;
           // Don't also update textContent to avoid disrupting focus.
           updateTextContent = false;
