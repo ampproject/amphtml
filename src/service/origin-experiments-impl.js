@@ -16,9 +16,9 @@
 
 import {Services} from '../services';
 import {bytesToString, stringToBytes} from '../utils/bytes';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin, parseUrlDeprecated} from '../url';
 import {parseJson} from '../json';
-import {registerServiceBuilderForDoc} from '../service';
 import {user} from '../log';
 
 /** @const {string} */
@@ -39,13 +39,13 @@ const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
  */
 export class OriginExperiments {
   /**
-   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!./service/crypto-impl.Crypto} */
+    /** @const @private {!./crypto-impl.Crypto} */
     this.crypto_ = Services.cryptoFor(ampdoc.win);
 
     /** @const @private {!TokenMaster} */
@@ -58,7 +58,7 @@ export class OriginExperiments {
   /**
    * Async returns array of origin experiment IDs that are enabled.
    * @param {boolean=} opt_rescan
-   * @param {!webCrypto.JsonWebKey=} publicJwk
+   * @param {!webCrypto.JsonWebKey=} publicJwk Overridable for testing.
    * @return {!Promise<!Array<string>>}
    */
   getExperiments(opt_rescan = false, publicJwk = PUBLIC_JWK) {
@@ -112,7 +112,7 @@ export class OriginExperiments {
  */
 class TokenMaster {
   /**
-   * @param {!./service/crypto-impl.Crypto} crypto
+   * @param {!./crypto-impl.Crypto} crypto
    */
   constructor(crypto) {
     this.crypto_ = crypto;
@@ -271,4 +271,15 @@ class TokenMaster {
  */
 export function installOriginExperimentsForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'origin-experiments', OriginExperiments);
+}
+
+/**
+ * Doesn't live in services.js to avoid bundling into v0.js.
+ * Be sure to call installOriginExperimentsForDoc() before using.
+ * @param {!Element|!ShadowRoot} element
+ * @return {!./service/origin-experiments-impl.OriginExperiments}
+ */
+export function originExperimentsForDoc(element) {
+  return /** @type {!./service/origin-experiments-impl.OriginExperiments} */ (
+    getServiceForDoc(element, 'origin-experiments'));
 }

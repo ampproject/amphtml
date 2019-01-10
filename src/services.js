@@ -291,15 +291,6 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!ShadowRoot} element
-   * @return {!./service/origin-experiments-impl.OriginExperiments}
-   */
-  static originExperimentsForDoc(element) {
-    return /** @type {!./service/origin-experiments-impl.OriginExperiments} */ (
-      getServiceForDoc(element, 'origin-experiments'));
-  }
-
-  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */
