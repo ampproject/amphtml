@@ -95,7 +95,7 @@ export class OriginExperiments {
         if (token) {
           const p = this.tokenMaster_.verifyToken(
               token, win.location, publicKey).catch(error => {
-            user().error(TAG, 'Failed to verify experiment token:' + error);
+            user().error(TAG, 'Failed to verify experiment token:', error);
           });
           promises.push(p);
         } else {
@@ -109,8 +109,9 @@ export class OriginExperiments {
 
 /**
  * Handles key generation and token signing/verifying.
+ * @protected
  */
-class TokenMaster {
+export class TokenMaster {
   /**
    * @param {!./crypto-impl.Crypto} crypto
    */
