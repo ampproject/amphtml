@@ -347,7 +347,7 @@ async function reportBundleSize() {
             response.body);
       }
     } catch (error) {
-      log(red('Could not report a skipped pull request'));
+      log(red('Could not report the bundle size of this pull request'));
       log(red(error));
       process.exitCode = 1;
       return;
