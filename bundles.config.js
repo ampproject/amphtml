@@ -101,7 +101,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     options: {hasCss: true},
     type: TYPES.MISC,
   },
