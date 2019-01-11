@@ -21,6 +21,9 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
+import {
+  ancestorElementsByTag, iterateCursor, waitForBodyPromise,
+} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -31,7 +34,6 @@ import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
@@ -1121,7 +1123,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty = (tag == 'INPUT' && property in element);
+        const updateProperty = (tag === 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -1139,6 +1141,11 @@ export class Bind {
             element.removeAttribute(property);
             mutated = true;
           }
+          if (mutated) {
+            // Safari-specific workaround for updating <select> elements
+            // when a child option[selected] attribute changes.
+            this.updateSelectForSafari_(element, property, newValue);
+          }
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
               element, property, String(newValue), updateProperty);
@@ -1150,6 +1157,34 @@ export class Bind {
         break;
     }
     return null;
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} property
+   * @param {BindExpressionResultDef} newValue
+   */
+  updateSelectForSafari_(element, property, newValue) {
+    // We only care about option[selected].
+    if (element.tagName !== 'OPTION' || property !== 'selected') {
+      return;
+    }
+    // We only care if this option was selected, not deselected.
+    if (!newValue) {
+      return;
+    }
+    // Workaround only needed for Safari.
+    if (!Services.platformFor(this.win_).isSafari()) {
+      return;
+    }
+    const selects = ancestorElementsByTag(element, 'select');
+    if (!selects.length) {
+      return;
+    }
+    // Set corresponding selectedIndex on <select> parent.
+    const select = selects[0];
+    const index = toArray(select.options).indexOf(element);
+    select.selectedIndex = index;
   }
 
   /**
