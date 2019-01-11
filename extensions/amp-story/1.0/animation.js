@@ -46,6 +46,8 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
+const STOP_ANIMATION_AFTER_ATTRIBUTE_NAME = 'stop-animation-after';
+/** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 
 
@@ -109,6 +111,9 @@ class AnimationRunner {
 
     /** @private @const */
     this.duration_ = animationDef.duration || this.presetDef_.duration || 0;
+
+    /** @private @const */
+    this.stopAfter_ = animationDef.stopAfter || null;
 
     /**
      * @private @const {!Promise<
@@ -240,6 +245,16 @@ class AnimationRunner {
    */
   startWhenReady_(runner) {
     runner.start();
+    if (this.stopAfter_) {
+      this.timer_.promise(this.stopAfter_).then(() => this.pause());
+    }
+  }
+
+  /**
+   * Pause animation.
+   */
+  pause() {
+    this.runner_.pause();
   }
 
   /** @return {boolean} */
@@ -494,6 +509,11 @@ export class AnimationManager {
     if (el.hasAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME)) {
       animationDef.delay =
           timeStrToMillis(el.getAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME));
+    }
+
+    if (el.hasAttribute(STOP_ANIMATION_AFTER_ATTRIBUTE_NAME)) {
+      animationDef.stopAfter =
+        timeStrToMillis(el.getAttribute(STOP_ANIMATION_AFTER_ATTRIBUTE_NAME));
     }
 
     if (el.hasAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME)) {
