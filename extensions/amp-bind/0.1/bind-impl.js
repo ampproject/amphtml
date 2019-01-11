@@ -1185,7 +1185,9 @@ export class Bind {
     // Set corresponding selectedIndex on <select> parent.
     const select = selects[0];
     const index = toArray(select.options).indexOf(element);
-    select.selectedIndex = index;
+    if (index >= 0) {
+      select.selectedIndex = index;
+    }
   }
 
   /**
