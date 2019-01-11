@@ -19,13 +19,13 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
 - [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your feature with and who can help guide you through the process.
-- [ ] File an [Intent-to-implement (I2I)](TODO) GitHub issue and cc your reviewer on it.  The I2I should include:
+- [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=) GitHub issue and cc your reviewer on it.  The I2I should include:
   -  A high-level description of the feature.
-  -  A description of the API you plan to create.
+  -  A description of the change/feature you plan to create.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
   -  Details on any data collection or tracking that the feature might perform.
   -  A prototype or mockup (for example, an image, a GIF, or a link to a demo).
-- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the Approvers Working Group (WG).  Work with your reviewer to determine whether the feature is a significant enough change that it requires approval from the Approvers Working Group and/or any other Working Group.
+- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers).  Work with your reviewer to determine whether the feature is a significant enough change that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
 - [ ] Get pre-approval from the Approvers WG if needed.  For features that require approval from the Approvers WG, at least 3 members of the Approvers Working Group should provide pre-approval on the I2I before significant implementation work proceeds.
 - [ ] Finalize the design of your feature.
   - Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
@@ -35,15 +35,24 @@ Significant changes (e.g. new components or significant changes to behavior) req
 
 ## Find a reviewer
 
-If you're making a minor fix and just want to find someone to review/approve your code, look at the OWNERS.yaml files in the directories where you're modifying code and assign your PR to one of them (or cc them on the PR).
+## Finding a reviewer for small changes
+
+If you're making a minor fix and just want to find someone to review/approve your code, look at the OWNERS.yaml files in the directories where you're modifying code and either:
+- assign your PR to one of them if you are able to
+- cc them by adding the text "/cc @username" in the PR description/comment
+
+
+## Finding a reviewer for significant changes
 
 A reviewer is needed if you are making a more substantial change to AMP.  A reviewer is a member of the AMP community who is knowledgeable about the area you are modifying and who can guide you from the design phase all the way through launch.
 
 To find a reviewer:
-- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a reviewer from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
+- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a reviewer from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
 - If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS.yaml files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
 - If you're still not sure who your reviewer should be, ask for a reviewer on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 - If you can't find a reviewer after going through these routes or the reviewers you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
+
+Once you have found a reviewer, make sure to @-mention them on any issues / PRs related to your change (e.g. if mrjoro is your reviewer you can just add "/cc @mrjoro" in the issue/PR body or comment).
 
 ## Implementation
 
