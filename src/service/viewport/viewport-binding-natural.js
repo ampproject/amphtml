@@ -67,6 +67,9 @@ export class ViewportBindingNatural_ {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private {number} */
+    this.paddingTop_ = 0;
+
     dev().fine(TAG_, 'initialized natural viewport');
   }
 
@@ -114,6 +117,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    this.paddingTop_ = paddingTop;
     setImportantStyles(this.win.document.documentElement, {
       'padding-top': px(paddingTop),
     });
@@ -201,7 +205,12 @@ export class ViewportBindingNatural_ {
     const scrollingElement = this.getScrollingElement();
     const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = computedStyle(this.win, scrollingElement);
+    let paddingTop = 0;
+    if (scrollingElement !== this.win.document.documentElement) {
+      paddingTop = this.paddingTop_;
+    }
     return rect.height
+        + paddingTop
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }
