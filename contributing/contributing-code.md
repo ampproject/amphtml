@@ -19,7 +19,7 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
 - [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your feature with and who can help guide you through the process.
-- [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=) GitHub issue and cc your reviewer on it.  The I2I should include:
+- [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your reviewer on it.  The I2I should include:
   -  A high-level description of the feature.
   -  A description of the change/feature you plan to create.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
@@ -31,7 +31,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
   - Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
   - Your reviewer can help you determine if your feature requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
 - [ ] Proceed with the [implementation](#implementation) of your feature.
-- [ ] For features that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](TODO).  Indicate which experiment is gating the feature and a rollout plan.  Once this issue is approved by 3 members of the Approver WG the rollout plan described in the I2S may proceed.
+- [ ] For features that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E).  Indicate which experiment is gating the feature and a rollout plan.  Once this issue is approved by 3 members of the Approver WG the rollout plan described in the I2S may proceed.
 
 ## Find a reviewer
 
