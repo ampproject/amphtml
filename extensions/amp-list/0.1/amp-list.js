@@ -21,9 +21,6 @@ import {CSS} from '../../../build/amp-list-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
-import {
-  PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -36,13 +33,9 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getServiceForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {htmlFor} from '../../../src/static-template';
-import {
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
@@ -68,6 +61,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
 
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
@@ -128,9 +124,6 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenLoadMore_ = null;
 
-    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = null;
-
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
@@ -155,6 +148,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, viewer, this.templates_);
@@ -250,7 +244,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
-      this.getViewport().onResize(() => {
+      this.viewport_.onResize(() => {
         this.attemptToFit_(dev().assertElement(this.container_));
       });
     }
@@ -806,7 +800,7 @@ export class AmpList extends AMP.BaseElement {
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
     if (triggerOnScroll) {
-      this.maybeSetupLoadMoreAuto_();
+      this.setupLoadMoreAuto_();
     }
     const loadMoreEndElement = this.getLoadMoreEndElement_();
     const loadMoreButtonClickable = this.getLoadMoreButtonClickable_();
@@ -1016,23 +1010,17 @@ export class AmpList extends AMP.BaseElement {
   /**
    * @private
    */
-  maybeSetupLoadMoreAuto_() {
-    if (!this.positionObserver_) {
-      installPositionObserverServiceForDoc(this.getAmpDoc());
-      this.positionObserver_ = getServiceForDoc(
-          this.getAmpDoc(),
-          'position-observer'
-      );
-      this.positionObserver_.observe(this.container_,
-          PositionObserverFidelity.LOW,
-          ({positionRect, viewportRect}) => {
-            const ratio = 3;
-            if (this.loadMoreSrc_ &&
-                positionRect.bottom < ratio * viewportRect.bottom) {
+  setupLoadMoreAuto_() {
+    const loadMoreButton = dev().assertElement(this.loadMoreButton_);
+    this.viewport_.onScroll(() => {
+      this.viewport_.getClientRectAsync(loadMoreButton)
+          .then(positionRect => {
+            const vr = this.viewport_.getRect();
+            if (vr.bottom + 3 * vr.height > positionRect.bottom) {
               this.loadMoreCallback_();
             }
           });
-    }
+    });
   }
 
   /**
