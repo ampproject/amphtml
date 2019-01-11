@@ -195,6 +195,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getContentHeight() {
+    // Don't use scrollHeight, since it returns `MAX(viewport_height,
+    // document_height)`, even though we only want the latter. Also, it doesn't
+    // account for margins
     const scrollingElement = this.getScrollingElement();
     const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = getComputedStyle(scrollingElement);
