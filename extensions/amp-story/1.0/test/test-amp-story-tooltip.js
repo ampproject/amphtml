@@ -61,8 +61,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   });
 
   it('should build the tooltip', () => {
-    tooltip.build_();
-    expect(tooltip.isBuilt_).to.be.true;
+    tooltip.buildFocusedState_();
     expect(tooltip.focusedStateOverlay_).to.exist;
   });
 
