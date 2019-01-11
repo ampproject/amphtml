@@ -151,6 +151,9 @@ export class AnalyticsConfig {
     }
 
     return varGroupsPromise.then(() => {
+      // Don't send varGroups in payload to configRewriter endpoint.
+      varGroups && delete rewriterConfig['varGroups'];
+    }).then(() => {
       const fetchConfig = {
         method: 'POST',
         body: config,
@@ -182,8 +185,16 @@ export class AnalyticsConfig {
    * vars object.
    * @param {!JsonObject} varGroups
    * @param {!JsonObject} rewriterConfig
+   * @return {!Promise}
    */
   handleVarGroups_(varGroups, rewriterConfig) {
+    const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
+    if (!vendorVarGroups) {
+      user().warn(this.getName_(), 'This publisher does not currently ' +
+          'support varGroups');
+      return Promise.resolve();
+    }
+
     const allPromises = [];
     // Merge varGroups to see what has been enabled.
     deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
@@ -218,10 +229,7 @@ export class AnalyticsConfig {
       allPromises.push(groupPromise);
     });
 
-    return Promise.all(allPromises).then(() => {
-      // Don't send varGroups in payload to configRewriter endpoint.
-      delete rewriterConfig['varGroups'];
-    });
+    return Promise.all(allPromises);
   }
 
   /**

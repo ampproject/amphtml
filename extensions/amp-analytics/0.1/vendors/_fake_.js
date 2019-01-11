@@ -29,6 +29,16 @@ export const _FAKE_ = /** @type {!JsonObject} */ ({
   },
   'configRewriter': {
     'url': '/analytics/rewriter',
+    'varGroups': {
+      'feature1': {
+        'dr': 'DOCUMENT_REFERRER',
+        'su': 'SOURCE_URL',
+      },
+      'feature2': {
+        'name': 'cats',
+        'title': 'TITLE',
+      },
+    },
   },
   'vars': {
     'clientId': 'CLIENT_ID(_fake_)',

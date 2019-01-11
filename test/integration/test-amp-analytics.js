@@ -575,6 +575,13 @@ describe('amp-analytics', function() {
           {
             "vars": {
               "url" : "${RequestBank.getUrl()}"
+            },
+            "configRewriter": {
+              "varGroups": {
+                "feature2": {
+                  "enabled": true
+                }
+              }
             }
           }
           </script>
@@ -592,6 +599,10 @@ describe('amp-analytics', function() {
         // endpoint. This logic is located in the file
         // /build-system/routes/analytics.js
         const body = JSON.parse(req.body);
+        expect(body.reqBody.configRewriter.vars).to.deep.equal({
+          name: 'cats',
+          title: 'AMP TEST',
+        });
         expect(body.rewritten).to.be.true;
         expect(body.testId).to.equal(12358);
       });
