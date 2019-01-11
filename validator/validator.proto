@@ -407,6 +407,7 @@ message HtmlFormat {
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
+    ACTIONS = 5;
     EXPERIMENTAL = 4;  // Currently unused
   }
 }
