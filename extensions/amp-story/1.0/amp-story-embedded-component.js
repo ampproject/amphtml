@@ -167,6 +167,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to embedded component updates.
    * @param {?Element} target
+   * @private
    */
   onEmbeddedComponentUpdate_(target) {
     switch (this.state_) {
@@ -186,8 +187,9 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Sets new state for the embedded component.
-   * @param {ComponentState<number>} state
+   * @param {ComponentState} state
    * @param {?Element} target
+   * @private
    */
   setState_(state, target) {
     switch (state) {
@@ -248,6 +250,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Closes the expanded view overlay.
    * @param {?Element} target
+   * @private
    */
   maybeCloseExpandedView_(target) {
     if (target && matches(target, '.i-amphtml-expanded-view-close-button')) {
@@ -366,6 +369,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Updates tooltip behavior depending on the target.
    * @param {!Element} target
+   * @private
    */
   updateTooltipBehavior_(target) {
     if (matches(target, embeddedComponentSelectors().LINK)) {
@@ -492,6 +496,7 @@ export class AmpStoryEmbeddedComponent {
    * @param {!ClientRect} targetRect
    * @param {!ClientRect} pageRect
    * @param {!Object} state
+   * @private
    */
   verticalPositioning_(targetRect, pageRect, state) {
     const targetTopOffset = targetRect.top - pageRect.top;
@@ -513,6 +518,7 @@ export class AmpStoryEmbeddedComponent {
    * @param {!ClientRect} targetRect
    * @param {!ClientRect} pageRect
    * @param {!Object} state
+   * @private
    */
   horizontalPositioning_(targetRect, pageRect, state) {
     const targetLeftOffset = targetRect.left - pageRect.left;
