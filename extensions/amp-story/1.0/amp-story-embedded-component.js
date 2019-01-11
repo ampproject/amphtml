@@ -546,7 +546,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   onOutsideTooltipClick_(event) {
-    if (!closest(devAssert(event.target),
+    if (!closest(dev().assertElement(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
       this.closeFocusedState_();
