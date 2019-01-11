@@ -222,7 +222,7 @@ export class AmpStoryEmbeddedComponent {
       this.expandedViewOverlay_ &&
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           storyPage.classList.toggle('i-amphtml-expanded-mode', false);
-          toggle(dev().assertElement(this.expandedViewOverlay_), false);
+          toggle(devAssert(this.expandedViewOverlay_), false);
         });
       return;
     }
@@ -271,7 +271,7 @@ export class AmpStoryEmbeddedComponent {
     this.shadowRoot_ = this.win_.document.createElement('div');
 
     this.focusedStateOverlay_ =
-      dev().assert(this.buildFocusedStateTemplate_(this.win_.document));
+      devAssert(this.buildFocusedStateTemplate_(this.win_.document));
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
     this.focusedStateOverlay_
@@ -311,7 +311,7 @@ export class AmpStoryEmbeddedComponent {
     if (!target) {
       this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
       this.resources_.mutateElement(
-          dev().assertElement(this.focusedStateOverlay_),
+          devAssert(this.focusedStateOverlay_),
           () => {
             this.focusedStateOverlay_
                 .classList.toggle('i-amphtml-hidden', true);
@@ -331,7 +331,7 @@ export class AmpStoryEmbeddedComponent {
     this.previousTarget_ = target;
 
     this.resources_.mutateElement(
-        dev().assertElement(this.focusedStateOverlay_),
+        devAssert(this.focusedStateOverlay_),
         () => {
           this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
@@ -346,7 +346,7 @@ export class AmpStoryEmbeddedComponent {
    */
   onUIStateUpdate_(uiState) {
     this.resources_.mutateElement(
-        dev().assertElement(this.focusedStateOverlay_),
+        devAssert(this.focusedStateOverlay_),
         () => {
           [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
             this.focusedStateOverlay_.setAttribute('desktop', '') :
@@ -373,7 +373,7 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipBehavior_(target) {
     if (matches(target, embeddedComponentSelectors().LINK)) {
-      addAttributesToElement(dev().assertElement(this.tooltip_),
+      addAttributesToElement(devAssert(this.tooltip_),
           dict({'href': this.getElementHref_(target)}));
       return;
     }
@@ -482,9 +482,9 @@ export class AmpStoryEmbeddedComponent {
           this.tooltip_.classList.toggle('i-amphtml-tooltip-arrow-on-top',
               state.arrowOnTop);
 
-          setImportantStyles(dev().assertElement(this.tooltipArrow_),
+          setImportantStyles(devAssert(this.tooltipArrow_),
               {left: `${state.arrowLeftOffset}px`});
-          setImportantStyles(dev().assertElement(this.tooltip_),
+          setImportantStyles(devAssert(this.tooltip_),
               {top: `${state.tooltipTop}px`, left: `${state.tooltipLeft}px`});
         });
   }
@@ -546,7 +546,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   onOutsideTooltipClick_(event) {
-    if (!closest(dev().assertElement(event.target),
+    if (!closest(devAssert(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
       this.closeFocusedState_();
@@ -626,7 +626,7 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     dispatch(
         this.win_,
-        dev().assertElement(this.shadowRoot_),
+        devAssert(this.shadowRoot_),
         direction,
         undefined,
         {bubbles: true});
