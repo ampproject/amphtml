@@ -214,7 +214,11 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   onMeasureChanged() {
     if (this.resetOnResize_) {
-      this.resetContentDimensions_();
+      this.getViewport().getLayoutRectAsync(this.element).then(layoutRect => {
+        if (layoutRect.height !== 0 && layoutRect.width !== 0) {
+          this.resetContentDimensions_();
+        }
+      });
     }
   }
 
@@ -355,8 +359,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
 
-    this.elementBox_ = layoutRectFromDomRect(this.element
-        ./*OK*/getBoundingClientRect());
+    this.elementBox_ = this.getViewport().getLayoutRect(this.element);
 
     this.updateContentDimensions_(sourceAspectRatio);
     this.updateMaxScale_(sourceAspectRatio);
