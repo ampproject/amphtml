@@ -63,8 +63,6 @@ feature_tests/unprintable_chars.html:36:2 The parent tag of tag 'amphtml engine 
 >>       ^~~~~~~~~
 feature_tests/unprintable_chars.html:41:6 The mandatory tag 'html doctype' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/unprintable_chars.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
->>       ^~~~~~~~~
-feature_tests/unprintable_chars.html:41:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
->>       ^~~~~~~~~
 feature_tests/unprintable_chars.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+>>       ^~~~~~~~~
+feature_tests/unprintable_chars.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

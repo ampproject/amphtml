@@ -164,6 +164,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
     this.htmlFormat = 'AMP4EMAIL';
   }
+  if (this.ampHtmlFile.indexOf('actions_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-actions-') != -1) {
+    this.htmlFormat = 'ACTIONS';
+  }
   /**
    * If set to false, output will be generated without inlining the input
    * document.

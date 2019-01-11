@@ -37,6 +37,4 @@ feature_tests/new_and_old_boilerplate_mixed2.html:28:2 The mandatory attribute '
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/new_and_old_boilerplate_mixed2.html:35:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
->>       ^~~~~~~~~
 feature_tests/new_and_old_boilerplate_mixed2.html:35:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
