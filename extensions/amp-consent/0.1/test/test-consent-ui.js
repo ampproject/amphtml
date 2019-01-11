@@ -250,6 +250,7 @@ describes.realWin('consent-ui', {
     it('should not enable the overlay if not configured', function* () {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
+        'uiConfig': {},
       });
       consentUI =
         new ConsentUI(mockInstance, config);
@@ -268,7 +269,9 @@ describes.realWin('consent-ui', {
     it('append/hide/show overlay', function* () {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
-        'overlay': 'true',
+        'uiConfig': {
+          'overlay': 'true',
+        },
       });
       consentUI =
         new ConsentUI(mockInstance, config);
@@ -276,6 +279,9 @@ describes.realWin('consent-ui', {
       consentUI.loadIframe_ = () => {
         return Promise.resolve();
       };
+
+      expect(consentUI.overlayEnabled_).to.be.true;
+
       expect(consentUI.maskElement_).to.be.null;
       expect(consentUI.scrollEnabled_).to.be.true;
       consentUI.show();
