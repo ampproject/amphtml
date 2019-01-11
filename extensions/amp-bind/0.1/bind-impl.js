@@ -1160,6 +1160,7 @@ export class Bind {
   }
 
   /**
+   * Hopefully we can delete this with Safari 13+.
    * @param {!Element} element
    * @param {string} property
    * @param {BindExpressionResultDef} newValue
