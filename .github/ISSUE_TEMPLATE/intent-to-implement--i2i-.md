@@ -37,5 +37,6 @@ Add any other information that may help people understand your I2I.
 
 <!---
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one.  (See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for help in finding a reviewer.)
+-->
 
 /cc @ampproject/wg-approvers
