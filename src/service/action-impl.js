@@ -747,6 +747,7 @@ export class ActionService {
 function isActionWhitelisted_(invocation, whitelist) {
   let {method} = invocation;
   const {node, tagOrTarget} = invocation;
+  // Use alias if default action is invoked.
   if (method === DEFAULT_ACTION
       && (typeof node.getDefaultActionAlias == 'function')) {
     method = node.getDefaultActionAlias();
