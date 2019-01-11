@@ -103,12 +103,12 @@ function printChangeSummary() {
     console.log(fileLogPrefix, colors.cyan('origin/master'),
         'is currently at commit',
         colors.cyan(shortSha(gitTravisMasterBaseline())));
+    console.log(fileLogPrefix,
+        'Testing the following changes at commit',
+        colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
   }
 
   const filesChanged = gitDiffStatMaster();
-  console.log(fileLogPrefix,
-      'Testing the following changes at commit',
-      colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
   console.log(filesChanged);
 
   const branchPoint = gitMergeBaseMaster();
