@@ -37,7 +37,7 @@ const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 app.use(bodyParser.text());
-app.use('/amp4test', require('./amp4test'));
+app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.

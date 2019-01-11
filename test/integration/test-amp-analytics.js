@@ -574,7 +574,7 @@ describe('amp-analytics', function() {
           <script type="application/json">
           {
             "vars": {
-              "url" : "${RequestBank.getUrl(0)}"
+              "url" : "${RequestBank.getUrl()}"
             }
           }
           </script>
@@ -586,8 +586,11 @@ describe('amp-analytics', function() {
       return browser.waitForElementLayout('amp-analytics');
     });
 
-    it('should should use config from server', () => {
-      return RequestBank.withdraw(0).then(req => {
+    it('should use config from server', () => {
+      return RequestBank.withdraw().then(req => {
+        // The config here should have been rewritten by the /analytics/rewriter
+        // endpoint. This logic is located in the file
+        // /build-system/routes/analytics.js
         const body = JSON.parse(req.body);
         expect(body.rewritten).to.be.true;
         expect(body.testId).to.equal(12358);

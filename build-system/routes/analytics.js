@@ -15,8 +15,9 @@
  */
 
 const router = require('express').Router();
+const {log} = require('../amp4test');
 
-router.use('/rewriter', (req, res) => {
+router.post('/rewriter', (req, res) => {
   const body = JSON.parse(req.body);
   if (body.vars && body.vars.url) {
     const requestsConfig = {
@@ -38,8 +39,8 @@ router.use('/rewriter', (req, res) => {
 });
 
 router.use('/:type', (req, res) => {
-  console.log('Analytics event received: ' + req.params.type);
-  console.log(req.query);
+  log('Analytics event received: ' + req.params.type);
+  log(req.query);
   res.status(204).send();
 });
 
