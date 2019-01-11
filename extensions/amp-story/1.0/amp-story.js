@@ -148,6 +148,7 @@ const Attributes = {
 const HistoryStates = {
   PAGE_ID: 'ampStoryPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
+  NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
 /**
@@ -782,6 +783,7 @@ export class AmpStory extends AMP.BaseElement {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
+          this.initializeStoryNavigationPath_();
         })
         .then(() => this.initializeBookend_())
         .then(() => {
@@ -1209,6 +1211,9 @@ export class AmpStory extends AMP.BaseElement {
     } else if (direction === NavigationDirection.NEXT) {
       this.storyNavigationPath_.push(targetPage);
     }
+    this.setHistoryState_(
+      HistoryStates.NAVIGATION_PATH,
+      this.storyNavigationPath_.map(page => page.element.id));
     return targetPage;
   }
 
@@ -2120,6 +2125,15 @@ export class AmpStory extends AMP.BaseElement {
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
     this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+  }
+
+  initializeStoryNavigationPath_(){
+    const historyNavigationPath =
+      this.getHistoryState_(HistoryStates.NAVIGATION_PATH);
+    if (historyNavigationPath) {
+        this.storyNavigationPath_ =
+        historyNavigationPath.map(pageId => this.getPageById(pageId));
+    }
   }
 
   /** @private */
