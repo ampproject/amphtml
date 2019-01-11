@@ -745,7 +745,8 @@ export class ActionService {
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
-  let {method, node, tagOrTarget} = invocation;
+  let {method} = invocation;
+  const {node, tagOrTarget} = invocation;
   if (method === DEFAULT_ACTION
       && (typeof node.getDefaultActionAlias == 'function')) {
     method = node.getDefaultActionAlias();
@@ -753,9 +754,13 @@ function isActionWhitelisted_(invocation, whitelist) {
   const lcMethod = method.toLowerCase();
   const lcTagOrTarget = tagOrTarget.toLowerCase();
   return whitelist.some(w => {
-    return (w.tagOrTarget === '*'
-        || w.tagOrTarget.toLowerCase() === lcTagOrTarget) &&
-        (w.method.toLowerCase() === lcMethod);
+    if (w.tagOrTarget.toLowerCase() === lcTagOrTarget
+        || (w.tagOrTarget === '*')) {
+      if (w.method.toLowerCase() === lcMethod) {
+        return true;
+      }
+    }
+    return false;
   });
 }
 
