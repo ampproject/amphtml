@@ -1526,18 +1526,18 @@ export class AmpStory extends AMP.BaseElement {
       }
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
-        actions.execute(this.sidebar_, 'open', /* args */ null,
-            /* source */ null, /* caller */ null, /* event */ null,
-            ActionTrust.HIGH);
         this.openOpacityMask_();
+        actions.execute(this.sidebar_, 'open', /* args */ null,
+            /* source */   null, /* caller */ null, /* event */ null,
+            ActionTrust.HIGH);
       } else {
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
-      actions.execute(this.sidebar_, 'open', /* args */ null,
-          /* source */ null, /* caller */ null, /* event */ null,
-          ActionTrust.HIGH);
       this.openOpacityMask_();
+      actions.execute(this.sidebar_, 'open', /* args */ null,
+          /* source */  null, /* caller */ null, /* event */ null,
+          ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1552,10 +1552,10 @@ export class AmpStory extends AMP.BaseElement {
       maskEl.addEventListener('click', () => {
         const actions = Services.actionServiceForDoc(this.element);
         if (this.sidebar_) {
+          this.closeOpacityMask_();
           actions.execute(this.sidebar_, 'close', /* args */ null,
               /* source */ null, /* caller */ null, /* event */ null,
               ActionTrust.HIGH);
-          this.closeOpacityMask_();
         }
       });
       this.maskElement_ = maskEl;
