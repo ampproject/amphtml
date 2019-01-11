@@ -45,7 +45,8 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-accordion',version: '0.1',type: TYPES.MISC},
+  {name: 'amp-access-poool', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
   {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adsense-impl', version: '0.1', type: TYPES.AD},
@@ -100,7 +101,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     options: {hasCss: true},
     type: TYPES.MISC,
   },

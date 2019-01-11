@@ -91,6 +91,10 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
     name: "title"
     mandatory: true
   }
@@ -101,6 +105,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-SIDEBAR"
     child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"

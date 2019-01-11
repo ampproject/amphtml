@@ -32,7 +32,12 @@ import {
 } from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
+import {
+  dev,
+  devAssert,
+  duplicateErrorIfNecessary,
+  user,
+} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getAmpAdRenderOutsideViewport,
@@ -209,8 +214,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdUIHandler);
-    dev().assert(AMP.AmpAdXOriginIframeHandler);
+    devAssert(AMP.AmpAdUIHandler);
+    devAssert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<undefined>} */
     this.keysetPromise_ = null;
@@ -626,7 +631,7 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
-            getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+            getConsentPolicyState(this.element, consentPolicyId)
                 .catch(err => {
                   user().error(TAG, 'Error determining consent state', err);
                   return CONSENT_POLICY_STATE.UNKNOWN;
@@ -888,7 +893,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   the refresh function complete. This is particularly handy for testing.
    */
   refresh(refreshEndCallback) {
-    dev().assert(!this.isRefreshing);
+    devAssert(!this.isRefreshing);
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
@@ -898,7 +903,7 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.resolve();
     }
     const promiseId = this.promiseId_;
-    return dev().assert(this.adPromise_).then(() => {
+    return devAssert(this.adPromise_).then(() => {
       if (!this.isRefreshing || promiseId != this.promiseId_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.
@@ -1201,7 +1206,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.isRefreshing = false;
       return;
     }
-    dev().assert(this.uiHandler);
+    devAssert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
@@ -1265,7 +1270,7 @@ export class AmpA4A extends AMP.BaseElement {
           // give up and render the fallback content (or collapse the ad slot).
           const networkFailureHandlerResult =
               this.onNetworkFailure(error, /** @type {string} */ (this.adUrl_));
-          dev().assert(!!networkFailureHandlerResult);
+          devAssert(!!networkFailureHandlerResult);
           if (networkFailureHandlerResult.frameGetDisabled) {
             // Reset adUrl to null which will cause layoutCallback to not
             // fetch via frame GET.
@@ -1355,9 +1360,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
-    dev().assert(creativeMetaData.minifiedCreative,
+    devAssert(creativeMetaData.minifiedCreative,
         'missing minified creative');
-    dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
+    devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
     this.iframe = /** @type {!HTMLIFrameElement} */(
@@ -1408,14 +1413,18 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error executing onCreativeRender', err);
       })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      // It's enough to wait for "ini-load" signal because in a FIE case
-      // we know that the embed no longer consumes significant resources
-      // after the initial load.
-      return friendlyIframeEmbed.whenIniLoaded();
-    }).then(() => {
-      checkStillCurrent();
-      // Capture ini-load ping.
-      this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+      const iniLoadPromise = friendlyIframeEmbed.whenIniLoaded().then(() => {
+        checkStillCurrent();
+        this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+      });
+      const isIniLoadFixExpr = !!frameDoc.querySelector(
+          'meta[name="amp-experiments-opt-in"][content*="fie_ini_load_fix"]');
+      if (!isIniLoadFixExpr) {
+        return iniLoadPromise;
+      }
+
+      // There's no need to wait for all resources to load.
+      // StartRender is enough
     });
   }
 
@@ -1502,7 +1511,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
     /** @type {?string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
-    dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
+    devAssert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
     'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.maybeTriggerAnalyticsEvent_('renderSafeFrameStart');
@@ -1668,7 +1677,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     const analyticsEvent =
-        dev().assert(LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]);
+        devAssert(LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]);
     const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
         dict({'time': Math.round(this.getNow_())}),
         this.getA4aAnalyticsVars(analyticsEvent)));

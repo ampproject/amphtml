@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifChrome().skipSinglePass();
-config.run('amp-carousel', function() {
+const t = describe.configure()
+    .ifChrome()
+    .skipSinglePass()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
+t.run('amp-carousel', function() {
   this.timeout(10000);
 
   const extensions = ['amp-carousel'];
@@ -184,8 +188,7 @@ config.run('amp-carousel', function() {
       expect(document.querySelectorAll('amp-carousel')).to.have.length.above(0);
     });
 
-    // TODO(#19801): Fix test that broke on Chrome 71.
-    it.configure().skipChrome().run('should not have the buttons visible ' +
+    it('should not have the buttons visible ' +
         'when amp-mode-mouse class is not on body', () => {
       document.body.classList.remove('amp-mode-mouse');
       const amp = document.querySelector('#carousel-1');

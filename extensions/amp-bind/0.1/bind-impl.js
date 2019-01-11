@@ -24,7 +24,7 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -195,10 +195,10 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+        embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**
@@ -685,7 +685,7 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
+    const doc = devAssert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
@@ -1076,17 +1076,23 @@ export class Bind {
 
     switch (property) {
       case 'text':
-        element.textContent = String(newValue);
-        // If this is a <title> element in the <head>, update document title.
+        let updateTextContent = true;
+        const stringValue = String(newValue);
+
+        // textContent on <textarea> only works before interaction.
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+          // Don't also update textContent to avoid disrupting focus.
+          updateTextContent = false;
+        }
+        // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
-          this.localWin_.document.title = String(newValue);
+          this.localWin_.document.title = stringValue;
         }
-        // Setting `textContent` on TEXTAREA element only works if user
-        // has not interacted with the element, therefore `value` also needs
-        // to be set (but `value` is not an attribute on TEXTAREA)
-        if (tag == 'TEXTAREA') {
-          element.value = String(newValue);
+        // Default behavior.
+        if (updateTextContent) {
+          element.textContent = stringValue;
         }
         break;
 

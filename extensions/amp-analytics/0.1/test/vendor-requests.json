@@ -1,4 +1,7 @@
 {
+  "_fake_": {
+    "endpoint": "/analytics/fake"
+  },
   "acquialift": {
     "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
     "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
@@ -20,6 +23,10 @@
   "alexametrics": {
     "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
     "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+  },
+  "amplitude": {
+    "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
+    "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
   },
   "atinternet": {
     "base": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
@@ -242,7 +249,7 @@
     "host": "https://pixels.mparticle.com",
     "endpointPath": "/v1/!apiKey/Pixel",
     "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
-    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=!pageName&hn=_ampdoc_url_&ttl=_title_&path=_canonical_path_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
     "event": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=AppEvent&n=!eventName&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion"
   },
   "mpulse": {
@@ -319,6 +326,9 @@
     "basePrefix": "/api/v3",
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid",
     "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=!contentCreated&content_author=!contentAuthor&content_section=!contentSection&timezone_offset=_timezone_&tags=!tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid"
+  },
+  "pinpoll": {
+    "pageview": "https://pa.pinpoll.com/v1?url=_source_url_&sourceHost=_source_host_&sourceHostname=_source_hostname_&sourcePath=_source_path_&canonicalUrl=_canonical_url_&platform=AMP&title=_title_&referrer=_document_referrer_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&ua=_user_agent_&clientId=_client_id_"
   },
   "pressboard": {
     "host": "https://adserver.pressboard.ca",
@@ -411,11 +421,11 @@
   },
   "upscore":{
       "host":"https://hit-pool.upscore.com/amp?",
-      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time",
-      "initialHit":"author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_",
-      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=final",
-      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=pulse",
-      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_&type=init"
+      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
+      "initialHit":"author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
+      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
+      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
+      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",

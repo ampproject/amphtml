@@ -125,12 +125,15 @@ export class FixedLayer {
       return;
     }
 
-
-
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
+      // Rare but may happen if the document is being concurrently disposed.
+      if (!stylesheet) {
+        dev().error(TAG, 'Aborting setup due to null stylesheet.');
+        return;
+      }
       const {ownerNode} = stylesheet;
       if (stylesheet.disabled ||
               !ownerNode ||

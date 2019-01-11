@@ -23,10 +23,12 @@ import {
 /** @const {number} */
 const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
-// TODO(@cramforce): Find out why it does not work with obfuscated
-// props.
-const t = describe.configure().retryOnSaucelabs()
-    .skipIfPropertiesObfuscated();
+const t = describe.configure()
+    .retryOnSaucelabs()
+    // TODO(@cramforce): Find out why it does not work with obfuscated props.
+    .skipIfPropertiesObfuscated()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
 t.run('error page', function() {
   this.timeout(TIMEOUT);
 
@@ -52,8 +54,7 @@ t.run('error page', function() {
   });
 
   it.configure().skipFirefox().skipEdge()
-      // TODO(#19790): fix this test on SuaceLabs.
-      .skip('should show the body in error test', () => {
+      .run('should show the body in error test', () => {
         return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
       });
 

@@ -31,7 +31,7 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -53,11 +53,11 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-next-page'),
+    userAssert(isExperimentOn(this.win, 'amp-next-page'),
         'Experiment amp-next-page disabled');
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
-    user().assert(separatorElements.length <= 1,
+    userAssert(separatorElements.length <= 1,
         '%s should contain at most one <div separator> child', TAG);
 
     let separator = null;
@@ -80,18 +80,18 @@ export class AmpNextPage extends AMP.BaseElement {
 
       const type = element.getAttribute('type');
       if (type) {
-        user().assert(type === 'adsense', `${TAG} only supports type=adsense`);
+        userAssert(type === 'adsense', `${TAG} only supports type=adsense`);
         const client = element.getAttribute('data-client');
         const slot = element.getAttribute('data-slot');
 
-        user().assert(/^ca-pub-\d+$/.test(client),
+        userAssert(/^ca-pub-\d+$/.test(client),
             `${TAG} AdSense client should be of the format 'ca-pub-123456'`);
-        user().assert(/^\d+$/.test(slot),
+        userAssert(/^\d+$/.test(slot),
             `${TAG} AdSense slot should be a number`);
 
         const consentPolicyId = this.getConsentPolicy();
         const consent = consentPolicyId ?
-          getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+          getConsentPolicyState(element, consentPolicyId)
               .catch(err => {
                 user().error(TAG, 'Error determining consent state', err);
                 return CONSENT_POLICY_STATE.UNKNOWN;
@@ -119,7 +119,7 @@ export class AmpNextPage extends AMP.BaseElement {
         configPromise = Promise.resolve(inlineConfig);
       }
 
-      user().assert(inlineConfig || src || type,
+      userAssert(inlineConfig || src || type,
           '%s should contain a <script> child, a URL specified in [src], or a '
           + '[type]', TAG);
 
@@ -142,10 +142,10 @@ export class AmpNextPage extends AMP.BaseElement {
     if (!scriptElements.length) {
       return null;
     }
-    user().assert(scriptElements.length === 1,
+    userAssert(scriptElements.length === 1,
         `${TAG} should contain at most one <script> child`);
     const scriptElement = scriptElements[0];
-    user().assert(isJsonScriptTag(scriptElement),
+    userAssert(isJsonScriptTag(scriptElement),
         `${TAG} config should ` +
         'be inside a <script> tag with type="application/json"');
     return tryParseJson(scriptElement.textContent, error => {

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 import {parseJson, recreateNonProtoObject} from '../json';
@@ -90,7 +90,7 @@ export class Storage {
    * @return {!Promise}
    */
   set(name, value, opt_isUpdate) {
-    dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
+    devAssert(typeof value == 'boolean', 'Only boolean values accepted');
     return this.setNonBoolean(name, value, opt_isUpdate);
   }
 
@@ -224,7 +224,7 @@ export class Store {
    * @param {boolean=} opt_isUpdate
    */
   set(name, value, opt_isUpdate) {
-    dev().assert(name != '__proto__' && name != 'prototype',
+    devAssert(name != '__proto__' && name != 'prototype',
         'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {

@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisCommitRangeStart} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -108,22 +108,21 @@ function isPullRequest() {
  * @return {string} the `master` ancestor's bundle size.
  */
 async function getAncestorBundleSize() {
-  const gitBranchPointSha = gitTravisCommitRangeStart();
-  const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
-  log('Branch point from master is', cyan(gitBranchPointShortSha));
+  const gitBranchPoint = gitTravisMasterBaseline();
+  log('Branch point from master is', cyan(shortSha(gitBranchPoint)));
   return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
-        path: path.join('bundle-size', gitBranchPointSha),
+        path: path.join('bundle-size', gitBranchPoint),
       })
   ).then(result => {
     const ancestorBundleSize =
         Buffer.from(result.data.content, 'base64').toString().trim();
-    log('Bundle size of', cyan(gitBranchPointShortSha), 'is',
+    log('Bundle size of', cyan(shortSha(gitBranchPoint)), 'is',
         cyan(ancestorBundleSize));
     return ancestorBundleSize;
   }).catch(() => {
-    log(yellow('WARNING: Failed to retrieve bundle size of'),
-        cyan(gitBranchPointShortSha));
+    log(yellow('WARNING: Failed to retrieve bundle size of baseline commit'),
+        cyan(shortSha(gitBranchPoint)));
     log(yellow('Falling back to comparing to the max bundle size only'));
     return null;
   });
@@ -277,7 +276,17 @@ async function legacyBundleSizeCheck() {
             cyan(maxSize), red('(Δ +') + cyan(sizeDelta) + red('KB)'));
         log(red('This is part of a new effort to reduce AMP\'s binary size ' +
                 '(#14392).'));
-        log(red('Please contact @choumx or @jridgewell for assistance.'));
+        log(green('How to proceed from here:'), 'send a pull request to edit',
+            'the', cyan('bundle-size/.max_size'), 'file in the',
+            cyan('ampproject/amphtml-build-artifacts'), 'repository.');
+        log('Increases to the max size should be in', cyan('0.1KB'),
+            'intervals');
+        log('Direct link to edit this file and create a pull request:',
+            cyan('https://github.com/ampproject/amphtml-build-artifacts/edit/' +
+                 'master/bundle-size/.max_size'));
+        log('Tag @choumx and @jridgewell in the PR description for approval.');
+        log(yellow('Note: this process is being replaced by a GitHub' +
+                   'Application check, instead of running on Travis.'));
         process.exitCode = 1;
         return;
       case STATUS_PASS:
@@ -318,6 +327,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequest()) {
+    const baseSha = gitTravisMasterBaseline();
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
@@ -326,6 +336,7 @@ async function reportBundleSize() {
             path.join('commit', commitHash, 'report')),
         json: true,
         body: {
+          baseSha,
           bundleSize,
         },
       });
@@ -335,7 +346,7 @@ async function reportBundleSize() {
             response.body);
       }
     } catch (error) {
-      log(red('Could not report a skipped pull request'));
+      log(red('Could not report the bundle size of this pull request'));
       log(red(error));
       process.exitCode = 1;
       return;

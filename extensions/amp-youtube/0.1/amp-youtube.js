@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -43,13 +43,16 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 
+
+const TAG = 'amp-youtube';
+
+
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 /**
  * @enum {number}
  * @private
  */
-
-// Correct PlayerStates taken from
-// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -327,7 +330,7 @@ class AmpYoutube extends AMP.BaseElement {
   assertDatasourceExists_() {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);
-    user().assert(
+    userAssert(
         datasourceExists, 'Exactly one of data-videoid or '
       + 'data-live-channelid should be present for <amp-youtube> %s',
         this.element
@@ -584,9 +587,14 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-youtube', '0.1', AMP => {
-  AMP.registerElement('amp-youtube', AmpYoutube);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpYoutube);
 });

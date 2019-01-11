@@ -2,7 +2,7 @@
 
 **Our last scheduled release for 2018 will be created on Tuesday, December 11, 2018 (targeting full rollout on December 18).**
 
-After this the next scheduled release will be created on Wednesday, January 3, 2019 (targeting full rollout on January 9).
+After this the next scheduled release will be created on Wednesday, January 2, 2019 (targeting full rollout on January 8).
 
 If necessary, fixes for P0 issues may be cherry-picked into the production release and pushed during this time.
 ⚡⚡⚡
@@ -15,6 +15,7 @@ If necessary, fixes for P0 issues may be cherry-picked into the production relea
 	- [Cherry pick criteria](#cherry-pick-criteria)
 	- [Process for requesting a cherry pick](#process-for-requesting-a-cherry-pick)
 - [AMP Dev Channel](#amp-dev-channel)
+- [AMP Release Candidate (RC) Channel](#amp-release-candidate-rc-channel)
 - [Release cadence](#release-cadence)
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday.  **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
@@ -78,7 +79,7 @@ The AMP Dev Channel is a way to opt a browser into using the canary release buil
 Opting into the Dev Channel is great to:
 
 - test and play with new features not yet available to all users
-- use in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
+- use in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
 
 When you opt into the AMP Dev Channel you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the AMP Dev Channel version of AMP.
 
@@ -89,6 +90,25 @@ To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](h
   - include a note that the problem is new to the Dev Channel build so that it can be properly prioritized
   - include a URL to a page that reproduces the problem
 - ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the Dev Channel version to production if needed
+
+## AMP Release Candidate (RC) Channel
+
+The AMP Release Candidate (RC) Channel is a way to opt a browser into using the build of the AMP JS libraries that will be released during the subsequent release cycle (typically, a week later). It is similar to the Dev Channel described above, but it will not contain the experimental features that are still under development.
+
+Opting into the RC Channel is great to:
+
+- test and play with the version of the AMP runtime that will be released soon
+- use in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
+
+Similar to the Dev channel, when you opt into the AMP RC Channel you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the AMP RC Channel version of AMP.
+
+To opt your browser into the AMP RC Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP RC Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
+
+**If you find an issue that appears to only occur in the RC Channel version of AMP**:
+- please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
+  - include a note that the problem is new to the RC Channel build so that it can be properly prioritized
+  - include a URL to a page that reproduces the problem
+- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the RC Channel version to production if needed
 
 ## Release cadence
 

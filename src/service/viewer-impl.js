@@ -308,9 +308,8 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            dev().error(TAG_, 'Untrusted viewer url override: ' +
-                viewerUrlOverride + ' at ' +
-                this.messagingOrigin_);
+            dev().expectedError(TAG_, 'Untrusted viewer url override: ' +
+                viewerUrlOverride + ' at ' + this.messagingOrigin_);
           }
           resolve(this.resolvedViewerUrl_);
         });

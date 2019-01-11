@@ -15,14 +15,17 @@
  */
 
 import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
+import {_FAKE_} from './vendors/_fake_.js';
 import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
 import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics';
 import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics';
+import {AMPLITUDE_CONFIG} from './vendors/amplitude';
 import {ATINTERNET_CONFIG} from './vendors/atinternet';
 import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics';
 import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
@@ -62,6 +65,7 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PERMUTIVE_CONFIG} from './vendors/permutive';
 import {PIANO_CONFIG} from './vendors/piano';
+import {PINPOLL_CONFIG} from './vendors/pinpoll';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
@@ -91,6 +95,7 @@ import {
 } from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
+import {UPSCORE_CONFIG} from './vendors/upscore';
 
 /**
  * @const {!JsonObject}
@@ -174,6 +179,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'adobeanalytics_nativeConfig': ADOBEANALYTICS_NATIVECONFIG_CONFIG,
   'afsanalytics': AFSANALYTICS_CONFIG,
   'alexametrics': ALEXAMETRICS_CONFIG,
+  'amplitude': AMPLITUDE_CONFIG,
   'atinternet': ATINTERNET_CONFIG,
   'baiduanalytics': BAIDUANALYTICS_CONFIG,
   'bg': BG_CONFIG,
@@ -218,6 +224,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'piStats': PISTATS_CONFIG,
   'permutive': PERMUTIVE_CONFIG,
   'piano': PIANO_CONFIG,
+  'pinpoll': PINPOLL_CONFIG,
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'retargetly': RETARGETLY_CONFIG,
@@ -232,9 +239,14 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'topmailru': TOPMAILRU_CONFIG,
   'treasuredata': TREASUREDATA_CONFIG,
   'umenganalytics': UMENGANALYTICS_CONFIG,
+  'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
 });
+
+if (getMode().test || getMode().localDev) {
+  ANALYTICS_CONFIG['_fake_'] = _FAKE_;
+}
 
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

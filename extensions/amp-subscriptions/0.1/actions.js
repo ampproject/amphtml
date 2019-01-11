@@ -15,12 +15,12 @@
  */
 
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
 
-/** @const */
 const TAG = 'amp-subscriptions';
+const LOCAL = 'local';
 
 
 /**
@@ -83,21 +83,21 @@ export class Actions {
    * @return {!Promise<string>}
    */
   execute(action) {
-    user().assert(this.actionsConfig_[action],
+    userAssert(this.actionsConfig_[action],
         'Action URL is not configured: %s', action);
     // URL should always be available at this time.
-    const url = user().assert(this.builtActionUrlMap_[action],
+    const url = userAssert(this.builtActionUrlMap_[action],
         'Action URL is not ready: %s', action);
-    return this.execute_(url, 'subscriptions-action-' + action);
+    return this.execute_(url, action);
   }
 
   /**
    * @param {string} url
-   * @param {string} eventLabel
+   * @param {string} action
    * @return {!Promise}
    * @private
    */
-  execute_(url, eventLabel) {
+  execute_(url, action) {
     const now = Date.now();
 
     // If action is pending, block a new one from starting for 1 second. After
@@ -108,25 +108,25 @@ export class Actions {
       return this.actionPromise_;
     }
 
-    dev().fine(TAG, 'Start action: ', url, eventLabel);
+    dev().fine(TAG, 'Start action: ', url, action);
 
-    this.analytics_.event(eventLabel + '-started');
+    this.analytics_.actionEvent(LOCAL, action, 'started');
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise.then(result => {
-      dev().fine(TAG, 'Action completed: ', eventLabel, result);
+      dev().fine(TAG, 'Action completed: ', action, result);
       this.actionPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
-        this.analytics_.event(eventLabel + '-success');
+        this.analytics_.actionEvent(LOCAL, action, 'success');
       } else {
-        this.analytics_.event(eventLabel + '-rejected');
+        this.analytics_.actionEvent(LOCAL, action, 'rejected');
       }
       return (success || !s);
     }).catch(reason => {
-      dev().fine(TAG, 'Action failed: ', eventLabel, reason);
-      this.analytics_.event(eventLabel + '-failed');
+      dev().fine(TAG, 'Action failed: ', action, reason);
+      this.analytics_.actionEvent(LOCAL, action, 'failed');
       if (this.actionPromise_ == actionPromise) {
         this.actionPromise_ = null;
       }

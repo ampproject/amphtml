@@ -1,0 +1,13 @@
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index 06f0e1a95..80d7b42a7 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -170,7 +170,7 @@ export function factory($, window, document, undefined) {
+                     var maskset = generateMaskSet(scopedOpts, that.noMasksCache);
+                     if (maskset !== undefined) {
+                         if (el.inputmask !== undefined) {
+-                            el.inputmask.opts.autoUnmask = true;
++                            el.inputmask.opts.autoUnmask = el.inputmask.opts.autoUnmask;
+                             el.inputmask.remove();
+                         }
+                         el.inputmask = new Inputmask(undefined, undefined, true);

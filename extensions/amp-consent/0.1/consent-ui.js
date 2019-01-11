@@ -15,30 +15,36 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
 } from '../../../src/dom';
+import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
+import {getServicePromiseForDoc} from '../../../src/service';
+import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
+const CONSENT_STATE_MANAGER = 'consentStateManager';
 
 // Classes for consent UI
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
-  loading: 'i-amphtml-consent-loading',
-  fill: 'i-amphtml-consent-fill',
-  placeholder: 'i-amphtml-consent-placeholder',
+  loading: 'i-amphtml-consent-ui-loading',
+  fill: 'i-amphtml-consent-ui-fill',
+  placeholder: 'i-amphtml-consent-ui-placeholder',
 };
 
 export class ConsentUI {
@@ -71,8 +77,17 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
+    /** @private {boolean} */
+    this.scrollEnabled_ = true;
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -82,6 +97,9 @@ export class ConsentUI {
 
     /** @private {?Deferred} */
     this.iframeReady_ = null;
+
+    /** @private {?JsonObject} */
+    this.clientConfig_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -124,6 +142,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
+      this.clientConfig_ = config['clientConfig'] || null;
     }
   }
 
@@ -197,10 +216,17 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      // Need to remove from fixed layer and add it back to update element's top
+      // NOTE (torch2424): This is very sensitive. Fixed layer applies
+      // a `top: calc(0px)` in order to fix some bugs, thus
+      // We should be careful in moving this around as
+      // `removeFromFixedLayer` will remove the `top` styling.
+      // This will preserve The animation,
+      // and prevent element flashing.
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
       this.isVisible_ = false;
+
+      this.enableScroll_();
     });
   }
 
@@ -214,6 +240,8 @@ export class ConsentUI {
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
+
+    this.disableScroll_();
 
     this.isFullscreen_ = true;
   }
@@ -238,15 +266,44 @@ export class ConsentUI {
    * @return {!Element}
    */
   createPlaceholder_() {
-    // TODO(@zhouyx): Allow publishers to provide placeholder upon request
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
-    const {classList} = placeholder;
-    classList.add(consentUiClasses.fill);
-    classList.add(consentUiClasses.placeholder);
+    placeholder.classList.add(consentUiClasses.placeholder);
+
+    const loadingSpinner = htmlFor(placeholder)`
+      <svg viewBox="0 0 40 40">
+        <defs>
+          <linearGradient id="grad">
+            <stop stop-color="rgb(105, 105, 105)"></stop>
+            <stop offset="100%"
+            stop-color="rgb(105, 105, 105)"
+            stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
+      </svg>`;
+
+    placeholder.appendChild(loadingSpinner);
     return placeholder;
   }
 
+  /**
+   * Get the client information that needs to be passed to cmp iframe
+   * @return {!Promise<JsonObject>}
+   */
+  getClientInfoPromise_() {
+    const consentStatePromise =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+    return consentStatePromise.then(consentStateManager => {
+      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
+        return dict({
+          'clientConfig': this.clientConfig_,
+          'consentState': getConsentStateValue(consentInfo['consentState']),
+          'consentString': consentInfo['consentString'],
+        });
+      });
+    });
+  }
 
   /**
    * Apply placeholder
@@ -261,11 +318,21 @@ export class ConsentUI {
           dev().assertElement(this.placeholder_), null);
     }
     classList.add(consentUiClasses.loading);
-    toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
-    this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-    insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    return this.iframeReady_.promise;
+
+    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
+      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
+      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+    });
+
+    return Promise.all([
+      iframePromise,
+      this.iframeReady_.promise,
+      this.baseInstance_.mutateElement(() => {
+        toggle(dev().assertElement(this.placeholder_), true);
+      }),
+    ]);
   }
 
   /**
@@ -297,6 +364,9 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
+
+        // TODO (torch2424): Show mask if publisher provides the option
+        // this.showMaskElement_();
       });
     });
   }
@@ -318,8 +388,59 @@ export class ConsentUI {
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
+    this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
+
+    // TODO (torch2424): Hide mask if publisher provides the option
+    // this.hideMaskElement_();
   }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  disableScroll_() {
+    if (this.scrollEnabled_) {
+      this.viewport_.enterOverlayMode();
+      this.scrollEnabled_ = false;
+    }
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  enableScroll_() {
+    if (!this.scrollEnabled_) {
+      this.viewport_.leaveOverlayMode();
+      this.scrollEnabled_ = true;
+    }
+  }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  showMaskElement_() {
+    if (!this.maskElement_) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add('i-amphtml-consent-ui-mask');
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+  }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  hideMaskElement_() {
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+  }
+
 
   /**
    * Listen to iframe messages and handle events.
@@ -327,12 +448,14 @@ export class ConsentUI {
    *
    * Required message from iframe to hide placeholder and display iframe
    * {
-   *   type: 'consent-ui-ready'
+   *   type: 'consent-ui',
+   *   action: 'ready'
    * }
    *
    * Enter Fullscreen
    * {
-   *   type: 'consent-ui-enter-fullscreen'
+   *   type: 'consent-ui',
+   *   action: 'enter-fullscreen'
    * }
    *
    * @param {!Event} event
@@ -344,15 +467,15 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data || !data['type']) {
+    if (!data || data['type'] != 'consent-ui') {
       return;
     }
 
-    if (data['type'] === 'consent-ui-ready') {
+    if (data['action'] === 'ready') {
       this.iframeReady_.resolve();
     }
 
-    if (data['type'] === 'consent-ui-enter-fullscreen') {
+    if (data['action'] === 'enter-fullscreen') {
 
       // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {
