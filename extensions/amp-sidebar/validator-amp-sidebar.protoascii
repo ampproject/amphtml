@@ -15,7 +15,7 @@
 #
 tags: {  # amp-sidebar
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
@@ -40,7 +40,7 @@ tags: {  # amp-sidebar
 tags: {  # <amp-sidebar> not in amp-story
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-SIDEBAR"
   # There is an alternate spec for amp-sidebar in amp-story.
   disallowed_ancestor: "AMP-STORY"
@@ -69,7 +69,7 @@ tags: { #<amp-sidebar> in amp-story
 tags: {  # amp-sidebar > nav
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "NAV"
   spec_name: "amp-sidebar > nav"
   mandatory_parent: "AMP-SIDEBAR"
