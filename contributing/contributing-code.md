@@ -18,20 +18,19 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
-- [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your feature with and who can help guide you through the process.
+- [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your change with and who can help guide you through the process.
 - [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your reviewer on it.  The I2I should include:
-  -  A high-level description of the feature.
-  -  A description of the change/feature you plan to create.
+  -  A description of the change you plan to implement.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
-  -  Details on any data collection or tracking that the feature might perform.
+  -  Details on any data collection or tracking that your change might require.
   -  A prototype or mockup (for example, an image, a GIF, or a link to a demo).
-- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers).  Work with your reviewer to determine whether the feature is a significant enough change that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
-- [ ] Get pre-approval from the Approvers WG if needed.  For features that require approval from the Approvers WG, at least 3 members of the Approvers Working Group should provide pre-approval on the I2I before significant implementation work proceeds.
-- [ ] Finalize the design of your feature.
+- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers).  Work with your reviewer to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
+- [ ] Get pre-approval from the Approvers WG if needed.  For changes that require approval from the Approvers WG, at least 3 members of the Approvers WG should provide pre-approval on the I2I before significant implementation work proceeds.
+- [ ] Finalize the design of your change.
   - Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
-  - Your reviewer can help you determine if your feature requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
-- [ ] Proceed with the [implementation](#implementation) of your feature.
-- [ ] For features that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E).  Indicate which experiment is gating the feature and a rollout plan.  Once this issue is approved by 3 members of the Approver WG the rollout plan described in the I2S may proceed.
+  - Your reviewer can help you determine if your change requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
+- [ ] Proceed with the [implementation](#implementation) of your change.
+- [ ] For changes that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E).  Indicate which experiment is gating your change and a rollout plan.  Once this issue is approved by 3 members of the Approvers WG the rollout plan described in the I2S may proceed.
 
 ## Find a reviewer
 
@@ -61,7 +60,7 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
 - [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
 - [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
 - Write your code.
-   - For more substantial features, multiple smaller PRs are preferable to one large PR.  These will be easier to review and can prevent wasted work.
+   - For more substantial changes, multiple smaller PRs are preferable to one large PR.  These will be easier to review and can prevent wasted work.
    - Consult these resources for guidance and guidelines:
      - **Design**: [AMP Design Principles](./DESIGN_PRINCIPLES.md)
      - **JavaScript**: [Google JavaScript Code Style Guide](https://google.github.io/styleguide/jsguide.html)
@@ -71,12 +70,12 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
        - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
        - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
      - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
-  - [Put your new feature behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
+  - [Put your change behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
 - [Test your changes](./getting-started-e2e.md#testing-your-changes).
   - A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 - Prepare for your code review.
-   - For more substantial features, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
+   - For more substantial changes, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
    - Before your final review, make sure your change:
      - [Has good test coverage](./TESTING.md)
      - [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
@@ -86,7 +85,7 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
      - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 - Send your code for review.
   - [Sign the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
-  - [Pull the latest changes from the AMPHTML repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
+  - [Pull the latest changes from the amphtml repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
   - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/enable-git-pre-push.sh#L17-L20).
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
@@ -97,9 +96,9 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
 
 ## Contributing extended components
 
-A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features.
+AMP is designed to be extensible - it is meant to support “Extended Components” that provide first-class support for additional rich features.
 
-Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized.
+Because Extended Components may have significant impact on AMP performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized.
 
 In particular, we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
