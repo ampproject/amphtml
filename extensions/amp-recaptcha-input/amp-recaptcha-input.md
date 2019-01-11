@@ -53,10 +53,10 @@ This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page corre
 
 ```
 <form amp-form-attributes-go-here>
-
+  ...
   <amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey=”reCAPTCHA_site_key" data-action="reCAPTCHA_example_action">
   </amp-recaptcha-input>
-
+  ...
 </form>
 ```
 
