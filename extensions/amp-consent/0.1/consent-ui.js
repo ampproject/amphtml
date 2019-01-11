@@ -76,7 +76,7 @@ export class ConsentUI {
     this.ui_ = null;
 
     /** @private {!boolean} */
-    this.overlayEnabled_ = isExperimentOn(this.win_, 'amp-consent-v2') &&
+    this.overlayEnabled_ = isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
       config['uiConfig'] &&
       !!config['uiConfig']['overlay'];
 
