@@ -78,7 +78,7 @@ export class ConsentUI {
     /** @private {boolean} */
     this.overlayEnabled_ = isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
       config['uiConfig'] &&
-      !!config['uiConfig']['overlay'];
+      config['uiConfig']['overlay'] === true;
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;

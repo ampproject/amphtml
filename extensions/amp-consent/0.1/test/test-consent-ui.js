@@ -270,7 +270,7 @@ describes.realWin('consent-ui', {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
         'uiConfig': {
-          'overlay': 'true',
+          'overlay': true,
         },
       });
       consentUI =

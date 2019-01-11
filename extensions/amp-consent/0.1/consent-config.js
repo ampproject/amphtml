@@ -157,7 +157,10 @@ export class ConsentConfig {
    *   "consents": {
    *     "foo": {
    *       "checkConsentHref": "https://fake.com",
-   *       "promptUISrc": "https://fake.com/promptUI.html"
+   *       "promptUISrc": "https://fake.com/promptUI.html",
+   *       "uiConfig": {
+   *          "overlay": true
+   *        }
    *     }
    *   }
    * }
