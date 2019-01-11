@@ -745,22 +745,23 @@ export class ActionService {
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
-  const {method, node, tagOrTarget} = invocation;
-  const tagOrTargetCalled = tagOrTarget.toLowerCase();
-  let methodCalled = method.toLowerCase();
-  const defaultActionAlias = node.getDefaultActionAlias();
-  const calledByDefaultActionAndHasDefaultAlias =
-      method == DEFAULT_ACTION && (node && defaultActionAlias);
-  // If called via default action 'activate', check the whitelist
-  // against the default action alias.
-  if (calledByDefaultActionAndHasDefaultAlias) {
-    methodCalled = defaultActionAlias.toLowerCase();
+  let {method} = invocation;
+  const {node, tagOrTarget} = invocation;
+  // Use alias if default action is invoked.
+  if (method === DEFAULT_ACTION
+      && (typeof node.getDefaultActionAlias == 'function')) {
+    method = node.getDefaultActionAlias();
   }
-
-  return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*'
-        || tagOrTargetCalled == tagOrTarget.toLowerCase()) &&
-        (methodCalled == method.toLowerCase());
+  const lcMethod = method.toLowerCase();
+  const lcTagOrTarget = tagOrTarget.toLowerCase();
+  return whitelist.some(w => {
+    if (w.tagOrTarget.toLowerCase() === lcTagOrTarget
+        || (w.tagOrTarget === '*')) {
+      if (w.method.toLowerCase() === lcMethod) {
+        return true;
+      }
+    }
+    return false;
   });
 }
 
