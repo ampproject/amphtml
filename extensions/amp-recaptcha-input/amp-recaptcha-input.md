@@ -43,20 +43,24 @@ limitations under the License.
 
 ## Behavior
 
-This extension adds a parameter containing a recaptcha response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling greaptcha.execute with the provided site key and action.
+This extension adds a parameter containing a recaptcha response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling `grecaptcha.execute` with the provided site key and action.
 
 ### Example
 
-This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page correlates to calls on the grecaptcha object and form body.
+This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page correlates to calls on the `grecaptcha` object and form body. `<amp-recaptcha-input>` must be a child of a `<form>` element.
 
 **`<amp-recaptcha-input>` usage**
 
 ```
-<amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey=”reCAPTCHA_site_key" data-action="reCAPTCHA_example_action">
-</amp-recaptcha-input>
+<form amp-form-attributes-go-here>
+
+  <amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey=”reCAPTCHA_site_key" data-action="reCAPTCHA_example_action">
+  </amp-recaptcha-input>
+
+</form>
 ```
 
-**Corresponding grecaptcha call**
+**Corresponding `grecaptcha` call**
 
 ```
 grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
