@@ -269,6 +269,10 @@
   margin: 0 24px !important;
 }
 
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
+  height: 3px !important;
+}
+
 .i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
   border-radius: 100px !important;
 }

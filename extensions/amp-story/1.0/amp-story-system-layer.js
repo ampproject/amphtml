@@ -516,7 +516,7 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to desktop state updates and triggers the desktop UI.
+   * Reacts to UI state updates and triggers the expected UI.
    * @param {!UIType} uiState
    * @private
    */
@@ -526,9 +526,19 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP_PANELS ?
-        this.getShadowRoot().classList.add('i-amphtml-story-desktop-panels') :
-        this.getShadowRoot().classList.remove('i-amphtml-story-desktop-panels');
+      const shadowRoot = this.getShadowRoot();
+
+      shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+
+      switch (uiState) {
+        case UIType.DESKTOP_PANELS:
+          shadowRoot.classList.add('i-amphtml-story-desktop-panels');
+          break;
+        case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+      }
     });
   }
 
