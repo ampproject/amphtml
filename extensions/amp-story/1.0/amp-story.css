@@ -180,12 +180,8 @@ amp-story-page[active] {
 
 amp-story amp-sidebar[side][open] {
   background-color: #ffffff !important;
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
   transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  display: block !important;
+  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 [desktop] amp-sidebar[side][open]{
@@ -197,7 +193,7 @@ amp-story amp-sidebar[side] {
   min-width: 280px !important;
   width: 280px !important;
   transform: translate3d(100%, 0, 0) !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
   display: block !important;
 }
 
