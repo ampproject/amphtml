@@ -34,10 +34,8 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
-
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
-
 
 // Classes for consent UI
 export const consentUiClasses = {

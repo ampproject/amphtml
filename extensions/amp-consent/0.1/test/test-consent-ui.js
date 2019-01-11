@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE,
-  constructConsentInfo} from '../consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  constructConsentInfo,
+} from '../consent-info';
 import {
   ConsentUI,
   consentUiClasses,
@@ -155,8 +157,6 @@ describes.realWin('consent-ui', {
       expect(elementByTag(parent, 'iframe')).to.be.null;
       consentUI.show();
       yield macroTask();
-      yield macroTask();
-      yield macroTask();
       expect(elementByTag(parent, 'iframe')).to.not.be.null;
       consentUI.hide();
       expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -258,7 +258,7 @@ describes.realWin('consent-ui', {
         'clientConfig': {
           'test': 'ABC',
         },
-        'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+        'consentState': 'accepted',
         'consentString': 'test',
       }));
     });
