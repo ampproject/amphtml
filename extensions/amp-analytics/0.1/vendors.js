@@ -40,7 +40,6 @@ import {DYNATRACE_CONFIG} from './vendors/dynatrace';
 import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
 import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel';
-import {MOCK_CONFIG} from './vendors/mock';
 import {GEMIUS_CONFIG} from './vendors/gemius';
 import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
