@@ -203,8 +203,6 @@ feature_tests/regexps.html:154:2 The attribute 'name' in tag 'input' is set to t
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/regexps.html:157:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+feature_tests/regexps.html:157:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
 feature_tests/regexps.html:157:6 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
->>       ^~~~~~~~~
-feature_tests/regexps.html:157:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
