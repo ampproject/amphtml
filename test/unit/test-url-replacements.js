@@ -85,10 +85,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
           registerServiceBuilder(iframe.win, 'variant', function() {
-            return Promise.resolve({
-              'x1': 'v1',
-              'x2': null,
-            });
+            return {
+              getVariants: () => Promise.resolve({
+                'x1': 'v1',
+                'x2': null,
+              }),
+            };
           });
         }
         if (opt_options.withShareTracking) {
