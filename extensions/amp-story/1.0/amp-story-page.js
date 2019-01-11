@@ -71,14 +71,20 @@ import {upgradeBackgroundAudio} from './audio';
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 /**
- * Selectors for media elements
+ * Selectors for media elements.
+ * Only get the page media: direct children of amp-story-page (ie:
+ * background-audio), or descendant of amp-story-grid-layer. That excludes media
+ * contained in amp-story-page-attachment.
  * @enum {string}
  */
 const Selectors = {
   // which media to wait for on page layout.
-  ALL_AMP_MEDIA: 'amp-audio, amp-video, amp-img, amp-anim',
-  ALL_MEDIA: 'audio, video',
-  ALL_VIDEO: 'video',
+  ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
+      'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
+      'amp-story-grid-layer amp-anim',
+  ALL_MEDIA: 'amp-story-page > audio, amp-story-grid-layer audio, ' +
+      'amp-story-grid-layer video',
+  ALL_VIDEO: 'amp-story-grid-layer video',
 };
 
 /** @private @const {string} */
