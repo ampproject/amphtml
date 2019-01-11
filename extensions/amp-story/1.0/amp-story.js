@@ -90,11 +90,15 @@ import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {
+  getHistoryState,
+  removeAttributeInMutate,
+  setAttributeInMutate,
+  setHistoryState,
+} from './utils';
 import {getMode} from '../../../src/mode';
-import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -146,8 +150,9 @@ const Attributes = {
 
 /** @enum {string} */
 const HistoryStates = {
-  PAGE_ID: 'ampStoryPageId',
+  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
+  PAGE_ID: 'ampStoryPageId',
 };
 
 /**
@@ -765,7 +770,7 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
+    const initialPageId = getHistoryState(this.win, HistoryStates.PAGE_ID) ||
         firstPageEl.id;
 
     this.initializeSidebar_();
@@ -786,7 +791,7 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.initializeBookend_())
         .then(() => {
           const bookendInHistory =
-              !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
+              !!getHistoryState(this.win, HistoryStates.BOOKEND_ACTIVE);
           if (bookendInHistory) {
             return this.hasBookend_().then(hasBookend => {
               if (hasBookend) {
@@ -798,6 +803,13 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
+          const shouldReOpenAttachmentForPageId =
+              getHistoryState(this.win, HistoryStates.ATTACHMENT_PAGE_ID);
+
+          if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
+            this.activePage_.openAttachment(false /** shouldAnimate */);
+          }
+
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
@@ -1344,7 +1356,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.setHistoryState_(HistoryStates.PAGE_ID, pageId);
+    setHistoryState(this.win, HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1693,36 +1705,7 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-    this.setHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
-  }
-
-  /**
-   * Updates the value for a given state in the window history.
-   * @param {string} stateName
-   * @param {string|boolean} value
-   * @private
-   */
-  setHistoryState_(stateName, value) {
-    const {history} = this.win;
-    const state = getState(history) || {};
-    const newHistory = Object.assign({}, /** @type {!Object} */ (state),
-        {[stateName]: value});
-
-    history.replaceState(newHistory, '');
-  }
-
-  /**
-   * Returns the value of a given state of the window history.
-   * @param {string} stateName
-   * @return {?string}
-   * @private
-   */
-  getHistoryState_(stateName) {
-    const {history} = this.win;
-    if (history && getState(history)) {
-      return getState(history)[stateName];
-    }
-    return null;
+    setHistoryState(this.win, HistoryStates.BOOKEND_ACTIVE, isActive);
   }
 
   /**
@@ -1898,7 +1881,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build(!!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE));
+    this.bookend_
+        .build(!!getHistoryState(this.win, HistoryStates.BOOKEND_ACTIVE));
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
