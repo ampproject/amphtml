@@ -19,9 +19,121 @@
 import {
   Alignment,
   Axis,
+  getDimension,
+  updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
+import {
+  backwardWrappingDistance,
+  forwardWrappingDistance,
+  wrappingDistance,
+} from './array-util.js';
+import {debounce} from '../../../src/utils/rate-limit';
+import {getStyle, setStyle} from '../../../src/style';
+import {listenOnce} from '../../../src/event-helper';
 
+/**
+ * How long to wait prior to resetting the scrolling position after the last
+ * scroll event. Ideally this should be low, so that once the user stops
+ * scrolling, things are immediately centered again. Since there can be some
+ * delay between scroll events, and we do not want to move things during a
+ * scroll, it cannot be too small. 200ms seems to be around the lower limit for
+ * this value on Android / iOS.
+ */
+const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
+
+/**
+ * Runs a callback while disabling smooth scrolling by temporarily setting
+ * the `scrollBehavior` to `auto`.
+ * @param {!Element} el
+ * @param {Function} cb
+ */
+function runDisablingSmoothScroll(el, cb) {
+  const scrollBehavior = getStyle(el, 'scrollBehavior');
+
+  setStyle(el, 'scrollBehavior', 'auto');
+  cb();
+  setStyle(el, 'scrollBehavior', scrollBehavior);
+}
+
+/**
+ * @param {!Array<number>} arr
+ * @return {number}
+ */
+function sum(arr) {
+  return arr.reduce((p, c) => p + c, 0);
+}
+
+/**
+ * How the carousel works when looping:
+ *
+ * We want to make sure that the user can scroll all the way to the opposite
+ * end (either forwards or backwards) of the carousel, but no further (no
+ * looping back past where you started). We use spacer elements to adjust the
+ * scroll width of the scrolling area to allow the browser to scroll as well as
+ * providing targets for the browser to snap on. This is important as these
+ * targets need to be present before the scroll starts for things to work
+ * correctly.
+ *
+ * The spacers come in 3 types:
+ *
+ * - beforeSpacers: These provide scroll/snap before the first slide
+ * - replacementSpacers: These take up the spot of the slides as they are
+ *   translated around
+ * - afterSpacers: These provide scroll/snap targets after the last slide
+ *
+ * The spacers are then hidden/shown depending on the reference point, called
+ * the restingIndex to allow full movement forwards and backwards. You can
+ * imagine this looks like the following if you have 5 slides:
+ *
+ *                [r][r][r][r][r]
+ * [b][b][b][b][b][1][2][3][4][5][a][a][a][a][a]
+ *
+ * b = beforeSpacer, r = replacementSpacer, a = afterSpacer
+ *
+ * The replacement spacers are stacked on top of the slides.
+ * When the restingIndex is the first index, we should translate slides and
+ * hide the spacers as follows:
+ *
+ * [h][ ][ ][4][5][1][2][3][ ][ ][h][h][h][h][h]
+ *
+ * h = hidden
+ *
+ * This ensures that if you move left or right, there is a slide to show. Note
+ * that we have two empty slots at the start, where slides '2' and '3' will
+ * be moved as the user scrolls. Likewise, we have two slots at the end, where
+ * slides '4' and '5' will move. Since the other spacers are hidden, the
+ * browser cannot scroll into that area.
+ *
+ * When the user stops scrolling, we update the restingIndex and show/hide the
+ * appropriate spacers. For example, if the user started at slide '1' and moved
+ * left to slide '4', the UI would update to the following as they scrolled:
+ *
+ * [h][2][3][4][5][1][ ][ ][ ][ ][h][h][h][h][h]
+ *
+ * Once scrolling stopped, the reference point would be reset and this would
+ * update to:
+ *
+ * [h][h][h][h][ ][ ][2][3][4][5][1][ ][ ][h][h]
+ *
+ * Handling sideSlideCount:
+ *
+ * The carousel may be configured to only show a certain number of slides on
+ * either side of the resting index. This limits how far the user can move at
+ * a time. This simply hides any slides or spacers that are too far from the
+ * resting index. For example, if we have a resting index of '1', we want:
+ *
+ * [h][h][h][h][5][1][2][h][h][h][h][h][h][h][h]
+ *
+ * Moving slides:
+ *
+ * Slides are moved around using `transform: translate` relative to their
+ * original resting spot. Slides are moved to be before or after the current
+ * slide as the user scrolls. Currently, half the slides are moved before and
+ * half the slides are moved after. This could be a bit smarter and only move
+ * as many as are necessary to have a sufficient amount of buffer. When slides
+ * are moved, they are positioned on top of an existing spacer.
+ */
 export class Carousel {
   /**
   * @param {{
@@ -52,6 +164,11 @@ export class Carousel {
       scrollContainer,
       advanceable: this,
     });
+
+    /** @private @const */
+    this.debouncedResetScrollReferencePoint_ = debounce(
+        win, () => this.resetScrollReferencePoint_(),
+        RESET_SCROLL_REFERENCE_POINT_WAIT_MS);
 
     /** @private {number} */
     this.advanceCount_ = 1;
@@ -346,8 +463,14 @@ export class Carousel {
       if (!this.slides_.length) {
         return;
       }
-
-      // TODO(sparhami) implement
+      this.updateSpacers_();
+      this.setChildrenSnapAlign_();
+      this.hideSpacersAndSlides_();
+      this.resetScrollReferencePoint_(/* force */true);
+      this.ignoreNextScroll_ = true;
+      runDisablingSmoothScroll(this.scrollContainer_, () => {
+        this.scrollCurrentIntoView_();
+      });
     });
   }
 
@@ -361,16 +484,248 @@ export class Carousel {
   }
 
   /**
+   * Handles a touch start, preventing the restWindow_ from running until the
+   * user stops touching.
    * @private
    */
   handleTouchStart_() {
+    this.touching_ = true;
+
+    listenOnce(window, 'touchend', () => {
+      this.touching_ = false;
+      this.debouncedResetScrollReferencePoint_();
+    }, true);
+  }
+
+  /**
+   * Handles a scroll event, updating the the current index as well as moving
+   * slides around as needed.
+   * @private
+   */
+  handleScroll_() {
+    if (this.ignoreNextScroll_) {
+      this.ignoreNextScroll_ = false;
+      return;
+    }
+
+    this.updateCurrent_();
+    this.debouncedResetScrollReferencePoint_();
+  }
+  /**
+   * @param {!Element} el The slide or spacer to move.
+   * @param {number} revolutions How many revolutions forwards (or backwards)
+   *    the slide or spacer should move.
+   * @param {number} revolutionLength The length of a single revolution around
+   *    the scrollable area.
+   * @private
+   */
+  setElementTransform_(el, revolutions, revolutionLength) {
     // TODO(sparhami) implement
   }
 
   /**
+   * Resets the transforms for all the slides, putting them back in their
+   * natural position.
    * @private
    */
-  handleScroll_() {
+  resetSlideTransforms_() {
+    // TODO(sparhami) implement
+  }
+
+  /**
+   * @return {!Array{number}} An array of the lengths of the slides.
+   * @private
+   */
+  getSlideLengths_() {
+    return this.slides_.map(s => getDimension(this.axis_, s).length);
+  }
+
+  /**
+   * @param {number} count The number of spacers to create
+   * @return {!Array<!Element>} An array of spacers.
+   * @private
+   */
+  createSpacers_(count) {
+    const spacers = [];
+    for (let i = 0; i < count; i++) {
+      const spacer = document.createElement('div');
+      spacer.className = 'i-amphtml-carousel-spacer';
+      spacers.push(spacer);
+    }
+    return spacers;
+  }
+
+  /**
+   * Updates the spacers, removing the old ones and creating new ones.
+   * @private
+   */
+  updateSpacers_() {
+    const {axis_, slides_} = this;
+    const slideLengths = this.getSlideLengths_();
+    const totalLength = sum(slideLengths);
+    const count = this.loop_ ? slides_.length : 0;
+
+    // Replace the before spacers.
+    this.beforeSpacers_.forEach(spacer => {
+      this.scrollContainer_.removeChild(spacer);
+    });
+    this.beforeSpacers_ = this.createSpacers_(count);
+    this.beforeSpacers_.forEach((spacer, i) => {
+      updateLengthStyle(axis_, spacer, slideLengths[i]);
+      this.scrollContainer_.insertBefore(spacer, slides_[0]);
+    });
+
+    // Replace the replacement spacers.
+    this.replacementSpacers_.forEach(spacer => {
+      this.scrollContainer_.removeChild(spacer);
+    });
+    this.replacementSpacers_ = this.createSpacers_(count);
+    this.replacementSpacers_.forEach((spacer, i) => {
+      updateLengthStyle(axis_, spacer, slideLengths[i]);
+      // Translate these 1 revolution up, so they end up on top of the slides.
+      this.setElementTransform_(spacer, -1, totalLength);
+      this.scrollContainer_.appendChild(spacer);
+    });
+
+    // Replace the after spacers.
+    this.afterSpacers_.forEach(spacer => {
+      this.scrollContainer_.removeChild(spacer);
+    });
+    this.afterSpacers_ = this.createSpacers_(count);
+    this.afterSpacers_.forEach((spacer, i) => {
+      updateLengthStyle(axis_, spacer, slideLengths[i]);
+      // Translate these 1 revolution up, so they end up right after the
+      // slides (where the replacement spacers were).
+      this.setElementTransform_(spacer, -1, totalLength);
+      this.scrollContainer_.appendChild(spacer);
+    });
+  }
+
+  /**
+   * Updates the snap-align for all spacers/slides. The spacers have the same
+   * snap property as the associated slide.
+   * @private
+   */
+  setChildrenSnapAlign_() {
+    // TODO(sparhami) implement
+  }
+
+  /**
+   * Hides any spacers or slides that are not currently necessary. Slides may
+   * be hidden if sideSlideCount is specified. Enough spacers are shown to
+   * allow 1 revolution of scrolling (not including the current slide) before
+   * / after the current slide. The rest of the spacers are hidden.
+   *
+   * Note that spacers are sized the same as the slide that they replace. As a
+   * result, we need to hide the correct spacers rather than simply the
+   * correct number of them.
+   *
+   * @private
+   */
+  hideSpacersAndSlides_() {
+    const {
+      afterSpacers_,
+      replacementSpacers_,
+      beforeSpacers_,
+      currentIndex_,
+      loop_,
+      slides_,
+    } = this;
+    const sideSlideCount = Math.min(slides_.length - 1, this.sideSlideCount_);
+    const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
+    const numAfterSpacers = Math.max(0, currentIndex_ - 1);
+
+    [slides_, replacementSpacers_].forEach(elements => {
+      elements.forEach((el, i) => {
+        const distance = loop_ ?
+          wrappingDistance(currentIndex_, i, elements) :
+          Math.abs(currentIndex_ - i);
+        const tooFar = distance > sideSlideCount;
+        el.hidden = tooFar;
+      });
+    });
+
+    beforeSpacers_.forEach((el, i) => {
+      const distance = backwardWrappingDistance(
+          currentIndex_, i, beforeSpacers_);
+      const tooFar = distance > sideSlideCount;
+      el.hidden = tooFar || i < slides_.length - numBeforeSpacers;
+    });
+
+    afterSpacers_.forEach((el, i) => {
+      const distance = forwardWrappingDistance(
+          currentIndex_, i, afterSpacers_);
+      const tooFar = distance > sideSlideCount;
+      el.hidden = tooFar || i > numAfterSpacers;
+    });
+  }
+
+  /**
+   * Updates the current element. If the current element has changed, then
+   * slides are moved around as necessary before/after the current slide.
+   * @private
+   */
+  updateCurrent_() {
+    // TODO(sparhami) implement
+  }
+
+  /**
+   * Resets the frame of reference for scrolling, centering things around the
+   * current index and moving things as appropriate.
+   * @param {boolean} force Whether or not to force the window reset, ignoring
+   *    whether or not the resting index has changed.
+   * @private
+   */
+  resetScrollReferencePoint_(force = false) {
+    // Make sure if the user is in the middle of a drag, we do not move
+    // anything.
+    if (this.touching_) {
+      return;
+    }
+
+    // We are still on the same slide, so nothing needs to move.
+    if (this.restingIndex_ == this.currentIndex_ && !force) {
+      return;
+    }
+
+    const totalLength = sum(this.getSlideLengths_());
+
+    this.runMutate_(() => {
+      this.restingIndex_ = this.currentIndex_;
+
+      this.resetSlideTransforms_();
+      this.hideSpacersAndSlides_();
+      this.moveSlides_(totalLength);
+      this.restoreScrollStart_();
+    });
+  }
+
+  /**
+   * Updates the scroll start of the scrolling element. This restores the
+   * scroll position to the same offset within the currentElement as before.
+   * This is useful when some layout has occured that may change the existing
+   * scroll position.
+   * @private
+   */
+  restoreScrollStart_() {
+    // TODO(sparhami) implement
+  }
+
+  /**
+   * Scrolls the current element into view based on its alignment,
+   * @private
+   */
+  scrollCurrentIntoView_() {
+    // TODO(sparhami) implement
+  }
+
+  /**
+   * Moves slides that are not at the current index before or after by
+   * translating them if necessary.
+   * @param {number} totalLength The total length of all the slides.
+   * @private
+   */
+  moveSlides_(totalLength) {
     // TODO(sparhami) implement
   }
 }
