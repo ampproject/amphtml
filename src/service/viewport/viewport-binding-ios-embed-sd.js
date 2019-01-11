@@ -401,7 +401,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // account for margins
     const scrollingElement = this.wrapper_;
     const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = getComputedStyle(scrollingElement);
+    const style = computedStyle(this.win, scrollingElement);
     return rect.height
         + this.paddingTop_
         + this.getBorderTop()

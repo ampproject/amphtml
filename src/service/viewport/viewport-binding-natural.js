@@ -17,10 +17,10 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -200,7 +200,7 @@ export class ViewportBindingNatural_ {
     // account for margins
     const scrollingElement = this.getScrollingElement();
     const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = getComputedStyle(scrollingElement);
+    const style = computedStyle(this.win, scrollingElement);
     return rect.height
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);

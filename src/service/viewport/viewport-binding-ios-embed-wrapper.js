@@ -17,10 +17,10 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
 import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
@@ -243,7 +243,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // account for margins
     const scrollingElement = this.win.document.body;
     const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = getComputedStyle(scrollingElement);
+    const style = computedStyle(this.win, scrollingElement);
     return rect.height
         + this.paddingTop_
         + parseInt(style.marginTop, 10)
