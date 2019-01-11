@@ -394,7 +394,7 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  extensions 5;
+  reserved 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
@@ -549,7 +549,7 @@ message TagSpec {
   optional AmpLayout amp_layout = 11;
 
   // Deprecated fields, do not reuse.
-  extensions 14, 26;
+  reserved 14, 26;
 }
 
 // Defines how much css is allowed on the document including inline styles.
@@ -602,7 +602,7 @@ message ValidatorRules {
   repeated CssLengthSpec css_length_spec = 18;
 
   // Deprecated fields, do not reuse.
-  extensions 2, 5, 11, 12, 14;
+  reserved 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -793,7 +793,7 @@ message ValidationError {
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
 
-  extensions 4;  // Previously used tag ids.
+  reserved 4;  // Previously used tag ids.
 }
 
 // Used in the verbose validator to select between multiple generated error
