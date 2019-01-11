@@ -64,6 +64,10 @@ export class ConsentConfig {
       config['clientConfig'] = this.getConfig_()['clientConfig'];
     }
 
+    if (this.getConfig_()['uiConfig']) {
+      config['uiConfig'] = this.getConfig_()['uiConfig'];
+    }
+
     return config;
   }
 

@@ -230,12 +230,14 @@
     <amp-consent id='ABC' layout='nodisplay' type='_ping_'>
       <script type="application/json">
         {
-          "consents": {
-            "_ping_": {
-              "overlay": true
-            }
+          "postPromptUI": "postPromptUI",
+          "clientConfig": {
+            "CMP_id": "asdf",
+            "other_info": "ahhhh"
           },
-          "postPromptUI": "postPromptUI"
+          "uiConfig": {
+            "overlay": true,
+          }
         }
       </script>
       <div id="ui1">

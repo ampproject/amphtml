@@ -75,8 +75,10 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
-    /** @private {boolean} */
-    this.overlayEnabled_ = false;
+    /** @private {!boolean} */
+    this.overlayEnabled_ = isExperimentOn(this.win_, 'amp-consent-v2') &&
+      config['uiConfig'] &&
+      !!config['uiConfig']['overlay'];
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;
@@ -145,8 +147,6 @@ export class ConsentUI {
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
-
-    this.overlayEnabled_ = !!config['overlay'];
   }
 
   /**
@@ -171,9 +171,7 @@ export class ConsentUI {
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
 
-          if (this.overlayEnabled_) {
-            this.showOverlay_();
-          }
+          this.maybeShowOverlay_();
 
           this.showIframe_();
         });
@@ -184,17 +182,17 @@ export class ConsentUI {
           return;
         }
 
-        if (this.overlayEnabled_) {
-          this.showOverlay_();
-        }
-
-        toggle(this.ui_, true);
         if (!this.isPostPrompt_) {
+
+          this.maybeShowOverlay_();
+
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
           this.baseInstance_.scheduleLayout(this.ui_);
         }
+
+        toggle(this.ui_, true);
       };
 
       // If the UI is an AMP Element, wait until it's built before showing it,
@@ -229,10 +227,9 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      if (this.overlayEnabled_) {
-        this.hideOverlay_();
-      }
-
+      // Hide the overlay
+      this.maybeHideOverlay_();
+      // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
 
       // NOTE (torch2424): This is very sensitive. Fixed layer applies
@@ -393,9 +390,14 @@ export class ConsentUI {
 
   /**
    * Shows the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
    * @private
    */
-  showOverlay_() {
+  maybeShowOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
     if (!this.maskElement_) {
       const mask = this.win_.document.createElement('div');
       mask.classList.add(consentUiClasses.mask);
@@ -408,9 +410,14 @@ export class ConsentUI {
 
   /**
    * Hides the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
    * @private
    */
-  hideOverlay_() {
+  maybeHideOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
     if (this.maskElement_) {
       toggle(this.maskElement_, /* display */false);
     }
