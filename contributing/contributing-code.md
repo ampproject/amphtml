@@ -80,7 +80,7 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
      - [Has good test coverage](./TESTING.md)
      - [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
      - [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
-     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
+     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/enable-git-pre-push.sh#L17-L20)
      - [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
      - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 - Send your code for review.
