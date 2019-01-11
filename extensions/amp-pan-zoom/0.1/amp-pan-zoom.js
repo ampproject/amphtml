@@ -214,11 +214,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   onMeasureChanged() {
     if (this.resetOnResize_) {
-      this.getViewport().getLayoutRectAsync(this.element).then(layoutRect => {
-        if (layoutRect.height !== 0 && layoutRect.width !== 0) {
-          this.resetContentDimensions_();
-        }
-      });
+      this.resetContentDimensions_();
     }
   }
 
@@ -344,7 +340,9 @@ export class AmpPanZoom extends AMP.BaseElement {
         elementBoxRatio / sourceAspectRatio,
         sourceAspectRatio / elementBoxRatio
     );
-    this.maxScale_ = Math.max(this.maxScale_, maxScale);
+    if (!isNaN(maxScale)) {
+      this.maxScale_ = Math.max(this.maxScale_, maxScale);
+    }
   }
 
   /**
