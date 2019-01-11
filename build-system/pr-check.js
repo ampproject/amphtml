@@ -38,6 +38,7 @@ const {
   gitDiffStatMaster,
   gitMergeBaseMaster,
   gitTravisMasterBaseline,
+  shortSha,
 } = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
@@ -100,19 +101,20 @@ function timedExecOrDie(cmd) {
 function printChangeSummary() {
   if (process.env.TRAVIS) {
     console.log(fileLogPrefix, colors.cyan('origin/master'),
-        'is currently at commit', colors.cyan(gitTravisMasterBaseline()));
+        'is currently at commit',
+        colors.cyan(shortSha(gitTravisMasterBaseline())));
   }
 
   const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
-      colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
+      colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
   console.log(filesChanged);
 
   const branchPoint = gitMergeBaseMaster();
   console.log(fileLogPrefix, 'Commit log since branch',
       colors.cyan(gitBranchName()), 'was forked from',
-      colors.cyan('master'), 'at', colors.cyan(branchPoint) + ':');
+      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
   console.log(gitDiffCommitLog() + '\n');
 }
 
