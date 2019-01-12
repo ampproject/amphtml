@@ -149,7 +149,7 @@ const Attributes = {
 };
 
 /** @enum {string} */
-const HistoryStates = {
+export const HistoryStates = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
   PAGE_ID: 'ampStoryPageId',
