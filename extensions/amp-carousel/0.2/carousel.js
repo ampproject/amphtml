@@ -533,7 +533,7 @@ export class Carousel {
   }
 
   /**
-   * @return {!Array{number}} An array of the lengths of the slides.
+   * @return {!Array<number>}} An array of the lengths of the slides.
    * @private
    */
   getSlideLengths_() {

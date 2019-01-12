@@ -54,7 +54,7 @@ export function getDimension(axis, el) {
     left,
     right,
     width,
-  } = el.getBoundingClientRect();
+  } = el./*OK*/getBoundingClientRect();
 
   return {
     start: axis == Axis.X ? left : top,
