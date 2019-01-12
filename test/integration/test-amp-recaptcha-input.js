@@ -45,6 +45,7 @@ function getMockedRecaptchaFrame(fixture) {
     console.error(Object.keys(bootstrapFrame.contentDocument));
     return poll('load recaptcha api script', () => {
       // Wait for the recaptcha script to add it's own api script
+      // Need to do partial string match *= for css value 'google'
       bootstrapFrame.contentDocument.querySelector('script[type]')
     }, undefined, 5000);
   }).then(() => {
