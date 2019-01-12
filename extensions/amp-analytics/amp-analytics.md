@@ -173,6 +173,87 @@ In this example, we specify the `config` attribute to load the configuration dat
 <amp-analytics config="https://example.com/analytics.account.config.json">
 ```
 
+#### Configuration Rewriter
+
+The configuration rewriter feature is designed to allow analytics providers to dynamically rewrite a provided configuration. This is similar to the remote configuration feature but additionally includes any user-provided configuration in the request made to the sever. This currently can only be enabled by an analytics vendor.
+
+An analytics vendor will specify a `configRewriter` property with a server url.
+```js
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+    },
+    ...
+}
+```
+
+The runtime will fetch the remote configuration (if given) and merge it with the configuration inlined in the document, before sending a request to `configRewriter` endpoint given by the vendor. The vendor can then use this data server side to construct and return a new rewritten configuration.
+
+The runtime will then merge all these configurations in order to determine the final configuration. This will happen in this order of precedence (highest to lowest):
+1. Rewritten Configuration
+1. Inlined Configuration
+1. Vendor defined configuration
+
+##### Variable Groups
+
+Variable Groups is a feature that allows analytics providers to provide a predefined set of variables that can easily be enabled by an user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
+
+To set up this feature the analytics provider should create a new `varGroups` object inside of the `configRewriter` configuration. Inside this object you may include any named variable groups you might want enabled. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. A _important_ note is that the `${varName}` variants will not work.
+
+For example we may have a vendor who's configuration looks like this:
+```js
+// This is predefined by vendor.
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+      'varGroups' : {
+        'group1': {
+          'referrer': 'DOCUMENT_REFERRER',
+          'source': 'SOURCE_URL',
+        'group2': {
+          'title': 'TITLE',
+        },
+      },
+    },
+    ...
+}
+```
+
+Publishers can then specify which variable groups they wish to enable by including `{enabled: true}` for the specific variable groups in their `amp-analytics` configuration.
+```html
+/* Included on publisher page */
+<amp-analytics type="myVendor" id="myVendor" data-credentials="include">
+  <script type="application/json">
+  {
+    "configRewriter": {
+      "varGroups": {
+        "group1": {
+          "enabled": true
+        },
+        "group2": {
+          "enabled": true
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+```
+
+Here the publisher has enabled both `group1` and `group2`. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url. In this example the request body would look something like this:
+```json
+/* Sent to configuration rewriter server. */
+"configRewriter": {
+  "vars": {
+    "referrer": "https://www.example.com",
+    "source": "https://www.amp.dev",
+    "title": "Cool Amp Tips"
+  }
+}
+```
+
 ###  Configuration data objects
 
 ####  Requests
