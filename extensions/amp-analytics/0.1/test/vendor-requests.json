@@ -1,4 +1,7 @@
 {
+  "_fake_": {
+    "endpoint": "/analytics/fake"
+  },
   "acquialift": {
     "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
     "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
@@ -246,7 +249,7 @@
     "host": "https://pixels.mparticle.com",
     "endpointPath": "/v1/!apiKey/Pixel",
     "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
-    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=!pageName&hn=_ampdoc_url_&ttl=_title_&path=_canonical_path_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
     "event": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=AppEvent&n=!eventName&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion"
   },
   "mpulse": {
@@ -418,11 +421,11 @@
   },
   "upscore":{
       "host":"https://hit-pool.upscore.com/amp?",
-      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time",
-      "initialHit":"author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_",
-      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=final",
-      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=pulse",
-      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_&type=init"
+      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
+      "initialHit":"author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
+      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
+      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
+      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",

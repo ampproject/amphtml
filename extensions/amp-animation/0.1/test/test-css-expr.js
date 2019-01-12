@@ -71,6 +71,9 @@ describe('CSS parse', () => {
     if (n instanceof ast.CssIndexNode) {
       return 'INDEX<>';
     }
+    if (n instanceof ast.CssLengthFuncNode) {
+      return 'LENGTH<>';
+    }
     if (n instanceof ast.CssVarNode) {
       return `VAR<${n.varName_}${n.def_ ? ', ' + pseudo(n.def_) : ''}>`;
     }
@@ -320,6 +323,11 @@ describe('CSS parse', () => {
   it('should parse an index function', () => {
     expect(parsePseudo('index()')).to.equal('INDEX<>');
     expect(parsePseudo('INDEX()')).to.equal('INDEX<>');
+  });
+
+  it('should parse a length function', () => {
+    expect(parsePseudo('length()')).to.equal('LENGTH<>');
+    expect(parsePseudo('LENGTH()')).to.equal('LENGTH<>');
   });
 
   it('should parse a var()', () => {
@@ -1348,6 +1356,36 @@ describes.sandboxed('CSS resolve', {}, () => {
           '*');
       expect(node.isConst()).to.be.false;
       expect(resolvedCss(node)).to.equal('22s');
+    });
+  });
+
+  describe('length', () => {
+    it('should always consider as non-const', () => {
+      expect(ast.isVarCss('length()', false)).to.be.true;
+      expect(ast.isVarCss('length()', normalize)).to.be.true;
+    });
+
+    it('should always be a non-const and no css', () => {
+      const node = new ast.CssLengthFuncNode();
+      expect(node.isConst()).to.be.false;
+      expect(node.isConst(normalize)).to.be.false;
+      expect(() => node.css()).to.throw(/no css/);
+    });
+
+    it('should resolve a no-arg', () => {
+      contextMock.expects('getTargetLength').withExactArgs().returns(12);
+      const node = new ast.CssLengthFuncNode();
+      expect(resolvedCss(node)).to.equal('12');
+    });
+
+    it('should combine with calc', () => {
+      contextMock.expects('getTargetLength').withExactArgs().returns(12);
+      const node = new ast.CssCalcProductNode(
+          new ast.CssTimeNode(2, 's'),
+          new ast.CssLengthFuncNode(),
+          '*');
+      expect(node.isConst()).to.be.false;
+      expect(resolvedCss(node)).to.equal('24s');
     });
   });
 

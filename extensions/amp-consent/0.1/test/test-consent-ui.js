@@ -15,12 +15,20 @@
  */
 
 import {
+  CONSENT_ITEM_STATE,
+  constructConsentInfo,
+} from '../consent-info';
+import {
   ConsentUI,
   consentUiClasses,
 } from '../consent-ui';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -71,6 +79,14 @@ describes.realWin('consent-ui', {
         return Promise.resolve();
       },
     };
+    resetServiceForTesting(win, 'consentStateManager');
+    registerServiceBuilder(win, 'consentStateManager', function() {
+      return Promise.resolve({
+        getConsentInstanceInfo: () => {return Promise.resolve(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test'));},
+      });
+    });
+
     toggleExperiment(win, 'amp-consent-v2', true);
   });
 
@@ -132,7 +148,7 @@ describes.realWin('consent-ui', {
       expect(parent.classList.contains('amp-hidden')).to.be.true;
     });
 
-    it('append/remove iframe', () => {
+    it('append/remove iframe', function* () {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
       });
@@ -140,6 +156,7 @@ describes.realWin('consent-ui', {
           new ConsentUI(mockInstance, config);
       expect(elementByTag(parent, 'iframe')).to.be.null;
       consentUI.show();
+      yield macroTask();
       expect(elementByTag(parent, 'iframe')).to.not.be.null;
       consentUI.hide();
       expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -224,6 +241,26 @@ describes.realWin('consent-ui', {
             parent.classList.contains(consentUiClasses.iframeActive)
         ).to.be.true;
       });
+    });
+
+    it('should pass the info to the iframe', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+      });
+      consentUI = new ConsentUI(mockInstance, config);
+      consentUI.show();
+      yield macroTask();
+
+      expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'consentState': 'accepted',
+        'consentString': 'test',
+      }));
     });
   });
 

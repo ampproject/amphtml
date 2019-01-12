@@ -239,7 +239,11 @@
       <script type="application/json">
         {
         "consents": {},
-        "postPromptUI": "postPromptUI"
+        "postPromptUI": "postPromptUI",
+        "clientConfig": {
+          "CMP_id": "test_id",
+          "other_info": "test_info"
+        }
       }
       </script>
       <div id="ui1">
@@ -358,6 +362,12 @@
   <footer>
     <div class="brand-logo">PublisherLogo</div>
   </footer>
+
+  <script>
+    setTimeout(() => {
+      AMP.toggleExperiment('amp-consent-v2', true);
+    }, 500);
+  </script>
 </body>
 
 </html>

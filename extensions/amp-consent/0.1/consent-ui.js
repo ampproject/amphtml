@@ -20,18 +20,22 @@ import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
 } from '../../../src/dom';
+import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
+const CONSENT_STATE_MANAGER = 'consentStateManager';
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -94,6 +98,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {?JsonObject} */
+    this.clientConfig_ = null;
+
     /** @private {?Element} */
     this.placeholder_ = null;
 
@@ -135,6 +142,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
+      this.clientConfig_ = config['clientConfig'] || null;
     }
   }
 
@@ -279,6 +287,23 @@ export class ConsentUI {
     return placeholder;
   }
 
+  /**
+   * Get the client information that needs to be passed to cmp iframe
+   * @return {!Promise<JsonObject>}
+   */
+  getClientInfoPromise_() {
+    const consentStatePromise =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+    return consentStatePromise.then(consentStateManager => {
+      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
+        return dict({
+          'clientConfig': this.clientConfig_,
+          'consentState': getConsentStateValue(consentInfo['consentState']),
+          'consentString': consentInfo['consentString'],
+        });
+      });
+    });
+  }
 
   /**
    * Apply placeholder
@@ -294,10 +319,15 @@ export class ConsentUI {
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
-    this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-    insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+
+    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
+      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
+      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+    });
 
     return Promise.all([
+      iframePromise,
       this.iframeReady_.promise,
       this.baseInstance_.mutateElement(() => {
         toggle(dev().assertElement(this.placeholder_), true);
@@ -358,6 +388,7 @@ export class ConsentUI {
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
+    this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
 
     // TODO (torch2424): Hide mask if publisher provides the option

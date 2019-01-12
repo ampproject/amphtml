@@ -26,7 +26,6 @@ tags: {  # amp-image-slider
 }
 tags: {  # <amp-image-slider>
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-IMAGE-SLIDER"
   requires_extension: "amp-image-slider"
   attr_lists: "extended-amp-global"

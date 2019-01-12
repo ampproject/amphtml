@@ -502,6 +502,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 
 .i-amphtml-loading-container {
   display: block !important;
+  pointer-events: none;
   z-index: 1;
 }
 

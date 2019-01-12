@@ -42,11 +42,12 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
 let ExperimentDef;
 
 /**
- * This experiment is special because it uses a different mechanism that is
+ * These experiments are special because they use a different mechanism that is
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
+const RC_EXPERIMENT_ID = 'rc-channel';
 
 
 /** @const {!Array<!ExperimentDef>} */
@@ -57,6 +58,13 @@ const EXPERIMENTS = [
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'contributing/release-schedule.md#amp-dev-channel',
+  },
+  // Release Candidate (RC Channel)
+  {
+    id: RC_EXPERIMENT_ID,
+    name: 'AMP RC Channel (more info)',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
   {
     id: 'alp',
@@ -231,12 +239,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-scaling',
-    name: 'Scale pages dynamically in amp-story by default',
-    spec: 'https://github.com/ampproject/amphtml/issues/12902',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
-  },
-  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
@@ -269,6 +271,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
     id: 'no-sync-xhr-in-ads',
@@ -530,8 +538,28 @@ function updateExperimentRow(experiment) {
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
     return getCookie(window, 'AMP_CANARY') == '1';
+  } else if (id == RC_EXPERIMENT_ID) {
+    return getCookie(window, 'AMP_CANARY') == '2';
   }
   return isExperimentOn(window, /*OK*/id);
+}
+
+/**
+ * Opts in to / out of the "canary" or "rc" runtime types by setting the
+ * AMP_CANARY cookie.
+ * @param {string} cookieState '0' for disabled, '1' for canary, '2' for rc
+ */
+function setAmpCanaryCookie_(cookieState) {
+  const validUntil =
+      (cookieState != '0') ? (Date.now() + COOKIE_MAX_AGE_MS) : 0;
+  const cookieOptions = {
+    // Set explicit domain, so the cookie gets sent to sub domains.
+    domain: location.hostname,
+    allowOnProxyOrigin: true,
+  };
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
+  // Reflect default experiment state.
+  self.location.reload();
 }
 
 /**
@@ -550,16 +578,9 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = Date.now() + COOKIE_MAX_AGE_MS;
-
-      setCookie(window, 'AMP_CANARY',
-          (on ? '1' : '0'), (on ? validUntil : 0), {
-            // Set explicit domain, so the cookie gets send to sub domains.
-            domain: location.hostname,
-            allowOnProxyOrigin: true,
-          });
-      // Reflect default experiment state.
-      self.location.reload();
+      setAmpCanaryCookie_(on ? '1' : '0');
+    } else if (id == RC_EXPERIMENT_ID) {
+      setAmpCanaryCookie_(on ? '2' : '0');
     } else {
       toggleExperiment(window, id, on);
     }
@@ -599,7 +620,7 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
- * user has (depends on whether they opted into canary), so that
+ * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {

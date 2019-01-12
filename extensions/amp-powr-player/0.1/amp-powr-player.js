@@ -425,8 +425,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
     return [];
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-AMP.extension('amp-powr-player', '0.1', AMP => {
-  AMP.registerElement('amp-powr-player', AmpPowrPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpPowrPlayer);
 });
