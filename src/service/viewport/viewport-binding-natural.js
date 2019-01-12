@@ -17,10 +17,10 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -66,6 +66,9 @@ export class ViewportBindingNatural_ {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
+
+    /** @private {number} */
+    this.paddingTop_ = 0;
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -114,6 +117,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    this.paddingTop_ = paddingTop;
     setImportantStyles(this.win.document.documentElement, {
       'padding-top': px(paddingTop),
     });
@@ -195,14 +199,20 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getContentHeight() {
-    // The reparented body inside wrapper will have the correct content height.
-    // Body is overflow: hidden so that the scrollHeight include the margins of
-    // body's first and last child.
-    // Body height doesn't include paddingTop on the parent, so we add on the
-    // position of the body from the top of the viewport and subtract the
-    // scrollTop (as position relative to the viewport changes as you scroll).
-    const rect = this.win.document.body./*OK*/getBoundingClientRect();
-    return rect.height + rect.top + this.getScrollTop();
+    // Don't use scrollHeight, since it returns `MAX(viewport_height,
+    // document_height)`, even though we only want the latter. Also, it doesn't
+    // account for margins
+    const scrollingElement = this.getScrollingElement();
+    const rect = scrollingElement./*OK*/getBoundingClientRect();
+    const style = computedStyle(this.win, scrollingElement);
+    let paddingTop = 0;
+    if (scrollingElement !== this.win.document.documentElement) {
+      paddingTop = this.paddingTop_;
+    }
+    return rect.height
+        + paddingTop
+        + parseInt(style.marginTop, 10)
+        + parseInt(style.marginBottom, 10);
   }
 
   /** @override */
