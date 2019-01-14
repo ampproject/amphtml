@@ -138,13 +138,13 @@ describe('inabox', function() {
       env.win.document.body.removeChild(iframe);
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
@@ -252,13 +252,15 @@ describe('inabox with a complex image ad', function() {
       Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
     });
 
-    it('should properly render ad in a friendly iframe with viewability pings',
+    it.configure().skipSafari().run(
+        'should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
         });
 
-    it('should properly render ad in a safe frame with viewability pings',
+    it.configure().skipSafari().run(
+        'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
