@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/dom';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  waitForBodyPromise,
+  waitForChild,
+} from '../../../src/dom';
+import {installServiceInEmbedScope} from '../../../src/service';
 import {toArray} from '../../../src/types';
-import {user} from '../../../src/log';
 
 /**
  * CSS class used to deactivate animations.
@@ -128,24 +134,65 @@ function setCounter(receiver, counterName, counterValue) {
 /**
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
+ * @implements {../../../src/service.EmbeddableService}
  */
 export class AmpGwdRuntimeService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc An AMP document
    *     with GWD content in which to install the animation runtime controller.
+   * @param {!Window=} opt_win If in a FIE, the FIE window in which to install
+   *     the service.
    */
-  constructor(ampdoc) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+  constructor(ampdoc, opt_win) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Function} */
+    /**
+     * The window containing the GWD ad document. This will differ from the
+     * provided AmpDoc's window when in FIE.
+     * @const @private {!Window}
+     */
+    this.win_ = opt_win || ampdoc.win;
+
+    /**
+     * The GWD ad document root. This will differ from the top-level AmpDoc's
+     * root when in FIE.
+     * @const @private {!Document}
+     */
+    this.doc_ = this.win_.document;
+
+    /** @const @private {!Function} */
     this.boundOnAnimationEndEvent_ = this.onAnimationEndEvent_.bind(this);
 
-    this.ampdoc_.whenBodyAvailable().then(() => { this.initialize_(); });
+    // Initialize once the body and DOM is ready.
+    const docReadyPromise =
+        opt_win ? waitForBodyPromise(this.doc_) : ampdoc.whenBodyAvailable();
+    docReadyPromise.then(() => {
+      // If the page deck is not yet in the DOM, wait until it is. The page deck
+      // must be present in the body before the runtime can be initialized, as
+      // it must activate animations on the first page. It's not clear whether
+      // in production this is a realistic scenario (though this occurs in
+      // tests), but this also avoids performing initialization on the top-level
+      // document on which the service is first (unnecessarily) installed when
+      // in a FIE.
+      const body = dev().assertElement(this.doc_.body);
+      waitForChild(
+          body,
+          () => !!body.querySelector(
+              `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`),
+          this.initialize_.bind(this));
+    });
+  }
+
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
+    installServiceInEmbedScope(
+        embedWin, GWD_SERVICE_NAME, new AmpGwdRuntimeService(ampdoc, embedWin));
   }
 
   /**
-   * Performs setup tasks on body ready.
+   * Initializes the runtime. Attaches `animationend` event listeners for
+   * handling timeline events, and activates animations on the first page.
    * @private
    */
   initialize_() {
@@ -174,7 +221,7 @@ export class AmpGwdRuntimeService {
    * @param {boolean} enable True to enable, false to disable.
    */
   setEnabled(enable) {
-    this.ampdoc_.getBody().classList.toggle(ANIMATIONS_DISABLED_CLASS, !enable);
+    this.doc_.body.classList.toggle(ANIMATIONS_DISABLED_CLASS, !enable);
   }
 
   /**
@@ -184,19 +231,23 @@ export class AmpGwdRuntimeService {
    *     pagedeck amp-carousel).
    */
   setCurrentPage(index) {
-    const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
+    const gwdPages = this.doc_.body.querySelectorAll(
         `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
 
     if (gwdPages.length == 0) {
+      user().warn(LOG_ID,
+          'Could not set current page. No pages were found in the document.');
       return;
     }
 
     // Deactivate the outgoing current page, if there is one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
-    const currentPageEl = this.ampdoc_.getRootNode().querySelector(
+    const activePageSelector =
         `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}.${
           escapeCssSelectorIdent(PlaybackCssClass.PLAY)
-        }`);
+        }`;
+    const currentPageEl =
+        scopedQuerySelector(this.doc_.body, activePageSelector);
 
     if (currentPageEl) {
       this.deactivatePage_(currentPageEl);
@@ -341,7 +392,7 @@ export class AmpGwdRuntimeService {
 
     // Pause playback. The pause must be triggered after a delay as a workaround
     // for a Safari bug that prevents pausing animations from working.
-    this.ampdoc_.win.setTimeout(() => {
+    this.win_.setTimeout(() => {
       this.pause(id);
     }, GOTO_AND_PAUSE_DELAY);
   }
@@ -390,13 +441,13 @@ export class AmpGwdRuntimeService {
    */
   getReceiver(id) {
     if (id == 'document.body') {
-      return this.ampdoc_.getBody();
+      return this.doc_.body;
     }
 
     // Try to locate the receiver by id in the DOM.
     // TODO(sklobovskaya): When support for groups is added, this lookup will
     // need to use GwdIds.
-    const receiver = this.ampdoc_.getRootNode().getElementById(id);
+    const receiver = this.doc_.getElementById(id);
 
     // Check that a valid element was found.
     if (receiver && receiver.classList) {
@@ -460,9 +511,9 @@ export class AmpGwdRuntimeService {
       'sourceEvent': event,
     });
     const timelineEvent =
-        createCustomEvent(this.ampdoc_.win, GWD_TIMELINE_EVENT, detail);
+        createCustomEvent(this.win_, GWD_TIMELINE_EVENT, detail);
 
-    this.ampdoc_.getRootNode().dispatchEvent(timelineEvent);
+    this.doc_.dispatchEvent(timelineEvent);
   }
 
   /**
@@ -470,7 +521,7 @@ export class AmpGwdRuntimeService {
    */
   listenForAnimationEnd_() {
     for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
-      this.ampdoc_.getBody().addEventListener(
+      this.doc_.body.addEventListener(
           VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
     }
   }
@@ -480,7 +531,7 @@ export class AmpGwdRuntimeService {
    */
   unlistenForAnimationEnd_() {
     for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
-      this.ampdoc_.getBody().removeEventListener(
+      this.doc_.body.removeEventListener(
           VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
     }
   }
@@ -498,5 +549,10 @@ export class AmpGwdRuntimeService {
  * @param {!Element} element
  */
 function reflow(element) {
-  element./*OK*/offsetWidth = element./*OK*/offsetWidth;
+  // exporting global to trick Closure into thinking this function has side
+  // effects.
+  const globalRef = '__AMP_GWD_TEMP';
+  // Reading `offsetWidth` is what actually causes reflow.
+  self[globalRef] = element./*OK*/offsetWidth;
+  delete self[globalRef];
 }

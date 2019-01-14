@@ -78,25 +78,54 @@ const chaiAsPromised = [
 ];
 
 const unitTestPaths = [
-  'test/functional/**/*.js',
+  'test/unit/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
 ];
 
 const unitTestOnSaucePaths = [
-  'test/functional/**/*.js',
+  'test/unit/**/*.js',
   'ads/**/test/test-*.js',
 ];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
-  'test/functional/test-error.js',
+  'test/unit/test-error.js',
   'extensions/**/test/integration/**/*.js',
+];
+
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
 ];
 
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
+];
+
+/**
+ * Array of 3p bootstrap urls
+ * Defined by the following object schema:
+ * basename: the name of the 3p frame without extension
+ * max: the path of the readable html
+ * min: the name of the minimized html
+ */
+const thirdPartyFrames = [
+  {
+    basename: 'frame',
+    max: '3p/frame.max.html',
+    min: 'frame.html',
+  },
+  {
+    basename: 'nameframe',
+    max: '3p/nameframe.max.html',
+    min: 'nameframe.html',
+  },
+  {
+    basename: 'recaptcha',
+    max: '3p/recaptcha.max.html',
+    min: 'recaptcha.html',
+  },
 ];
 
 /** @const  */
@@ -110,6 +139,8 @@ module.exports = {
   unitTestOnSaucePaths,
   integrationTestPaths,
   lintGlobs,
+  devDashboardTestPaths,
+  thirdPartyFrames,
   jsonGlobs: [
     '**/*.json',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
@@ -132,7 +163,8 @@ module.exports = {
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
-    '!build-system/tasks/visual-diff-wrapper.snippet.js',
+    '!build-system/tasks/visual-diff/node_modules/**/*.*',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!third_party/**/*.*',
@@ -140,9 +172,10 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/*.js',
+    '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!firebase/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

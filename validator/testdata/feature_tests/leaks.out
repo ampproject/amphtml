@@ -30,7 +30,7 @@ feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html
 |
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
-feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 |
 |
 |  <!-- AMP boilerplate which should not produce errors -->
@@ -132,25 +132,21 @@ feature_tests/leaks.html:89:0 The tag 'img' may only appear as a descendant of t
 >> ^~~~~~~~~
 feature_tests/leaks.html:90:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |
-|  <image src="https://leaking.via/image-src">
+|  <image src="https://leaking.via/image-src"></image>
 >> ^~~~~~~~~
 feature_tests/leaks.html:92:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
-|  <image href="https://leaking.via/image-href">
+|  <image href="https://leaking.via/image-href"></image>
 >> ^~~~~~~~~
 feature_tests/leaks.html:93:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
 |
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:95:0 The tag 'picture' is disallowed. [DISALLOWED_HTML]
+feature_tests/leaks.html:95:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |      <source srcset="https://leaking.via/picture-source-srcset">
->>     ^~~~~~~~~
-feature_tests/leaks.html:96:4 The parent tag of tag 'amp-ima-video > source' is 'picture', but it can only be 'amp-ima-video'. (see https://www.ampproject.org/docs/reference/components/amp-ima-video) [AMP_TAG_PROBLEM]
->>     ^~~~~~~~~
-feature_tests/leaks.html:96:4 The tag 'amp-ima-video > source' requires including the 'amp-ima-video' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-ima-video) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </picture>
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:98:0 The tag 'picture' is disallowed. [DISALLOWED_HTML]
+feature_tests/leaks.html:98:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |      <img srcset="https://leaking.via/picture-img-srcset">
 >>     ^~~~~~~~~
 feature_tests/leaks.html:99:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]

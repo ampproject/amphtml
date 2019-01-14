@@ -19,7 +19,7 @@ import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 
 
@@ -29,16 +29,27 @@ export let EntitlementChangeEventDef;
 /** @const */
 const TAG = 'amp-subscriptions';
 
+/**
+ * @typedef {{
+ *   platform: !./subscription-platform.SubscriptionPlatform,
+ *   weight: number,
+ * }}
+ */
+let PlatformWeightDef;
+
+
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
-   * @param {!JsonObject} scoreConfig
+   * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
+   * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
    */
-  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
+  constructor(expectedServiceIds, scoreConfig,
+    fallbackEntitlement, opt_Platforms) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = dict();
+    this.subscriptionPlatforms_ = opt_Platforms || dict();
 
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
@@ -64,9 +75,6 @@ export class PlatformStore {
     /** @private {?Deferred} */
     this.grantStatusPromise_ = null;
 
-    /** @private @const {!Observable} */
-    this.onGrantStateResolvedCallbacks_ = new Observable();
-
     /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
 
@@ -79,7 +87,7 @@ export class PlatformStore {
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
 
-    /** @private @canst {!./entitlement.Entitlement} */
+    /** @private @const {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
@@ -96,6 +104,25 @@ export class PlatformStore {
     this.onPlatformResolvedCallbacks_.fire({
       serviceId,
     });
+  }
+
+  /**
+   * Reset the platformStore via a factory that returns a
+   * new PlatformStore with the same platforms as this one.
+   * @return {PlatformStore}
+   */
+  resetPlatformStore() {
+    // Reset individual platforms to ensure their UX clears.
+    for (const platformKey in this.subscriptionPlatforms_) {
+      this.subscriptionPlatforms_[platformKey].reset();
+    }
+    // Then create new platform store withe the newply reset platforms in it.
+    return new PlatformStore(
+        this.serviceIds_,
+        this.scoreConfig_,
+        this.fallbackEntitlement_,
+        this.subscriptionPlatforms_
+    );
   }
 
   /**
@@ -123,12 +150,12 @@ export class PlatformStore {
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
-    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
+    devAssert(platform, `Platform for id ${serviceId} is not resolved`);
     return platform;
   }
 
   /**
-   * Returns the local platform;
+   * Returns the local platform
    * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
@@ -181,6 +208,9 @@ export class PlatformStore {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
+    if (entitlement.granted) {
+      this.saveGrantEntitlement_(entitlement);
+    }
     this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
   }
 
@@ -190,7 +220,7 @@ export class PlatformStore {
    * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
-    dev().assert(this.entitlements_[serviceId],
+    devAssert(this.entitlements_[serviceId],
         `Platform ${serviceId} has not yet resolved with entitlements`);
     return this.entitlements_[serviceId];
   }
@@ -201,18 +231,9 @@ export class PlatformStore {
    * @return {!Promise<!./entitlement.Entitlement>} entitlement
    */
   getEntitlementPromiseFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
+    devAssert(this.entitlementDeferredMap_[serviceId],
         `Platform ${serviceId} is not declared`);
     return this.entitlementDeferredMap_[serviceId].promise;
-  }
-
-  /**
-   * @param {string} serviceId
-   */
-  resetEntitlementFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
-        `Platform ${serviceId} is not declared`);
-    this.entitlementDeferredMap_[serviceId] = new Deferred();
   }
 
   /**
@@ -225,7 +246,7 @@ export class PlatformStore {
 
     this.grantStatusPromise_ = new Deferred();
 
-    // Check if current entitlements unblocks the reader
+    // Check if current entitlements unblock the reader
     for (const key in this.entitlements_) {
       const entitlement = (this.entitlements_[key]);
       if (entitlement.granted) {
@@ -235,13 +256,12 @@ export class PlatformStore {
     }
 
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if non of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(({entitlement}) => {
         if (entitlement.granted) {
-          this.saveGrantEntitlement_(entitlement);
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
           this.grantStatusPromise_.resolve(false);
@@ -258,14 +278,13 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
-    // The entitlement will be stored either if its the first one to grant
+    // The entitlement will be stored if either it is the first one to grant
     // or the new one has full subscription but the last one didn't.
     if ((!this.grantStatusEntitlement_ && entitlement.granted)
         || (this.grantStatusEntitlement_
           && !this.grantStatusEntitlement_.isSubscriber()
           && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
-      this.onGrantStateResolvedCallbacks_.fire();
     }
   }
 
@@ -283,8 +302,10 @@ export class PlatformStore {
           || this.areAllPlatformsResolved_()) {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
-      this.onGrantStateResolvedCallbacks_.add(() => {
-        if (this.grantStatusEntitlement_.granted
+      this.onEntitlementResolvedCallbacks_.add(() => {
+        // Grant entitlement only if subscriber
+        if ((this.grantStatusEntitlement_
+             && this.grantStatusEntitlement_.isSubscriber())
             || this.areAllPlatformsResolved_()) {
           this.grantStatusEntitlementPromise_.resolve(
               this.grantStatusEntitlement_);
@@ -312,7 +333,7 @@ export class PlatformStore {
     }
     this.allResolvedPromise_ = new Deferred();
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if non of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.allResolvedPromise_.resolve(
           this.getAvailablePlatformsEntitlements_());
     } else {
@@ -386,21 +407,18 @@ export class PlatformStore {
    * weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
    * - base weight
-   * - weight factors the platform supports multiploed by score in the config
+   * - weight factors the platform supports multiplied by score in the config
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
    * @return {!./subscription-platform.SubscriptionPlatform}
-   * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
-  selectApplicablePlatform_(optionalFactor) {
-    const localPlatform = this.getLocalPlatform();
-
-    dev().assert(this.areAllPlatformsResolved_(),
+  selectApplicablePlatform_() {
+    devAssert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    // Subscriber wins immediatly.
+    // Subscriber wins immediately.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
@@ -411,30 +429,20 @@ export class PlatformStore {
       }
     }
 
-    const platformWeights = this.getAllPlatformWeights_(optionalFactor);
-    platformWeights.sort((platform1, platform2) => {
-      // Force local platform to win ties
-      if (platform2.weight == platform1.weight &&
-        platform2.platform == localPlatform) {
-        return 1;
-      }
-      return platform2.weight - platform1.weight;
-    });
-    return platformWeights[0].platform;
+    return this.rankPlatformsByWeight_(this.getAllPlatformWeights_());
   }
 
   /**
    * Calculate and return weights for all platforms
-   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
-   * @param {string=} optionalFactor if present only use this factor for calculation
+   * @return {!Array<!PlatformWeightDef>}
    * @private
    */
-  getAllPlatformWeights_(optionalFactor) {
-    // Get weights for all of the platforms
+  getAllPlatformWeights_() {
+    // Get weights for all of the platforms.
     return this.getAvailablePlatforms().map(platform => {
       return {
         platform,
-        weight: this.calculatePlatformWeight_(platform, optionalFactor),
+        weight: this.calculatePlatformWeight_(platform),
       };
     });
   }
@@ -442,20 +450,18 @@ export class PlatformStore {
   /**
    * Calculate platform weight
    * @param {!./subscription-platform.SubscriptionPlatform} platform
-   * @param {string=} optionalFactor if specified only calculate this factor
    * @return {number}
    * @private
    */
-  calculatePlatformWeight_(platform, optionalFactor) {
-    const factorWeights = [0]; // reduce always needs somthing to work with
+  calculatePlatformWeight_(platform) {
+    const factorWeights = [0]; // reduce always needs something to work with
 
     // Start with base score
     const weight = platform.getBaseScore();
 
     // Iterate score factors checking service support
     for (const factor in this.scoreConfig_) {
-      if (hasOwn(this.scoreConfig_, factor) &&
-        (!optionalFactor || optionalFactor === factor)) {
+      if (hasOwn(this.scoreConfig_, factor)) {
         factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
       }
     }
@@ -464,21 +470,60 @@ export class PlatformStore {
   }
 
   /**
-   * Records a platform failure and logs error if all platforms have failed.
+   * @param {!Array<!PlatformWeightDef>} platformWeights
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  rankPlatformsByWeight_(platformWeights) {
+    const localPlatform = this.getLocalPlatform();
+    platformWeights.sort((platform1, platform2) => {
+      // Force local platform to win ties
+      if (platform2.weight == platform1.weight &&
+        platform1.platform == localPlatform) {
+        return -1;
+      }
+      return platform2.weight - platform1.weight;
+    });
+    return platformWeights[0].platform;
+  }
+
+  /**
+   * Returns most qualified platform for the specified factor.
+   *
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
+   *
+   * @param {string} factor
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  selectApplicablePlatformForFactor_(factor) {
+    /** @type {!Array<!PlatformWeightDef>} */
+    const platformWeights = this.getAvailablePlatforms().map(platform => {
+      const factorValue = platform.getSupportedScoreFactor(factor);
+      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      return {platform, weight};
+    });
+    return this.rankPlatformsByWeight_(platformWeights);
+  }
+
+  /**
+   * Records a platform failure
+   * logs error if all platforms have failed
+   * uses fallback if there is one.
    * @param {string} serviceId
    */
-  reportPlatformFailure(serviceId) {
-    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+  reportPlatformFailureAndFallback(serviceId) {
+    if (serviceId === this.getLocalPlatform().getServiceId()
+      && this.fallbackEntitlement_) {
+      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
+          this.fallbackEntitlement_);
+      user().warn(TAG, 'Local platform has failed to resolve,  '
+        + 'using fallback entitlement.');
+    } else if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       const entitlement = Entitlement.empty(serviceId);
       this.resolveEntitlement(serviceId, entitlement);
       this.failedPlatforms_.push(serviceId);
-    }
-
-    if (this.failedPlatforms_.length == this.serviceIds_.length) {
-      user().warn(TAG, 'All platforms have failed to resolve, '
-          + 'using fallback entitlement for local platform');
-      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
-          this.fallbackEntitlement_);
     }
   }
 
@@ -487,7 +532,7 @@ export class PlatformStore {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    return this.selectApplicablePlatform_(
+    return this.selectApplicablePlatformForFactor_(
         SubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }

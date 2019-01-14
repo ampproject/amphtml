@@ -112,4 +112,9 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       },
     },
   },
+  'cookies': {
+    '_ga': {
+      'value': 'LINKER_PARAM(_gl, _ga)',
+    },
+  },
 });

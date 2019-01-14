@@ -20,7 +20,7 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from '../../messaging/messaging';
-import {ViewerForTesting} from '../viewer-for-testing';
+import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
 
@@ -112,7 +112,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           expect(sendRequestSpy.lastCall.args[2]).to.equal(true);
         });
 
-        it('should not initiate the Touch Handler', () => {
+        it('should not initiate touch handler without capability', () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
@@ -124,11 +124,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           expect(initTouchHandlerStub).to.not.be.called;
         });
 
-        it('should initiate the Touch Handler', () => {
+        it('should initiate touch handler with capability', () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
-          sandbox.stub(viewer, 'hasCapability').returns(true);
+          sandbox.stub(viewer, 'hasCapability').withArgs('swipe').returns(true);
           const initTouchHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
@@ -137,11 +137,53 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             expect(initTouchHandlerStub).to.be.called;
           });
         });
+
+        it('should not initiate keyboard handler without capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          const initKeyboardHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initKeyboardHandler_');
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging);
+
+          expect(initKeyboardHandlerStub).to.not.be.called;
+        });
+
+        it('should initiate keyboard handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('keyboard')
+              .returns(true);
+          const initKeyboardHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initKeyboardHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initKeyboardHandlerStub).to.be.called;
+          });
+        });
+
+        it('should initiate focus handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('focus-rect')
+              .returns(true);
+          const initFocusHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initFocusHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initFocusHandlerStub).to.be.called;
+          });
+        });
       });
     });
   });
 
-  describe.configure().ifNewChrome().run('Unit Tests for messaging.js', () => {
+  describe.configure().ifChrome().run('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
     const requestProcessor = function() {
       return Promise.resolve({});

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-subscriptions';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor
@@ -34,7 +38,12 @@ export const SubscriptionAnalyticsEvents = {
   STARTED: 'subscriptions-started',
   ACCESS_GRANTED: 'subscriptions-access-granted',
   ACCESS_DENIED: 'subscriptions-access-denied',
+  // common service adapter events
+  LINK_REQUESTED: 'subscriptions-link-requested',
+  LINK_COMPLETE: 'subscriptions-link-complete',
+  LINK_CANCELED: 'subscriptions-link-canceled',
 };
+
 
 export class SubscriptionAnalytics {
 
@@ -47,23 +56,33 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   *
    * @param {string} eventType
    * @param {string} serviceId
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, Object.assign({
-      serviceId,
-    }, opt_vars));
+    this.event(eventType, /** @type {!JsonObject} */ (Object.assign(dict({
+      'serviceId': serviceId,
+    }), opt_vars)));
   }
 
   /**
-   *
    * @param {string} eventType
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
+    user().info(TAG, eventType, opt_vars || '');
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
+  }
+
+  /**
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {string} status
+   * @param {!JsonObject=} opt_vars
+   */
+  actionEvent(serviceId, action, status, opt_vars) {
+    this.serviceEvent(
+        `subscriptions-action-${action}-${status}`, serviceId, opt_vars);
   }
 }

@@ -187,8 +187,22 @@
         "consents": {
           "myConsentId": {
             "checkConsentHref": "http://localhost:8000/get-consent-v1",
-            "promptUI": "ui1",
-            "onUpdateHref": "//updateHref"
+            "promptUI": "ui1"
+          }
+        },
+        "clientConfig": {
+          "mytest": "test",
+          "anothertest": "test2"
+        },
+        "policy": {
+          "default": {
+            "waitFor": {
+              "myConsentId": []
+            },
+            "timeout": {
+              "seconds": 5,
+              "fallbackAction": "reject"
+            }
           }
         },
         "postPromptUI": "postPromptUI"

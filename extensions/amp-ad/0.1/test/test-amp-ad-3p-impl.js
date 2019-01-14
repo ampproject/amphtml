@@ -94,7 +94,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
-        expect(iframe.style.display).to.equal('');
+        expect(iframe).to.not.have.attribute('hidden');
 
         expect(url).to.match(/frame(.max)?.html/);
         const data = JSON.parse(iframe.name).attributes;
@@ -400,7 +400,6 @@ describes.realWin('amp-ad-3p-impl', {
 
     beforeEach(() => {
       adConfig['_ping_'].fullWidthHeightRatio = 1.2;
-      adConfig['_ping_'].mcFullWidthHeightRatio = 0.27;
       win.document.body.removeChild(ad3p.element);
     });
 
@@ -464,7 +463,7 @@ describes.realWin('amp-ad-3p-impl', {
             sandbox.stub(impl, 'attemptChangeSize').callsFake(
                 (height, width) => {
                   expect(width).to.equal(VIEWPORT_WIDTH);
-                  expect(height).to.equal(1111);
+                  expect(height).to.equal(1032);
                   return Promise.resolve();
                 });
 
@@ -569,7 +568,7 @@ describes.realWin('amp-ad-3p-impl', {
           // Right margin is 9px from containerContainer and 25px from
           // container.
           expect(element.style.marginLeft).to.be.equal('');
-          expect(element.style.marginRight).to.be.equal('-49px');
+          expect(element.style.marginRight).to.be.equal('-34px');
         });
       });
     });

@@ -1,7 +1,8 @@
 node_modules
 build
-build-system/tasks/visual-diff-wrapper.snippet.js
+build-system/tasks/visual-diff/snippets/*.js
 build-system/babel-plugins/**/fixtures/**/*.js
+build-system/app-index/test/**/*.js
 dist
 dist.3p
 dist.tools
@@ -16,6 +17,7 @@ validator/node_modules
 validator/nodejs/node_modules
 validator/webui/node_modules
 eslint-rules
+babel.config.js
 karma.conf.js
 testing/local-amp-chrome-extension
 extensions/amp-a4a/0.1/test/testdata

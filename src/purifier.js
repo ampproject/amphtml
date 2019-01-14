@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as DOMPurify from 'dompurify/dist/purify.cjs';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -23,17 +22,29 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict} from './utils/object';
-import {filterSplice} from './utils/array';
 import {parseSrcset} from './srcset';
+import {remove} from './utils/array';
 import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
+import purify from 'dompurify/dist/purify.es';
+
+/**
+ * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
+ */
+let DomPurifyDef;
+
+/** @private @const {!DomPurifyDef} */
+const DomPurify = purify(self);
 
 /** @private @const {string} */
 const TAG = 'purifier';
 
 /** @private @const {string} */
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
+
+/** @private @const {string} */
+export const BIND_PREFIX = 'data-amp-bind-';
 
 /**
  * @const {!Object<string, boolean>}
@@ -207,39 +218,75 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 });
 
 /**
- * Test for invalid `style` attribute values. `!important` is a general AMP
- * rule, while `position:fixed|sticky` is a current runtime limitation since
- * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
- * elements.
+ * Test for invalid `style` attribute values.
+ *
+ * !important avoids overriding AMP styles, while `position:fixed|sticky` is a
+ * FixedLayer limitation (it only scans the style[amp-custom] stylesheet
+ * for potential fixed/sticky elements). Note that the latter can be
+ * circumvented with CSS comments -- not a big deal.
+ *
  * @const {!RegExp}
  */
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-/** @const {!Object} */
-const PURIFY_CONFIG = {
-  'USE_PROFILES': {
-    'html': true,
-    'svg': true,
-    'svgFilters': true,
+const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
+  USE_PROFILES: {
+    html: true,
+    svg: true,
+    svgFilters: true,
   },
-};
+});
+
+
+/**
+ * Monotonically increasing counter used for keying nodes.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
 
 /**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
+ * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty) {
-  const config = Object.assign({}, PURIFY_CONFIG, {
-    'ADD_ATTR': WHITELISTED_ATTRS,
-    'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
-    // Avoid reparenting of some elements to document head e.g. <script>.
-    'FORCE_BODY': true,
-    // Avoid need for serializing to/from string by returning Node directly.
-    'RETURN_DOM': true,
-  });
+export function purifyHtml(dirty, diffing = false) {
+  const config = purifyConfig();
+  addPurifyHooks(DomPurify, diffing);
+  const body = DomPurify.sanitize(dirty, config);
+  DomPurify.removeAllHooks();
+  return body;
+}
 
+/**
+ * Returns DOMPurify config for normal, escaped templates.
+ * Do not use for unescaped templates.
+ *
+ * NOTE: see that we use DomPurifyConfig found in
+ * build-system/dompurify.extern.js as the exact type. This is to prevent
+ * closure compiler from optimizing these fields here in this file and in the
+ * 3rd party library file. See #19624 for further information.
+ * @return {!DomPurifyConfig}
+ */
+export function purifyConfig() {
+  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
+    ADD_ATTR: WHITELISTED_ATTRS,
+    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
+    // Avoid reparenting of some elements to document head e.g. <script>.
+    FORCE_BODY: true,
+    // Avoid need for serializing to/from string by returning Node directly.
+    RETURN_DOM: true,
+  }));
+  return /** @type {!DomPurifyConfig} */ (config);
+}
+
+/**
+ * Adds AMP hooks to given DOMPurify object.
+ * @param {!DomPurifyDef} purifier
+ * @param {boolean} diffing
+ */
+export function addPurifyHooks(purifier, diffing) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -247,6 +294,15 @@ export function purifyHtml(dirty) {
   // Reference to DOMPurify's `allowedAttributes` whitelist.
   let allowedAttributes;
   const allowedAttributesChanges = [];
+
+  // Disables DOM diffing for a given node and allows it to be replaced.
+  const disableDiffingFor = node => {
+    const key = 'i-amphtml-key';
+    if (diffing && !node.hasAttribute(key)) {
+      // set-dom uses node attribute keys for opting out of diffing.
+      node.setAttribute(key, KEY_COUNTER++);
+    }
+  };
 
   /**
    * @param {!Node} node
@@ -260,6 +316,8 @@ export function purifyHtml(dirty) {
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
+      // AMP elements don't support arbitrary mutation, so don't DOM diff them.
+      disableDiffingFor(node);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -344,17 +402,24 @@ export function purifyHtml(dirty) {
       }
     }
 
-    // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
+    const classicBinding = attrName[0] == '['
+        && attrName[attrName.length - 1] == ']';
+    const alternativeBinding = startsWith(attrName, BIND_PREFIX);
+    // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    const isBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    if (isBinding) {
+    if (classicBinding) {
       const property = attrName.substring(1, attrName.length - 1);
-      node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      node.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
+    }
+    if (classicBinding || alternativeBinding) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
+      // Don't DOM diff nodes with bindings because amp-bind scans newly
+      // rendered elements and discards _all_ old elements _before_ diffing, so
+      // preserving some old elements would cause loss of functionality.
+      disableDiffingFor(node);
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
@@ -386,25 +451,22 @@ export function purifyHtml(dirty) {
 
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
-    filterSplice(this.removed, r => {
+    remove(this.removed, r => {
       if (r.from === node && r.attribute) {
         const {name, value} = r.attribute;
         if (name.toLowerCase() === 'on') {
           node.setAttribute('on', value);
-          return false; // Delete from `removed` array once processed.
+          return true; // Delete from `removed` array once processed.
         }
       }
-      return true;
+      return false;
     });
   };
 
-  DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
-  DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
-  DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
-  DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const body = DOMPurify.sanitize(dirty, config);
-  DOMPurify.removeAllHooks();
-  return body;
+  purifier.addHook('uponSanitizeElement', uponSanitizeElement);
+  purifier.addHook('afterSanitizeElements', afterSanitizeElements);
+  purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
 }
 
 /**
@@ -419,7 +481,7 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
 
-  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+  DomPurify.addHook('uponSanitizeElement', (node, data) => {
     const {tagName} = data;
     allowedTags = data.allowedTags;
     if (tagName === 'template') {
@@ -429,7 +491,7 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
       }
     }
   });
-  DOMPurify.addHook('afterSanitizeElements', unusedNode => {
+  DomPurify.addHook('afterSanitizeElements', unusedNode => {
     // DOMPurify doesn't have an required-attribute tag whitelist API and
     // `allowedTags` has a per-invocation scope, so we need to remove
     // required-attribute tags after sanitizing each element.
@@ -439,12 +501,12 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // reparented to the head. So to support nested templates, we need
   // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
   // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
-  const fragment = DOMPurify.sanitize(html, {
+  const fragment = DomPurify.sanitize(html, {
     'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
     'FORCE_BODY': true,
     'RETURN_DOM_FRAGMENT': true,
   });
-  DOMPurify.removeAllHooks();
+  DomPurify.removeAllHooks();
   // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
   // namespaces for all elements and attributes.
   const div = doc.createElement('div');
@@ -454,8 +516,8 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
 
 /**
  * Whether the attribute/value is valid.
- * @param {string} tagName
- * @param {string} attrName
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
@@ -479,14 +541,18 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
     }
   }
 
-  // Inline styles are not allowed.
+  // Don't allow certain inline style values.
   if (attrName == 'style') {
     return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
   }
 
   // Don't allow CSS class names with internal AMP prefix.
-  // See https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
   if (attrName == 'class' && attrValue && /(^|\W)i-amphtml-/i.test(attrValue)) {
+    return false;
+  }
+
+  // Don't allow '__amp_source_origin' in URLs.
+  if (isUrlAttribute(attrName) && /__amp_source_origin/.test(attrValue)) {
     return false;
   }
 
@@ -558,20 +624,27 @@ export function rewriteAttributesForElement(
 /**
  * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
  * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
- * @see resolveUrlAttr for rewriting rules.
- * @param {string} tagName
- * @param {string} attrName
+ * See resolveUrlAttr() for rewriting rules.
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @private Visible for testing.
+ * @private
+ * @visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
-  const tag = tagName.toLowerCase();
-  const attr = attrName.toLowerCase();
-  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
-    return resolveUrlAttr(tag, attr, attrValue, self.location);
+  if (isUrlAttribute(attrName)) {
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
   return attrValue;
+}
+
+/**
+ * @param {string} attrName Lowercase attribute name.
+ * @return {boolean}
+ */
+function isUrlAttribute(attrName) {
+  return (attrName == 'src' || attrName == 'href' || attrName == 'srcset');
 }
 
 /**
@@ -581,12 +654,13 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
  * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
  *   again to be served with AMP Cache (cdn.ampproject.org).
  *
- * @param {string} tagName
- * @param {string} attrName
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @param {!Location} windowLocation
  * @return {string}
- * @private Visible for testing.
+ * @private
+ * @visibleForTesting
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);

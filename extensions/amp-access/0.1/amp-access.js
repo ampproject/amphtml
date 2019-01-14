@@ -21,7 +21,7 @@ import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {evaluateAccessExpr} from './access-expr';
 import {getSourceOrigin} from '../../../src/url';
@@ -193,8 +193,8 @@ export class AccessService {
       const contentArray = rawContent;
       for (let i = 0; i < contentArray['length']; i++) {
         const namespace = contentArray[i]['namespace'];
-        user().assert(!!namespace, 'Namespace required');
-        user().assert(!configMap[namespace],
+        userAssert(!!namespace, 'Namespace required');
+        userAssert(!configMap[namespace],
             'Namespace already used: ' + namespace);
         configMap[namespace] = contentArray[i];
       }
@@ -246,7 +246,7 @@ export class AccessService {
         }
       }
     }
-    user().assert(false,
+    userAssert(false,
         'Access vendor "%s" can only be used for "type=vendor", but none found',
         name);
     // Should not happen, just to appease type checking.
@@ -293,9 +293,8 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
-    // is migrated to ampdoc as well.
-    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
+    const actionService = Services.actionServiceForDoc(this.accessElement_);
+    actionService.installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     for (let i = 0; i < this.sources_.length; i++) {
@@ -659,6 +658,11 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_(invocation.method.substring('login-'.length));
+    } else if (invocation.method == 'refresh') {
+      if (invocation.event) {
+        invocation.event.preventDefault();
+      }
+      this.runAuthorization_();
     }
     return null;
   }
@@ -669,7 +673,7 @@ export class AccessService {
    * @return {!AccessSource}
    */
   getSource(index) {
-    user().assert(index >= 0 && index < this.sources_.length,
+    userAssert(index >= 0 && index < this.sources_.length,
         'Invalid index: %d', index);
     return this.sources_[index];
   }
@@ -696,7 +700,7 @@ export class AccessService {
     }
 
     // If there is only one source, process as standalone
-    user().assert(singleSource, 'Login must match namespace: %s', namespace);
+    userAssert(singleSource, 'Login must match namespace: %s', namespace);
     return this.sources_[0].loginWithType(type);
   }
 

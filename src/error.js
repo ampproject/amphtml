@@ -209,7 +209,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+    onError['call'](undefined, undefined, undefined, undefined,
         undefined, error);
   } catch (errorReportingError) {
     setTimeout(function() {
@@ -275,7 +275,7 @@ export function isBlockedByConsent(errorOrMessage) {
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = /** @type {!Function} */ (reportErrorToServer);
+  win.onerror = /** @type {!Function} */ (onError);
   win.addEventListener('unhandledrejection', event => {
     if (event.reason &&
       (event.reason.message === CANCELLED ||
@@ -296,7 +296,7 @@ export function installErrorReporting(win) {
  * @param {*|undefined} error
  * @this {!Window|undefined}
  */
-function reportErrorToServer(message, filename, line, col, error) {
+function onError(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
     makeBodyVisibleRecovery(this.document);
@@ -319,16 +319,28 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
-    reportingBackoff(() => {
+    reportingBackoff(() =>
+      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data)));
+  }
+}
+
+/**
+ * Passes the given error data to either server or viewer.
+ * @param {!Window} win
+ * @param {!JsonObject} data Data from `getErrorReportData`.
+ * @return {Promise<undefined>}
+ */
+export function reportErrorToServerOrViewer(win, data) {
+  // Report the error to viewer if it has the capability. The data passed
+  // to the viewer is exactly the same as the data passed to the server
+  // below.
+  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+    if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
-    });
-  }
+    }
+  });
 }
 
 /**
@@ -487,7 +499,17 @@ export function getErrorReportData(message, filename, line, col, error,
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
+
+  if (getMode().singlePassType) {
+    data['spt'] = getMode().singlePassType;
+  }
+
   data['rt'] = runtime;
+
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.
@@ -545,7 +567,10 @@ export function getErrorReportData(message, filename, line, col, error,
       data['s'] = error.stack;
     }
 
-    error.message += ' _reported_';
+    // TODO(jridgewell, #18574); Make sure error is always an object.
+    if (error.message) {
+      error.message += ' _reported_';
+    }
   } else {
     data['f'] = filename || '';
     data['l'] = line || '';
@@ -639,11 +664,14 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  if (isExperimentOn(win, 'user-error-reporting')) {
-    const vars = {
+  // Currently this can only be executed in a single-doc mode. Otherwise,
+  // it's not clear which ampdoc the event would belong too.
+  if (Services.ampdocServiceFor(win).isSingleDoc()
+      && isExperimentOn(win, 'user-error-reporting')) {
+    const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
-    };
+    });
     triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
   }
 }

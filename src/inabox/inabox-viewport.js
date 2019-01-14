@@ -19,7 +19,7 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {
@@ -165,9 +165,9 @@ export class ViewportBindingInabox {
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewportRect;
+          this.viewportRect_ = data['viewportRect'];
 
-          this.updateBoxRect_(data.targetRect);
+          this.updateBoxRect_(data['targetRect']);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
@@ -265,7 +265,7 @@ export class ViewportBindingInabox {
    * @visibleForTesting
    */
   getChildResources() {
-    return Services.resourcesForDoc(this.win.document).get();
+    return Services.resourcesForDoc(this.win.document.documentElement).get();
   }
 
   /** @private */
@@ -289,7 +289,7 @@ export class ViewportBindingInabox {
             MessageType.SEND_POSITIONS, MessageType.POSITION,
             data => {
               this.requestPositionPromise_ = null;
-              dev().assert(data.targetRect, 'Host should send targetRect');
+              devAssert(data.targetRect, 'Host should send targetRect');
               resolve(data.targetRect);
             }
         );
@@ -346,8 +346,8 @@ export class ViewportBindingInabox {
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
             unlisten();
-            if (response.success) {
-              this.updateBoxRect_(response.boxRect);
+            if (response['success']) {
+              this.updateBoxRect_(response['boxRect']);
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');
@@ -367,7 +367,7 @@ export class ViewportBindingInabox {
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           response => {
             unlisten();
-            this.updateBoxRect_(response.boxRect);
+            this.updateBoxRect_(response['boxRect']);
             resolve();
           });
     });
@@ -389,6 +389,7 @@ export class ViewportBindingInabox {
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
   /** @override */ getContentHeight() {return 0;}
+  /** @override */ contentHeightChanged() {}
   /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }

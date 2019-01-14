@@ -36,7 +36,7 @@ import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
 import {toggleExperiment} from '../../src/experiments';
 
-describe.configure().ifNewChrome().run('3p-frame', () => {
+describe.configure().ifChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -398,7 +398,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
   it('should pick default url if custom disabled', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
+    expect(getBootstrapBaseUrl(window, true, true)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
@@ -427,7 +427,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   it('should prefetch default bootstrap frame if custom disabled', () => {
     window.AMP_MODE = {localDev: true};
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    preloadBootstrap(window, preconnect, undefined, true);
+    preloadBootstrap(window, preconnect, true);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       expect(document.querySelectorAll('link[rel=preload]' +

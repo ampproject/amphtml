@@ -41,7 +41,7 @@ import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
-  user,
+  userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {parseJson} from '../src/json';
@@ -64,7 +64,6 @@ import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
-import {recaptcha} from './recaptcha';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 import {viqeoplayer} from './viqeoplayer';
@@ -106,12 +105,14 @@ import {adventive} from '../ads/adventive';
 import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
+import {adyoulike} from '../ads/adyoulike';
 import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
+import {baidu} from '../ads/baidu';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
@@ -141,6 +142,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
@@ -174,6 +176,7 @@ import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
+import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
@@ -182,6 +185,8 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
+import {onead} from '../ads/onead';
+import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
@@ -190,6 +195,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {pressboard} from '../ads/pressboard';
 import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
@@ -198,6 +204,7 @@ import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
 import {realclick} from '../ads/realclick';
+import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
@@ -244,6 +251,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {yieldpro} from '../ads/yieldpro';
 import {zedo} from '../ads/zedo';
+import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
@@ -271,6 +279,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   taboola: true,
+  zen: true,
   zergnet: true,
   runative: true,
 };
@@ -317,12 +326,14 @@ register('adventive', adventive);
 register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
+register('adyoulike', adyoulike);
 register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('baidu', baidu);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
 register('bodymovinanimation', bodymovinanimation);
@@ -356,6 +367,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
@@ -393,6 +405,7 @@ register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
+register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativo', nativo);
@@ -401,6 +414,8 @@ register('nend', nend);
 register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
+register('onead', onead);
+register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
@@ -409,6 +424,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('pressboard', pressboard);
 register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
@@ -417,8 +433,8 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('realclick', realclick);
-register('recaptcha', recaptcha);
 register('reddit', reddit);
+register('recomad', recomad);
 register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
@@ -468,12 +484,12 @@ register('yieldone', yieldone);
 register('yieldpro', yieldpro);
 register('yotpo', yotpo);
 register('zedo', zedo);
+register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
-// TODO(@torch2424) Remove this in follow up PR.
 const defaultAllowedTypesInCustomFrame = [
   // Entries must be reasonably safe and not allow overriding the injected
   // JS URL.
@@ -481,7 +497,6 @@ const defaultAllowedTypesInCustomFrame = [
   // draw3p. See amp-ad docs.
   'facebook',
   'twitter',
-  'recaptcha',
   'doubleclick',
   'yieldbot',
   '_ping_',
@@ -519,11 +534,11 @@ function init(win) {
 export function draw3p(win, data, configCallback) {
   const type = data['type'];
 
-  user().assert(isTagNameAllowed(type, win.context.tagName),
+  userAssert(isTagNameAllowed(type, win.context.tagName),
       'Embed type %s not allowed with tag %s', type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user().assert(data,
+      userAssert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -601,7 +616,7 @@ export function validateParentOrigin(window, parentLocation) {
   if (!ancestors || !ancestors.length) {
     return;
   }
-  user().assert(ancestors[0] == parentLocation.origin,
+  userAssert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
 }
@@ -629,8 +644,8 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
-      'Non-whitelisted 3p type for custom iframe: ' + type);
+  userAssert(allowedTypes && allowedTypes.indexOf(type) != -1,
+      'Non-whitelisted 3p type for custom iframe: %s', type);
 }
 
 /**

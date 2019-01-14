@@ -18,6 +18,7 @@ goog.provide('amp.validator.ValidatorTest');
 
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.HtmlFormat');
+goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
@@ -162,6 +163,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   if (this.ampHtmlFile.indexOf('amp4email_feature_tests/') != -1 ||
       this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
     this.htmlFormat = 'AMP4EMAIL';
+  }
+  if (this.ampHtmlFile.indexOf('actions_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-actions-') != -1) {
+    this.htmlFormat = 'ACTIONS';
   }
   /**
    * If set to false, output will be generated without inlining the input
@@ -619,9 +624,10 @@ describe('CssLength', () => {
 /**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
+ * @param {!amp.validator.TagSpec} tagSpec
  * @param {!amp.validator.ValidatorRules} rules
  */
-function attrRuleShouldMakeSense(attrSpec, rules) {
+function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   // name
   it('attr_spec name defined', () => {
     expect(attrSpec.name).toBeDefined();
@@ -646,8 +652,9 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       }
     });
     // If protocol is http then allow_relative should not be false
-    // except for `data-` attributes.
-    if (!attrSpec.name.startsWith('data-')) {
+    // except for `data-` attributes and email spec.
+    if (!attrSpec.name.startsWith('data-') &&
+        !tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
       for (const protocol of attrSpec.valueUrl.protocol) {
         if ((protocol === 'http') &&
             (attrSpec.valueUrl.allowRelative !== null)) {
@@ -828,6 +835,7 @@ describe('ValidatorRulesMakeSense', () => {
 
   // tag_specs
   const specNameIsUnique = {};
+  const namedIdIsUnique = {};
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
@@ -867,6 +875,13 @@ describe('ValidatorRulesMakeSense', () => {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
+      }
+    });
+    it('unique named_id if present', () => {
+      if (tagSpec.namedId !== null &&
+          tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {
+        expect(namedIdIsUnique.hasOwnProperty(tagSpec.namedId)).toBe(false);
+        namedIdIsUnique[tagSpec.namedId] = 0;
       }
     });
     // Verify AMP4ADS extensions are whitelisted.
@@ -1081,6 +1096,11 @@ describe('ValidatorRulesMakeSense', () => {
               expect(atRuleSpecRegex.test(atRuleSpec.name)).toBe(true);
             });
           }
+          if (atRuleSpec.mediaQuerySpec !== null) {
+            it('only media atrule contains mediaQuerySpec', () => {
+              expect(atRuleSpec.name === 'media');
+            });
+          }
           it('unique at_rule_spec name', () => {
             expect(atRuleSpecNameIsUnique.hasOwnProperty(atRuleSpec.name))
                 .toBe(false);
@@ -1112,10 +1132,11 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // We want to be certain not to allow SCRIPT tagspecs which don't either
-      // define a src attribute OR define a JSON type.
+      // define a src attribute OR define a JSON or TEXT/PLAIN type.
       if (tagSpec.tagName === 'SCRIPT') {
         let hasSrc = false;
         let hasJson = false;
+        let hasTextPlain = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
@@ -1128,11 +1149,15 @@ describe('ValidatorRulesMakeSense', () => {
                   value === 'application/json') {
                 hasJson = true;
               }
+              if (value == 'text/plain') {
+                hasTextPlain = true;
+              }
             }
           }
         }
-        it('script tags must be json or src', () => {
-          expect(hasSrc || hasJson).toBe(true);
+        it('script tags must have either a src attribute or type json or '
+           + 'text/plain', () => {
+          expect(hasSrc || hasJson || hasTextPlain).toBe(true);
         });
       }
       // cdata_regex and mandatory_cdata
@@ -1157,6 +1182,12 @@ describe('ValidatorRulesMakeSense', () => {
         }
       });
     }
+    // attr_specs within each tag_spec within rules.
+    for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) { continue; }
+      const attrSpec = rules.attrs[attrSpecId];
+      attrRuleShouldMakeSense(attrSpec, tagSpec, rules);
+    }
   }
 
   // satisfies needs to match up with requires and excludes
@@ -1179,11 +1210,6 @@ describe('ValidatorRulesMakeSense', () => {
     expect(subtractDiff(allSatisfies, allRequiresAndExcludes)).toEqual([]);
     expect(subtractDiff(allRequiresAndExcludes, allSatisfies)).toEqual([]);
   });
-
-  // attr_specs within rules.
-  for (const attrSpec of rules.attrs) {
-    attrRuleShouldMakeSense(attrSpec, rules);
-  }
 
   // Verify that for every error code in our enum, we have exactly one format
   // and specificity value in the rules.

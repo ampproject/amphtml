@@ -51,7 +51,7 @@ describe.configure().run('amp-image-lightbox', function() {
 
     it('should activate on tap of source image', () => {
       const lightbox = win.document.getElementById('image-lightbox-1');
-      expect(lightbox.style.display).to.equal('none');
+      expect(lightbox).to.have.display('none');
       const ampImage = win.document.getElementById('img0');
       const imageLoadedPromise = waitForImageToLoad(ampImage);
       return imageLoadedPromise.then(() => {
@@ -76,7 +76,7 @@ describe.configure().run('amp-image-lightbox', function() {
 function waitForLightboxOpen(document) {
   return poll('wait for image-lightbox-1 to open', () => {
     const lightbox = document.getElementById('image-lightbox-1');
-    return lightbox.style.display == '';
+    return getComputedStyle(lightbox).display != 'none';
   });
 }
 

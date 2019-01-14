@@ -1,0 +1,99 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>Input masking examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-inputmask" src="https://cdn.ampproject.org/v0/amp-inputmask-0.1.js"></script>
+    <style amp-custom>
+    [contenteditable],
+    input[type=tel],
+    input[type=search],
+    input[type=text] {
+      padding: 5px;
+      font-size: 16px;
+      border: 1px solid lightgray;
+    }
+
+    [contenteditable]:focus,
+    input[type=tel]:focus,
+    input[type=search]:focus,
+    input[type=text]:focus {
+      border-bottom: 2px solid blue;
+    }
+    </style>
+</head>
+<body>
+  <h1>Input Masking</h1>
+
+  <!-- TODO(cvializ) -->
+  <!--
+  <h2>Named Masks</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <p>Plain text</p>
+    <input name="text">
+
+    <p>Single character</p>
+    <input name="char" mask="L">
+
+    <p>Email</p>
+    <input name="email" mask="email" placeholder="alice@example.com" type="search">
+
+    <p>US and Canada Phone</p>
+    <input name="phone" mask="phone-us" placeholder="+1(555) 555-5555" type="tel"></div>
+
+    <p>International Phone</p>
+    <input name="phone-intl" mask="phone" placeholder="+1(555) 555-5555" type="tel">
+
+
+    <p>mm/dd/yyyy</p>
+    <input name="date-us" mask="date-us" placeholder="mm/dd/yyyy" type="tel">
+    <p>dd/mm/yyyy</p>
+    <input name="date-intl" mask="date-intl" placeholder="dd/mm/yyyy" type="tel">
+    <p>yyyy-mm-dd</p>
+    <input name="date-iso" mask="date-iso" placeholder="yyyy-mm-dd" type="tel">
+
+    <input type="submit">
+  </form>
+  -->
+  <h2>Custom Masks</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <p>Phone</p>
+    <input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+
+    <p>US Postal Code</p>
+    <input mask="00000 00000-0000" placeholder="10024" type="text">
+
+    <p>Canadian Postal Code</p>
+    <input mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+
+    <p>15 or 16 digit Credit Card (switches on length)</p>
+    <input mask="0000_000000_00000 0000_0000_0000_0000 " placeholder="0000 0000 0000 0000" type="text">
+
+    <p>15 or 16 digit Credit Card (switches on 37 or 34)</p>
+    <input mask="3400_000000_00000 3700_000000_00000 0000_0000_0000_0000" type="text">
+
+    <input type="submit">
+  </form>
+
+  <!-- TODO(cvializ) -->
+  <!-- <h2>Unusual input types</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+
+    <p>phone (textarea)</p>
+    <textarea mask="+1_(000)_000-0000" placeholder="+1(555) 555-5555"></textarea>
+
+    <input type="submit">
+  </form> -->
+</body>
+</html>

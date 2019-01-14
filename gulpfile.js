@@ -42,6 +42,7 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {thirdPartyFrames} = require('./build-system/config');
 const {transpileTs} = require('./build-system/typescript');
 const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
@@ -65,10 +66,18 @@ const adVendors = [];
 
 const {green, red, cyan} = colors;
 
+// Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
-const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
+const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
+const minifiedAdsTarget = 'dist/amp4ads-v0.js';
+// TODO(#18934, erwinm): temporary fix.
+//const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
+
+// Unminified targets to which AMP_CONFIG must be written.
 const unminifiedRuntimeTarget = 'dist/amp.js';
+const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
+const unminifiedAdsTarget = 'dist/amp-inabox.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
@@ -110,6 +119,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
@@ -365,6 +375,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           include3pDirectories: true,
           includePolyfills: false,
         }),
+    compileJs('./3p/', 'recaptcha.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+          minifiedName: 'recaptcha.js',
+          checkTypes: opt_checkTypes,
+          watch,
+          minify: shouldMinify,
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          externs: [],
+          include3pDirectories: true,
+          includePolyfills: true,
+        }),
     compileJs('./src/', 'amp.js', './dist', {
       toName: 'amp.js',
       minifiedName: 'v0.js',
@@ -375,6 +396,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
       singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -389,6 +411,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
+  // TODO(#18934, erwinm): temporarily commented out to unblock master builds.
+  // theres a race condition between the read to amp.js here, and on the
+  // main v0.js compile above.
+  /**
   if (!argv.single_pass) {
     promises.push(
         compileJs('./src/', 'amp.js', './dist', {
@@ -402,7 +428,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
           wrapper: wrappers.mainBinary,
         }));
-  }
+  }*/
 
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
@@ -476,21 +502,19 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           }));
     }
 
-    promises.push(
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify),
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
-    );
+    thirdPartyFrames.forEach(frameObject => {
+      promises.push(
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify)
+      );
+    });
 
     if (watch) {
-      $$.watch('3p/nameframe.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html', shouldMinify);
-      });
-      $$.watch('3p/frame.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify);
+      thirdPartyFrames.forEach(frameObject => {
+        $$.watch(frameObject.max, function() {
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify);
+        });
       });
     }
 
@@ -512,11 +536,6 @@ const cssEntryPoints = [
     path: 'amp.css',
     outJs: 'css.js',
     outCss: 'v0.css',
-  },
-  {
-    path: 'video-docking.css',
-    outJs: 'video-docking.css.js',
-    outCss: 'video-docking.css',
   },
   {
     path: 'video-autoplay.css',
@@ -737,7 +756,16 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : wrappers.extension(name, options.loadPriority),
-  }));
+  })).then(() => {
+    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    if (name === 'amp-script') {
+      // TODO(choumx): Compile this when worker-dom externs are available.
+      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const file = `dist/v0/amp-script-worker-${version}`;
+      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
+      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
+    }
+  });
 }
 
 /**
@@ -848,7 +876,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 
@@ -945,16 +974,31 @@ function dist() {
         return copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget).then(() => {
+          return Promise.all([
+            enableLocalTesting(minifiedRuntimeTarget),
+            enableLocalTesting(minifiedAdsTarget),
+            enableLocalTesting(minifiedShadowRuntimeTarget),
+          ]).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget);
+              // TODO(#18934, erwinm): temporary fix.
+              //return enableLocalTesting(minifiedRuntimeEsmTarget)
+              return enableLocalTesting(minifiedShadowRuntimeTarget)
+                  .then(() => {
+                    return enableLocalTesting(minifiedAdsTarget);
+                  });
             }
           });
         }
       }).then(() => {
-        return createModuleCompatibleES5Bundle('v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
+        if (argv.esm) {
+          return Promise.all([
+            createModuleCompatibleES5Bundle('v0.js'),
+            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+            createModuleCompatibleES5Bundle('shadow-v0.js'),
+          ]);
+        } else {
+          return Promise.resolve();
+        }
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
@@ -1123,6 +1167,19 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
+  } else if (srcFilename == 'amp-date-picker.js') {
+    // For amp-date-picker, we inject the react-dates bundle after compile
+    // to avoid CC from messing with browserify's module boilerplate.
+    const file = fs.readFileSync(destFilePath, 'utf8');
+    const firstLineBreak = file.indexOf('\n');
+    const wrapperOpen = file.substr(0, firstLineBreak + 1);
+    const reactDates = fs.readFileSync(
+        'third_party/react-dates/bundle.js', 'utf8');
+    // Inject the bundle inside the standard AMP wrapper (after the first line).
+    const newSource = [
+      wrapperOpen, reactDates, file.substr(firstLineBreak + 1),
+    ].join('\n');
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
 }
 
@@ -1188,16 +1245,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babelify, {
-        compact: false,
-        presets: [
-          ['env', {
-            targets: {
-              browsers: ['last 2 versions', 'safari >= 9'],
-            },
-          }],
-        ],
-      })
+      .transform(babelify)
       .once('transform', () => {
         endBuildStep('Transformed', srcFilename, startTime);
       });
@@ -1209,13 +1257,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   // We don't need an explicit function wrapper like we do for `gulp dist`
   // because Babel handles that for you.
   const wrapper = options.wrapper || wrappers.none;
+  const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
+      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true})
       .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe($$.wrap, wrapper)
-      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
+      .pipe($$.regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
 
   const lazywrite = lazypipe()
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
@@ -1223,8 +1272,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const destFilename = options.toName || srcFilename;
   /**
-   * Rebundle-javascript
-   *
    * @param {boolean} failOnError
    * @return {Promise}
    */
@@ -1276,8 +1323,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               return enableLocalTesting(unminifiedRuntimeTarget);
             } else if (destFilename === 'amp-esm.js') {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'amp4ads-v0.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
+            } else if (destFilename === 'amp-shadow.js') {
+              return enableLocalTesting(unminifiedShadowRuntimeTarget);
+            } else if (destFilename === 'amp-inabox.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else {
               return Promise.resolve();
             }
@@ -1676,6 +1729,7 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         extensions_from: '  Watches and builds only the extensions from the ' +
             'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
+        disable_dev_dashboard_cache: 'Disables the dev dashboard cache',
       },
     });
 gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
@@ -1688,6 +1742,8 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     extensions: '  Builds only the listed extensions.',
     extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
+    single_pass_dest: '  The directory closure compiler will write out to ' +
+            'with --single_pass mode. The default directory is `dist`',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',

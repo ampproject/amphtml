@@ -24,7 +24,7 @@ import {
 import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
-  dev,
+  dev, devAssert,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -397,20 +397,21 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  */
 export function adopt(global) {
   return adoptShared(global, global => {
+    const {documentElement} = global.document;
+
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
 
-    const viewer = Services.viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(documentElement);
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = Services.resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(documentElement);
     }
 
-    const viewport = Services.viewportForDoc(global.document);
-
+    const viewport = Services.viewportForDoc(documentElement);
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
@@ -530,7 +531,7 @@ export class MultidocManager {
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    amp.setVisibilityState = function(state) {
+    amp['setVisibilityState'] = function(state) {
       setViewerVisibilityState(viewer, state);
     };
 
@@ -542,7 +543,7 @@ export class MultidocManager {
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
-    amp.postMessage = viewer.receiveMessage.bind(viewer);
+    amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
     /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
     let onMessage;
@@ -552,7 +553,7 @@ export class MultidocManager {
      * messages to the viewer.
      * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp.onMessage = function(callback) {
+    amp['onMessage'] = function(callback) {
       onMessage = callback;
     };
 
@@ -572,7 +573,7 @@ export class MultidocManager {
     /**
      * Closes the document. The document can no longer be activated again.
      */
-    amp.close = () => {
+    amp['close'] = () => {
       this.closeShadowRoot_(shadowRoot);
     };
 
@@ -656,7 +657,7 @@ export class MultidocManager {
           // Start streaming.
           let renderStarted = false;
           const writer = createShadowDomWriter(this.win);
-          amp.writer = writer;
+          amp['writer'] = writer;
           writer.onBody(doc => {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
@@ -929,7 +930,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
       `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
-  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+  devAssert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
   if (!scriptInHead) {
     return false;

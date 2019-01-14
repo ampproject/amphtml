@@ -18,12 +18,12 @@
 import {
   ExpansionOptions,
   VariableService,
+  encodeVars,
   getNameArgsForTesting,
   installVariableService,
   variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-analytics.VariableService', function() {
   let variables;
@@ -34,15 +34,15 @@ describe('amp-analytics.VariableService', function() {
 
   describe('encodeVars', () => {
     it('correctly encodes scalars and arrays', () => {
-      expect(variables.encodeVars('v', 'abc %&')).to.equal('abc%20%25%26');
-      expect(variables.encodeVars('v', 'SOME_MACRO(abc,123)'))
+      expect(encodeVars('abc %&')).to.equal('abc%20%25%26');
+      expect(encodeVars('SOME_MACRO(abc,123)'))
           .to.equal('SOME_MACRO(abc,123)');
 
       const array = ['abc %&', 'a b'];
-      expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
+      expect(encodeVars(array)).to.equal('abc%20%25%26,a%20b');
       // Test non-inplace semantics by testing again.
-      expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
-      expect(variables.encodeVars('v', ['12.3', 'SOME_MACRO(abc,123)', 'ab/c']))
+      expect(encodeVars(array)).to.equal('abc%20%25%26,a%20b');
+      expect(encodeVars(['12.3', 'SOME_MACRO(abc,123)', 'ab/c']))
           .to.equal('12.3,SOME_MACRO(abc,123),ab%2Fc');
     });
   });
@@ -162,20 +162,14 @@ describe('amp-analytics.VariableService', function() {
 
   describes.fakeWin('macros', {amp: true}, env => {
     let win;
-    let ampdoc;
     let urlReplacementService;
 
     beforeEach(() => {
-      ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(env.win, 'url-replacement-v2', true);
       installVariableService(win);
       variables = variableServiceFor(win);
-      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
-    });
-
-    afterEach(() => {
-      toggleExperiment(env.win, 'url-replacement-v2');
+      const {documentElement} = win.document;
+      urlReplacementService = Services.urlReplacementsForDoc(documentElement);
     });
 
     function check(input, output) {

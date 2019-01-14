@@ -16,7 +16,7 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {fetchDocument} from '../../../src/document-fetcher';
@@ -163,7 +163,7 @@ export class AccessServerAdapter {
           }));
     }).then(responseDoc => {
       dev().fine(TAG, 'Authorization response: ', responseDoc);
-      const accessDataString = dev().assert(
+      const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
       const accessData = parseJson(accessDataString);

@@ -34,9 +34,9 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getData, loadPromise} from '../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -106,7 +106,7 @@ export class AmpAdXOriginIframeHandler {
    * @return {!Promise} awaiting render complete promise
    */
   init(iframe, opt_isA4A) {
-    dev().assert(
+    devAssert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
@@ -181,14 +181,15 @@ export class AmpAdXOriginIframeHandler {
         }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
-    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
-      // Wait just a little to allow `no-content` message to arrive.
-      if (this.iframe) {
-        // Chrome does not reflect the iframe readystate.
-        this.iframe.readyState = 'complete';
-      }
-      return timer.promise(10);
-    });
+    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe)
+        .then(() => {
+          // Wait just a little to allow `no-content` message to arrive.
+          if (this.iframe) {
+            // Chrome does not reflect the iframe readystate.
+            this.iframe.readyState = 'complete';
+          }
+          return timer.promise(10);
+        });
 
     // Calculate render-start and no-content signals.
     const {
@@ -438,7 +439,7 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
-      dev().assert(position,
+      devAssert(position,
           'element clientRect should intersects with root clientRect');
       const viewport = this.viewport_.getRect();
       return dict({

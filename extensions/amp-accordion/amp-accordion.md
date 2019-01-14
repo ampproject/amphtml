@@ -92,7 +92,7 @@ This action collapses an `amp-accordion`. If it is already collapsed, it will st
 
 ##### `animate`
 
-Set this attribute on the `<amp-accordion>` to allow for expand/collapse to animate.
+Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
 
 ##### `disable-session-states`
 
@@ -105,9 +105,6 @@ Set this attribute on a `<section>` to display the section as expanded on page l
 #####  `expand-single-section`
 
 Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
-
-##### `animate`
-Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
 
 ## Styling
 

@@ -22,12 +22,12 @@ import {
   ScrollableShareWidget,
 } from './amp-story-share';
 import {EventType, dispatch} from './events';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
@@ -360,7 +360,7 @@ export class Bookend {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == Keys.ESCAPE) {
         event.preventDefault();
         this.close_();
       }
@@ -513,8 +513,7 @@ export class Bookend {
     }
 
     if (target.hasAttribute('on')) {
-      const ampdoc = getAmpdoc(this.parentEl_);
-      const actionService = Services.actionServiceForDoc(ampdoc);
+      const actionService = Services.actionServiceForDoc(this.parentEl_);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }
@@ -586,7 +585,7 @@ export class Bookend {
 
   /** @private */
   assertBuilt_() {
-    dev().assert(this.isBuilt(), 'Bookend component needs to be built.');
+    devAssert(this.isBuilt(), 'Bookend component needs to be built.');
   }
 
   /**
@@ -670,7 +669,7 @@ export class Bookend {
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
-      user().assert(isProtocolValid(jsonLd['image']),
+      userAssert(isProtocolValid(jsonLd['image']),
           `Unsupported protocol for story image URL ${jsonLd['image']}`);
       metadata.imageUrl = jsonLd['image'][0];
     }

@@ -171,7 +171,13 @@ export class PolyfillDefaultValidator extends FormValidator {
   }
 
   /** @override */
-  onBlur(unusedEvent) {
+  onBlur(e) {
+    // NOTE: IE11 focuses the submit button after submitting a form.
+    // Then amp-form focuses the first field with an error, which causes the
+    // submit button to blur. So we need to disregard the submit button blur.
+    if (e.target.type == 'submit') {
+      return;
+    }
     this.validationBubble_.hide();
   }
 
@@ -468,10 +474,16 @@ export function isCheckValiditySupported(doc) {
  * @return {?string}
  */
 function getInvalidType(input) {
+  // 'badInput' takes precedence over others.
+  const validityTypes = ['badInput'];
   for (const invalidType in input.validity) {
-    if (input.validity[invalidType]) {
-      return invalidType;
+    // add other types after
+    if (!validityTypes.includes(invalidType)) {
+      validityTypes.push(invalidType);
     }
   }
-  return null;
+  // Finding error type with value true
+  const response = validityTypes.filter(type =>
+    input.validity[type] === true);
+  return response.length ? response[0] : null;
 }

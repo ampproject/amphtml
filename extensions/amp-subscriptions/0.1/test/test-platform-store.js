@@ -79,22 +79,6 @@ describes.realWin('Platform store', {}, () => {
     return expect(p).to.eventually.equal(ent);
   });
 
-  it('should reset entitlement', () => {
-    // Request entitlement promise even before it's resolved.
-    const p = platformStore.getEntitlementPromiseFor('service2');
-
-    // Resolve once.
-    platformStore.resolveEntitlement('service2', new Entitlement({
-      service: 'service2',
-      granted: false,
-    }));
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
-
-    // Reset: new entitlement promise.
-    platformStore.resetEntitlementFor('service2');
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.not.equal(p);
-  });
-
   it('should call onChange callbacks on every resolve', () => {
     const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
         'fire');
@@ -398,7 +382,58 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
-  describe('reportPlatformFailure_', () => {
+  describe('selectPlatformForLogin', () => {
+    let localPlatform, localFactors;
+    let anotherPlatform, anotherFactors;
+
+    beforeEach(() => {
+      localFactors = {};
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      // Base score does not matter.
+      sandbox.stub(localPlatform, 'getBaseScore')
+          .callsFake(() => 10000);
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => localFactors[factor]);
+      anotherFactors = {};
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 0);
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => anotherFactors[factor]);
+      // Local is ordered last in this case intentionally.
+      platformStore.resolvePlatform('another', anotherPlatform);
+      platformStore.resolvePlatform('local', localPlatform);
+    });
+
+    it('should chose local platform by default', () => {
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(localPlatform);
+    });
+
+    it('should chose platform based on the viewer factor', () => {
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(anotherPlatform);
+    });
+
+    it('should tie-break to local', () => {
+      localFactors['supportsViewer'] = 1;
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(localPlatform);
+    });
+
+    it('should rank factors as numbers', () => {
+      localFactors['supportsViewer'] = 0.99999;
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(anotherPlatform);
+    });
+  });
+
+  describe('reportPlatformFailureAndFallback', () => {
     let errorSpy;
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
@@ -408,11 +443,57 @@ describes.realWin('Platform store', {}, () => {
       const platform = new SubscriptionPlatform();
       sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
       sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
-      platformStore.reportPlatformFailure('service1');
-      platformStore.reportPlatformFailure('local');
+      platformStore.reportPlatformFailureAndFallback('service1');
+      expect(errorSpy).to.not.be.called;
+      platformStore.reportPlatformFailureAndFallback('local');
       expect(errorSpy).to.be.calledOnce;
       expect(platformStore.entitlements_['local'].json())
           .to.deep.equal(fallbackEntitlement.json());
+    });
+
+    it('should not interfere with selectPlatform flow if using fallback, '
+      + 'when reason is SUBSCRIBER', () => {
+      const platform = new SubscriptionPlatform();
+      const anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(
+          () => serviceIds[0]);
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 10);
+      platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+      platformStore.resolvePlatform('local', platform);
+      platformStore.reportPlatformFailureAndFallback('local');
+      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      return platformStore.selectPlatform().then(platform => {
+        expect(platformStore.entitlements_['local']).deep.equals(
+            fallbackEntitlement);
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(platform.getServiceId()).to.equal('local');
+      });
+    });
+
+    it('should not interfere with selectPlatform flow if using fallback, '
+      + 'when reason is not SUBSCRIBER', () => {
+      const platform = new SubscriptionPlatform();
+      const anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(
+          () => serviceIds[0]);
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 10);
+      platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+      platformStore.resolvePlatform('local', platform);
+      fallbackEntitlement.grantReason = GrantReason.METERING;
+      platformStore.reportPlatformFailureAndFallback('local');
+      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      return platformStore.selectPlatform().then(platform => {
+        expect(platformStore.entitlements_['local']).deep.equals(
+            fallbackEntitlement);
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(platform.getServiceId()).to.equal(serviceIds[0]);
+      });
     });
   });
 
@@ -427,55 +508,60 @@ describes.realWin('Platform store', {}, () => {
   });
 
   describe('getGrantEntitlement', () => {
-    const subscribedMeteredEntitlement = new Entitlement({
+    const subscribedEntitlement = new Entitlement({
       source: 'local',
       service: 'local',
       granted: true,
       grantReason: GrantReason.SUBSCRIBER,
     });
+    const meteringEntitlement = new Entitlement({
+      source: 'local',
+      service: 'local',
+      granted: true,
+      grantReason: GrantReason.METERING,
+    });
+    const noEntitlement = new Entitlement({
+      source: 'local',
+      service: 'local',
+      granted: false,
+    });
+
     it('should resolve with existing entitlement with subscriptions', () => {
-      platformStore.grantStatusEntitlement_ = subscribedMeteredEntitlement;
+      platformStore.grantStatusEntitlement_ = subscribedEntitlement;
       return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement.json()).to.deep.equal(
-            subscribedMeteredEntitlement.json());
+        expect(entitlement).to.equal(subscribedEntitlement);
       });
     });
 
     it('should resolve with first entitlement with subscriptions', () => {
-      const meteringEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        granted: true,
-        data: {
-          metering: {
-            'left': 5,
-            'total': 10,
-            'token': 'token',
-          },
-        },
-      });
-      platformStore.grantStatusEntitlement_ = meteringEntitlement;
-      platformStore.saveGrantEntitlement_(subscribedMeteredEntitlement);
+      platformStore.resolveEntitlement('service1', subscribedEntitlement);
       return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement.json()).to.deep.equal(
-            subscribedMeteredEntitlement.json());
+        expect(entitlement).to.equal(subscribedEntitlement);
       });
     });
 
     it('should resolve with metered entitlement when no '
         + 'platform is subscribed', () => {
-      const meteringEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        granted: true,
-        grantReason: GrantReason.METERING,
-      });
-      sandbox.stub(platformStore, 'areAllPlatformsResolved_')
-          .callsFake(() => true);
-      platformStore.saveGrantEntitlement_(meteringEntitlement);
+      platformStore.resolveEntitlement('service1', noEntitlement);
+      platformStore.resolveEntitlement('service2', meteringEntitlement);
       return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement.json()).to.deep.equal(
-            meteringEntitlement.json());
+        expect(entitlement).to.equal(meteringEntitlement);
+      });
+    });
+
+    it('should override metering with subscription', () => {
+      platformStore.resolveEntitlement('service1', meteringEntitlement);
+      platformStore.resolveEntitlement('service2', subscribedEntitlement);
+      return platformStore.getGrantEntitlement().then(entitlement => {
+        expect(entitlement).to.equal(subscribedEntitlement);
+      });
+    });
+
+    it('should resolve to null if nothing matched', () => {
+      platformStore.resolveEntitlement('service1', noEntitlement);
+      platformStore.resolveEntitlement('service2', noEntitlement);
+      return platformStore.getGrantEntitlement().then(entitlement => {
+        expect(entitlement).to.be.null;
       });
     });
   });

@@ -15,7 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -115,22 +115,6 @@ function generateFunctionWhitelist() {
     return sort;
   }
 
-  /**
-   * Polyfills Object.values for IE.
-   * @param {!Object} object
-   * @return {!Array}
-   * @see https://github.com/es-shims/Object.values
-   */
-  function values(object) {
-    const v = [];
-    for (const key in object) {
-      if (hasOwn(object, key)) {
-        v.push(object[key]);
-      }
-    }
-    return v;
-  }
-
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': {
@@ -181,7 +165,8 @@ function generateFunctionWhitelist() {
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
-    'keys': Object.keys, // Object.values is polyfilled below.
+    'keys': Object.keys,
+    'values': Object.values,
   };
 
   // Creates a map of function name to the function itself.
@@ -194,7 +179,7 @@ function generateFunctionWhitelist() {
     Object.keys(functionsForType).forEach(name => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
+        devAssert(!func.name || name === func.name, 'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`);
         out[type][name] = func;
       } else {
@@ -209,8 +194,6 @@ function generateFunctionWhitelist() {
   out[CUSTOM_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
   out[CUSTOM_FUNCTIONS]['sort'] = sort; // Deprecated.
   out[CUSTOM_FUNCTIONS]['splice'] = splice; // Deprecated.
-  out[CUSTOM_FUNCTIONS]['values'] =
-      (typeof Object.values == 'function') ? Object.values : values;
 
   return out;
 }
@@ -428,9 +411,7 @@ export class BindExpression {
         if (memberType !== 'string' && memberType !== 'number') {
           return null;
         }
-        // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object} */ (target), member)) {
+        if (hasOwn(target, String(member))) {
           return target[member];
         }
         return null;
@@ -440,7 +421,7 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (Object.prototype.hasOwnProperty.call(scope, variable)) {
+        if (hasOwn(scope, String(variable))) {
           return scope[variable];
         }
         return null;

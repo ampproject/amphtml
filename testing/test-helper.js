@@ -135,37 +135,132 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-/////////////////
-// Request Bank
-// A server side temporary request storage which is useful for testing
-// browser sent HTTP requests.
-/////////////////
+// Use a browserId to avoid cross-browser race conditions
+// when testing in Saucelabs.
+/** @const {string} */
+const browserId = (Date.now() + Math.random()).toString(32);
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/' + browserId;
 
 /**
- * Append user agent to request-bank deposit/withdraw IDs to avoid
- * cross-browser race conditions when testing in Saucelabs.
- * @const {string}
+ * A server side temporary request storage which is useful for testing
+ * browser sent HTTP requests.
  */
-const userAgent = encodeURIComponent(window.navigator.userAgent);
+export class RequestBank {
 
-export function depositRequestUrl(id) {
-  return `${REQUEST_URL}deposit/${id}-${userAgent}`;
+  static getBrowserId() {
+    return browserId;
+  }
+
+  /**
+   * Returns the URL for depositing a request.
+   *
+   * @param {number|string|undefined} requestId
+   * @returns {string}
+   */
+  static getUrl(requestId) {
+    return `${REQUEST_URL}/deposit/${requestId}/`;
+  }
+
+  /**
+   * Returns a Promise that resolves when the request of given ID is deposited.
+   * The returned promise resolves to an JsonObject contains the request info:
+   * {
+   *   url: string
+   *   headers: JsonObject
+   *   body: string
+   * }
+   * @param {number|string|undefined} requestId
+   * @returns {Promise<JsonObject>}
+   */
+  static withdraw(requestId) {
+    const url = `${REQUEST_URL}/withdraw/${requestId}/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    }).then(res => res.json());
+  }
+
+  static tearDown() {
+    const url = `${REQUEST_URL}/teardown/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    });
+  }
 }
 
-export function withdrawRequest(win, id) {
-  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
-  return xhrServiceForTesting(win).fetchJson(url, {
-    method: 'GET',
-    ampCors: false,
-    credentials: 'omit',
-  }).then(res => res.json());
+export class BrowserController {
+  constructor(win) {
+    this.win_ = win;
+    this.doc_ = this.win_.document;
+  }
+
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementBuild(selector, timeout = 5000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to build`,
+        () => {
+          const someNotBuilt = [].some.call(elements,
+              e => e.classList.contains('i-amphtml-notbuilt'));
+          return !someNotBuilt;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementLayout(selector, timeout = 10000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to layout`,
+        () => {
+          // AMP elements set `readyState` to complete when their
+          // layoutCallback() promise is resolved.
+          const someNotReady = [].some.call(elements,
+              e => e.readyState !== 'complete');
+          return !someNotReady;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  click(selector) {
+    const element = this.doc_.querySelector(selector);
+    if (element) {
+      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
+    }
+  }
+
+  scrollTo(px) {
+    this.win_.scrollTo(0, px);
+  }
 }
 
 export function createPointerEvent(type, x, y) {
-  const event = new /*OK*/CustomEvent(type);
+  const event = new /*OK*/CustomEvent(type, {bubbles: true});
   event.clientX = x;
   event.clientY = y;
   event.pageX = x;
@@ -177,4 +272,38 @@ export function createPointerEvent(type, x, y) {
     pageY: y,
   }];
   return event;
+}
+
+export class ImagePixelVerifier {
+  constructor(windowInterface) {
+    this.imagePixels_ = [];
+    const FakeImage = () => {
+      const pixel = {};
+      this.imagePixels_.push(pixel);
+      return pixel;
+    };
+    windowInterface.getImage.returns(FakeImage);
+  }
+
+  hasRequestSent() {
+    return this.imagePixels_.length > 0;
+  }
+
+  verifyRequest(url, referrerPolicy) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.equal(url);
+    expect(pixel.referrerPolicy).to.equal(referrerPolicy);
+  }
+
+  verifyRequestMatch(regex) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.match(regex);
+  }
+
+  getLastRequestUrl() {
+    if (!this.hasRequestSent()) {
+      return null;
+    }
+    return this.imagePixels_[this.imagePixels_.length - 1].src;
+  }
 }

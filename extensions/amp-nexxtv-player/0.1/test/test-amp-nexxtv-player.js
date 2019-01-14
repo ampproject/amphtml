@@ -61,7 +61,7 @@ describes.realWin('amp-nexxtv-player', {
       const playerIframe = nexxtv.querySelector('iframe');
 
       expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/761/'
+      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/761/video/'
             + '71QQG852413DU7J?dataMode=static&platform=amp');
     });
   });

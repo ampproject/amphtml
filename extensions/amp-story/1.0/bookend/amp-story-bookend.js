@@ -29,18 +29,19 @@ import {
   ScrollableShareWidget,
 } from '../amp-story-share';
 import {EventType, dispatch} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../localization';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
-import {dev, user} from '../../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
+import {toggle} from '../../../../src/style';
 
 
 /** @private @const {string} */
@@ -51,7 +52,7 @@ const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
 
 /**
- * Key for omponents in bookend config.
+ * Key for components in bookend config.
  * @private @const {string}
  */
 const BOOKEND_VERSION_KEY = 'bookendVersion';
@@ -62,27 +63,32 @@ const BOOKEND_VERSION_KEY = 'bookendVersion';
  */
 const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
-/** @private @const {!../simple-template.ElementDef} */
-const ROOT_TEMPLATE = {
-  tag: 'section',
-  attrs: dict({
-    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
-        HIDDEN_CLASSNAME}),
-  children: [
-    // Overflow container that gets pushed to the bottom when content height is
-    // smaller than viewport.
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
-      children: [
-        // Holds bookend content.
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
-        },
-      ],
-    },
-  ],
+/**
+ * @param {string} hidden
+ * @return {!../simple-template.ElementDef}
+ */
+const buildRootTemplate = hidden => {
+  return /** @type {!../simple-template.ElementDef} */ ({
+    tag: 'section',
+    attrs: dict({
+      'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+          hidden}),
+    children: [
+      // Overflow container that gets pushed to the bottom when content height
+      // is smaller than viewport.
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+        children: [
+          // Holds bookend content.
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
+          },
+        ],
+      },
+    ],
+  });
 };
 
 /** @private @const {!../simple-template.ElementDef} */
@@ -92,7 +98,7 @@ const REPLAY_ICON_TEMPLATE = {
 };
 
 /** @type {string} */
-const TAG = 'amp-story';
+const TAG = 'amp-story-bookend';
 
 /**
  * @param {string} title
@@ -103,7 +109,8 @@ const TAG = 'amp-story';
 const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
+    attrs: dict({'class': 'i-amphtml-story-bookend-replay ' +
+      'i-amphtml-story-bookend-top-level'}),
     children: [
       {
         tag: 'div',
@@ -140,7 +147,8 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
 const buildPromptConsentTemplate = consentId => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
+    attrs: dict({'class': 'i-amphtml-story-bookend-consent ' +
+        'i-amphtml-story-bookend-top-level'}),
     children: [
       {
         tag: 'h3',
@@ -192,12 +200,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.replayButton_ = null;
 
     /**
-     * Root element containing a shadow DOM root.
-     * @private {?Element}
-     */
-    this.root_ = null;
-
-    /**
      * Actual bookend.
      * @private {?Element}
      */
@@ -214,18 +216,20 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * Builds the bookend components and appends it to the provided story.
+   * @param {boolean} skipAnimation Skips opening animation of the bookend.
    */
-  build() {
+  build(skipAnimation = false) {
     if (this.isBuilt_) {
       return;
     }
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win.document.createElement('div');
-    this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
+    this.bookendEl_ =
+        renderAsElement(this.win.document, buildRootTemplate(skipAnimation ?
+          '' : HIDDEN_CLASSNAME));
 
-    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
+    createShadowRootWithStyle(this.element, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -249,9 +253,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.initializeListeners_();
 
-    this.mutateElement(() => {
-      this.element.parentElement.appendChild(this.getRoot());
-    });
+    // Removes the [hidden] attribute the runtime sets because of the
+    // [layout="nodisplay"].
+    toggle(this.element, true);
   }
 
   /**
@@ -267,7 +271,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == Keys.ESCAPE) {
         event.preventDefault();
         this.close_();
       }
@@ -305,7 +309,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onReplayButtonClick_(event) {
     event.stopPropagation();
-    dispatch(this.win, this.getRoot(), EventType.REPLAY,
+    dispatch(this.win, this.element, EventType.REPLAY,
     /* payload */ undefined, {bubbles: true});
   }
 
@@ -338,7 +342,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      uiState === UIType.DESKTOP ?
+      [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
     });
@@ -402,7 +406,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
             response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
       } else {
-        // TODO(#14667): Write doc regarding amp-story bookend v1.0.
         dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
         `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
       }
@@ -490,7 +493,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /** @private */
   assertBuilt_() {
-    dev().assert(this.isBuilt(), 'Bookend component needs to be built.');
+    devAssert(this.isBuilt(), 'Bookend component needs to be built.');
   }
 
   /**
@@ -532,12 +535,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /** @return {!Element} */
-  getRoot() {
-    this.assertBuilt_();
-    return dev().assertElement(this.root_);
-  }
-
-  /** @return {!Element} */
   getShadowRoot() {
     this.assertBuilt_();
     return dev().assertElement(this.bookendEl_);
@@ -572,7 +569,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
@@ -587,7 +584,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
     const image = jsonLd && isArray(jsonLd['image']) ? jsonLd['image'] : null;
 
     if (image != null && image.length >= 0) {
-      user().assert(urlService.isProtocolValid(image[0]),
+      userAssert(urlService.isProtocolValid(image[0]),
           `Unsupported protocol for story image URL ${image[0]}`);
       metadata.imageUrl = image[0];
     }

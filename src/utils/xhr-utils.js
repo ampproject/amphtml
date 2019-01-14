@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
 import {getCorsUrl,
@@ -84,8 +84,9 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
 export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
+    const wrapper = /** @type {!FormDataWrapperInterface} **/ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-    newInit.body = fromIterator(/** @type {!FormDataWrapper} **/ (init.body).entries());
+    newInit.body = fromIterator(wrapper.entries());
   }
   return {input, init: newInit};
 }
@@ -129,7 +130,7 @@ export function toStructuredCloneable(input, init) {
  * @private
  */
 export function fromStructuredCloneable(response, responseType) {
-  user().assert(isObject(response), 'Object expected: %s', response);
+  userAssert(isObject(response), 'Object expected: %s', response);
 
   const isDocumentType = responseType == 'document';
   if (!isDocumentType) {
@@ -233,7 +234,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
  * intercepted.
  */
 export function setupInput(win, input, init) {
-  dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
+  devAssert(typeof input == 'string', 'Only URL supported: %s', input);
   if (init.ampCors !== false) {
     input = getCorsUrl(win, input);
   }
@@ -253,7 +254,7 @@ export function setupInit(opt_init, opt_accept) {
   // In particular, Firefox does not tolerate `null` values for
   // `credentials`.
   const creds = init.credentials;
-  dev().assert(
+  devAssert(
       creds === undefined || creds == 'include' || creds == 'omit',
       'Only credentials=include|omit support: %s', creds);
 
@@ -264,7 +265,7 @@ export function setupInit(opt_init, opt_accept) {
   }
 
   // In edge a `TypeMismatchError` is thrown when body is set to null.
-  dev().assert(init.body !== null, 'fetch `body` can not be `null`');
+  devAssert(init.body !== null, 'fetch `body` can not be `null`');
 
   return init;
 }
@@ -310,7 +311,7 @@ export function setupJsonFetchInit(init) {
   if (fetchInit.method == 'POST' && !isFormDataWrapper(fetchInit.body)) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
-    dev().assert(
+    devAssert(
         allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
         'body must be of type object or array. %s',
         fetchInit.body
@@ -342,7 +343,7 @@ function normalizeMethod_(method) {
     return 'GET';
   }
   method = method.toUpperCase();
-  dev().assert(
+  devAssert(
       allowedMethods_.includes(method),
       'Only one of %s is currently allowed. Got %s',
       allowedMethods_.join(', '),
@@ -365,14 +366,14 @@ export function verifyAmpCORSHeaders(win, response, init) {
     const sourceOrigin = getSourceOrigin(win.location.href);
     // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
     // ensure that it's equal to the current source origin.
-    user().assert(allowSourceOriginHeader == sourceOrigin,
+    userAssert(allowSourceOriginHeader == sourceOrigin,
         `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
           ` equal to the current: ${allowSourceOriginHeader}` +
           ` vs ${sourceOrigin}`);
   } else if (init.requireAmpResponseSourceOrigin) {
     // If the `AMP-Access-Control-Allow-Source-Origin` header is not
     // returned but required, return error.
-    user().assert(false, 'Response must contain the' +
+    userAssert(false, 'Response must contain the' +
         ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
   }
   return response;

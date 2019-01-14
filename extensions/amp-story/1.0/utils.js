@@ -17,7 +17,8 @@ import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
-import {user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -33,7 +34,7 @@ export function timeStrToMillis(time) {
   const num = match[1];
   const units = match[2];
 
-  user().assert(
+  userAssert(
       match &&
           match.length == 3 &&
           (units == 's' || units == 'ms'),
@@ -198,6 +199,27 @@ export function removeAttributeInMutate(elementImpl, name) {
  * @param {string|!Location} url
  */
 export function userAssertValidProtocol(element, url) {
-  user().assert(Services.urlForDoc(element).isProtocolValid(url),
+  userAssert(Services.urlForDoc(element).isProtocolValid(url),
       'Unsupported protocol for URL %s', url);
+}
+
+/**
+ * Gets the origin url for elements that display a url. It
+ * trims the protocol prefix and returns only the hostname of the origin.
+ * @param {!Element} element
+ * @param {string} url
+ * @return {string}
+ */
+export function getSourceOriginForElement(element, url) {
+  let domainName;
+
+  try {
+    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
+    // Remove protocol prefix.
+    domainName = Services.urlForDoc(element).parse(domainName).hostname;
+  } catch (e) {
+    // Unknown path prefix in url.
+    domainName = Services.urlForDoc(element).parse(url).hostname;
+  }
+  return domainName;
 }

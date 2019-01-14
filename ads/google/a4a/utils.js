@@ -18,7 +18,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getBinaryType,
@@ -101,16 +101,17 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
- * Returns the value of navigation start using the performance API or 0 if not
- * supported by the browser.
+ * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
  * performance API.
  * @param {!Window} win
+ * @param {string} timingEvent The name of the timing event, e.g.
+ *     'navigationStart' or 'domContentLoadEventStart'.
  * @return {number}
  */
-function getNavStart(win) {
+function getNavigationTiming(win, timingEvent) {
   return (win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart']) || 0;
+      win['performance']['timing'][timingEvent]) || 0;
 }
 
 /**
@@ -206,7 +207,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector =
       r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
-  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
+  const {documentElement} = win.document;
+  return Services.resourcesForDoc(documentElement).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
           r.element.getAttribute('type') == type;
@@ -251,9 +253,10 @@ export function googlePageParameters(a4a, startTime) {
   const referrerPromise = Services.timerFor(win).timeoutPromise(
       1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
       .catch(() => {
-        dev().error('AMP-A4A', 'Referrer timeout!');
+        dev().expectedError('AMP-A4A', 'Referrer timeout!');
         return '';
       });
+  const domLoading = getNavigationTiming(win, 'domLoading');
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'), referrerPromise])
       .then(promiseResults => {
@@ -301,6 +304,7 @@ export function googlePageParameters(a4a, startTime) {
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == canonicalUrl ? null : win.location.href,
           'ref': referrer || null,
+          'bdt': domLoading ? startTime - domLoading : null,
         };
       });
 }
@@ -349,7 +353,7 @@ function iframeNestingDepth(win) {
     w = w.parent;
     depth++;
   }
-  dev().assert(w == win.top);
+  devAssert(w == win.top);
   return depth;
 }
 
@@ -417,7 +421,7 @@ function secondWindowFromTop(win) {
     secondFromTop = secondFromTop.parent;
     depth++;
   }
-  dev().assert(secondFromTop.parent == win.top);
+  devAssert(secondFromTop.parent == win.top);
   return secondFromTop;
 }
 
@@ -584,7 +588,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
-  const navStart = getNavStart(win);
+  const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = {
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
@@ -615,7 +619,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   try {
     const analyticsConfig =
         parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
-    dev().assert(Array.isArray(analyticsConfig['url']));
+    devAssert(Array.isArray(analyticsConfig['url']));
     const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
@@ -756,7 +760,7 @@ export function getEnclosingContainerTypes(adElement) {
  * @return {string|undefined} potentially modified url, undefined
  */
 export function maybeAppendErrorParameter(adUrl, parameterValue) {
-  dev().assert(!!adUrl && !!parameterValue);
+  devAssert(!!adUrl && !!parameterValue);
   // Add parameter indicating error so long as the url has not already been
   // truncated and error parameter is not already present.  Note that we assume
   // that added, error parameter length will be less than truncation parameter
@@ -767,7 +771,7 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
     return;
   }
   const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
-  dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
+  devAssert(modifiedAdUrl.length <= MAX_URL_LENGTH);
   return modifiedAdUrl;
 }
 
@@ -807,8 +811,9 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
   // If configured to use amp-consent, delay request until consent state is
   // resolved.
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      (consentPolicyId ? getConsentPolicyState(ampDoc, consentPolicyId) :
-        Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
+      (consentPolicyId
+        ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
+        : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
           .then(consentState =>
             consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
             consentState == CONSENT_POLICY_STATE.UNKNOWN ?

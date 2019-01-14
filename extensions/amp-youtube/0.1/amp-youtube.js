@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -43,13 +43,16 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 
+
+const TAG = 'amp-youtube';
+
+
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 /**
  * @enum {number}
  * @private
  */
-
-// Correct PlayerStates taken from
-// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -244,11 +247,20 @@ class AmpYoutube extends AMP.BaseElement {
         this.handleYoutubeMessage_.bind(this)
     );
 
-    const loaded = this.loadPromise(this.iframe_).then(() => {
-      // Tell YT that we want to receive messages
-      this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const loaded = this.loadPromise(this.iframe_)
+        // Make sure the YT player is ready for this. For some reason YT player
+        // would send couple of messages but then stop. Waiting for a bit before
+        // sending the 'listening' event seems to fix that and allow YT Player
+        // to send messages continuously.
+        //
+        // This was removed in #6915 but due to #17979 it has been taken back
+        // for a workaround.
+        .then(() => Services.timerFor(this.win).promise(300))
+        .then(() => {
+          // Tell YT that we want to receive messages
+          this.listenToFrame_();
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        });
     this.playerReadyResolver_(loaded);
     return loaded;
   }
@@ -318,7 +330,7 @@ class AmpYoutube extends AMP.BaseElement {
   assertDatasourceExists_() {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);
-    user().assert(
+    userAssert(
         datasourceExists, 'Exactly one of data-videoid or '
       + 'data-live-channelid should be present for <amp-youtube> %s',
         this.element
@@ -390,6 +402,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
+      element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
 
@@ -557,7 +570,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.info_) {
       return this.info_.currentTime;
     }
-    return 0;
+    return NaN;
   }
 
   /** @override */
@@ -566,7 +579,7 @@ class AmpYoutube extends AMP.BaseElement {
       return this.info_.duration;
     }
     // Not supported.
-    return 1;
+    return NaN;
   }
 
   /** @override */
@@ -574,9 +587,14 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-youtube', '0.1', AMP => {
-  AMP.registerElement('amp-youtube', AmpYoutube);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpYoutube);
 });

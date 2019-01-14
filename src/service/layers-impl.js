@@ -16,12 +16,12 @@
 
 import {Services} from '../services';
 import {computedStyle} from '../style';
-import {dev} from '../log';
-import {filterSplice} from '../utils/array';
+import {dev, devAssert} from '../log';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {remove} from '../utils/array';
 import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
@@ -185,7 +185,7 @@ export class LayoutLayers {
 
     // Layout may have been removed from the tracked layouts (due to
     // reparenting).
-    if (this.layouts_.indexOf(layout) === -1) {
+    if (!this.layouts_.includes(layout)) {
       this.layouts_.push(layout);
     }
 
@@ -208,23 +208,28 @@ export class LayoutLayers {
       return;
     }
 
-    const index = this.layouts_.indexOf(layout);
+    const layouts = this.layouts_;
+    const index = layouts.indexOf(layout);
     if (index > -1) {
-      this.layouts_.splice(index, 1);
+      layouts.splice(index, 1);
     }
 
     const parent = layout.getParentLayer();
     if (parent) {
       parent.remove(layout);
+    } else {
+      // Don't know who the parent is.
+      // Ensure the entire layer tree removes the layout.
+      for (let i = 0; i < layouts.length; i++) {
+        layouts[i].remove(layout);
+      }
     }
 
-    // Dirty measurements so it is remeasured if reattached.
-    layout.dirtyMeasurements();
+    // The layout it likely to be reparented under a new layer.
+    layout.forgetParentLayer();
 
-    // Do not go through the normal undeclareLayer process, since there's no
-    // parent layer to reparent our children. Just mark that we are no longer a
-    // layer.
-    layout.isLayer_ = false;
+    // Measurements have likely changed due to CSS rules matching.
+    layout.dirtyMeasurements();
   }
 
   /**
@@ -560,7 +565,7 @@ export class LayoutElement {
    * @return {!LayoutElement}
    */
   static for(element) {
-    return /** @type {!LayoutElement} */ (dev().assert(
+    return /** @type {!LayoutElement} */ (devAssert(
         LayoutElement.forOptional(element)));
   }
 
@@ -585,6 +590,10 @@ export class LayoutElement {
    * @return {?LayoutElement}
    */
   static getParentLayer(node, opt_force) {
+    if (isDestroyed(node)) {
+      return null;
+    }
+
     if (!opt_force) {
       const layout = LayoutElement.forOptional(node);
       if (layout) {
@@ -592,7 +601,7 @@ export class LayoutElement {
       }
     }
 
-    let win = /** @type {!Window } */ (dev().assert(
+    let win = /** @type {!Window } */ (devAssert(
         node.ownerDocument.defaultView));
     let el = node;
     let op = node;
@@ -654,13 +663,13 @@ export class LayoutElement {
         op = el;
         // Update our window reference if we crossed a FIE boundary.
         if (el) {
-          win = /** @type {!Window } */ (dev().assert(
+          win = /** @type {!Window } */ (devAssert(
               el.ownerDocument.defaultView));
         }
       }
     }
 
-    dev().assert(last.nodeType === Node.DOCUMENT_NODE,
+    devAssert(last.nodeType === Node.DOCUMENT_NODE,
         'node not in the DOM tree');
     return null;
   }
@@ -718,10 +727,15 @@ export class LayoutElement {
    * @param {!LayoutElement} child
    */
   add(child) {
-    dev().assert(this.isLayer());
-    dev().assert(this.contains(child));
+    devAssert(this.isLayer());
+    devAssert(this.contains(child));
 
-    this.children_.push(child);
+    // Parents track the children, but not all children are aware of their
+    // parents. When a child finds its parent, it adds itself to the parent.
+    // This might lead to a double tracking.
+    if (!this.children_.includes(child)) {
+      this.children_.push(child);
+    }
   }
 
   /**
@@ -730,13 +744,9 @@ export class LayoutElement {
    * @param {!LayoutElement} child
    */
   remove(child) {
-    dev().assert(this.isLayer());
-    dev().assert(child.getParentLayer() === this);
-
     const i = this.children_.indexOf(child);
     if (i > -1) {
       this.children_.splice(i, 1);
-      child.forgetParentLayer();
     }
   }
 
@@ -757,7 +767,7 @@ export class LayoutElement {
    * @param {boolean} scrollsLikeViewport
    */
   declareLayer(isRootLayer, scrollsLikeViewport) {
-    dev().assert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
+    devAssert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
       ' scroll like a viewport.');
 
     if (this.isLayer_) {
@@ -790,7 +800,11 @@ export class LayoutElement {
     }
 
     const element = this.element_;
-    const win = /** @type {!Window } */ (dev().assert(
+    if (isDestroyed(element)) {
+      return;
+    }
+
+    const win = /** @type {!Window } */ (devAssert(
         element.ownerDocument.defaultView));
     // If it remains fixed, it will still be a layer.
     if (computedStyle(win, element).position === 'fixed') {
@@ -801,8 +815,8 @@ export class LayoutElement {
     // Handle if this was a fixed position layer (and therefore had null parent
     // layer).
     const parent = this.getParentLayer() ||
-        LayoutElement.getParentLayer(this.element_, true);
-    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(parent)));
+        LayoutElement.getParentLayer(element, true);
+    this.transfer_(/** @type {!LayoutElement} */ (devAssert(parent)));
   }
 
   /**
@@ -818,7 +832,7 @@ export class LayoutElement {
     // everything in this layer.
     const contained = layer.contains(this);
 
-    filterSplice(this.children_, layout => {
+    remove(this.children_, layout => {
       if (contained || layer.contains(layout)) {
         // Mark the layout as needing a remeasure, since its offset position
         // has likely changed.
@@ -827,10 +841,10 @@ export class LayoutElement {
         // And transfer ownership to the new layer.
         layout.parentLayer_ = layer;
         layer.children_.push(layout);
-        return false;
+        return true;
       }
 
-      return true;
+      return false;
     });
   }
 
@@ -1035,7 +1049,7 @@ export class LayoutElement {
     const stopAt = opt_ancestor
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
-    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+    for (let l = this; l && l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Calculate the scrolled position. If the element has offset 200, and
       // the parent is scrolled 150, then the scrolled position is just 50.
@@ -1070,7 +1084,7 @@ export class LayoutElement {
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
 
-    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+    for (let l = this; l && l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Add up every offset position in the ancestry.
       x += position.left;
@@ -1133,12 +1147,15 @@ export class LayoutElement {
    * @template T
    */
   iterateAncestry(iterator, state) {
-    const activeLayer = Services.layersForDoc(this.element_).getActiveLayer();
+    const activeLayer = isDestroyed(this.element_)
+      ? null
+      : Services.layersForDoc(this.element_).getActiveLayer();
 
     // Gather, and update whether the layers are descendants of the active
     // layer.
-    let isActive = activeLayer === this || activeLayer.contains(this);
-    dev().assert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
+    let isActive = activeLayer === this ||
+        (!!activeLayer && activeLayer.contains(this));
+    devAssert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
 
     let layer = this;
     while (layer) {
@@ -1272,7 +1289,7 @@ function sameDocument(element, other) {
  * @return {?Element}
  */
 function frameParent(node) {
-  dev().assert(node.nodeType === Node.DOCUMENT_NODE);
+  devAssert(node.nodeType === Node.DOCUMENT_NODE);
   try {
     const {defaultView} = node;
     const frameElement = defaultView && defaultView.frameElement;
@@ -1281,6 +1298,21 @@ function frameParent(node) {
       : null;
   } catch (e) { }
   return null;
+}
+
+/**
+ * Checks several references to see if the node's context window has been
+ * destroyed (eg, a node inside an iframe that was disconnected from the DOM).
+ *
+ * @param {!Node} node
+ */
+function isDestroyed(node) {
+  const {ownerDocument} = node;
+  if (!ownerDocument) {
+    return true;
+  }
+  const {defaultView} = ownerDocument;
+  return !defaultView || !defaultView.document;
 }
 
 /**

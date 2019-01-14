@@ -109,6 +109,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const doc = this.win.document;
     const {documentElement} = doc;
     documentElement.classList.add('i-amphtml-ios-embed-sd');
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      documentElement.classList.add('i-amphtml-body-minheight');
+    }
 
     const scroller = htmlFor(doc)`
       <div id="i-amphtml-scroller">
@@ -297,7 +300,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    return !isExperimentOn(this.win, 'ios-embed-sd-notransfer');
   }
 
   /** @override */
@@ -393,15 +396,35 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   getContentHeight() {
-    // The reparented body inside scroller will have the correct content height.
-    // Body is overflow: hidden so that the scrollHeight include the margins of
-    // body's first and last child.
-    // Body height doesn't include paddingTop on the parent, so we add on the
-    // position of the body from the top of the viewport and subtract the
-    // scrollTop (as position relative to the viewport changes as you scroll).
-    return this.wrapper_./*OK*/scrollHeight
+    // Don't use scrollHeight, since it returns `MAX(viewport_height,
+    // document_height)`, even though we only want the latter. Also, it doesn't
+    // account for margins
+    const scrollingElement = this.wrapper_;
+    const rect = scrollingElement./*OK*/getBoundingClientRect();
+    const style = computedStyle(this.win, scrollingElement);
+    return rect.height
         + this.paddingTop_
-        + this.getBorderTop();
+        + this.getBorderTop()
+        + parseInt(style.marginTop, 10)
+        + parseInt(style.marginBottom, 10);
+  }
+
+  /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      this.vsync_.mutate(() => {
+        setImportantStyles(this.scroller_, {
+          '-webkit-overflow-scrolling': 'auto',
+        });
+        this.vsync_.mutate(() => {
+          setImportantStyles(this.scroller_, {
+            '-webkit-overflow-scrolling': 'touch',
+          });
+        });
+      });
+    }
   }
 
   /** @override */

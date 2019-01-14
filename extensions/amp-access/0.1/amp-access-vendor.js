@@ -16,7 +16,7 @@
 
 import './access-vendor';
 import {Deferred} from '../../../src/utils/promise';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
@@ -40,7 +40,7 @@ export class AccessVendorAdapter {
     this.ampdoc = ampdoc;
 
     /** @const @private {string} */
-    this.vendorName_ = user().assert(configJson['vendor'],
+    this.vendorName_ = userAssert(configJson['vendor'],
         '"vendor" name must be specified');
 
     /** @const @private {!JsonObject} */
@@ -72,7 +72,7 @@ export class AccessVendorAdapter {
    * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(vendor) {
-    user().assert(this.vendorResolve_, 'Vendor has already been registered');
+    userAssert(this.vendorResolve_, 'Vendor has already been registered');
     this.vendorResolve_(vendor);
     this.vendorResolve_ = null;
   }

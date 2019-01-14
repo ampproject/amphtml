@@ -410,6 +410,19 @@ describe('amp-a4a', () => {
       });
     });
 
+    it('detachedCallback should destroy FIE and detach frame', () => {
+      const fieDestroySpy =
+          sandbox./*OK*/spy(FriendlyIframeEmbed.prototype, 'destroy');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        a4a.detachedCallback();
+        expect(fieDestroySpy).to.be.called;
+        expect(a4aElement.querySelector('iframe')).to.not.be.ok;
+      });
+    });
+
+    // TODO: Remove after launch fie_ini_load_fix to 100%
     it('for A4A FIE should wait for initial layout', () => {
       let iniLoadResolver;
       const iniLoadPromise = new Promise(resolve => {
@@ -433,6 +446,25 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
         expect(whenIniLoadedStub).to.be.calledOnce;
         expect(lifecycleEventStub).to.be.calledWith('friendlyIframeIniLoad');
+      });
+    });
+
+    it('for A4A layout should resolve once FIE is created', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+
+      // Never resolve
+      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype,'whenIniLoaded')
+          .callsFake(() => {return new Promise(() => {});});
+      let creativeString = buildCreativeString();
+      // TODO: Remove after launch fie_ini_load_fix to 100%
+      creativeString = creativeString.replace('<body>',
+          '<body>' +
+          '<meta name=amp-experiments-opt-in content=a,fie_ini_load_fix,b>');
+      const metaData = a4a.getAmpAdMetadata(creativeString);
+      return a4a.renderAmpCreative_(metaData).then(() => {
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
       });
     });
 
@@ -494,6 +526,8 @@ describe('amp-a4a', () => {
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .callsFake(() => Promise.resolve());
       return a4a.layoutCallback().then(() => {
         verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
@@ -1906,7 +1940,7 @@ describe('amp-a4a', () => {
             }),
         'Some style is "background: green"').to.be.true;
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(Services.urlReplacementsForDoc(frameDoc))
+        expect(Services.urlReplacementsForDoc(frameDoc.documentElement))
             .to.not.equal(Services.urlReplacementsForDoc(a4aElement));
       });
     });

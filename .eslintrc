@@ -1,4 +1,5 @@
 {
+  "root": true,
   "parser": "babel-eslint",
   "plugins": [
     "chai-expect",
@@ -17,25 +18,9 @@
     "sourceType": "module"
   },
   "globals": {
-    "it": false,
-    "chai": false,
-    "expect": false,
-    "describe": false,
-    "beforeEach": false,
-    "afterEach": false,
-    "before": false,
-    "after": false,
     "AMP": false,
-    "assert": false,
-    "sinon": true,
-    "sandbox": true,
     "context": false,
-    "global": false,
-    "describes": true,
-    "allowConsoleError": false,
-    "expectAsyncConsoleError": false,
-    "restoreAsyncErrorThrows": false,
-    "stubAsyncErrorThrows": false
+    "global": false
   },
   "settings": {
     "jsdoc": {
@@ -75,7 +60,10 @@
     "amphtml-internal/no-has-own-property-method": 1,
     "amphtml-internal/no-import": 2,
     "amphtml-internal/no-import-rename": 2,
+    "amphtml-internal/no-is-amp-alt": 2,
     "amphtml-internal/no-mixed-operators": 2,
+    "amphtml-internal/no-module-exports": 2,
+    "amphtml-internal/no-mixed-interpolation": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-display": 2,
     "amphtml-internal/no-style-property-setting": 2,
@@ -129,6 +117,7 @@
     "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
+    "no-restricted-globals": [2, "error", "event"],
     "no-script-url": 2,
     "no-self-compare": 2,
     "no-sequences": 2,
@@ -189,6 +178,32 @@
         "jsdoc/require-param-name": 0,
         "jsdoc/require-param-type": 0,
         "jsdoc/require-returns-type": 0
+      },
+      "globals": {
+        "it": false,
+        "chai": false,
+        "expect": false,
+        "describe": false,
+        "beforeEach": false,
+        "afterEach": false,
+        "before": false,
+        "after": false,
+        "assert": false,
+        "sinon": true,
+        "sandbox": true,
+        "describes": true,
+        "allowConsoleError": false,
+        "expectAsyncConsoleError": false,
+        "restoreAsyncErrorThrows": false,
+        "stubAsyncErrorThrows": false
+      }
+    },
+    {
+      "files": ["babel.config.js"],
+      "globals": {
+        "module": false,
+        "process": false,
+        "require": false
       }
     }
   ]

@@ -23,7 +23,7 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {fetchDocument} from '../../../src/document-fetcher';
@@ -128,7 +128,7 @@ export class AccessServerJwtAdapter {
     /** @const @private {?string} */
     this.keyUrl_ = configJson['publicKeyUrl'] || null;
 
-    user().assert(this.key_ || this.keyUrl_,
+    userAssert(this.key_ || this.keyUrl_,
         '"publicKey" or "publicKeyUrl" must be specified');
     if (this.keyUrl_) {
       assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
@@ -206,7 +206,7 @@ export class AccessServerJwtAdapter {
       return resp.text();
     }).then(encoded => {
       const jwt = this.jwtHelper_.decode(encoded);
-      user().assert(jwt['amp_authdata'],
+      userAssert(jwt['amp_authdata'],
           '"amp_authdata" must be present in JWT');
       return {encoded, jwt};
     });
@@ -261,13 +261,13 @@ export class AccessServerJwtAdapter {
 
     // exp: expiration time.
     const exp = jwt['exp'];
-    user().assert(exp, '"exp" field must be specified');
-    user().assert(parseFloat(exp) * 1000 > now,
+    userAssert(exp, '"exp" field must be specified');
+    userAssert(parseFloat(exp) * 1000 > now,
         'token has expired: %s', exp);
 
     // aud: audience.
     const aud = jwt['aud'];
-    user().assert(aud, '"aud" field must be specified');
+    userAssert(aud, '"aud" field must be specified');
     let audForAmp = false;
     if (isArray(aud)) {
       for (let i = 0; i < aud.length; i++) {
@@ -279,7 +279,7 @@ export class AccessServerJwtAdapter {
     } else {
       audForAmp = (aud == AMP_AUD);
     }
-    user().assert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
+    userAssert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
   }
 
   /**

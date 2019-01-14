@@ -37,13 +37,21 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-[desktop].i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+.i-amphtml-story-hidden.i-amphtml-story-system-layer {
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-hidden.i-amphtml-story-system-layer * {
+  pointer-events: none !important;
+}
+
+.i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0 !important;
 }
 
 .i-amphtml-story-system-layer-buttons {
   margin-top: 8px; /* 6px progress bar + 2px margin */
-  pointer-events: auto !important;
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
@@ -120,12 +128,12 @@
   transform-origin: right !important;
 }
 
-[info] .i-amphtml-message-container {
+.first-page-active[info] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: 48px !important;
 }
 
-[info][dir=rtl] .i-amphtml-message-container {
+.first-page-active[info][dir=rtl] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: auto !important;
   padding-left: 48px !important;
@@ -179,19 +187,24 @@
 .i-amphtml-story-unmute-audio-control,
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
-.i-amphtml-story-unmute-no-sound-text  {
+.i-amphtml-story-unmute-no-sound-text,
+.i-amphtml-story-sidebar-control   {
   display: none !important;
 }
 
-.audio-playing:not([muted]) .i-amphtml-story-mute-audio-control,
-.audio-playing[muted] .i-amphtml-story-unmute-audio-control {
+[i-amphtml-story-has-sidebar] .i-amphtml-story-sidebar-control {
+  display: block !important;
+}
+
+.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
 
-.audio-playing[muted] .i-amphtml-story-mute-text,
-[i-amphtml-story-audio-state].audio-playing:not([muted]) .i-amphtml-story-unmute-sound-text,
-:not([i-amphtml-story-audio-state]).audio-playing:not([muted]) .i-amphtml-story-unmute-no-sound-text {
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
+:not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
   display: block !important;
 }
 
@@ -207,6 +220,10 @@
 
 .i-amphtml-story-mute-audio-control {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-sidebar-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-share-control {
@@ -229,11 +246,12 @@
 }
 
 .i-amphtml-story-no-sharing .i-amphtml-story-share-control,
-.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control,
+.i-amphtml-story-no-sharing .i-amphtml-story-share-pill {
   display: none !important;
 }
 
-[desktop].i-amphtml-story-system-layer {
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
   top: auto !important;
   bottom: 0 !important;
@@ -244,18 +262,22 @@
   flex-direction: row-reverse !important;
 }
 
-[desktop] .i-amphtml-story-progress-bar {
+.i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
   position: relative !important;
   height: 3px !important;
   width: calc(100vw / 3) !important;
   margin: 0 24px !important;
 }
 
-[desktop] .i-amphtml-story-page-progress-bar {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
+  height: 3px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
   border-radius: 100px !important;
 }
 
-[desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
   display: flex !important;
   height: 40px !important;
   align-items: center !important;
@@ -263,7 +285,7 @@
   margin-top: 0px !important;
 }
 
-[desktop] .i-amphtml-story-share-control {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-control {
   display: none !important;
 }
 
@@ -279,7 +301,7 @@ div.i-amphtml-story-share-pill-container {
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-[desktop] div.i-amphtml-story-share-pill-container {
+.i-amphtml-story-desktop-panels div.i-amphtml-story-share-pill-container {
   display: block !important;
 }
 
@@ -411,39 +433,39 @@ span.i-amphtml-story-share-pill-label {
   padding: 0;
 }
 
-[desktop] .i-amphtml-story-share-icon {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon {
   font-size: 0px!important;
   background-size: 24px 24px !important;
   background-position: center center !important;
   padding: 0 !important;
 }
 
-[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon.amp-social-share-facebook {
   /* SVG icon has inner padding, so the glyph renders visually smaller than
    * other icons, so we work around it by setting a higher background size. */
   background-size: 28px 28px !important;
   background-position: center center !important;
 }
 
-[desktop] .i-amphtml-story-share-icon::before {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  background-color: transparent !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-label {
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-share-icon:active::before {
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-share-list {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
   margin-right: 72px !important;
 }
 
-[dir=rtl][desktop] .i-amphtml-story-share-list {
+[dir=rtl].i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
   margin-right: 0 !important;
   margin-left: 72px !important;
 }
 
 /* system layer changes */
 
-[desktop] .i-amphtml-story-share-pill-container {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill-container {
   z-index: 100002 !important; /* 1 higher than bookend */
 }

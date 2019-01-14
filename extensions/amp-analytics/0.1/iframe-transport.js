@@ -16,7 +16,7 @@
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
@@ -24,7 +24,7 @@ import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+const TAG_ = 'amp-analytics/iframe-transport';
 
 /** @private @const {number} */
 const LONG_TASK_REPORTING_THRESHOLD = 5;
@@ -76,7 +76,7 @@ export class IframeTransport {
     /** @private @const {string} */
     this.creativeId_ = id;
 
-    dev().assert(config && config['iframe'],
+    devAssert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
@@ -108,7 +108,7 @@ export class IframeTransport {
       this.ampWin_.document.body.appendChild(frameData.frame);
       this.createPerformanceObserver_();
     }
-    dev().assert(frameData, 'Trying to use non-existent frame');
+    devAssert(frameData, 'Trying to use non-existent frame');
   }
 
   /**
@@ -180,7 +180,7 @@ export class IframeTransport {
               (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
               entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc &&
+                if (this.frameUrl_ == attrib['containerSrc'] &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
                   user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
                 }
@@ -203,7 +203,7 @@ export class IframeTransport {
    */
   static markCrossDomainIframeAsDone(ampDoc, type) {
     const frameData = IframeTransport.getFrameData(type);
-    dev().assert(frameData && frameData.frame && frameData.usageCount,
+    devAssert(frameData && frameData.frame && frameData.usageCount,
         'Marked the ' + type + ' frame as done, but there is no' +
         ' record of it existing.');
     if (--(frameData.usageCount)) {
@@ -246,8 +246,8 @@ export class IframeTransport {
    */
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
-    dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue,
+    devAssert(frameData, 'Trying to send message to non-existent frame');
+    devAssert(frameData.queue,
         'Event queue is missing for messages from ' + this.type_ +
         ' to creative ID ' + this.creativeId_);
     frameData.queue.enqueue(

@@ -27,7 +27,6 @@ tags: {  # amp-list
 }
 tags: {  # amp-list
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
@@ -37,14 +36,26 @@ tags: {  # amp-list
   }
   attr_lists: "common-extension-attrs"
 }
+tags: {  # amp-list
+  html_format: ACTIONS
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-list] (ACTIONS)"
+  extension_spec: {
+    name: "amp-list"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 tags: {  # <amp-list> with mandatory src and/or [src] attr
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
-    attrs: {
+  attrs: {
     name: "auto-resize"
     value: ""
+    deprecation: "replacement-to-be-determined-at-a-later-date"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/18849"
   }
   attrs: {
     name: "binding"
@@ -130,4 +141,64 @@ tags: {  # <amp-list>
     supported_layouts: RESPONSIVE
   }
 }
-
+# ACTIONS <amp-list> with POST identity token
+tags: {  # <amp-list>
+  html_format: ACTIONS
+  tag_name: "AMP-LIST"
+  spec_name: "AMP-LIST (ACTIONS)"
+  requires_extension: "amp-list"
+  attrs: {
+    name: "auto-resize"
+    value: ""
+    deprecation: "replacement-to-be-determined-at-a-later-date"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/18849"
+  }
+  attrs: {
+    name: "binding"
+    value: "always"
+    value: "no"
+    value: "refresh"
+  }
+  attrs: { name: "credentials" }
+  attrs: {
+    name: "cross-origin"
+    value: "amp-viewer-auth-token-via-post"
+  }
+  attrs: { name: "items" }
+  attrs: { name: "max-items" }
+  attrs: {
+    name: "reset-on-refresh"
+    value: ""
+    value: "always"
+    value: "fetch"
+  }
+  attrs: { name: "single-item" }
+  attrs: {
+    name: "src"
+    mandatory_anyof: "['src','[src]']"
+    value_url: {
+      protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "template" }
+  # <amp-bind>
+  attrs: {
+    name: "[src]"
+    mandatory_anyof: "['src','[src]']"
+  }
+  attrs: {
+    name: "[state]"
+    deprecation: "[src]"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

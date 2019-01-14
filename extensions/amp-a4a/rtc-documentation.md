@@ -120,6 +120,20 @@ Additionally, macros can be substituted in by the Fast Fetch implementation itse
 
 The `errorReportingUrl` property is optional. The only available macros are ERROR_TYPE and HREF. See [RTC Error Pingback](#rtc-error-pingback) section below for more information on how error reporting works.
 
+#### Currently Supported Vendors
+
+*   AppNexus
+*   APS
+*   Criteo
+*   IndexExchange
+*   Lotame
+*   Media.net
+*   PubMatic OpenWrap
+*   Purch
+*   Rubicon
+*   Salesforce
+*   Yieldbot
+
 ### RTC Callout Request Specification
 
 RTC callout requests are sent from the AMP runtime with the following headers:

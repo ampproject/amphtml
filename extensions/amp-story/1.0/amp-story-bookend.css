@@ -54,7 +54,7 @@
   content: " " !important;
   display: block !important;
   z-index: -1 !important; /* places it under content */
-  background: rgba(0, 0, 0, 0.70) !important;
+  background: #202125 !important;
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
@@ -77,12 +77,13 @@
   overflow: hidden !important;
 }
 
-.i-amphtml-story-bookend-consent {
-  margin: 0 32px !important;
+.i-amphtml-story-bookend-top-level {
+  margin-left: 24px !important;
+  margin-right: 24px !important;
 }
 
 .i-amphtml-story-bookend-consent:last-child {
-  margin-bottom: 32px !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-consent .i-amphtml-story-bookend-heading {
@@ -248,7 +249,6 @@
 }
 
 .i-amphtml-story-bookend-replay {
-  margin: 0 24px !important;
   overflow: hidden !important;
   display: flex !important;
   max-height: 120px !important;
@@ -279,7 +279,6 @@
 }
 
 .i-amphtml-story-bookend-component-set {
-  margin: 0 24px !important;
   margin-bottom: 24px !important;
 }
 
@@ -325,14 +324,22 @@
   white-space: nowrap !important;
 }
 
-.i-amphtml-story-share-widget {
+.i-amphtml-story-bookend .i-amphtml-story-share-widget {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 
-.i-amphtml-story-share-list {
+.i-amphtml-story-bookend .i-amphtml-story-share-list {
   padding-left: 16px !important;
   padding-right: 16px !important;
+}
+
+.i-amphtml-story-bookend .i-amphtml-story-share-item .i-amphtml-story-share-icon {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.i-amphtml-story-bookend .i-amphtml-story-share-icon .i-amphtml-story-share-label {
+  color: #FFF !important;
 }
 
 [desktop].i-amphtml-story-bookend {

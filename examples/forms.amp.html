@@ -188,7 +188,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 </form>
 
@@ -201,7 +201,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 </form>
 
@@ -212,7 +212,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
 
     </fieldset>
     <div submit-success>
@@ -237,7 +237,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success>
@@ -262,7 +262,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email1" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
     <div submitting>
       <template type="amp-mustache">
@@ -295,7 +295,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email2" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div submit-success>
@@ -326,7 +326,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email3" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div class="form-message invalid-message">
@@ -379,7 +379,7 @@
             <span>Subscribe</span>
             <input type="email" name="email" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -405,7 +405,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email4"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email4"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -429,7 +429,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email5"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -463,7 +463,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email51" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -487,7 +487,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email6"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email6"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -511,7 +511,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email7"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email7"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -586,10 +586,10 @@
             <span>Your email</span>
             <input type="email" name="email" id="email8" required>
         </label>
-        <input type="submit" value="Subscribe - Input">
-        <input type="submit" value="Subscribe 2 - Input">
-        <button type="submit">Subscribe with a Button</button>
-        <button type="submit">Subscribe with a Button 2</button>
+        <input name="submit-button" type="submit" value="Subscribe - Input">
+        <input name="submit-button" type="submit" value="Subscribe 2 - Input">
+        <button name="submit-button" type="submit" value="Subscribe with a Button">Subscribe with a Button</button>
+        <button name="submit-button" type="submit" value="Subscribe with a Button 2">Subscribe with a Button 2</button>
     </fieldset>
 
     <div submit-success>
@@ -616,7 +616,7 @@
         <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="3" selected></amp-img>
         <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="4"></amp-img>
     </amp-selector>
-    <input type="Submit">
+    <input name="submit-button" type="submit" value="Submit">
 </form>
 
 
@@ -630,7 +630,7 @@
             <span>Send us a message</span>
             <input type="text" name="message" id="message1" required>
         </label>
-        <input type="submit" value="Send">
+        <input name="submit-button" type="submit" value="Send">
     </fieldset>
 </form>
 
@@ -649,7 +649,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email9" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div class="form-message invalid-message">
@@ -704,11 +704,15 @@
             <span>City</span>
             <input type="text" name="city" required>
         </label>
+        <label>
+            <span>Not sent to verify</span>
+            <input type="text" name="do-not-verify" no-verify>
+        </label>
         <p>Throw an error?</p>
         <label>Yes: <input type="radio" name="error" value="true" required></label>
         <label>No: <input type="radio" name="error" value="false" required checked></label>
         <div class="spinner"></div>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
     <div submit-success>
         <template type="amp-mustache">
@@ -754,7 +758,7 @@
             <span>Search for</span>
             <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success>
@@ -787,7 +791,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success template="submit_success_template"></div>
@@ -799,7 +803,7 @@
         <p>Upload a file:</p>
         <input type="file" name="myFile" accept="text/plain">
     </label>
-    <div><input type="submit"></div>
+    <div><input name="submit-button" type="submit" value="Submit"></div>
     <div submit-success><template type="amp-mustache">Way to go 🎉 {{message}}</template></div>
     <div submit-error>Way to fail</div>
 </form>

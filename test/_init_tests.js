@@ -16,7 +16,6 @@
 
 // This must load before all other tests.
 import '../src/polyfills';
-import 'babel-polyfill';
 import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
@@ -42,6 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
@@ -135,12 +135,6 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipOldChrome() {
-    return this.skip(() => {
-      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
@@ -169,6 +163,10 @@ class TestConfig {
     });
   }
 
+  skipWindows() {
+    return this.skip(() => this.platform.isWindows());
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -180,10 +178,6 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
-  }
-
-  ifNewChrome() {
-    return this.ifChrome().skipOldChrome();
   }
 
   ifChrome() {
@@ -219,12 +213,12 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs() {
+  retryOnSaucelabs(times = 4) {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
-      mocha.retries(4);
+      mocha.retries(times);
     });
     return this;
   }
@@ -317,11 +311,11 @@ function warnForConsoleError() {
   const consoleErrorStub =
       consoleErrorSandbox.stub(console, 'error').callsFake(printWarning);
 
-  this.expectAsyncConsoleError = function(message, repeat = 1) {
+  self.expectAsyncConsoleError = function(message, repeat = 1) {
     expectedAsyncErrors.push.apply(
         expectedAsyncErrors, Array(repeat).fill(message));
   };
-  this.allowConsoleError = function(func) {
+  self.allowConsoleError = function(func) {
     consoleErrorStub.reset();
     consoleErrorStub.callsFake(() => {});
     const result = func();
@@ -349,7 +343,7 @@ function restoreConsoleError() {
         'The test "' + testName + '" called "expectAsyncConsoleError", ' +
         'but there were no call(s) to console.error with these message(s): ' +
         '"' + expectedAsyncErrors.join('", "') + '"';
-    throw new Error(helpMessage);
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
@@ -371,7 +365,7 @@ function maybeStubConsoleInfoLogWarn() {
  * Used to precent asynchronous throwing of errors during each test.
  */
 function preventAsyncErrorThrows() {
-  this.stubAsyncErrorThrows = function() {
+  self.stubAsyncErrorThrows = function() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
@@ -379,7 +373,7 @@ function preventAsyncErrorThrows() {
       throw error;
     });
   };
-  this.restoreAsyncErrorThrows = function() {
+  self.restoreAsyncErrorThrows = function() {
     rethrowAsyncSandbox.restore();
   };
   setReportError(reportError);
@@ -401,7 +395,7 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -428,6 +422,7 @@ function beforeTest() {
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
 afterEach(function() {
+  that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
@@ -545,8 +540,8 @@ chai.Assertion.addMethod('display', function(display) {
   const tagName = obj.tagName.toLowerCase();
   this.assert(
       value === display,
-      'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
-      'expected element \'' + tagName + '\' not to be #{act}.',
+      'expected element \'' + tagName + '\' to be display #{exp}, got #{act}.',
+      'expected element \'' + tagName + '\' not to be display #{act}.',
       display,
       value
   );

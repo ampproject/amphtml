@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
@@ -85,6 +85,9 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.endDate_ = '';
 
     /** @private {number} */
+    this.timeleftMs_ = 0;
+
+    /** @private {number} */
     this.timestampMs_ = 0;
 
     /** @private {number} */
@@ -115,9 +118,14 @@ export class AmpDateCountdown extends AMP.BaseElement {
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
-    //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
+    // Note: One of end-date, timeleft-ms, timestamp-ms,
+    // timestamp-seconds is required.
     /** @private {string} */
     this.endDate_ = this.element.getAttribute('end-date');
+
+    /** @private {number} */
+    this.timeleftMs_
+       = Number(this.element.getAttribute('timeleft-ms'));
 
     /** @private {number} */
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
@@ -209,15 +217,17 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     if (this.endDate_) {
       epoch = Date.parse(this.endDate_);
+    } else if (this.timeleftMs_) {
+      epoch = Number(new Date()) + this.timeleftMs_;
     } else if (this.timestampMs_) {
       epoch = this.timestampMs_;
     } else if (this.timestampSeconds_) {
       epoch = this.timestampSeconds_ * 1000;
     }
 
-    user().assert(!isNaN(epoch),
-        'One of end-date, timestamp-ms, timestamp-seconds is required');
-
+    userAssert(!isNaN(epoch),
+        'One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ' +
+        'is required');
     return epoch;
   }
 
@@ -238,7 +248,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         'seconds': localeWordList[5],
       };
     } else {
-      user().error(TAG, `Invalid locale '${locale}', return empty locale word`);
+      user().error(TAG, 'Invalid locale %s, return empty locale word', locale);
       return {};
     }
   }
@@ -324,9 +334,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
    */
   rendered_(element) {
     return this.mutateElement(() => {
-      const template = this.element.firstElementChild;
+      // TODO(UI): The rendered content should be added to a container child
+      // to avoid removal/re-addition of the <template> child. See amp-list.
+      const template = this.templates_.findTemplate(this.element);
+      const isChildTemplate = this.element.contains(template);
       removeChildren(this.element);
-      this.element.appendChild(template);
+      // Re-add template if it was a child element (vs. referenced by ID).
+      if (isChildTemplate) {
+        this.element.appendChild(template);
+      }
       this.element.appendChild(element);
     });
   }

@@ -93,9 +93,9 @@ Before any code can be merged into the AMP repository, it has to be reviewed and
 
 - If you are contributing a fix or a new feature to AMP, be sure to follow the tips on [preparing your code for review](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code-for-a-feature-coding--implementation-phase) and follow [instructions](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review) on how to submit a pull request.
 
-- Pull requests in AMP are triaged similar to Issues and within 2 days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
+- Pull requests in AMP are triaged similar to Issues and within 2 business days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
 
-- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 days since opening the PR.
+- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 business days since opening the PR.
 
 - Turnaround time for a PR to be merged is variable and depends on the size and quality of the code. Most PRs go through multiple cycles of review comments. It can take anywhere between a day for simple fixes to weeks for larger features.
 
