@@ -965,12 +965,26 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
       this.openAttachmentEl_
           .querySelector('.i-amphtml-story-page-open-attachment-text')
-          .addEventListener('click', () => {
-            attachmentEl.getImpl().then(attachment => attachment.open());
-          });
+          .addEventListener('click', () => this.openAttachment());
+
       this.mutateElement(
           () => this.element.appendChild(this.openAttachmentEl_));
     }
+  }
+
+  /**
+   * Opens the attachment, if any.
+   * @param {boolean=} shouldAnimate
+   */
+  openAttachment(shouldAnimate = true) {
+    const attachmentEl =
+        this.element.querySelector('amp-story-page-attachment');
+
+    if (!attachmentEl) {
+      return;
+    }
+
+    attachmentEl.getImpl().then(attachment => attachment.open(shouldAnimate));
   }
 
   /**
