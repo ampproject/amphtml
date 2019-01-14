@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
+import {
+  HistoryState,
+  createShadowRootWithStyle,
+  setHistoryState,
+} from './utils';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
-
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -356,9 +363,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
   /**
    * Fully opens the attachment from its current position.
-   * @public
+   * @param {boolean=} shouldAnimate
    */
-  open() {
+  open(shouldAnimate = true) {
     if (this.state_ === AttachmentState.OPEN) {
       return;
     }
@@ -370,9 +377,23 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
+
+      if (!shouldAnimate) {
+        // Resets the 'transition' property, and removes this override in the
+        // next frame, after the element is positioned.
+        setImportantStyles(this.element, {transition: 'initial'});
+        this.mutateElement(() => resetStyles(this.element, ['transition']));
+      }
+
       this.element.classList.add('i-amphtml-story-page-attachment-open');
       toggle(dev().assertElement(this.containerEl_), true);
     });
+
+    setHistoryState(
+        this.win,
+        HistoryState.ATTACHMENT_PAGE_ID,
+        /** @type {string} */
+        (this.storeService_.get(StateProperty.CURRENT_PAGE_ID)));
   }
 
   /**
@@ -397,5 +418,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       setTimeout(
           () => toggle(dev().assertElement(this.containerEl_), false), 250);
     });
+
+    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
   }
 }
