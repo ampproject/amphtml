@@ -209,24 +209,13 @@ export class AnalyticsConfig {
         return;
       }
 
-      const varNames = [];
-      const valuePromises = [];
-
-      Object.keys(group).forEach(varName => {
-        if (varName === 'enabled') {
-          return;
-        }
-        varNames.push(varName);
-        const expanded = Services.urlReplacementsForDoc(this.element_)
-            .expandStringAsync(group[varName]);
-        valuePromises.push(expanded);
-      });
-
-      const groupPromise = Promise.all(valuePromises).then(resolvedValues => {
-        varNames.forEach((name, i) =>
-          rewriterConfig['vars'][name] = resolvedValues[i]);
-      });
-
+      const groupPromise = shallowExpandObject(this.element_, group)
+          .then(expandedGroup => {
+            // This is part of the user config and should not be sent.
+            delete expandedGroup['enabled'];
+            // Merge all groups into single `vars` object.
+            Object.assign(rewriterConfig['vars'], expandedGroup);
+          });
       allPromises.push(groupPromise);
     });
 
@@ -422,4 +411,30 @@ function expandRequestStr(request) {
   return {
     'baseUrl': request,
   };
+}
+
+/**
+ * Expands all key value pairs asynchronously and returns a promise that will
+ * resolve with the expanded object.
+ * @param {!Element|!ShadowRoot} element
+ * @param {Object} obj
+ * @return {!Promise<Object>}
+ */
+function shallowExpandObject(element, obj) {
+  const expandedObj = dict();
+  const keys = [];
+  const expansionPromises = [];
+
+  Object.keys(obj).forEach(key => {
+    keys.push(key);
+    const expanded = Services.urlReplacementsForDoc(element)
+        .expandStringAsync(obj[key]);
+    expansionPromises.push(expanded);
+  });
+
+  return Promise.all(expansionPromises).then(expandedValues => {
+    keys.forEach((key, i) =>
+      expandedObj[key] = expandedValues[i]);
+    return expandedObj;
+  });
 }
