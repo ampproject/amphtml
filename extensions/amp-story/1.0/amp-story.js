@@ -41,11 +41,11 @@ import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -242,8 +242,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
-    /** Instantiates the tooltip in case its needed. */
-    new AmpStoryTooltip(this.win, this.element);
+    /** Instantiate in case there are embedded components. */
+    new AmpStoryEmbeddedComponent(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -651,7 +651,7 @@ export class AmpStory extends AMP.BaseElement {
       const {deltaX, deltaY} = gesture.data;
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
+          this.storeService_.get(StateProperty.EMBEDDED_COMPONENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||

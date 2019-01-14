@@ -34,11 +34,11 @@ module.exports = {
     await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.tap('.i-amphtml-story-tooltip-layer');
+    await page.tap('.i-amphtml-story-focused-state-layer');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ ['.i-amphtml-story-tooltip-layer.i-amphtml-hidden']);
+      /* loadingCompleteCss */ ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
   },
   'tapping on tooltip should keep it open': async (page, name) => {
     const screen = page.touchscreen;
