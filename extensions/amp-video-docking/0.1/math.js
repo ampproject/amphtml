@@ -62,7 +62,5 @@ export function calculateLeftJustifiedX(
   itemMargin,
   step) {
 
-  console.log(calculateJustified(containerWidth, itemWidth, itemMargin, -step));
-
   return calculateJustified(containerWidth, itemWidth, itemMargin, -step);
 }
