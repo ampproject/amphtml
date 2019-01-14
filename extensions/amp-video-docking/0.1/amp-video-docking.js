@@ -215,7 +215,8 @@ const PlaceholderBackground = html =>
       ref="poster">
     </div>
     <div class="amp-video-docked-placeholder-icon"
-      ref="icon"></div>
+      ref="icon">
+    </div>
   </div>`;
 
 
