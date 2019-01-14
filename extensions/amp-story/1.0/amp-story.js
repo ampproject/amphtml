@@ -781,7 +781,6 @@ export class AmpStory extends AMP.BaseElement {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
-
           if (isExperimentOn(this.win, 'amp-story-branching')) {
             this.initializeStoryNavigationPath_();
           }
