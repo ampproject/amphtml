@@ -65,6 +65,17 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
+  attrs: {
+    name: "load-more"
+    value: "auto"
+    value: "manual"
+   }
+  attrs: {
+    name: "load-more-bookmark"
+    trigger: {
+    also_requires_attr: "load-more"
+    }
+  }
   attrs: { name: "max-items" }
   attrs: {
     name: "reset-on-refresh"
@@ -104,6 +115,35 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+
+tags: { # amp-list-load-more
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-LIST-LOAD-MORE"
+  requires_extension: "amp-list"
+  mandatory_parent: "AMP-LIST"
+  attrs: {
+    name: "load-more-button"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-failed"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-loading"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-end"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+}
+
 # AMP4EMAIL disallows mustache in src attribute.
 tags: {  # <amp-list>
   html_format: AMP4EMAIL
