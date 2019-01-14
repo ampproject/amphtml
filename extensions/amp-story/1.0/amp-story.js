@@ -1212,8 +1212,8 @@ export class AmpStory extends AMP.BaseElement {
       this.storyNavigationPath_.push(targetPage);
     }
     this.setHistoryState_(
-      HistoryStates.NAVIGATION_PATH,
-      this.storyNavigationPath_.map(page => page.element.id));
+        HistoryStates.NAVIGATION_PATH,
+        this.storyNavigationPath_.map(page => page.element.id));
     return targetPage;
   }
 
@@ -2127,11 +2127,15 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
-  initializeStoryNavigationPath_(){
+  /**
+   * Checks for the the storyNavigationPath stack in the history.
+   * @private
+   */
+  initializeStoryNavigationPath_() {
     const historyNavigationPath =
       this.getHistoryState_(HistoryStates.NAVIGATION_PATH);
     if (historyNavigationPath) {
-        this.storyNavigationPath_ =
+      this.storyNavigationPath_ =
         historyNavigationPath.map(pageId => this.getPageById(pageId));
     }
   }
