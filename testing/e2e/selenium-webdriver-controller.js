@@ -221,7 +221,7 @@ export class SeleniumWebDriverController {
   async scroll(handle, opt_scrollToOptions) {
     const webElement = handle.getElement();
     const scrollTo = (element, opt_scrollToOptions) => {
-      element.scrollTo(opt_scrollToOptions);
+      element./*OK*/scrollTo(opt_scrollToOptions);
     };
 
     return await this.driver.executeScript(

@@ -15,7 +15,7 @@
  */
 
 // import to install chromedriver
-import * as chromedriver from 'chromedriver'; // eslint-disable-line no-unused-vars
+import * as cd from 'chromedriver'; // eslint-disable-line no-unused-vars
 import {Builder, Capabilities} from 'selenium-webdriver';
 import {SeleniumWebDriverController} from './selenium-webdriver-controller';
 
@@ -24,7 +24,7 @@ const SUB = ' ';
 const TIMEOUT = 20000;
 
 /**
- * TODO(estherkim): use this to specify browsers and fixtures to opt into or out of
+ * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  fixtures: (!Array<string>|undefined),
