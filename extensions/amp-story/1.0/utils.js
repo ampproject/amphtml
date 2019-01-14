@@ -225,6 +225,13 @@ export function getSourceOriginForElement(element, url) {
   return domainName;
 }
 
+/** @enum {string} */
+export const HistoryState = {
+  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
+  BOOKEND_ACTIVE: 'ampStoryBookendActive',
+  PAGE_ID: 'ampStoryPageId',
+};
+
 /**
  * Updates the value for a given state in the window history.
  * @param {!Window} win

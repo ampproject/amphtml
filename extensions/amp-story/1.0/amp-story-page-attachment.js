@@ -20,10 +20,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
-import {HistoryStates} from './amp-story';
+import {
+  HistoryState,
+  createShadowRootWithStyle,
+  setHistoryState,
+} from './utils';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle, setHistoryState} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
@@ -388,7 +391,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     setHistoryState(
         this.win,
-        HistoryStates.ATTACHMENT_PAGE_ID,
+        HistoryState.ATTACHMENT_PAGE_ID,
         /** @type {string} */
         (this.storeService_.get(StateProperty.CURRENT_PAGE_ID)));
   }
@@ -416,6 +419,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
           () => toggle(dev().assertElement(this.containerEl_), false), 250);
     });
 
-    setHistoryState(this.win, HistoryStates.ATTACHMENT_PAGE_ID, null);
+    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
   }
 }
