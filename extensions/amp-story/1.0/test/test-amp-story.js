@@ -1338,7 +1338,7 @@ describes.realWin('amp-story', {
             story.activePage_.element.dispatchEvent(
                 new MouseEvent('click', {clientX: 200}));
             return expect(replaceStateStub).to.have.been.calledWith(
-                {ampStoryNavigationPath: ['cover', 'page-1']}, '',);
+                {ampStoryNavigationPath: ['cover', 'page-1']},);
           });
     });
 
