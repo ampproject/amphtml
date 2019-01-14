@@ -15,13 +15,13 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpStoryTooltip} from '../amp-story-tooltip';
+import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
 import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-tooltip', {amp: true}, env => {
+describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   let tooltip;
   let win;
   let parentEl;
@@ -57,20 +57,19 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
     parentEl.appendChild(fakeCover);
     parentEl.appendChild(fakePage);
 
-    tooltip = new AmpStoryTooltip(win, parentEl);
+    tooltip = new AmpStoryEmbeddedComponent(win, parentEl);
   });
 
   it('should build the tooltip', () => {
-    tooltip.build_();
-    expect(tooltip.isBuilt_).to.be.true;
-    expect(tooltip.tooltipOverlayEl_).to.exist;
+    tooltip.buildFocusedState_();
+    expect(tooltip.focusedStateOverlay_).to.exist;
   });
 
   it('should append the tooltip to the parentEl when clicking a clickable ' +
     'element', () => {
     fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
     // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
     expect(parentEl.childElementCount).to.equal(3);
@@ -79,47 +78,47 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
   it('should show the tooltip on store property update', () => {
     fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    expect(tooltip.tooltipOverlayEl_).to.not.have.class('i-amphtml-hidden');
+    expect(tooltip.focusedStateOverlay_).to.not.have.class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip on store property update', () => {
     fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, null);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
 
-    expect(tooltip.tooltipOverlayEl_).to.have.class('i-amphtml-hidden');
+    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip when switching page', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
     storeService.dispatch(Action.CHANGE_PAGE, {id: 'newPageId'});
 
-    expect(tooltip.tooltipOverlayEl_).to.have.class('i-amphtml-hidden');
+    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip when clicking outside of it', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    tooltip.tooltipOverlayEl_.dispatchEvent(new Event('click'));
+    tooltip.focusedStateOverlay_.dispatchEvent(new Event('click'));
 
-    expect(tooltip.tooltipOverlayEl_).to.have.class('i-amphtml-hidden');
+    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should navigate when tooltip is open and user clicks on arrow', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
     const nextPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
-    const rightButton = tooltip.tooltipOverlayEl_
-        .querySelector('.i-amphtml-story-tooltip-layer-nav-button' +
+    const rightButton = tooltip.focusedStateOverlay_
+        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
           '.i-amphtml-story-tooltip-nav-button-right');
 
     rightButton.dispatchEvent(new Event('click'));
@@ -131,13 +130,13 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
     'story is RTL', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_RTL, true);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
     const previousPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
 
-    const rightButton = tooltip.tooltipOverlayEl_
-        .querySelector('.i-amphtml-story-tooltip-layer-nav-button' +
+    const rightButton = tooltip.focusedStateOverlay_
+        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
           '.i-amphtml-story-tooltip-nav-button-right');
 
     rightButton.dispatchEvent(new Event('click'));
@@ -148,9 +147,9 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
   it('should append icon when icon attribute is present', () => {
     addAttributesToElement(clickableEl, {'data-tooltip-icon': '/my-icon'});
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipIconEl = tooltip.tooltipOverlayEl_
+    const tooltipIconEl = tooltip.focusedStateOverlay_
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
 
     expect(tooltipIconEl).to.have.attribute('src');
@@ -164,10 +163,10 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
         /*eslint no-script-url: 0*/ 'javascript:alert("evil!")'});
     fakePage.appendChild(clickableEl);
     expectAsyncConsoleError(
-        '[amp-story-tooltip] The tooltip icon url is invalid');
+        '[amp-story-embedded-component] The tooltip icon url is invalid');
 
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
-    const tooltipIconEl = tooltip.tooltipOverlayEl_
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
+    const tooltipIconEl = tooltip.focusedStateOverlay_
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
     expect(tooltipIconEl).to.not.have.attribute('src');
   });
@@ -175,9 +174,9 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
   it('should append text when text attribute is present', () => {
     addAttributesToElement(clickableEl, {'data-tooltip-text': 'my cool text'});
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipTextEl = tooltip.tooltipOverlayEl_
+    const tooltipTextEl = tooltip.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
     expect(tooltipTextEl.textContent).to.equal('my cool text');
@@ -185,9 +184,9 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
 
   it('should append local url when text attribute is not present', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipTextEl = tooltip.tooltipOverlayEl_
+    const tooltipTextEl = tooltip.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
     expect(tooltipTextEl.textContent).to.equal('localhost');

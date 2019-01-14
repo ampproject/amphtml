@@ -68,6 +68,8 @@ export const UIType = {
  *    adState: boolean,
  *    bookendState: boolean,
  *    desktopState: boolean,
+ *    embeddedComponent: ?Element,
+ *    expandedComponent: ?Element,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    landscapeState: boolean,
@@ -81,7 +83,6 @@ export const UIType = {
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    tooltipElement: ?Element,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -108,6 +109,8 @@ export const StateProperty = {
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
   DESKTOP_STATE: 'desktopState',
+  EMBEDDED_COMPONENT: 'embeddedComponent',
+  EXPANDED_COMPONENT: 'expandedComponent',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   LANDSCAPE_STATE: 'landscapeState',
@@ -123,7 +126,6 @@ export const StateProperty = {
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
-  TOOLTIP_ELEMENT: 'tooltipElement',
   UI_STATE: 'uiState',
 
   // App data.
@@ -144,6 +146,8 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_EMBEDDED_COMPONENT: 'toggleEmbeddedComponent',
+  TOGGLE_EXPANDED_COMPONENT: 'toggleExpandedComponent',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_LANDSCAPE: 'toggleLandscape',
   TOGGLE_MUTED: 'toggleMuted',
@@ -157,7 +161,6 @@ export const Action = {
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
-  TOGGLE_TOOLTIP: 'toggleTooltip',
   TOGGLE_UI: 'toggleUi',
 };
 
@@ -211,6 +214,19 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.BOOKEND_STATE]: !!data,
             [StateProperty.PAUSED_STATE]: !!data,
+          }));
+    case Action.TOGGLE_EMBEDDED_COMPONENT:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.EMBEDDED_COMPONENT]: data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
+    case Action.TOGGLE_EXPANDED_COMPONENT:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !data,
+            [StateProperty.EXPANDED_COMPONENT]: data,
           }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
@@ -267,12 +283,6 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
-    case Action.TOGGLE_TOOLTIP:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.TOOLTIP_ELEMENT]: data,
-          }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -393,6 +403,8 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.EMBEDDED_COMPONENT]: null,
+      [StateProperty.EXPANDED_COMPONENT]: null,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
@@ -406,7 +418,6 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.TOOLTIP_ELEMENT]: null,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
