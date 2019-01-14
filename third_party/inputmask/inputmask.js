@@ -1806,7 +1806,10 @@ export function factory($, window, document, undefined) {
                     }
                 }
                 checkVal(input, false, false, pasteValue.toString().split(""));
-                writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                // Use settimeout to make Safari paste work
+                setTimeout(() => {
+                    writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                }, 0);
                 return e.preventDefault();
             },
             inputFallBackEvent: function(e) {
