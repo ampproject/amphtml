@@ -17,7 +17,7 @@
 import {
   PlayingStates,
   VideoAttributes,
-  VideoEvents, // TODO: registered, visibility
+  VideoEvents,
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 
@@ -68,7 +68,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       parseAttribute(
           name,
           required,
-          value => JSON.parse(value)
+          value => JSON.parse(decodeURIComponent(value))
       );
 
     parseAttribute.boolean = (name, required) =>
@@ -92,34 +92,33 @@ export class AmpWpmPlayer extends AMP.BaseElement {
           value => parseInt(value, 10),
       );
 
+    const clip = parseAttribute.json('clip') || {};
     const output = {
       ampcontrols: true,
       forceUrl4stat: this.win.location.href,
       target: 'playerTarget',
+      ...clip,
     };
 
     output.adv = parseAttribute.boolean('adv');
-    output.url = parseAttribute.string('url', true); // false, moze byc clip obj
+    output.url = parseAttribute.string('url');
     output.title = parseAttribute.string('title');
-    // screenshot?
-    output.clip = parseAttribute.json('clip');
+    output.screenshot = parseAttribute.string('screenshot');
     output.forcerelated = parseAttribute.boolean('forcerelated');
     output.hiderelated = parseAttribute.boolean('hiderelated');
     output.hideendscreen = parseAttribute.boolean('hideendscreen');
     output.mediaEmbed = parseAttribute.string('mediaEmbed');
     output.extendedrelated = parseAttribute.boolean('extendedrelated');
-    // skin OBJ
+    output.skin = parseAttribute.json('skin');
     output.showlogo = parseAttribute.boolean('showlogo');
     output.watermark = parseAttribute.boolean('watermark');
-    // output.getAppUserInfo = parseAttribute.function('getAppUserInfo');
     output.qoeEventsConfig = parseAttribute.json('qoeEventsConfig');
     output.advVastDuration = parseAttribute.number('advVastDuration');
     output.vastTag = parseAttribute.string('vastTag');
     output.embedTrackings = parseAttribute.json('embedTrackings');
-
     output.id = parseAttribute.string('id');
 
-    // output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY);
+    // output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY); // TODO: czy to tutaj wgl ma byc?
     output.ampnoaudio = parseAttribute.boolean(VideoAttributes.NO_AUDIO);
     output.dock = parseAttribute.boolean(VideoAttributes.DOCK);
     output.rotateToFullscreen = parseAttribute.boolean(
@@ -229,8 +228,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       this.videoId = this.attributes.clip;
     }
 
-    // TODO: atrybuty z obiektu clip
-
     if (!this.videoId) {
       throw new Error('No clip specified');
     }
@@ -244,7 +241,8 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.element.appendChild(this.container_);
 
-    this.placeholderUrl = this.attributes.screenshot || this.getScreenshotUrl_(this.videoId);
+    this.placeholderUrl = this.attributes.screenshot
+      || this.getScreenshotUrl_(this.videoId);
   }
 
   /** @override */
@@ -257,18 +255,16 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+    placeholder.setAttribute('placeholder', 'true');
 
     const image = this.win.document.createElement('amp-img');
     image.setAttribute('layout', 'fill');
-    image.setAttribute('placeholder', 'true');
-    this.placeholderUrl.then(url => {
-      image.setAttribute('src', url);
-    });
+    // this.placeholderUrl.then(url => {
+    image.setAttribute('src', this.placeholderUrl);
+    // });
 
     placeholder.appendChild(image);
     return placeholder;
@@ -278,7 +274,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   layoutCallback() {
     const that = this;
 
-    this.addMessageListener_('FRAME.READY', () => {
+    this.addMessageListener_('FRAME_READY', () => {
       that.contentWindow_ = that.iframe
           .querySelector('iframe')
           .contentWindow;
@@ -286,7 +282,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       that.sendCommand_('init', JSON.stringify(that.attributes), true);
     });
 
-    this.addMessageListener_('PLAYER.READY', () => {
+    this.addMessageListener_('PLAYER_READY', () => {
       that.frameReady = true;
 
       that.element.dispatchCustomEvent(VideoEvents.LOAD);
@@ -298,6 +294,8 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       that.element.dispatchCustomEvent(VideoEvents.PLAYING);
       that.element.dispatchCustomEvent(VideoEvents.RELOAD);
       that.playingState = PlayingStates.PLAYING_AUTO;
+      that.togglePlaceholder(false);
+
     });
 
     this.addMessageListener_('USERPLAY', () => {
@@ -317,6 +315,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('START_ADV_QUEUE', () => {
       that.element.dispatchCustomEvent(VideoEvents.AD_START);
+      that.togglePlaceholder(false);
     });
 
     this.addMessageListener_('END_ADV_QUEUE', () => {
@@ -339,7 +338,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     this.addMessageListener_('METADATA', data => {
       that.metadata_ = JSON.parse(data);
-      // that.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA); // TODO: TUTAJ COS NIE DZIALA I WALI BLAD
     });
 
     this.iframe = this.win.document.createElement('amp-iframe');
@@ -352,12 +350,10 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.iframe.setAttribute('frameborder', 0);
     this.iframe.setAttribute('allowfullscreen', true);
 
-    this.placeholderUrl.then(url => {
-      placeholder.setAttribute('src', url);
-    });
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', 'true');
+    placeholder.setAttribute('src', this.placeholderUrl);
 
     this.iframe.appendChild(placeholder);
     this.container_.appendChild(this.iframe);
@@ -370,9 +366,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   supportsPlatform() {
     return true;
   }
@@ -386,15 +380,9 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     return true;
   }
 
-  /**
-  * @param {boolean=} onLayout
-  * @override
-  */
+  /** @override */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.frameUrl.toLocaleString(), onLayout);
-    this.preconnect.url(this.attributes.url, onLayout);
-    this.preconnect.url('https://std.wpcdn.pl/wpjslib/wpjslib-inline.js', onLayout);
-    this.preconnect.url('https://std.wpcdn.pl/player/mobile-autoplay/wpjslib_player.js', onLayout); // TODO: url playera
   }
 
   /** @override */
@@ -402,9 +390,12 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.sendCommand_('pause');
   }
 
-  /**
-  * @override
-  */
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
+
+  /** @override */
   play(isAutoplay) {
     this.sendCommand_('play');
 
@@ -413,33 +404,25 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       : PlayingStates.PLAYING_MANUAL;
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   pause() {
     this.sendCommand_('pause');
     this.playingState = PlayingStates.PAUSED;
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   mute() {
     this.sendCommand_('mute');
     this.element.dispatchCustomEvent(VideoEvents.MUTED);
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   unmute() {
     this.sendCommand_('unmute');
     this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   showControls() {
     if (this.playingState === PlayingStates.PLAYING_AUTO) {
       this.sendCommand_('popupControls');
@@ -448,23 +431,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     }
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   hideControls() {
     this.sendCommand_('hideControls');
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe); // TODO: resize iframe
+    fullscreenEnter(this.iframe);
   }
 
-  /**
-  * @override
-  */
+  /** @override */
   fullscreenExit() {
     fullscreenExit(this.iframe);
   }
@@ -476,7 +453,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    return this.metadata_; // TODO: odpowiedni format danych
+    return this.metadata_;
   }
 
   /** @override */
@@ -496,30 +473,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsAutoFullscreen() {
-    return true; // TODO: check
+    return false;
   }
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    return false; // TODO: check
-  }
-
-  // TODO: zaimplementować video element actions z: https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events
-
-  // /**
-  // * Called when video is first loaded.
-  // * @override
-  // */
-  // firstLayoutCompleted() {} // TODO: tfisthis?
-
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    console.log('mutations', mutations);
+    return false;
   }
 
   /** @override */
-  detachedCallback() {
-    console.warn('DETACHED LOG W KODZIE');
+  firstLayoutCompleted() {
+    // Do not hide the placeholder.
   }
 }
 
