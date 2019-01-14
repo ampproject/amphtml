@@ -15,8 +15,10 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
+import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
@@ -43,14 +45,23 @@ const AttachmentState = {
 const getTemplateEl = element => {
   return htmlFor(element)`
     <div class="i-amphtml-story-page-attachment">
-      <div class="i-amphtml-story-page-attachment-header">
-        <span
-            class="i-amphtml-story-page-attachment-close-button" role="button">
-        </span>
-      </div>
       <div class="i-amphtml-story-page-attachment-container">
         <div class="i-amphtml-story-page-attachment-content"></div>
       </div>
+    </div>`;
+};
+
+/**
+ * Drawer's header template.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const getHeaderEl = element => {
+  return htmlFor(element)`
+    <div class="i-amphtml-story-page-attachment-header">
+      <span
+          class="i-amphtml-story-page-attachment-close-button" role="button">
+      </span>
     </div>`;
 };
 
@@ -67,6 +78,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.contentEl_ = null;
+
+    /** @private {?Element} */
+    this.headerEl_ = null;
 
     /** @private {!AttachmentState} */
     this.state_ = AttachmentState.CLOSED;
@@ -99,8 +113,12 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO: maybe render the header in Shadow DOM?
     const templateEl = getTemplateEl(this.element);
+
+    const headerShadowRootEl = this.win.document.createElement('div');
+    this.headerEl_ = getHeaderEl(this.element);
+    createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
+    templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
     this.containerEl_ = dev().assertElement(
         templateEl.querySelector('.i-amphtml-story-page-attachment-container'));
@@ -125,7 +143,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.querySelector('.i-amphtml-story-page-attachment-close-button')
+    this.headerEl_
+        .querySelector('.i-amphtml-story-page-attachment-close-button')
         .addEventListener('click', () => this.close_(), true /** useCapture */);
 
     // Enforced by AMP validation rules.

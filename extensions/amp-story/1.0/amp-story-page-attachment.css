@@ -36,25 +36,6 @@ amp-story-page-attachment.i-amphtml-story-page-attachment-open {
   height: 100% !important;
 }
 
-.i-amphtml-story-page-attachment-header {
-  position: relative !important;
-  height: 40px !important;
-  background: #fff !important;
-  border-radius: 8px 8px 0 0 !important;
-  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.12) !important;
-  z-index: 1 !important;
-}
-
-.i-amphtml-story-page-attachment-close-button {
-  display: inline-block !important;
-  margin: 8px;
-  height: 24px !important;
-  width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(0, 0, 0, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
-  color: rgba(0, 0, 0, 0.87) !important;
-  cursor: pointer !important;
-}
-
 .i-amphtml-story-page-attachment-container {
   height: calc(100% - 40px) !important;
   background: rgba(255, 255, 255, 1) !important;
