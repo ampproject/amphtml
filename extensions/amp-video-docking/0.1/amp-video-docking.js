@@ -33,6 +33,7 @@ import {
 import {Services} from '../../../src/services';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
+import {calculateLeftJustifiedX, calculateRightJustifiedX} from './math';
 import {
   childElementByTag,
   escapeCssSelectorIdent,
@@ -48,7 +49,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
@@ -209,11 +210,12 @@ const ShadowLayer = html =>
  * @private
  */
 const PlaceholderBackground = html =>
-  // First child of root should be poster layer. See `setPosterImage_`.
   html`<div class="amp-video-docked-placeholder-background">
-    <div class="amp-video-docked-placeholder-background-poster">
+    <div class="amp-video-docked-placeholder-background-poster"
+      ref="poster">
     </div>
-    <div class="amp-video-docked-placeholder-icon"></div>
+    <div class="amp-video-docked-placeholder-icon"
+      ref="icon"></div>
   </div>`;
 
 
@@ -314,10 +316,9 @@ export class VideoDocking {
     this.getPlaceholderBackground_ =
           once(() => this.append_(PlaceholderBackground(html)));
 
-    /** @private @const {function():!Element} */
-    this.getPlaceholderIcon_ =
-          once(() => dev().assertElement(
-              this.getPlaceholderBackground_().lastElementChild));
+    /** @private @const {function():!Object<string, !Element>} */
+    this.getPlaceholderRefs_ =
+          once(() => htmlRefs(this.getPlaceholderBackground_()));
 
     /** @private {?../../../src/video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
@@ -898,10 +899,11 @@ export class VideoDocking {
     // (see `AmpVideo#createPosterForAndroidBug_`).
     this.removePosterForAndroidBug_(element);
 
-    const {x, y, scale} = this.getDims_(video, target, step);
+    const {x, y, scale, relativeX} = this.getDims_(video, target, step);
     video.hideControls();
     this.getControls_().enable();
-    this.placeAt_(video, x, y, scale, step);
+    this.placeAt_(video, x, y, scale, step, /* transitionDuration */ undefined,
+        relativeX);
     this.setCurrentlyDocked_(video, target, step);
   }
 
@@ -1009,9 +1011,10 @@ export class VideoDocking {
    * @param {number} scale
    * @param {number} step in [0..1]
    * @param {number=} opt_transitionDurationMs
+   * @param {RelativeX=} opt_relativeX
    * @private
    */
-  placeAt_(video, x, y, scale, step, opt_transitionDurationMs) {
+  placeAt_(video, x, y, scale, step, opt_transitionDurationMs, opt_relativeX) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
       return Promise.resolve();
     }
@@ -1033,10 +1036,17 @@ export class VideoDocking {
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
     const {overlay} = this.getControls_();
-    const placeholderIcon = this.getPlaceholderIcon_();
+    const placeholderBackground = this.getPlaceholderBackground_();
+    const placeholderIcon = this.getPlaceholderRefs_()['icon'];
+    const hasRelativePlacement = isFiniteNumber(opt_relativeX);
+    const isPlacementRtl = opt_relativeX == RelativeX.LEFT;
 
-    applyBreakpointClassname(placeholderIcon, width,
-        PLACEHOLDER_ICON_BREAKPOINTS);
+    if (hasRelativePlacement) {
+      applyBreakpointClassname(placeholderIcon, width,
+          PLACEHOLDER_ICON_BREAKPOINTS);
+
+      placeholderIcon.classList.toggle('amp-rtl', isPlacementRtl);
+    }
 
     // Setting explicit dimensions is needed to match the video's aspect
     // ratio. However, we only do this once to prevent jank in subsequent
@@ -1083,9 +1093,19 @@ export class VideoDocking {
       PLACEHOLDER_ICON_SMALL_MARGIN :
       PLACEHOLDER_ICON_LARGE_MARGIN;
 
-    // TODO(alanorozco): Place, animate and style icon for RTL.
-    const placeholderIconX = step *
-        (width - placeholderIconWidth - placeholderIconMargin * 2);
+    /**
+     * @param {number} containerWidth
+     * @param {number} itemWidth
+     * @param {number} itemMargin
+     * @param {number} step
+     * @return {number}
+     */
+    const iconPlacementFn = isPlacementRtl ?
+      calculateLeftJustifiedX :
+      calculateRightJustifiedX;
+
+    const placeholderIconX = iconPlacementFn(
+        width, placeholderIconWidth, placeholderIconMargin, step);
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
@@ -1096,18 +1116,19 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
 
-      this.getElementsOnPlaceholderArea_().forEach(el => {
-        maybeSetSizing(el, /* positioned */ true);
-        setOpacity(el);
-        setTransitionTiming(el);
-      });
+      maybeSetSizing(placeholderBackground, /* positioned */ true);
+      setOpacity(placeholderBackground);
+      setTransitionTiming(placeholderBackground);
 
       this.setPosterImage_(video);
 
       setTransitionTiming(placeholderIcon);
-      setImportantStyles(placeholderIcon, {
-        'transform': transform(placeholderIconX, /* y */ 0, /* scale */ 1),
-      });
+
+      if (hasRelativePlacement) {
+        setImportantStyles(placeholderIcon, {
+          'transform': transform(placeholderIconX, /* y */ 0, /* scale */ 1),
+        });
+      }
 
       this.getElementsOnDockArea_(video).forEach(el => {
         setImportantStyles(el, {
@@ -1184,16 +1205,6 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!Array<!Element>}
-   * @private
-   */
-  getElementsOnPlaceholderArea_() {
-    return [
-      this.getPlaceholderBackground_(),
-    ];
-  }
-
-  /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   setPosterImage_(video) {
@@ -1201,11 +1212,7 @@ export class VideoDocking {
 
     const {element} = video;
 
-    const placeholderBackground = this.getPlaceholderBackground_();
-
-    // First child is the poster layer, see `PlaceholderBackground`.
-    const placeholderPoster =
-        dev().assertElement(childElementByTag(placeholderBackground, 'div'));
+    const placeholderPoster = this.getPlaceholderRefs_()['poster'];
 
     if (!element.hasAttribute('poster')) {
       toggle(placeholderPoster, false);
@@ -1644,12 +1651,13 @@ export class VideoDocking {
   getDims_(video, target, step) {
     const {left, width} = video.getLayoutBox();
     const {x, y, targetWidth, initialY} = this.getTargetArea_(video, target);
+    const relativeX = x < left ? RelativeX.LEFT : RelativeX.RIGHT;
     const currentX = mapStep(step, left, x);
     const currentWidth = mapStep(step, width, targetWidth);
     const currentY = mapStep(step, initialY,
         this.calculateFinalY_(video, y, step));
     const scale = currentWidth / width;
-    return {x: currentX, y: currentY, scale};
+    return {x: currentX, y: currentY, scale, relativeX};
   }
 
   /**
@@ -1701,9 +1709,10 @@ export class VideoDocking {
     const step = 0;
 
     const {target} = devAssert(this.currentlyDocked_);
-    const {x, y, scale} = this.getDims_(video, target, step);
+    const {x, y, scale, relativeX} = this.getDims_(video, target, step);
 
-    return this.placeAt_(video, x, y, scale, step)
+    return this.placeAt_(
+        video, x, y, scale, step, /* transitionDuration */ undefined, relativeX)
         .then(() => this.maybeUpdateStaleYAfterScroll_(video))
         .then(() => this.resetOnUndock_(video));
   }
@@ -1725,7 +1734,7 @@ export class VideoDocking {
       const shadowLayer = this.getShadowLayer_();
       const {overlay} = this.getControls_();
       const almostDismissed = 'amp-video-docked-almost-dismissed';
-      const placeholderIcon = this.getPlaceholderIcon_();
+      const placeholderIcon = this.getPlaceholderRefs_()['icon'];
       const placeholderBackground = this.getPlaceholderBackground_();
 
       // TODO(alanorozco): Remove weird flick-to-dismiss.
