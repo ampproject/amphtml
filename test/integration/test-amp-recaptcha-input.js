@@ -28,29 +28,78 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/amp-recaptcha-input.html', 3000, () => {});
 }
 
-function getMockedRecaptchaFrame(fixture) {
+function get3pRecaptchaScript(bootstrapFrame) {
+  // Using a partial string match *= for css value
+  return bootstrapFrame.contentDocument.querySelector('script[src*="./recaptcha.js"]');
+}
 
+function getRecaptchaApiScript(bootstrapFrame) {
+  return bootstrapFrame.contentDocument.querySelector('script[src*="https://www.google.com/recaptcha/api.js"]');
+}
+
+/**
+ * Function that does the following:
+ * 1. Create the Fixture, with out custom bootstrap frame src
+ *
+ * 2. Ensure/Wait for the bootstrap frame,
+ * to add (not load) the 3p recaptcha script,
+ * As well as the recaptcha API script
+ * reCAPCTHA API: https://www.google.com/recaptcha/api.js?render=[sitekey here]
+ */
+function getRecaptchaFrame(fixture) {
   let bootstrapFrame = undefined;
 
   return poll('create bootstrap frame', () => {
     return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
-  }, undefined, 5000).then(frame => {
+  }, undefined, 2000).then(frame => {
     bootstrapFrame = frame;
     bootstrapFrame.src = '/dist.3p/current/recaptcha.max.html';
     return new Promise(resolve => {
       bootstrapFrame.onload = resolve;
     });
   }).then(() => {
-    console.error('yooooo');
-    console.error(Object.keys(bootstrapFrame.contentDocument));
     return poll('load recaptcha api script', () => {
-      // Wait for the recaptcha script to add it's own api script
-      // Need to do partial string match *= for css value 'google'
-      bootstrapFrame.contentDocument.querySelector('script[type]')
-    }, undefined, 5000);
+      // Using a partial string match *= for css value
+      return get3pRecaptchaScript(bootstrapFrame) && getRecaptchaApiScript(bootstrapFrame);
+    }, undefined, 2000);
   }).then(() => {
-    // TODO
-    return Promise.resolve(bootstrapFrame);
+    return bootstrapFrame;
+  });
+}
+
+/**
+ * Function that does the following:
+ *
+ * 1. Remove the recaptcha API Script from the recaptcha frame
+ *
+ * 2. Mocks out the grecaptcha object, and calls ready()
+ */
+function getMockedRecaptchaFrame(fixture) {
+  return getRecaptchaFrame(fixture).then((bootstrapFrame) => {
+    // Remove all 3p script tags from the page
+    getRecaptchaApiScript(bootstrapFrame).remove();
+    // Remove the other possible recaptcha script that may get loaded
+    const otherRecaptchaScript = bootstrapFrame.contentDocument.querySelector('script[src*="gstatic"]');
+    if (otherRecaptchaScript) {
+      otherRecaptchaScript.remove();
+    }
+
+    bootstrapFrame.contentWindow.grecaptcha = {
+      mock: true,
+      ready: (callback) => {
+        console.log('mock grecaptcha ready()');
+        callback();
+      },
+      execute: () => {
+        console.log('mock recaptcha execute()');
+        Promise.resolve('mock-recaptcha-token')
+      }
+    };
+
+    // Re-initialize with the mock
+    bootstrapFrame.contentWindow.initRecaptcha();
+
+    return bootstrapFrame;
   });
 }
 
@@ -66,7 +115,7 @@ describe.configure().run('amp-recaptcha-input', () => {
   });
 
   it('should be able to create the bootstrap frame', function() {
-    this.timeout(10000);
+    this.timeout(7000);
     return poll('create bootstrap frame', () => {
       return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
     }, undefined, 5000).then(frame => {
@@ -76,11 +125,21 @@ describe.configure().run('amp-recaptcha-input', () => {
     });
   });
 
-  it('should load the recaptcha api script', function() {
-    this.timeout(20000);
+  it('should load the 3p recaptcha and recaptcha api script', function() {
+    this.timeout(7000);
+
+    return getRecaptchaFrame(fixture).then(bootstrapFrame => {
+      expect(get3pRecaptchaScript(bootstrapFrame)).to.be.ok;
+      expect(getRecaptchaApiScript(bootstrapFrame)).to.be.ok;
+    });
+  });
+
+  it('should respond when ready from bootstrap frame', function() {
+    this.timeout(7000);
 
     return getMockedRecaptchaFrame(fixture).then(bootstrapFrame => {
-      console.error(Object.keys(bootstrapFrame.contentWindow));
+      const ampRecaptchaInputElement = fixture.doc.querySelector('amp-recaptcha-input');
+      return ampRecaptchaInputElement.implementation_.recaptchaService_.recaptchaApiReady_;
     });
   });
 
