@@ -338,7 +338,6 @@ amp-story-grid-layer amp-twitter::after {
 }
 
 .i-amphtml-animate-expand-in {
-  /** If you change the duration of this animation, please reflect if in the JS animateExpanded_ method too. */
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 

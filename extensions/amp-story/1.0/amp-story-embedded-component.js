@@ -228,6 +228,8 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    this.animateExpanded_(devAssert(targetToExpand));
+
     if (!this.expandedViewOverlay_) {
       this.buildAndAppendExpandedViewOverlay_(storyPage);
     }
@@ -396,7 +398,6 @@ export class AmpStoryEmbeddedComponent {
     event.stopPropagation();
 
     this.setState_(ComponentState.EXPANDED, this.previousTarget_);
-    this.animateExpanded_(devAssert(this.previousTarget_));
 
     this.storeService_.dispatch(
         Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
@@ -448,15 +449,9 @@ export class AmpStoryEmbeddedComponent {
           target.classList.add('i-amphtml-animate-expand-in');
           setImportantStyles(dev().assertElement(target),
               {
-                'transform': 'translate3d(' + state.translateX + 'px, ' +
-                  state.translateY + 'px, 0)',
-
+                transform: `translate3d(${state.translateX}px,
+                    ${state.translateY}px, 0)`,
               });
-          setTimeout(() => {
-            target.classList.remove('i-amphtml-animate-expand-in');
-          // Note: if you change the duration here, you'll also have to change
-          // the animation duration in the CSS.
-          }, 225);
         });
   }
 
