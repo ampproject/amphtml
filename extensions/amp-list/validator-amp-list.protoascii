@@ -98,6 +98,9 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   attrs: { name: "template" }
   # <amp-bind>
   attrs: {
+    name: "[is-layout-container]"
+  }
+  attrs: {
     name: "[src]"
     mandatory_anyof: "['src','[src]']"
   }
