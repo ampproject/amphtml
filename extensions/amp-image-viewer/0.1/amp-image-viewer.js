@@ -29,6 +29,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {elementByTag} from '../../../src/dom';
 import {
@@ -76,8 +77,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.imageBox_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenOnSwipePan_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenOnClickHaltMotion_ = null;
 
     /** @private {number} */
     this.scale_ = 1;
@@ -398,25 +402,11 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
-    this.gestures_ = Gestures.get(
-        this.element,
-        /* opt_shouldNotPreventDefault */true
-    );
-
-    this.gestures_.onPointerDown(gesture => {
-      if (this.motion_) {
-        this.motion_.halt();
-        gesture.event.preventDefault();
-      }
-    });
+    this.gestures_ = Gestures.get(this.element);
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, gesture => {
-      const {
-        data,
-        event,
-      } = gesture;
-      event.preventDefault();
+      const {data} = gesture;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = (this.elementBox_.width / 2) - data.clientX;
       const deltaY = (this.elementBox_.height / 2) - data.clientY;
@@ -426,11 +416,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, gesture => {
-      const {
-        data,
-        event,
-      } = gesture;
-      event.preventDefault();
+      const {data} = gesture;
       this.onTapZoom_(data.centerClientX, data.centerClientY,
           data.deltaX, data.deltaY);
       if (data.last) {
@@ -440,11 +426,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, gesture => {
-      const {
-        data,
-        event,
-      } = gesture;
-      event.preventDefault();
+      const {data} = gesture;
       this.onPinchZoom_(data.centerClientX, data.centerClientY,
           data.deltaX, data.deltaY, data.dir);
       if (data.last) {
@@ -454,34 +436,59 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Registers a Swipe gesture to handle panning when the image is zoomed.
+   * @param {!EventTarget} target
    * @private
    */
-  registerPanningGesture_() {
+  propagateClickEvent_(target) {
+    const event = createCustomEvent(
+        this.win,
+        'click',
+        null,
+        {bubbles: true}
+    );
+    target.dispatchEvent(event);
+  }
+
+  /**
+   * Registers a Swipe gesture and motion halt handler to handle panning when
+   * the image is zoomed.
+   * @private
+   */
+  onZoomedIn_() {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, gesture => {
-          const {
-            data,
-            event,
-          } = gesture;
-          event.preventDefault();
+          const {data} = gesture;
           this.onMove_(data.deltaX, data.deltaY, false);
           if (data.last) {
             this.onMoveRelease_(data.velocityX, data.velocityY);
           }
         });
+
+    this.unlistenOnClickHaltMotion_ = this.gestures_.onPointerDown(event => {
+      if (this.motion_) {
+        this.motion_.halt();
+      } else {
+        this.propagateClickEvent_(event.target);
+      }
+    });
   }
 
   /**
-   * Deregisters the Swipe gesture for panning when the image is zoomed out.
+   * Deregisters the Swipe gesture and motion halt handler for panning when
+   * the image is zoomed out.
    * @private
    */
-  unregisterPanningGesture_() {
+  onZoomedOut_() {
     if (this.unlistenOnSwipePan_) {
       this.unlistenOnSwipePan_();
       this.unlistenOnSwipePan_ = null;
       this.gestures_.removeGesture(SwipeXYRecognizer);
+    }
+
+    if (this.unlistenOnClickHaltMotion_) {
+      this.unlistenOnClickHaltMotion_();
+      this.unlistenOnClickHaltMotion_ = null;
     }
   }
 
@@ -737,11 +744,11 @@ export class AmpImageViewer extends AMP.BaseElement {
       if (relayout) {
         this.updateSrc_();
       }
-      // After the scale is updated, also register or unregister panning
-      if (this.scale_ <= 1) {
-        this.unregisterPanningGesture_();
+      // After updating the scale, register or deregister zoomed-in actions
+      if (this.scale_ > 1) {
+        this.onZoomedIn_();
       } else {
-        this.registerPanningGesture_();
+        this.onZoomedOut_();
       }
     });
   }
