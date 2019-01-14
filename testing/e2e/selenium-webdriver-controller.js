@@ -258,7 +258,7 @@ export class SeleniumWebDriverController {
    * @private
    */
   async switchToFrame_(handle) {
-    // TODO(esth): add 'id' parameter, to select element inside 'handle'
+    // TODO(estherkim): add 'id' parameter, to select element inside 'handle'
     // use case: testing x-origin iframes like amp-mathml, amp-ima-video
 
     const element = handle.getElement();

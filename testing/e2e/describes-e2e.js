@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-/*eslint-disable */
 // import to install chromedriver
-import * as chromedriver from 'chromedriver';
-/*eslint-enable */
-
+import * as chromedriver from 'chromedriver'; // eslint-disable-line no-unused-vars
 import {Builder, Capabilities} from 'selenium-webdriver';
 import {SeleniumWebDriverController} from './selenium-webdriver-controller';
 
@@ -27,7 +24,7 @@ const SUB = ' ';
 const TIMEOUT = 20000;
 
 /**
- * TODO(esth): use this to specify browsers and fixtures to opt into or out of
+ * TODO(estherkim): use this to specify browsers and fixtures to opt into or out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  fixtures: (!Array<string>|undefined),
@@ -40,7 +37,7 @@ export let TestSpec;
  */
 export const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
-  // TODO(esth): add fixtures for viewer, shadow, cache, etc
+  // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
 
 /**
@@ -170,17 +167,17 @@ class AmpPageFixture {
 
   /** @override */
   setup(env) {
-    // TODO(esth): implement sessions
-    // TODO(esth): ensure tests are in a sandbox
+    // TODO(estherkim): implement sessions
+    // TODO(estherkim): ensure tests are in a sandbox
     // See https://w3c.github.io/webdriver/#sessions
 
-    // TODO(esth): create multiple drivers per 'config.browsers'
+    // TODO(estherkim): create multiple drivers per 'config.browsers'
     // const config = {
     //   browsers: this.browsers_,
     //   session: undefined,
     // };
 
-    // TODO(esth): remove hardcoded chrome driver
+    // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
     // const chromeOptions = {'args': ['--headless']};
     // capabilities.set('chromeOptions', chromeOptions);
