@@ -22,7 +22,7 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {
-  ancestorElementsByTag, iterateCursor, waitForBodyPromise,
+  closestByTag, iterateCursor, waitForBodyPromise,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
@@ -1178,7 +1178,7 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const selects = ancestorElementsByTag(element, 'select');
+    const selects = closestByTag(element, 'select');
     if (!selects.length) {
       return;
     }
