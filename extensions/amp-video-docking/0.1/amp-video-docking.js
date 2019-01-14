@@ -35,18 +35,17 @@ import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
 import {calculateLeftJustifiedX, calculateRightJustifiedX} from './math';
 import {
-  childElementByTag,
-  escapeCssSelectorIdent,
-  isRTL,
-  removeElement,
-} from '../../../src/dom';
-import {
   createCustomEvent,
   listen,
   listenOnce,
 } from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  escapeCssSelectorIdent,
+  isRTL,
+  removeElement,
+} from '../../../src/dom';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
