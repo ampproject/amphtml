@@ -37,7 +37,8 @@ const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 app.use(bodyParser.text());
-app.use('/amp4test', require('./amp4test'));
+app.use('/amp4test', require('./amp4test').app);
+app.use('/analytics', require('./routes/analytics'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -176,12 +177,6 @@ app.use('/api/dont-show', (req, res) => {
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.end(req.body);
-});
-
-app.use('/analytics/:type', (req, res) => {
-  console.log('Analytics event received: ' + req.params.type);
-  console.log(req.query);
-  res.status(204).send();
 });
 
 /**
@@ -1191,6 +1186,29 @@ const generateJson = numberOfItems => {
   }
   return results;
 };
+
+const generateResults = (category, count = 2) => {
+  const r = {};
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const buster = randInt(10000);
+    const item = {};
+    item.src = `https://placeimg.com/600/400/${category}?${buster}`;
+    items.push(item);
+  }
+
+  r.items = items;
+  r['load-more-src'] =
+      `/infinite-scroll-random/${category}?${randInt(10000)}`;
+
+  return r;
+};
+
+app.get('/infinite-scroll-random/:category', function(request, response) {
+  const {category} = request.params;
+  const result = generateResults(category);
+  response.json(result);
+});
 
 app.get('/infinite-scroll-faulty', function(req, res) {
   const {query} = req;

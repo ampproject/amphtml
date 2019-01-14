@@ -574,6 +574,10 @@ describe('getBinaryType', () => {
     expect(getBinaryType(win)).to.equal('production');
     win.AMP_CONFIG.type = 'canary';
     expect(getBinaryType(win)).to.equal('canary');
+    win.AMP_CONFIG.type = 'control';
+    expect(getBinaryType(win)).to.equal('control');
+    win.AMP_CONFIG.type = 'rc';
+    expect(getBinaryType(win)).to.equal('rc');
     delete win.AMP_CONFIG.type;
     expect(getBinaryType(win)).to.equal('unknown');
   });

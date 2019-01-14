@@ -241,8 +241,8 @@
         "consents": {},
         "postPromptUI": "postPromptUI",
         "clientConfig": {
-          "CMP_id": "asdf",
-          "other_info": "ahhhh"
+          "CMP_id": "test_id",
+          "other_info": "test_info"
         }
       }
       </script>
@@ -362,6 +362,12 @@
   <footer>
     <div class="brand-logo">PublisherLogo</div>
   </footer>
+
+  <script>
+    setTimeout(() => {
+      AMP.toggleExperiment('amp-consent-v2', true);
+    }, 500);
+  </script>
 </body>
 
 </html>

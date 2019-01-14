@@ -1076,17 +1076,23 @@ export class Bind {
 
     switch (property) {
       case 'text':
-        element.textContent = String(newValue);
-        // If this is a <title> element in the <head>, update document title.
+        let updateTextContent = true;
+        const stringValue = String(newValue);
+
+        // textContent on <textarea> only works before interaction.
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+          // Don't also update textContent to avoid disrupting focus.
+          updateTextContent = false;
+        }
+        // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
-          this.localWin_.document.title = String(newValue);
+          this.localWin_.document.title = stringValue;
         }
-        // Setting `textContent` on TEXTAREA element only works if user
-        // has not interacted with the element, therefore `value` also needs
-        // to be set (but `value` is not an attribute on TEXTAREA)
-        if (tag == 'TEXTAREA') {
-          element.value = String(newValue);
+        // Default behavior.
+        if (updateTextContent) {
+          element.textContent = stringValue;
         }
         break;
 
