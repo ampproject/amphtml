@@ -277,6 +277,7 @@ exports.extensionBundles = [
         'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
+        'amp-story-page-attachment-header',
         'amp-story-unsupported-browser-layer',
         'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',
