@@ -223,7 +223,7 @@ export class AmpStoryEmbeddedComponent {
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           storyPage.classList.toggle('i-amphtml-expanded-mode', false);
           toggle(devAssert(this.expandedViewOverlay_), false);
-          resetStyles(this.previousTarget_, ['transform']);
+          resetStyles(devAssert(this.previousTarget_), ['transform']);
         });
       return;
     }
@@ -396,7 +396,7 @@ export class AmpStoryEmbeddedComponent {
     event.stopPropagation();
 
     this.setState_(ComponentState.EXPANDED, this.previousTarget_);
-    this.animateExpanded_(this.previousTarget_);
+    this.animateExpanded_(devAssert(this.previousTarget_));
 
     this.storeService_.dispatch(
         Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
