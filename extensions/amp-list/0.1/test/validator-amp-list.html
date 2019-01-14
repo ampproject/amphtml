@@ -112,6 +112,10 @@
     <amp-list-load-more load-more-failed></amp-list-load-more>
     <amp-list-load-more load-more-end></amp-list-load-more>
   </amp-list>
+  <!-- Valid amp-list with [is-layout-container] attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    [is-layout-container]="containerState"></amp-list>
   </amp-list>
   <!-- Invalid: unsupported "binding" attribute value -->
   <amp-list width=10 height=10
