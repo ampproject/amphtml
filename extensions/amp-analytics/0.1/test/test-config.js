@@ -622,7 +622,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   function stubXhr() {
     installDocService(win, true);
 
-    const expandStringStub = sinon.stub();
+    const expandStringStub = sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
     expandStringStub.resolvesArg(0);
 

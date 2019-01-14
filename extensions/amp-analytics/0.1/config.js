@@ -190,7 +190,8 @@ export class AnalyticsConfig {
   handleVarGroups_(varGroups, rewriterConfig) {
     const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
     if (!vendorVarGroups) {
-      user().warn(this.getName_(), 'This publisher does not currently ' +
+      const TAG = this.getName_();
+      user().warn(TAG, 'This publisher does not currently ' +
           'support varGroups');
       return Promise.resolve();
     }
