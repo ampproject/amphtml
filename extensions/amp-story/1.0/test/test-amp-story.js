@@ -1341,6 +1341,7 @@ describes.realWin('amp-story', {
                 {ampStoryNavigationPath: ['cover', 'page-1']}, '',);
           });
     });
+
     it(
         'should navigate to the correct previous page after navigating away',
         () => {
