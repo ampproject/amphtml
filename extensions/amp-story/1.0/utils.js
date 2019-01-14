@@ -230,6 +230,7 @@ export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
   PAGE_ID: 'ampStoryPageId',
+  NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
 /**

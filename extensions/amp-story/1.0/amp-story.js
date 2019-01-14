@@ -149,13 +149,6 @@ const Attributes = {
   SUPPORTS_LANDSCAPE: 'supports-landscape',
 };
 
-/** @enum {string} */
-const HistoryStates = {
-  PAGE_ID: 'ampStoryPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  NAVIGATION_PATH: 'ampStoryNavigationPath',
-};
-
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -1223,8 +1216,9 @@ export class AmpStory extends AMP.BaseElement {
     } else if (direction === NavigationDirection.NEXT) {
       this.storyNavigationPath_.push(targetPage);
     }
-    this.setHistoryState_(
-        HistoryStates.NAVIGATION_PATH,
+    setHistoryState(
+        this.win,
+        HistoryState.NAVIGATION_PATH,
         this.storyNavigationPath_.map(page => page.element.id));
     return targetPage;
   }
@@ -2117,7 +2111,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializeStoryNavigationPath_() {
     const historyNavigationPath =
-      this.getHistoryState_(HistoryStates.NAVIGATION_PATH);
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
       this.storyNavigationPath_ =
         historyNavigationPath.map(pageId => this.getPageById(pageId));
