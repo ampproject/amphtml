@@ -417,7 +417,7 @@ function expandRequestStr(request) {
  * Expands all key value pairs asynchronously and returns a promise that will
  * resolve with the expanded object.
  * @param {!Element|!ShadowRoot} element
- * @param {Object} obj
+ * @param {!Object} obj
  * @return {!Promise<Object>}
  */
 function shallowExpandObject(element, obj) {
