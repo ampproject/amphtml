@@ -261,6 +261,19 @@ function isSizedLayoutRect({width, height}) {
 
 
 /**
+ * @param {!DockTargetDef} a
+ * @param {!DockTargetDef} b
+ * @return {boolean}
+ */
+function targetsEqual(a, b) {
+  if (isElement(a)) {
+    return a == b;
+  }
+  return a.posX == b.posX;
+}
+
+
+/**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
  * {@see ../../../src/video-interface.VideoInterface}.
  * @visibleForTesting
@@ -640,14 +653,18 @@ export class VideoDocking {
    * @private
    */
   updateOnResize_(video) {
-    const target = this.getTargetFor_(video);
-    if (target) {
-      this.dock_(video, target, /* step */ 1);
-      return;
-    }
-    if (this.isCurrentlyDocked_(video)) {
-      this.undock_(video);
-    }
+    // Update on subsequent animation frame to allow CSS media queries to be
+    // applied.
+    this.ampdoc_.win.requestAnimationFrame(() => {
+      const target = this.getTargetFor_(video);
+      if (target) {
+        this.dock_(video, target, /* step */ 1);
+        return;
+      }
+      if (this.isCurrentlyDocked_(video)) {
+        this.undock_(video);
+      }
+    });
   }
 
   /**
@@ -810,20 +827,6 @@ export class VideoDocking {
   }
 
   /**
-   * @param {number} dirX
-   * @param {number} dirY
-   * @private
-   */
-  dismiss_(dirX = 0, dirY = 0) {
-    const video = this.getDockedVideo_();
-    const {posY} = this.currentlyDocked_.target;
-    video.pause();
-    this.lastDismissed_ = video;
-    this.lastDismissedPosY_ = posY || null;
-    this.undock_(video, dirX, dirY);
-  }
-
-  /**
    * @return {!RelativeY}
    * @private
    */
@@ -886,7 +889,10 @@ export class VideoDocking {
    */
   dock_(video, target, step) {
     const currentlyDocked = this.currentlyDocked_;
-    if (currentlyDocked && currentlyDocked.step >= step) {
+
+    if (currentlyDocked &&
+      targetsEqual(target, currentlyDocked.target) &&
+      currentlyDocked.step >= step) {
       return;
     }
 
@@ -1260,7 +1266,9 @@ export class VideoDocking {
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
     this.currentlyDocked_ = {video, target, step};
-    if (!previouslyDocked || previouslyDocked.video != video) {
+    if (!previouslyDocked ||
+        !targetsEqual(target, previouslyDocked.target) ||
+        previouslyDocked.video != video) {
       const {
         x,
         y,
@@ -1411,25 +1419,6 @@ export class VideoDocking {
     this.isDragging_ = true;
     this.getControls_().disable();
     this.offset_(offset.x, offset.y);
-    this.updateDismissalAreaStyling_(offset.x, offset.y);
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @private
-   */
-  updateDismissalAreaStyling_(offsetX, offsetY) {
-    const video = this.getDockedVideo_();
-    const {element} = video;
-    const internalElement = getInternalVideoElementFor(element);
-    const inDismissalArea = this.inDismissalArea_(offsetX, offsetY);
-
-    video.mutateElement(() => {
-      const className = 'amp-video-docked-almost-dismissed';
-      internalElement.classList.toggle(className, inDismissalArea);
-      this.getControls_().overlay.classList.toggle(className, inDismissalArea);
-    });
   }
 
   /**
@@ -1459,40 +1448,7 @@ export class VideoDocking {
 
     this.getControls_().enable();
 
-    if (this.dismissOnDragEnd_(offset.x, offset.y)) {
-      return;
-    }
-
     this.snap_(offset.x, offset.y);
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @private
-   */
-  dismissOnDragEnd_(offsetX, offsetY) {
-    const inDimissalArea = this.inDismissalArea_(offsetX, offsetY);
-    if (inDimissalArea) {
-      this.dismiss_();
-    }
-    return inDimissalArea;
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @return {boolean}
-   */
-  inDismissalArea_(offsetX, offsetY) {
-    // TODO: Use topEdge/bottomEdge
-    const dismissToleranceFromCenterPx = 20;
-    const {width: vw, height: vh} = this.viewport_.getSize();
-    const {centerX, centerY} = this.getCenter_(offsetX, offsetY);
-    return centerX >= (vw - dismissToleranceFromCenterPx) ||
-        centerX <= dismissToleranceFromCenterPx ||
-        centerY >= (vh - dismissToleranceFromCenterPx) ||
-        centerY <= dismissToleranceFromCenterPx;
   }
 
   /**
@@ -1731,14 +1687,8 @@ export class VideoDocking {
       video.showControls();
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
-      const {overlay} = this.getControls_();
-      const almostDismissed = 'amp-video-docked-almost-dismissed';
       const placeholderIcon = this.getPlaceholderRefs_()['icon'];
       const placeholderBackground = this.getPlaceholderBackground_();
-
-      // TODO(alanorozco): Remove weird flick-to-dismiss.
-      internalElement.classList.remove(almostDismissed);
-      overlay.classList.remove(almostDismissed);
 
       toggle(shadowLayer, false);
 
