@@ -25,7 +25,7 @@ import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getAmpdoc} from '../../../src/service';
@@ -429,7 +429,9 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipEl_(target) {
-    const embedConfig = this.getEmbedConfigFor_(target);
+    const embedConfig = userAssert(this.getEmbedConfigFor_(target), 'Invalid ' +
+      'embed config for target', target);
+
     this.updateTooltipText_(target, embedConfig);
     this.updateTooltipComponentIcon_(target, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
@@ -556,14 +558,16 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Updates tooltip action icon. This is found on the right of the text.
    * @param {!Object} embedConfig
+   * @private
    */
   updateTooltipActionIcon_(embedConfig) {
     const actionIcon =
       this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
 
     this.resources_.mutateElement(devAssert(actionIcon), () => {
-      actionIcon.classList.toggle(ActionIcon.EXPAND, false);
-      actionIcon.classList.toggle(ActionIcon.LAUNCH, false);
+      Object.values(ActionIcon).map(iconClass => {
+        actionIcon.classList.toggle(iconClass, false);
+      });
 
       actionIcon.classList.toggle(embedConfig.actionIcon, true);
     });
