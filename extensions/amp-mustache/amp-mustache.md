@@ -77,6 +77,8 @@ target AMP element that uses this template to render its content (for example, i
 
 ## Restrictions
 
+### Validation
+
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
 
@@ -84,6 +86,14 @@ that among other things, you can't use `amp-mustache` to:
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
 The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+
+### Sanitization
+
+Mustache output is sanitized for security reasons, which may result in certain elements and attributes being removed.
+
+A console error will be output with details of the sanitized element or attribute. For example:
+
+> [PURIFIER] Removed unsafe attribute: href="javascript:alert"
 
 ## Pitfalls
 

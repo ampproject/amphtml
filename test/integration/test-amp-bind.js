@@ -19,13 +19,14 @@ import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
 
+const TIMEOUT = 15000;
+
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
 describe.configure().skipEdge().run('amp-bind', function() {
-  // Give more than default 2000ms timeout for local testing.
-  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
+  // Helper that sets the poll timeout.
   function poll(desc, condition, onError) {
     return classicPoll(desc, condition, onError, TIMEOUT);
   }
