@@ -19,12 +19,17 @@ import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
 import {
-  LINKS_IMPRESSIONS_TRACKING_URL,
-  NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
+  DEFAULT_CONFIG,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from '../constants';
+
+
+const {
+  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
+  linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
+  nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
+} = DEFAULT_CONFIG;
 
 describes.fakeWin(
     'test-tracking',

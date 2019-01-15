@@ -158,7 +158,8 @@ export class Tracking {
     });
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in NA_CLICK_TRACKING_URL.
+    // placeholder variables defined in NA_CLICK_TRACKING_URL
+    // (See constants.js).
     this.analytics_.trigger(NON_AFFILIATE_CLICK, dict({
       'data': JSON.stringify(data),
       'rnd': 'RANDOM',
@@ -187,7 +188,8 @@ export class Tracking {
     ));
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
+    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
+    // (See constants.js).
     this.analytics_.trigger(PAGE_IMPRESSIONS, dict({
       'data': JSON.stringify(data),
     }));
@@ -218,6 +220,7 @@ export class Tracking {
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
+    // (See constants.js).
     this.analytics_.trigger(LINK_IMPRESSIONS, dict({
       'data': JSON.stringify(data),
     }));

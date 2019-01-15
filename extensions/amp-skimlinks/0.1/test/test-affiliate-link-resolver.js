@@ -18,11 +18,13 @@ import {
   AFFILIATE_STATUS,
   AffiliateLinkResolver,
 } from '../affiliate-link-resolver';
-import {DOMAIN_RESOLVER_API_URL} from '../constants';
+import {DEFAULT_CONFIG} from '../constants';
 import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
+
+const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 
 describes.fakeWin(
     'AffiliateLinkResolver',

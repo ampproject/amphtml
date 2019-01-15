@@ -20,13 +20,13 @@ export const AFFILIATION_API = 'https://go.skimresources.com';
 export const PLATFORM_NAME = 'amp@' + AMP_SKIMLINKS_VERSION;
 export const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
 
-export const DOMAIN_RESOLVER_API_URL = 'https://r.skimresources.com/api';
-export const TRACKING_API_URL = 'https://t.skimresources.com/api';
-export const PAGE_IMPRESSION_TRACKING_URL =
+const DOMAIN_RESOLVER_API_URL = 'https://r.skimresources.com/api';
+const TRACKING_API_URL = 'https://t.skimresources.com/api';
+const PAGE_IMPRESSION_TRACKING_URL =
     `${TRACKING_API_URL}/track.php?data=\${data}`;
-export const LINKS_IMPRESSIONS_TRACKING_URL =
+const LINKS_IMPRESSIONS_TRACKING_URL =
     `${TRACKING_API_URL}/link?data=\${data}`;
-export const NA_CLICK_TRACKING_URL =
+const NA_CLICK_TRACKING_URL =
     `${TRACKING_API_URL}/?call=track&rnd=\${rnd}&data=\${data}`;
 
 // Domains excluded from impressions & affiliation & NA click tracking.
@@ -38,3 +38,12 @@ export const GLOBAL_DOMAIN_BLACKLIST = [
   'twitter.com',
   'youtube.com',
 ];
+
+export const DEFAULT_CONFIG = {
+  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
+  linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
+  nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
+  waypointUrl: AFFILIATION_API,
+  beaconUrl: DOMAIN_RESOLVER_API_URL,
+};
+

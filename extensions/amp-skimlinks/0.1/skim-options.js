@@ -19,12 +19,8 @@ import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
 
 import {
-  AFFILIATION_API,
-  DOMAIN_RESOLVER_API_URL,
+  DEFAULT_CONFIG,
   GLOBAL_DOMAIN_BLACKLIST,
-  LINKS_IMPRESSIONS_TRACKING_URL,
-  NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
 } from './constants';
 
 const errors = {
@@ -35,13 +31,7 @@ const errors = {
   INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
 };
 
-export const defaultConfig = {
-  'pageTrackingUrl': PAGE_IMPRESSION_TRACKING_URL,
-  'linksTrackingUrl': LINKS_IMPRESSIONS_TRACKING_URL,
-  'nonAffiliateTrackingUrl': NA_CLICK_TRACKING_URL,
-  'waypointUrl': AFFILIATION_API,
-  'beaconUrl': DOMAIN_RESOLVER_API_URL,
-};
+
 
 /**
  *
@@ -167,11 +157,29 @@ function getInternalDomains_(docInfo) {
 
 /**
  * @param {!Element} element
+ * @return {!Object}
  */
 function getConfig_(element) {
   try {
-    return Object.assign({}, defaultConfig, getChildJsonConfig(element));
+    // Custom config is only used for e2e tests.
+    const customConfigJson = getChildJsonConfig(element);
+    // Warning: getChildJsonConfig returns an JSON object while
+    // DEFAULT_CONFIG is a normal object with keys that can be renamed
+    // by google closure compiler on the production build. Therefore, we
+    // are converting here the JSON object keys to the internal object keys.
+    return {
+      pageTrackingUrl: customConfigJson['pageTrackingUrl'] ||
+        DEFAULT_CONFIG.pageTrackingUrl,
+      linksTrackingUrl: customConfigJson['linksTrackingUrl'] ||
+        DEFAULT_CONFIG.linksTrackingUrl,
+      nonAffiliateTrackingUrl: customConfigJson['nonAffiliateTrackingUrl'] ||
+        DEFAULT_CONFIG.nonAffiliateTrackingUrl,
+      waypointUrl: customConfigJson['waypointUrl'] ||
+        DEFAULT_CONFIG.waypointUrl,
+      beaconUrl: customConfigJson['beaconUrl'] ||
+        DEFAULT_CONFIG.beaconUrl,
+    };
   } catch (err) {
-    return defaultConfig;
+    return DEFAULT_CONFIG;
   }
 }
