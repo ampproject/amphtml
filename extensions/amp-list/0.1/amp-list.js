@@ -38,7 +38,7 @@ import {getValueForExpr} from '../../../src/json';
 import {htmlFor} from '../../../src/static-template';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, toggle} from '../../../src/style';
+import {px, setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
   setupInput,
@@ -716,6 +716,9 @@ export class AmpList extends AMP.BaseElement {
           .remove('i-amphtml-list-load-more-overflow');
       this.container_.classList
           .remove('i-amphtml-list-load-more-container-overflow');
+      setStyles(this.container_, {
+        marginBottom: '',
+      });
     });
   }
 
@@ -727,13 +730,22 @@ export class AmpList extends AMP.BaseElement {
         .contains('i-amphtml-list-load-more-container-overflow')) {
       return;
     }
-    this.mutateElement(() => {
-      this.container_.classList
-          .add('i-amphtml-list-load-more-container-overflow');
-      this.loadMoreButton_.classList
-          .add('i-amphtml-list-load-more-overflow');
-      this.element.appendChild(this.loadMoreButton_);
-    });
+    let buttonHeight;
+
+    this.measureMutateElement(
+        () => {
+          buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
+        },
+        () => {
+          this.container_.classList
+              .add('i-amphtml-list-load-more-container-overflow');
+          this.loadMoreButton_.classList
+              .add('i-amphtml-list-load-more-overflow');
+          setStyles(this.container_, {
+            'margin-bottom': px(buttonHeight),
+          });
+          this.element.appendChild(this.loadMoreButton_);
+        });
   }
 
   /**
