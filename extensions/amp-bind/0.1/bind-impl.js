@@ -37,6 +37,7 @@ import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 const TAG = 'amp-bind';
 
@@ -174,10 +175,10 @@ export class Bind {
           if (opt_win) {
             // In FIE, scan the document node of the iframe window.
             const {document} = opt_win;
-            return waitForBodyPromise(document).then(() => document);
+            return whenDocumentReady(document).then(() => document);
           } else {
             // Otherwise, scan the root node of the ampdoc.
-            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+            return ampdoc.whenReady().then(() => ampdoc.getRootNode());
           }
         })
         .then(root => {

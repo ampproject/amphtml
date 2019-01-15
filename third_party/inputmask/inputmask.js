@@ -1681,9 +1681,21 @@ export function factory($, window, document, undefined) {
         var EventHandlers = {
             keydownEvent: function(e) {
                 var input = this, $input = $(input), k = e.keyCode, pos = caret(input);
-                if (k === Inputmask.keyCode.BACKSPACE || k === Inputmask.keyCode.DELETE || iphone && k === Inputmask.keyCode.BACKSPACE_SAFARI || e.ctrlKey && k === Inputmask.keyCode.X && !isInputEventSupported("cut")) {
+                if (k === Inputmask.keyCode.BACKSPACE || k === Inputmask.keyCode.DELETE || iphone && k === Inputmask.keyCode.BACKSPACE_SAFARI || (e.ctrlKey || e.metaKey) && k === Inputmask.keyCode.X && !isInputEventSupported("cut")) {
                     e.preventDefault();
+
+                    // Handle META/CTRL+DELETE clear keyboard shortcut
+                    if (e.metaKey || e.ctrlKey) {
+                        pos.begin = 0;
+                    }
+
                     handleRemove(input, k, pos);
+
+                    // Handle SelectAll then Delete
+                    if (pos.end - pos.begin == input.value.length) {
+                        resetMaskSet(false);
+                    }
+
                     writeBuffer(input, getBuffer(true), getMaskSet().p, e, input.inputmask._valueGet() !== getBuffer().join(""));
                 } else if (k === Inputmask.keyCode.END || k === Inputmask.keyCode.PAGE_DOWN) {
                     e.preventDefault();
@@ -1794,7 +1806,10 @@ export function factory($, window, document, undefined) {
                     }
                 }
                 checkVal(input, false, false, pasteValue.toString().split(""));
-                writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                // Use settimeout to make Safari paste work
+                setTimeout(() => {
+                    writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                }, 0);
                 return e.preventDefault();
             },
             inputFallBackEvent: function(e) {
@@ -2008,7 +2023,19 @@ export function factory($, window, document, undefined) {
                 var clipboardData = window.clipboardData || ev.clipboardData, clipData = isRTL ? getBuffer().slice(pos.end, pos.begin) : getBuffer().slice(pos.begin, pos.end);
                 clipboardData.setData("text", isRTL ? clipData.reverse().join("") : clipData.join(""));
                 if (document.execCommand) document.execCommand("copy");
+
+                // Handle META/CTRL+DELETE clear keyboard shortcut
+                if (e.metaKey || e.ctrlKey) {
+                    pos.begin = 0;
+                }
+
                 handleRemove(input, Inputmask.keyCode.DELETE, pos);
+
+                // Handle SelectAll then Delete
+                if (pos.end - pos.begin == input.value.length) {
+                    resetMaskSet(false);
+                }
+
                 writeBuffer(input, getBuffer(), getMaskSet().p, e, undoValue !== getBuffer().join(""));
             },
             blurEvent: function(e) {
