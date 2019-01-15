@@ -727,22 +727,13 @@ export class AmpList extends AMP.BaseElement {
         .contains('i-amphtml-list-load-more-container-overflow')) {
       return;
     }
-
-    let buttonHeight;
-    let height;
-    this.measureMutateElement(
-        () => {
-          buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
-          height = this.element./*OK*/offsetHeight;
-        },
-        () => {
-          this.container_.classList
-              .add('i-amphtml-list-load-more-container-overflow');
-          this.loadMoreButton_.classList
-              .add('i-amphtml-list-load-more-overflow');
-          this.element.appendChild(this.loadMoreButton_);
-          this.element.changeSize(height + buttonHeight);
-        });
+    this.mutateElement(() => {
+      this.container_.classList
+          .add('i-amphtml-list-load-more-container-overflow');
+      this.loadMoreButton_.classList
+          .add('i-amphtml-list-load-more-overflow');
+      this.element.appendChild(this.loadMoreButton_);
+    });
   }
 
   /**
