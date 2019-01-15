@@ -37,6 +37,8 @@ tags: {
     name: "mask"
     mandatory: true
     dispatch_key: NAME_DISPATCH
+    # Only allow named masks to appear alone in the mask list.
+    blacklisted_value_regex: "([^\\s]+\\scredit|credit\\s[^\\s]+)"
   }
   attrs: {
     name: "mask-output"
