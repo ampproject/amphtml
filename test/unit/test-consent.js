@@ -20,16 +20,17 @@ describes.fakeWin('consent', {amp: true}, env => {
   describe('block by metaTags', () => {
     let doc;
     let head;
+    let meta;
     beforeEach(() => {
       doc = env.win.document;
       head = doc.head;
-      const meta = doc.createElement('meta');
+      meta = doc.createElement('meta');
       meta.setAttribute('name', 'amp-consent-blocking');
       meta.setAttribute('content', 'AMP-TEST,amp-ad');
-      head.appendChild(meta);
     });
 
     it('block by tagName', () => {
+      doc.head.appendChild(meta);
       const element = doc.createElement('amp-test');
       element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
@@ -37,6 +38,7 @@ describes.fakeWin('consent', {amp: true}, env => {
     });
 
     it('block by lowercase tagName', () => {
+      head.appendChild(meta);
       const element = doc.createElement('amp-ad');
       element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
@@ -44,25 +46,15 @@ describes.fakeWin('consent', {amp: true}, env => {
     });
 
     it('not block unspecified element', () => {
+      head.appendChild(meta);
       const element = doc.createElement('amp-not-exist');
       element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.false;
     });
 
-    it('work with multi metaTags', () => {
-      const meta = doc.createElement('meta');
-      meta.setAttribute('name', 'amp-consent-blocking');
-      meta.setAttribute('content', 'amp-this');
-      head.appendChild(meta);
-      const element = doc.createElement('amp-this');
-      element.getAmpDoc = () => {return env.ampdoc;};
-      doc.body.appendChild(element);
-      expect(shouldBlockOnConsentByMeta(element)).to.be.true;
-    });
-
-    it.only('handles white space', () => {
-      const meta = doc.createElement('meta');
+    it('handles white space', () => {
+      meta = doc.createElement('meta');
       meta.setAttribute('name', 'amp-consent-blocking');
       meta.setAttribute('content', ' amp-this,    amp-that  ');
       head.appendChild(meta);
@@ -73,7 +65,7 @@ describes.fakeWin('consent', {amp: true}, env => {
     });
 
     it('only work with tagName', () => {
-      const meta = doc.createElement('meta');
+      meta = doc.createElement('meta');
       meta.setAttribute('name', 'amp-consent-blocking');
       meta.setAttribute('content', 'amp-this:name,amp-this[name]');
       head.appendChild(meta);
