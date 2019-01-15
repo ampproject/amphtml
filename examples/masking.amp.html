@@ -30,42 +30,26 @@
 <body>
   <h1>Input Masking</h1>
 
-  <!-- TODO(cvializ) -->
-  <!--
   <h2>Named Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
-    <p>Plain text</p>
-    <input name="text">
-
-    <p>Single character</p>
-    <input name="char" mask="L">
-
-    <p>Email</p>
-    <input name="email" mask="email" placeholder="alice@example.com" type="search">
-
-    <p>US and Canada Phone</p>
-    <input name="phone" mask="phone-us" placeholder="+1(555) 555-5555" type="tel"></div>
-
-    <p>International Phone</p>
-    <input name="phone-intl" mask="phone" placeholder="+1(555) 555-5555" type="tel">
-
-
-    <p>mm/dd/yyyy</p>
-    <input name="date-us" mask="date-us" placeholder="mm/dd/yyyy" type="tel">
-    <p>dd/mm/yyyy</p>
-    <input name="date-intl" mask="date-intl" placeholder="dd/mm/yyyy" type="tel">
-    <p>yyyy-mm-dd</p>
-    <input name="date-iso" mask="date-iso" placeholder="yyyy-mm-dd" type="tel">
+    <p>Credit card (credit)</p>
+    <input id="credit" type="text" mask="credit" placeholder="Credit">
 
     <input type="submit">
   </form>
-  -->
+
   <h2>Custom Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
+    <p>Plain text (no mask)</p>
+    <input name="text" type="text">
+
+    <p>Single character</p>
+    <input name="char" mask="L" type="text">
+
     <p>Phone</p>
     <input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
 
