@@ -256,7 +256,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
-    /** @private @const {Array<string>} */
+    /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
 
     /** @const @private {!AmpStoryVariableService} */
@@ -1208,20 +1208,18 @@ export class AmpStory extends AMP.BaseElement {
       this.storyNavigationPath_.pop();
       if (this.storyNavigationPath_.length > 0) {
         const pathPrevious =
-            this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
-            this.storyNavigationPath_[0];
+            this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
         if (pathPrevious != targetPageId) {
           return this.getPageById(pathPrevious);
         }
       }
     } else if (direction === NavigationDirection.NEXT) {
       const topOfStack =
-          this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
-          this.storyNavigationPath_[0];
-      // // If the user navigates the away from the page, the top of storyStack
-      // // will be the same as ampStoryPageId in the history state.
-      if ((targetPageId != topOfStack) ||
-        this.storyNavigationPath_.length == 0) {
+          this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
+      // If the user navigates the away from the page, the top of storyStack
+      // will be the same as ampStoryPageId in the history state.
+      if ((targetPageId !== topOfStack) ||
+        this.storyNavigationPath_.length === 0) {
         this.storyNavigationPath_.push(targetPageId);
       }
     }
