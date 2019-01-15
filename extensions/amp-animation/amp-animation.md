@@ -96,7 +96,7 @@ and is comprised of:
 
 ### Conditions
 
-Conditions can specify whether this animation component is included in the final animation. Currently, only `media` expression is supported.
+Conditions can specify whether this animation component is included in the final animation.
 
 #### Media query
 
