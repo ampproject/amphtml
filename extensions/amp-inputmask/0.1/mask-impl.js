@@ -90,7 +90,8 @@ export class Mask {
       jitMasking: true,
     };
 
-    const namedFormat = NamedMasksToInputmask[mask];
+    const trimmedMask = mask.trim();
+    const namedFormat = NamedMasksToInputmask[trimmedMask];
     if (namedFormat) {
       if (typeof namedFormat == 'object') {
         Object.assign(config, namedFormat);
@@ -98,7 +99,7 @@ export class Mask {
         config.alias = namedFormat;
       }
     } else {
-      const inputmaskMask = convertAmpMaskToInputmask(mask);
+      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
       config.alias = 'custom';
       config.mask = () => inputmaskMask;
     }
