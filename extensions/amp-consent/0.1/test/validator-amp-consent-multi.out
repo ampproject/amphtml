@@ -37,7 +37,7 @@ FAIL
 |      <button>Accept</button>
 |    </div>
 |  </amp-consent>
-|  <!-- Invalid: multiple amp-consent with type -->
+|  <!-- Invalid: multiple amp-consent -->
 |  <amp-consent type="_ping_" layout='nodisplay'>
 |    <script type="application/json">{
 |      "clientConfig": {
