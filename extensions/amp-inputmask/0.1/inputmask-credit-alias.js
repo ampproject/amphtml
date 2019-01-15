@@ -22,33 +22,31 @@
 export function factory(Inputmask) {
   // TODO(cvializ): Improve card chunking support
   // https://baymard.com/checkout-usability/credit-card-patterns
-  Inputmask.extendDefinitions({
-    // TODO(cvializ): escape these definitions or make them local to the alias.
-    // matches 37 and 34, amex prefixes
-    '♤': {
-      'validator': function(chrs, buffer) {
-        const val = buffer.buffer.join('') + chrs;
-        const valExp2 = /3(4|7)/;
-        const regextest = valExp2.test(val);
-        return regextest;
-      },
-      'cardinality': 2,
-    },
-    // matches two-digit number except 34 and 37
-    '♢': {
-      'validator': function(chrs, buffer) {
-        const val = buffer.buffer.join('') + chrs;
-        const valExp2 = new RegExp('\\d\\d');
-        const regextest = valExp2.test(val);
-        return regextest && val != '34' && val != '37';
-      },
-      'cardinality': 2,
-    },
-  });
-
   Inputmask.extendAliases({
     'credit': {
-      mask: ['♢99 9999 9999 9999', '♤99 999999 99999'],
+      mask: function(opts) {
+        opts.definitions = {
+          'x': {
+            'validator': function(chrs, buffer) {
+              const val = buffer.buffer.join('') + chrs;
+              const valExp2 = new RegExp('\\d\\d');
+              const regextest = valExp2.test(val);
+              return regextest && val != '34' && val != '37';
+            },
+            'cardinality': 2,
+          },
+          'y': {
+            'validator': function(chrs, buffer) {
+              const val = buffer.buffer.join('') + chrs;
+              const valExp2 = /3(4|7)/;
+              const regextest = valExp2.test(val);
+              return regextest;
+            },
+            'cardinality': 2,
+          },
+        };
+        return ['x99 9999 9999 9999', 'y99 999999 99999'];
+      },
     },
   });
 }
