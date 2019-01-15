@@ -838,7 +838,7 @@ export class AmpStory extends AMP.BaseElement {
     const isActualPage =
       pageId =>
         findIndex(this.pages_, page => page.element.id === pageId) >= 0;
-    const historyPage = this.getHistoryState_(HistoryStates.PAGE_ID);
+    const historyPage = getHistoryState(HistoryStates.PAGE_ID);
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
