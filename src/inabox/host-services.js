@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
@@ -25,7 +26,21 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
+export const HostServiceError = {
+  MISS_MATCH: 1, // the API impl mis-match the environment
+  NOT_SUPPORTED: 2, // the feature is not supported
+};
+
 export class HostServices {
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {boolean}
+   */
+  static isAvailable(elementOrAmpDoc) {
+    const head = Services.ampdoc(elementOrAmpDoc).getHeadNode();
+    return !!head.querySelector('script[host-api]');
+  }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc

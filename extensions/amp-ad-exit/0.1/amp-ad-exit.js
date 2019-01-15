@@ -28,12 +28,14 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
+import {HostServiceError, HostServices} from '../../../src/inabox/host-services';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
 import {parseUrlDeprecated} from '../../../src/url';
+
 const TAG = 'amp-ad-exit';
 
 /**
@@ -106,7 +108,21 @@ export class AmpAdExit extends AMP.BaseElement {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
+    const finalUrl = substituteVariables(target.finalUrl);
+    if (HostServices.isAvailable(this.getAmpDoc())) {
+      HostServices.exitForDoc(this.getAmpDoc())
+          .then(exitService => exitService.openUrl(finalUrl))
+          .catch(errorCode => {
+            // TODO: reporting on errors
+            dev().fine(TAG, 'HostServiceError: ' + errorCode);
+            // fallback on browser API on environment miss match
+            if (errorCode === HostServiceError.MISS_MATCH) {
+              openWindowDialog(this.win, finalUrl, '_blank');
+            }
+          });
+    } else {
+      openWindowDialog(this.win, finalUrl, '_blank');
+    }
   }
 
 
