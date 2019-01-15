@@ -526,7 +526,7 @@ describes.realWin('SlideScroll', {
     const ampSlideScroll = await getAmpSlideScroll();
     const impl = ampSlideScroll.implementation_;
     const getLayoutWidthStub = sandbox.stub(impl, 'getLayoutWidth');
-    
+
     getLayoutWidthStub.returns(200);
     impl.onLayoutMeasure();
     expect(getLayoutWidthStub).to.have.been.calledOnce;
