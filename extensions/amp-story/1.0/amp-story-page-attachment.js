@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
@@ -29,6 +30,7 @@ import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
+import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /** @const {number} */
@@ -106,6 +108,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       swipingUp: null,
       isSwipeY: null,
     };
+
+    /** @private {!Array<function()>} */
+    this.touchEventUnlisteners_ = [];
   }
 
   /** @override */
@@ -154,15 +159,53 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         .querySelector('.i-amphtml-story-page-attachment-close-button')
         .addEventListener('click', () => this.close_(), true /** useCapture */);
 
-    // Enforced by AMP validation rules.
-    const storyPageEl = this.element.parentElement;
+    // Closes the attachment on opacity background clicks.
+    this.element.addEventListener('click', event => {
+      if (event.target.tagName.toLowerCase() === 'amp-story-page-attachment') {
+        this.close_();
+      }
+    }, true /** useCapture */);
 
-    storyPageEl.addEventListener(
-        'touchstart', this.onTouchStart_.bind(this), true /** useCapture */);
-    storyPageEl.addEventListener(
-        'touchmove', this.onTouchMove_.bind(this), true /** useCapture */);
-    storyPageEl.addEventListener(
-        'touchend', this.onTouchEnd_.bind(this), true /** useCapture */);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+  }
+
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    uiState === UIType.MOBILE ?
+      this.startListeningForTouchEvents_() :
+      this.stopListeningForTouchEvents_();
+  }
+
+  /**
+   * @private
+   */
+  startListeningForTouchEvents_() {
+    // Enforced by AMP validation rules.
+    const storyPageEl = dev().assertElement(this.element.parentElement);
+
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this),
+            {capture: true}));
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this),
+            {capture: true}));
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this),
+            {capture: true}));
+  }
+
+  /**
+   * @private
+   */
+  stopListeningForTouchEvents_() {
+    this.touchEventUnlisteners_.forEach(fn => fn());
+    this.touchEventUnlisteners_ = [];
   }
 
   /**

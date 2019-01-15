@@ -21,6 +21,7 @@ amp-story-page-attachment {
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
+  overflow: hidden !important;
   z-index: 4 !important; /** Over amp-story-cta-layer. */
   transform: translate3d(0, 100%, 0) !important;
   /** If you change the duration of this animation, please reflect if in the JavaScript close_ method too. */
@@ -59,4 +60,26 @@ amp-story-page-attachment.i-amphtml-story-page-attachment-open {
 
 .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content > * {
   display: none !important;
+}
+
+[desktop] amp-story-page-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s !important;
+}
+
+[desktop] amp-story-page-attachment.i-amphtml-story-page-attachment-open {
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+[desktop] .i-amphtml-story-page-attachment {
+  height: 60vh !important;
+  width: 800px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 }
