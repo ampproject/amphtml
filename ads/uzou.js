@@ -24,7 +24,6 @@ import {parseJson} from '../src/json';
 export function uzou(global, data) {
   validateData(data, ['widgetParams'], []);
 
-  const akamaiHost = 'speee-ad.akamaized.net';
   const prefixMap = {
     test: 'dev-',
     development: 'dev-',
@@ -33,6 +32,7 @@ export function uzou(global, data) {
   };
 
   const widgetParams = parseJson(data['widgetParams']);
+  const akamaiHost = widgetParams['akamaiHost'] || 'speee-ad.akamaized.net';
   const placementCode = widgetParams['placementCode'];
   const mode = widgetParams['mode'] || 'production';
   const entryPoint = `https://${prefixMap[mode]}${akamaiHost}/tag/${placementCode}/js/outer-frame.min.js`;
@@ -46,8 +46,8 @@ export function uzou(global, data) {
   const uzouInjector = {
     url: (
       widgetParams['url'] ||
-      global.context.canonicalUrl ||
-      global.context.sourceUrl
+      global.context.sourceUrl ||
+      global.context.canonicalUrl
     ),
     referer: widgetParams['referer'] || global.context.referrer,
   };
