@@ -489,6 +489,25 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
 }
+# AMP metadata, name=amp-consent-blocking
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-consent-blocking"
+  mandatory_parent: "HEAD"
+  satisfies: "meta name=amp-consent-blocking"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-consent-blocking"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # AMP metadata, name=amp-experiment-token
 # Related to AMP Origin Experiments
 tags: {
