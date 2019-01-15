@@ -52,7 +52,7 @@ const EXPANDABLE_COMPONENTS = {
   TWITTER: {
     componentIcon: 'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.' +
     'w3.org/2000/svg" width="400" height="400"><g fill="none" fill-rule="eve' +
-    'nodd"><path d="M0 0h400v400H0z"/><path fill="%23757575" fill-rule="nonz' +
+    'nodd"><path d="M0 0h400v400H0z"/><path fill="%231da1f2" fill-rule="nonz' +
     'ero" d="M153.62 301.59c94.34 0 145.94-78.16 145.94-145.94 0-2.22 0-4.43' +
     '-.15-6.63A104.36 104.36 0 0 0 325 122.47a102.38 102.38 0 0 1-29.46 8.07 ' +
     '51.47 51.47 0 0 0 22.55-28.37 102.79 102.79 0 0 1-32.57 12.45c-15.9-16.' +
