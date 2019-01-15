@@ -40,6 +40,7 @@ import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
+import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
@@ -1409,10 +1410,15 @@ function createBaseCustomElementClass(win) {
      * @return {?string}
      */
     getConsentPolicy_() {
-      const policyId = this.getAttribute('data-block-on-consent');
+      let policyId = this.getAttribute('data-block-on-consent');
       if (policyId === null) {
-        // data-block-on-consent attribute not set
-        return null;
+        if (shouldBlockOnConsentByMeta(this)) {
+          policyId = 'default';
+          this.setAttribute('data-block-on-consent', policyId);
+        } else {
+          // data-block-on-consent attribute not set
+          return null;
+        }
       }
       if (policyId == '' || policyId == 'default') {
         // data-block-on-consent value not set, up to individual element
