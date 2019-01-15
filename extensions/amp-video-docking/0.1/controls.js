@@ -212,9 +212,12 @@ export class Controls {
    * @param {!../../../src/layout-rect.LayoutRectDef} area
    */
   setVideo(video, area) {
-    this.video_ = video;
     this.area_ = area;
-    this.listen_(video);
+
+    if (this.video_ != video) {
+      this.video_ = video;
+      this.listen_(video);
+    }
   }
 
   /**

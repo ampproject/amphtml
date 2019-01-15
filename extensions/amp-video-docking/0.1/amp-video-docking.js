@@ -261,6 +261,19 @@ function isSizedLayoutRect({width, height}) {
 
 
 /**
+ * @param {!DockTargetDef} a
+ * @param {!DockTargetDef} b
+ * @return {boolean}
+ */
+function targetsEqual(a, b) {
+  if (isElement(a)) {
+    return a == b;
+  }
+  return a.posX == b.posX;
+}
+
+
+/**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
  * {@see ../../../src/video-interface.VideoInterface}.
  * @visibleForTesting
@@ -640,14 +653,18 @@ export class VideoDocking {
    * @private
    */
   updateOnResize_(video) {
-    const target = this.getTargetFor_(video);
-    if (target) {
-      this.dock_(video, target, /* step */ 1);
-      return;
-    }
-    if (this.isCurrentlyDocked_(video)) {
-      this.undock_(video);
-    }
+    // Update on subsequent animation frame to allow CSS media queries to be
+    // applied.
+    this.ampdoc_.win.requestAnimationFrame(() => {
+      const target = this.getTargetFor_(video);
+      if (target) {
+        this.dock_(video, target, /* step */ 1);
+        return;
+      }
+      if (this.isCurrentlyDocked_(video)) {
+        this.undock_(video);
+      }
+    });
   }
 
   /**
@@ -886,7 +903,10 @@ export class VideoDocking {
    */
   dock_(video, target, step) {
     const currentlyDocked = this.currentlyDocked_;
-    if (currentlyDocked && currentlyDocked.step >= step) {
+
+    if (currentlyDocked &&
+      targetsEqual(target, currentlyDocked.target) &&
+      currentlyDocked.step >= step) {
       return;
     }
 
@@ -1260,7 +1280,9 @@ export class VideoDocking {
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
     this.currentlyDocked_ = {video, target, step};
-    if (!previouslyDocked || previouslyDocked.video != video) {
+    if (!previouslyDocked ||
+        !targetsEqual(target, previouslyDocked.target) ||
+        previouslyDocked.video != video) {
       const {
         x,
         y,
