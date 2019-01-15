@@ -118,7 +118,7 @@ const buildOpenAttachmentElement = element =>
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset">
         <span class="i-amphtml-story-page-open-attachment-icon"></span>
         <span class="i-amphtml-story-page-open-attachment-text"
-            role="button">Swipe up</span>
+            role="button"></span>
       </div>`;
 
 /**
@@ -963,12 +963,20 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
-      this.openAttachmentEl_
-          .querySelector('.i-amphtml-story-page-open-attachment-text')
-          .addEventListener('click', () => this.openAttachment());
 
-      this.mutateElement(
-          () => this.element.appendChild(this.openAttachmentEl_));
+      const textEl = this.openAttachmentEl_
+          .querySelector('.i-amphtml-story-page-open-attachment-text');
+
+      textEl.addEventListener('click', () => this.openAttachment());
+
+      const openAttachmentLabel = Services.localizationService(this.win)
+          .getLocalizedString(
+              LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+
+      this.mutateElement(() => {
+        textEl.textContent = openAttachmentLabel;
+        this.element.appendChild(this.openAttachmentEl_);
+      });
     }
   }
 
