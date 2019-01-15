@@ -185,13 +185,13 @@ export class Carousel {
     /** @private {boolean} */
     this.updating_ = false;
 
-    /**@private {!Array<Element>} */
+    /**@private {!Array<!Element>} */
     this.beforeSpacers_ = [];
 
-    /** @private {!Array<Element>} */
+    /** @private {!Array<!Element>} */
     this.replacementSpacers_ = [];
 
-    /** @private {!Array<Element>} */
+    /** @private {!Array<!Element>} */
     this.afterSpacers_ = [];
 
     /**
@@ -494,7 +494,9 @@ export class Carousel {
     listenOnce(window, 'touchend', () => {
       this.touching_ = false;
       this.debouncedResetScrollReferencePoint_();
-    }, true);
+    }, {
+      capture: true,
+    });
   }
 
   /**
