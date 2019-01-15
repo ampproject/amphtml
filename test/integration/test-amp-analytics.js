@@ -575,6 +575,13 @@ describe('amp-analytics', function() {
           {
             "vars": {
               "url" : "${RequestBank.getUrl()}"
+            },
+            "configRewriter": {
+              "varGroups": {
+                "feature2": {
+                  "enabled": true
+                }
+              }
             }
           }
           </script>
@@ -592,6 +599,44 @@ describe('amp-analytics', function() {
         // endpoint. This logic is located in the file
         // /build-system/routes/analytics.js
         const body = JSON.parse(req.body);
+        expect(body.reqBody.configRewriter.vars).to.deep.equal({
+          name: 'cats',
+          title: 'AMP TEST',
+          title2: 'AMP TEST',
+        });
+        expect(body.rewritten).to.be.true;
+        expect(body.testId).to.equal(12358);
+      });
+    });
+  });
+
+  describes.integration('configRewriter without publisher config', {
+    body:
+      `<amp-analytics type="_fake_">
+          <script type="application/json">
+          {
+            "vars": {
+              "url" : "${RequestBank.getUrl()}"
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
+    it('should use config from server', () => {
+      return RequestBank.withdraw().then(req => {
+        // The config here should have been rewritten by the /analytics/rewriter
+        // endpoint. This logic is located in the file
+        // /build-system/routes/analytics.js
+        const body = JSON.parse(req.body);
+        expect(body.reqBody.configRewriter.vars).to.deep.equal({
+          title2: 'AMP TEST',
+        });
         expect(body.rewritten).to.be.true;
         expect(body.testId).to.equal(12358);
       });
