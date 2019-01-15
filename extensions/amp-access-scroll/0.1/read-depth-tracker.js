@@ -87,7 +87,7 @@ export class ReadDepthTracker {
    * @param {...*} arg
    */
   updateLastRead(...arg) {
-    const snippet = arg[0];
+    const snippet = arg[0].toString();
     this.accessSource_.buildUrl((
       `${this.connectHostname_}/amp/updatedepth`
       + '?rid=READER_ID'
