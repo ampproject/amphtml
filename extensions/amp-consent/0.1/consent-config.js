@@ -64,6 +64,10 @@ export class ConsentConfig {
       config['clientConfig'] = this.getConfig_()['clientConfig'];
     }
 
+    if (this.getConfig_()['uiConfig']) {
+      config['uiConfig'] = this.getConfig_()['uiConfig'];
+    }
+
     return config;
   }
 
@@ -153,7 +157,10 @@ export class ConsentConfig {
    *   "consents": {
    *     "foo": {
    *       "checkConsentHref": "https://fake.com",
-   *       "promptUISrc": "https://fake.com/promptUI.html"
+   *       "promptUISrc": "https://fake.com/promptUI.html",
+   *       "uiConfig": {
+   *          "overlay": true
+   *        }
    *     }
    *   }
    * }
