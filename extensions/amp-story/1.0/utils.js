@@ -237,7 +237,7 @@ export const HistoryState = {
  * Updates the value for a given state in the window history.
  * @param {!Window} win
  * @param {string} stateName
- * @param {string|boolean|string[]|null} value
+ * @param {string|boolean|Array<string>|null} value
  */
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
