@@ -765,11 +765,6 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    // TODO(#20128): initialPageId will no longer be necessary here once
-    // branching experiment is live.
-    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
-        firstPageEl.id;
-
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -797,13 +792,9 @@ export class AmpStory extends AMP.BaseElement {
             });
           }
         })
-        .then(() => {
-          let maybeInitialPageId = initialPageId;
-          if (isExperimentOn(this.win, 'amp-story-branching')) {
-            maybeInitialPageId = this.getInitialPageId_(firstPageEl);
-          }
-          return this.switchTo_(maybeInitialPageId, NavigationDirection.NEXT);
-        })
+        .then(() =>
+          this.switchTo_(
+              this.getInitialPageId_(firstPageEl), NavigationDirection.NEXT))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -830,19 +821,27 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Retrieves the initial pageId to begin the story with. In order, the
-   * initial page for a story should be the page ID in the history, a valid
-   * page ID in the URL fragment, and then the first page of the story.
-   * @param {Element} firstPageEl
+   * initial page for a story should be either a valid page ID in the URL
+   * fragment, the page ID in the history, or the first page of the story.
+   * @param {!Element} firstPageEl
    * @return {string}
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
-        firstPageEl.id;
-    const maybePageId = parseQueryString(this.win.location.hash)['page'];
     const isActualPage =
-      findIndex(this.pages_, page => page.element.id === maybePageId) >= 0;
-    return (maybePageId && isActualPage) ? maybePageId : initialPageId;
+      pageId =>
+        findIndex(this.pages_, page => page.element.id === pageId) >= 0;
+    const historyPage = this.getHistoryState_(HistoryStates.PAGE_ID);
+
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      const maybePageId = parseQueryString(this.win.location.hash)['page'];
+      if (maybePageId && isActualPage(maybePageId)) {
+        return maybePageId;
+      }
+    } else if (historyPage && isActualPage(historyPage)) {
+      return historyPage;
+    }
+    return firstPageEl.id;
   }
 
   /**
