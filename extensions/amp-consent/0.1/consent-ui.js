@@ -45,6 +45,7 @@ export const consentUiClasses = {
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
+  mask: 'i-amphtml-consent-ui-mask',
 };
 
 export class ConsentUI {
@@ -76,6 +77,11 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.ui_ = null;
+
+    /** @private {boolean} */
+    this.overlayEnabled_ = isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
+      config['uiConfig'] &&
+      config['uiConfig']['overlay'] === true;
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;
@@ -167,6 +173,9 @@ export class ConsentUI {
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
+
+          this.maybeShowOverlay_();
+
           this.showIframe_();
         });
       });
@@ -175,13 +184,18 @@ export class ConsentUI {
         if (!this.ui_) {
           return;
         }
-        toggle(this.ui_, true);
+
         if (!this.isPostPrompt_) {
+
+          this.maybeShowOverlay_();
+
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
           this.baseInstance_.scheduleLayout(this.ui_);
         }
+
+        toggle(this.ui_, true);
       };
 
       // If the UI is an AMP Element, wait until it's built before showing it,
@@ -216,6 +230,11 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
+      // Hide the overlay
+      this.maybeHideOverlay_();
+      // Enable the scroll, in case we were fullscreen with no overlay
+      this.enableScroll_();
+
       // NOTE (torch2424): This is very sensitive. Fixed layer applies
       // a `top: calc(0px)` in order to fix some bugs, thus
       // We should be careful in moving this around as
@@ -225,8 +244,6 @@ export class ConsentUI {
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
       this.isVisible_ = false;
-
-      this.enableScroll_();
     });
   }
 
@@ -364,9 +381,6 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
-
-        // TODO (torch2424): Show mask if publisher provides the option
-        // this.showMaskElement_();
       });
     });
   }
@@ -390,9 +404,42 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
+  }
 
-    // TODO (torch2424): Hide mask if publisher provides the option
-    // this.hideMaskElement_();
+  /**
+   * Shows the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
+   * @private
+   */
+  maybeShowOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
+    if (!this.maskElement_) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add(consentUiClasses.mask);
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+    this.disableScroll_();
+  }
+
+  /**
+   * Hides the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
+   * @private
+   */
+  maybeHideOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+    this.enableScroll_();
   }
 
   /**
@@ -416,31 +463,6 @@ export class ConsentUI {
       this.scrollEnabled_ = true;
     }
   }
-
-  /**
-   * Shows the mask element
-   * @private
-   */
-  showMaskElement_() {
-    if (!this.maskElement_) {
-      const mask = this.win_.document.createElement('div');
-      mask.classList.add('i-amphtml-consent-ui-mask');
-      this.parent_.ownerDocument.body.appendChild(mask);
-      this.maskElement_ = mask;
-    }
-    toggle(this.maskElement_, /* display */true);
-  }
-
-  /**
-   * Shows the mask element
-   * @private
-   */
-  hideMaskElement_() {
-    if (this.maskElement_) {
-      toggle(this.maskElement_, /* display */false);
-    }
-  }
-
 
   /**
    * Listen to iframe messages and handle events.

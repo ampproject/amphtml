@@ -136,7 +136,7 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
   width: 100vw !important;
   height: 100vh !important;
   opacity: 0.2;
-  animation: i-amphtml-consent-ui-mask 0.5s ease-in;
+  animation: i-amphtml-consent-ui-mask 0.25s ease-in;
   /* Prevent someone from making this a full-sceen image */
   background-image: none !important;
   background-color: #000;

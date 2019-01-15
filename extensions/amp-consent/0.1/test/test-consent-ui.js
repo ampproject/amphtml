@@ -264,6 +264,64 @@ describes.realWin('consent-ui', {
     });
   });
 
+  describe('overlay', () => {
+
+    it('should not enable the overlay if not configured', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'uiConfig': {},
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+      // Mock out load Iframe_
+      consentUI.loadIframe_ = () => {
+        return Promise.resolve();
+      };
+      expect(consentUI.maskElement_).to.be.null;
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_).to.be.null;
+      expect(consentUI.scrollEnabled_).to.be.true;
+    });
+
+    it('append/hide/show overlay', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'uiConfig': {
+          'overlay': true,
+        },
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+      // Mock out load Iframe_
+      consentUI.loadIframe_ = () => {
+        return Promise.resolve();
+      };
+
+      expect(consentUI.overlayEnabled_).to.be.true;
+
+      expect(consentUI.maskElement_).to.be.null;
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_).to.not.be.null;
+      expect(consentUI.scrollEnabled_).to.be.false;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.not.be.ok;
+      expect(consentUI.scrollEnabled_).to.be.false;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+      expect(consentUI.scrollEnabled_).to.be.true;
+    });
+  });
+
   describe('fullscreen', () => {
 
     it('should respond to the fullscreen event', () => {
@@ -341,33 +399,12 @@ describes.realWin('consent-ui', {
         consentUI.enterFullscreen_();
 
         expect(consentUI.scrollEnabled_).to.be.false;
-      });
-    });
 
-    // TODO (torch2424): Unskip/Update in follow PR to #19125
-    it.skip('append/hide/show mask', function* () {
-      const config = dict({
-        'promptUISrc': 'https//promptUISrc',
+        sandbox.stub(consentUI, 'baseInstance_')
+            .callsFake(callback => callback());
+        consentUI.hide();
+        expect(consentUI.scrollEnabled_).to.be.true;
       });
-      consentUI =
-        new ConsentUI(mockInstance, config);
-      // Mock out load Iframe_
-      consentUI.loadIframe_ = () => {
-        return Promise.resolve();
-      };
-      expect(consentUI.maskElement_).to.be.null;
-      consentUI.show();
-      yield macroTask();
-      expect(consentUI.maskElement_).to.not.be.null;
-      consentUI.hide();
-      yield macroTask();
-      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
-      consentUI.show();
-      yield macroTask();
-      expect(consentUI.maskElement_.hasAttribute('hidden')).to.not.be.ok;
-      consentUI.hide();
-      yield macroTask();
-      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
     });
   });
 });

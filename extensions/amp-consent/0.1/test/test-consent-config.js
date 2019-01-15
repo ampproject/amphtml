@@ -81,6 +81,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'clientConfig': {
           'test': 'ABC',
         },
+        'uiConfig': {
+          'overlay': true,
+        },
         'policy': {
           'default': {
             'waitFor': {},
@@ -99,6 +102,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'postPromptUI': 'test',
         'clientConfig': {
           'test': 'ABC',
+        },
+        'uiConfig': {
+          'overlay': true,
         },
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({
