@@ -487,20 +487,20 @@ export class AmpStoryEmbeddedComponent {
     return parseUrlDeprecated(elUrl).href;
   }
 
- /**
-  * Gets corresponding config for a given embed target.
-  * @param {!Element} target
-  * @return {!Object}
-  */
- getEmbedConfigFor_(target) {
-  const componentIndex = findIndex(Object.values(INTERACTIVE_COMPONENTS),
-      config => {
-        return matches(target, config.selector);
-      });
+  /**
+   * Gets corresponding config for a given embed target.
+   * @param {!Element} target
+   * @return {!Object}
+   */
+  getEmbedConfigFor_(target) {
+    const componentIndex = findIndex(Object.values(INTERACTIVE_COMPONENTS),
+        config => {
+          return matches(target, config.selector);
+        });
 
-  return INTERACTIVE_COMPONENTS[
-      Object.keys(INTERACTIVE_COMPONENTS)[componentIndex]];
- }
+    return INTERACTIVE_COMPONENTS[
+        Object.keys(INTERACTIVE_COMPONENTS)[componentIndex]];
+  }
 
   /**
    * Animates into expanded view.
