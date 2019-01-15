@@ -83,7 +83,6 @@ export class SeleniumWebDriverController {
    * @override
    */
   async findElement(selector) {
-    // const {browser} = this;
     const bySelector = By.css(selector);
 
     await this.driver.wait(until.elementLocated(bySelector));
@@ -97,11 +96,38 @@ export class SeleniumWebDriverController {
    * @override
    */
   async findElements(selector) {
-    // const {browser} = this;
     const bySelector = By.css(selector);
 
     await this.driver.wait(until.elementLocated(bySelector));
     const webElements = await this.driver.findElements(bySelector);
+    return webElements.map(webElement => new ElementHandle(webElement, this));
+  }
+
+  /**
+   * @param {string} xpath
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async findElementXPath(xpath) {
+    const {browser} = this;
+    const byXpath = By.xpath(xpath);
+
+    await browser.wait(until.elementLocated(byXpath));
+    const webElement = await browser.findElement(byXpath);
+    return new ElementHandle(webElement, this);
+  }
+
+  /**
+   * @param {string} xpath
+   * @return {!Promise<!Array<!ElementHandle<!WebElement>>>}
+   * @override
+   */
+  async findElementsXPath(xpath) {
+    const {browser} = this;
+    const byXpath = By.xpath(xpath);
+
+    await browser.wait(until.elementLocated(byXpath));
+    const webElements = await browser.findElements(byXpath);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
