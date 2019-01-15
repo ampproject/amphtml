@@ -38,6 +38,10 @@ export const _FAKE_ = /** @type {!JsonObject} */ ({
         'name': 'cats',
         'title': 'TITLE',
       },
+      'alwaysOnFeature': {
+        'title2': 'TITLE',
+        'enabled': true,
+      },
     },
   },
   'vars': {

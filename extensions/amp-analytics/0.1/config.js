@@ -141,19 +141,7 @@ export class AnalyticsConfig {
     const TAG = this.getName_();
     dev().fine(TAG, 'Rewriting config', configRewriterUrl);
 
-    let varGroupsPromise = Promise.resolve();
-    const rewriterConfig = config['configRewriter'];
-    const varGroups = rewriterConfig && rewriterConfig['varGroups'];
-
-    if (varGroups) {
-      varGroupsPromise = this.handleVarGroups_(varGroups,
-          rewriterConfig);
-    }
-
-    return varGroupsPromise.then(() => {
-      // Don't send varGroups in payload to configRewriter endpoint.
-      varGroups && delete rewriterConfig['varGroups'];
-    }).then(() => {
+    return this.handleVarGroups_(config).then(() => {
       const fetchConfig = {
         method: 'POST',
         body: config,
@@ -183,29 +171,40 @@ export class AnalyticsConfig {
   /**
    * Check to see which varGroups are enabled, resolve and merge them into
    * vars object.
-   * @param {!JsonObject} varGroups
-   * @param {!JsonObject} rewriterConfig
+   * @param {!JsonObject} pubConfig
    * @return {!Promise}
    */
-  handleVarGroups_(varGroups, rewriterConfig) {
+  handleVarGroups_(pubConfig) {
+    const pubRewriterConfig = pubConfig['configRewriter'];
+    const pubVarGroups = pubRewriterConfig && pubRewriterConfig['varGroups'];
     const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
-    if (!vendorVarGroups) {
+
+    if (!pubVarGroups && !vendorVarGroups) {
+      return Promise.resolve();
+    }
+
+    if (pubVarGroups && !vendorVarGroups) {
       const TAG = this.getName_();
-      user().warn(TAG, 'This publisher does not currently ' +
+      user().warn(TAG, 'This analytics provider does not currently ' +
           'support varGroups');
       return Promise.resolve();
     }
 
-    const allPromises = [];
-    // Merge varGroups to see what has been enabled.
-    deepMerge(varGroups, this.getConfigRewriter_()['varGroups']);
-    // Create object that will later hold all the resolved variables.
+    // Create object that will later hold all the resolved variables, and any
+    // intermediary objects as necessary.
+    pubConfig['configRewriter'] = pubConfig['configRewriter'] || dict();
+    const rewriterConfig = pubConfig['configRewriter'];
     rewriterConfig['vars'] = dict({});
 
-    Object.keys(varGroups).forEach(groupName => {
-      const group = varGroups[groupName];
+    const allPromises = [];
+    // Merge publisher && vendor varGroups to see what has been enabled.
+    const mergedConfig = pubVarGroups || dict();
+    deepMerge(mergedConfig, vendorVarGroups);
+
+    Object.keys(mergedConfig).forEach(groupName => {
+      const group = mergedConfig[groupName];
       if (!group['enabled']) {
-        // Pubs must explicity enable any var groups.
+        // Any varGroups must be explicitly enabled.
         return;
       }
 
@@ -219,7 +218,14 @@ export class AnalyticsConfig {
       allPromises.push(groupPromise);
     });
 
-    return Promise.all(allPromises);
+    return Promise.all(allPromises).then(() => {
+      // Don't send an empty vars payload.
+      if (!Object.keys(rewriterConfig['vars']).length) {
+        return delete pubConfig['configRewriter'];
+      }
+      // Don't send varGroups in payload to configRewriter endpoint.
+      pubVarGroups && delete rewriterConfig['varGroups'];
+    });
   }
 
   /**

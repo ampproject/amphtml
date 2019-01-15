@@ -452,7 +452,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       });
     });
 
-    it('should resolve and send enabled varGroups', () => {
+    it('should resolve and send publisher enabled varGroups', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -492,6 +492,79 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
                 key: 'cats',
               },
             },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+    it('should resolve and send vendor enabled varGroups', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'key': 'cats',
+              'cid': 'CLIENT_ID(foo)',
+              'enabled': true,
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}] ,
+            configRewriter: {
+              vars: {
+                cid: 'amp12345',
+                key: 'cats',
+              },
+            },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+    it('should not send configRewriter object if no vars are enabled', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'key': 'cats',
+              'cid': 'CLIENT_ID(foo)',
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}] ,
           },
           method: 'POST',
           requireAmpResponseSourceOrigin: false,
