@@ -28,7 +28,7 @@
     "@ampproject/animations": "0.1.1",
     "@ampproject/worker-dom": "0.2.8",
     "document-register-element": "1.5.0",
-    "dompurify": "1.0.8",
+    "dompurify": "1.0.9",
     "moment": "2.22.2",
     "preact-compat": "3.18.4",
     "preact": "8.4.2",
