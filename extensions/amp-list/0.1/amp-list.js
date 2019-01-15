@@ -687,12 +687,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.getAttribute('layout') == Layout.CONTAINER) {
       return;
     }
-    let targetHeight;
-    let height;
     this.measureElement(() => {
-      targetHeight = target./*OK*/scrollHeight;
-      height = this.element./*OK*/offsetHeight;
-    }).then(() => {
+      const targetHeight = target./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
       if (targetHeight > height) {
         if (!this.loadMoreEnabled_) {
           this.attemptChangeHeight(targetHeight).catch(() => {});
