@@ -343,9 +343,10 @@ amp-story-grid-layer amp-twitter::after {
 
 .i-amphtml-expanded-mode amp-twitter {
   z-index: 1 !important;
-  position: absolute !important;
-  top: 15% !important;
-  left: 0 !important;
+}
+
+.i-amphtml-animate-expand-in {
+  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {

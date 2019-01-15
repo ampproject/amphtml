@@ -30,7 +30,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {setImportantStyles, toggle} from '../../../src/style';
+import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /**
  * Enum of elements that can be expanded.
@@ -223,9 +223,12 @@ export class AmpStoryEmbeddedComponent {
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           storyPage.classList.toggle('i-amphtml-expanded-mode', false);
           toggle(devAssert(this.expandedViewOverlay_), false);
+          resetStyles(devAssert(this.previousTarget_), ['transform']);
         });
       return;
     }
+
+    this.animateExpanded_(devAssert(targetToExpand));
 
     if (!this.expandedViewOverlay_) {
       this.buildAndAppendExpandedViewOverlay_(storyPage);
@@ -413,6 +416,43 @@ export class AmpStoryEmbeddedComponent {
     }
 
     return parseUrlDeprecated(elUrl).href;
+  }
+
+  /**
+   * Animates into expanded view.
+   * @param {!Element} target
+   * @private
+   */
+  animateExpanded_(target) {
+    const state = {};
+    this.resources_.measureMutateElement(target,
+        /** measure */
+        () => {
+          const targetRect = target./*OK*/getBoundingClientRect();
+          const storyPage =
+            this.storyEl_.querySelector('amp-story-page[active]');
+          const pageRect = storyPage./*OK*/getBoundingClientRect();
+
+          const centeredTop = pageRect.height / 2 - targetRect.height / 2;
+          const centeredLeft = pageRect.width / 2 - targetRect.width / 2;
+
+          // Only account for offset from target to page borders. Since in
+          // desktop mode page is not at the borders of viewport.
+          const leftOffset = targetRect.left - pageRect.left;
+          const topOffset = targetRect.top - pageRect.top;
+
+          state.translateY = centeredTop - topOffset;
+          state.translateX = leftOffset - centeredLeft;
+        },
+        /** mutate */
+        () => {
+          target.classList.add('i-amphtml-animate-expand-in');
+          setImportantStyles(dev().assertElement(target),
+              {
+                transform: `translate3d(${state.translateX}px,
+                    ${state.translateY}px, 0)`,
+              });
+        });
   }
 
   /**
