@@ -48,13 +48,8 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 You can specify a template in one of two ways:
 
-<<<<<<< HEAD
 - a `template` attribute that references an ID of an existing `template` or `script` element.
 - a `template` or `script` element nested directly inside the `amp-list` element.
-=======
-- a `template` attribute that references an ID of an existing `template` element.
-- a `template` element nested directly inside the `<amp-list>` element.
->>>>>>> master
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
