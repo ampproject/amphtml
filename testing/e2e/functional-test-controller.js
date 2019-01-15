@@ -175,6 +175,36 @@ export class FunctionalTestController {
   async findElements(unusedSelector) {}
 
   /**
+   * Note: Use findElement instead where possible. CSS selectors are more
+   * familiar to developers and easier to reason about. If you need to use
+   * this method, a comment explaining the xpath query can be helpful.
+   * The Find Element command is used to find the first element matching the
+   * given xpath in the current browsing context that can be used as the
+   * web element context for future element-centric commands.
+   * {@link https://www.w3.org/TR/webdriver1/#xpath}
+   * {@link https://www.w3.org/TR/webdriver1/#find-element}
+   *
+   * @param {string} xpath
+   * @return {!Promise<!ElementHandle>}
+   */
+  async findElementXPath(unusedXpath) {}
+
+  /**
+   * Note: Use findElements instead where possible. CSS selectors are more
+   * familiar to developers and easier to reason about. If you need to use
+   * this method, a comment explaining the xpath query can be helpful.
+   * The Find Elements command is used to find all elements matching the
+   * given xpath in the current browsing context that can be used as the
+   * web element context for future element-centric commands.
+   * {@link https://www.w3.org/TR/webdriver1/#xpath}
+   * {@link https://www.w3.org/TR/webdriver1/#find-elements}
+   *
+   * @param {string} xpath
+   * @return {!Promise<!Array<!ElementHandle>>}
+   */
+  async findElementsXPath(unusedXpath) {}
+
+  /**
    * The Find Element From Element command is used to find the first element
    * that is a descendent of the given element matching the given selector in
    * the current browsing context that can be used as the web element context
