@@ -827,20 +827,6 @@ export class VideoDocking {
   }
 
   /**
-   * @param {number} dirX
-   * @param {number} dirY
-   * @private
-   */
-  dismiss_(dirX = 0, dirY = 0) {
-    const video = this.getDockedVideo_();
-    const {posY} = this.currentlyDocked_.target;
-    video.pause();
-    this.lastDismissed_ = video;
-    this.lastDismissedPosY_ = posY || null;
-    this.undock_(video, dirX, dirY);
-  }
-
-  /**
    * @return {!RelativeY}
    * @private
    */
@@ -1305,10 +1291,14 @@ export class VideoDocking {
     const {target} = this.currentlyDocked_;
 
     const step = 1;
+    const transitionDurationMs = 0;
 
     const {x, y, scale} = this.getDims_(video, target, step);
+    const {centerX} = this.getCenter_(offsetX, offsetY);
+    const offsetRelativeX = this.calculateRelativeX_(centerX);
+
     this.placeAt_(video, x + offsetX, y + offsetY, scale, step,
-        /* transitionDurationMs */ 0);
+        transitionDurationMs, offsetRelativeX);
   }
 
   /**
@@ -1457,7 +1447,8 @@ export class VideoDocking {
     this.isDragging_ = false;
 
     this.getControls_().enable();
-    this.snapToCorner_(offset.x, offset.y);
+
+    this.snap_(offset.x, offset.y);
   }
 
   /**
@@ -1484,45 +1475,38 @@ export class VideoDocking {
    * @param {number} offsetY
    * @private
    */
-  snapToCorner_(offsetX, offsetY) {
+  snap_(offsetX, offsetY) {
     const video = this.getDockedVideo_();
     const {step} = this.currentlyDocked_;
 
-    const {centerX, centerY} = this.getCenter_(offsetX, offsetY);
-
-    let minDistance = null;
-    let closestCornerX = null;
-    let closestCornerY = null;
-
-    [RelativeX.LEFT, RelativeX.RIGHT].forEach(posX => {
-      const posY = RelativeY.TOP;
-      const cornerX = posX == RelativeX.LEFT ?
-        this.getLeftEdge_() :
-        this.getRightEdge_();
-      const cornerY = this.getTopEdge_();
-      const distance = Math.sqrt(
-          Math.pow(cornerX - centerX, 2) +
-          Math.pow(cornerY - centerY, 2));
-      if (minDistance === null ||
-          distance < minDistance) {
-        minDistance = distance;
-        closestCornerY = posY;
-        closestCornerX = posX;
-      }
-    });
+    const {centerX} = this.getCenter_(offsetX, offsetY);
+    const offsetRelativeX = this.calculateRelativeX_(centerX);
 
     const target = {
-      posX: closestCornerX,
-      posY: closestCornerY,
+      posX: offsetRelativeX,
+      // TODO(alanorozco): Reconsider if we have a need to bookkeep RelativeY.
+      posY: RelativeY.TOP,
     };
 
     this.currentlyDocked_.target = target;
 
-    this.preferredCornerX_ = closestCornerX;
+    this.preferredCornerX_ = offsetRelativeX;
 
     const {x, y, scale} = this.getDims_(video, target, step);
 
-    this.placeAt_(video, x, y, scale, step, /* transitionDurationMs */ 200);
+    this.placeAt_(video, x, y, scale, step, /* transitionDurationMs */ 200,
+        offsetRelativeX);
+  }
+
+  /**
+   * @param {number} centerX
+   * @return {!RelativeX}
+   * @private
+   */
+  calculateRelativeX_(centerX) {
+    return centerX >= this.getAreaWidth_() / 2 ?
+      RelativeX.RIGHT :
+      RelativeX.LEFT;
   }
 
   /**
@@ -1556,6 +1540,8 @@ export class VideoDocking {
         this.getRightEdge_() - margin - targetWidth :
         this.getLeftEdge_() + margin);
 
+    // TODO(alanorozco): Reconsider if y-axis logic for both sides is needed
+    // at all.
     const y =
       (posY == RelativeY.TOP ?
         this.getTopEdge_() + margin :
@@ -1615,7 +1601,7 @@ export class VideoDocking {
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
-   * @return {{x: number, y: number, scale: number}}
+   * @return {{x: number, y: number, scale: number, relativeX: !RelativeX}}
    */
   getDims_(video, target, step) {
     const {left, width} = video.getLayoutBox();
