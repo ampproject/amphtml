@@ -51,6 +51,16 @@ amp-list[load-more] [load-more-button].i-amphtml-default-ui,
   bottom: 0;
 }
 
+[load-more] div[role="list"].i-amphtml-list-load-more-container-overflow {
+  bottom: 0;
+  margin-bottom: 80px;
+  overflow-y: hidden;
+  height: auto;
+  width: auto;
+  min-height: auto;
+  min-width: auto;
+}
+
 amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-load-more-spinner {
   display: inline-block;
   width: 40px;

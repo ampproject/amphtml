@@ -687,28 +687,62 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.getAttribute('layout') == Layout.CONTAINER) {
       return;
     }
+    let targetHeight;
+    let height;
     this.measureElement(() => {
-      const scrollHeight = target./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).then(() => {
-          if (this.loadMoreEnabled_) {
-            this.mutateElement(() => {
-              this.loadMoreButton_.classList
-                  .remove('i-amphtml-list-load-more-overflow');
-            });
-          }
-        }).catch(() => {
-          if (this.loadMoreEnabled_) {
-            this.mutateElement(() => {
-              this.loadMoreButton_.classList
-                  .add('i-amphtml-list-load-more-overflow');
-              this.element.appendChild(this.loadMoreButton_);
-            });
-          }
-        });
+      targetHeight = target./*OK*/scrollHeight;
+      height = this.element./*OK*/offsetHeight;
+    }).then(() => {
+      if (targetHeight > height) {
+        if (!this.loadMoreEnabled_) {
+          this.attemptChangeHeight(targetHeight).catch(() => {});
+        } else {
+          this.attemptChangeHeight(targetHeight).then(() => {
+            this.handleLoadMoreChangeHeightSuccess_();
+          }).catch(() => {
+            this.handleLoadMoreChangeHeightFailure_();
+          });
+        }
       }
     });
+  }
+
+  /**
+   * @private
+   */
+  handleLoadMoreChangeHeightSuccess_() {
+    this.mutateElement(() => {
+      this.loadMoreButton_.classList
+          .remove('i-amphtml-list-load-more-overflow');
+      this.container_.classList
+          .remove('i-amphtml-list-load-more-container-overflow');
+    });
+  }
+
+  /**
+   * @private
+   */
+  handleLoadMoreChangeHeightFailure_() {
+    if (this.container_.classList
+        .contains('i-amphtml-list-load-more-container-overflow')) {
+      return;
+    }
+
+    let buttonHeight;
+    let height;
+    this.measureMutateElement(
+        () => {
+          buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
+          height = this.element./*OK*/offsetHeight;
+        },
+        () => {
+          this.container_.classList
+              .add('i-amphtml-list-load-more-container-overflow');
+          this.loadMoreButton_.classList
+              .add('i-amphtml-list-load-more-overflow');
+          this.element.appendChild(this.loadMoreButton_);
+          this.element.changeSize(height + buttonHeight);
+        });
   }
 
   /**

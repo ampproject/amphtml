@@ -66,7 +66,7 @@
   <amp-list width="auto" height="200"
     layout="fixed-height"
     src="/infinite-scroll?items=2&left=20"
-    load-more="auto"
+    load-more="manual"
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="pin-container">
@@ -86,27 +86,7 @@
   </amp-list>
 
   <h1>Second List</h1>
-  <amp-list width="auto" height="200"
-    layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3"
-    load-more="auto"
-    load-more-bookmark="next">
-    <template type="amp-mustache">
-      <div class="pin-container">
-        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
-        <div class="title">{{title}}</div>
-        <div class="description">
-          At vero eos et accusamus et iusto odio dignissimos ducimus...
-        </div>
-      </div>
-    </template>
-    <div load-more-end>
-      LOAD ENDED
-    </div>
-    <div fallback>
-      FALLBACK
-    </div>
-  </amp-list>
+
 </article>
 </body>
 </html>
