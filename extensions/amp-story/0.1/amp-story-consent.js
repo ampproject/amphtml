@@ -32,7 +32,7 @@ import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from './utils';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -286,7 +286,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   assertAndParseConfig_() {
     const storyConsentScript = childElementByTag(this.element, 'script');
 
-    user().assert(
+    userAssert(
         storyConsentScript && isJsonScriptTag(storyConsentScript),
         `${TAG} config should be put in a <script> tag with ` +
         'type="application/json"');
@@ -301,7 +301,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentConfig_.title, `${TAG}: config requires a title`);
     user().assertString(
         this.storyConsentConfig_.message, `${TAG}: config requires a message`);
-    user().assert(
+    userAssert(
         this.storyConsentConfig_.vendors &&
             isArray(this.storyConsentConfig_.vendors),
         `${TAG}: config requires an array of vendors`);

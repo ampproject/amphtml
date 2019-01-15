@@ -41,7 +41,7 @@ import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
-  user,
+  userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {parseJson} from '../src/json';
@@ -112,6 +112,7 @@ import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
+import {baidu} from '../ads/baidu';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
@@ -141,6 +142,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
@@ -174,6 +176,7 @@ import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
+import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
@@ -182,6 +185,8 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
+import {onead} from '../ads/onead';
+import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
@@ -328,6 +333,7 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('baidu', baidu);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
 register('bodymovinanimation', bodymovinanimation);
@@ -361,6 +367,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
@@ -398,6 +405,7 @@ register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
+register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativo', nativo);
@@ -406,6 +414,8 @@ register('nend', nend);
 register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
+register('onead', onead);
+register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
@@ -524,11 +534,11 @@ function init(win) {
 export function draw3p(win, data, configCallback) {
   const type = data['type'];
 
-  user().assert(isTagNameAllowed(type, win.context.tagName),
+  userAssert(isTagNameAllowed(type, win.context.tagName),
       'Embed type %s not allowed with tag %s', type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user().assert(data,
+      userAssert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -606,7 +616,7 @@ export function validateParentOrigin(window, parentLocation) {
   if (!ancestors || !ancestors.length) {
     return;
   }
-  user().assert(ancestors[0] == parentLocation.origin,
+  userAssert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
 }
@@ -634,7 +644,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  userAssert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: %s', type);
 }
 

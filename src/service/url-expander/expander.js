@@ -15,7 +15,7 @@
  */
 
 import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user} from '../../log';
+import {rethrowAsync, user, userAssert} from '../../log';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -85,6 +85,19 @@ export class Expander {
     return this.parseUrlRecursively_(url, matches);
   }
 
+  /**
+   * Return any macros that exist in the given url.
+   * @param {string} url
+   * @return {!Array}
+   */
+  getMacroNames(url) {
+    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const matches = url.match(expr);
+    if (matches) {
+      return matches;
+    }
+    return [];
+  }
 
   /**
    * Structures the regex matching into the desired format
@@ -175,7 +188,7 @@ export class Expander {
           if (!ignoringChars) {
             ignoringChars = true;
             nextArgShouldBeRaw = true;
-            user().assert(builder.trim() === '',
+            userAssert(builder.trim() === '',
                 `The substring "${builder}" was lost during url-replacement. ` +
                 'Please ensure the url syntax is correct');
             builder = '';

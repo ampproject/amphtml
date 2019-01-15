@@ -17,12 +17,10 @@
 import * as setDOM from 'set-dom/src/index';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {CSS} from '../../../build/amp-list-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
-import {
-  PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -32,21 +30,18 @@ import {
 } from '../../../src/batched-json';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {createLoaderElement} from '../../../src/loader';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getServiceForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
-import {
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
+import {htmlFor} from '../../../src/static-template';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
+  setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 
@@ -66,6 +61,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
 
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
@@ -112,17 +110,19 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?string} */
     this.loadMoreSrc_ = null;
     /** @private {?Element} */
-    this.loadMoreOverflow_ = null;
+    this.loadMoreButton_ = null;
     /** @private {?Element} */
-    this.loadMoreLoadingOverlay_ = null;
+    this.loadMoreButtonClickable_ = null;
     /** @private {?Element} */
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
     /** @private {?Element} */
-    this.loadMoreOverflowElement_ = null;
-    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = null;
+    this.loadMoreFailedClickable_ = null;
+    /** @private {?Element} */
+    this.loadMoreEndElement_ = null;
+    /**@private {?UnlistenDef} */
+    this.unlistenLoadMore_ = null;
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
@@ -148,6 +148,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, viewer, this.templates_);
@@ -178,25 +179,54 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.loadMoreEnabled_) {
-      this.getLoadMoreOverflowElement_();
+      this.getLoadMoreButton_();
       this.getLoadMoreLoadingElement_();
-      if (!this.loadMoreLoadingElement_) {
-        this.getLoadMoreLoadingOverlay_();
-      }
       this.getLoadMoreFailedElement_();
+      this.getLoadMoreEndElement_();
+      this.getLoadMoreButtonClickable_();
+      this.getLoadMoreFailedClickable_();
+      // Hide overflow element
+      const overflowElement = this.getOverflowElement();
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
     }
   }
 
   /**
    * @private
-   * @return {!Element|null}
+   * @return {!Element}
    */
-  getLoadMoreOverflowElement_() {
-    if (!this.loadMoreOverflow_) {
-      this.loadMoreOverflow_ = childElementByAttr(
+  getLoadMoreButton_() {
+    if (!this.loadMoreButton_) {
+      this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
+
+      if (!this.loadMoreButton_) {
+        this.loadMoreButton_ = htmlFor(this.win.document)`
+          <amp-list-load-more load-more-button class="i-amphtml-default-ui">
+            <button load-more-clickable class="i-amphtml-list-load-more-button">
+              <label>See More</label>
+            </button>
+          </amp-list-load-more>
+        `;
+      }
     }
-    return this.loadMoreOverflowElement_;
+    return this.loadMoreButton_;
+  }
+
+  /**
+   * @private
+   * @return {!Element}
+   */
+  getLoadMoreButtonClickable_() {
+    if (!this.loadMoreButtonClickable_) {
+      const loadMoreButton = this.getLoadMoreButton_();
+      this.loadMoreButtonClickable_ =
+        childElementByAttr(loadMoreButton, 'load-more-clickable') ||
+        loadMoreButton;
+    }
+    return this.loadMoreButtonClickable_;
   }
 
   /** @override */
@@ -212,6 +242,13 @@ export class AmpList extends AMP.BaseElement {
     if (placeholder) {
       this.attemptToFit_(placeholder);
     }
+
+    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
+      this.viewport_.onResize(() => {
+        this.attemptToFit_(dev().assertElement(this.container_));
+      });
+    }
+
     return this.fetchList_();
   }
 
@@ -349,33 +386,56 @@ export class AmpList extends AMP.BaseElement {
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       fetch = this.fetch_(opt_refresh).then(data => {
-        let items = getValueForExpr(data, itemsExpr);
-        if (this.element.hasAttribute('single-item')) {
-          user().assert(typeof items !== 'undefined',
-              'Response must contain an array or object at "%s". %s',
-              itemsExpr, this.element);
-          if (!isArray(items)) {
-            items = [items];
-          }
-        } else if (this.loadMoreEnabled_) {
-          const nextExpr = this.element.getAttribute('load-more-bookmark')
-            || 'load-more-src';
-          this.loadMoreSrc_ = /** @type {string} */
-            (getValueForExpr(data, nextExpr));
+        let items = data;
+        if (itemsExpr != '.') {
+          items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
         }
-        user().assert(isArray(items),
-            'Response must contain an array at "%s". %s',
+        userAssert(typeof items !== 'undefined',
+            'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
-        const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
-        if (maxLen < items.length) {
-          items = items.slice(0, maxLen);
+        if (this.element.hasAttribute('single-item') && !isArray(items)) {
+          items = [items];
         }
-        return this.scheduleRender_(/** @type {!Array} */(items), !!opt_append);
-      }, error => {
-        throw user().createError('Error fetching amp-list', error);
+        items = user().assertArray(items);
+        if (this.element.hasAttribute('max-items')) {
+          items = this.truncateToMaxLen_(items);
+        }
+        if (this.loadMoreEnabled_) {
+          this.updateLoadMoreSrc_(/**@type {!JsonObject} */(data));
+        }
+        return this.scheduleRender_(items, !!opt_append, data);
       });
     }
-    return fetch.catch(error => this.showFallback_(error));
+
+    return fetch.catch(error => {
+      if (opt_append) {
+        throw error;
+      }
+      this.showFallback_(error);
+    });
+  }
+
+  /**
+   * @param {!Array<?JsonObject>} items
+   * @return {!Array<?JsonObject>}
+   * @private
+   */
+  truncateToMaxLen_(items) {
+    const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
+    if (maxLen < items.length) {
+      items = items.slice(0, maxLen);
+    }
+    return items;
+  }
+
+  /**
+   * @param {!JsonObject} data
+   * @private
+   */
+  updateLoadMoreSrc_(data) {
+    const nextExpr = this.element.getAttribute('load-more-bookmark')
+      || 'load-more-src';
+    this.loadMoreSrc_ = /** @type {string} */ (getValueForExpr(data, nextExpr));
   }
 
   /**
@@ -388,12 +448,13 @@ export class AmpList extends AMP.BaseElement {
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return requestForBatchFetch(
-        this.getAmpDoc(),
         this.element,
         this.getPolicy_(),
         refresh).then(r => {
       request = r;
 
+      request.xhrUrl =
+         setupInput(this.win, request.xhrUrl, request.fetchOpt);
       request.fetchOpt = setupAMPCors(
           this.win, request.xhrUrl, request.fetchOpt);
       setupJsonFetchInit(r.fetchOpt);
@@ -420,10 +481,11 @@ export class AmpList extends AMP.BaseElement {
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|?JsonObject|string|undefined} data
    * @param {boolean} append
+   * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(data, append) {
+  scheduleRender_(data, append, opt_payload) {
     dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
@@ -433,10 +495,11 @@ export class AmpList extends AMP.BaseElement {
       this.renderPass_.schedule();
     }
 
-    this.renderItems_ = {data, append, resolver, rejecter};
+    this.renderItems_ = {data, append, resolver, rejecter,
+      payload: opt_payload};
 
     if (this.renderedItems_ && append) {
-      this.renderItems_.data = this.renderedItems_.concat(data);
+      this.renderItems_.payload = opt_payload || {};
     }
 
     return promise;
@@ -449,7 +512,7 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
-    dev().assert(current && current.data, 'Nothing to render.');
+    devAssert(current && current.data, 'Nothing to render.');
     dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
@@ -471,16 +534,55 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       const html = /** @type {string} */ (current.data);
       this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(element => this.render_([element], current.append))
+          .then(result => this.updateBindings_([result]))
+          .then(element => this.render_(element, current.append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
+      const payload = /** @type {!JsonObject} */ (current.payload);
       this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements, current.append))
-          .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
+          .then(() => this.maybeRenderLoadMoreTemplates_(payload))
+          .then(() => this.maybeSetLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
+  }
+
+  /**
+   * @param {!JsonObject} data
+   * @return {!Promise}
+   * @private
+   */
+  maybeRenderLoadMoreTemplates_(data) {
+    if (!this.loadMoreEnabled_) {
+      return Promise.resolve();
+    }
+    const promises = [];
+    promises.push(this.maybeRenderLoadMoreElement_(
+        this.getLoadMoreButton_(), data));
+    promises.push(this.maybeRenderLoadMoreElement_(
+        this.getLoadMoreEndElement_(), data));
+    return Promise.all(promises);
+  }
+
+  /**
+   * @param {?Element} elem
+   * @param {!JsonObject} data
+   * @return {!Promise}
+   * @private
+   */
+  maybeRenderLoadMoreElement_(elem, data) {
+    if (elem && this.templates_.hasTemplate(elem)) {
+      return this.templates_.findAndRenderTemplate(elem, data)
+          .then(newContents => {
+            return this.mutateElement(() => {
+              removeChildren(dev().assertElement(elem));
+              elem.appendChild(newContents);
+            });
+          });
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -551,6 +653,9 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
+        if (this.loadMoreEnabled_) {
+          this.moveButtonsToBottom_(container);
+        }
       }
 
       const event = createCustomEvent(this.win,
@@ -579,11 +684,29 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
+    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+      return;
+    }
     this.measureElement(() => {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
+        this.attemptChangeHeight(scrollHeight).then(() => {
+          if (this.loadMoreEnabled_) {
+            this.mutateElement(() => {
+              this.loadMoreButton_.classList
+                  .remove('i-amphtml-list-load-more-overflow');
+            });
+          }
+        }).catch(() => {
+          if (this.loadMoreEnabled_) {
+            this.mutateElement(() => {
+              this.loadMoreButton_.classList
+                  .add('i-amphtml-list-load-more-overflow');
+              this.element.appendChild(this.loadMoreButton_);
+            });
+          }
+        });
       }
     });
   }
@@ -639,7 +762,7 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     // TODO (#18875): cleanup resizable-children experiment
-    user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
+    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
         'Experiment amp-list-resizable-children is disabled');
 
     const previousLayout = this.element.getAttribute('layout');
@@ -667,122 +790,216 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Promise}
    * @private
    */
-  setLoadMore_() {
-    if (!this.loadMoreSrc_ && !this.loadMoreOverflow_) {
-      return;
+  maybeSetLoadMore_() {
+    const shouldSetLoadMore = this.loadMoreEnabled_ && this.loadMoreSrc_;
+    if (!shouldSetLoadMore) {
+      return Promise.resolve();
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
     if (triggerOnScroll) {
-      this.maybeSetupLoadMoreAuto_();
+      this.setupLoadMoreAuto_();
     }
-    if (this.loadMoreOverflow_) {
-      this.mutateElement(() => {
-        this.loadMoreOverflow_.classList.toggle('amp-visible', true);
-        listen(this.loadMoreOverflow_, 'click', () => this.loadMoreCallback_());
-      });
-    }
-    if (!this.loadMoreOverflow_ && !triggerOnScroll) {
-      user().error(TAG,
-          'load-more is specified but no means of paging (overflow or ' +
-          'load-more=auto) is available', this);
+    const loadMoreEndElement = this.getLoadMoreEndElement_();
+    const loadMoreButtonClickable = this.getLoadMoreButtonClickable_();
+    return this.mutateElement(() => {
+      this.getLoadMoreButton_().classList.toggle('amp-visible', true);
+      this.getLoadMoreFailedElement_().classList.toggle('amp-visible', false);
+      if (loadMoreEndElement) {
+        loadMoreEndElement.classList.toggle('amp-visible', false);
+      }
+      this.unlistenLoadMore_ = listen(
+          loadMoreButtonClickable,
+          'click', () => this.loadMoreCallback_());
+      // Guarantees that the height accounts for the newly visible button
+      this.attemptToFit_(dev().assertElement(this.container_));
+    });
+  }
+
+
+  /**
+   * Moves all the load-more visual elements to the bottom of the list
+   * after newly appended items.
+   * @param {!Element} container
+   * @private
+   */
+  moveButtonsToBottom_(container) {
+    container.appendChild(this.getLoadMoreButton_());
+    container.appendChild(this.getLoadMoreFailedElement_());
+    container.appendChild(this.getLoadMoreLoadingElement_());
+    const loadMoreEndElement = this.getLoadMoreEndElement_();
+    if (loadMoreEndElement) {
+      container.appendChild(loadMoreEndElement);
     }
   }
 
   /**
+   * Called when 3 viewports above bottom of automatic load-more list, or
+   * manually on clicking the load-more-button element. Sets the amp-list
+   * src to the bookmarked src and fetches data from it.
    * @private
    */
   loadMoreCallback_() {
-    if (!this.loadMoreSrc_) {
-      return;
+    if (this.loadMoreSrc_) {
+      this.element.setAttribute('src', this.loadMoreSrc_);
+      this.loadMoreSrc_ = null;
     }
-    if (this.loadMoreOverflow_) {
-      this.loadMoreOverflow_.onclick = null;
-    }
-    this.element.setAttribute('src', this.loadMoreSrc_);
-    this.loadMoreSrc_ = null;
     this.toggleLoadMoreLoading_(true);
     return this.fetchList_(/* opt_append */ true)
-        .catch(() => this.setLoadMoreFailed_())
-        .then(() => this.toggleLoadMoreLoading_(false));
+        .then(() => {
+          if (this.loadMoreSrc_) {
+            this.toggleLoadMoreLoading_(false);
+          } else {
+            this.setLoadMoreEnded_();
+          }
+          if (this.unlistenLoadMore_) {
+            this.unlistenLoadMore_();
+            this.unlistenLoadMore_ = null;
+          }
+        }).catch(() => {
+          this.setLoadMoreFailed_();
+        });
   }
 
   /**
+   * @return {?Element}
    * @private
    */
   getLoadMoreLoadingElement_() {
     if (!this.loadMoreLoadingElement_) {
       this.loadMoreLoadingElement_ = childElementByAttr(
           this.element, 'load-more-loading');
+
+      if (!this.loadMoreLoadingElement_) {
+        this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
+          <amp-list-load-more load-more-loading class="i-amphtml-default-ui">
+            <div class="i-amphtml-list-load-more-spinner"></div>
+          </amp-list-load-more>
+        `;
+      }
     }
     return this.loadMoreLoadingElement_;
   }
 
   /**
+   * @return {!Promise}
    * @private
    */
-  getLoadMoreLoadingOverlay_() {
-    if (!this.loadMoreLoadingOverlay_) {
-      this.loadMoreLoadingOverlay_ = createLoaderElement(
-          this.win.document, 'load-more-loading');
-      this.loadMoreLoadingOverlay_.setAttribute('load-more-loading', '');
-      this.loadMoreOverflow_.appendChild(this.loadMoreLoadingOverlay_);
-    }
-    return this.loadMoreLoadingOverlay_;
+  setLoadMoreEnded_() {
+    return this.mutateElement(() => {
+      this.getLoadMoreFailedElement_().classList.toggle('amp-visible', false);
+      this.getLoadMoreButton_().classList.toggle('amp-visible', false);
+      this.getLoadMoreLoadingElement_().classList.toggle('amp-visible', false);
+      const loadMoreEndElement = this.getLoadMoreEndElement_();
+      if (loadMoreEndElement) {
+        loadMoreEndElement.classList.toggle('amp-visible', true);
+      }
+    });
   }
-
   /**
+   * Toggles the visibility of the load-more-loading element.
    * @param {boolean} state
    * @private
    */
   toggleLoadMoreLoading_(state) {
-    if (this.loadMoreLoadingElement_) {
-      this.mutateElement(() => {
-        if (state) {
-          this.loadMoreOverflow_.classList.toggle('amp-visible', false);
-        }
-        this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
-      });
-    } else if (this.loadMoreOverflow_) {
-      this.mutateElement(() => {
-        this.loadMoreOverflow_.classList.toggle('amp-load-more-loading', state);
-        this.loadMoreLoadingOverlay_.classList.toggle('amp-active', !state);
-      });
-    }
-  }
-
-  /**
-   * @private
-   */
-  setLoadMoreFailed_() {
-    if (!this.loadMoreFailedElement_ && !this.loadMoreOverflow_) {
-      return;
-    }
     this.mutateElement(() => {
-      if (this.loadMoreFailedElement_) {
-        this.loadMoreFailedElement_.classList.toggle('amp-visible', true);
+      // If it's loading, then it's no longer failed or ended
+      if (state) {
+        this.getLoadMoreFailedElement_().classList.toggle('amp-visible', false);
+        const loadMoreEndElement = this.getLoadMoreEndElement_();
+        if (loadMoreEndElement) {
+          loadMoreEndElement.classList.toggle('amp-visible', false);
+        }
       }
-      if (this.loadMoreOverflow_) {
-        this.loadMoreOverflow_.classList.toggle('amp-visible', false);
-      }
+      this.getLoadMoreButton_().classList.toggle('amp-visible', !state);
+      this.getLoadMoreLoadingElement_().classList.toggle('amp-visible', state);
     });
   }
 
   /**
+   * Shows the load-more-failed element and hides the load-more-button
+   * element.
+   * @private
+   */
+  setLoadMoreFailed_() {
+    const loadMoreFailedElement = this.getLoadMoreFailedElement_();
+    const loadMoreButton = this.getLoadMoreButton_();
+    if (!loadMoreFailedElement && !loadMoreButton) {
+      return;
+    }
+    const loadMoreFailedClickable = this.getLoadMoreFailedClickable_();
+    this.mutateElement(() => {
+      loadMoreFailedElement.classList.toggle('amp-visible', true);
+      this.unlistenLoadMore_ = listen(
+          loadMoreFailedClickable,
+          'click', () => this.loadMoreCallback_());
+      loadMoreButton.classList.toggle('amp-visible', false);
+      this.getLoadMoreLoadingElement_().classList.toggle('amp-visible', false);
+    });
+  }
+
+  /**
+   * @return {!Element}
    * @private
    */
   getLoadMoreFailedElement_() {
     if (!this.loadMoreFailedElement_) {
       this.loadMoreFailedElement_ = childElementByAttr(
           this.element, 'load-more-failed');
+
+      if (!this.loadMoreFailedElement_) {
+        this.loadMoreFailedElement_ = htmlFor(this.win.document)`
+          <amp-list-load-more load-more-failed class="i-amphtml-default-ui">
+            <div class="i-amphtml-list-load-more-message">
+              Unable to Load More
+            </div>
+            <button load-more-clickable
+              class="i-amphtml-list-load-more-button
+                     i-amphtml-list-load-more-button-has-icon
+                     i-amphtml-list-load-more-button-small"
+            >
+              <div class="i-amphtml-list-load-more-icon"></div>
+              <label>Retry</label>
+            </button>
+          </amp-list-load-more>
+        `;
+      }
     }
     return this.loadMoreFailedElement_;
+  }
+
+  /**
+   * @private
+   * @return {!Element}
+   */
+  getLoadMoreFailedClickable_() {
+    if (!this.loadMoreFailedClickable_) {
+      const loadFailedElement = this.getLoadMoreFailedElement_();
+      this.loadMoreFailedClickable_ = childElementByAttr(
+          loadFailedElement, 'load-more-clickable') ||
+        loadFailedElement;
+    }
+    return this.loadMoreFailedClickable_;
+  }
+
+  /**
+   * @return {?Element}
+   * @private
+   */
+  getLoadMoreEndElement_() {
+    if (!this.loadMoreEndElement_) {
+      this.loadMoreEndElement_ = childElementByAttr(
+          this.element, 'load-more-end');
+    }
+    return this.loadMoreEndElement_;
   }
 
 
   /**
    * @param {boolean} opt_refresh
+   * @return {!Promise<(!Array<JsonObject>|!JsonObject)>}
    * @private
    */
   fetch_(opt_refresh = false) {
@@ -793,23 +1010,17 @@ export class AmpList extends AMP.BaseElement {
   /**
    * @private
    */
-  maybeSetupLoadMoreAuto_() {
-    if (!this.positionObserver_) {
-      installPositionObserverServiceForDoc(this.getAmpDoc());
-      this.positionObserver_ = getServiceForDoc(
-          this.getAmpDoc(),
-          'position-observer'
-      );
-      this.positionObserver_.observe(this.container_,
-          PositionObserverFidelity.LOW,
-          ({positionRect, viewportRect}) => {
-            const ratio = 1.5;
-            if (this.loadMoreSrc_ &&
-                positionRect.bottom < ratio * viewportRect.bottom) {
+  setupLoadMoreAuto_() {
+    const loadMoreButton = dev().assertElement(this.loadMoreButton_);
+    this.viewport_.onScroll(() => {
+      this.viewport_.getClientRectAsync(loadMoreButton)
+          .then(positionRect => {
+            const vr = this.viewport_.getRect();
+            if (vr.bottom + 3 * vr.height > positionRect.bottom) {
               this.loadMoreCallback_();
             }
           });
-    }
+    });
   }
 
   /**
@@ -857,5 +1068,5 @@ export class AmpList extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpList);
+  AMP.registerElement(TAG, AmpList, CSS);
 });

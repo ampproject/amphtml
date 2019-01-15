@@ -15,22 +15,22 @@
  */
 
 import {computedStyle, setStyles} from '../../../../src/style';
-import {dev, user} from '../../../../src/log';
+import {devAssert, userAssert} from '../../../../src/log';
 
 export const Presets = {
   'parallax': {
     userAsserts(element) {
-      const factorValue = user().assert(
+      const factorValue = userAssert(
           element.getAttribute('data-parallax-factor'),
           'data-parallax-factor=<number> attribute must be provided for: %s',
           element);
-      user().assert(parseFloat(factorValue) > 0,
+      userAssert(parseFloat(factorValue) > 0,
           'data-parallax-factor must be a number and greater than 0 for: %s',
           element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
       if (!top || top > fxElement.adjustedViewportHeight) {
@@ -59,13 +59,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top - (fxElement.viewportHeight *
@@ -81,11 +81,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const topAsLength = style.top == 'auto' ? '0px' : style.top;
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} +
                   ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -106,13 +109,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -126,11 +129,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
                   `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -151,13 +157,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -171,11 +177,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
                   `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -196,13 +205,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top + (fxElement.viewportHeight *
@@ -218,11 +227,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const topAsLength = style.top == 'auto' ? '0px' : style.top;
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} -
                   ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -243,13 +255,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -274,20 +286,20 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd <= 100,
+      userAssert(marginEnd >= 0 && marginEnd <= 100,
           'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
-      user().assert(marginEnd > marginStart,
+      userAssert(marginEnd > marginStart,
           'data-margin-end must be greater than data-margin-start for: %s',
           element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
       if (!top || (top > (1 - fxElement.getMarginStart()) *

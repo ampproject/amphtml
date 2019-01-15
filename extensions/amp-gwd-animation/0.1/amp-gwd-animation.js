@@ -26,7 +26,7 @@ import {getExistingServiceForDocInEmbedScope, getParentWindowFrameElement}
   from '../../../src/service';
 import {getFriendlyIframeEmbedOptional}
   from '../../../src/friendly-iframe-embed';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
@@ -136,12 +136,12 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
-      user().assert(this.element.id, `The ${TAG} element must have an id.`);
+      userAssert(this.element.id, `The ${TAG} element must have an id.`);
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
-      const nodeOrDoc = this.fie_ ? this.element : this.getAmpDoc();
-      addAction(nodeOrDoc, gwdPageDeck, 'slideChange', setCurrentPageAction);
+      addAction(this.element, gwdPageDeck, 'slideChange',
+          setCurrentPageAction);
     }
 
     // Register handlers for supported actions.
@@ -209,9 +209,8 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   executeInvocation_(invocation) {
-    const nodeOrDoc = this.fie_ ? this.element : this.getAmpDoc();
-    const service = user().assert(
-        getExistingServiceForDocInEmbedScope(nodeOrDoc, GWD_SERVICE_NAME),
+    const service = userAssert(
+        getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
         'Cannot execute action because the GWD service is not registered.');
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
@@ -229,8 +228,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   onGwdTimelineEvent_(event) {
-    const nodeOrDoc = this.fie_ ? this.element : this.getAmpDoc();
-    const actionService = Services.actionServiceForDoc(nodeOrDoc);
+    const actionService = Services.actionServiceForDoc(this.element);
     const eventName = getDetail(event)['eventName'];
     const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
 
@@ -247,21 +245,19 @@ export class GwdAnimation extends AMP.BaseElement {
 }
 
 /**
- * Adds an event action definition to a node.
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc The node
- *     or AmpDoc reference for retrieving the action service. The node rather
- *     than the doc is provided when in a FIE.
- * @param {!Element} element The target element whose actions to update.
+ * Adds an event action definition to an element.
+ * @param {!Element} context
+ * @param {!Element} target The target element whose actions to update.
  * @param {string} event The event name, e.g., 'slideChange'.
  * @param {string} actionStr e.g., `someDiv.hide`.
  * @private Visible for testing.
  */
-export function addAction(nodeOrDoc, element, event, actionStr) {
+export function addAction(context, target, event, actionStr) {
   // Assemble the new actions string by splicing in the new action string
   // with any existing actions.
   let newActionsStr;
 
-  const currentActionsStr = element.getAttribute('on') || '';
+  const currentActionsStr = target.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
   const eventActionsIndex = currentActionsStr.indexOf(eventPrefix);
 
@@ -284,7 +280,8 @@ export function addAction(nodeOrDoc, element, event, actionStr) {
   }
 
   // Reset the element's actions with the new actions string.
-  Services.actionServiceForDoc(nodeOrDoc).setActions(element, newActionsStr);
+  const actionService = Services.actionServiceForDoc(context);
+  actionService.setActions(target, newActionsStr);
 }
 
 AMP.extension(TAG, '0.1', AMP => {

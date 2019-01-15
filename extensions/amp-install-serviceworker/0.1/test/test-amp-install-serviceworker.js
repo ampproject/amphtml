@@ -84,8 +84,51 @@ describes.realWin('amp-install-serviceworker', {
       },
       navigator: {
         serviceWorker: {
-          register: src => {
+          register: (src, options) => {
             expect(calledSrc).to.be.undefined;
+            expect(options.scope).to.be.equal('/');
+            calledSrc = src;
+            return p;
+          },
+        },
+      },
+    };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
+    implementation.buildCallback();
+    expect(calledSrc).to.be.undefined;
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
+  });
+
+  it('should install for custom scope', () => {
+    const install = doc.createElement('div');
+    container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
+    install.setAttribute('src', 'https://example.com/sw.js');
+    install.setAttribute('data-scope', '/profile');
+    const implementation = new AmpInstallServiceWorker(install);
+    let calledSrc;
+    const p = new Promise(() => {});
+    implementation.win = {
+      complete: true,
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: (src, options) => {
+            expect(calledSrc).to.be.undefined;
+            expect(options.scope).to.be.equal('/profile');
             calledSrc = src;
             return p;
           },
@@ -126,13 +169,16 @@ describes.realWin('amp-install-serviceworker', {
         },
       });
     };
+    const postMessageStub = sandbox.stub();
     const fakeRegistration = {
       installing: {
         addEventListener: sandbox.spy(eventListener),
       },
+      active: {
+        postMessage: postMessageStub,
+      },
     };
     const p = Promise.resolve(fakeRegistration);
-    const postMessageStub = sandbox.stub();
     implementation.win = {
       complete: true,
       location: {
@@ -142,9 +188,6 @@ describes.realWin('amp-install-serviceworker', {
         serviceWorker: {
           register: () => {
             return p;
-          },
-          controller: {
-            postMessage: postMessageStub,
           },
         },
       },
@@ -173,8 +216,72 @@ describes.realWin('amp-install-serviceworker', {
             expect(fakeRegistration.installing.addEventListener)
                 .to.be.calledWith('statechange', sinon.match.func);
             expect(postMessageStub).to.be.calledWith(JSON.stringify({
-              type: 'FIRST_VISIT_CACHING',
+              type: 'AMP__FIRST-VISIT-CACHING',
               payload: AMP_SCRIPTS,
+            }));
+          });
+        });
+  });
+
+  it('should postMessage all a[data-rel=prefetch] scripts used to'
+    + ' service worker for prefetching', () => {
+    const install = doc.createElement('div');
+    install.setAttribute('data-prefetch', true);
+    container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
+    install.setAttribute('src', 'https://example.com/sw.js');
+    const implementation = new AmpInstallServiceWorker(install);
+    const postMessageStub = sandbox.stub();
+    const fakeRegistration = {
+      active: {
+        postMessage: postMessageStub,
+      },
+    };
+    const p = Promise.resolve(fakeRegistration);
+    implementation.win = {
+      complete: true,
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: () => {
+            return p;
+          },
+        },
+      },
+      document: {
+        querySelectorAll: () => [
+          {
+            href: 'https://ampproject.org/',
+          },
+          {
+            href: 'https://ampbyexample.com/components/amp-accordion/',
+          },
+        ],
+        createElement: () => {
+          return {
+            relList: {
+              supports: () => false,
+            },
+          };
+        },
+      },
+    };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
+    implementation.buildCallback();
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          return p.then(() => {
+            expect(postMessageStub).to.be.calledWith(JSON.stringify({
+              type: 'AMP__LINK-PREFETCH',
+              payload: ['https://ampproject.org/', 'https://ampbyexample.com/components/amp-accordion/'],
             }));
           });
         });
@@ -303,7 +410,7 @@ describes.realWin('amp-install-serviceworker', {
       });
     });
 
-    function testIframe() {
+    function testIframe(callCount = 1) {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       let iframe;
@@ -330,12 +437,13 @@ describes.realWin('amp-install-serviceworker', {
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
           () => {
-            expect(mutateElement).to.have.been.calledOnce;
+            expect(mutateElement).to.have.been.callCount(callCount);
           });
     }
 
-    it('should inject iframe on proxy if provided (valid canonical)',
-        testIframe);
+    it('should inject iframe on proxy if provided (valid canonical)', () => {
+      return testIframe();
+    });
 
     it('should inject iframe on proxy if provided (valid source)', () => {
       docInfo = {
@@ -359,6 +467,11 @@ describes.realWin('amp-install-serviceworker', {
       allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
       }).to.throw(/https/); });
+    });
+
+    it('should not inject iframe on proxy if safari', () => {
+      implementation.isSafari_ = true;
+      return allowConsoleError(() => testIframe(0));
     });
   });
 });

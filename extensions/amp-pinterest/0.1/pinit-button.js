@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {Util} from './util';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 
 import {toWin} from '../../../src/types';
@@ -42,11 +42,11 @@ export class PinItButton {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    user().assert(rootElement.getAttribute('data-url'),
+    userAssert(rootElement.getAttribute('data-url'),
         'The data-url attribute is required for Pin It buttons');
-    user().assert(rootElement.getAttribute('data-media'),
+    userAssert(rootElement.getAttribute('data-media'),
         'The data-media attribute is required for Pin It buttons');
-    user().assert(rootElement.getAttribute('data-description'),
+    userAssert(rootElement.getAttribute('data-description'),
         'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
@@ -56,8 +56,11 @@ export class PinItButton {
     this.round = rootElement.getAttribute('data-round');
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
+    /** @type {?string} */
     this.media = null;
+    /** @type {?string} */
     this.url = null;
+    /** @type {?string} */
     this.href = null;
   }
 

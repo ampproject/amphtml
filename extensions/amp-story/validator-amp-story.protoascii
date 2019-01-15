@@ -91,6 +91,10 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
     name: "title"
     mandatory: true
   }
@@ -101,6 +105,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-SIDEBAR"
     child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
@@ -473,6 +478,7 @@ descendant_tag_list: {
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-CALL-TRACKING"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
@@ -541,6 +547,7 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
@@ -552,6 +559,7 @@ descendant_tag_list: {
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
+  tag: "AMP-TIMEAGO"
   tag: "AMP-VIDEO"
   tag: "ARTICLE"
   tag: "ASIDE"

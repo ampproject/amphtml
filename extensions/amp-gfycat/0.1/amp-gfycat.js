@@ -17,13 +17,15 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-gfycat';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -111,7 +113,7 @@ class AmpGfycat extends AMP.BaseElement {
    * @private
    */
   getVideoId_() {
-    return user().assert(
+    return userAssert(
         this.element.getAttribute('data-gfyid'),
         'The data-gfyid attribute is required for <amp-gfycat> %s',
         this.element);
@@ -304,9 +306,14 @@ class AmpGfycat extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-gfycat', '0.1', AMP => {
-  AMP.registerElement('amp-gfycat', AmpGfycat);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpGfycat);
 });

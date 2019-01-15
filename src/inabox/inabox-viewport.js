@@ -19,7 +19,7 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {
@@ -265,7 +265,7 @@ export class ViewportBindingInabox {
    * @visibleForTesting
    */
   getChildResources() {
-    return Services.resourcesForDoc(this.win.document).get();
+    return Services.resourcesForDoc(this.win.document.documentElement).get();
   }
 
   /** @private */
@@ -289,7 +289,7 @@ export class ViewportBindingInabox {
             MessageType.SEND_POSITIONS, MessageType.POSITION,
             data => {
               this.requestPositionPromise_ = null;
-              dev().assert(data.targetRect, 'Host should send targetRect');
+              devAssert(data.targetRect, 'Host should send targetRect');
               resolve(data.targetRect);
             }
         );

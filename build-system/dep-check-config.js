@@ -131,6 +131,7 @@ exports.rules = [
       '3p/**->src/consent-state.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -149,6 +150,7 @@ exports.rules = [
       'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
+      'ads/**->src/utils/rate-limit.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
@@ -263,9 +265,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-list/0.1/amp-list.js->' +
             'src/service/position-observer/position-observer-worker.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
@@ -319,11 +321,13 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/polyfills.js->src/polyfills/object-values.js',
       'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/object-values.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
@@ -405,8 +409,6 @@ exports.rules = [
       'ads/pulsepoint.js->ads/google/doubleclick.js',
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST **/
-      'ads/criteo.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
     ],
   },

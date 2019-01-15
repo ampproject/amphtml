@@ -159,16 +159,21 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const {allowedProtocols} = rules;
-    if (allowedProtocols && url) {
-      const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(url);
-      if (match !== null) {
-        const protocol = match[1].toLowerCase().trim();
-        // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!hasOwn(allowedProtocols, protocol)) {
-          return false;
+    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    if (url) {
+      if (/__amp_source_origin/.test(url)) {
+        return false;
+      }
+      const {allowedProtocols} = rules;
+      if (allowedProtocols) {
+        const re = /^([^:\/?#.]+):[\s\S]*$/;
+        const match = re.exec(url);
+        if (match !== null) {
+          const protocol = match[1].toLowerCase().trim();
+          // hasOwn() needed since nested objects are not prototype-less.
+          if (!hasOwn(allowedProtocols, protocol)) {
+            return false;
+          }
         }
       }
     }
@@ -230,6 +235,11 @@ function createElementRules_() {
     'AMP-DATE-PICKER': {
       'max': null,
       'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,
@@ -320,6 +330,9 @@ function createElementRules_() {
       'disabled': null,
       'type': null,
       'value': null,
+    },
+    'DETAILS': {
+      'open': null,
     },
     'FIELDSET': {
       'disabled': null,

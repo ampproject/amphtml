@@ -17,14 +17,19 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
+  calculateLegacyStateValue,
+  composeStoreValue,
+  constructConsentInfo,
   getStoredConsentInfo,
+  isConsentInfoStoredValueSame,
+  recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {isEnumValue} from '../../../src/types';
+import {dev, devAssert, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
+
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
@@ -38,17 +43,20 @@ export class ConsentStateManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ConsentInstance>} */
-    this.instances_ = {};
+    /** @private {?string} */
+    this.instanceId_ = null;
 
-    /** @private {!Object<string, ?Observable>}*/
-    this.consentChangeObservables_ = {};
+    /** @private {?ConsentInstance} */
+    this.instance_ = null;
 
-    /** @private {!Object<string, ?function()>} */
-    this.consentReadyResolvers_ = {};
+    /** @private {?function(!ConsentInfoDef)} */
+    this.consentChangeHandler_ = null;
 
-    /** @private {!Object<string, ?Promise>} */
-    this.consentReadyPromises_ = {};
+    /** @private {?Promise} */
+    this.consentReadyPromise_ = null;
+
+    /** @private {?function()} */
+    this.consentReadyResolver_ = null;
   }
 
   /**
@@ -57,62 +65,77 @@ export class ConsentStateManager {
    * @param {!Object} config
    */
   registerConsentInstance(instanceId, config) {
-    if (this.instances_[instanceId]) {
-      dev().error(TAG, 'instance %s already registered', instanceId);
+    if (this.instance_) {
+      dev().error(TAG, 'Cannot register consent instance %s, ' +
+          'instance %s has already been registered.',
+      instanceId, this.instanceId_);
       return;
     }
-    this.instances_[instanceId] = new ConsentInstance(
-        this.ampdoc_, instanceId, config);
-    this.consentChangeObservables_[instanceId] = new Observable();
-    if (this.consentReadyResolvers_[instanceId]) {
-      this.consentReadyResolvers_[instanceId]();
-      this.consentReadyPromises_[instanceId] = null;
-      this.consentReadyResolvers_[instanceId] = null;
+
+    this.instanceId_ = instanceId;
+
+    this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
+
+    if (this.consentReadyResolver_) {
+      this.consentReadyResolver_();
+      this.consentReadyResolver_ = null;
     }
   }
 
   /**
    * Update consent instance state
-   * @param {string} instanceId
    * @param {CONSENT_ITEM_STATE} state
+   * @param {string=} consentStr
    */
-  updateConsentInstanceState(instanceId, state) {
-    if (!this.instances_[instanceId] ||
-        !this.consentChangeObservables_[instanceId]) {
-      dev().error(TAG, 'instance %s not registered', instanceId);
+  updateConsentInstanceState(state, consentStr) {
+    if (!this.instance_) {
+      dev().error(TAG, 'instance not registered');
       return;
     }
-    this.consentChangeObservables_[instanceId].fire(state);
-    this.instances_[instanceId].update(state);
+
+    if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      if (consentStr) {
+        user().error(TAG,
+            'Consent string value %s will be ignored on user dismiss',
+            consentStr);
+        consentStr = undefined;
+      }
+    }
+
+    this.instance_.update(state, consentStr);
+
+    if (this.consentChangeHandler_) {
+      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
+    }
   }
 
   /**
    * Get local consent instance state
-   * @param {string} instanceId
-   * @return {Promise<CONSENT_ITEM_STATE>}
+   * @return {Promise<!ConsentInfoDef>}
    */
-  getConsentInstanceState(instanceId) {
-    dev().assert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    return this.instances_[instanceId].get();
+  getConsentInstanceInfo() {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    return this.instance_.get();
   }
 
   /**
    * Register the handler for every consent state change.
-   * @param {string} instanceId
-   * @param {function(CONSENT_ITEM_STATE)} handler
+   * @param {function(!ConsentInfoDef)} handler
    */
-  onConsentStateChange(instanceId, handler) {
-    dev().assert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
+  onConsentStateChange(handler) {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
 
-    const unlistener = this.consentChangeObservables_[instanceId].add(handler);
+    devAssert(!this.consentChangeHandler_,
+        '%s: Duplicate consent change handler, will be ignored', TAG);
+
+    this.consentChangeHandler_ = handler;
+
     // Fire first consent instance state.
-    this.getConsentInstanceState(instanceId).then(state => {
-      handler(state);
+    this.getConsentInstanceInfo().then(info => {
+      handler(info);
     });
-
-    return unlistener;
   }
 
 
@@ -120,42 +143,39 @@ export class ConsentStateManager {
    * Sets a promise which resolves to a shareData object that is to be returned
    * from the remote endpoint.
    *
-   * @param {string} instanceId
    * @param {Promise<?Object>} sharedDataPromise
    */
-  setConsentInstanceSharedData(instanceId, sharedDataPromise) {
-    dev().assert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
+  setConsentInstanceSharedData(sharedDataPromise) {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    this.instance_.sharedDataPromise = sharedDataPromise;
   }
 
   /**
    * Returns a promise that resolves to a shareData object that is returned
    * from the remote endpoint.
    *
-   * @param {string} instanceId
    * @return {?Promise<?Object>}
    */
-  getConsentInstanceSharedData(instanceId) {
-    dev().assert(this.instances_[instanceId],
-        '%s: cannot find this instance', TAG);
-    return this.instances_[instanceId].sharedDataPromise;
+  getConsentInstanceSharedData() {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    return this.instance_.sharedDataPromise;
   }
 
   /**
    * Returns a promise that's resolved when consent instance is ready.
-   * @param {string} instanceId
    */
-  whenConsentReady(instanceId) {
-    if (this.instances_[instanceId]) {
+  whenConsentReady() {
+    if (this.instance_) {
       return Promise.resolve();
     }
-    if (!this.consentReadyPromises_[instanceId]) {
+    if (!this.consentReadyPromise_) {
       const deferred = new Deferred();
-      this.consentReadyPromises_[instanceId] = deferred.promise;
-      this.consentReadyResolvers_[instanceId] = deferred.resolve;
+      this.consentReadyPromise_ = deferred.promise;
+      this.consentReadyResolver_ = deferred.resolve;
     }
-    return this.consentReadyPromises_[instanceId];
+    return this.consentReadyPromise_;
   }
 }
 
@@ -173,6 +193,10 @@ export class ConsentInstance {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    /** @private {boolean} */
+    this.isAmpConsentV2ExperimentOn_ =
+        isExperimentOn(ampdoc.win, 'amp-consent-v2');
+
     /** @private {string} */
     this.id_ = id;
 
@@ -182,8 +206,8 @@ export class ConsentInstance {
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
-    /** @private {?CONSENT_ITEM_STATE} */
-    this.localValue_ = null;
+    /** @private {?ConsentInfoDef}*/
+    this.localConsentInfo_ = null;
 
     /** @private {string} */
     this.storageKey_ = 'amp-consent:' + id;
@@ -198,80 +222,94 @@ export class ConsentInstance {
   /**
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
+   * @param {string=} consentString
    */
-  update(state) {
-    if (!isEnumValue(CONSENT_ITEM_STATE, state)) {
-      state = CONSENT_ITEM_STATE.UNKNOWN;
-    }
+  update(state, consentString) {
+    const localStateValue =
+        this.localConsentInfo_ && this.localConsentInfo_['consentState'];
+    const localConsentStr =
+        this.localConsentInfo_ && this.localConsentInfo_['consentString'];
+    const calculatedState =
+        recalculateConsentStateValue(state, localStateValue);
 
-    if (state == CONSENT_ITEM_STATE.DISMISSED) {
-      this.localValue_ = this.localValue_ || CONSENT_ITEM_STATE.UNKNOWN;
+    // TODO(@zhouyx) Make consentString init value to null
+    consentString = consentString || localConsentStr || undefined;
+    const newConsentInfo = constructConsentInfo(calculatedState, consentString);
+    const oldConsentInfo = this.localConsentInfo_;
+    this.localConsentInfo_ = newConsentInfo;
+
+    if (state === CONSENT_ITEM_STATE.DISMISSED ||
+        isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
+      // Only update/save to localstorage if it's not dismiss
+      // And the value is different from what is stored.
       return;
     }
 
-    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
-      if (!this.localValue_ || this.localValue_ == CONSENT_ITEM_STATE.UNKNOWN) {
-        this.localValue_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
-      }
-      return;
-    }
+    // TODO(@zhouyx): Need force update to update timestamp
+    this.updateStoredValue_(newConsentInfo);
+  }
 
-    if (state === this.localValue_) {
-      return;
-    }
-
-    this.localValue_ = state;
-
-    if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-      return;
-    }
-
-    const value = (state == CONSENT_ITEM_STATE.ACCEPTED);
+  /**
+   * Write the new value to localStorage and send updateHrefRequest
+   * @param {!ConsentInfoDef} consentInfo
+   */
+  updateStoredValue_(consentInfo) {
     this.storagePromise_.then(storage => {
-      if (state != this.localValue_) {
-        // If state has changed. do not store.
+      if (!isConsentInfoStoredValueSame(
+          consentInfo, this.localConsentInfo_)) {
+        // If state has changed. do not store outdated value.
         return;
       }
-      storage.set(this.storageKey_, value);
-      this.sendUpdateHrefRequest_(value);
+      const value = composeStoreValue(
+          consentInfo, this.isAmpConsentV2ExperimentOn_);
+      if (value == null) {
+        // Value can be false, do not use !value check
+        // Nothing to store to localStorage
+        return;
+      }
+      storage.setNonBoolean(this.storageKey_, value);
+      this.sendUpdateHrefRequest_(consentInfo);
     });
   }
 
   /**
    * Get the local consent state list
-   * @return {!Promise<CONSENT_ITEM_STATE>}
+   * @return {!Promise<!ConsentInfoDef>}
    */
   get() {
-    if (this.localValue_) {
-      return Promise.resolve(
-          /** @type {CONSENT_ITEM_STATE} */ (this.localValue_));
+    if (this.localConsentInfo_) {
+      // Return the local value if it has been processed before
+      return Promise.resolve(this.localConsentInfo_);
     }
 
     return this.storagePromise_.then(storage => {
       return storage.get(this.storageKey_);
     }).then(storedValue => {
-      if (this.localValue_) {
-        // If value has been updated. return most updated value;
-        return this.localValue_;
+      if (this.localConsentInfo_) {
+        // If local value has been updated, return most updated value;
+        return this.localConsentInfo_;
       }
+
       const consentInfo = getStoredConsentInfo(storedValue);
-      this.localValue_ = consentInfo['consentState'];
-      return this.localValue_;
+      this.localConsentInfo_ = consentInfo;
+      return this.localConsentInfo_;
     }).catch(e => {
       dev().error(TAG, 'Failed to read storage', e);
-      return CONSENT_ITEM_STATE.UNKNOWN;
+      return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
     });
   }
 
   /**
    * send a POST request to the updateHref with userId with fixed scope
-   * and consentInstanceId
-   * @param {boolean} state
+   * and consentInstanceIds
+   * @param {!ConsentInfoDef} consentInfo
    */
-  sendUpdateHrefRequest_(state) {
+  sendUpdateHrefRequest_(consentInfo) {
     if (!this.onUpdateHref_) {
       return;
     }
+    const consentState =
+        calculateLegacyStateValue(consentInfo['consentState']);
     const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
       return cid.get({scope: CID_SCOPE, createCookieIfNotPresent: true},
           Promise.resolve());
@@ -280,8 +318,13 @@ export class ConsentInstance {
       const request = /** @type {!JsonObject} */ ({
         'consentInstanceId': this.id_,
         'ampUserId': userId,
-        'consentState': state,
       });
+      if (consentState != null) {
+        request['consentState'] = consentState;
+      }
+      if (consentInfo['consentString']) {
+        request['consentString'] = consentInfo['consentString'];
+      }
       const init = {
         credentials: 'include',
         method: 'POST',

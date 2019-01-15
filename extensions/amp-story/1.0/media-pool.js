@@ -34,7 +34,7 @@ import {
   VideoServiceSignals,
 } from '../../../src/service/video-service-interface';
 import {ampMediaElementFor} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
@@ -249,7 +249,7 @@ export class MediaPool {
         return;
       }
 
-      const ctor = dev().assert(this.mediaFactory_[type],
+      const ctor = devAssert(this.mediaFactory_[type],
           `Factory for media type \`${type}\` unset.`);
 
       // Cloning nodes is faster than building them.
@@ -441,7 +441,7 @@ export class MediaPool {
 
     return removeFromDom.then(() => {
       const index = allocatedEls.indexOf(poolMediaEl);
-      dev().assert(index >= 0, 'Cannot deallocate unallocated media element.');
+      devAssert(index >= 0, 'Cannot deallocate unallocated media element.');
       allocatedEls.splice(index, 1);
       this.unallocated[mediaType].push(poolMediaEl);
     });
@@ -635,7 +635,7 @@ export class MediaPool {
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
 
     const sources = this.sources_[placeholderEl.id];
-    dev().assert(sources instanceof Sources,
+    devAssert(sources instanceof Sources,
         'Cannot play unregistered element.');
 
     const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||

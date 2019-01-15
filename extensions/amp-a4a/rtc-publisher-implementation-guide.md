@@ -19,6 +19,19 @@ To use RTC, you must meet the following requirements:
 *   Use an ad network that supports Fast Fetch and AMP RTC
 *   Set the `rtc-config` attribute on each amp-ad element for which RTC is to be used, as specified below.
 
+### Supported Vendors
+
+*   AppNexus
+*   APS
+*   Criteo
+*   IndexExchange
+*   Lotame
+*   Media.net
+*   PubMatic OpenWrap
+*   Purch
+*   Rubicon
+*   Salesforce
+*   Yieldbot
 
 ### Overview
 

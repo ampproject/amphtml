@@ -354,8 +354,8 @@ export class SystemLayer {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
-      this.onUIStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
@@ -516,19 +516,29 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to desktop state updates and triggers the desktop UI.
+   * Reacts to UI state updates and triggers the expected UI.
    * @param {!UIType} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
-    if (uiState === UIType.DESKTOP) {
+    if (uiState === UIType.DESKTOP_PANELS) {
       this.buildSharePill_();
     }
 
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+      const shadowRoot = this.getShadowRoot();
+
+      shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+
+      switch (uiState) {
+        case UIType.DESKTOP_PANELS:
+          shadowRoot.classList.add('i-amphtml-story-desktop-panels');
+          break;
+        case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+      }
     });
   }
 

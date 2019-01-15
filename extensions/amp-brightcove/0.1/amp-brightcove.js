@@ -25,7 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -60,6 +60,15 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.muted_ = false;
+
+    /** @private {?number}  */
+    this.currentTime_ = null;
+
+    /** @private {?number}  */
+    this.duration_ = null;
+
+    /** @private {Array}  */
+    this.playedRanges_ = [];
 
     /** @private {?boolean}  */
     this.hasAmpSupport_ = false;
@@ -102,10 +111,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const ampdoc = this.getAmpDoc();
-    const deferred = new Deferred();
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
@@ -190,6 +198,16 @@ class AmpBrightcove extends AMP.BaseElement {
       this.playing_ = false;
     }
 
+    if (data['ct']) {
+      this.currentTime_ = data['ct'];
+    }
+    if (data['pr']) {
+      this.playedRanges_ = data['pr'];
+    }
+    if (data['dur']) {
+      this.duration_ = data['dur'];
+    }
+
     if (redispatch(element, eventType, {
       'ready': VideoEvents.LOAD,
       'playing': VideoEvents.PLAYING,
@@ -241,7 +259,7 @@ class AmpBrightcove extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-    const account = user().assert(
+    const account = userAssert(
         el.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         el);
@@ -425,25 +443,26 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return this.currentTime_;
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return this.duration_;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playedRanges_;
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-brightcove', '0.1', AMP => {
-  AMP.registerElement('amp-brightcove', AmpBrightcove);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpBrightcove);
 });

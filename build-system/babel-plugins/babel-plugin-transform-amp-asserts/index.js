@@ -23,6 +23,14 @@ function isRemovableMethod(t, node, names) {
   });
 }
 
+const typeMap = {
+  'assertElement': '!Element',
+  'assertString': 'string',
+  'assertNumber': 'number',
+  'assertBoolean': 'boolean',
+  'assertArray': '!Array',
+};
+
 const removableDevAsserts = [
   'assert',
   'fine',
@@ -30,6 +38,7 @@ const removableDevAsserts = [
   'assertString',
   'assertNumber',
   'assertBoolean',
+  'assertArray',
 ];
 
 const removableUserAsserts = ['fine'];
@@ -66,16 +75,33 @@ module.exports = function(babel) {
         // This might not be the case like in assertEnum which we currently
         // don't remove.
         const args = path.node.arguments[0];
+        const type = typeMap[property.name];
+
         if (args) {
           if (parenthesized) {
             path.replaceWith(t.parenthesizedExpression(args));
             path.skip();
-          } else {
+          // If is not an assert type, we won't need to do type annotation.
+          // If it has no type that we can cast to, then we also won't need to
+          // do type annotation.
+          } else if (!property.name.startsWith('assert') || !type) {
             path.replaceWith(args);
+          } else {
+            // Special case null value argument since it's mostly used for
+            // interface methods with no implementation which will most likely
+            // get DCE'd by Closure Compiler since they are unused code methods.
+            if (args.type === 'NullLiteral') {
+              return;
+            } else {
+              path.replaceWith(t.parenthesizedExpression(args));
+              // Add a cast annotation to fix type.
+              path.addComment('leading', `* @type {${type}} `);
+            }
           }
         } else {
           // This is to resolve right hand side usage of expression where
-          // no argument is passed in.
+          // no argument is passed in. This bare undefined value is eventually
+          // stripped by Closure Compiler.
           path.replaceWith(t.identifier('undefined'));
         }
       },

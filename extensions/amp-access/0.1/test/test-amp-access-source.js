@@ -36,6 +36,9 @@ describes.fakeWin('AccessSource', {
   let ampdoc;
   let element;
 
+  // Undefined initialization params for AccessSource (unused in tests so far).
+  let readerIdFn, scheduleViewFn, onReauthorizeFn;
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -57,7 +60,8 @@ describes.fakeWin('AccessSource', {
   });
 
   function expectSourceType(ampdoc, config, type, adapter) {
-    const source = new AccessSource(ampdoc, config, null);
+    const source = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, element);
     expect(source.type_).to.equal(type);
     expect(source.adapter_).to.be.instanceOf(adapter);
   }
@@ -72,7 +76,8 @@ describes.fakeWin('AccessSource', {
       },
     };
 
-    const service = new AccessSource(ampdoc, config);
+    const service = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, element);
     expect(service.loginConfig_).to.deep.equal({
       'login1': 'https://acme.com/l1',
       'login2': 'https://acme.com/l2',
@@ -130,7 +135,8 @@ describes.fakeWin('AccessSource', {
       type: 'vendor',
       vendor: 'vendor1',
     };
-    const source = new AccessSource(ampdoc, config);
+    const source = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, element);
     sandbox.stub(source.adapter_, 'getConfig');
     source.getAdapterConfig();
     expect(source.adapter_.getConfig.called).to.be.true;
@@ -182,7 +188,8 @@ describes.fakeWin('AccessSource', {
       'login': 'https://acme.com/l',
       'authorizationFallbackResponse': {'error': true},
     };
-    const service = new AccessSource(ampdoc, config);
+    const service = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, element);
     expect(service.authorizationFallbackResponse_).to.deep.equal(
         {'error': true});
   });
@@ -192,7 +199,8 @@ describes.fakeWin('AccessSource', {
       type: 'vendor',
       vendor: 'vendor1',
     };
-    const source = new AccessSource(ampdoc, config);
+    const source = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, element);
     const sourceMock = sandbox.mock(source);
     sourceMock.expects('login_')
         .withExactArgs('https://url', '')
@@ -211,6 +219,9 @@ describes.fakeWin('AccessSource adapter context', {
   let configElement;
   let source;
   let context;
+
+  // Undefined initialization params for AccessSource (unused in tests so far).
+  let scheduleViewFn, onReauthorizeFn;
 
   beforeEach(() => {
     win = env.win;
@@ -233,8 +244,9 @@ describes.fakeWin('AccessSource adapter context', {
     configElement.textContent = JSON.stringify(config);
     document.body.appendChild(configElement);
 
-    source = new AccessSource(ampdoc, config,
-        () => Promise.resolve('reader1'));
+    const readerIdFn = () => Promise.resolve('reader1');
+    source = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, configElement);
     context = source.adapter_.context_;
   });
 
@@ -299,6 +311,9 @@ describes.fakeWin('AccessSource authorization', {
   let adapterMock;
   let source;
 
+  // Undefined initialization params for AccessSource (unused in tests so far).
+  let scheduleViewFn, onReauthorizeFn;
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -313,7 +328,10 @@ describes.fakeWin('AccessSource authorization', {
       'pingback': 'https://acme.com/p?rid=READER_ID',
       'login': 'https://acme.com/l?rid=READER_ID',
     };
-    source = new AccessSource(ampdoc, config, () => Promise.resolve('reader1'));
+    const readerIdFn = () => Promise.resolve('reader1');
+    source = new AccessSource(ampdoc, config, readerIdFn, scheduleViewFn,
+        onReauthorizeFn, win.document.documentElement);
+
     const adapter = {
       getConfig: () => {
       },

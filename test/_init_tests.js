@@ -41,6 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
@@ -134,12 +135,6 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipOldChrome() {
-    return this.skip(() => {
-      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
@@ -168,6 +163,10 @@ class TestConfig {
     });
   }
 
+  skipWindows() {
+    return this.skip(() => this.platform.isWindows());
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -179,10 +178,6 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
-  }
-
-  ifNewChrome() {
-    return this.ifChrome().skipOldChrome();
   }
 
   ifChrome() {
@@ -218,12 +213,12 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs() {
+  retryOnSaucelabs(times = 4) {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
-      mocha.retries(4);
+      mocha.retries(times);
     });
     return this;
   }
@@ -348,7 +343,7 @@ function restoreConsoleError() {
         'The test "' + testName + '" called "expectAsyncConsoleError", ' +
         'but there were no call(s) to console.error with these message(s): ' +
         '"' + expectedAsyncErrors.join('", "') + '"';
-    throw new Error(helpMessage);
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
@@ -427,6 +422,7 @@ function beforeTest() {
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
 afterEach(function() {
+  that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();

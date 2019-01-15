@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../services';
-import {dev} from '../../log';
+import {devAssert} from '../../log';
 import {
   layoutRectEquals,
   layoutRectLtwh,
@@ -87,7 +87,7 @@ export class PositionObserverWorker {
       return;
     }
 
-    dev().assert(position.positionRect,
+    devAssert(position.positionRect,
         'PositionObserver should always trigger entry with clientRect');
     const positionRect =
     /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
