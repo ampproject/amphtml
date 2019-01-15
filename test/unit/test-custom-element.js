@@ -607,11 +607,23 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should respect user specified consent policy', () => {
       const element = new ElementClass();
+      element.getAmpDoc = () => {return env.ampdoc;};
       expect(element.getConsentPolicy_()).to.equal(null);
       element.setAttribute('data-block-on-consent', '');
       expect(element.getConsentPolicy_()).to.equal('default');
       element.setAttribute('data-block-on-consent', '_none');
       expect(element.getConsentPolicy_()).to.equal('_none');
+    });
+
+    it('should repsect metaTag specified consent', () => {
+      const meta = doc.createElement('meta');
+      meta.setAttribute('name', 'amp-consent-blocking');
+      meta.setAttribute('content', 'amp-test');
+      doc.head.appendChild(meta);
+      const element = new ElementClass();
+      element.getAmpDoc = () => {return env.ampdoc;};
+      expect(element.getConsentPolicy_()).to.equal('default');
+      expect(element.getAttribute('data-block-on-consent')).to.equal('default');
     });
 
 
@@ -928,6 +940,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const element = new StubElementClass();
       element.setAttribute('layout', 'fill');
       element.everAttached = true;
+      element.ampdoc_ = env.ampdoc;
       element.resources_ = resources;
       resourcesMock.expects('upgraded').withExactArgs(element).once();
       element.upgrade(TestElement);

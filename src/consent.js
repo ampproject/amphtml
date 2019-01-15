@@ -18,6 +18,7 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from './consent-state';
 import {Services} from './services';
+import {user} from './log';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
@@ -72,4 +73,35 @@ export function getConsentPolicyInfo(element, policyId) {
         return consentPolicy.getConsentStringInfo(
             /** @type {string} */ (policyId));
       });
+}
+
+/**
+ * Determine if an element needs to be blocked by consent based on metaTags.
+ * @param {*} element
+ * @return {boolean}
+ */
+export function shouldBlockOnConsentByMeta(element) {
+  const ampdoc = element.getAmpDoc();
+  let content =
+      Services.documentInfoForDoc(ampdoc).metaTags['amp-consent-blocking'];
+
+  if (!content) {
+    return false;
+  }
+
+  // validator enforce uniqueness of <meta name='amp-consent-blocking'>
+  // content will not be an array.
+  if (typeof content !== 'string') {
+    user().error('CONSENT',
+        'Invalid amp-consent-blocking value, ignore meta tag');
+    return false;
+  }
+
+  // Handles whitespace
+  content = content.toUpperCase().replace(/\s/g, '').split(',');
+
+  if (content.includes(element.tagName)) {
+    return true;
+  }
+  return false;
 }
