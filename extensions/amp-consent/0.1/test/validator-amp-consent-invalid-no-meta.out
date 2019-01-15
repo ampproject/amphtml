@@ -1,6 +1,6 @@
-PASS
+FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -30,19 +30,15 @@ PASS
 |  </head>
 |  <body>
 |  Hello, world.
-|  <!-- Valid -->
-|  <amp-consent id='ABC' layout='nodisplay'>
+|  <!-- Invalid: no meta tag -->
+|  <amp-consent type="_ping_" layout='nodisplay'>
 |    <script type="application/json">{
-|      "consents": {
-|        "DEF": {
-|          "checkConsentHref": "http://localhost:8000/get-consent-v1",
-|          "promptUI": "ui1"
-|        }
+|      "client_config": {
+|        "info": "test"
 |      }
 |    }</script>
-|    <div id='ui1'>UI1
-|      <button>Accept</button>
-|    </div>
 |  </amp-consent>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-consent/0.1/test/validator-amp-consent-invalid-no-meta.html:41:6 The tag 'meta name=amp-consent-blocking' is missing or incorrect, but required by 'amp-consent [type]'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_TAG_PROBLEM]
