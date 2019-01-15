@@ -29,6 +29,14 @@ const LINKS_IMPRESSIONS_TRACKING_URL =
 const NA_CLICK_TRACKING_URL =
     `${TRACKING_API_URL}/?call=track&rnd=\${rnd}&data=\${data}`;
 
+export const DEFAULT_CONFIG = {
+  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
+  linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
+  nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
+  waypointUrl: AFFILIATION_API,
+  beaconUrl: DOMAIN_RESOLVER_API_URL,
+};
+
 // Domains excluded from impressions & affiliation & NA click tracking.
 export const GLOBAL_DOMAIN_BLACKLIST = [
   'facebook.com',
@@ -39,11 +47,12 @@ export const GLOBAL_DOMAIN_BLACKLIST = [
   'youtube.com',
 ];
 
-export const DEFAULT_CONFIG = {
-  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
-  linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
-  nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
-  waypointUrl: AFFILIATION_API,
-  beaconUrl: DOMAIN_RESOLVER_API_URL,
+export const OPTIONS_ERRORS = {
+  INVALID_PUBCODE: '"publisher-code" is required.',
+  INVALID_XCUST:
+    '"custom-tracking-id" should be <=50 characters and only contain upper ' +
+    'and lowercase characters, numbers, underscores and pipes.',
+  INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
 };
+
 

@@ -21,17 +21,8 @@ import {userAssert} from '../../../src/log';
 import {
   DEFAULT_CONFIG,
   GLOBAL_DOMAIN_BLACKLIST,
+  OPTIONS_ERRORS,
 } from './constants';
-
-const errors = {
-  INVALID_PUBCODE: '"publisher-code" is required.',
-  INVALID_XCUST:
-    '"custom-tracking-id" should be <=50 characters and only contain upper ' +
-    'and lowercase characters, numbers, underscores and pipes.',
-  INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
-};
-
-
 
 /**
  *
@@ -63,6 +54,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
  *
  * @param {!Element} element
  * @param {!Array<string>} internalDomains
+ * @return {!Array<string>}
  */
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
@@ -89,7 +81,7 @@ function getExcludedDomains_(element, internalDomains) {
  */
 function getPubCode_(element) {
   const pubCode = element.getAttribute('publisher-code');
-  assertSkimOption(pubCode, errors.INVALID_PUBCODE);
+  assertSkimOption(pubCode, OPTIONS_ERRORS.INVALID_PUBCODE);
 
   return pubCode;
 }
@@ -103,7 +95,7 @@ function getTrackingStatus_(element) {
   const tracking = element.getAttribute('tracking');
   if (tracking) {
     const isValidValue = tracking === 'true' || tracking === 'false';
-    assertSkimOption(isValidValue, errors.INVALID_TRACKING_STATUS);
+    assertSkimOption(isValidValue, OPTIONS_ERRORS.INVALID_TRACKING_STATUS);
     return tracking === 'true';
   }
 
@@ -120,7 +112,7 @@ function getCustomTrackingId_(element) {
   if (customTrackingId) {
     // TODO: Check for alphanumerical + [_|] only.
     const isValidXcust = customTrackingId.length <= 50;
-    assertSkimOption(isValidXcust, errors.INVALID_XCUST);
+    assertSkimOption(isValidXcust, OPTIONS_ERRORS.INVALID_XCUST);
   }
 
   return customTrackingId;
