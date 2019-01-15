@@ -81,7 +81,7 @@ export class AmpRecaptchaService {
     /** @private {number} */
     this.registeredElementCount_ = 0;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.recaptchaFrameOrigin_ = null;
 
     /** @private {!Deferred} */
@@ -298,8 +298,8 @@ export class AmpRecaptchaService {
    */
   listenIframe_(evName, cb) {
 
-    // Wrap ouur in a check for the origin.
-    const wrappedCallback = (data, source, origin) => {
+    // Wrap our callback in a check for the iframe origin.
+    const checkOriginWrappedCallback = (data, source, origin) => {
       if (origin == this.recaptchaFrameOrigin_) {
         cb(data, source, origin);
       }
@@ -308,7 +308,7 @@ export class AmpRecaptchaService {
     return listenFor(
         dev().assertElement(this.iframe_),
         evName,
-        wrappedCallback,
+        checkOriginWrappedCallback,
         true);
   }
 

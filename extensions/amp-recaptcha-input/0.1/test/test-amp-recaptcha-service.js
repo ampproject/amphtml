@@ -45,6 +45,20 @@ describes.realWin('amp-recaptcha-service', {
         });
   });
 
+  it('should store the iframe src origin ' +
+    'to be used in message origin checking', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return recaptchaService
+        .register(fakeSitekey).then(() => {
+          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+          expect(recaptchaService.iframe_).to.be.ok;
+
+          expect(recaptchaService.recaptchaFrameOrigin_).to.be.ok;
+          expect(recaptchaService.recaptchaFrameOrigin_
+              .includes('.recaptcha.localhost')).to.be.ok;
+        });
+  });
+
   it('should only initialize once for X number of elements,' +
     ' and iframe already exists', () => {
 
