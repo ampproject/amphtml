@@ -1330,20 +1330,19 @@ describes.realWin('amp-story', {
         });
 
     it('should update browser history with the story navigation path', () => {
-      createPages(
-          story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      const pageCount = 2;
+      createPages(story.element, pageCount, ['cover', 'page-1']);
       story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             story.activePage_.element.dispatchEvent(
                 new MouseEvent('click', {clientX: 200}));
             return expect(replaceStateStub).to.have.been.calledWith(
-                {ampStoryNavigationPath: ['cover', 'page-1']},);
+                {ampStoryNavigationPath: ['cover', 'page-1']});
           });
     });
 
-    it(
-        'should navigate to the correct previous page after navigating away',
+    it('should navigate to the correct previous page after navigating away',
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
@@ -1355,6 +1354,7 @@ describes.realWin('amp-story', {
                     .element.setAttribute('advance-to', 'page-3');
                 story.activePage_.element.dispatchEvent(
                     new MouseEvent('click', {clientX: 200}));
+
 
                 win.location = 'https://example.com/';
                 win.location = currentLocation;

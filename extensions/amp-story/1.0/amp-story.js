@@ -256,7 +256,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
-    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    /** @private @const {Array<string>} */
     this.storyNavigationPath_ = [];
 
     /** @const @private {!AmpStoryVariableService} */
@@ -1204,25 +1204,32 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateStoryNavigationPath_(targetPageId, direction) {
-    const targetPage = this.getPageById(targetPageId);
     if (direction === NavigationDirection.PREVIOUS) {
       this.storyNavigationPath_.pop();
       if (this.storyNavigationPath_.length > 0) {
         const pathPrevious =
             this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
             this.storyNavigationPath_[0];
-        if (pathPrevious.element.id != targetPageId) {
-          return pathPrevious;
+        if (pathPrevious != targetPageId) {
+          return this.getPageById(pathPrevious);
         }
       }
     } else if (direction === NavigationDirection.NEXT) {
-      this.storyNavigationPath_.push(targetPage);
+      const topOfStack =
+          this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
+          this.storyNavigationPath_[0];
+      // // If the user navigates the away from the page, the top of storyStack
+      // // will be the same as ampStoryPageId in the history state.
+      if ((targetPageId != topOfStack) ||
+        this.storyNavigationPath_.length == 0) {
+        this.storyNavigationPath_.push(targetPageId);
+      }
     }
     setHistoryState(
         this.win,
         HistoryState.NAVIGATION_PATH,
-        this.storyNavigationPath_.map(page => page.element.id));
-    return targetPage;
+        this.storyNavigationPath_);
+    return this.getPageById(targetPageId);
   }
 
   /**
@@ -2115,8 +2122,7 @@ export class AmpStory extends AMP.BaseElement {
     const historyNavigationPath =
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
-      this.storyNavigationPath_ =
-        historyNavigationPath.map(pageId => this.getPageById(pageId));
+      this.storyNavigationPath_ = historyNavigationPath;
     }
   }
 
