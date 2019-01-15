@@ -254,6 +254,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+import {speakol} from '../ads/speakol';
 
 
 /**
@@ -282,6 +283,7 @@ const AMP_EMBED_ALLOWED = {
   zen: true,
   zergnet: true,
   runative: true,
+  speakol: true,
 };
 
 init(window);
@@ -487,6 +489,7 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
+register('speakol', speakol);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
