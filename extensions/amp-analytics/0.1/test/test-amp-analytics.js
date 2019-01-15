@@ -127,7 +127,7 @@ describes.realWin('amp-analytics', {
 
     const wi = mockWindowInterface(sandbox);
     requestVerifier = new ImagePixelVerifier(wi);
-    return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
+    return Services.userNotificationManagerForDoc(doc.head).then(manager => {
       uidService = manager;
     });
   });

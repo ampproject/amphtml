@@ -424,6 +424,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/478011222#L634
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -480,6 +482,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -538,22 +542,26 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
+      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
       "name": "amp-story: tooltip",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component.js"
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
+      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component-desktop.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",

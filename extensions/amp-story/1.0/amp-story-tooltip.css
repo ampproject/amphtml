@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-tooltip-layer {
+.i-amphtml-story-focused-state-layer {
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
@@ -23,7 +23,7 @@
   position: absolute !important;
 }
 
-.i-amphtml-story-tooltip-layer::before {
+.i-amphtml-story-focused-state-layer::before {
   content: '' !important;
   position: absolute !important;
   top: 0 !important;
@@ -35,14 +35,14 @@
   transition: opacity 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-tooltip-layer.i-amphtml-hidden,
-.i-amphtml-story-tooltip-layer.i-amphtml-hidden::before {
+.i-amphtml-story-focused-state-layer.i-amphtml-hidden,
+.i-amphtml-story-focused-state-layer.i-amphtml-hidden::before {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button-container {
+.i-amphtml-story-focused-state-layer-nav-button-container {
   height: 100% !important;
   width: 160px !important;
   position: absolute !important;
@@ -51,17 +51,17 @@
   justify-content: center !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-left {
+.i-amphtml-story-focused-state-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-left {
   background-image: linear-gradient(90deg, rgba(33, 33, 33, 0.30) 2%, rgba(33, 33, 33, 0) 100%) !important;
   left: 0 !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-right {
+.i-amphtml-story-focused-state-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-right {
   background-image: linear-gradient(90deg, rgba(33, 33, 33, 0) 2%, rgba(33, 33, 33, 0.30) 100%) !important;
   right: 0 !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button {
+.i-amphtml-story-focused-state-layer-nav-button {
   position: absolute !important;
   top: 0 !important;
   bottom: 0 !important;
@@ -74,27 +74,27 @@
   transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
+.i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
   left: -8px !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M30.83 14.83L28 12 16 24l12 12 2.83-2.83L21.66 24z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
 }
 
-.i-amphtml-hidden .i-amphtml-story-tooltip-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
+.i-amphtml-hidden .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
   transform: translate3d(8px, 0, 0);
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-.i-amphtml-story-tooltip-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
+.i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
   right: -8px !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M20 12l-2.83 2.83L26.34 24l-9.17 9.17L20 36l12-12z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
 }
 
-.i-amphtml-hidden .i-amphtml-story-tooltip-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
+.i-amphtml-hidden .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
   transform: translate3d(-8px, 0, 0);
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-[desktop] .i-amphtml-story-tooltip-layer-nav-button-container {
+[desktop] .i-amphtml-story-focused-state-layer-nav-button-container {
   display: none !important;
 }
 
