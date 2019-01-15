@@ -123,6 +123,8 @@ export class AmpList extends AMP.BaseElement {
     this.loadMoreEndElement_ = null;
     /**@private {?UnlistenDef} */
     this.unlistenLoadMore_ = null;
+    /**@private {boolean} */
+    this.loadMoreShown_ = false;
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
@@ -813,8 +815,12 @@ export class AmpList extends AMP.BaseElement {
       this.unlistenLoadMore_ = listen(
           loadMoreButtonClickable,
           'click', () => this.loadMoreCallback_());
+    }).then(() => {
       // Guarantees that the height accounts for the newly visible button
-      this.attemptToFit_(dev().assertElement(this.container_));
+      if (!this.loadMoreShown_) {
+        this.attemptToFit_(dev().assertElement(this.container_));
+        this.loadMoreShown_ = true;
+      }
     });
   }
 
