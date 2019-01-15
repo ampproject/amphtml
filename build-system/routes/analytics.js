@@ -32,10 +32,11 @@ router.post('/rewriter', (req, res) => {
     extraUrlParams: {
       testId: 12358,
       rewritten: true,
+      reqBody: body,
     },
   };
-  Object.assign(body, extraUrlParams);
-  res.json(body);
+  const payload = Object.assign({}, body, extraUrlParams);
+  res.json(payload);
 });
 
 router.use('/:type', (req, res) => {
