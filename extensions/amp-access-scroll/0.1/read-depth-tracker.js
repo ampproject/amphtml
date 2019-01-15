@@ -94,7 +94,7 @@ export class ReadDepthTracker {
       + '&cid=CLIENT_ID(scroll1)'
       + '&c=CANONICAL_URL'
       + '&o=AMPDOC_URL'
-      + '&rd=' + snippet
+      + '&rd=' + encodeURIComponent(snippet)
     ), false).then(url => {
       Services.xhrFor(this.ampdoc_.win)
           .fetch(url);
