@@ -1429,25 +1429,6 @@ export class VideoDocking {
     this.isDragging_ = true;
     this.getControls_().disable();
     this.offset_(offset.x, offset.y);
-    this.updateDismissalAreaStyling_(offset.x, offset.y);
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @private
-   */
-  updateDismissalAreaStyling_(offsetX, offsetY) {
-    const video = this.getDockedVideo_();
-    const {element} = video;
-    const internalElement = getInternalVideoElementFor(element);
-    const inDismissalArea = this.inDismissalArea_(offsetX, offsetY);
-
-    video.mutateElement(() => {
-      const className = 'amp-video-docked-almost-dismissed';
-      internalElement.classList.toggle(className, inDismissalArea);
-      this.getControls_().overlay.classList.toggle(className, inDismissalArea);
-    });
   }
 
   /**
@@ -1476,41 +1457,7 @@ export class VideoDocking {
     this.isDragging_ = false;
 
     this.getControls_().enable();
-
-    if (this.dismissOnDragEnd_(offset.x, offset.y)) {
-      return;
-    }
-
     this.snapToCorner_(offset.x, offset.y);
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @private
-   */
-  dismissOnDragEnd_(offsetX, offsetY) {
-    const inDimissalArea = this.inDismissalArea_(offsetX, offsetY);
-    if (inDimissalArea) {
-      this.dismiss_();
-    }
-    return inDimissalArea;
-  }
-
-  /**
-   * @param {number} offsetX
-   * @param {number} offsetY
-   * @return {boolean}
-   */
-  inDismissalArea_(offsetX, offsetY) {
-    // TODO: Use topEdge/bottomEdge
-    const dismissToleranceFromCenterPx = 20;
-    const {width: vw, height: vh} = this.viewport_.getSize();
-    const {centerX, centerY} = this.getCenter_(offsetX, offsetY);
-    return centerX >= (vw - dismissToleranceFromCenterPx) ||
-        centerX <= dismissToleranceFromCenterPx ||
-        centerY >= (vh - dismissToleranceFromCenterPx) ||
-        centerY <= dismissToleranceFromCenterPx;
   }
 
   /**
@@ -1754,14 +1701,8 @@ export class VideoDocking {
       video.showControls();
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
-      const {overlay} = this.getControls_();
-      const almostDismissed = 'amp-video-docked-almost-dismissed';
       const placeholderIcon = this.getPlaceholderRefs_()['icon'];
       const placeholderBackground = this.getPlaceholderBackground_();
-
-      // TODO(alanorozco): Remove weird flick-to-dismiss.
-      internalElement.classList.remove(almostDismissed);
-      overlay.classList.remove(almostDismissed);
 
       toggle(shadowLayer, false);
 
