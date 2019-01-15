@@ -522,24 +522,30 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should handle layout measures (orientation changes)', () => {
-    return getAmpSlideScroll().then(ampSlideScroll => {
-      const impl = ampSlideScroll.implementation_;
-      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth').callsFake(
-          () => {
-            return impl.slideWidth_ == 400 ? 200 : 400;
-          });
-      impl.onLayoutMeasure();
-      expect(getLayoutWidthSpy).to.have.been.called;
-      expect(impl.slideWidth_).to.equal(200);
+  it('should handle layout measures (orientation changes)', async() => {
+    const ampSlideScroll = await getAmpSlideScroll();
+    const impl = ampSlideScroll.implementation_;
+    const getLayoutWidthStub = sandbox.stub(impl, 'getLayoutWidth');
 
-      impl.showSlide_(1);
-      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
-      impl.onLayoutMeasure();
-      expect(getLayoutWidthSpy).to.have.callCount(2);
-      expect(impl.slideWidth_).to.equal(400);
-      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
-    });
+    getLayoutWidthStub.returns(200);
+    impl.onLayoutMeasure();
+    expect(getLayoutWidthStub).to.have.been.calledOnce;
+    expect(impl.slideWidth_).to.equal(200);
+
+    // Show the first slide, make sure the scroll position is correct.
+    impl.showSlide_(1);
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
+
+    // Now do a layout measure letting the component know it changed size.
+    getLayoutWidthStub.returns(400);
+    impl.onLayoutMeasure();
+    expect(getLayoutWidthStub).to.have.callCount(2);
+    expect(impl.slideWidth_).to.equal(400);
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
+
+    // Make sure the scroll position is correct after layoutCallback.
+    await impl.layoutCallback();
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
   });
 
   it('should relayout the current slide on layoutCallback', () => {

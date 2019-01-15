@@ -272,20 +272,6 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
-
-    if (this.hasNativeSnapPoints_) {
-      // The state being calculated after this short circuit is only needed if
-      // CSS Scroll Snap is not enabled.
-      return;
-    }
-
-    if (this.slideIndex_ !== null) {
-      // Reset scrollLeft on orientationChange.
-      this.slidesContainer_./*OK*/scrollLeft =
-          this.getScrollLeftForIndex_(user().assertNumber(this.slideIndex_,
-              'E#19457 this.slideIndex_'));
-      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
-    }
   }
 
   /** @override */
@@ -293,12 +279,18 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.slideIndex_ === null) {
       this.showSlide_(this.initialSlideIndex_);
     } else {
+      const index = user().assertNumber(
+          this.slideIndex_, 'E#19457 this.slideIndex_');
+      const scrollLeft = this.getScrollLeftForIndex_(index);
       // When display is toggled on a partcular media or element resizes,
       // it will need to be re-laid-out. This is only needed when the slide
       // does not change (example when browser window size changes,
       // or orientation changes)
-      this.scheduleLayout(this.slides_[user().assertNumber(this.slideIndex_,
-          'E#19457 this.slideIndex_')]);
+      this.scheduleLayout(this.slides_[index]);
+      // Reset scrollLeft on orientationChange or anything that changes the
+      // size of the carousel.
+      this.slidesContainer_./*OK*/scrollLeft = scrollLeft;
+      this.previousScrollLeft_ = scrollLeft;
     }
     return Promise.resolve();
   }
@@ -705,7 +697,7 @@ export class AmpSlideScroll extends BaseSlides {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.shouldLoop && index == 0) {
+    if ((!this.shouldLoop && index == 0) || this.slides_.length <= 1) {
       newScrollLeft = 0;
     }
     return newScrollLeft;
