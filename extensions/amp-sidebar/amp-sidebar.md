@@ -201,6 +201,47 @@ In the following example, we display a `toolbar` if the window width is less tha
 See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
 {% endcall %}
 
+## Sidebar for Stories
+The sidebar is also usable within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are **disallowed** attributes and features of sidebars within an `amp-story`
+
+- side
+- open
+- toolbar
+- toolbar-target
+
+### Behavior
+- The `<amp-sidebar>` must be a direct child of `<amp-story>`
+- The sidebar defaults to the "start" side for regular AMP documents, left for left-right languages and right for right-to-left languages
+- The `<amp-sidebar>` has default background color of white and is overridable in CSS
+- The `<amp-sidebar>` the maximum width of the sidebar is enforced (320px for the desktop experience and otherwise 280px)
+- By default, an 'hamburger' style button that opens/closes the sidebar will appear on the story UI
+
+*Example: Basic Sidebar in a Story*
+
+In the following example, we've placed a simple sidebar in within a story. Remember that you will need to link to both the sidebar and story in the head of the document in order to use these components together.
+
+```html
+...
+<body>
+    <amp-story standalone>
+      <amp-sidebar id="sidebar1" layout="nodisplay">
+        <ul>
+          <li><a href=https://www.ampproject.org"> External Link </a></li>
+          <li>Nav item 2</li>
+          <li>Nav item 3</li>
+        </ul>
+      </amp-sidebar>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <h1>Hello World</h1>
+          <p>This is the cover page of this story.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      ...
+  </body>
+```
+
+
 ## Attributes
 
 ##### side
