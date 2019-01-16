@@ -845,7 +845,7 @@ export class AmpStory extends AMP.BaseElement {
       if (maybePageId && isActualPage(maybePageId)) {
         return maybePageId;
       }
-    } else if (historyPage && isActualPage(historyPage)) {
+    } if (historyPage && isActualPage(historyPage)) {
       return historyPage;
     }
     return firstPageEl.id;
