@@ -189,7 +189,8 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    this.consentString_ = consentStr || this.consentString_;
+    const prevConsentStr = this.consentString_;
+    this.consentString_ = consentStr;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -208,6 +209,8 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
+      // consentString doesn't change with dismiss action
+      this.consentString_ = prevConsentStr;
     } else {
       this.consentState_ = state;
     }

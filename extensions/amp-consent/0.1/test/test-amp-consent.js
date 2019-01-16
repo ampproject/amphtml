@@ -325,6 +325,20 @@ describes.realWin('amp-consent', {
       win.dispatchEvent(event);
       expect(actionSpy).to.not.be.called;
     });
+
+    it('ignore info with action dismiss', () => {
+      expectAsyncConsoleError('[amp-consent] ' +
+          'Consent string value %s not applicable on user dismiss, ' +
+          'stored value will be kept and used ');
+      event.data = {
+        'type': 'consent-response',
+        'action': 'dismiss',
+        'info': 'test',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+    });
   });
 
   describe('UI', () => {
