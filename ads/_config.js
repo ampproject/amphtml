@@ -835,6 +835,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'sas': {},
+
   'sekindo': {
     renderStartImplemented: true,
   },
