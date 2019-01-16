@@ -64,6 +64,26 @@ export function getDimension(axis, el) {
 }
 
 /**
+ * @param {!Axis} axis The axis to get the center point for.
+ * @param {!Element} el The Element to get the center point for.
+ * @return {number} The center point.
+ */
+export function getCenter(axis, el) {
+  const {start, end} = getDimension(axis, el);
+  return (start + end) / 2;
+}
+
+/**
+ * @param {!Axis} axis The axis to get the start point for.
+ * @param {!Element} el The Element to get the start point for.
+ * @return {number} The start point.
+ */
+export function getStart(axis, el) {
+  const {start} = getDimension(axis, el);
+  return start;
+}
+
+/**
  * @param {!Axis} axis The axis along which to set the length.
  * @param {!Element} el The Element to set the length for.
  * @param {number} length The length value, in pixels, to set.
@@ -74,4 +94,62 @@ export function updateLengthStyle(axis, el, length) {
   } else {
     setStyle(el, 'height', `${length}px`);
   }
+}
+
+/**
+ * Gets the current scroll position for an element along a given axis.
+ * @param {!Axis} axis The axis to set the scroll position for.
+ * @param {!Element} el The Element to set the scroll position for.
+ * @return {number} The scroll position.
+ */
+export function getScrollPosition(axis, el) {
+  if (axis == Axis.X) {
+    return el.scrollLeft;
+  }
+
+  return el.scrollTop;
+}
+
+/**
+ * Sets the scroll position for an element along a given axis.
+ * @param {!Axis} axis The axis to set the scroll position for.
+ * @param {!Element} el The Element to set the scroll position for.
+ * @param {number} position The scroll position.
+ */
+export function setScrollPosition(axis, el, position) {
+  if (axis == Axis.X) {
+    el.scrollLeft = position;
+  } else {
+    el.scrollTop = position;
+  }
+
+}
+
+/**
+ * Updates the scroll position for an element along a given axis.
+ * @param {!Axis} axis The axis to set the scroll position for.
+ * @param {!Element} el The Element to set the scroll position for.
+ * @param {number} delta The scroll delta.
+ */
+export function updateScrollPosition(axis, el, delta) {
+  setScrollPosition(axis, el, getScrollPosition(axis, el) + delta);
+}
+
+/**
+ * Scrolls the position within a scrolling container to an Element. Unlike
+ * `scrollIntoView`, this function does not scroll the container itself into
+ * view.
+ * @param {!Element} el The Element to scroll to.
+ * @param {!Element} container The scrolling container.
+ * @param {!Axis} axis The axis to scroll along.
+ * @param {!Alignment} alignment How to align the element within the container.
+ */
+export function scrollContainerToElement(el, container, axis, alignment) {
+  const startAligned = alignment == Alignment.START;
+  const snapOffset = startAligned ? getStart(axis, el) : getCenter(axis, el);
+  const scrollOffset = startAligned ? getStart(axis, container) :
+    getCenter(axis, container);
+  const delta = snapOffset - scrollOffset;
+
+  updateScrollPosition(axis, container, delta);
 }

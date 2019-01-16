@@ -20,6 +20,7 @@ import {
   Alignment,
   Axis,
   getDimension,
+  scrollContainerToElement,
   updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
@@ -29,8 +30,10 @@ import {
   wrappingDistance,
 } from './array-util.js';
 import {debounce} from '../../../src/utils/rate-limit';
-import {getStyle, setStyle} from '../../../src/style';
+import {getStyle, setStyle, setStyles} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
+import {mod} from '../../../src/utils/math';
+import {toArray} from '../../../src/types';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -299,7 +302,27 @@ export class Carousel {
    * @param {number} delta
    */
   advance(delta) {
-    // TODO(sparhami) implement
+    const {slides_: slides, currentIndex_} = this;
+
+    const newIndex = currentIndex_ + delta;
+    const endIndex = slides.length - 1;
+    const atStart = currentIndex_ == 0;
+    const atEnd = currentIndex_ == endIndex;
+    const passingStart = newIndex < 0;
+    const passingEnd = newIndex > endIndex;
+
+    if (this.loop_) {
+      this.goToSlide(mod(newIndex, endIndex + 1));
+    } else if (delta > 0 && this.inLastWindow_(currentIndex_) &&
+        this.inLastWindow_(newIndex)) {
+      this.goToSlide(0);
+    } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
+      this.goToSlide(endIndex);
+    } else if ((passingStart && !atStart) || (passingEnd && atEnd)) {
+      this.goToSlide(0);
+    } else {
+      this.goToSlide(newIndex);
+    }
   }
 
   /**
@@ -308,7 +331,12 @@ export class Carousel {
    * @param {number} index
    */
   goToSlide(index) {
-    // TODO(sparhami) implement
+    if (index < 0 || index > this.slides_.length - 1) {
+      return;
+    }
+
+    this.updateCurrentIndex_(index);
+    this.scrollCurrentIntoView_();
   }
 
   /**
@@ -484,6 +512,16 @@ export class Carousel {
   }
 
   /**
+   * Updates the current index as well as firing an event.
+   * @param {number} currentIndex The new current index.
+   * @private
+   */
+  updateCurrentIndex_(currentIndex) {
+    this.currentIndex_ = currentIndex;
+    // TODO(sparhami) Fire an event.
+  }
+
+  /**
    * Handles a touch start, preventing the restWindow_ from running until the
    * user stops touching.
    * @private
@@ -609,7 +647,31 @@ export class Carousel {
    * @private
    */
   setChildrenSnapAlign_() {
-    // TODO(sparhami) implement
+    const slideCount = this.slides_.length;
+    const startAligned = this.alignment_ == Alignment.START ;
+    const oddVisibleCount = mod(this.visibleCount_, 2) == 1;
+    // For the legacy scroll-snap-coordinate, when center aligning with an odd
+    // count, actually use a start coordinate. Otherwise it will snap to the
+    // center of the slides near the edge of the container. That is
+    //    ______________             _____________
+    // [ | ][   ][   ][ | ]   vs.   [   ][   ][   ]
+    //    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾‾‾
+    const coordinate = startAligned || oddVisibleCount ? '0%' : '50%';
+
+    toArray(this.scrollContainer_.children).forEach((child, index) => {
+      // Note that we are dealing with both spacers, so we need to make sure
+      // we are always dealing with the slideIndex. Since we have the same
+      // number of each type of spacer as we do slides, we can simply do a mod
+      // to do the mapping.
+      const slideIndex = mod(index, slideCount);
+      // If an item is at the start of the group, it gets an aligned.
+      const shouldSnap = mod(slideIndex, this.snapBy_ == 0);
+
+      setStyles(child, {
+        'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
+        'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
+      });
+    });
   }
 
   /**
@@ -718,7 +780,12 @@ export class Carousel {
    * @private
    */
   scrollCurrentIntoView_() {
-    // TODO(sparhami) implement
+    scrollContainerToElement(
+        this.slides_[this.currentIndex_],
+        this.scrollContainer_,
+        this.axis_,
+        this.alignment_
+    );
   }
 
   /**
@@ -729,5 +796,21 @@ export class Carousel {
    */
   moveSlides_(totalLength) {
     // TODO(sparhami) implement
+  }
+
+  /**
+   * Checks if a given index is in the last window of items. For example, if
+   * showing two slides at a time with the slides [a, b, c, d], both slide
+   * b and c are in the last window.
+   * @param {number} index The index to check.
+   * @return {boolean} True if the slide is in the last window, false
+   *    otherwise.
+   */
+  inLastWindow_(index) {
+    const {alignment_, slides_, visibleCount_} = this;
+    const startAligned = alignment_ == Alignment.START;
+    const lastWindowSize = startAligned ? visibleCount_ : visibleCount_ / 2;
+
+    return index >= slides_.length - lastWindowSize;
   }
 }
