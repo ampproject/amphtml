@@ -29,9 +29,9 @@ rating viewer, you'd do this by building an extension.
 
 # Checklist for creating an experiment
 
--[] Create your directory structure.
--[] Create an experiment.
--[] Check previous PRs of past experiments to model your extension after, if applicable.
+- [ ] Create your directory structure.
+- [ ] Create an experiment.
+- [ ] Check previous PRs of past experiments to model your extension after, if applicable.
 
 ## A word on contributing
 
