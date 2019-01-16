@@ -23,7 +23,7 @@ import {mod} from '../../../src/utils/math';
  * betweeb 'a' and 'b' is also 1.
  * @param {number} a A start index.
  * @param {number} b An end index.
- * @param {!Array} arr An array.
+ * @param {!IArrayLike} arr An array like Object.
  */
 export function wrappingDistance(a, b, arr) {
   return a === b ? 0 : Math.min(
@@ -37,7 +37,7 @@ export function wrappingDistance(a, b, arr) {
  * forwardWrappingDistance between 'b' and 'a' is 2.
  * @param {number} a A start index.
  * @param {number} b An end index.
- * @param {!Array} arr An array.
+ * @param {!IArrayLike} arr An array like Object.
  */
 export function forwardWrappingDistance(a, b, {length}) {
   return a === b ? length : mod(b - a, length);
@@ -49,7 +49,7 @@ export function forwardWrappingDistance(a, b, {length}) {
  * backwardWrappingDistance between 'a' and 'b' is 2.
  * @param {number} a A start index.
  * @param {number} b An end index.
- * @param {!Array} arr An array.
+ * @param {!IArrayLike} arr An array like Object.
  */
 export function backwardWrappingDistance(a, b, {length}) {
   return a === b ? length : mod(a - b, length);
