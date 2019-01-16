@@ -30,7 +30,6 @@ import {tryParseJson} from './json';
  */
 const UNLISTEN_SENTINEL = 'unlisten';
 
-
 /**
  * @typedef {{
  *   frame: !Element,

@@ -545,21 +545,6 @@ describes.realWin('amp-iframe', {
       expect(attemptChangeSize).to.be.calledWith(217, 114);
     });
 
-    it('should resize amp-iframe with opaque origin', function* () {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        sandbox: 'allow-scripts',
-        width: 100,
-        height: 100,
-        resizable: '',
-      });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
-      const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
-      impl.updateSize_(217, '114' /* be tolerant to string number */);
-      expect(attemptChangeSize).to.be.calledWith(217, 114);
-    });
-
     it('should resize amp-iframe when only height is provided', function* () {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
