@@ -33,12 +33,12 @@ export function zucks(global, data) {
       container.appendChild(d);
 
       if (data['zoeMultiAd'] !== 'true') {
-        (global.window.gZgokZoeQueue =
-          (global.window.gZgokZoeQueue || [])).push({frameId});
+        (global.gZgokZoeQueue =
+          (global.gZgokZoeQueue || [])).push({frameId});
       }
 
-      (global.window.gZgokZoeWidgetQueue =
-        (global.window.gZgokZoeWidgetQueue || []))
+      (global.gZgokZoeWidgetQueue =
+        (global.gZgokZoeWidgetQueue || []))
           .push({frameId, parent: `#${elementId}`});
     });
   }
