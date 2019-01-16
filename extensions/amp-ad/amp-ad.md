@@ -366,6 +366,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
+- [Tcsemotion](../../ads/tcsemotion.md)
 
 ## Supported embed types
 

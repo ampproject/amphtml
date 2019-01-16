@@ -1091,4 +1091,9 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'tcsemotion': {
+    prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',
+    renderStartImplemented: true,
+  },
+
 };
