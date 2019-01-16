@@ -226,6 +226,7 @@ import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
+import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
@@ -256,7 +257,6 @@ import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 import {speakol} from '../ads/speakol';
-import {tcsemotion} from '../ads/tcsemotion';
 
 
 /**
@@ -460,6 +460,7 @@ register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
+register('tcsemotion', tcsemotion);
 register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
@@ -493,7 +494,6 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
-register('tcsemotion', tcsemotion);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

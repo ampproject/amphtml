@@ -16,7 +16,8 @@
 
 ## Configuration
 
-For additional details and support contact your adserver
+Please refer to [Tcsemotion](https://tcsemotion.com/) for more
+information on how to get zone id and other details
 
 ### Required parameters
 

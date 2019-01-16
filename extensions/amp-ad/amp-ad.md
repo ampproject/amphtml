@@ -340,6 +340,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
+- [Tcsemotion](../../ads/tcsemotion.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
@@ -366,7 +367,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
-- [Tcsemotion](../../ads/tcsemotion.md)
 
 ## Supported embed types
 
