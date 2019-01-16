@@ -2296,6 +2296,28 @@ describes.repeated('', {
         });
       });
 
+      it('NonXHRGet should submit async if Async Input', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, getValueStub} = response;
+
+          // Make the form a NonXHRGet
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+
+          const formElementSubmitSpy =
+            sandbox.spy(ampForm.form_, 'submit');
+
+          const mockEvent = {
+            preventDefault: () => {},
+          };
+
+          return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
+            expect(getValueStub).to.be.called;
+            expect(formElementSubmitSpy).to.be.called;
+          });
+        });
+      });
+
       it('should call getValue() on Async Input Elements', () => {
         return getAmpFormWithAsyncInput().then(response => {
           const {ampForm, getValueStub} = response;
