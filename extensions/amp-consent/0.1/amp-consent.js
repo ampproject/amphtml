@@ -21,6 +21,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -31,8 +32,8 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
@@ -68,8 +69,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, !ConsentUI>} */
-    this.consentUI_ = map();
+    /** @private {?ConsentUI} */
+    this.consentUI_ = null;
 
     /** @private {?JsonObject} */
     this.consentConfig_ = null;
@@ -111,9 +112,14 @@ export class AmpConsent extends AMP.BaseElement {
 
     const config = new ConsentConfig(this.element);
 
-    if (config.getPostPromptUI()) {
+    this.consentConfig_ = config.getConsentConfig();
+
+    // ConsentConfig has verified that there's one and only one consent instance
+    this.consentId_ = this.consentConfig_['storageKey'];
+
+    if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ =
-          new ConsentUI(this, dict({}), config.getPostPromptUI());
+          new ConsentUI(this, dict({}), this.consentConfig_['postPromptUI']);
     }
 
     /**
@@ -137,13 +143,6 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-    const consentConfigDepr = config.getConsentConfig();
-
-    // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ =
-        Object.keys(/** @type {!Object} */ (consentConfigDepr))[0];
-
-    this.consentConfig_ = consentConfigDepr[this.consentId_];
 
     const policyConfig = config.getPolicyConfig();
 
@@ -453,7 +452,7 @@ export class AmpConsent extends AMP.BaseElement {
     return Services.geoForDocOrNull(this.element).then(geo => {
       userAssert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
+      return (geo.isInCountryGroup(geoGroup) == GEO_IN_GROUP.IN);
     });
   }
 
@@ -473,6 +472,9 @@ export class AmpConsent extends AMP.BaseElement {
       const request = /** @type {!JsonObject} */ ({
         'consentInstanceId': this.consentId_,
       });
+      if (this.consentConfig_['clientConfig']) {
+        request['clientConfig'] = this.consentConfig_['clientConfig'];
+      }
       const init = {
         credentials: 'include',
         method: 'POST',
@@ -501,7 +503,8 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   initPromptUI_(isConsentRequired) {
-    this.consentUI_ = new ConsentUI(this, this.consentConfig_);
+    this.consentUI_ = new ConsentUI(this, devAssert(this.consentConfig_,
+        'consent config not found'));
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo()

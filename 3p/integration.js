@@ -91,6 +91,7 @@ import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
+import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -176,6 +177,7 @@ import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
+import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
@@ -253,6 +255,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+import {speakol} from '../ads/speakol';
 
 
 /**
@@ -281,6 +284,7 @@ const AMP_EMBED_ALLOWED = {
   zen: true,
   zergnet: true,
   runative: true,
+  speakol: true,
 };
 
 init(window);
@@ -311,6 +315,7 @@ register('admixer', admixer);
 register('adocean', adocean);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
+register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -404,6 +409,7 @@ register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
+register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativo', nativo);
@@ -485,6 +491,7 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
+register('speakol', speakol);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

@@ -51,12 +51,10 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'ABC': {
-          'checkConsentHref': 'https://response1',
-        },
+        'storageKey': 'ABC',
+        'checkConsentHref': 'https://response1',
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
-      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
     });
 
     it('read cmp config', () => {
@@ -64,14 +62,12 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        '_ping_': {
-          'checkConsentHref': '/get-consent-v1',
-          'promptUISrc':
-              '/test/manual/diy-consent.html',
-        },
+        'storageKey': '_ping_',
+        'checkConsentHref': '/get-consent-v1',
+        'promptUISrc':
+            '/test/manual/diy-consent.html',
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
-      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
     });
 
     it('merge inline config w/ cmp config', () => {
@@ -81,6 +77,12 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             'promptIfUnknownForGeoGroup': 'eea',
             'checkConsentHref': '/override',
           },
+        },
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'uiConfig': {
+          'overlay': true,
         },
         'policy': {
           'default': {
@@ -92,11 +94,17 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        '_ping_': {
-          'checkConsentHref': '/override',
-          'promptUISrc':
-              '/test/manual/diy-consent.html',
-          'promptIfUnknownForGeoGroup': 'eea',
+        'storageKey': '_ping_',
+        'checkConsentHref': '/override',
+        'promptUISrc':
+            '/test/manual/diy-consent.html',
+        'promptIfUnknownForGeoGroup': 'eea',
+        'postPromptUI': 'test',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'uiConfig': {
+          'overlay': true,
         },
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({
@@ -104,7 +112,6 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'waitFor': {},
         },
       }));
-      expect(consentConfig.getPostPromptUI()).to.equal('test');
     });
 
     it('assert valid config', () => {

@@ -28,7 +28,8 @@ const tryConnect = require('try-net-connect');
 const {
   gitBranchName,
   gitCommitterEmail,
-  gitMergeBaseTravisMaster,
+  gitTravisMasterBaseline,
+  shortSha,
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {log, verifyCssElements} = require('./helpers');
@@ -100,7 +101,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitMergeBaseTravisMaster();
+    process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
   }
 }
 
@@ -291,7 +292,7 @@ async function runVisualTests(assetGlobs, webpages) {
   log('info', 'Started Percy build', colors.cyan(buildId));
   if (process.env['PERCY_TARGET_COMMIT']) {
     log('info', 'The Percy build is baselined on top of commit',
-        colors.cyan(process.env['PERCY_TARGET_COMMIT']));
+        colors.cyan(shortSha(process.env['PERCY_TARGET_COMMIT'])));
   }
 
   try {

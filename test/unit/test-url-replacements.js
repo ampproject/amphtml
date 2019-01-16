@@ -85,10 +85,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
           registerServiceBuilder(iframe.win, 'variant', function() {
-            return Promise.resolve({
-              'x1': 'v1',
-              'x2': null,
-            });
+            return {
+              getVariants: () => Promise.resolve({
+                'x1': 'v1',
+                'x2': null,
+              }),
+            };
           });
         }
         if (opt_options.withShareTracking) {
@@ -181,6 +183,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     win.document.defaultView = win;
     win.document.documentElement.ownerDocument = win.document;
+    win.document.head = {
+      nodeType: /* element */ 1,
+      // Fake query selectors needed to bypass <meta> tag checks.
+      querySelector: () => null,
+      querySelectorAll: () => [],
+    };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     installDocumentInfoServiceForDoc(ampdoc);
