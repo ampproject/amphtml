@@ -266,6 +266,7 @@ export function listenFor(
       opt_is3P
   );
 
+  const iframeOrigin = parseUrlDeprecated(iframe.src).origin;
   let events = listenForEvents[typeOfMessage] ||
     (listenForEvents[typeOfMessage] = []);
 
@@ -282,7 +283,6 @@ export function listenFor(
 
       // For `amp` sentinel origin must match unless opaque origin is allowed
       const isOpaqueAndAllowed = origin == 'null' && opt_allowOpaqueOrigin;
-      const iframeOrigin = parseUrlDeprecated(iframe.src).origin;
       if (iframeOrigin != origin && !isOpaqueAndAllowed) {
         return;
       }
