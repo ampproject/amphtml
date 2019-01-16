@@ -8,9 +8,9 @@ How would you like to help?
 
 * [Report a bug](#report-a-bug)
 * [Make a suggestion](#make-a-suggestion)
-* [Contribute code/features](#contribute-code-features)
+* [Contribute code/features](#contribute-codefeatures)
 * [Get started with open source](#get-started-with-open-source)
-* [Participate in ongoing discussions](#participate-in-ongoing-discussions)
+* [Participate in ongoing discussions](#ongoing-participation)
 
 > :grey_question: If you have questions about *using* AMP or are *encountering problems using AMP* on your site please visit our [support page](SUPPORT.md) for help.
 
