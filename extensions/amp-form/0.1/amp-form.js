@@ -527,7 +527,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(event);
+        this.handleNonXhrGet_();
         return Promise.resolve();
       }
 
@@ -894,7 +894,7 @@ export class AmpForm {
    */
   handleNonXhrGet_(event) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    if (!event) {
+    if (event) {
       this.form_.submit();
     }
     this.setState_(FormState.INITIAL);
