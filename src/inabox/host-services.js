@@ -27,8 +27,13 @@ const ServiceNames = {
 };
 
 export const HostServiceError = {
-  MISS_MATCH: 1, // the API impl mis-match the environment
-  NOT_SUPPORTED: 2, // the feature is not supported
+  MISS_MATCH: 1, // The HostService impl mis-matches the environment,
+  // extension should consider to fallback to
+  // its default behavior on regular web.
+  NOT_SUPPORTED: 2, // The particular feature is not supported
+  // by the current implementation of HostServices,
+  // it's up to extension to decide what's the best
+  // fallback behavior.
 };
 
 export class HostServices {
@@ -39,7 +44,7 @@ export class HostServices {
    */
   static isAvailable(elementOrAmpDoc) {
     const head = Services.ampdoc(elementOrAmpDoc).getHeadNode();
-    return !!head.querySelector('script[host-api]');
+    return !!head.querySelector('script[host-service]');
   }
 
   /**
