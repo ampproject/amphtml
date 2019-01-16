@@ -29,7 +29,7 @@ export const MaskChars = {
 export const MASK_SEPARATOR_CHAR = ' ';
 
 export const NamedMasks = {
-  CREDIT: 'credit',
+  PAYMENT_CARD: 'payment-card',
 };
 
 /** @enum {string} */

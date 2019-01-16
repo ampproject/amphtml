@@ -20,7 +20,6 @@ import {
   NamedMasks,
 } from './constants';
 import {MaskInterface} from './mask-interface';
-import {factory as inputmaskCreditAliasFactory} from './inputmask-credit-alias';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {
   factory as inputmaskDependencyFactory,
@@ -28,9 +27,12 @@ import {
 import {
   factory as inputmaskFactory,
 } from '../../../third_party/inputmask/inputmask';
+import {
+  factory as inputmaskPaymentCardAliasFactory,
+} from './inputmask-payment-card-alias';
 
 const NamedMasksToInputmask = {
-  [NamedMasks.CREDIT]: 'credit',
+  [NamedMasks.PAYMENT_CARD]: 'payment-card',
 };
 
 const MaskCharsToInputmask = {
@@ -66,7 +68,7 @@ export class Mask {
         inputmaskDependencyFactory(win, doc);
     Inputmask = Inputmask || inputmaskFactory(
         InputmaskDependencyLib, win, doc, undefined);
-    inputmaskCreditAliasFactory(Inputmask);
+    inputmaskPaymentCardAliasFactory(Inputmask);
     inputmaskCustomAliasFactory(Inputmask);
 
     Inputmask.extendDefaults({

@@ -23,7 +23,7 @@ export function factory(Inputmask) {
   // TODO(cvializ): Improve card chunking support
   // https://baymard.com/checkout-usability/credit-card-patterns
   Inputmask.extendAliases({
-    'credit': {
+    'payment-card': {
       mask: function(opts) {
         opts.definitions = {
           'x': {

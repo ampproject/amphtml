@@ -135,19 +135,19 @@ The following named masks are supported:
 <th>Description</th>
 </tr>
 <tr>
-<td><code>credit</code></td>
-<td>The user must enter a credit card number.
+<td><code>payment-card</code></td>
+<td>The user must enter a payment card number.
 The mask automatically adds spaces to chunk the numbers, and supports both
 American Express-style and Visa-style chunking.</td>
 </tr>
 </tbody>
 </table>
 
-As an example, this masked input will allow the user to enter a credit card number.
+As an example, this masked input will allow the user to enter a payment card number.
 Space characters " " will be automatically added as the user types.
 
 ```html
-<input type="tel" mask="credit" placeholder="0000 0000 0000 0000">
+<input type="tel" mask="payment-card" placeholder="0000 0000 0000 0000">
 ```
 
 #### mask-output
