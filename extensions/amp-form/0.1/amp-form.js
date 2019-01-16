@@ -527,7 +527,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(false);
+        this.handleNonXhrGet_(/*shouldSubmitFormElement*/false);
         return Promise.resolve();
       }
 
@@ -574,7 +574,7 @@ export class AmpForm {
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(true);
+      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
     }
 
     return Promise.resolve();
