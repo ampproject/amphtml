@@ -35,6 +35,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
     clickableEl = win.document.createElement('a');
+    addAttributesToElement(clickableEl, {'href': 'https://google.com'});
 
     // Making sure resource tasks run synchronously.
     sandbox.stub(Services, 'resourcesForDoc').returns({
@@ -183,13 +184,13 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
-  it('should append local url when text attribute is not present', () => {
+  it('should append href url when text attribute is not present', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
     const tooltipTextEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
-    expect(tooltipTextEl.textContent).to.equal('localhost');
+    expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 });
