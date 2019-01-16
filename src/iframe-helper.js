@@ -30,6 +30,7 @@ import {tryParseJson} from './json';
  */
 const UNLISTEN_SENTINEL = 'unlisten';
 
+
 /**
  * @typedef {{
  *   frame: !Element,
@@ -84,7 +85,6 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
-  const {origin} = parseUrlDeprecated(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 
@@ -100,7 +100,6 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   if (!windowEvents) {
     windowEvents = {
       frame: iframe,
-      origin,
       events: Object.create(null),
     };
     listenSentinel.push(windowEvents);
@@ -133,12 +132,6 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     const {contentWindow} = we.frame;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
-    } else if (sentinel === 'amp') {
-      // A non-3P code path, origin must match.
-      if (we.origin === origin && contentWindow == triggerWin) {
-        windowEvents = we;
-        break;
-      }
     } else if (triggerWin == contentWindow ||
         isDescendantWindow(contentWindow, triggerWin)) {
       // 3p code path, we may accept messages from nested frames.
@@ -246,12 +239,20 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @param {?function(!JsonObject, !Window, string)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @param {boolean=} opt_includingNestedWindows set to true if a messages from
+ * @param {boolean=} opt_includingNestedWindows set to true if messages from
  *     nested frames should also be accepted.
+ * @param {boolean=} opt_allowOpaqueOrigin set to true if messages from
+       opaque origins (origin == null) are allowed.
  * @return {!UnlistenDef}
  */
 export function listenFor(
-  iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
+  iframe,
+  typeOfMessage,
+  callback,
+  opt_is3P,
+  opt_includingNestedWindows,
+  opt_allowOpaqueOrigin) {
+
   devAssert(iframe.src, 'only iframes with src supported');
   devAssert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -266,12 +267,28 @@ export function listenFor(
       opt_is3P
   );
 
-
   let events = listenForEvents[typeOfMessage] ||
     (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
   let listener = function(data, source, origin) {
+    const sentinel = data['sentinel'];
+
+    // Exclude messages that don't satisfy amp sentinel rules.
+    if (sentinel == 'amp') {
+      // For `amp` sentinel, nested windows are not allowed
+      if (source != iframe.contentWindow) {
+        return;
+      }
+
+      // For `amp` sentinel origin must match unless opaque origin is allowed
+      const isOpaqueAndAllowed = origin == 'null' && opt_allowOpaqueOrigin;
+      const iframeOrigin = parseUrlDeprecated(iframe.src).origin;
+      if (iframeOrigin != origin && !isOpaqueAndAllowed) {
+        return;
+      }
+    }
+
     // Exclude nested frames if necessary.
     // Note that the source was already verified to be either the contentWindow
     // of the iframe itself or a descendant window within it.

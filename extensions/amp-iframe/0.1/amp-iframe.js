@@ -408,7 +408,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     listenFor(iframe, 'embed-size', data => {
       this.updateSize_(data['height'], data['width']);
-    });
+    }, undefined, undefined, /*opt_allowOpaqueOrigin*/ true);
 
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
