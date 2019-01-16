@@ -185,7 +185,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
+    return lightboxManagerForDoc(this.element).then(manager => {
       this.manager_ = manager;
       this.history_ = Services.historyForDoc(this.getAmpDoc());
       this.action_ = Services.actionServiceForDoc(this.element);
@@ -1151,6 +1151,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      this.getViewport().leaveLightboxMode();
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1161,7 +1162,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
-          this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
@@ -1452,13 +1452,13 @@ export function installLightboxGallery(ampdoc) {
 
 /**
  * Returns a promise for the LightboxManager.
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element} element
  * @return {!Promise<?LightboxManager>}
  */
-function lightboxManagerForDoc(elementOrAmpDoc) {
+function lightboxManagerForDoc(element) {
   return /** @type {!Promise<?LightboxManager>} */ (
     getElementServiceForDoc(
-        elementOrAmpDoc, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
+        element, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
 }
 
 AMP.extension(TAG, '0.1', AMP => {

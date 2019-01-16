@@ -38,7 +38,6 @@ import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
@@ -115,11 +114,6 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-
-    this.user().assert(
-        isExperimentOn(this.win, 'amp-video-iframe'),
-        'To use <amp-video-iframe> you must turn on the `amp-video-iframe`' +
-          'experiment');
 
     // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
     // cached default value, which makes this assertion fail. Move to
@@ -475,6 +469,11 @@ class AmpVideoIframe extends AMP.BaseElement {
   getPlayedRanges() {
     // TODO(alanorozco)
     return [];
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 

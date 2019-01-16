@@ -228,3 +228,20 @@ export function hasStoredValue(info) {
   return info['consentState'] === CONSENT_ITEM_STATE.ACCEPTED ||
       info['consentState'] === CONSENT_ITEM_STATE.REJECTED;
 }
+
+/**
+ * Convert the CONSENT_ITEM_STATE back to readable string
+ * @param {!CONSENT_ITEM_STATE} enumState
+ * @return {string}
+ */
+export function getConsentStateValue(enumState) {
+  if (enumState === CONSENT_ITEM_STATE.ACCEPTED) {
+    return 'accepted';
+  }
+
+  if (enumState === CONSENT_ITEM_STATE.REJECTED) {
+    return 'rejected';
+  }
+
+  return 'unknown';
+}

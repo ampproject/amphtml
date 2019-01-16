@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -139,7 +140,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   buildCallback() {
     const ampdoc = this.getAmpDoc();
     this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForDoc(this.element);
 
     this.elementId_ = userAssert(this.element.id,
         'amp-user-notification should have an id.');
@@ -217,7 +218,7 @@ export class AmpUserNotification extends AMP.BaseElement {
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
       const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
-        return geo.ISOCountryGroups.indexOf(group) >= 0;
+        return geo.isInCountryGroup(group) == GEO_IN_GROUP.IN;
       });
 
       // Invert if includeGeos is false

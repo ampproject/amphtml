@@ -32,12 +32,13 @@ const minimatch = require('minimatch');
 const path = require('path');
 const {
   gitBranchName,
-  gitBranchPointFromMaster,
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffNameOnlyMaster,
   gitDiffStatMaster,
-  gitPrBranchPoint,
+  gitMergeBaseMaster,
+  gitTravisMasterBaseline,
+  shortSha,
 } = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
@@ -98,17 +99,22 @@ function timedExecOrDie(cmd) {
  * Prints a summary of files changed by, and commits included in the PR.
  */
 function printChangeSummary() {
+  if (process.env.TRAVIS) {
+    console.log(fileLogPrefix, colors.cyan('origin/master'),
+        'is currently at commit',
+        colors.cyan(shortSha(gitTravisMasterBaseline())));
+    console.log(fileLogPrefix,
+        'Testing the following changes at commit',
+        colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
+  }
+
   const filesChanged = gitDiffStatMaster();
-  console.log(fileLogPrefix,
-      'Testing the following changes at commit',
-      colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
 
-  const branchPoint = process.env.TRAVIS ?
-    gitPrBranchPoint() : gitBranchPointFromMaster();
+  const branchPoint = gitMergeBaseMaster();
   console.log(fileLogPrefix, 'Commit log since branch',
       colors.cyan(gitBranchName()), 'was forked from',
-      colors.cyan('master'), 'at', colors.cyan(branchPoint) + ':');
+      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
   console.log(gitDiffCommitLog() + '\n');
 }
 

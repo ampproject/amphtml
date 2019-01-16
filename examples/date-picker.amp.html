@@ -47,7 +47,7 @@
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -298,6 +298,29 @@
 <div><span [text]="max">2018-10-10</span></div>
 <label>max: <input on="change:AMP.setState({max: event.value})" value="2018-10-10"></label>
 <amp-date-picker mode="static" layout="fixed-height" height="360" max="2018-10-10" [max]="max"></amp-date-picker>
+
+<h3>src</h3>
+<amp-state id="flipflop">
+  <script type="application/json">true</script>
+</amp-state>
+<button on="tap:AMP.setState({flipflop: !flipflop})">Toggle src</button>
+<input id="bind-src-input" type="tel" placeholder="Pick a date">
+<amp-date-picker
+  type="single"
+  number-of-months="1"
+  mode="static"
+  src="date-picker.json"
+  [src]="flipflop ? 'date-picker.json' : 'date-picker-other.json'"
+  layout="fixed-height"
+  first-day-of-week="1"
+  height="360"
+  format="DD/MM/YYYY"
+  input-selector="#bind-src-input"
+>
+  <template type="amp-mustache" date-template id="spooky">
+    🙀
+  </template>
+</amp-date-picker>
 
 <h3>range min/max</h3>
 <h3>min</h3>
