@@ -1218,8 +1218,7 @@ export class AmpStory extends AMP.BaseElement {
           this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
       // If the user navigates the away from the page, the top of storyStack
       // will be the same as ampStoryPageId in the history state.
-      if ((targetPageId !== topOfStack) ||
-        this.storyNavigationPath_.length === 0) {
+      if (targetPageId !== topOfStack) {
         this.storyNavigationPath_.push(targetPageId);
       }
     }

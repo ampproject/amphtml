@@ -1248,6 +1248,7 @@ describes.realWin('amp-story', {
     it('should advance to specified page with advanced-to attribute', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
       story.buildCallback();
+
       return story.layoutCallback()
           .then(() => {
             expect(story.activePage_.element.id).to.equal('cover');
@@ -1266,6 +1267,7 @@ describes.realWin('amp-story', {
           createPages(story.element, 4,
               ['cover', 'page-1', 'page-2', 'page-3']);
           story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.element.setAttribute('id', 'story');
@@ -1286,6 +1288,7 @@ describes.realWin('amp-story', {
           createPages(story.element, 4,
               ['cover', 'page-1', 'page-2', 'page-3']);
           story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.element.setAttribute('id', 'story');
@@ -1311,7 +1314,7 @@ describes.realWin('amp-story', {
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.getPageById('cover')
@@ -1332,7 +1335,7 @@ describes.realWin('amp-story', {
     it('should update browser history with the story navigation path', () => {
       const pageCount = 2;
       createPages(story.element, pageCount, ['cover', 'page-1']);
-      story.buildCallback();
+
       return story.layoutCallback()
           .then(() => {
             story.activePage_.element.dispatchEvent(
@@ -1346,7 +1349,7 @@ describes.realWin('amp-story', {
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 const currentLocation = win.location;
