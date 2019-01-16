@@ -8,7 +8,7 @@ How would you like to help?
 
 * [Report a bug](#report-a-bug)
 * [Make a suggestion](#make-a-suggestion)
-* [Contribute](#contribute)
+* [Contribute code/features](#contribute-codefeatures)
 * [Get started with open source](#get-started-with-open-source)
 * [Participate in ongoing discussions](#ongoing-participation)
 
@@ -26,7 +26,7 @@ The community regularly monitoring issues and will try to fix open bugs quickly 
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing code/features](#contribute-code-features) section below for next steps.
 
-## Contribute
+## Contribute code/features
 
 We'd love to have your help contributing code and features to AMP!
 
