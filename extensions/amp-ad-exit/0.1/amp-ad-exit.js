@@ -110,7 +110,7 @@ export class AmpAdExit extends AMP.BaseElement {
     	openWindowDialog(this.win, substituteVariables(target.finalUrl), '_top');
     } else {
     	openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
-	}
+    }
   }
 
 
