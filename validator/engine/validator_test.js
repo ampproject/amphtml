@@ -347,6 +347,21 @@ describe('ValidatorOutput', () => {
   });
 });
 
+describe('ValidationResultTransformerVersion', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Confirm that the transformer version in attribute "transformed" is
+  // set to ValidationResult.transformer_version.
+  it('produces expected output with hash in the URL', () => {
+    const test = new ValidatorTestCase(
+        'transformed_feature_tests/minimum_valid_amp.html');
+    const result =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    assertStrictEqual(1, result.transformerVersion);
+  });
+});
+
 describe('ValidatorCssLengthValidation', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   // Rather than encoding some really long author stylesheets in
