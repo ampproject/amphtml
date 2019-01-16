@@ -8,9 +8,9 @@ How would you like to help?
 
 * [Report a bug](#report-a-bug)
 * [Make a suggestion](#make-a-suggestion)
-* [Contribute code/features](#contribute-code-features)
+* [Contribute](#contribute)
 * [Get started with open source](#get-started-with-open-source)
-* [Participate in ongoing discussions](#participate-in-ongoing-discussions)
+* [Participate in ongoing discussions](#ongoing-participation)
 
 > :grey_question: If you have questions about *using* AMP or are *encountering problems using AMP* on your site please visit our [support page](SUPPORT.md) for help.
 
@@ -26,7 +26,7 @@ The community regularly monitoring issues and will try to fix open bugs quickly 
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing code/features](#contribute-code-features) section below for next steps.
 
-## Contribute code/features
+## Contribute
 
 We'd love to have your help contributing code and features to AMP!
 
