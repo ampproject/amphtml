@@ -241,7 +241,6 @@ In the following example, we've placed a simple sidebar in within a story. Remem
   </body>
 ```
 
-
 ## Attributes
 
 ##### side
