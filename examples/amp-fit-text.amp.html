@@ -18,13 +18,13 @@
       display: inline-block;
       font-size: 20px;
     }
-    .bigL {
+    .big-left {
       font-size: 90px;
       float: left;
       clear: both;
       line-height: .75;
     }
-    .bigR {
+    .big-right {
       font-size: 90px;
       float: right;
       clear: both;
@@ -51,21 +51,15 @@
   </p>
   <h2>truncate with line-clamp</h2>
   <p>
-    <amp-fit-text width="300" height="200" layout="fixed" class="box1" overflow="truncate" font-size="20">
+    <amp-fit-text width="300" height="200" layout="fixed" class="box1" max-font-size="20" min-font-size="20">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pellentesque leo at gravida imperdiet. Duis malesuada imperdiet ligula non tincidunt. Suspendisse blandit orci at placerat varius. Sed nunc arcu, rhoncus non faucibus vel, accumsan ac lorem. In pellentesque mattis nisl iaculis placerat. Duis vitae augue nulla. Fusce aliquet vulputate interdum.
     </amp-fit-text>
   </p>
   <h2>truncate with javascript</h2>
   <p>
-    <amp-fit-text width="300" height="200" layout="fixed" class="box2" overflow="truncate">
-      <span no-fit class="bigL">L</span>orem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pellentesque leo at gravida imperdiet. <span no-fit class="bigR">R</span> Duis malesuada imperdiet ligula non tincidunt. Suspendisse blandit orci at placerat varius. Sed nunc arcu, honcus non faucibus vel, accumsan ac lorem. In pellentesque mattis nisl iaculis placerat. Duis vitae augue nulla. Fusce aliquet vulputate interdum.
+    <amp-fit-text width="300" height="200" layout="fixed" class="box2" max-font-size="20" min-font-size="20">
+      <span no-fit class="big-left">L</span>orem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pellentesque leo at gravida imperdiet. <span no-fit class="big-right">R</span> Duis malesuada imperdiet ligula non tincidunt. Suspendisse blandit orci at placerat varius. Sed nunc arcu, honcus non faucibus vel, accumsan ac lorem. In pellentesque mattis nisl iaculis placerat. Duis vitae augue nulla. Fusce aliquet vulputate interdum.
     </amp-fit-text>
-  </p>
-  <h2>derp</h2>
-  <p>
-    <amp-layout width="300" height="200" layout="fixed" class="box2">
-      <span class="bigL">L</span>orem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pellentesque leo at gravida imperdiet. Duis malesuada imperdiet ligula non tincidunt. Suspendisse blandit orci at placerat varius. Sed nunc arcu, rhoncus non faucibus vel, accumsan ac lorem. In pellentesque mattis nisl iaculis placerat. Duis vitae augue nulla. Fusce aliquet vulputate interdum.
-    </amp-layout>
   </p>
 </body>
 </html>

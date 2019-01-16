@@ -42,11 +42,6 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
-
-    // fit|truncate|truncate-js
-    // this.overflowMethod_ = 'fit';
-    this.overflowMethod_ = this.element.getAttribute('overflow') || 'fit';
-    // this.overflowMode
   }
 
   /** @override */
@@ -62,9 +57,7 @@ class AmpFitText extends AMP.BaseElement {
     setStyles(this.content_, {zIndex: 2});
 
     this.contentWrapper_ = this.element.ownerDocument.createElement('div');
-    if (this.overflowMethod_ === 'fit') {
-      setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
-    }
+    setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
     this.content_.appendChild(this.contentWrapper_);
 
     this.measurer_ = this.element.ownerDocument.createElement('div');
@@ -75,7 +68,7 @@ class AmpFitText extends AMP.BaseElement {
       left: 0,
       zIndex: 1,
       visibility: 'hidden',
-      // lineHeight: `${LINE_HEIGHT_EM_}em`,
+      lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
     this.getRealChildNodes().forEach(node => {
@@ -85,18 +78,11 @@ class AmpFitText extends AMP.BaseElement {
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
-    if (this.overflowMethod_ === 'fit') {
-      setStyles(this.measurer_, {
-        lineHeight: `${LINE_HEIGHT_EM_}em`,
-      });
-      this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
-          'min-font-size')) || 6;
+    this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
+        'min-font-size')) || 6;
 
-      this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
-          'max-font-size')) || 72;
-    } else {
-      this.fontSize_ = getLengthNumeral(this.element.getAttribute('font-size'));
-    }
+    this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
+        'max-font-size')) || 72;
   }
 
   /** @override */
@@ -111,11 +97,7 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.overflowMethod_ === 'fit') {
-      this.updateFontSize_();
-    } else {
-      this.updateText_();
-    }
+    this.updateFontSize_();
     return Promise.resolve();
   }
 
@@ -127,21 +109,8 @@ class AmpFitText extends AMP.BaseElement {
         this.minFontSize_, this.maxFontSize_);
     setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
-        fontSize, this.overflowMethod_);
+        fontSize);
   }
-
-  updateText_() {
-    const maxHeight = this.element./*OK*/offsetHeight;
-    const fontSize = this.fontSize_;
-    if (fontSize) {
-      setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
-      updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
-          fontSize, this.overflowMethod_);
-    } else {
-      truncate_(this.contentWrapper_, this.measurer_, maxHeight);
-    }
-  }
-}
 
 /**
  * @param {Element} content
@@ -155,10 +124,10 @@ function truncate_(content, measurer, height) {
     return;
   }
   const originalInnerHtml = measurer./*OK*/innerHTML;
-  const children = measurer.childNodes;
-  let idx = children.length - 1;
+  const childNodes = measurer.childNodes;
+  let idx = childNodes.length - 1;
   while (idx > -1 && measurer./*OK*/offsetHeight > height) {
-    if (children[idx].nodeType === Node.TEXT_NODE) {
+    if (childNodes[idx].nodeType === Node.TEXT_NODE) {
       const node = children[idx];
       const chars = node.textContent.split('');
       while (chars.length > 0 && measurer./*OK*/offsetHeight > height) {
@@ -217,11 +186,14 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
 
-  content.classList.toggle('i-amphtml-fit-text-content-overflown', overflown);
-  setStyles(content, {
-    lineClamp: overflown ? numberOfLines : '',
-    maxHeight: overflown ? px(lineHeight * numberOfLines) : '',
-  });
+  // content.classList.toggle('i-amphtml-fit-text-content-overflown', overflown);
+  // setStyles(content, {
+  //   lineClamp: overflown ? numberOfLines : '',
+  //   maxHeight: overflown ? px(lineHeight * numberOfLines) : '',
+  // });
+  if (overflown) {
+    truncate_(this.contentWrapper_, this.measurer_, maxHeight);
+  }
 }
 
 
