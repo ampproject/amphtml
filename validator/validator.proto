@@ -825,6 +825,14 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // If the AMP document is a transformed AMP document, then this is the
+  // version of the transformers that were used to transform it. If the document
+  // is not transformed, then the transformer_version's value will be 0.
+  // Note: the AMP Pacakager's transformer library specifies the version as
+  // int64. However, JavaScript does not natively support int64 so int32 is
+  // used instead.
+  // https://github.com/ampproject/amppackager/blob/master/transformer/transformers/context.go
+  optional int32 transformer_version = 6 [default = 0];
   // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
   // type that has yet to be defined. These are declared on the HTML tag and
   // parsed by the Validator Engine.

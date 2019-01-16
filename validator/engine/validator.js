@@ -4742,6 +4742,7 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    const transformedValueRe = new RegExp(/^\w+;v=(\d+)$/);
     for (const attr of attrs) {
       // Verify this attribute is a type identifier. Other attributes are
       // validated in validateAttributes.
@@ -4756,8 +4757,23 @@ class ParsedValidatorRules {
           }
           // The type identifier "actions" and "transformed" are not considered
           // mandatory unlike other type identifiers.
-          if (identifier != 'actions' && identifier != 'transformed') {
+          if (identifier !== 'actions' && identifier !== 'transformed') {
             hasMandatoryTypeIdentifier = true;
+          }
+          // The type identifier "transformed" has restrictions on it's value.
+          // It must be \w+;v=\d+ (e.g. google;v=1).
+          if ((identifier === 'transformed') && (attr.value !== '')) {
+            const reResult = transformedValueRe.exec(attr.value);
+            if (reResult !== null) {
+              validationResult.transformerVersion = parseInt(reResult[1], 10);
+            } else {
+              context.addError(
+                  amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                  context.getLineCol(),
+                  /*params=*/[attr.name, 'html', attr.value],
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
+                  validationResult);
+            }
           }
         } else {
           context.addError(
