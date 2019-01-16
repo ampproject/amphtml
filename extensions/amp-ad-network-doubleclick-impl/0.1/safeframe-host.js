@@ -677,8 +677,6 @@ export class SafeframeHostApi {
   handleFluidMessage_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.baseInstance_.forceCollapse();
       return;
     }
     this.baseInstance_.attemptChangeHeight(newHeight)
@@ -690,8 +688,6 @@ export class SafeframeHostApi {
             dev().error(TAG, err);
             return;
           }
-          // TODO(levitzky) Add more error handling here
-          this.baseInstance_.forceCollapse();
         });
   }
 
