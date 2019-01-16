@@ -18,7 +18,7 @@ amp-list[load-more] [load-more-loading].amp-visible,
 amp-list[load-more] [load-more-failed].amp-visible,
 amp-list[load-more] [load-more-button].amp-visible,
 amp-list[load-more] [load-more-end].amp-visible {
-  display: block;
+  visibility: visible;
   width: 100%;
 }
 
@@ -41,18 +41,18 @@ amp-list[load-more] [load-more-button].i-amphtml-default-ui,
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: .1em;
-
   color: rgb(51,51,51);
   text-align: center;
 }
 
-[load-more-button].i-amphtml-list-load-more-overflow {
+amp-list[load-more] [load-more-loading],
+amp-list[load-more] [load-more-failed],
+amp-list[load-more] [load-more-button] {
   position: absolute;
   bottom: 0;
 }
 
-[load-more] div[role="list"].i-amphtml-list-load-more-container-overflow {
-  bottom: 0;
+[load-more] div[role="list"] {
   overflow-y: hidden;
   height: auto;
   width: auto;

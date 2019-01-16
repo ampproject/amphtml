@@ -814,7 +814,7 @@ amp-list[load-more] [load-more-failed],
 amp-list[load-more] [load-more-button],
 amp-list[load-more] [load-more-end]
 {
-  display: none;
+  visibility: hidden;
 }
 
 /**

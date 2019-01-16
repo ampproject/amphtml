@@ -179,17 +179,21 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.loadMoreEnabled_) {
-      this.getLoadMoreButton_();
-      this.getLoadMoreLoadingElement_();
-      this.getLoadMoreFailedElement_();
-      this.getLoadMoreEndElement_();
-      this.getLoadMoreButtonClickable_();
-      this.getLoadMoreFailedClickable_();
-      // Hide overflow element
-      const overflowElement = this.getOverflowElement();
-      if (overflowElement) {
-        toggle(overflowElement, false);
-      }
+      this.mutateElement(() => {
+        this.getLoadMoreButton_();
+        this.getLoadMoreLoadingElement_();
+        this.getLoadMoreFailedElement_();
+        this.getLoadMoreEndElement_();
+        this.getLoadMoreButtonClickable_();
+        this.getLoadMoreFailedClickable_();
+        // Hide overflow element
+        const overflowElement = this.getOverflowElement();
+        if (overflowElement) {
+          toggle(overflowElement, false);
+        }
+      }).then(() => {
+        this.adjustContainerForLoadMoreButton_();
+      });
     }
   }
 
@@ -210,9 +214,31 @@ export class AmpList extends AMP.BaseElement {
             </button>
           </amp-list-load-more>
         `;
+        this.element.appendChild(this.loadMoreButton_);
       }
     }
     return this.loadMoreButton_;
+  }
+
+  /**
+   * @return {?Element}
+   * @private
+   */
+  getLoadMoreLoadingElement_() {
+    if (!this.loadMoreLoadingElement_) {
+      this.loadMoreLoadingElement_ = childElementByAttr(
+          this.element, 'load-more-loading');
+
+      if (!this.loadMoreLoadingElement_) {
+        this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
+          <amp-list-load-more load-more-loading class="i-amphtml-default-ui">
+            <div class="i-amphtml-list-load-more-spinner"></div>
+          </amp-list-load-more>
+        `;
+        this.element.appendChild(this.loadMoreLoadingElement_);
+      }
+    }
+    return this.loadMoreLoadingElement_;
   }
 
   /**
@@ -653,9 +679,6 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
-        if (this.loadMoreEnabled_) {
-          this.moveButtonsToBottom_(container);
-        }
       }
 
       const event = createCustomEvent(this.win,
@@ -688,60 +711,35 @@ export class AmpList extends AMP.BaseElement {
       return;
     }
     this.measureElement(() => {
-      const targetHeight = target./*OK*/scrollHeight;
+      let targetHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
+      if (this.loadMoreEnabled_) {
+        const buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
+        targetHeight += buttonHeight;
+      }
       if (targetHeight > height) {
-        if (!this.loadMoreEnabled_) {
-          this.attemptChangeHeight(targetHeight).catch(() => {});
-        } else {
-          this.attemptChangeHeight(targetHeight).then(() => {
-            this.handleLoadMoreChangeHeightSuccess_();
-          }).catch(() => {
-            this.handleLoadMoreChangeHeightFailure_();
-          });
-        }
+        this.attemptChangeHeight(targetHeight).catch(() => {});
       }
     });
   }
 
-  /**
-   * @private
-   */
-  handleLoadMoreChangeHeightSuccess_() {
-    this.mutateElement(() => {
-      this.loadMoreButton_.classList
-          .remove('i-amphtml-list-load-more-overflow');
-      this.container_.classList
-          .remove('i-amphtml-list-load-more-container-overflow');
-      setStyles(this.container_, {
-        marginBottom: '',
-      });
-    });
-  }
 
   /**
    * @private
    */
-  handleLoadMoreChangeHeightFailure_() {
-    if (this.container_.classList
-        .contains('i-amphtml-list-load-more-container-overflow')) {
-      return;
-    }
+  adjustContainerForLoadMoreButton_() {
     let buttonHeight;
-
+    let listHeight;
     this.measureMutateElement(
         () => {
           buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
+          listHeight = this.element.offsetHeight;
         },
         () => {
-          this.container_.classList
-              .add('i-amphtml-list-load-more-container-overflow');
-          this.loadMoreButton_.classList
-              .add('i-amphtml-list-load-more-overflow');
-          setStyles(this.container_, {
+          setStyles(dev().assertElement(this.container_), {
             'margin-bottom': px(buttonHeight),
           });
-          this.element.appendChild(this.loadMoreButton_);
+          this.element.changeSize(listHeight + buttonHeight);
         });
   }
 
@@ -852,23 +850,6 @@ export class AmpList extends AMP.BaseElement {
     });
   }
 
-
-  /**
-   * Moves all the load-more visual elements to the bottom of the list
-   * after newly appended items.
-   * @param {!Element} container
-   * @private
-   */
-  moveButtonsToBottom_(container) {
-    container.appendChild(this.getLoadMoreButton_());
-    container.appendChild(this.getLoadMoreFailedElement_());
-    container.appendChild(this.getLoadMoreLoadingElement_());
-    const loadMoreEndElement = this.getLoadMoreEndElement_();
-    if (loadMoreEndElement) {
-      container.appendChild(loadMoreEndElement);
-    }
-  }
-
   /**
    * Called when 3 viewports above bottom of automatic load-more list, or
    * manually on clicking the load-more-button element. Sets the amp-list
@@ -895,26 +876,6 @@ export class AmpList extends AMP.BaseElement {
         }).catch(() => {
           this.setLoadMoreFailed_();
         });
-  }
-
-  /**
-   * @return {?Element}
-   * @private
-   */
-  getLoadMoreLoadingElement_() {
-    if (!this.loadMoreLoadingElement_) {
-      this.loadMoreLoadingElement_ = childElementByAttr(
-          this.element, 'load-more-loading');
-
-      if (!this.loadMoreLoadingElement_) {
-        this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
-          <amp-list-load-more load-more-loading class="i-amphtml-default-ui">
-            <div class="i-amphtml-list-load-more-spinner"></div>
-          </amp-list-load-more>
-        `;
-      }
-    }
-    return this.loadMoreLoadingElement_;
   }
 
   /**
@@ -999,6 +960,7 @@ export class AmpList extends AMP.BaseElement {
             </button>
           </amp-list-load-more>
         `;
+        this.element.appendChild(this.loadMoreFailedElement_);
       }
     }
     return this.loadMoreFailedElement_;
