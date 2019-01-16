@@ -106,10 +106,12 @@ export class AmpAdExit extends AMP.BaseElement {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    if (target.behaviors && target.behaviors.clickTarget && target.behaviors.clickTarget == "_top"){
-    	openWindowDialog(this.win, substituteVariables(target.finalUrl), '_top');
+    if (target.behaviors && target.behaviors.clickTarget &&
+    	target.behaviors.clickTarget == '_top') {
+      openWindowDialog(this.win, substituteVariables(target.finalUrl), '_top');
     } else {
-    	openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
+      openWindowDialog(this.win, substituteVariables(target.finalUrl),
+          '_blank');
     }
   }
 

@@ -66,12 +66,12 @@ export let VariablesDef;
  *   clickTarget: (string|undefined)
  * }}
  */
- export let BehaviorDef;
+export let BehaviorDef;
 
- /**
+/**
  * @typedef {!Object<string, !BehaviorDef>}
  */
- export let BehaviorsDef;
+export let BehaviorsDef;
 
 /**
  * @typedef {{
