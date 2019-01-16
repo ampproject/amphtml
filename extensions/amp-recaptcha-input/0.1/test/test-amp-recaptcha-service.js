@@ -45,20 +45,6 @@ describes.realWin('amp-recaptcha-service', {
         });
   });
 
-  it('should store the iframe src origin ' +
-    'to be used in message origin checking', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-
-          expect(recaptchaService.recaptchaFrameOrigin_).to.be.ok;
-          expect(recaptchaService.recaptchaFrameOrigin_
-              .includes('.recaptcha.localhost')).to.be.ok;
-        });
-  });
-
   it('should only initialize once for X number of elements,' +
     ' and iframe already exists', () => {
 
@@ -157,6 +143,31 @@ describes.realWin('amp-recaptcha-service', {
           expect(executeMapKeys[0]).to.be.equal('0');
         });
   });
+
+  it('should postmessage to the specificed ' +
+    'recaptcha frame origin on execute', () => {
+
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+
+    const postMessageStub = sandbox.stub(
+        recaptchaService,
+        'postMessageToIframe_'
+    );
+
+    return recaptchaService
+        .register(fakeSitekey).then(() => {
+          expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+
+          recaptchaService.execute(0, '');
+          recaptchaService.recaptchaApiReady_.resolve();
+          return recaptchaService.recaptchaApiReady_.promise;
+        }).then(() => {
+          expect(postMessageStub).to.be.calledWith(
+              recaptchaService.recaptchaFrameOrigin_
+          );
+        });
+  });
+
 
   it('should reject if there is no iframe on execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);

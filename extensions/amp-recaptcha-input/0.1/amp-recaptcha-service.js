@@ -157,12 +157,10 @@ export class AmpRecaptchaService {
       });
 
       // Send the message
-      postMessage(
-          dev().assertElement(this.iframe_),
-          'amp-recaptcha-action',
-          message,
+      this.postMessageToIframe_(
           devAssert(this.recaptchaFrameOrigin_),
-          true);
+          message
+      );
     });
     return executePromise.promise;
   }
@@ -297,18 +295,25 @@ export class AmpRecaptchaService {
    * @private
    */
   listenIframe_(evName, cb) {
-
-    // Wrap our callback in a check for the iframe origin.
-    const checkOriginWrappedCallback = (data, source, origin) => {
-      if (origin == this.recaptchaFrameOrigin_) {
-        cb(data, source, origin);
-      }
-    };
-
     return listenFor(
         dev().assertElement(this.iframe_),
         evName,
-        checkOriginWrappedCallback,
+        cb,
+        true);
+  }
+
+  /**
+   * Function to send a message to our iframe
+   * @param {string} origin
+   * @param {!JsonObject} message
+   * @private
+   */
+  postMessageToIframe_(origin, message) {
+    postMessage(
+        dev().assertElement(this.iframe_),
+        'amp-recaptcha-action',
+        message,
+        origin,
         true);
   }
 
