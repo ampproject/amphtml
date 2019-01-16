@@ -642,6 +642,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mox': {
+    prefetch: [
+      'https://ad.mox.tv/js/amp.min.js',
+      'https://ad.mox.tv/mox/mwayss_invocation.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -873,6 +881,10 @@ export const adConfig = {
 
   'sovrn': {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  'speakol': {
+    renderStartImplemented: true,
   },
 
   'spotx': {

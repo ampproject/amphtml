@@ -48,12 +48,12 @@ import {Services} from '../../../src/services';
  */
 import {ampGeoPresets} from './amp-geo-presets';
 
+import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
 
 /**
  * @enum {number}
@@ -91,15 +91,15 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
+
 /**
- * @typedef {{
- *   ISOCountry: string,
- *   matchedISOCountryGroups: !Array<string>,
- *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: GEO_IN_GROUP,
- *   ISOCountryGroups: !Array<string>
- * }}
- */
+  * @typedef {{
+  *   ISOCountry: string,
+  *   matchedISOCountryGroups: !Array<string>,
+  *   allISOCountryGroups: !Array<string>,
+  *   isInCountryGroup: (function(string):GEO_IN_GROUP),
+  * }}
+  */
 export let GeoDef;
 
 
@@ -110,6 +110,8 @@ export class AmpGeo extends AMP.BaseElement {
 
     /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
+    /** @private {boolean} */
+    this.error_ = false;
     /** @private {string} */
     this.country_ = 'unknown';
     /** @private {Array<string>} */
@@ -169,32 +171,38 @@ export class AmpGeo extends AMP.BaseElement {
    * @param {Document} doc
    */
   findCountry_(doc) {
-    // First see if we've been pre-rendered with a country, if so set it
+    // Flag to see if we've been pre-rendered with a country
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
+    // Trim the spaces off the patched country
+    const trimmedCountry = COUNTRY.trim();
 
-    if (preRenderMatch &&
-        !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
-      this.mode_ = mode.GEO_PRERENDER;
-      this.country_ = preRenderMatch[1];
-    } else {
-      this.mode_ = mode.GEO_HOT_PATCH;
-      this.country_ = COUNTRY.trim();
-      // If we got a country code it will be 2 characters
-      // If the lengths is 0 the country is unknown
-      // If the length is > 2 we didn't get patched
-      // (probably local dev) so we treat it as unknown.
-      if (this.country_.length !== 2) {
-        this.country_ = 'unknown';
-      }
-    }
+    // default country is 'unknown' which is also the zero length case
 
-    // Are we in debug override?
-    // match to \w characters only to prevent xss vector
     if (getMode(this.win).geoOverride &&
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
+      // debug override case, only works in canary or localdev
+      // match to \w characters only to prevent xss vector
       this.mode_ = mode.GEO_OVERRIDE;
       this.country_ = getMode(this.win).geoOverride.toLowerCase();
+    } else if (preRenderMatch &&
+        !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
+      // pre-rendered by a publisher case, if we're a cache we ignore that
+      // since there is no way the publisher could know the geo of the client.
+      // When caches start pre-rendering geo we'll need to add specifc code
+      // to handle that.
+      this.mode_ = mode.GEO_PRERENDER;
+      this.country_ = preRenderMatch[1];
+    } else if (trimmedCountry.length == 2) {
+      // We have a valid 2 letter ISO country
+      this.mode_ = mode.GEO_HOT_PATCH;
+      this.country_ = trimmedCountry;
+    } else if (trimmedCountry.length > 2 && !getMode(this.win).localDev) {
+      // We were not patched, if we're not in dev this is an error
+      // and we leave the country at the default 'unknown'
+      this.error_ = true;
+      dev().error(TAG,
+          'GEONOTPATCHED: amp-geo served unpatched, ISO country not set');
     }
   }
 
@@ -205,7 +213,7 @@ export class AmpGeo extends AMP.BaseElement {
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
-      config.ISOCountryGroups);
+      config['ISOCountryGroups']);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
@@ -307,6 +315,10 @@ export class AmpGeo extends AMP.BaseElement {
             classesToAdd.push('amp-geo-no-group');
           }
 
+          if (self.error_) {
+            classesToAdd.push('amp-geo-error');
+          }
+
           states.ISOCountryGroups = self.matchedGroups_;
           classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
@@ -324,7 +336,7 @@ export class AmpGeo extends AMP.BaseElement {
 
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
-            if (config.AmpBind) {
+            if (config['AmpBind']) {
               const geoState = doc.getElementById(GEO_ID);
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
@@ -351,13 +363,6 @@ export class AmpGeo extends AMP.BaseElement {
         allISOCountryGroups: this.definedGroups_,
         /* API */
         isInCountryGroup: this.isInCountryGroup.bind(this),
-        /**
-         * Temp still return old interface to avoid version skew
-         * with consuming extensions.  This will go away don't use it!
-         * replace with matchedISOCountryGroups or use the isInCountryGroup
-         * API
-         */
-        ISOCountryGroups: self.matchedGroups_,
       };
     });
   }

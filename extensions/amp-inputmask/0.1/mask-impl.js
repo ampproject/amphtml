@@ -20,6 +20,7 @@ import {
   NamedMasks,
 } from './constants';
 import {MaskInterface} from './mask-interface';
+import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {
   factory as inputmaskDependencyFactory,
 } from '../../../third_party/inputmask/inputmask.dependencyLib';
@@ -69,6 +70,7 @@ export class Mask {
         inputmaskDependencyFactory(win, doc);
     Inputmask = Inputmask || inputmaskFactory(
         InputmaskDependencyLib, win, doc, undefined);
+    inputmaskCustomAliasFactory(Inputmask);
 
     Inputmask.extendDefaults({
       // A list of supported input type attribute values
@@ -95,6 +97,7 @@ export class Mask {
       config.alias = NamedMasksToInputmask[mask];
     } else {
       const inputmaskMask = convertAmpMaskToInputmask(mask);
+      config.alias = 'custom';
       config.mask = () => inputmaskMask;
     }
 

@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const app = module.exports = require('express').Router();
+const app = require('express').Router();
 const minimist = require('minimist');
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -327,3 +327,8 @@ function composeDocument(config) {
     </body>
     </html>`;
 }
+
+module.exports = {
+  app,
+  log,
+};

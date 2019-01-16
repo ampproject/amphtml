@@ -31,10 +31,11 @@ import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
+import {iterateCursor} from '../../../src/dom';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 const TAG = 'amp-bind';
 
@@ -172,10 +173,10 @@ export class Bind {
           if (opt_win) {
             // In FIE, scan the document node of the iframe window.
             const {document} = opt_win;
-            return waitForBodyPromise(document).then(() => document);
+            return whenDocumentReady(document).then(() => document);
           } else {
             // Otherwise, scan the root node of the ampdoc.
-            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+            return ampdoc.whenReady().then(() => ampdoc.getRootNode());
           }
         })
         .then(root => {
@@ -1076,17 +1077,23 @@ export class Bind {
 
     switch (property) {
       case 'text':
-        element.textContent = String(newValue);
-        // If this is a <title> element in the <head>, update document title.
+        let updateTextContent = true;
+        const stringValue = String(newValue);
+
+        // textContent on <textarea> only works before interaction.
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+          // Don't also update textContent to avoid disrupting focus.
+          updateTextContent = false;
+        }
+        // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
-          this.localWin_.document.title = String(newValue);
+          this.localWin_.document.title = stringValue;
         }
-        // Setting `textContent` on TEXTAREA element only works if user
-        // has not interacted with the element, therefore `value` also needs
-        // to be set (but `value` is not an attribute on TEXTAREA)
-        if (tag == 'TEXTAREA') {
-          element.value = String(newValue);
+        // Default behavior.
+        if (updateTextContent) {
+          element.textContent = stringValue;
         }
         break;
 

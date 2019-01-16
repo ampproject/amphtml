@@ -340,7 +340,9 @@ export class AmpPanZoom extends AMP.BaseElement {
         elementBoxRatio / sourceAspectRatio,
         sourceAspectRatio / elementBoxRatio
     );
-    this.maxScale_ = Math.max(this.maxScale_, maxScale);
+    if (!isNaN(maxScale)) {
+      this.maxScale_ = Math.max(this.maxScale_, maxScale);
+    }
   }
 
   /**
@@ -355,8 +357,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
 
-    this.elementBox_ = layoutRectFromDomRect(this.element
-        ./*OK*/getBoundingClientRect());
+    this.elementBox_ = this.getViewport().getLayoutRect(this.element);
 
     this.updateContentDimensions_(sourceAspectRatio);
     this.updateMaxScale_(sourceAspectRatio);

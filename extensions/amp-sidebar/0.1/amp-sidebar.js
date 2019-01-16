@@ -158,6 +158,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
+        event.preventDefault();
         this.close_();
       }
     });
