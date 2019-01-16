@@ -26,8 +26,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-// TODO(lannka, 16825): This is flaky.
-describe.configure().skip('amp-ad 3P', () => {
+describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
@@ -161,7 +160,7 @@ describe.configure().skip('amp-ad 3P', () => {
     }).then(() => {
       return poll('wait for attemptChangeSize', () => {
         return iframe.contentWindow.ping.resizeSuccess != undefined;
-      });
+      }, null, 5000);
     }).then(() => {
       lastIO = null;
       iframe.contentWindow.context.observeIntersection(changes => {

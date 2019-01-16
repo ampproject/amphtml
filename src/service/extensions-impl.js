@@ -17,13 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
-  adoptServiceForEmbed,
-  adoptServiceForEmbedIfEmbeddable,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  setParentWindow,
-} from '../service';
-import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
@@ -33,7 +26,14 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync} from '../log';
+import {
+  getAmpdoc,
+  installServiceInEmbedIfEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  setParentWindow,
+} from '../service';
 import {getMode} from '../mode';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
@@ -65,7 +65,7 @@ const LOADER_PROP = '__AMP_EXT_LDR';
 const LOAD_TIMEOUT = 8000;
 
 /**
- * The structure that contains the declaration of a custom element.
+ * Contains data for the declaration of a custom element.
  *
  * @typedef {{
  *   implementationClass:
@@ -77,11 +77,19 @@ let ExtensionElementDef;
 
 
 /**
+ * Contains data for the declaration of an extension service.
+ *
+ * @typedef {{serviceName: string, serviceClass: function(new:Object, !./ampdoc-impl.AmpDoc)}}
+ */
+let ExtensionServiceDef;
+
+
+/**
  * The structure that contains the resources declared by an extension.
  *
  * @typedef {{
  *   elements: !Object<string, !ExtensionElementDef>,
- *   services: !Array<string>,
+ *   services: !Object<string, !ExtensionServiceDef>,
  * }}
  */
 let ExtensionDef;
@@ -257,7 +265,7 @@ export class Extensions {
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
-      dev().assert(!holder.loaded && !holder.error);
+      devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
     oldScriptElement.removeAttribute('custom-element');
@@ -275,7 +283,7 @@ export class Extensions {
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
-      const element = dev().assert(extension.elements[elementName],
+      const element = devAssert(extension.elements[elementName],
           'Element not found: %s', elementName);
       return element.implementationClass;
     });
@@ -338,7 +346,10 @@ export class Extensions {
    */
   addService(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();
-    holder.extension.services.push(name);
+    holder.extension.services.push(/** @type {!ExtensionServiceDef} */ ({
+      serviceName: name,
+      serviceClass: implementationClass,
+    }));
     this.addDocFactory(ampdoc => {
       registerServiceBuilderForDoc(
           ampdoc,
@@ -366,6 +377,8 @@ export class Extensions {
         this.ampdocService_.hasAmpDocShell())) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
+      // Note that this won't trigger for FIE extensions that are not present
+      // in the parent doc.
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
       }
@@ -437,8 +450,8 @@ export class Extensions {
       opt_preinstallCallback(childWin);
     }
 
-    // Adopt embeddable services.
-    adoptStandardServicesForEmbed(childWin);
+    // Install embeddable standard services.
+    installStandardServicesInEmbed(childWin, parentWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -456,7 +469,7 @@ export class Extensions {
       const promise = this.preloadExtension(extensionId).then(extension => {
         // Adopt embeddable extension services.
         extension.services.forEach(service => {
-          adoptServiceForEmbedIfEmbeddable(childWin, service);
+          installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
         });
 
         // Adopt the custom elements.
@@ -672,8 +685,8 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
-    installCustomElements(childWin, class {});
+  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+    installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
   }
@@ -683,17 +696,25 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
+ * @param {!Window} parentWin
  * @visibleForTesting
  */
-export function adoptStandardServicesForEmbed(childWin) {
-  // The order of service adoptations is important.
-  // TODO(dvoytenko): Refactor service registration if this set becomes
-  // to pass the "embeddable" flag if this set becomes too unwieldy.
-  adoptServiceForEmbed(childWin, 'url');
-  adoptServiceForEmbed(childWin, 'action');
-  adoptServiceForEmbed(childWin, 'standard-actions');
-  adoptServiceForEmbed(childWin, 'navigation');
-  adoptServiceForEmbed(childWin, 'timer');
+export function installStandardServicesInEmbed(childWin, parentWin) {
+  const frameElement = dev().assertElement(childWin.frameElement,
+      'frameElement not found for embed');
+  const standardServices = [
+    // The order of service adoptations is important.
+    Services.urlForDoc(frameElement),
+    Services.actionServiceForDoc(frameElement),
+    Services.standardActionsForDoc(frameElement),
+    Services.navigationForDoc(frameElement),
+    Services.timerFor(parentWin),
+  ];
+  const ampdoc = getAmpdoc(frameElement);
+  standardServices.forEach(service => {
+    // Static functions must be invoked on the class, not the instance.
+    service.constructor.installInEmbedWindow(childWin, ampdoc);
+  });
 }
 
 

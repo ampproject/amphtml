@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -52,20 +52,6 @@ import {requireExternal} from '../../../src/module';
  */
 let DateTemplateMapDef;
 
-/**
- * @typedef {{
- *   startDate: ?moment,
- *   endDate: ?moment
- * }}
- */
-let DatesChangeDetailsDef;
-
-/**
- * @typedef {{
- *   date: ?moment
- * }}
- */
-let DateChangeDetailsDef;
 
 /** @dict @extends {JsonObject} */
 class BindDateDetails {
@@ -106,6 +92,7 @@ const attributesToForward = [
   'month-format',
   'number-of-months',
   'minimum-nights',
+  'maximum-nights',
 ];
 
 /** @enum {string} */
@@ -252,7 +239,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.renderInfo = this.renderInfo.bind(this);
 
     /** @const */
-    this.renderDay = this.renderDay.bind(this);
+    this.renderDay = this.renderDay_.bind(this);
 
     /** @private {?Promise<string>} */
     this.infoTemplatePromise_ = null;
@@ -413,7 +400,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
     if (this.fullscreen_) {
-      user().assert(this.mode_ == DatePickerMode.STATIC,
+      userAssert(this.mode_ == DatePickerMode.STATIC,
           'amp-date-picker mode must be "static" to use fullscreen attribute');
     }
 
@@ -484,6 +471,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
       this.state_ = this.getInitialState_();
+      this.render(this.state_);
     });
   }
 
@@ -501,7 +489,17 @@ export class AmpDatePicker extends AMP.BaseElement {
       newState['max'] = max;
     }
 
-    this.setState_(newState);
+    let p = null;
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.clearRenderedTemplates_();
+      this.cleanupSrcTemplates_();
+
+      p = this.setupSrcAttributes_();
+      this.setupTemplates_();
+    }
+
+    Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -870,8 +868,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       return alternativeName;
     }
 
-    user().error(TAG, `Multiple date-pickers with implicit ${name} fields ` +
-        'need to have IDs');
+    user().error(
+        TAG,
+        'Multiple date-pickers with implicit %s fields need to have IDs',
+        name);
     return '';
   }
 
@@ -1244,9 +1244,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Respond to user interactions that change a DateRangePicker's dates.
-   * @param {!DatesChangeDetailsDef} param
+   * @param {!JsonObject} param
    */
-  onDatesChange({startDate, endDate}) {
+  onDatesChange(param) {
+    const startDate = param['startDate'];
+    const endDate = param['endDate'];
     const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
         this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
@@ -1485,7 +1487,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Render a day in the calendar view.
    * @param {!moment} date
    */
-  renderDay(date) {
+  renderDay_(date) {
     const key = date.format(DEFAULT_FORMAT);
     const cachedDay = this.renderedTemplates_[key];
     if (cachedDay) {
@@ -1701,15 +1703,16 @@ export class AmpDatePicker extends AMP.BaseElement {
       const {minHeight} = computedStyle(this.win, container);
       if (minHeight === DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT) {
         user().warn(TAG,
+            '%s\n The "day-size" attribute is changed from the default value '
+            + '%s. You must specify a new "min-height" `for the %s element in '
+            + 'your AMP CSS.\n This is necessary due to a bug in the '
+            + 'date-picker library. When the bug is fixed, the %s CSS class '
+            + 'will be removed. '
+            + 'See https://github.com/ampproject/amphtml/issues/13897',
             this.element,
-            'The "day-size" attribute is changed from the default value ' +
-            `"${DEFAULT_DAY_SIZE}". You must specify a new "min-height" ` +
-            `for the "${TRANSITION_CONTAINER_SELECTOR}" element in your ` +
-            'AMP CSS.\n' +
-            'This is necessary due to a bug in the date-picker library. ' +
-            `When the bug is fixed, the "${RESIZE_BUG_CSS}" CSS class ` +
-            'will be removed.\n' +
-            'See https://github.com/ampproject/amphtml/issues/13897');
+            DEFAULT_DAY_SIZE,
+            TRANSITION_CONTAINER_SELECTOR,
+            RESIZE_BUG_CSS);
       }
     }
   }

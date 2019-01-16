@@ -20,7 +20,7 @@ import {
   createElementWithAttributes,
   removeElement,
 } from './dom';
-import {dev} from './log';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {isArray, toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';
@@ -61,7 +61,7 @@ export function insertAnalyticsElement(
     extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
     Services.analyticsForDocOrNull(parentElement).then(analytics => {
-      dev().assert(analytics);
+      devAssert(analytics);
     });
   }
   parentElement.appendChild(analyticsElem);
@@ -80,7 +80,7 @@ class CustomEventReporter {
    * @param {!JsonObject} config
    */
   constructor(parent, config) {
-    dev().assert(config['triggers'], 'Config must have triggers defined');
+    devAssert(config['triggers'], 'Config must have triggers defined');
     /** @private {string} */
     this.id_ = parent.getResourceId();
 
@@ -92,14 +92,14 @@ class CustomEventReporter {
 
     for (const event in config['triggers']) {
       const eventType = config['triggers'][event]['on'];
-      dev().assert(eventType,
+      devAssert(eventType,
           'CustomEventReporter config must specify trigger eventType');
       const newEventType = this.getEventTypeInSandbox_(eventType);
       config['triggers'][event]['on'] = newEventType;
     }
 
     this.parent_.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
-      insertAnalyticsElement(this.parent_, config, false);
+      insertAnalyticsElement(this.parent_, config, true);
     });
   }
 
@@ -108,7 +108,7 @@ class CustomEventReporter {
    * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   trigger(eventType, opt_vars) {
-    dev().assert(this.config_['triggers'][eventType],
+    devAssert(this.config_['triggers'][eventType],
         'Cannot trigger non initiated eventType');
     triggerAnalyticsEvent(this.parent_,
         this.getEventTypeInSandbox_(eventType), opt_vars);
@@ -160,7 +160,7 @@ export class CustomEventReporterBuilder {
    */
   track(eventType, request) {
     request = isArray(request) ? request : [request];
-    dev().assert(!this.config_['triggers'][eventType],
+    devAssert(!this.config_['triggers'][eventType],
         'customEventReporterBuilder should not track same eventType twice');
     const requestList = [];
     for (let i = 0; i < request.length; i++) {
@@ -181,7 +181,7 @@ export class CustomEventReporterBuilder {
    * means #build() should only be called once after all eventType are added.
    */
   build() {
-    dev().assert(this.config_, 'CustomEventReporter already built');
+    devAssert(this.config_, 'CustomEventReporter already built');
     const report = new CustomEventReporter(
         this.parent_, /** @type {!JsonObject} */ (this.config_));
     this.config_ = null;

@@ -16,7 +16,7 @@
 
 import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
@@ -95,19 +95,9 @@ export class AmpDocService {
    * @param {{
    *  closestAmpDoc: boolean
    * }=} opt_options
-   * @return {!AmpDoc}
+   * @return {?AmpDoc}
    */
-  getAmpDoc(opt_node = undefined, {closestAmpDoc = false} = {}) {
-    // Ensure that node is attached if specified. This check uses a new and
-    // fast `isConnected` API and thus only checked on platforms that have it.
-    // See https://www.chromestatus.com/feature/5676110549352448.
-    if (opt_node) {
-      dev().assert(
-          opt_node['isConnected'] === undefined ||
-          opt_node['isConnected'] === true,
-          'The node must be attached to request ampdoc.');
-    }
-
+  getAmpDocIfAvailable(opt_node = undefined, {closestAmpDoc = false} = {}) {
     // Single document: return it immediately.
     if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
@@ -127,7 +117,7 @@ export class AmpDocService {
     // make sure any functionality that works for a standalone AmpDoc works if
     // the AmpDoc is loaded in a shadow doc.
     if (!this.singleDoc_) {
-      dev().assert(opt_node);
+      devAssert(opt_node);
     }
     // Otherwise discover and possibly create the ampdoc.
     let n = opt_node;
@@ -170,7 +160,40 @@ export class AmpDocService {
       return this.singleDoc_;
     }
 
-    throw dev().createError('No ampdoc found for', opt_node);
+    return null;
+  }
+
+  /**
+   * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
+   * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
+   * instance is returned, unless specfically looking for a closer `AmpDoc`.
+   * Otherwise, this method locates the `AmpDoc` that contains the specified
+   * node and, if necessary, initializes it.
+   *
+   * An Error is thrown in development if no `AmpDoc` is found.
+   * @param {!Node=} opt_node
+   * @param {{
+   *  closestAmpDoc: boolean
+   * }=} opt_options
+   * @return {!AmpDoc}
+   */
+  getAmpDoc(opt_node, opt_options) {
+    // Ensure that node is attached if specified. This check uses a new and
+    // fast `isConnected` API and thus only checked on platforms that have it.
+    // See https://www.chromestatus.com/feature/5676110549352448.
+    if (opt_node) {
+      devAssert(
+          opt_node['isConnected'] === undefined ||
+          opt_node['isConnected'] === true,
+          'The node must be attached to request ampdoc.');
+    }
+
+    const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
+    if (!ampdoc) {
+      throw dev().createError('No ampdoc found for', opt_node);
+    }
+
+    return ampdoc;
   }
 
   /**
@@ -181,7 +204,7 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
-    dev().assert(!shadowRoot[AMPDOC_PROP],
+    devAssert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
@@ -200,7 +223,7 @@ export class AmpDocService {
    * @restricted
    */
   installShellShadowDoc() {
-    dev().assert(this.singleDoc_ === null,
+    devAssert(this.singleDoc_ === null,
         'AmpDocShell cannot be installed in single-doc mode');
     this.shellShadowDoc_ = new AmpDocShell(this.win);
     this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
@@ -243,7 +266,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isSingleDoc() {
-    return /** @type {?} */ (dev().assert(null, 'not implemented'));
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -288,7 +311,7 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    */
   getRootNode() {
-    return /** @type {?} */ (dev().assert(null, 'not implemented'));
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -304,7 +327,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isBodyAvailable() {
-    return /** @type {?} */ (dev().assert(false, 'not implemented'));
+    return /** @type {?} */ (devAssert(false, 'not implemented'));
   }
 
   /**
@@ -324,7 +347,7 @@ export class AmpDoc {
    * @return {!Promise<!Element>}
    */
   whenBodyAvailable() {
-    return /** @type {?} */ (dev().assert(null, 'not implemented'));
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -335,7 +358,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isReady() {
-    return /** @type {?} */ (dev().assert(null, 'not implemented'));
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -344,7 +367,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenReady() {
-    return /** @type {?} */ (dev().assert(null, 'not implemented'));
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -523,7 +546,7 @@ export class AmpDocShadow extends AmpDoc {
    * @restricted
    */
   setBody(body) {
-    dev().assert(!this.body_, 'Duplicate body');
+    devAssert(!this.body_, 'Duplicate body');
     this.body_ = body;
     this.bodyResolver_(body);
     this.bodyResolver_ = undefined;
@@ -544,7 +567,7 @@ export class AmpDocShadow extends AmpDoc {
    * @restricted
    */
   setReady() {
-    dev().assert(!this.ready_, 'Duplicate ready state');
+    devAssert(!this.ready_, 'Duplicate ready state');
     this.ready_ = true;
     this.readyResolver_();
     this.readyResolver_ = undefined;

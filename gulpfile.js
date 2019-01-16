@@ -42,6 +42,7 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {thirdPartyFrames} = require('./build-system/config');
 const {transpileTs} = require('./build-system/typescript');
 const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
@@ -118,6 +119,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
@@ -500,28 +502,19 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           }));
     }
 
-    promises.push(
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify),
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
-        thirdPartyBootstrap(
-            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify)
-
-    );
+    thirdPartyFrames.forEach(frameObject => {
+      promises.push(
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify)
+      );
+    });
 
     if (watch) {
-      $$.watch('3p/nameframe.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html', shouldMinify);
-      });
-      $$.watch('3p/frame.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify);
-      });
-      $$.watch('3p/recaptcha.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify);
+      thirdPartyFrames.forEach(frameObject => {
+        $$.watch(frameObject.max, function() {
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify);
+        });
       });
     }
 
@@ -543,11 +536,6 @@ const cssEntryPoints = [
     path: 'amp.css',
     outJs: 'css.js',
     outCss: 'v0.css',
-  },
-  {
-    path: 'video-docking.css',
-    outJs: 'video-docking.css.js',
-    outCss: 'video-docking.css',
   },
   {
     path: 'video-autoplay.css',
@@ -772,10 +760,10 @@ function buildExtensionJs(path, name, version, options) {
     // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
     if (name === 'amp-script') {
       // TODO(choumx): Compile this when worker-dom externs are available.
-      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-          `dist/v0/amp-script-worker-${version}.js`);
-      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-          `dist/v0/amp-script-worker-${version}.max.js`);
+      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const file = `dist/v0/amp-script-worker-${version}`;
+      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
+      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
     }
   });
 }
@@ -888,7 +876,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 
@@ -1001,11 +990,15 @@ function dist() {
           });
         }
       }).then(() => {
-        return createModuleCompatibleES5Bundle('v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('shadow-v0.js');
+        if (argv.esm) {
+          return Promise.all([
+            createModuleCompatibleES5Bundle('v0.js'),
+            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+            createModuleCompatibleES5Bundle('shadow-v0.js'),
+          ]);
+        } else {
+          return Promise.resolve();
+        }
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
@@ -1264,13 +1257,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   // We don't need an explicit function wrapper like we do for `gulp dist`
   // because Babel handles that for you.
   const wrapper = options.wrapper || wrappers.none;
+  const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
+      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true})
       .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe($$.wrap, wrapper)
-      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
+      .pipe($$.regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
 
   const lazywrite = lazypipe()
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')

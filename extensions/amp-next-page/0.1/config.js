@@ -21,7 +21,9 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
+
+const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
 
 /**
  * @typedef {{
@@ -49,12 +51,12 @@ export let AmpNextPageItem;
  * @return {!AmpNextPageConfig}
  */
 export function assertConfig(context, config, documentUrl) {
-  user().assert(config, 'amp-next-page config must be specified');
-  user().assert(isArray(config.pages), 'pages must be an array');
+  userAssert(config, 'amp-next-page config must be specified');
+  userAssert(isArray(config.pages), 'pages must be an array');
   assertRecos(context, config.pages, documentUrl);
 
   if ('hideSelectors' in config) {
-    user().assert(isArray(config['hideSelectors']),
+    userAssert(isArray(config['hideSelectors']),
         'amp-next-page hideSelectors should be an array');
     assertSelectors(config['hideSelectors']);
   }
@@ -84,9 +86,9 @@ function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
       user().assertString(selector,
-          `amp-next-page hideSelector value ${selector} is not a string`);
-      user().assert(!pattern.test(selector),
-          `amp-next-page hideSelector '${selector}' not allowed`);
+          'amp-next-page hideSelector value should be a string');
+      userAssert(!pattern.test(selector),
+          'amp-next-page hideSelector %s not allowed', selector);
     });
   });
 }
@@ -108,7 +110,9 @@ function assertReco(context, reco, documentUrl) {
   const {origin} = urlService.parse(documentUrl);
   const sourceOrigin = getSourceOrigin(documentUrl);
 
-  user().assert(url.origin === origin || url.origin === sourceOrigin,
+  userAssert(
+      url.origin === origin || url.origin === sourceOrigin
+      || isValidAdSenseURL(context, url, origin),
       'pages must be from the same origin as the current document');
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
@@ -120,4 +124,20 @@ function assertReco(context, reco, documentUrl) {
         encodeURIComponent(url.host) +
         url.pathname + (url.search || '') + (url.hash || '');
   }
+}
+
+/**
+ * @param {!Element} context
+ * @param {!Location} url
+ * @param {string} origin
+ * @return {boolean}
+ */
+function isValidAdSenseURL(context, url, origin) {
+  const matches = url.search.match(/adurl=(.*)(?:&|$)/);
+  if (!matches) {
+    return false;
+  }
+  const urlService = Services.urlForDoc(context);
+  const targetUrl = urlService.parse(matches[1]);
+  return url.origin === ADSENSE_REC_ORIGIN && targetUrl.origin === origin;
 }

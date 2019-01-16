@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -267,7 +267,7 @@ The `vars` configuration object can be used to define new key-value pairs or ove
 
 #### Extra URL Params
 
-The `extraUrlParams` configuration object specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
+The `extraUrlParams` configuration object specifies additional parameters to be included in the request. By default, extra URL params are appended to the query string of a request URL via the usual "&foo=baz" convention.
 
 Here's an example that would append `&a=1&b=2&c=3` to a request:
 
@@ -279,9 +279,13 @@ Here's an example that would append `&a=1&b=2&c=3` to a request:
 }
 ```
 
+`extraUrlParams` may be sent via the request body instead of the URL if `useBody` is enabled and the request is sent via the `beacon` or `xhrpost` transport methods. In this case, the parameters are not URL encoded or flattened. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more details.
+
 The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to `String.replace()` to pre-process keys in the `extraUrlParams` configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
 
 `extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
+
+If `useBody` is enabled and the request is sent via the `beacon` or `xhrpost` transport methods, `extraUrlParamsReplaceMap` string substitution will only be performed on the top-level keys in `extraUrlParams`.
 
 #### Triggers
 
@@ -442,7 +446,7 @@ NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/1089
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
   - `waitFor`: This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
-  - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
+  - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec. Note that when `reportWhen` is specified, the report will be sent at the time of the signal even if visibility requirements are not met at that time or have not been met previously. Any relevant variables (`totalVisibleTime`, etc.) will be populated according to the visibility requirements in this `visibilitySpec`.
   - `continuousTimeMin` and `continuousTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger fires when the element is not visible. If both bounds are set to 100, the trigger fires when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. The default values for `visiblePercentageMin` and `visiblePercentageMax` are  0 and 100, respectively.
@@ -653,11 +657,11 @@ Video analytics provides several triggers (`"on": "video-*"`) that publishers ca
 The `transport` configuration object specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
-  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
+  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
+  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
 
-MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration.
+MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. Furthermore, the vendor frame may send a response, to be used by amp-ad-exit. See [analytics-iframe-transport-remote-frame.html](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [fake_amp_ad_with_iframe_transport.html](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html): the former file sends a response JSON object of {'collected-data': 'abc'}, and the latter file uses that object to substitute 'abc' for 'bar_' in finalUrl.
 
 If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 
@@ -672,6 +676,23 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 ```
 
 To learn more, see [this example that implements iframe transport client API](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
+
+##### Use Body for Extra URL Params
+
+The `useBody` configuration option indicates whether or not to include `extraUrlParams` in the POST request body instead of in the URL as URL-encoded query parameters.
+
+`useBody` is only available for the `beacon` and `xhrpost` transport methods. If `useBody` is true and used in conjunction with either of these transport methods, `extraUrlParams` are sent in the POST request body. Otherwise, the request is sent with an empty body and the `extraUrlParams` are included as URL parameters.
+
+With `useBody`, you can include nested objects in `extraUrlParams`. However, if the request falls back to other transport options that don't support `useBody` (e.g. `image`), then those nested objects will be stringified into the URL as `[object Object]`.
+
+```javascript
+"transport": {
+  "beacon": true,
+  "xhrpost": true,
+  "useBody": true,
+  "image": false
+}
+```
 
 ##### Referrer Policy
 
@@ -694,6 +715,12 @@ The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics`
 Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
 
 If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
+
+#### Cookies
+
+The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's domain.
+
+Details on setting up the `cookies` configuration can be found at [Receiving Linker Params on AMP Pages](./linker-id-receiving.md#receiving-linker-params-on-amp-pages)
 
 ## Validation
 

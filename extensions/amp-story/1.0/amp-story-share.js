@@ -20,7 +20,7 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
@@ -105,7 +105,13 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+  children: [
+    {
+      tag: 'span',
+      attrs: dict({'class': 'i-amphtml-story-share-label'}),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+    },
+  ],
 };
 
 
@@ -138,7 +144,7 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = dev().assert(
+  const shareProviderLocalizedStringId = devAssert(
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
       `No localized string to display name for share type ${shareType}.`);
 
@@ -149,12 +155,18 @@ function buildProvider(doc, shareType, opt_params) {
           attrs: /** @type {!JsonObject} */ (Object.assign(
               dict({
                 'width': 48,
-                'height': 66,
+                'height': 48,
                 'class': 'i-amphtml-story-share-icon',
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          localizedStringId: shareProviderLocalizedStringId,
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({'class': 'i-amphtml-story-share-label'}),
+              localizedStringId: shareProviderLocalizedStringId,
+            },
+          ],
         },
       ]));
 }
@@ -227,7 +239,7 @@ export class ShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    dev().assert(!this.root, 'Already built.');
+    devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
     this.localizationServicePromise_ =
@@ -248,7 +260,7 @@ export class ShareWidget {
    */
   getAmpDoc_() {
     return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-      dev().assert(this.ampdoc_));
+      devAssert(this.ampdoc_));
   }
 
   /** @private */
@@ -275,7 +287,7 @@ export class ShareWidget {
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
-        dev().assert(localizationService,
+        devAssert(localizationService,
             'Could not retrieve LocalizationService.');
         const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
@@ -375,7 +387,7 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = dev().assert(this.root).firstElementChild;
+    const list = devAssert(this.root).firstElementChild;
     const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
@@ -457,7 +469,7 @@ export class ScrollableShareWidget extends ShareWidget {
           return;
         }
 
-        const icon = dev().assert(items[0].firstElementChild);
+        const icon = devAssert(items[0].firstElementChild);
 
         const leftMargin = icon./*OK*/offsetLeft - this.root./*OK*/offsetLeft;
         const iconWidth = icon./*OK*/offsetWidth;

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-list"></a> `amp-list`
+# <a name="amp-list"></a> `<amp-list>`
 
 [TOC]
 
@@ -40,7 +40,7 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
+The `<amp-list>` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -49,7 +49,7 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 You can specify a template in one of two ways:
 
 - a `template` attribute that references an ID of an existing `template` element.
-- a `template` element nested directly inside the `amp-list` element.
+- a `template` element nested directly inside the `<amp-list>` element.
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
@@ -99,37 +99,37 @@ Here is how we styled the content fetched:
     amp-list div[role="list"] {
       display: grid;
       grid-gap: 0.5em;
-    } 
+    }
 ```
-    
+
 ## Behavior
 
 The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from
 the current viewport.
 
-If `amp-list` needs more space after loading, it requests the AMP runtime to update its
+If `<amp-list>` needs more space after loading, it requests the AMP runtime to update its
 height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new
 height, it will display the `overflow` element when available. Notice however, that the typical
-placement of `amp-list` elements at the bottom of the document almost always guarantees
+placement of `<amp-list>` elements at the bottom of the document almost always guarantees
 that the AMP runtime can resize them.
 
-By default, `amp-list` adds a `list` ARIA role to the list element and a `listitem` role to item
+By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item
 elements rendered via the template.
 
 ### XHR batching
 
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-list` elements) on an AMP page.  For example, if your `amp-list` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page.  For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
-In `amp-list`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `amp-list` elements rendering different content but sharing a single XHR.
+In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
 
 
 ### Specifying an overflow
 
-Optionally, the `amp-list` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `amp-list` element as requested.
+Optionally, the `<amp-list>` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `<amp-list>` element as requested.
 
 *Example: Displaying an overflow when the list needs more space*
 
-In the following example, we display a list of images and titles. Because the amp-list content requires more space than available, the AMP Runtime displays the overflow element.
+In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP Runtime displays the overflow element.
 
 <!--embedded example - displays in ampproject.org -->
 <div>
@@ -156,10 +156,10 @@ Here's the CSS for the `overflow`:
 
 ### Placeholder and fallback
 
-Optionally, `amp-list` supports a placeholder and/or fallback.
+Optionally, `<amp-list>` supports a placeholder and/or fallback.
 
-- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `amp-list` loads successfully. If a fallback is also provided, the placeholder is hidden when the `amp-list` fails to load.
-- A *fallback* is a child element with the `fallback` attribute. This element is shown if the `amp-list` fails to load.
+- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
+- A *fallback* is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
 Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
@@ -172,7 +172,7 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 
 ### Refreshing data
 
-The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
+The `<amp-list>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
 <button on="tap:myList.refresh">Refresh List</button>
@@ -183,12 +183,29 @@ The `amp-list` element exposes a `refresh` action that other elements can refere
 </amp-list>
 ```
 
+### Dynamic Resizing
+##### Experimental: amp-list-resizable-children
+In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+
+```html
+  <button on="list.changeToLayoutContainer()">Show Grid</button>
+  <amp-list id="list"
+    width="396" height="80" layout="responsive"
+    src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      {{title}}
+    </template>
+  </amp-list>
+```
+
+This action is experimentally available under `amp-list-resizable-children`.
+
 ## Attributes
 
 ##### src (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
-within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -219,7 +236,7 @@ Here's an example that specifies including credentials to display personalized c
 ##### items (optional)
 
 Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
-By defaut `amp-list` expects an array, the `single-item` attribute may be used to load data from an object.
+By defaut `<amp-list>` expects an array, the `single-item` attribute may be used to load data from an object.
 
 - The default value is `"items"`. The expected response: `{items: [...]}`.
 - If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
@@ -240,7 +257,7 @@ The `items` array will be truncated to `max-items` entries if the returned value
 
 #### single-item (optional)
 
-Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
+Causes `<amp-list>` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
 #### reset-on-refresh (optional)
@@ -249,9 +266,12 @@ Displays a loading indicator and placeholder again when the list's source is ref
 
 By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
 
+#### [is-layout-container] (experimental, optional)
+This is a bindable attribute that should always be false by default. When set to true via `bind`, it changes the layout of the `<amp-list>` to layout `CONTAINER`. This attribute is useful for handling dynamic resizing for amp-list. This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER`--it potentially causes content jumping on first load. This attribute is experimentally available under `amp-list-resizable-children`. Alternatively, one may also use the `changeToLayoutContainer` action.
+
 #### binding (optional)
 
-For pages using `amp-list` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
+For pages using `<amp-list>` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
 
 We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
@@ -261,13 +281,119 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+## Experimental: Load More and Infinite Scroll (amp-list-load-more)
+We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `<amp-list>`. You can enable this feature by turning on the 'amp-list-load-more' experiment on the [experiments page](https://cdn.ampproject.org/experiments.html) and adding the `load-more` attribute to `<amp-list>`. This is an experimental feature, and final APIs may change.
+
+#### Sample Usage
+
+```
+<amp-list load-more src="https://my.rest.endpoint/" ...>
+  <template type="amp-mustache">
+  // ...
+  </template>
+</amp-list>
+
+```
+
+### Attributes
+#### load-more (mandatory)
+This attribute accepts two values: "auto" or "manual". Setting the value of this attribute to "manual" will show a "load-more" button at the end of `<amp-list>`. Setting the value of this attribute to "auto" will cause `<amp-list>` to automatically load more elements three viewports down for an infinite scroll effect.
+
+#### load-more-bookmark (optional)
+This attribute specifies a field name in the returned data that will give the url of the next items to load. If this attribute is not specified, `<amp-list>` expects the json payload to have the `load-more-src` field, which corresponds to the next url to load. In the case where this field is called something else, you can specify the name of that field via the `load-more-bookmark` field.E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
+
+```
+{ "items": [...], "next": "https://url.to.load" }
+```
+
+### Customizing load-more elements
+`<amp-list>` with the `load-more` attribute contains these UI elements: a load-more button, a loader, a load-failed element, and optionally an end-cap marking the end of the list. These elements can be customized by providing `<amp-list-load-more>` elements as children of `<amp-list>` with the following attributes:
+
+#### load-more-button
+An `<amp-list-load-more>` element with the `load-more-button` attribute that a button with the `load-more-clickable` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
+
+##### Example:
+
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <div load-more-button>
+    See More /* My custom see more button */
+  </div>
+</amp-list>
+```
+It can be templated via `amp-mustache`.
+
+##### Example:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <amp-list-load-more load-more-button>
+    <template type="amp-mustache">
+      Showing {{#count}} out of {{#total}} items
+      <button>
+        Click here to see more!
+      </button>
+    </template>
+  </amp-list-load-more>
+</amp-list>
+```
+
+#### load-more-loading
+This element is a loader that will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the `<amp-list>` are still loading). This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-loading`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <amp-list-load-more> load-more-loading>
+    <svg>...</svg> /* My custom loader */
+  </amp-list-load-more>
+</amp-list>
+```
+
+#### load-more-failed
+A `<amp-list-load-more>` element containing the `load-more-failed` attribute that contains a button with the `load-more-clickable` attribute that will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-failed`. Example below:
+```
+<<<<<<< HEAD
+<amp-list load-more src="https://www.load.more/" ...>
+  <amp-list-load-more load-more-failed>
+    Something went wrong, click here to try again /* Custom load-failed element */
+  </amp-list-load-more>
+</amp-list>
+```
+
+#### load-more-end
+This element is not provided by default, but if a `<amp-list-load-more>` element containing the `load-more-end` attribute is attached to `<amp-list>` as a child element, this element will be displayed at the bottom of the `<amp-list>` if there are no more items.  This element can be templated via `amp-mustache`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <amp-list-load-more> load-more-end>
+    Congratulations! You've reached the end. /* Custom load-end element */
+  </amp-list-load-more>>
+</amp-list>
+```
+=======
+<amp-list-load-more load-more-failed class="i-amphtml-default-ui">
+  <div class="i-amphtml-list-load-more-message">
+    Unable to Load More
+  </div>
+  <button load-more-clickable
+    class="i-amphtml-list-load-more-button
+            i-amphtml-list-load-more-button-has-icon
+            i-amphtml-list-load-more-button-small"
+  >
+    <div class="i-amphtml-list-load-more-icon"></div>
+    <label>Retry</label>
+  </button>
+</amp-list-load-more>
+```
+
+#### load-more-end (optional)
+A `<amp-list-load-more>` element containing the `load-more-end` attribute. This element will be displayed at the bottom of the `<amp-list>` if there are no more items. This element is optional. This element can be templated via `amp-mustache`.
+>>>>>>> Define additional tag for simpler validation
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Substitutions
 
-The `amp-list` allows all standard URL variable substitutions.
+The `<amp-list>` allows all standard URL variable substitutions.
 See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 For example:

@@ -20,7 +20,7 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from '../../messaging/messaging';
-import {ViewerForTesting} from '../viewer-for-testing';
+import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
 
@@ -164,11 +164,26 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             expect(initKeyboardHandlerStub).to.be.called;
           });
         });
+
+        it('should initiate focus handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('focus-rect')
+              .returns(true);
+          const initFocusHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initFocusHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initFocusHandlerStub).to.be.called;
+          });
+        });
       });
     });
   });
 
-  describe.configure().ifNewChrome().run('Unit Tests for messaging.js', () => {
+  describe.configure().ifChrome().run('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
     const requestProcessor = function() {
       return Promise.resolve({});

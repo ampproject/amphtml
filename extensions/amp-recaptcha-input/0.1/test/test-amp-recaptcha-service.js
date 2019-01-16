@@ -30,6 +30,7 @@ describes.realWin('amp-recaptcha-service', {
 }, env => {
   let recaptchaService;
   const fakeSitekey = 'fake-sitekey-fortesting';
+  const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
 
   beforeEach(() => {
     recaptchaService = new AmpRecaptchaService(env.ampdoc);
@@ -98,6 +99,22 @@ describes.realWin('amp-recaptcha-service', {
         });
   });
 
+  it('should not allow elements to register,' +
+    ' if they pass a different sitekey', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return recaptchaService
+        .register(fakeSitekey).then(() => {
+          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+          expect(recaptchaService.iframe_).to.be.ok;
+
+          return recaptchaService.register(anotherFakeSitekey).catch(err => {
+            expect(err).to.be.ok;
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
+        });
+  });
+
   it('should return when the iframe is' +
     ' loaded and ready', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
@@ -119,7 +136,7 @@ describes.realWin('amp-recaptcha-service', {
         .register(fakeSitekey).then(() => {
           expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
-          recaptchaService.execute(0, '', '');
+          recaptchaService.execute(0, '');
 
           const executeMapKeys = Object.keys(recaptchaService.executeMap_);
           expect(executeMapKeys.length).to.be.equal(1);
@@ -130,7 +147,7 @@ describes.realWin('amp-recaptcha-service', {
   it('should reject if there is no iframe on execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     expect(recaptchaService.iframe_).to.not.be.ok;
-    return recaptchaService.execute(0, '', '').catch(err => {
+    return recaptchaService.execute(0, '').catch(err => {
       expect(err).to.be.ok;
     });
   });

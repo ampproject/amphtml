@@ -31,16 +31,17 @@ export function videonow(global, data) {
 
   // production version by default
   let script = (data.src && decodeURI(data.src)) ||
-      ('https://static.videonow.ru/dev/vn_init_module.js?profileId=' + profileId);
+    ('https://static.videonow.ru/vn_init.js' +
+      '?amp=1&profileId=' + profileId);
 
   if (kind === 'local') {
-    script = 'https://localhost:8085/vn_init.js?profileId=' + profileId +
-        '&url=' + encodeURIComponent('https://localhost:8085/init');
+    script = 'https://localhost:8085/vn_init.js?amp=1' +
+      '?profileId=' + profileId +
+      '&url=' + encodeURIComponent('https://localhost:8085/init');
   } else if (kind === 'dev') {
-    // this part can be changed late
-    script = 'https://static.videonow.ru/dev/vn_init_module.js?profileId=' +
-        profileId +
-        '&url=' + encodeURIComponent('https://data.videonow.ru/?init');
+    script = 'https://static.videonow.ru/dev/vn_init_module.js' +
+      '?amp=1&profileId=' + profileId +
+      '&url=' + encodeURIComponent('https://data.videonow.ru/?init');
   }
 
   loadScript(global, script);

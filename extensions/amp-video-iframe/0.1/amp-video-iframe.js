@@ -27,11 +27,10 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
-  isAdLike,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
@@ -54,6 +53,8 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 const SANDBOX = [
   SandboxOptions.ALLOW_SCRIPTS,
   SandboxOptions.ALLOW_SAME_ORIGIN,
+  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
@@ -92,14 +93,8 @@ class AmpVideoIframe extends AMP.BaseElement {
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
 
-    /** @private {?function()} */
-    this.readyPromise_ = null;
-
-    /** @private {?function()} */
-    this.readyResolver_ = null;
-
-    /** @private {?function()} */
-    this.readyRejecter_ = null;
+    /** @private {?Deferred} */
+    this.readyDeferred_ = null;
 
     /** @private {boolean} */
     this.canPlay_ = false;
@@ -120,12 +115,14 @@ class AmpVideoIframe extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    this.user().assert(!isAdLike(element),
-        '<amp-video-iframe> does not allow ad iframes. ',
-        'Please use amp-ad instead.');
+    // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
+    // cached default value, which makes this assertion fail. Move to
+    // `describes.integration` to see if that fixes it.
+    const isIntegrationTest =
+        element.hasAttribute('i-amphtml-integration-test');
 
-    this.user().assert(!looksLikeTrackingIframe(element),
-        '<amp-video-iframe> does not allow tracking iframes. ',
+    this.user().assert(isIntegrationTest || !looksLikeTrackingIframe(element),
+        '<amp-video-iframe> does not allow tracking iframes. ' +
         'Please use amp-analytics instead.');
 
     installVideoManagerForDoc(element);
@@ -141,6 +138,24 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
     return this.createReadyPromise_().then(() => this.onReady_());
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (mutations['src']) {
+      this.updateSrc_();
+    }
+  }
+
+  /** @private */
+  updateSrc_() {
+    const iframe = this.iframe_;
+
+    if (!iframe || iframe.src == this.getSrc_()) {
+      return;
+    }
+
+    iframe.src = this.getSrc_();
   }
 
   /**
@@ -219,11 +234,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   createReadyPromise_() {
-    const {promise, resolve, reject} = new Deferred();
-    this.readyPromise_ = promise;
-    this.readyResolver_ = resolve;
-    this.readyRejecter_ = reject;
-    return promise;
+    this.readyDeferred_ = new Deferred();
+    return this.readyDeferred_.promise;
   }
 
   /**
@@ -262,7 +274,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      user().assert(false, 'Unknown method `%s`.', methodReceived);
+      userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
 
@@ -271,18 +283,18 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     this.canPlay_ = this.canPlay_ || isCanPlayEvent;
 
+    const {reject, resolve} = devAssert(this.readyDeferred_);
+
     if (isCanPlayEvent) {
-      dev().assert(this.readyResolver_).call();
-      return;
+      return resolve();
     }
 
     if (eventReceived == 'error' && !this.canPlay_) {
-      dev().assert(this.readyRejecter_).call();
-      return;
+      return reject('Received `error` event.');
     }
 
     if (eventReceived == 'analytics') {
-      const spec = dev().assert(data['analytics']);
+      const spec = devAssert(data['analytics']);
 
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
@@ -301,7 +313,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     user().assertString(eventType, '`eventType` missing in analytics event');
 
-    user().assert(
+    userAssert(
         getAnalyticsEventTypePrefixRegex().test(eventType),
         'Invalid analytics `eventType`. Value must start with `%s`.',
         ANALYTICS_EVENT_TYPE_PREFIX);
@@ -352,10 +364,11 @@ class AmpVideoIframe extends AMP.BaseElement {
     if (!this.iframe_ || !this.iframe_.contentWindow) {
       return;
     }
-    if (!this.readyPromise_) {
+    const {promise} = this.readyDeferred_;
+    if (!promise) {
       return;
     }
-    this.readyPromise_.then(() => {
+    promise.then(() => {
       this.iframe_.contentWindow./*OK*/postMessage(
           JSON.stringify(message), '*');
     });
@@ -456,6 +469,11 @@ class AmpVideoIframe extends AMP.BaseElement {
   getPlayedRanges() {
     // TODO(alanorozco)
     return [];
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 

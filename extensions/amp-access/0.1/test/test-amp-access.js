@@ -18,12 +18,12 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
+import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {installPerformanceService} from
   '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.fakeWin('AccessService', {
   amp: true,
@@ -965,6 +965,70 @@ describes.fakeWin('AccessService pingback', {
   });
 });
 
+describes.fakeWin('AccessService refresh', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
+  let configElement;
+  let serviceMock;
+  let service;
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
+
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID',
+    });
+    document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
+
+    service = new AccessService(ampdoc);
+
+    const cid = {
+      get: () => {},
+    };
+    service.cid_ = Promise.resolve(cid);
+
+    service.analyticsEvent_ = sandbox.spy();
+    serviceMock = sandbox.mock(service);
+    service.sources_[0].openLoginDialog_ = () => {};
+    service.sources_[0].loginUrlMap_[''] = 'https://acme.com/l?rid=R';
+    service.sources_[0].analyticsEvent_ = sandbox.spy();
+    service.sources_[0].getAdapter().postAction = sandbox.spy();
+
+    service.viewer_ = {
+      broadcast: () => {},
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
+    };
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+  });
+
+  it('should intercept global action to refresh', () => {
+    serviceMock.expects('runAuthorization_')
+        .withExactArgs()
+        .once();
+    const event = {preventDefault: sandbox.spy()};
+    service.handleAction_({method: 'refresh', event});
+    expect(event.preventDefault).to.be.calledOnce;
+  });
+});
 
 describes.fakeWin('AccessService login', {
   amp: true,
@@ -1631,8 +1695,8 @@ describes.fakeWin('AccessService multiple sources', {
     const authorizationStub =
       sandbox.stub(sourceBeer, 'runAuthorization').callsFake(
           () => Promise.resolve());
-    const broadcastStub = sandbox.stub(sourceBeer.viewer_,
-        'broadcast');
+    const viewer = Services.viewerForDoc(ampdoc);
+    const broadcastStub = sandbox.stub(viewer, 'broadcast');
     const sourceBeerMock = sandbox.mock(sourceBeer);
     sourceBeerMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
@@ -1663,8 +1727,8 @@ describes.fakeWin('AccessService multiple sources', {
     const authorizationStub =
       sandbox.stub(sourceDonuts, 'runAuthorization').callsFake(
           () => Promise.resolve());
-    const broadcastStub = sandbox.stub(sourceDonuts.viewer_,
-        'broadcast');
+    const viewer = Services.viewerForDoc(ampdoc);
+    const broadcastStub = sandbox.stub(viewer, 'broadcast');
     const sourceDonutsMock = sandbox.mock(sourceDonuts);
     sourceDonutsMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')

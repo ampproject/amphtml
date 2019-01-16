@@ -22,10 +22,11 @@ import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
+
 const TAG = 'amp-selector';
 
 /**
@@ -39,9 +40,7 @@ const KEYBOARD_SELECT_MODES = {
   SELECT: 'select',
 };
 
-
 export class AmpSelector extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -50,10 +49,10 @@ export class AmpSelector extends AMP.BaseElement {
     this.isMultiple_ = false;
 
     /** @private {!Array<!Element>} */
-    this.selectedOptions_ = [];
+    this.selectedElements_ = [];
 
     /** @private {!Array<!Element>} */
-    this.options_ = [];
+    this.elements_ = [];
 
     /** @private {!Array<!Element>} */
     this.inputs_ = [];
@@ -99,7 +98,7 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
-      user().assert(
+      userAssert(
           !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
           '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
@@ -129,9 +128,9 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction('toggle', invocation => {
       const {args} = invocation;
-      user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
-      user().assert(args['index'] < this.options_.length, '\'index\' must be ' +
-        'less than the length of options in the <amp-selector>');
+      userAssert(args['index'] >= 0, '\'index\' must be greater than 0');
+      userAssert(args['index'] < this.elements_.length, '\'index\' must ' +
+        'be less than the length of options in the <amp-selector>');
       if (args && args['index'] !== undefined) {
         this.toggle_(args['index'], args['value']);
       }
@@ -164,32 +163,36 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   selectedAttributeMutated_(newValue) {
-    if (newValue === null) {
+    let selected = Array.isArray(newValue) ? newValue : [newValue];
+    if (newValue === null || selected.length == 0) {
       this.clearAllSelections_();
       return;
     }
-    let selectedArray = Array.isArray(newValue) ? newValue : [newValue];
     // Only use first value if multiple selection is disabled.
     if (!this.isMultiple_) {
-      selectedArray = selectedArray.slice(0, 1);
+      selected = selected.slice(0, 1);
+    }
+    // If selection hasn't changed, early-out.
+    const current = this.selectedOptions_();
+    if (areEqualOrdered(current.sort(), selected.sort())) {
+      return;
     }
     // Convert array values to strings and create map for fast lookup.
-    const selectedMap = selectedArray.reduce((map, value) => {
+    const isSelected = selected.reduce((map, value) => {
       map[value] = true;
       return map;
     }, Object.create(null));
     // Iterate through elements and toggle selection as necessary.
-    for (let i = 0; i < this.options_.length; i++) {
-      const element = this.options_[i];
+    for (let i = 0; i < this.elements_.length; i++) {
+      const element = this.elements_[i];
       const option = element.getAttribute('option');
-      if (selectedMap[option]) {
+      if (isSelected[option]) {
         this.setSelection_(element);
       } else {
         this.clearSelection_(element);
       }
     }
     this.updateFocus_();
-    // Update inputs.
     this.setInputs_();
   }
 
@@ -214,20 +217,20 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
-    this.options_.forEach(option => {
+    this.elements_.forEach(option => {
       option.tabIndex = -1;
     });
 
     let focusElement = opt_focusEl;
     if (!focusElement) {
       if (this.isMultiple_) {
-        focusElement = this.options_[0];
+        focusElement = this.elements_[0];
       } else {
-        focusElement = this.selectedOptions_[0] || this.options_[0];
+        focusElement = this.selectedElements_[0] || this.elements_[0];
       }
     }
     if (focusElement) {
-      this.focusedIndex_ = this.options_.indexOf(focusElement);
+      this.focusedIndex_ = this.elements_.indexOf(focusElement);
       focusElement.tabIndex = 0;
     }
   }
@@ -238,40 +241,39 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   maybeRefreshOnUpdate_(unusedEvent) {
-    const newOptions = toArray(this.element.querySelectorAll('[option]'));
-    if (areEqualOrdered(this.options_, newOptions)) { // no updates
+    const newElements = toArray(this.element.querySelectorAll('[option]'));
+    if (areEqualOrdered(this.elements_, newElements)) {
       return;
     }
-    // Clear prev states
-    this.options_ = [];
-    this.selectedOptions_ = [];
-    this.inputs_ = [];
-    this.init_(newOptions);
+    this.init_(newElements);
   }
 
   /**
-   * @param {Array<Element>=} opt_options
+   * @param {!Array<!Element>=} opt_elements
    * @private
    */
-  init_(opt_options) {
-    const options = opt_options ?
-      opt_options :
-      toArray(this.element.querySelectorAll('[option]'));
-    options.forEach(option => {
-      if (!option.hasAttribute('role')) {
-        option.setAttribute('role', 'option');
+  init_(opt_elements) {
+    this.selectedElements_.length = 0;
+
+    const elements = opt_elements
+      ? opt_elements
+      : toArray(this.element.querySelectorAll('[option]'));
+    elements.forEach(el => {
+      if (!el.hasAttribute('role')) {
+        el.setAttribute('role', 'option');
       }
-      if (option.hasAttribute('disabled')) {
-        option.setAttribute('aria-disabled', 'true');
+      if (el.hasAttribute('disabled')) {
+        el.setAttribute('aria-disabled', 'true');
       }
-      if (option.hasAttribute('selected')) {
-        this.setSelection_(option);
+      if (el.hasAttribute('selected')) {
+        this.setSelection_(el);
       } else {
-        this.clearSelection_(option);
+        this.clearSelection_(el);
       }
-      option.tabIndex = 0;
-      this.options_.push(option);
+      el.tabIndex = 0;
     });
+    this.elements_ = elements;
+
     this.updateFocus_();
     this.setInputs_();
   }
@@ -297,7 +299,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.inputs_ = [];
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
-    this.selectedOptions_.forEach(option => {
+    this.selectedElements_.forEach(option => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
         const value = option.getAttribute('option');
@@ -319,6 +321,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles user selection on an option.
    * @param {!Element} el The element selected.
+   * @private
    */
   onOptionPicked_(el) {
     if (el.hasAttribute('disabled')) {
@@ -336,26 +339,22 @@ export class AmpSelector extends AMP.BaseElement {
       }
       // Newly picked option should always have focus.
       this.updateFocus_(el);
-
-      // Trigger 'select' event with two data params:
-      // 'targetOption' - option value of the selected or deselected element.
-      // 'selectedOptions' - array of option values of selected elements.
-      const name = 'select';
-      const selections =
-          this.selectedOptions_.map(el => el.getAttribute('option'));
-      const selectEvent =
-          createCustomEvent(this.win, `amp-selector.${name}`, dict({
-            'targetOption': el.getAttribute('option'),
-            'selectedOptions': selections,
-          }));
-      this.action_.trigger(this.element, name, selectEvent,
-          ActionTrust.HIGH);
+      this.fireSelectEvent_(el);
     });
+  }
+
+  /**
+   * @return {!Array<string>}
+   * @private
+   */
+  selectedOptions_() {
+    return this.selectedElements_.map(el => el.getAttribute('option'));
   }
 
   /**
    * Handles click events for the selectables.
    * @param {!Event} event
+   * @private
    */
   clickHandler_(event) {
     if (this.element.hasAttribute('disabled')) {
@@ -377,15 +376,17 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean=} opt_value
+   * @private
    */
   toggle_(index, opt_value) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    const indexCurrentStatus = this.options_[index].hasAttribute('selected');
+    const el = this.elements_[index];
+    const indexCurrentStatus = el.hasAttribute('selected');
     const indexFinalStatus =
       opt_value !== undefined ? opt_value : !indexCurrentStatus;
-    const selectedIndex = this.options_.indexOf(this.selectedOptions_[0]);
+    const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
       return;
@@ -393,33 +394,53 @@ export class AmpSelector extends AMP.BaseElement {
 
     // There is a change of the `selected` attribute for the element
     if (selectedIndex !== index) {
-      this.setSelection_(this.options_[index]);
-      this.clearSelection_(this.options_[selectedIndex]);
+      this.setSelection_(el);
+      this.clearSelection_(this.elements_[selectedIndex]);
     } else {
-      this.clearSelection_(this.options_[index]);
+      this.clearSelection_(el);
     }
+
+    this.fireSelectEvent_(el);
   }
 
+  /**
+   * Triggers a 'select' event with two data params:
+   * 'targetOption' - option value of the selected or deselected element.
+   * 'selectedOptions' - array of option values of selected elements.
+   * @param {!Element} el The element that was selected or deslected.
+   * @private
+   */
+  fireSelectEvent_(el) {
+    const name = 'select';
+    const selectEvent =
+        createCustomEvent(this.win, `amp-selector.${name}`, dict({
+          'targetOption': el.getAttribute('option'),
+          'selectedOptions': this.selectedOptions_(),
+        }));
+    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+  }
 
   /**
    * Handles selectUp events.
    * @param {number} delta
+   * @private
    */
   select_(delta) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
+    const previousIndex = this.elements_.indexOf(this.selectedElements_[0]);
     const index = previousIndex + delta;
-    const normalizedIndex = mod(index, this.options_.length);
+    const normalizedIndex = mod(index, this.elements_.length);
 
-    this.setSelection_(this.options_[normalizedIndex]);
-    this.clearSelection_(this.options_[previousIndex]);
+    this.setSelection_(this.elements_[normalizedIndex]);
+    this.clearSelection_(this.elements_[previousIndex]);
   }
 
   /**
    * Handles keyboard events.
    * @param {!Event} event
+   * @private
    */
   keyDownHandler_(event) {
     if (this.element.hasAttribute('disabled')) {
@@ -446,6 +467,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles keyboard navigation events. Should not be called if
    * keyboard selection is disabled.
    * @param {!Event} event
+   * @private
    */
   navigationKeyDownHandler_(event) {
     const doc = this.win.document;
@@ -474,22 +496,22 @@ export class AmpSelector extends AMP.BaseElement {
     event.preventDefault();
 
     // Make currently selected option unfocusable
-    this.options_[this.focusedIndex_].tabIndex = -1;
+    this.elements_[this.focusedIndex_].tabIndex = -1;
 
     // Change the focus to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    this.focusedIndex_ = (this.focusedIndex_ + dir) % this.options_.length;
+    this.focusedIndex_ = (this.focusedIndex_ + dir) % this.elements_.length;
     if (this.focusedIndex_ < 0) {
-      this.focusedIndex_ = this.focusedIndex_ + this.options_.length;
+      this.focusedIndex_ = this.focusedIndex_ + this.elements_.length;
     }
 
     // Focus newly selected option
-    const newSelectedOption = this.options_[this.focusedIndex_];
+    const newSelectedOption = this.elements_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     tryFocus(newSelectedOption);
 
-    const focusedOption = this.options_[this.focusedIndex_];
+    const focusedOption = this.elements_[this.focusedIndex_];
     if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
       this.onOptionPicked_(focusedOption);
     }
@@ -498,11 +520,12 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles keyboard selection events.
    * @param {!Event} event
+   * @private
    */
   selectionKeyDownHandler_(event) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
-      if (this.options_.includes(event.target)) {
+      if (this.elements_.includes(event.target)) {
         event.preventDefault();
         const el = dev().assertElement(event.target);
         this.onOptionPicked_(el);
@@ -518,9 +541,9 @@ export class AmpSelector extends AMP.BaseElement {
   clearSelection_(element) {
     element.removeAttribute('selected');
     element.setAttribute('aria-selected', 'false');
-    const selIndex = this.selectedOptions_.indexOf(element);
+    const selIndex = this.selectedElements_.indexOf(element);
     if (selIndex !== -1) {
-      this.selectedOptions_.splice(selIndex, 1);
+      this.selectedElements_.splice(selIndex, 1);
     }
   }
 
@@ -529,9 +552,9 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   clearAllSelections_() {
-    while (this.selectedOptions_.length > 0) {
+    while (this.selectedElements_.length > 0) {
       // Clear selected options for single select.
-      const el = this.selectedOptions_.pop();
+      const el = this.selectedElements_.pop();
       this.clearSelection_(el);
     }
     this.setInputs_();
@@ -544,7 +567,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   setSelection_(element) {
     // Exit if `element` is already selected.
-    if (this.selectedOptions_.includes(element)) {
+    if (this.selectedElements_.includes(element)) {
       return;
     }
     if (!this.isMultiple_) {
@@ -552,10 +575,25 @@ export class AmpSelector extends AMP.BaseElement {
     }
     element.setAttribute('selected', '');
     element.setAttribute('aria-selected', 'true');
-    this.selectedOptions_.push(element);
+    this.selectedElements_.push(element);
+  }
+
+  /**
+   * @return {!Array<!Element>}
+   * @visibleForTesting
+   */
+  getElementsForTesting() {
+    return this.elements_;
+  }
+
+  /**
+   * @return {!Array<!Element>}
+   * @visibleForTesting
+   */
+  getSelectedElementsForTesting() {
+    return this.selectedElements_;
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpSelector, CSS);

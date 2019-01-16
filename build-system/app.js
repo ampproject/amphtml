@@ -33,9 +33,12 @@ const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
+const {renderShadowViewer} = require('./shadow-viewer');
+const {replaceUrls} = require('./app-utils');
 
-app.use(bodyParser.json());
-app.use('/amp4test', require('./amp4test'));
+app.use(bodyParser.text());
+app.use('/amp4test', require('./amp4test').app);
+app.use('/analytics', require('./routes/analytics'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -109,8 +112,10 @@ if (!global.AMP_TESTING) {
   });
 
   app.get('/proxy', (req, res) => {
-    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
-    res.redirect(`proxy/s/${sufix}`);
+    const {mode, url} = req.query;
+    const prefix = (mode || '').replace(/\/$/, '');
+    const sufix = url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`${prefix}/proxy/s/${sufix}`);
   });
 }
 
@@ -171,13 +176,7 @@ app.use('/api/dont-show', (req, res) => {
 
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
-});
-
-app.use('/analytics/:type', (req, res) => {
-  console.log('Analytics event received: ' + req.params.type);
-  console.log(req.query);
-  res.status(204).send();
+  res.end(req.body);
 });
 
 /**
@@ -1072,6 +1071,14 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
   next();
 });
 
+app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+  const mode = pc.env.SERVE_MODE;
+  if (mode == 'compiled') {
+    req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
+  }
+  next();
+});
+
 /*
  * Start Cache SW LOCALDEV section
  */
@@ -1163,6 +1170,127 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
   });
 });
 
+/*
+ * Infinite scroll related endpoints.
+ */
+const randInt = n => {
+  return Math.floor(Math.random() * Math.floor(n));
+};
+
+const squareImgUrl = width => {
+  return `http://picsum.photos/${width}?${randInt(50)}`;
+};
+
+const generateJson = numberOfItems => {
+  const results = [];
+  for (let i = 0; i < numberOfItems; i++) {
+    const imageUrl = squareImgUrl(200);
+    const r = {
+      'title': 'Item ' + randInt(100),
+      imageUrl,
+      'price': randInt(8) + 0.99,
+    };
+    results.push(r);
+  }
+  return results;
+};
+
+const generateResults = (category, count = 2) => {
+  const r = {};
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const buster = randInt(10000);
+    const item = {};
+    item.src = `https://placeimg.com/600/400/${category}?${buster}`;
+    items.push(item);
+  }
+
+  r.items = items;
+  r['load-more-src'] =
+      `/infinite-scroll-random/${category}?${randInt(10000)}`;
+
+  return r;
+};
+
+app.get('/infinite-scroll-random/:category', function(request, response) {
+  const {category} = request.params;
+  const result = generateResults(category);
+  response.json(result);
+});
+
+app.get('/infinite-scroll-faulty', function(req, res) {
+  const {query} = req;
+  const code = query['code'];
+  const items = generateJson(12);
+  let next = '/infinite-scroll-error';
+  if (code) {
+    next += '?code=' + code;
+  }
+  res.json({items, next});
+});
+
+app.get('/infinite-scroll-error', function(req, res) {
+  const {query} = req;
+  const code = query['code'] || 404;
+  res.status(code);
+  res.json({'msg': code});
+});
+
+app.get('/infinite-scroll', function(req, res) {
+  const {query} = req;
+  const numberOfItems = query['items'] || 10;
+  const pagesLeft = query['left'] || 1;
+  const latency = query['latency'] || 0;
+
+  const items = generateJson(numberOfItems);
+
+  const nextUrl = '/infinite-scroll?items=' +
+    numberOfItems + '&left=' + (pagesLeft - 1) +
+    '&latency=' + latency;
+
+  const randomFalsy = () => {
+    const rand = Math.floor(Math.random() * Math.floor(3));
+    switch (rand) {
+      case 1: return null;
+      case 2: return undefined;
+      case 3: return '';
+      default: return false;
+    }
+  };
+
+  const next = pagesLeft == 0 ? randomFalsy() : nextUrl;
+  const results = next === false ? {items}
+    : {items, next,
+      'loadMoreButtonText': 'test',
+      'loadMoreEndText': 'end',
+    };
+
+  if (latency) {
+    setTimeout(() => res.json(results), latency);
+  } else {
+    res.json(results);
+  }
+});
+
+
+/**
+ * Shadow viewer
+ */
+app.use('/shadow/', (req, res) => {
+  const {url} = req;
+  const isProxyUrl = /^\/proxy\//.test(url);
+
+  const baseHref = isProxyUrl ?
+    'https://cdn.ampproject.org/' :
+    `${path.dirname(url)}/`;
+
+  res.end(renderShadowViewer({
+    src: req.url.replace(/^\//, ''),
+    baseHref,
+  }));
+});
+
+
 /**
  * Autosuggest endpoint
  */
@@ -1184,73 +1312,6 @@ app.get('/search/countries', function(req, res) {
   };
   res.send(results);
 });
-
-/**
- * @param {string} mode
- * @param {string} file
- * @param {string=} hostName
- * @param {boolean=} inabox
- * @param {boolean=} storyV1
- */
-function replaceUrls(mode, file, hostName, inabox, storyV1) {
-  hostName = hostName || '';
-  if (mode == 'default') {
-    // TODO:(ccordry) remove this when story 0.1 is deprecated
-    if (storyV1) {
-      file = file.replace(
-          /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
-          hostName + '/dist/v0/amp-story-1.0.max.js');
-    }
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-        hostName + '/dist/amp.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-        hostName + '/dist/amp-shadow.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-        hostName + '/dist/v0/$1.max.js');
-    if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp-inabox.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp-inabox-lite.js';
-      }
-      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, filename);
-    }
-  } else if (mode == 'compiled') {
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-        hostName + '/dist/v0.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-        hostName + '/dist/shadow-v0.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp4ads-v0.js');
-    file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-        hostName + '/dist/v0/$1.js');
-    file = file.replace(
-        /\/dist.3p\/current\/(.*)\.max.html/g,
-        hostName + '/dist.3p/current-min/$1.html');
-    if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp4ads-v0.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp4ads-lite-v0.js';
-      }
-      file = file.replace(/\/dist\/v0\.js/g, filename);
-    }
-  }
-  return file;
-}
 
 /**
  * @param {string} ampJsVersion

@@ -383,7 +383,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
@@ -496,6 +496,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;button&gt;</code></td>
     <td><code>[disabled]</code><br><code>[type]</code><br><code>[value]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;details&gt;</code></td>
+    <td><code>[open]</code></td>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;fieldset&gt;</code></td>

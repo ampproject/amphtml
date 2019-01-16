@@ -45,7 +45,8 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-accordion',version: '0.1',type: TYPES.MISC},
+  {name: 'amp-access-poool', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
   {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adsense-impl', version: '0.1', type: TYPES.AD},
@@ -83,6 +84,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
+  {
+    name: 'amp-delight-player',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
+  },
   {name: 'amp-brightcove', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-byside-content',
@@ -94,7 +101,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     options: {hasCss: true},
     type: TYPES.MISC,
   },
@@ -107,6 +114,7 @@ exports.extensionBundles = [
   {name: 'amp-crypto-polyfill', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dailymotion', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-date-countdown', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-date-display', version: '0.1', type: TYPES.MISC},
   {name: 'amp-google-document-embed', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dynamic-css-classes', version: '0.1', type: TYPES.MISC},
   {name: 'amp-embedly-card', version: '0.1', type: TYPES.MISC},
@@ -176,7 +184,12 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-list', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-list',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {
     name: 'amp-live-list',
     version: '0.1',
@@ -226,6 +239,7 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {name: 'amp-skimlinks', version: '0.1', type: TYPES.MISC},
   {name: 'amp-soundcloud', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-springboard-player', version: '0.1', type: TYPES.MEDIA},
   {
@@ -236,13 +250,34 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
         'amp-story-consent',
         'amp-story-hint',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
+        'amp-story-info-dialog',
+        'amp-story-share',
+        'amp-story-share-menu',
+        'amp-story-system-layer',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story',
+    version: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-bookend',
+        'amp-story-tooltip',
+        'amp-story-consent',
+        'amp-story-hint',
+        'amp-story-page-attachment-header',
         'amp-story-unsupported-browser-layer',
         'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',
@@ -366,7 +401,13 @@ exports.extensionBundles = [
   {
     name: 'amp-video',
     version: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-video-docking',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-video-iframe',

@@ -19,7 +19,7 @@ import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Component tag identifier.
@@ -53,11 +53,9 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
+    userAssert(
         this.element.getAttribute('data-url'),
-        `The data-url attribute is required for <${TAG}> %s`,
-        this.element
-    );
+        'The data-url attribute is required for <%s> %s', TAG, this.element);
 
     const ampEmbedlyKeyElement = document.querySelector(KEY_TAG);
     if (ampEmbedlyKeyElement) {

@@ -25,7 +25,7 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
@@ -210,6 +210,9 @@ export class Resources {
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
+
+    /** @const @private {!Array<function()>} */
+    this.passCallbacks_ = [];
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
@@ -1141,6 +1144,14 @@ export class Resources {
   }
 
   /**
+   * Registers a callback to be called when the next pass happens.
+   * @param {function()} callback
+   */
+  onNextPass(callback) {
+    this.passCallbacks_.push(callback);
+  }
+
+  /**
    * Runs a pass immediately.
    */
   doPass() {
@@ -1169,7 +1180,7 @@ export class Resources {
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
           dict({'height': this.contentHeight_}), /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
+      dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1201,11 +1212,17 @@ export class Resources {
           this.viewer_.sendMessage('documentHeight',
               dict({'height': measuredContentHeight}), /* cancelUnsent */true);
           this.contentHeight_ = measuredContentHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
+          dev().fine(TAG_, 'document height changed: %s', this.contentHeight_);
           this.viewport_.contentHeightChanged();
         }
       });
     }
+
+    for (let i = 0; i < this.passCallbacks_.length; i++) {
+      const fn = this.passCallbacks_[i];
+      fn();
+    }
+    this.passCallbacks_.length = 0;
   }
 
   /**
@@ -2027,7 +2044,7 @@ export class Resources {
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
     opt_forceOutsideViewport) {
-    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
+    devAssert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
     'Not ready for layout: %s (%s)',
     resource.debugid, resource.getState());
@@ -2155,7 +2172,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev().assert(parentResource.element.contains(element));
+      devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }

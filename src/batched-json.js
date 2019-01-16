@@ -52,7 +52,7 @@ export function batchFetchJsonFor(
 {
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
-  return requestForBatchFetch(ampdoc, element, opt_urlReplacement, opt_refresh)
+  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
       .then(data => xhr.fetchJson(data.xhrUrl, data.fetchOpt))
       .then(res => res.json())
       .then(data => {
@@ -66,18 +66,17 @@ export function batchFetchJsonFor(
 /**
  * Handles url replacement and constructs the FetchInitJsonDef required for a
  * fetch.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
  * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @param {boolean} refresh Forces refresh of browser cache.
  * @return {!Promise<!FetchRequestDef>}
  */
-export function requestForBatchFetch(ampdoc, element, replacement, refresh) {
+export function requestForBatchFetch(element, replacement, refresh) {
   const url = element.getAttribute('src');
 
   // Replace vars in URL if desired.
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+  const urlReplacements = Services.urlReplacementsForDoc(element);
   const promise = (replacement >= UrlReplacementPolicy.OPT_IN)
     ? urlReplacements.expandUrlAsync(url)
     : Promise.resolve(url);

@@ -15,22 +15,22 @@
  */
 
 import {computedStyle, setStyles} from '../../../../src/style';
-import {dev, user} from '../../../../src/log';
+import {devAssert, userAssert} from '../../../../src/log';
 
 export const Presets = {
   'parallax': {
     userAsserts(element) {
-      const factorValue = user().assert(
+      const factorValue = userAssert(
           element.getAttribute('data-parallax-factor'),
           'data-parallax-factor=<number> attribute must be provided for: %s',
           element);
-      user().assert(parseFloat(factorValue) > 0,
+      userAssert(parseFloat(factorValue) > 0,
           'data-parallax-factor must be a number and greater than 0 for: %s',
           element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
       if (!top || top > fxElement.adjustedViewportHeight) {
@@ -46,20 +46,11 @@ export const Presets = {
       const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(fxElement.getElement(),
-          function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(),
-                {transform:
-                  `translateY(${fxElement.getOffset().toFixed(0)}px)`});
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(),
+          {transform:
+            `translateY(${fxElement.getOffset().toFixed(0)}px)`});
     },
   },
   'fly-in-bottom': {
@@ -68,13 +59,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top - (fxElement.viewportHeight *
@@ -84,36 +75,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} +
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+      });
     },
   },
   'fly-in-left': {
@@ -122,21 +109,17 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
         fxElement.viewportHeight) {
-        return;
-      }
-
-      if (fxElement.isMutateScheduled()) {
         return;
       }
 
@@ -146,27 +129,26 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
+      });
     },
   },
   'fly-in-right': {
@@ -175,21 +157,17 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
         fxElement.viewportHeight) {
-        return;
-      }
-
-      if (fxElement.isMutateScheduled()) {
         return;
       }
 
@@ -199,27 +177,26 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
+      });
     },
   },
   'fly-in-top': {
@@ -228,13 +205,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top + (fxElement.viewportHeight *
@@ -244,36 +221,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} -
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
+      });
     },
   },
   'fade-in': {
@@ -282,13 +255,13 @@ export const Presets = {
       if (!marginStart) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.viewportHeight);
+      devAssert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
@@ -296,22 +269,13 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'opacity': 1,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'opacity': 1,
+      });
     },
   },
   'fade-in-scroll': {
@@ -322,28 +286,24 @@ export const Presets = {
       if (!marginStart && !marginEnd) {
         return;
       }
-      user().assert(marginStart >= 0 && marginStart <= 100,
+      userAssert(marginStart >= 0 && marginStart <= 100,
           'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      user().assert(marginEnd >= 0 && marginEnd <= 100,
+      userAssert(marginEnd >= 0 && marginEnd <= 100,
           'data-margin-end must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
-      user().assert(marginEnd > marginStart,
+      userAssert(marginEnd > marginStart,
           'data-margin-end must be greater than data-margin-start for: %s',
           element);
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      devAssert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
       if (!top || (top > (1 - fxElement.getMarginStart()) *
         fxElement.adjustedViewportHeight)) {
-        return;
-      }
-
-      if (fxElement.isMutateScheduled()) {
         return;
       }
 
@@ -361,18 +321,9 @@ export const Presets = {
         (marginDelta * fxElement.viewportHeight);
       fxElement.setOffset(offset);
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(fxElement.getElement(),
-          function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
     },
   },
 };

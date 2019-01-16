@@ -15,6 +15,7 @@
  */
 
 import {
+  BIND_PREFIX,
   BLACKLISTED_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
@@ -29,7 +30,7 @@ import {startsWith} from './string';
 import {user} from './log';
 
 /** @private @const {string} */
-const TAG = 'sanitizer';
+const TAG = 'SANITIZER';
 
 /**
  * Whitelist of supported self-closing tags for Caja. These are used for
@@ -110,8 +111,15 @@ export function sanitizeHtml(html, diffing) {
       const bindingAttribs = [];
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
-        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+        if (!attr) {
+          continue;
+        }
+        const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
+        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
+        }
+        if (classicBinding || alternativeBinding) {
           bindingAttribs.push(i);
         }
       }
@@ -198,12 +206,16 @@ export function sanitizeHtml(html, diffing) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue)) {
-          user().error(TAG, `Removing "${attrName}" attribute with invalid `
-              + `value in <${tagName} ${attrName}="${attrValue}">.`);
+          user().error(TAG,
+              `Removed unsafe attribute: ${attrName}="${attrValue}"`);
           continue;
         }
         emit(' ');
-        emit(bindingAttribs.includes(i) ? `[${attrName}]` : attrName);
+        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+          emit(`[${attrName}]`);
+        } else {
+          emit(attrName);
+        }
         emit('="');
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.

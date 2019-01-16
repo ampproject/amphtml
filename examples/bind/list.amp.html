@@ -32,7 +32,7 @@
   <button on="tap:AMP.setState({src: otherFoods})">Show Other Foods</button>
 
   <hr>
-  
+
   <button on="tap:AMP.setState({
     src: [{
       name: 'pizza',
@@ -65,7 +65,7 @@
     <strong>Quantity:</strong>: {{quantity}}
     <strong>Unit Price</strong>: ${{unitPrice}}
     <strong>1+1:</strong>: <span [text]="1+1">?</span>
-    <strong>Foo</strong>: <span [text]="foo">?</span>
+    <strong>Foo</strong>: <span data-amp-bind-text="foo">?</span>
   </template>
 
   <h3>Default</h3>

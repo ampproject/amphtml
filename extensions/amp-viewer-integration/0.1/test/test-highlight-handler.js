@@ -142,10 +142,10 @@ describes.realWin('HighlightHandler', {
         {state: 'auto_scroll'});
 
     expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(255, 255, 0); ' +
-          'color: rgb(51, 51, 51);">amp</span> doc</div><div>' +
-          '<span style="background-color: rgb(255, 255, 0); color: ' +
-          'rgb(51, 51, 51);">highlight</span>ed text</div>');
+        '<div>text in <span style="background-color: rgb(255, 150, 50); ' +
+          'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
+          '<span style="background-color: rgb(255, 150, 50); color: ' +
+          'rgb(0, 0, 0);">highlight</span>ed text</div>');
 
     const viewerOrigin = 'http://localhost:9876';
     const port = new WindowPortEmulator(

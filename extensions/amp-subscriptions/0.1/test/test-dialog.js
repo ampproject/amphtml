@@ -58,16 +58,16 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
 
   it('should open content when invisible', () => {
     const promise = dialog.open(content, false);
-    expect(content.parentNode).to.equal(dialog.getRoot());
     expect(dialog.getRoot()).to.have.display('none');
-    expect(dialog.isVisible()).to.be.true;
     return vsync.mutatePromise(() => {}).then(() => {
       // First vsync displays the dialog.
+      expect(content.parentNode).to.equal(dialog.getRoot());
+      expect(dialog.isVisible()).to.be.true;
       expect(dialog.getRoot()).to.have.display('block');
       const styles = getComputedStyle(dialog.getRoot());
       expect(styles.transform).to.contain('17');
       return promise;
-    }).then(() => {
+    }).then(() => vsync.mutatePromise(() => {})).then(() => {
       expect(dialog.getRoot()).to.have.display('block');
       const styles = getComputedStyle(dialog.getRoot());
       expect(styles.transform).to.not.contain('17');
@@ -81,9 +81,10 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     const content2 = createElementWithAttributes(doc, 'div', {
       style: 'height:21px',
     });
-    return dialog.open(content, false).then(() => {
-      expect(content.parentNode).to.equal(dialog.getRoot());
-      return dialog.open(content2, false);
+    const promise = dialog.open(content2, false);
+    return vsync.mutatePromise(() => {}).then(() => {
+      expect(content2.parentNode).to.equal(dialog.getRoot());
+      return promise;
     }).then(() => {
       expect(content2.parentNode).to.equal(dialog.getRoot());
       expect(content.parentNode).to.be.null;
@@ -103,6 +104,18 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
       expect(dialog.isVisible()).to.be.false;
       expect(content.parentNode).to.equal(dialog.getRoot());
       expect(dialog.getRoot().parentNode).to.equal(doc.body);
+    });
+  });
+
+  it('should re-open after close', () => {
+    return dialog.open(content, false).then(() => {
+      expect(dialog.isVisible()).to.be.true;
+      return dialog.close();
+    }).then(() => {
+      expect(dialog.isVisible()).to.be.false;
+      return dialog.open(content, false);
+    }).then(() => {
+      expect(dialog.isVisible()).to.be.true;
     });
   });
 

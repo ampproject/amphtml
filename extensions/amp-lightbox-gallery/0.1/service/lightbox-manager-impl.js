@@ -28,7 +28,7 @@ import {
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {dev, user} from '../../../../src/log';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
@@ -129,8 +129,8 @@ export class LightboxManager {
    * @return {boolean}
    */
   meetsHeuristicsForTap_(element) {
-    dev().assert(element);
-    dev().assert(element.hasAttribute('lightbox'));
+    devAssert(element);
+    devAssert(element.hasAttribute('lightbox'));
 
     if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
@@ -243,8 +243,8 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element),
-        `The element ${element.tagName} isn't supported in lightbox yet.`);
+    userAssert(this.baseElementIsSupported_(element),
+        'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
@@ -275,7 +275,7 @@ export class LightboxManager {
    */
   getElementsForLightboxGroup(lightboxGroupId) {
     return this.maybeInit()
-        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
+        .then(() => devAssert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**
