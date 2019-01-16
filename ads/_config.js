@@ -174,6 +174,12 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'adsensor': {
+    prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
+    clientIdScope: 'amp_ecid_andensor',
+    renderStartImplemented: true,
+  },
+
   'adsnative': {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',
