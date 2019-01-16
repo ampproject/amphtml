@@ -1247,7 +1247,7 @@ describes.realWin('amp-story', {
 
     it('should advance to specified page with advanced-to attribute', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-      story.buildCallback();
+      // story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             expect(story.activePage_.element.id).to.equal('cover');
@@ -1311,7 +1311,7 @@ describes.realWin('amp-story', {
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
+          //story.buildCallback();
           return story.layoutCallback()
               .then(() => {
                 story.getPageById('cover')
@@ -1331,10 +1331,8 @@ describes.realWin('amp-story', {
 
     it('should begin at the specified page fragment parameter value', () => {
       win.location.hash = 'page=page-1';
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2','page-3']);
 
-      createPages(story.element, 4,
-          ['cover', 'page-1', 'page-2', 'page-3']);
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             expect(story.activePage_.element.id).to.equal('page-1');
@@ -1344,9 +1342,9 @@ describes.realWin('amp-story', {
     it('should begin at initial page when fragment parameter value is wrong',
         () => {
           win.location.hash = 'page=BADVALUE';
-          createPages(story.element, 4,
-              ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
           return story.layoutCallback()
               .then(() => {
                 expect(story.activePage_.element.id).to.equal('cover');
