@@ -733,13 +733,13 @@ export class AmpList extends AMP.BaseElement {
     this.measureMutateElement(
         () => {
           buttonHeight = this.loadMoreButton_./*OK*/scrollHeight;
-          listHeight = this.element.offsetHeight;
+          listHeight = this.element./*OK*/offsetHeight;
         },
         () => {
           setStyles(dev().assertElement(this.container_), {
             'margin-bottom': px(buttonHeight),
           });
-          this.element.changeSize(listHeight + buttonHeight);
+          this.element./*OK*/changeSize(listHeight + buttonHeight);
         });
   }
 
