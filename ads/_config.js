@@ -156,6 +156,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adpon': {
+    prefetch: 'https://ad.adpon.jp/amp.js',
+    clientIdScope: 'AMP_ECID_ADPON',
+  },
+
   'adreactor': {},
 
   'adsense': {
