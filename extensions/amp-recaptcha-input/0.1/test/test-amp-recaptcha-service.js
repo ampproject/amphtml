@@ -144,7 +144,7 @@ describes.realWin('amp-recaptcha-service', {
         });
   });
 
-  it('should postmessage to the specificed ' +
+  it('should postmessage to the specified ' +
     'recaptcha frame origin on execute', () => {
 
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
@@ -156,9 +156,8 @@ describes.realWin('amp-recaptcha-service', {
 
     return recaptchaService
         .register(fakeSitekey).then(() => {
-          expect(recaptchaService.unlisteners_.length).to.be.equal(3);
-
           recaptchaService.execute(0, '');
+
           recaptchaService.recaptchaApiReady_.resolve();
           return recaptchaService.recaptchaApiReady_.promise;
         }).then(() => {

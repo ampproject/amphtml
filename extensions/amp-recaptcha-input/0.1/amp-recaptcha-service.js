@@ -295,10 +295,17 @@ export class AmpRecaptchaService {
    * @private
    */
   listenIframe_(evName, cb) {
+
+    const checkOriginWrappedCallback = (data, source, origin) => {
+      if (this.recaptchaFrameOrigin_ === origin) {
+        cb(data, source, origin);
+      }
+    };
+
     return listenFor(
         dev().assertElement(this.iframe_),
         evName,
-        cb,
+        checkOriginWrappedCallback,
         true);
   }
 
