@@ -204,7 +204,7 @@ export class AmpList extends AMP.BaseElement {
    */
   getEndOfList_() {
     if (!this.endOfListDummy_) {
-      this.endOfListDummy_ = this.win.document.createElement('div');
+      this.endOfListDummy_ = this.win.document.createElement('span');
     }
     return this.endOfListDummy_;
   }
