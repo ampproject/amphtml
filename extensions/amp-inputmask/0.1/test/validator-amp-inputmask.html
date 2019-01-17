@@ -40,8 +40,19 @@
     <input mask="L0L_0L0" type="tel">
     <!-- Valid: mask attr with type=search -->
     <input mask="L0L_0L0" type="search">
+    <!-- Valid: mask attr with multiple custom masks -->
+    <input mask="00000 00000-0000" type="tel">
     <!-- Valid: mask attr with named mask "payment-card" -->
     <input mask="payment-card" type="tel">
+    <!-- Valid: mask attr with named mask "date-dd-mm-yyyy" -->
+    <input mask="date-dd-mm-yyyy" type="tel">
+    <!-- Valid: mask attr with named mask "date-mm-dd-yyyy" -->
+    <input mask="date-mm-dd-yyyy" type="tel">
+    <!-- Valid: mask attr with named mask "date-mm-yy" -->
+    <input mask="date-mm-yy" type="tel">
+    <!-- Valid: mask attr with named mask "date-yyyy-mm-dd" -->
+    <input mask="date-yyyy-mm-dd" type="tel">
+    <!-- Valid: mask attr with named mask with spaces -->
     <!-- Valid: mask attr with named mask "payment-card" with spaces -->
     <input mask="payment-card " type="tel">
     <input mask=" payment-card" type="tel">
@@ -75,6 +86,7 @@
     <input mask="LOL_0L0 payment-card"></div>
     <!-- Invalid: mask attr with multiple named masks -->
     <input mask="payment-card payment-card"></div>
+    <input mask="payment-card date-mm-yy"></div>
   </form>
   </form>
 
