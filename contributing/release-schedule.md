@@ -1,12 +1,3 @@
-⚡⚡⚡
-
-**Our last scheduled release for 2018 will be created on Tuesday, December 11, 2018 (targeting full rollout on December 18).**
-
-After this the next scheduled release will be created on Wednesday, January 2, 2019 (targeting full rollout on January 8).
-
-If necessary, fixes for P0 issues may be cherry-picked into the production release and pushed during this time.
-⚡⚡⚡
-
 # Release Schedule
 
 - [Detailed schedule](#detailed-schedule)
@@ -17,6 +8,7 @@ If necessary, fixes for P0 issues may be cherry-picked into the production relea
 - [AMP Dev Channel](#amp-dev-channel)
 - [AMP Release Candidate (RC) Channel](#amp-release-candidate-rc-channel)
 - [Release cadence](#release-cadence)
+- [Release freezes](#release-freezes)
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday.  **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
 
@@ -121,3 +113,22 @@ In determining how often we should push new versions of AMP to everyone, we have
 - the desire to get new features out quickly
 
 After considering all of these factors we have arrived at the 1-2 week push cycle.  Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
+
+## Release freezes
+
+There are occasions when we will skip a release of AMP to production, known as a release freeze.
+
+If a one week release freeze is announced for Week N:
+- The previous week's release build remains in canary/RC for an extra week, i.e. the release cut in Week N-1 is not pushed to production in Week N as would normally be the case.  Instead, it will be pushed to production in Week N+1.
+- A new release build is *not* made in the production freeze week (Week N).
+- The normal schedule will resume in Week N+1, i.e. a canary is cut in Week N+1 and pushed to production in Week N+1.
+
+A release freeze will happen due to:
+
+- Times when there are not enough people available to push the AMP release to production and monitor it.  Currently most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (4 July), Thanksgiving (4th Thursday in November), Christmas (December 25) and New Year's Eve/Day (December 31/January 1).
+- An emergency situation, such as a security or privacy issue as determined by the [Technical Steering Committee (TSC)](https://github.com/ampproject/meta-tsc) or the people performing the release.
+- Other situations when stability of the codebase is deemed to be particularly important as determined by the TSC.
+
+In all cases except emergencies the release freezes will be announced at least one month in advance.
+
+Note that unless otherwise announced a release freeze does not imply a code freeze.  Code may still be written, reviewed and merged during a release freeze.
