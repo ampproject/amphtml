@@ -188,7 +188,7 @@ export const VENDOR_ANALYTICS_CONFIG = {
 }
 ```
 
-The runtime will fetch the remote configuration (if given) and merge it with the configuration inlined in the document, then send a request to the vendor provided configRewriter endpoint. The vendor uses this data server side to construction and return a new rewritten configuration.
+The runtime sends a request containing the inlined configuration, merged with the provided remote configuration, to the configRewriter endpoint given by the vendor. The vendor uses this data server side to construction and return a new rewritten configuration.
 
 The runtime then merges all the provided configuration to determine the final configuration in order of highest to lowest precedence:
 1. Rewritten Configuration
@@ -197,9 +197,9 @@ The runtime then merges all the provided configuration to determine the final co
 
 ##### Variable Groups
 
-Variable Groups is a feature that allows analytics providers to provide a predefined set of variables that can easily be enabled by an user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
+Variable Groups is a feature that allows analytics providers to group a predefined set of variables that can easily be enabled by a user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
 
-To set up this feature the analytics provider should create a new `varGroups` object inside of the `configRewriter` configuration. Inside this object you may include any named variable groups you might want enabled. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
+Analytics providers need to create a new varGroups object inside of the configRewriter configuration to enable this feature. Publishers can then include any named analytic provider created varGroups they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
 
 For example we may have a vendor who's configuration looks like this:
 ```js
