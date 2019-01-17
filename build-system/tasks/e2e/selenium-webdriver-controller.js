@@ -113,11 +113,10 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementXPath(xpath) {
-    const {browser} = this;
     const byXpath = By.xpath(xpath);
 
-    await browser.wait(until.elementLocated(byXpath));
-    const webElement = await browser.findElement(byXpath);
+    await this.driver.wait(until.elementLocated(byXpath));
+    const webElement = await this.driver.findElement(byXpath);
     return new ElementHandle(webElement, this);
   }
 
@@ -127,11 +126,10 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementsXPath(xpath) {
-    const {browser} = this;
     const byXpath = By.xpath(xpath);
 
-    await browser.wait(until.elementLocated(byXpath));
-    const webElements = await browser.findElements(byXpath);
+    await this.driver.wait(until.elementLocated(byXpath));
+    const webElements = await this.driver.findElements(byXpath);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
