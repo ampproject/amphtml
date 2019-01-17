@@ -123,7 +123,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with blue text on white background"
           layout="fixed"
-          width="107" height="112" 
+          width="107" height="112"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
         <noscript>
           <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
@@ -134,7 +134,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with white text on blue background"
           layout="fixed"
-          width="107" height="101" 
+          width="107" height="101"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
         <noscript>
           <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
@@ -145,7 +145,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with blue text on blue background"
           layout="fixed"
-          width="103" height="102" 
+          width="103" height="102"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
         <noscript>
           <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
@@ -1138,6 +1138,11 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 }
 
 ```
+
+## Other components usable in AMP stories
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
+- [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
+- [amp4ads](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
 
 ## Validation
 
