@@ -34,8 +34,10 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
+
+const TAG = 'amp-vimeo';
 
 
 /**
@@ -133,7 +135,7 @@ class AmpVimeo extends AMP.BaseElement {
    */
   buildIframe_(isAutoplay) {
     const {element} = this;
-    const vidId = user().assert(
+    const vidId = userAssert(
         element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         element);
@@ -365,9 +367,14 @@ class AmpVimeo extends AMP.BaseElement {
       'value': optParams || '',
     })), '*');
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-vimeo', '0.1', AMP => {
-  AMP.registerElement('amp-vimeo', AmpVimeo);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVimeo);
 });

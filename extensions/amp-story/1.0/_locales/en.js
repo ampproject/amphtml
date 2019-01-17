@@ -76,6 +76,15 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
   },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Swipe up',
+    description: 'Label for a button to open a drawer containing additional ' +
+        'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Play video',
+    description: 'Label for a button to play the video visible on the page.',
+  },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
     description: 'Label indicating that users can navigate to the next ' +

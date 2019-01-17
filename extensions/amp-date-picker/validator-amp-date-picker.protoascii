@@ -173,12 +173,20 @@ attr_lists: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
+  # amp-bind
+  attrs: { name: "[src]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[min]" }
 }
 
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
   attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
   attrs: {
     name: "minimum-nights"
     value_regex: "[0-9]+"

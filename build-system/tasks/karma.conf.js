@@ -131,9 +131,6 @@ module.exports = {
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
-  // Number of sauce platforms to start in parallel
-  concurrency: 4,
-
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
@@ -146,16 +143,24 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
+      // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+      flags: ['--no-sandbox --remote-debugging-port=9222']
+          .concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_67: Object.assign({
+    SL_Chrome: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       platform: 'Windows 10',
-      version: '67.0',
+      version: 'latest',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_Beta: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      platform: 'Windows 10',
+      version: 'beta',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_Android_7: Object.assign({
       base: 'SauceLabs',
@@ -165,33 +170,39 @@ module.exports = {
       platformName: 'Android',
       platformVersion: '7.1',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_45: Object.assign({
+    SL_iOS_12: Object.assign({
       base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 8',
-      version: '45.0',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Android_6: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'Android Emulator',
-      browserName: 'Chrome',
-      platformName: 'Android',
-      platformVersion: '6.0',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '12.0',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      appiumVersion: '1.8.1',
+      appiumVersion: '1.9.1',
       deviceName: 'iPhone X Simulator',
       browserName: 'Safari',
       platformName: 'iOS',
       platformVersion: '11.3',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox_61: Object.assign({
+    SL_Firefox: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: '61.0',
+      version: 'latest',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_Beta: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'beta',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Safari_12: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '12.0',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Safari_11: Object.assign({
       base: 'SauceLabs',
@@ -228,7 +239,7 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    captureConsole: true,
+    captureConsole: false,
     verboseLogging: false,
   },
 

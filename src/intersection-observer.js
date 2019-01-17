@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
-import {dev} from './log';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 
@@ -60,7 +60,7 @@ function intersectionRatio(smaller, larger) {
  * @private
  */
 export function getIntersectionChangeEntry(element, owner, viewport) {
-  dev().assert(element.width >= 0 && element.height >= 0,
+  devAssert(element.width >= 0 && element.height >= 0,
       'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 

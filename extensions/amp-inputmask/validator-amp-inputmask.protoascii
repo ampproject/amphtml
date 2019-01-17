@@ -37,6 +37,19 @@ tags: {
     name: "mask"
     mandatory: true
     dispatch_key: NAME_DISPATCH
+    # Only allow named masks to appear alone in the mask list.
+    blacklisted_value_regex:
+        "([^\\s]+"      # One or more non-whitespace characters before
+        "\\s"           # a single whitespace, followed by
+        "payment-card"  # a named mask, indicating it's a list item.
+        "|"             # Or (to cover the other case):
+        "payment-card"  # A named mask followed by
+        "\\s"           # a single whitespace
+        "[^\\s]+)"      # followed by one or more non-whitespace characters.
+        "|([^\\s]+\\sdate-dd-mm-yyyy|date-dd-mm-yyyy\\s[^\\s]+)"
+        "|([^\\s]+\\sdate-mm-dd-yyyy|date-mm-dd-yyyy\\s[^\\s]+)"
+        "|([^\\s]+\\sdate-mm-yy|date-mm-yy\\s[^\\s]+)"
+        "|([^\\s]+\\sdate-yyyy-mm-dd|date-yyyy-mm-dd\\s[^\\s]+)"
   }
   attrs: {
     name: "mask-output"

@@ -30,7 +30,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -736,12 +736,15 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     /** @private {!Function} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+
+    this.registerDefaultAction(
+        invocation => this.open_(invocation), 'open');
   }
 
   /**
-  * Lazily builds the image-lightbox DOM on the first open.
-  * @private
-  * */
+   * Lazily builds the image-lightbox DOM on the first open.
+   * @private
+   */
   buildLightbox_() {
     if (this.container_) {
       return;
@@ -798,15 +801,18 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  activate(invocation) {
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} invocation
+   * @private
+   */
+  open_(invocation) {
     if (this.active_) {
       return;
     }
     this.buildLightbox_();
 
     const source = invocation.caller;
-    user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    userAssert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;
@@ -850,6 +856,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   closeOnEscape_(event) {
     if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }

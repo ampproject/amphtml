@@ -16,13 +16,14 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,
@@ -138,10 +139,10 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
+    this.storagePromise_ = Services.storageForDoc(this.element);
 
-    this.elementId_ = user().assert(this.element.id,
+    this.elementId_ = userAssert(this.element.id,
         'amp-user-notification should have an id.');
 
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
@@ -157,7 +158,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     // Casts string to boolean using !!(string) then coerce that to
     // number using when we add them so we can see easily test
     // how many flags were set.  We want 0 or 1.
-    user().assert(
+    userAssert(
         !!this.showIfHref_ +
         !!this.showIfGeo_ +
         !!this.showIfNotGeo_ <= 1,
@@ -191,7 +192,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.persistDismissal_ = (
       persistDismissal != 'false' && persistDismissal != 'no');
 
-    this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
+    this.registerDefaultAction(
+        () => this.dismiss(/*forceNoPersist*/ false),
+        'dismiss');
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
 
     const userNotificationManagerPromise =
@@ -211,11 +214,11 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   isNotificationRequiredGeo_(geoGroup, includeGeos) {
     return Services.geoForDocOrNull(this.element).then(geo => {
-      user().assert(geo,
+      userAssert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
       const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
-        return geo.ISOCountryGroups.indexOf(group) >= 0;
+        return geo.isInCountryGroup(group) == GEO_IN_GROUP.IN;
       });
 
       // Invert if includeGeos is false
@@ -305,7 +308,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   onGetShowEndpointSuccess_(data) {
-    user().assert(typeof data['showNotification'] == 'boolean',
+    userAssert(typeof data['showNotification'] == 'boolean',
         '`showNotification` ' +
         'should be a boolean. Got "%s" which is of type %s.',
         data['showNotification'], typeof data['showNotification']);
@@ -413,11 +416,6 @@ export class AmpUserNotification extends AMP.BaseElement {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         });
-  }
-
-  /** @override */
-  activate() {
-    this.dismiss(/*forceNoPersist*/false);
   }
 
   /**

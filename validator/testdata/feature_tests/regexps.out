@@ -27,7 +27,7 @@ FAIL
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style>invalid body</style>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [DISALLOWED_HTML]
+feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 |    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |
@@ -147,7 +147,7 @@ feature_tests/regexps.html:111:2 The attribute 'name' in tag 'meta name= and con
 |    -->
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:117:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:117:2 The tag 'style amp-custom' appears more than once in the document. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }
@@ -203,6 +203,6 @@ feature_tests/regexps.html:154:2 The attribute 'name' in tag 'input' is set to t
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/regexps.html:157:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+feature_tests/regexps.html:157:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
 feature_tests/regexps.html:157:6 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]

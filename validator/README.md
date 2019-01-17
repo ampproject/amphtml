@@ -25,6 +25,11 @@ If you just want to validate a page, please see
 ## Chrome Extension
 Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
+## Visual Studio Code Extension
+
+An extension for Visual Studio Code
+[VSCode marketplace](https://marketplace.visualstudio.com/items?itemName=amphtml.amphtml-validator)
+
 ## Command Line Tool and Node.js API
 
 Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
@@ -66,8 +71,8 @@ Dependencies:
   * protobuf
     ```sh
     brew install protobuf
-    mkdir -p /Users/USERNAME/Library/Python/2.7/lib/python/site-packages
-    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/USERNAME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
+    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
     ```
 
   * openjdk-7-jre
@@ -78,10 +83,15 @@ Dependencies:
 
 ### Usage
 
-Then, run `build.py`. This creates `dist/validator_minified.js`, which is
+Then, run `python build.py`. This creates `dist/validator_minified.js`, which is
 equivalent to the validator deployed at cdn.ampproject.org. You may now
 use the `--validator_js` command line flag to
 [amphtml-validator](https://www.ampproject.org/docs/guides/validate.html#command-line-tool) to use this validator.
+
+For use for testing with extensions, you can simply run `python build.py`
+to run all of the validator tests in the amphtml repo.
+To create/update `validator-*.out` files that are used in the test,
+run `python build.py --update_tests`.
 
 ```
 $ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
@@ -93,6 +103,9 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 ```
 
 ### Building on MacOS
+
+*Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead.*
+
 * Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
 * Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
 * If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.

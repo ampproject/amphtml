@@ -157,6 +157,12 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
+
+  /**
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
+   */
+  seekTo(unusedTimeSeconds) {}
 }
 
 
@@ -247,6 +253,15 @@ export const VideoEvents = {
    * @event load
    */
   LOAD: 'load',
+
+  /**
+   * loadedmetadata
+   *
+   * Fired when the video's metadata becomes available (e.g. duration).
+   *
+   * @event loadedmetadata
+   */
+  LOADEDMETADATA: 'loadedmetadata',
 
   /**
    * playing
@@ -436,6 +451,24 @@ export const VideoAnalyticsEvents = {
    * @event video-session-visible
    */
   SECONDS_PLAYED: 'video-seconds-played',
+
+  /**
+   * video-hosted-custom
+   *
+   * Indicates that a custom event incoming from a 3p frame is to be logged.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  CUSTOM: 'video-hosted-custom',
+
+  /**
+   * video-percentage-played
+   *
+   * Indicates that a percentage interval has been played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  PERCENTAGE_PLAYED: 'video-percentage-played',
 };
 
 
@@ -449,3 +482,12 @@ export const VideoAnalyticsEvents = {
  * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
 export let VideoOrBaseElementDef;
+
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
+}

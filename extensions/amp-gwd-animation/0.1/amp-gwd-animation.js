@@ -22,8 +22,11 @@ import {
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
 import {getDetail} from '../../../src/event-helper';
-import {getServiceForDoc} from '../../../src/service';
-import {user} from '../../../src/log';
+import {getExistingServiceForDocInEmbedScope, getParentWindowFrameElement}
+  from '../../../src/service';
+import {getFriendlyIframeEmbedOptional}
+  from '../../../src/friendly-iframe-embed';
+import {userAssert} from '../../../src/log';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
@@ -96,18 +99,36 @@ export class GwdAnimation extends AMP.BaseElement {
      */
     this.timelineEventPrefix_ = '';
 
+    /**
+     * The friendly iframe embed, if within one.
+     * @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed}
+     */
+    this.fie_ = null;
+
     /** @private {!Function} */
     this.boundOnGwdTimelineEvent_ = this.onGwdTimelineEvent_.bind(this);
   }
 
   /** @override */
   buildCallback() {
+    // Record the timeline event prefix.
     this.timelineEventPrefix_ =
         this.element.getAttribute('timeline-event-prefix') || '';
 
+    // Record whether the extension is in a FIE.
+    const frameElement =
+        getParentWindowFrameElement(this.element, this.getAmpDoc().win);
+    if (frameElement) {
+      this.fie_ = getFriendlyIframeEmbedOptional(frameElement);
+    }
+
+    // Retrieve the local document root (either the top-level doc or the FIE
+    // doc). This must be done after the FIE has been retrieved above.
+    const root = this.getRoot_();
+
     // Listen for GWD timeline events to re-broadcast them via the doc action
     // service.
-    this.getAmpDoc().getRootNode().addEventListener(
+    root.addEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
 
     // If the document has a GWD pagedeck, automatically generate listeners for
@@ -115,12 +136,12 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
-      user().assert(this.element.id, `The ${TAG} element must have an id.`);
+      userAssert(this.element.id, `The ${TAG} element must have an id.`);
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
-      addAction(
-          this.getAmpDoc(), gwdPageDeck, 'slideChange', setCurrentPageAction);
+      addAction(this.element, gwdPageDeck, 'slideChange',
+          setCurrentPageAction);
     }
 
     // Register handlers for supported actions.
@@ -131,12 +152,25 @@ export class GwdAnimation extends AMP.BaseElement {
   }
 
   /**
+   * The local document node managed by the GWD runtime (either the top-level
+   * document for single AmpDocs or a FIE document). This function will only
+   * return the right value after `buildCallback` has executed.
+   * @return {!Document|!ShadowRoot}
+   * @private
+   */
+  getRoot_() {
+    return this.fie_ ?
+      this.fie_.win.document :
+      this.getAmpDoc().getRootNode();
+  }
+
+  /**
    * Returns the GWD pagedeck element if one exists in the document.
    * @return {?Element}
    * @private
    */
   getGwdPageDeck_() {
-    return this.getAmpDoc().getRootNode().getElementById(GWD_PAGEDECK_ID);
+    return this.getRoot_().getElementById(GWD_PAGEDECK_ID);
   }
 
   /**
@@ -175,8 +209,8 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   executeInvocation_(invocation) {
-    const service = user().assert(
-        getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
+    const service = userAssert(
+        getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
         'Cannot execute action because the GWD service is not registered.');
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
@@ -194,35 +228,36 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   onGwdTimelineEvent_(event) {
-    Services.actionServiceForDoc(this.getAmpDoc()).trigger(
-        this.element,
-        `${this.timelineEventPrefix_}${getDetail(event)['eventName']}`,
-        event,
-        ActionTrust.HIGH);
+    const actionService = Services.actionServiceForDoc(this.element);
+    const eventName = getDetail(event)['eventName'];
+    const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
+
+    actionService.trigger(
+        this.element, timelineEventName, event, ActionTrust.HIGH);
   }
 
   /** @override */
   detachedCallback() {
-    this.getAmpDoc().getRootNode().removeEventListener(
+    this.getRoot_().removeEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
     return true;
   }
 }
 
 /**
- * Adds an event action definition to a node.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Element} element The target element whose actions to update.
+ * Adds an event action definition to an element.
+ * @param {!Element} context
+ * @param {!Element} target The target element whose actions to update.
  * @param {string} event The event name, e.g., 'slideChange'.
  * @param {string} actionStr e.g., `someDiv.hide`.
  * @private Visible for testing.
  */
-export function addAction(ampdoc, element, event, actionStr) {
+export function addAction(context, target, event, actionStr) {
   // Assemble the new actions string by splicing in the new action string
   // with any existing actions.
   let newActionsStr;
 
-  const currentActionsStr = element.getAttribute('on') || '';
+  const currentActionsStr = target.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
   const eventActionsIndex = currentActionsStr.indexOf(eventPrefix);
 
@@ -245,7 +280,8 @@ export function addAction(ampdoc, element, event, actionStr) {
   }
 
   // Reset the element's actions with the new actions string.
-  Services.actionServiceForDoc(ampdoc).setActions(element, newActionsStr);
+  const actionService = Services.actionServiceForDoc(context);
+  actionService.setActions(target, newActionsStr);
 }
 
 AMP.extension(TAG, '0.1', AMP => {

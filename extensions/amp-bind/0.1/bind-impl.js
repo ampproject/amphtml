@@ -24,17 +24,18 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
+import {iterateCursor} from '../../../src/dom';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 const TAG = 'amp-bind';
 
@@ -72,7 +73,8 @@ let BoundElementDef;
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
-  'AMP-LIST': ['state'],
+  // TODO (#18875): add is-layout-container to validator file for amp-list
+  'AMP-LIST': ['state', 'is-layout-container'],
   'AMP-SELECTOR': ['selected'],
 });
 
@@ -155,8 +157,8 @@ export class Bind {
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    /** @private {?./bind-validator.BindValidator} */
+    this.validator_ = null;
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
@@ -171,10 +173,10 @@ export class Bind {
           if (opt_win) {
             // In FIE, scan the document node of the iframe window.
             const {document} = opt_win;
-            return waitForBodyPromise(document).then(() => document);
+            return whenDocumentReady(document).then(() => document);
           } else {
             // Otherwise, scan the root node of the ampdoc.
-            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+            return ampdoc.whenReady().then(() => ampdoc.getRootNode());
           }
         })
         .then(root => {
@@ -194,10 +196,10 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+        embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**
@@ -278,8 +280,8 @@ export class Bind {
         case 'pushState':
           return this.pushStateWithExpression(expression, scope);
         default:
-          return Promise.reject(dev().createError('Unrecognized method: ' +
-              `"${tagOrTarget}.${method}"`));
+          return Promise.reject(dev().createError('Unrecognized method: %s.%s',
+              tagOrTarget, method));
       }
     } else {
       user().error('AMP-BIND', 'Please use the object-literal syntax, '
@@ -425,10 +427,19 @@ export class Bind {
    */
   initialize_(root) {
     dev().info(TAG, 'init');
-    return Promise.all([
-      this.addMacros_(),
-      this.addBindingsForNodes_([root]),
-    ]).then(results => {
+
+    // Disallow URL property bindings in AMP4EMAIL.
+    const allowUrlProperties = !this.isAmp4Email_();
+    this.validator_ = new BindValidator(allowUrlProperties);
+
+    // The web worker's evaluator also has an instance of BindValidator
+    // that should be initialized with the same `allowUrlProperties` value.
+    return this.ww_('bind.init', [allowUrlProperties]).then(() => {
+      return Promise.all([
+        this.addMacros_(),
+        this.addBindingsForNodes_([root]),
+      ]);
+    }).then(results => {
       dev().info(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
@@ -440,6 +451,17 @@ export class Bind {
       this.viewer_.sendMessage('bindReady', undefined);
       this.dispatchEventForTesting_(BindEvents.INITIALIZE);
     });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isAmp4Email_() {
+    const html = this.localWin_.document.documentElement;
+    const amp4email = html.hasAttribute('amp4email')
+        || html.hasAttribute('⚡4email');
+    return amp4email;
   }
 
   /**
@@ -510,6 +532,8 @@ export class Bind {
    * @private
    */
   addMacros_() {
+    // TODO(choumx, #17194): Query selector can miss elements when the body
+    // is streamed. This should be done at the custom element level.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
@@ -577,8 +601,8 @@ export class Bind {
   /** Emits console error stating that the binding limit was exceeded. */
   emitMaxBindingsExceededError_() {
     dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-        `(${this.maxNumberOfBindings_}). Additional elements with ` +
-        'bindings will be ignored.');
+        '(%s). Additional elements with bindings will be ignored.',
+    this.maxNumberOfBindings_);
   }
 
   /**
@@ -662,7 +686,7 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
+    const doc = devAssert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
@@ -795,7 +819,7 @@ export class Bind {
         return {property, expressionString: attribute.value};
       } else {
         const err = user().createError(
-            `${TAG}: Binding to [${property}] on <${tag}> is not allowed.`);
+            '%s: Binding to [%s] on <%s> is not allowed.', TAG, property, tag);
         this.reportError_(err, element);
       }
     }
@@ -840,8 +864,8 @@ export class Bind {
         if (elements.length > 0) {
           const evalError = errors[expressionString];
           const userError = user().createError(
-              `${TAG}: Expression evaluation error in "${expressionString}". `
-              + evalError.message);
+              '%s: Expression evaluation error in "%s". %s', TAG,
+              expressionString, evalError.message);
           userError.stack = evalError.stack;
           this.reportError_(userError, elements[0]);
         }
@@ -1031,8 +1055,8 @@ export class Bind {
         try {
           element.mutatedAttributesCallback(mutations);
         } catch (e) {
-          const error = user().createError(`${TAG}: Applying expression ` +
-              `results (${JSON.stringify(mutations)}) failed with error`, e);
+          const error = user().createError('%s: Applying expression results' +
+              ' (%s) failed with error,', TAG, JSON.stringify(mutations), e);
           this.reportError_(error, element);
         }
       }
@@ -1053,17 +1077,23 @@ export class Bind {
 
     switch (property) {
       case 'text':
-        element.textContent = String(newValue);
-        // If this is a <title> element in the <head>, update document title.
+        let updateTextContent = true;
+        const stringValue = String(newValue);
+
+        // textContent on <textarea> only works before interaction.
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+          // Don't also update textContent to avoid disrupting focus.
+          updateTextContent = false;
+        }
+        // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
-          this.localWin_.document.title = String(newValue);
+          this.localWin_.document.title = stringValue;
         }
-        // Setting `textContent` on TEXTAREA element only works if user
-        // has not interacted with the element, therefore `value` also needs
-        // to be set (but `value` is not an attribute on TEXTAREA)
-        if (tag == 'TEXTAREA') {
-          element.value = String(newValue);
+        // Default behavior.
+        if (updateTextContent) {
+          element.textContent = stringValue;
         }
         break;
 
@@ -1082,7 +1112,7 @@ export class Bind {
           element.setAttribute('class', ampClasses.join(' '));
         } else {
           const err = user().createError(
-              `${TAG}: "${newValue}" is not a valid result for [class].`);
+              '%s: "%s" is not a valid result for [class].', TAG, newValue);
           this.reportError_(err, element);
         }
         break;
@@ -1143,8 +1173,8 @@ export class Bind {
           updateProperty);
       return true;
     } catch (e) {
-      const error = user().createError(`${TAG}: "${value}" is not a ` +
-          `valid result for [${attrName}]`, e);
+      const error = user().createError('%s: "%s" is not a ' +
+          'valid result for [%]', TAG, value, attrName, e);
       this.reportError_(error, element);
     }
     return false;
@@ -1201,7 +1231,8 @@ export class Bind {
           }
         } else {
           const err = user().createError(
-              `${TAG}: "${expectedValue}" is not a valid result for [class].`);
+              '%s: "%s" is not a valid result for [class].',
+              TAG, expectedValue);
           this.reportError_(err, element);
         }
         match = this.compareStringArrays_(initialValue, classes);
@@ -1280,7 +1311,7 @@ export class Bind {
    * @private
    */
   reportWorkerError_(e, message, opt_element) {
-    const userError = user().createError(message + ' ' + e.message);
+    const userError = user().createError('%s %s', message, e.message);
     userError.stack = e.stack;
     this.reportError_(userError, opt_element);
     return userError;

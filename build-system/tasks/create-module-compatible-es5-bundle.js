@@ -31,8 +31,7 @@ const gulp = $$.help(require('gulp'));
 exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
       .pipe($$.sourcemaps.init({loadMaps: true}))
-      .pipe($$.rename(src.replace(/\.js$/, '-module.js')))
-      .pipe($$.regexpSourcemaps(/(global\?global:\w*})\(this\)/, '$1(self)', 'module-global'))
+      .pipe($$.regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
       .pipe($$.sourcemaps.write('./'))
       .pipe(gulp.dest('dist'));
 };

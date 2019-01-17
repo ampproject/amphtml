@@ -102,13 +102,6 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
-  error_message: 'Object.values is not allowed'
-  value: 'Object.values'
-  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
-}
-
-requirement: {
-  type: BANNED_NAME
   error_message: 'Object.entries is not allowed'
   value: 'Object.entries'
 }
@@ -307,4 +300,58 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
   value: 'Function.prototype.name'
+}
+
+
+# Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.remove() is unusual. Please use Node.p.removeChild()'
+  value: 'DocumentType.prototype.remove'
+  value: 'Element.prototype.remove'
+  value: 'CharacterData.prototype.remove'
+  whitelist: 'extensions/amp-inputmask/0.1/mask-impl.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.replaceWith() is unusual. Please use Node.p.replaceChild()'
+  value: 'DocumentType.prototype.replaceWith'
+  value: 'Element.prototype.replaceWith'
+  value: 'CharacterData.prototype.replaceWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.append() is unusual. Please use Node.p.appendChild()'
+  value: 'Element.prototype.append'
+  value: 'Document.prototype.append'
+  value: 'DocumentFragment.prototype.append'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.prepend() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.prepend'
+  value: 'Document.prototype.prepend'
+  value: 'DocumentFragment.prototype.prepend'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.before() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.before'
+  value: 'DocumentType.prototype.before'
+  value: 'CharacterData.prototype.before'
+  # It's really hard to properly type check this one.
+  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.after'
+  value: 'DocumentType.prototype.after'
+  value: 'CharacterData.prototype.after'
 }

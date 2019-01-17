@@ -43,6 +43,14 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
+  }
+
+  /**
    * Delegates actions to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
@@ -75,10 +83,9 @@ export class ServiceAdapter {
 
   /**
    * Reauthorize platforms
-   * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
-  reAuthorizePlatform(subscriptionPlatform) {
-    this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
+  resetPlatforms() {
+    this.subscriptionService_.resetPlatforms();
   }
 
   /**

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.35 */
+/** Version: 0.1.22.41 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -114,10 +114,16 @@ let ActivityRequest;
  *   redirect is used. By default, the activity request is appended to the
  *   activity URL. This option can be used if the activity request is passed
  *   to the activity by some alternative means.
+ * - disableRedirectFallback: disallows popup fallback to redirect. By default
+ *   the redirect fallback is allowed. This option has to be used very carefully
+ *   because there are many user agents that may fail to open a popup and it
+ *   won't be always possible for the opener window to even be aware of such
+ *   failures.
  *
  * @typedef {{
  *   returnUrl: (string|undefined),
  *   skipRequestInUrl: (boolean|undefined),
+ *   disableRedirectFallback: (boolean|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  * }}
@@ -413,6 +419,25 @@ function isEdgeBrowser(win) {
  */
 function throwAsync(e) {
   setTimeout(() => {throw e;});
+}
+
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isNodeConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return root && root.contains(node) || false;
 }
 
 
@@ -905,7 +930,7 @@ class ActivityIframePort {
    * @return {!Promise}
    */
   connect() {
-    if (!this.win_.document.documentElement.contains(this.iframe_)) {
+    if (!isNodeConnected(this.iframe_)) {
       throw new Error('iframe must be in DOM');
     }
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -1069,8 +1094,8 @@ class ActivityWindowPort {
     this.openTarget_ = target;
     /** @private @const {?Object} */
     this.args_ = opt_args || null;
-    /** @private @const {?ActivityOpenOptions} */
-    this.options_ = opt_options || null;
+    /** @private @const {!ActivityOpenOptions} */
+    this.options_ = opt_options || {};
 
     /** @private {?function((!ActivityResult|!Promise))} */
     this.resultResolver_ = null;
@@ -1160,9 +1185,9 @@ class ActivityWindowPort {
     // Protectively, the URL will contain the request payload, unless explicitly
     // directed not to via `skipRequestInUrl` option.
     let url = this.url_;
-    if (!(this.options_ && this.options_.skipRequestInUrl)) {
+    if (!this.options_.skipRequestInUrl) {
       const returnUrl =
-          this.options_ && this.options_.returnUrl ||
+          this.options_.returnUrl ||
           removeFragment(this.win_.location.href);
       const requestString = serializeRequest({
         requestId: this.requestId_,
@@ -1191,7 +1216,9 @@ class ActivityWindowPort {
       // Ignore.
     }
     // Then try with `_top` target.
-    if (!targetWin && openTarget != '_top') {
+    if (!targetWin &&
+        openTarget != '_top' &&
+        !this.options_.disableRedirectFallback) {
       openTarget = '_top';
       try {
         targetWin = this.win_.open(url, openTarget);
@@ -1248,13 +1275,11 @@ class ActivityWindowPort {
     const maxHeight = Math.max(availHeight - controlsHeight, availHeight * 0.5);
     let w = Math.floor(Math.min(600, maxWidth * 0.9));
     let h = Math.floor(Math.min(600, maxHeight * 0.9));
-    if (this.options_) {
-      if (this.options_.width) {
-        w = Math.min(this.options_.width, maxWidth);
-      }
-      if (this.options_.height) {
-        h = Math.min(this.options_.height, maxHeight);
-      }
+    if (this.options_.width) {
+      w = Math.min(this.options_.width, maxWidth);
+    }
+    if (this.options_.height) {
+      h = Math.min(this.options_.height, maxHeight);
     }
     const x = Math.floor((screen.width - w) / 2);
     const y = Math.floor((screen.height - h) / 2);
@@ -1404,8 +1429,7 @@ function discoverRedirectPort(win, fragment, requestId) {
   if (!fragmentParam) {
     return null;
   }
-  const response = /** @type {?Object} */ (JSON.parse(
-      decodeURIComponent(fragmentParam)));
+  const response = /** @type {?Object} */ (JSON.parse(fragmentParam));
   if (!response || response['requestId'] != requestId) {
     return null;
   }
@@ -1500,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.16';
+    this.version = '1.20';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1698,6 +1722,266 @@ var activityPorts = {
 var activityPorts_1 = activityPorts.ActivityPorts;
 var activityPorts_10 = activityPorts.createAbortError;
 var activityPorts_11 = activityPorts.isAbortError;
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  EVENT_PAYMENT_FAILED: 2000,
+};
+
+class AnalyticsContext {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmCampaign() {
+    return this.utmCampaign_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmCampaign(value) {
+    this.utmCampaign_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getLabelList() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabelList(value) {
+    this.label_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsContext',  // message type
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmCampaign_,  // field 5 - utm_campaign
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
+    ];
+  }
+}
+
+
+class AnalyticsRequest {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsRequest',  // message type
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+    ];
+  }
+}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2221,17 +2505,46 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {!Document} doc The document object.
+ * @param {*} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
 function injectStyleSheet(doc, styleText) {
-  const styleElement = createElement(doc, 'style', {
+  const styleElement = createElement(doc.getWin().document, 'style', {
     'type': styleType,
   });
   styleElement.textContent = styleText;
-  doc.head.appendChild(styleElement);
+  doc.getHead().appendChild(styleElement);
   return styleElement;
+}
+
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return root && root.contains(node) || false;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser$1(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
 }
 
 /**
@@ -3186,6 +3499,12 @@ class Entitlement {
     if (!product) {
       return false;
     }
+    // Wildcard allows this product.
+    const eq = product.indexOf(':');
+    if (eq != -1 &&
+        this.products.includes(product.substring(0, eq + 1) + '*')) {
+      return true;
+    }
     return this.products.includes(product);
   }
 
@@ -4013,7 +4332,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.35',
+    '_client': 'SwG 0.1.22.41',
   });
 }
 
@@ -4049,266 +4368,6 @@ function cacheParam(cacheKey) {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-/** @enum {number} */
-const AnalyticsEvent = {
-  UNKNOWN: 0,
-  IMPRESSION_PAYWALL: 1,
-  ACTION_SUBSCRIBE: 1000,
-  ACTION_PAYMENT_COMPLETE: 1001,
-  ACTION_ACCOUNT_CREATED: 1002,
-  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
-  EVENT_PAYMENT_FAILED: 2000,
-};
-
-class AnalyticsContext {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
-
-    /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
-
-    /** @private {?string} */
-    this.utmName_ = (data[5] == null) ? null : data[5];
-
-    /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
-
-    /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
-
-    /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
-  }
-
-  /**
-   * @return {?string}
-   */
-  getEmbedderOrigin() {
-    return this.embedderOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setEmbedderOrigin(value) {
-    this.embedderOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTransactionId() {
-    return this.transactionId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setTransactionId(value) {
-    this.transactionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getReferringOrigin() {
-    return this.referringOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setReferringOrigin(value) {
-    this.referringOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmSource() {
-    return this.utmSource_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmSource(value) {
-    this.utmSource_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmName() {
-    return this.utmName_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmName(value) {
-    this.utmName_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmMedium() {
-    return this.utmMedium_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmMedium(value) {
-    this.utmMedium_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.sku_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSku(value) {
-    this.sku_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getReadyToPay() {
-    return this.readyToPay_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setReadyToPay(value) {
-    this.readyToPay_ = value;
-  }
-
-  /**
-   * @return {!Array<string>}
-   */
-  getLabel() {
-    return this.label_;
-  }
-
-  /**
-   * @param {!Array<string>} value
-   */
-  setLabel(value) {
-    this.label_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsContext',  // message type
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmName_,  // field 5 - utm_name
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-    ];
-  }
-}
-
-
-class AnalyticsRequest {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
-
-    /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
-  }
-
-  /**
-   * @return {?AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!AnalyticsContext} value
-   */
-  setContext(value) {
-    this.context_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEvent}
-   */
-  getEvent() {
-    return this.event_;
-  }
-
-  /**
-   * @param {!AnalyticsEvent} value
-   */
-  setEvent(value) {
-    this.event_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsRequest',  // message type
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-    ];
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
  * The Flow goes like this:
  * a. Start Payments
@@ -4319,15 +4378,28 @@ class AnalyticsRequest {
  * In other words, Flow = Payments + Account Creation.
  */
 
+
+/**
+ * String values input by the publisher are mapped to the number values.
+ * @type {!Object<string, number>}
+ */
+const ReplaceSkuProrationModeMapping = {
+  // The replacement takes effect immediately, and the remaining time will
+  // be prorated and credited to the user. This is the current default
+  // behavior.
+  'IMMEDIATE_WITH_TIME_PRORATION': 1,
+};
+
+
 /**
  * The flow to initiate payment process.
  */
 class PayStartFlow {
   /**
    * @param {*} deps
-   * @param {string} sku
+   * @param {*} skuOrSubscriptionRequest
    */
-  constructor(deps, sku) {
+  constructor(deps, skuOrSubscriptionRequest) {
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -4340,8 +4412,10 @@ class PayStartFlow {
     /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {string} */
-    this.sku_ = sku;
+    /** @private @const {*} */
+    this.subscriptionRequest_ =
+        typeof skuOrSubscriptionRequest == 'string' ?
+            {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
 
     /** @private @const {*} */
     this.analyticsService_ = deps.analytics();
@@ -4352,21 +4426,30 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start() {
+    // Add the 'publicationId' key to the subscriptionRequest_ object.
+    const swgPaymentRequest =
+        Object.assign({}, this.subscriptionRequest_, {
+          'publicationId': this.pageConfig_.getPublicationId()});
+
+    // Map the proration mode to the enum value (if proration exists).
+    const prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
+    if (prorationMode) {
+      swgPaymentRequest.replaceSkuProrationMode =
+          ReplaceSkuProrationModeMapping[prorationMode];
+    }
+
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, {
-      'sku': this.sku_,
-    });
-    this.analyticsService_.setSku(this.sku_);
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SUBSCRIBE, this.subscriptionRequest_);
+    // TODO(chenshay): Create analytics for 'replace subscription'.
+    this.analyticsService_.setSku(this.subscriptionRequest_.skuId);
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_SUBSCRIBE);
     this.payClient_.start({
       'apiVersion': 1,
       'allowedPaymentMethods': ['CARD'],
       'environment': 'PRODUCTION',
       'playEnvironment': 'PROD',
-      'swg': {
-        'publicationId': this.pageConfig_.getPublicationId(),
-        'skuId': this.sku_,
-      },
+      'swg': swgPaymentRequest,
       'i': {
         'startTimeMs': Date.now(),
         'googleTransactionId': this.analyticsService_.getTransactionId(),
@@ -4402,13 +4485,10 @@ class PayCompleteFlow {
           deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
         } else {
           deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+          deps.jserror().error('Pay failed', reason);
         }
         throw reason;
       });
-    });
-    deps.activities().onRedirectError(() => {
-      deps.analytics().addLabels(['redirect']);
-      deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
     });
   }
 
@@ -4802,6 +4882,176 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -5112,10 +5362,7 @@ class FriendlyIframe {
    * @return {boolean}
    */
   isConnected() {
-    if (!this.getElement().ownerDocument) {
-      return false;
-    }
-    return this.getElement().ownerDocument.contains(this.iframe_);
+    return isConnected(this.getElement());
   }
 }
 
@@ -5275,7 +5522,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(iframeDoc, CSS$1);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -5740,176 +5987,6 @@ class DialogManager {
  * limitations under the License.
  */
 
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/** @implements {Doc} */
-class GlobalDoc {
-
-  /**
-   * @param {!Window|!Document} winOrDoc
-   */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
-  }
-
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
-  whenReady() {
-    return whenDocumentReady(this.doc_);
-  }
-}
-
-
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
-  }
-  // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
-  }
-  return /** @type {!Doc} */ (input);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
   'height': 0,
@@ -6154,6 +6231,24 @@ class EntitlementsManager {
   }
 
   /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.win_.location.search;
+  }
+
+  /**
+   * @private
+   * @return boolean true if UTM source is google
+   */
+  isGoogleUtmSource_() {
+    // TODO(sohanirao): b/120294106
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    return (utmParams['utm_source'] == 'google');
+  }
+
+  /**
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
@@ -6164,7 +6259,8 @@ class EntitlementsManager {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
-      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS) {
+      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
+            this.isGoogleUtmSource_()) {
         this.logPaywallImpression_();
       }
       return response;
@@ -6444,6 +6540,46 @@ function irtpStringToBoolean(value) {
       return undefined;
   }
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables GPay API in SwG.
+   * Cleanup issue: #406.
+   */
+  GPAY_API: 'gpay-api',
+
+  /**
+   * Enables GPay native support.
+   * Cleanup issue: #441.
+   */
+  GPAY_NATIVE: 'gpay-native',
+
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -6877,6 +7013,113 @@ class XhrFetcher {
 
 
 /**
+ */
+class JsError {
+
+  /**
+   * @param {*} doc
+   */
+  constructor(doc) {
+    /** @private @const {*} */
+    this.doc_ = doc;
+
+    /** @private @const {!Promise} */
+    this.microTask_ = Promise.resolve();
+  }
+
+  /**
+   * @param {...*} var_args
+   * @return {!Promise}
+   */
+  error(var_args) {
+    const args = Array.prototype.slice.call(arguments, 0);
+    return this.microTask_.then(() => {
+      const error = createErrorVargs.apply(null, args);
+      if (error.reported) {
+        return;
+      }
+      const img = this.doc_.getWin().document.createElement('img');
+      img.src =
+          'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
+          '?error=' + encodeURIComponent(String(error)) +
+          '&script=' + encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
+          '&line=' + (error.lineNumber || 1) +
+          '&trace=' + encodeURIComponent(error.stack);
+      // Appending this image to DOM is not necessary.
+      error.reported = true;
+    });
+  }
+}
+
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = duplicateErrorIfNecessary(arg);
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error}
+ */
+function duplicateErrorIfNecessary(error) {
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
+    return error;
+  }
+
+  const {message, stack} = error;
+  const e = new Error(message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = stack;
+  return e;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {string} requireOrigin
  * @param {boolean} requireOriginVerified
@@ -7111,6 +7354,12 @@ class LinkSaveFlow {
     /** @private {?Promise<*>} */
     this.requestPromise_ = null;
 
+    /** @private {?Promise<!Object>} */
+    this.linkedPromise_ = null;
+
+    /** @private {?Promise<boolean>} */
+    this.confirmPromise_ = null;
+
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
   }
@@ -7122,6 +7371,33 @@ class LinkSaveFlow {
   getRequestPromise() {
     return this.requestPromise_;
   }
+
+  /**
+   * @return {?Promise}
+   * @package Visible for testing.
+   */
+  whenLinked() {
+    return this.linkedPromise_;
+  }
+
+  /**
+   * @return {?Promise<boolean>}
+   * @package Visible for testing.
+   */
+  whenConfirmed() {
+    return this.confirmPromise_;
+  }
+
+  /**
+   * @private
+   */
+  complete_() {
+    this.dialogManager_.completeView(this.activityIframeView_);
+  }
+
+  /**
+   * @return {?Promise}
+   */
   /**
    * Starts the save subscription
    * @return {!Promise}
@@ -7137,7 +7413,8 @@ class LinkSaveFlow {
         this.activityPorts_,
         feUrl('/linksaveiframe'),
         feArgs(iframeArgs),
-        /* shouldFadeBody */ false
+        /* shouldFadeBody */ false,
+        /* hasLoadingIndicator */ true
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
@@ -7159,30 +7436,51 @@ class LinkSaveFlow {
           this.activityIframeView_.message(saveRequest);
         }).catch(reason => {
           // The flow is complete.
-          this.dialogManager_.completeView(this.activityIframeView_);
+          this.complete_();
           throw reason;
         });
       }
     });
+
+    this.linkedPromise_ = this.activityIframeView_.port().then(port => {
+      return acceptPortResultData(
+          port,
+          feOrigin(),
+          /* requireOriginVerified */ true,
+          /* requireSecureChannel */ true);
+    });
+
+    let linkConfirm = null;
+    this.confirmPromise_ = this.linkedPromise_.then(result => {
+      // This flow is complete
+      this.complete_();
+      if (result['linked']) {
+        this.dialogManager_.popupClosed();
+        this.deps_.callbacks().triggerFlowStarted(
+            SubscriptionFlows.LINK_ACCOUNT);
+        linkConfirm = new LinkCompleteFlow(this.deps_, result);
+        return linkConfirm.start();
+      }
+      return Promise.reject(createCancelError(this.win_, 'not linked'));
+    }).then(() => {
+      this.deps_.callbacks().triggerLinkProgress();
+      return linkConfirm.whenComplete();
+    }).then(() => {
+      return true;
+    }).catch(reason => {
+      if (isCancelError(reason)) {
+        this.deps_.callbacks().triggerFlowCanceled(
+            SubscriptionFlows.LINK_ACCOUNT);
+        return false;
+      }
+      // In case this flow wasn't complete, complete it here
+      this.complete_();
+      throw reason;
+    });
+
     /** {!Promise<boolean>} */
     return this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true).then(() => {
-          return this.activityIframeView_.port().then(port => {
-            return acceptPortResultData(
-                port,
-                feOrigin(),
-                /* requireOriginVerified */ true,
-                /* requireSecureChannel */ true);
-          }).then(result => {
-            return result['linked'];
-          }).catch(() => {
-            return false;
-          }).then(result => {
-            // The flow is complete.
-            this.dialogManager_.completeView(this.activityIframeView_);
-            return result;
-          });
-        });
+        /* hidden */ true);
   }
 }
 
@@ -7338,40 +7636,6 @@ class LoginNotificationApi {
     });
   }
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-};
 
 /**
  * @license
@@ -8621,10 +8885,6 @@ function apiV2DoesMerchantSupportSpecifiedCardType(
  * message.
  */
 function validateSecureContext() {
-  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
-    // This is for local development.
-    return null;
-  }
   if (window.isSecureContext === undefined) {
     // Browser not support isSecureContext, figure out a way to validate this
     // for the unsupported browser.
@@ -10730,8 +10990,6 @@ class PayClientBindingPayjs {
     /** @private @const {!RedirectVerifierHelper} */
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
-    // TODO(dvoytenko): Pass activities instance.
-    // TODO(dvoytenko): Pass redirect verifier key.
     /** @private @const {!PaymentsAsyncClient} */
     this.client_ = this.createClient_({
       environment: 'PRODUCTION',
@@ -10751,7 +11009,11 @@ class PayClientBindingPayjs {
    * @private
    */
   createClient_(options, handler) {
-    return new PaymentsAsyncClient(options, handler);
+    return new PaymentsAsyncClient(
+        options,
+        handler,
+        /* useIframe */ false,
+        this.activityPorts_);
   }
 
   /** @override */
@@ -11753,13 +12015,13 @@ class AnalyticsService {
    */
   addLabels(labels) {
     if (labels && labels.length > 0) {
-      const newLabels = [].concat(this.context_.getLabel());
+      const newLabels = [].concat(this.context_.getLabelList());
       labels.forEach(label => {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
       });
-      this.context_.setLabel(newLabels);
+      this.context_.setLabelList(newLabels);
     }
   }
 
@@ -11792,11 +12054,11 @@ class AnalyticsService {
   setContext_() {
     const utmParams = parseQueryString$1(this.getQueryString_());
     this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    const name = utmParams['utm_name'];
+    const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
-    if (name) {
-      this.context_.setUtmName(name);
+    if (campaign) {
+      this.context_.setUtmCampaign(campaign);
     }
     if (medium) {
       this.context_.setUtmMedium(medium);
@@ -11908,6 +12170,11 @@ class ConfiguredRuntime {
 
     /** @private @const {*} */
     this.config_ = defaultConfig();
+    if (isEdgeBrowser$1(this.win_)) {
+      // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
+      // or move it to Web Activities.
+      this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
+    }
     if (opt_config) {
       this.configure_(opt_config);
     }
@@ -11917,6 +12184,9 @@ class ConfiguredRuntime {
 
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
+
+    /** @private @const {!JsError} */
+    this.jserror_ = new JsError(this.doc_);
 
     /** @private @const {!Fetcher} */
     this.fetcher_ = opt_integr && opt_integr.fetcher ||
@@ -11958,7 +12228,14 @@ class ConfiguredRuntime {
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
 
-    injectStyleSheet(this.win_.document, CSS);
+    injectStyleSheet(this.doc_, CSS);
+
+    // Report redirect errors if any.
+    this.activityPorts_.onRedirectError(error => {
+      this.analyticsService_.addLabels(['redirect']);
+      this.analyticsService_.logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+      this.jserror_.error('Redirect error', error);
+    });
   }
 
   /** @override */
@@ -11974,6 +12251,11 @@ class ConfiguredRuntime {
   /** @override */
   pageConfig() {
     return this.pageConfig_;
+  }
+
+  /** @override */
+  jserror() {
+    return this.jserror_;
   }
 
   /** @override */
@@ -12177,9 +12459,13 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  subscribe(sku) {
+  subscribe(skuOrSubscriptionRequest) {
+    if (typeof skuOrSubscriptionRequest != 'string' &&
+        !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)) {
+      throw new Error('Not yet launched!');
+    }
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, sku).start();
+      return new PayStartFlow(this, skuOrSubscriptionRequest).start();
     });
   }
 

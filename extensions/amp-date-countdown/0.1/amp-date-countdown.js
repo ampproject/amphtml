@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
@@ -225,7 +225,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       epoch = this.timestampSeconds_ * 1000;
     }
 
-    user().assert(!isNaN(epoch),
+    userAssert(!isNaN(epoch),
         'One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ' +
         'is required');
     return epoch;
@@ -248,7 +248,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         'seconds': localeWordList[5],
       };
     } else {
-      user().error(TAG, `Invalid locale '${locale}', return empty locale word`);
+      user().error(TAG, 'Invalid locale %s, return empty locale word', locale);
       return {};
     }
   }

@@ -30,50 +30,46 @@
 <body>
   <h1>Input Masking</h1>
 
-  <!-- TODO(cvializ) -->
-  <!--
   <h2>Named Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
-    <p>Plain text</p>
-    <input name="text">
+    <p>Credit card (credit)</p>
+    <input id="payment-card" type="text" mask="payment-card" placeholder="Card number">
 
-    <p>Single character</p>
-    <input name="char" mask="L">
+    <p>mm/dd/yyyy (date-mm-dd-yyyy)</p>
+    <input name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
 
-    <p>Email</p>
-    <input name="email" mask="email" placeholder="alice@example.com" type="search">
+    <p>dd/mm/yyyy (date-dd-mm-yyyy)</p>
+    <input name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
 
-    <p>US and Canada Phone</p>
-    <input name="phone" mask="phone-us" placeholder="+1(555) 555-5555" type="tel"></div>
+    <p>yyyy-mm-dd (date-yyyy-mm-dd)</p>
+    <input name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
 
-    <p>International Phone</p>
-    <input name="phone-intl" mask="phone" placeholder="+1(555) 555-5555" type="tel">
-
-
-    <p>mm/dd/yyyy</p>
-    <input name="date-us" mask="date-us" placeholder="mm/dd/yyyy" type="tel">
-    <p>dd/mm/yyyy</p>
-    <input name="date-intl" mask="date-intl" placeholder="dd/mm/yyyy" type="tel">
-    <p>yyyy-mm-dd</p>
-    <input name="date-iso" mask="date-iso" placeholder="yyyy-mm-dd" type="tel">
+    <p>mm/yy (date-mm-yy)</p>
+    <input name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
 
     <input type="submit">
   </form>
-  -->
+
   <h2>Custom Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
+    <p>Plain text (no mask)</p>
+    <input name="text" type="text">
+
+    <p>Single character</p>
+    <input name="char" mask="L" type="text">
+
     <p>Phone</p>
-    <input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+    <input name="phone1" type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
 
     <p>US Postal Code</p>
-    <input mask="00000 00000-0000" placeholder="10024" type="text">
+    <input name="us-postal" mask="00000 00000-0000" placeholder="10024" type="text">
 
     <p>Canadian Postal Code</p>
-    <input mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+    <input name="ca-postal" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
 
     <p>15 or 16 digit Credit Card (switches on length)</p>
     <input mask="0000_000000_00000 0000_0000_0000_0000 " placeholder="0000 0000 0000 0000" type="text">

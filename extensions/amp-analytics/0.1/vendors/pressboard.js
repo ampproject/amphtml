@@ -25,6 +25,7 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
     'city': '',
     'dbInstance': '',
     'timeZoneOffset': '',
+    'clientId': 'CLIENT_ID(_pressboardmedia)',
   },
   'requests': {
     'host': 'https://adserver.pressboard.ca',
@@ -33,7 +34,7 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
       '&ts=${timestamp}' +
       '&ua=${userAgent}' +
       '&rand=${random}' +
-      '&uid=${clientId(_pressboardmedia)}' +
+      '&uid=${clientId}' +
       '&mid=${mediaId}&cid=${campaignId}&sid=${storyRequestId}' +
       '&geoid=${geoNameId}&cn=${country}&rg=${region}&ct=${city}' +
       '&dbi=${dbInstance}&tz=${timeZoneOffset}',

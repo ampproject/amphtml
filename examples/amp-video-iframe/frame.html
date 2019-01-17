@@ -1,10 +1,9 @@
 <!doctype html>
-<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <script async src="/dist/video-iframe-integration.js"></script>
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
 </head>
 <body style="margin: 0; padding: 0">
   <video
@@ -14,8 +13,22 @@
     src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4">
   </video>
 
-  <!-- Wait for API to initialize -->
+  <!-- Integration script -->
   <script>
+    //  #######  #####  #######
+    //  #       #     # #
+    //  #       #       #
+    //  #####    #####  ######
+    //  #             #       #
+    //  #       #     # #     #
+    //  #######  #####   #####
+
+    // This example is written in ES5 for browser compatibility.
+    // If you wish to write an integration script in ES2015+ that doesn't
+    // require older browser support or is otherwise transpiled into ES5, see
+    // ./frame-es2015.html.
+
+    // Wait for API to initialize
     (window.AmpVideoIframe = window.AmpVideoIframe || [])
         .push(onAmpIntegrationReady);
 
@@ -80,6 +93,13 @@
         // Unsupported in example. This should be a call to `exitFullscreen`
         // or browser equivalents.
       });
+
+      setInterval(function() {
+        // Post a custom analytics event every 3 seconds.
+        ampIntegration.postAnalyticsEvent('video-custom-foo', /* optional */ {
+          'myVar': Math.random().toString(),
+        });
+      }, 3000);
     }
   </script>
 </body>

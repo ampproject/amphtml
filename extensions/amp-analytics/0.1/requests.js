@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
+import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, defaultSerializer} from './transport-serializer';
-import {dev, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, transport, isSandbox) {
+  constructor(element, request, preconnect, transport, isSandbox) {
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = element.getAmpDoc();
 
     /** @const {!Window} */
     this.win = this.ampdoc_.win;
 
     /** @const {string} */
-    this.baseUrl = dev().assert(request['baseUrl']);
+    this.baseUrl = devAssert(request['baseUrl']);
 
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
@@ -60,8 +60,7 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ =
-      Services.urlReplacementsForDoc(this.ampdoc_);
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -69,7 +68,7 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
 
-    /** @private {!Array<!Promise<!batchSegmentDef>>} */
+    /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
@@ -136,7 +135,8 @@ export class RequestHandler {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
-        this.ampdoc_, params, expansionOption, bindings, this.whiteList_)
+        this.variableService_, this.urlReplacementService_, params,
+        expansionOption, bindings, this.whiteList_)
         .then(params => {
           return dict({
             'trigger': trigger['on'],
@@ -207,11 +207,12 @@ export class RequestHandler {
         }
         // TODO: iframePing will not work with batch. Add a config validation.
         if (trigger['iframePing']) {
-          user().assert(trigger['on'] == 'visible',
+          userAssert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
           this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
-          this.transport_.sendRequest(baseUrl, batchSegments);
+          this.transport_.sendRequest(
+              baseUrl, batchSegments, !!this.batchInterval_);
         }
       });
     });
@@ -242,10 +243,10 @@ export class RequestHandler {
 
     for (let i = 0; i < this.batchInterval_.length; i++) {
       let interval = this.batchInterval_[i];
-      user().assert(isFiniteNumber(interval),
+      userAssert(isFiniteNumber(interval),
           'Invalid batchInterval value: %s', this.batchInterval_);
       interval = Number(interval) * 1000;
-      user().assert(interval >= BATCH_INTERVAL_MIN,
+      userAssert(interval >= BATCH_INTERVAL_MIN,
           'Invalid batchInterval value: %s, ' +
           'interval value must be greater than %s ms.',
           this.batchInterval_, BATCH_INTERVAL_MIN);
@@ -279,7 +280,7 @@ export class RequestHandler {
    * Schedule sending request regarding to batchInterval
    */
   refreshBatchInterval_() {
-    dev().assert(this.batchIntervalPointer_ != null,
+    devAssert(this.batchIntervalPointer_ != null,
         'Should not start batchInterval without pointer');
     const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
       this.batchInterval_[this.batchIntervalPointer_++] :
@@ -299,12 +300,14 @@ export class RequestHandler {
  * @param {?JsonObject} configParams
  * @param {!JsonObject} trigger
  * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Element} element
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  ampdoc, msg, configParams, trigger, expansionOption) {
+  ampdoc, msg, configParams, trigger, expansionOption, element)
+{
   const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+  const urlReplacementService = Services.urlReplacementsForDoc(element);
 
   const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
@@ -321,7 +324,8 @@ export function expandPostMessage(
   return basePromise.then(expandedMsg => {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     //return base url with the appended extra url params;
-    return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
+    return expandExtraUrlParams(variableService, urlReplacementService, params,
+        expansionOption, bindings)
         .then(extraUrlParams => {
           return defaultSerializer(expandedMsg, [
             dict({'extraUrlParams': extraUrlParams}),
@@ -332,7 +336,8 @@ export function expandPostMessage(
 
 /**
  * Function that handler extraUrlParams from config and trigger.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./variables.VariableService} variableService
+ * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
  * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
@@ -340,11 +345,9 @@ export function expandPostMessage(
  * @return {!Promise<!Object>}
  * @private
  */
-function expandExtraUrlParams(
-  ampdoc, params, expansionOption, bindings, opt_whitelist) {
-  const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-
+function expandExtraUrlParams(variableService, urlReplacements, params,
+  expansionOption, bindings, opt_whitelist)
+{
   const requestPromises = [];
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
@@ -352,15 +355,27 @@ function expandExtraUrlParams(
       expansionOption.vars,
       expansionOption.iterations,
       true /* noEncode */);
-  // Add any given extraUrlParams as query string param
-  for (const k in params) {
-    if (typeof params[k] == 'string') {
-      const request = variableService.expandTemplate(params[k], option)
-          .then(v =>
-            urlReplacements.expandStringAsync(v, bindings, opt_whitelist))
-          .then(value => params[k] = value);
+
+  const expandObject = (params, key) => {
+    const value = params[key];
+
+    if (typeof value === 'string') {
+      const request = variableService.expandTemplate(value, option)
+          .then(value =>
+            urlReplacements.expandStringAsync(
+                value, bindings, opt_whitelist))
+          .then(value => params[key] = value);
       requestPromises.push(request);
+    } else if (isArray(value)) {
+      value.forEach((_, index) => expandObject(value, index));
+    } else if (isObject(value) && value !== null) {
+      Object.keys(value).forEach(key => expandObject(value, key));
     }
-  }
+  };
+
+  Object.keys(params).forEach(key =>
+    expandObject(params, key)
+  );
+
   return Promise.all(requestPromises).then(() => params);
 }

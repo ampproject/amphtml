@@ -16,6 +16,7 @@
 
 import {Pass} from '../pass';
 import {Services} from '../services';
+import {closest, domOrderComparator, matches} from '../dom';
 import {
   computedStyle,
   getStyle,
@@ -27,7 +28,6 @@ import {
   toggle,
 } from '../style';
 import {dev, user} from '../log';
-import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 
@@ -36,6 +36,15 @@ const TAG = 'FixedLayer';
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
+/**
+ * Passed to closest to determine if the fixed element is a lightbox, or a
+ * descendant of one. If so, FixedLayer ignores the element. #19149
+ *
+ * @param {!Element} el
+ */
+function lightboxOrDescendant(el) {
+  return el.tagName.indexOf('LIGHTBOX') !== -1;
+}
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
@@ -116,12 +125,15 @@ export class FixedLayer {
       return;
     }
 
-
-
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
+      // Rare but may happen if the document is being concurrently disposed.
+      if (!stylesheet) {
+        dev().error(TAG, 'Aborting setup due to null stylesheet.');
+        return;
+      }
       const {ownerNode} = stylesheet;
       if (stylesheet.disabled ||
               !ownerNode ||
@@ -433,11 +445,18 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be opaque (not 100%
-          // transparent) - that's a lot of work for no benefit. Additionally,
-          // transparent elements used for "service" needs and thus best kept
-          // in the original tree. The visibility, however, is not considered
-          // because `visibility` CSS is inherited.
+          // Transferability requires an element to be:
+          // 1. Greater than 0% opacity. That's a lot of work for no benefit.
+          //    Additionally, transparent elements used for "service" needs and
+          //    thus best kept in the original tree. The visibility, however,
+          //    is not considered because `visibility` CSS is inherited.
+          // 2. Height < 300. This avoids transferring large sections of UI,
+          //    e.g. publisher-customized amp-consent UI (#17995).
+          // 3. Has `top` or `bottom` CSS set. This ensures we only transfer
+          //    fixed elements that are _not_ auto-positioned to avoid jumping
+          //    position after transferring to the fixed layer (due to loss of
+          //    parent positioning context). We could calculate this offset, but
+          //    we don't (yet).
           let isTransferrable = false;
           if (isFixed) {
             if (forceTransfer === true) {
@@ -526,7 +545,7 @@ export class FixedLayer {
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           fixedSelector);
       for (let j = 0; j < elements.length; j++) {
-        if (j > 10) {
+        if (this.elements_.length > 10) {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
@@ -574,6 +593,11 @@ export class FixedLayer {
   setupElement_(element, selector, position, opt_forceTransfer) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
+
+    // TODO(jridgewell, #19149): This should be an official API.
+    if (closest(element, lightboxOrDescendant)) {
+      return;
+    }
 
     let fe = null;
     for (let i = 0; i < this.elements_.length; i++) {
@@ -855,10 +879,33 @@ class TransferLayerBody {
     return this.layer_;
   }
 
-  /** @override */
+  /**
+   * Synchronizes any attribute mutations done on the real body to the layer.
+   * This is to better simulate the body in CSS selectors.
+   * @override
+   */
   update() {
-    if (this.layer_.className != this.doc_.body.className) {
-      this.layer_.className = this.doc_.body.className;
+    const {body} = this.doc_;
+    const layer = this.layer_;
+    const bodyAttrs = body.attributes;
+    const layerAttrs = layer.attributes;
+    for (let i = 0; i < bodyAttrs.length; i++) {
+      const attr = bodyAttrs[i];
+      // Style is not copied because the fixed-layer must have very precise
+      // styles to enable smooth scrolling.
+      if (attr.name === 'style') {
+        continue;
+      }
+      // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
+      layerAttrs.setNamedItem(attr.cloneNode(false));
+    }
+    for (let i = 0; i < layerAttrs.length; i++) {
+      const {name} = layerAttrs[i];
+      if (name === 'style' || body.hasAttribute(name)) {
+        continue;
+      }
+      layer.removeAttribute(name);
+      i--;
     }
   }
 

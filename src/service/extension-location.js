@@ -46,6 +46,15 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
 }
 
 /**
+ * Calculates if we need a single pass folder or not.
+ *
+ * @return {string}
+ */
+function getSinglePassExperimentPath() {
+  return getMode().singlePassType ? `${getMode().singlePassType}/` : '';
+}
+
+/**
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
@@ -63,7 +72,8 @@ export function calculateExtensionScriptUrl(location, extensionId,
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
+  const spPath = getSinglePassExperimentPath();
+  return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
 }
 
 /**
@@ -79,7 +89,8 @@ export function calculateEntryPointScriptUrl(
   location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+    const spPath = getSinglePassExperimentPath();
+    return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
   }
   return `${base}/${entryPoint}.js`;
 }

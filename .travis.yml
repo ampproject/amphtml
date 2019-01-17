@@ -50,6 +50,7 @@ matrix:
 cache:
   yarn: true
   directories:
+    - build-system/tasks/visual-diff/node_modules
     - node_modules
     - validator/node_modules
     - validator/nodejs/node_modules

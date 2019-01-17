@@ -64,7 +64,7 @@ export function runVideoPlayerIntegrationTests(
   }
 
   describe.configure().skipIfPropertiesObfuscated()
-      .ifNewChrome().run('Video Interface', function() {
+      .ifChrome().run('Video Interface', function() {
         this.timeout(TIMEOUT);
 
         it('should override the video interface methods', function() {
@@ -86,7 +86,7 @@ export function runVideoPlayerIntegrationTests(
         afterEach(cleanUp);
       });
 
-  describe.configure().ifNewChrome().run('Actions', function() {
+  describe.configure().ifChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     // TODO(cvializ, #14827): Fails on Chrome 66.
@@ -136,8 +136,11 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().skipIfPropertiesObfuscated()
-      .ifNewChrome().run('Analytics Triggers', function() {
+  describe.configure()
+      .skipIfPropertiesObfuscated()
+      .ifChrome()
+      .skipWindows() // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+      .run('Analytics Triggers', function() {
         this.timeout(TIMEOUT);
         let video;
 
@@ -342,7 +345,8 @@ export function runVideoPlayerIntegrationTests(
 
         afterEach(cleanUp);
       });
-  const t = describe.configure().ifNewChrome().skipIfPropertiesObfuscated();
+
+  const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
   t.run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
@@ -441,7 +445,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifNewChrome().run('Rotate-to-fullscreen', function() {
+  describe.configure().ifChrome().run('Rotate-to-fullscreen', function() {
     this.timeout(TIMEOUT);
 
     let video;
@@ -544,6 +548,7 @@ export function runVideoPlayerIntegrationTests(
           video.setAttribute('layout', 'fixed');
           video.setAttribute('width', '300px');
           video.setAttribute('height', '50vh');
+          video.setAttribute('i-amphtml-integration-test', '');
 
           video.style.position = 'absolute';
           video.style.top = top;

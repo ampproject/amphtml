@@ -110,15 +110,19 @@ describes.realWin('amp-addthis', {
   });
 
   it('requires data-pub-id', () => {
-    expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
-        /The data\-pub\-id attribute is required for/
-    );
+    allowConsoleError(() => {
+      expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
+          /The data\-pub\-id attribute is required for/
+      );
+    });
   });
 
   it('requires data-widget-id', () => {
-    expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
-        /The data\-widget\-id attribute is required for/
-    );
+    allowConsoleError(() => {
+      expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
+          /The data\-widget\-id attribute is required for/
+      );
+    });
   });
 
   it('removes the iframe after unlayoutCallback', () => {
@@ -383,7 +387,6 @@ describes.realWin('amp-addthis', {
         }
     );
   });
-
   it('gives css style for iframe if floating tool loaded', () => {
     return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
         ({at}) => {

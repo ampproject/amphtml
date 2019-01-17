@@ -24,7 +24,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {toArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const SERVICE_ID = 'liveListManager';
 
@@ -166,9 +166,9 @@ export class LiveListManager {
    */
   updateLiveList_(liveList) {
     const id = liveList.getAttribute('id');
-    user().assert(id, 'amp-live-list must have an id.');
-    user().assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
-        'not exist on original page load.');
+    userAssert(id, 'amp-live-list must have an id.');
+    userAssert(id in this.liveLists_,
+        'amp-live-list#%s found but did not exist on original page load.', id);
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 
