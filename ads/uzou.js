@@ -44,7 +44,7 @@ export function uzou(global, data) {
   container.appendChild(d);
 
   const uzouInjector = {
-    url: encodeURIComponent(
+    url: fixedEncodeURIComponent(
       widgetParams['url'] ||
       global.context.sourceUrl ||
       global.context.canonicalUrl
@@ -60,5 +60,11 @@ export function uzou(global, data) {
 
   loadScript(global, entryPoint, () => {
     global.context.renderStart();
+  });
+}
+
+function fixedEncodeURIComponent (str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+    return '%' + c.charCodeAt(0).toString(16);
   });
 }
