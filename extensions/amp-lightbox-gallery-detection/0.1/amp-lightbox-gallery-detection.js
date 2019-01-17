@@ -22,6 +22,7 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {closest, iterateCursor, matches} from '../../../src/dom';
@@ -141,7 +142,9 @@ export class Scanner {
    * @return {!Promise<!Element>}
    */
   static getAllImages(doc) {
-    const imgs = toArray(doc.querySelectorAll('amp-img'));
+    const imgs = toArray(doc.querySelectorAll('amp-img'))
+        .filter(img => !img.hasAttribute(LIGHTBOXABLE_ATTR));
+
     const promises = imgs.map(whenLoadedOrNull);
 
     return Promise.all(promises).then(imagesOrNull =>
@@ -175,27 +178,43 @@ function whenLoadedOrNull(el) {
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Array<!Element>} images
+ */
+function applyToScanned(ampdoc, images) {
+  const lightboxable = images.filter(meetsCriteria);
+
+  if (lightboxable.length <= 0) {
+    return;
+  }
+
+  iterateCursor(lightboxable, element => {
+    element.setAttribute(LIGHTBOXABLE_ATTR, '');
+  });
+
+  Services.extensionsFor(ampdoc.win)
+      .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+}
+
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  */
 export function scanDoc(ampdoc) {
-  const {win} = ampdoc;
-  return Scanner.getAllImages(win.document).then(images => {
-    const lightboxable = images.filter(meetsCriteria);
+  const doc = ampdoc.win.document;
 
-    if (lightboxable.length <= 0) {
-      return;
-    }
-
-    iterateCursor(lightboxable, element => {
-      element.setAttribute(LIGHTBOXABLE_ATTR, '');
-    });
-
-    Services.extensionsFor(win)
-        .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+  const maybeApply = () => Scanner.getAllImages(doc).then(images => {
+    applyToScanned(ampdoc, images);
   });
+
+  ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, maybeApply);
+
+  return maybeApply();
 }
 
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
-  scanDoc(ampdoc);
+  ampdoc.whenReady().then(() => {
+    scanDoc(ampdoc);
+  });
 });
