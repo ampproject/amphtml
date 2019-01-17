@@ -22,7 +22,7 @@
  * @template T
  * @public
  */
-export class ElementHandle {
+class ElementHandle {
   /**
    * Wrap the framework-specific element handle object.
    * @param {!T} element
@@ -54,7 +54,7 @@ export class ElementHandle {
  * @template TYPE
  * @extends {Promise}
  */
-export class ControllerPromise {
+class ControllerPromise {
   /**
    * @param {function(function(?TYPE):void, function(*):void):void|!Promise<TYPE>} executorOrPromise
    * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
@@ -107,7 +107,7 @@ export class ControllerPromise {
 }
 
 /** @interface */
-export class FunctionalTestController {
+class FunctionalTestController {
   /**
    * Navigates to the given URL.
    * {@link https://www.w3.org/TR/webdriver1/#navigate-to}
@@ -391,7 +391,7 @@ export class FunctionalTestController {
  *   height: number
  * }}
 */
-export let WindowRectDef;
+let WindowRectDef;
 
 /**
  * @typedef {{
@@ -401,7 +401,7 @@ export let WindowRectDef;
  *   height: number
  * }}
 */
-export let DOMRectDef;
+let DOMRectDef;
 
 /** @enum {string} */
 // export let ScrollBehavior = {
@@ -416,4 +416,13 @@ export let DOMRectDef;
  * }}
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions}
  */
-export let ScrollToOptionsDef;
+let ScrollToOptionsDef;
+
+module.exports = {
+  ElementHandle,
+  ControllerPromise,
+  FunctionalTestController,
+  WindowRectDef,
+  DOMRectDef,
+  ScrollToOptionsDef,
+};

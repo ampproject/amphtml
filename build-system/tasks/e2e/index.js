@@ -25,7 +25,7 @@ function e2e() {
       .pipe(mocha({
         require: [
           '@babel/register',
-          '../../../build-system/tasks/e2e/test-module',
+          '../../../build-system/tasks/e2e/helper',
         ],
       }));
 }

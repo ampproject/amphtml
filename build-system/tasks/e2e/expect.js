@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ControllerPromise} from './functional-test-controller';
-import chai, {expect as chaiExpect} from 'chai';
+const chai = require('chai');
+const {ControllerPromise} = require('./functional-test-controller');
 
 let installed;
 /**
@@ -23,7 +23,7 @@ let installed;
  * @param {string=} opt_message
  * @return {!ExpectStatic}
  */
-export function expect(actual, opt_message) {
+function expect(actual, opt_message) {
   if (!installed) {
     installed = true;
     // See https://www.chaijs.com/guide/helpers/ for details on implementation
@@ -35,7 +35,7 @@ export function expect(actual, opt_message) {
     chai.use(installBelowWrapper);
   }
 
-  return chaiExpect(actual, opt_message);
+  return chai.expect(actual, opt_message);
 }
 
 function installEqualWrapper(chai, utils) {
@@ -148,3 +148,7 @@ function inheritChainingBehavior(_super) {
     _super.apply(this, arguments);
   };
 }
+
+module.exports = {
+  expect,
+};

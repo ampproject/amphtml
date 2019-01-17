@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {By, Condition, Key, until} from 'selenium-webdriver';
-import {ControllerPromise,ElementHandle} from './functional-test-controller';
-import fs from 'fs';
+const fs = require('fs');
+const {By, Condition, Key, until} = require('selenium-webdriver');
+const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -55,7 +55,7 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
 }
 
 /** @implements {FunctionalTestController} */
-export class SeleniumWebDriverController {
+class SeleniumWebDriverController {
   /**
    * @param {!WebDriver} driver
    */
@@ -318,3 +318,7 @@ export class SeleniumWebDriverController {
     await this.switchToParent_();
   }
 }
+
+module.exports = {
+  SeleniumWebDriverController,
+};
