@@ -1653,7 +1653,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           TestElement);
       win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
-      LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
+      LOADING_ELEMENTS_.push('amp-test-loader'.toUpperCase());
       resources = Services.resourcesForDoc(doc);
       resources.isBuildOn_ = true;
       resourcesMock = sandbox.mock(resources);

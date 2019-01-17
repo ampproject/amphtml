@@ -40,6 +40,15 @@ export const Layout = {
   INTRINSIC: 'intrinsic',
 };
 
+// These are the values of the following Layout values in a regex.
+// layout == Layout.FIXED
+// layout == Layout.FIXED_HEIGHT
+// layout == Layout.RESPONSIVE
+// layout == Layout.FILL
+// layout == Layout.FLEX_ITEM
+// layout == Layout.FLUID
+// layout == Layout.INTRINSIC
+const DEFINED_LAYOUT_SIZES = /^(fixed|fixed-height|responsive|fill|flex-item|fluid|intrinsic)$/i;
 
 /**
  * Layout priorities to use with BaseElement#getLayoutPriority() and
@@ -92,28 +101,27 @@ export const naturalDimensions_ = {
 /**
  * Elements that the progess can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
- * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ = {
-  'AMP-ANIM': true,
-  'AMP-BRIGHTCOVE': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
-  'AMP-EMBED': true,
-  'AMP-FACEBOOK': true,
-  'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-LIKE': true,
-  'AMP-FACEBOOK-PAGE': true,
-  'AMP-IFRAME': true,
-  'AMP-IMG': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-LIST': true,
-  'AMP-OOYALA-PLAYER': true,
-  'AMP-PINTEREST': true,
-  'AMP-PLAYBUZZ': true,
-  'AMP-VIDEO': true,
-  'AMP-YOUTUBE': true,
-};
+export const LOADING_ELEMENTS_ = [
+  'AMP-ANIM',
+  'AMP-BRIGHTCOVE',
+  'AMP-GOOGLE-DOCUMENT-EMBED',
+  'AMP-EMBED',
+  'AMP-FACEBOOK',
+  'AMP-FACEBOOK-COMMENTS',
+  'AMP-FACEBOOK-LIKE',
+  'AMP-FACEBOOK-PAGE',
+  'AMP-IFRAME',
+  'AMP-IMG',
+  'AMP-INSTAGRAM',
+  'AMP-LIST',
+  'AMP-OOYALA-PLAYER',
+  'AMP-PINTEREST',
+  'AMP-PLAYBUZZ',
+  'AMP-VIDEO',
+  'AMP-YOUTUBE',
+];
 
 
 /**
@@ -139,20 +147,13 @@ export function getLayoutClass(layout) {
   return 'i-amphtml-layout-' + layout;
 }
 
-
 /**
  * Whether an element with this layout inherently defines the size.
  * @param {!Layout} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
-  return (layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL ||
-      layout == Layout.FLEX_ITEM ||
-      layout == Layout.FLUID ||
-      layout == Layout.INTRINSIC);
+  return DEFINED_LAYOUT_SIZES.test(layout);
 }
 
 
@@ -251,8 +252,7 @@ export function getLengthNumeral(length) {
  * @return {boolean}
  */
 export function hasNaturalDimensions(tagName) {
-  tagName = tagName.toUpperCase();
-  return naturalDimensions_[tagName] !== undefined;
+  return naturalDimensions_[tagName.toUpperCase()] !== undefined;
 }
 
 
@@ -300,7 +300,7 @@ export function isLoadingAllowed(element) {
   if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
     return true;
   }
-  return LOADING_ELEMENTS_[tagName] || false;
+  return LOADING_ELEMENTS_.includes(tagName);
 }
 
 
