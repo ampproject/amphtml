@@ -75,6 +75,7 @@ const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
  */
 const CID_API_SCOPE_WHITELIST = {
   'googleanalytics': 'AMP_ECID_GOOGLE',
+  'googleauid': 'AMP_AUID_GOOGLE',
 };
 
 /**
@@ -83,6 +84,7 @@ const CID_API_SCOPE_WHITELIST = {
  */
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
+  'googleauid': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
 };
 
 /**
