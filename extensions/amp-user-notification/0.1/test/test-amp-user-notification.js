@@ -18,7 +18,7 @@ import {
   AmpUserNotification,
   UserNotificationManager,
 } from '../amp-user-notification';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
