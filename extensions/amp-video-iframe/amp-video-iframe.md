@@ -24,10 +24,6 @@ limitations under the License.
     <td>Displays an iframe containing a video player.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Status</strong></td>
-    <td>Experimental. You must turn on the <code>amp-video-iframe</code> experiment to use this component.</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js">&lt;/script></code></td>
   </tr>
