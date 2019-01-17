@@ -174,8 +174,8 @@ function convertAmpMaskToInputmask(ampMask) {
       const escape = escapeNext;
       escapeNext = (c == MaskChars.ESCAPE);
 
-      return escape ? c : MaskCharsToInputmask[c] || c;
-    }).filter(Boolean).join('');
+      return (escape ? c : MaskCharsToInputmask[c]) || c;
+    }).join('');
   });
 }
 
