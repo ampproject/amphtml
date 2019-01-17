@@ -350,12 +350,9 @@ export function addPurifyHooks(purifier, diffing) {
     });
     allowedTagsChanges.length = 0;
 
-    // Output user errors for each removed attribute or element.
+    // Output user errors for each removed element.
     this.removed.forEach(r => {
-      if (r.attribute) {
-        const {name, value} = r.attribute;
-        user().error(TAG, `Removed unsafe attribute: ${name}="${value}"`);
-      } else if (r.element) {
+      if (r.element) {
         const {nodeName} = r.element;
         if (nodeName !== 'REMOVE') { // <remove> is added by DOMPurify.
           user().error(TAG, 'Removed unsafe element:', r.element.nodeName);
@@ -416,8 +413,7 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
+    const classicBinding = isBindingAttribute(attrName);
     const alternativeBinding = startsWith(attrName, BIND_PREFIX);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
@@ -464,12 +460,21 @@ export function addPurifyHooks(purifier, diffing) {
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
     remove(this.removed, r => {
-      if (r.from === node && r.attribute) {
-        const {name, value} = r.attribute;
-        if (name.toLowerCase() === 'on') {
-          node.setAttribute('on', value);
-          return true; // Delete from `removed` array once processed.
-        }
+      // Ignore attributes belonging to other nodes.
+      if (r.from !== node) {
+        return false;
+      }
+      if (!r.attribute) {
+        return false;
+      }
+      const {name, value} = r.attribute;
+      if (name.toLowerCase() === 'on') {
+        node.setAttribute('on', value);
+        return true; // Delete from `removed` array once processed.
+      }
+      // Output user error for sanitized attributes.
+      if (!isBindingAttribute(name)) {
+        user().error(TAG, `Removed unsafe attribute: ${name}="${value}"`);
       }
       return false;
     });
@@ -479,6 +484,14 @@ export function addPurifyHooks(purifier, diffing) {
   purifier.addHook('afterSanitizeElements', afterSanitizeElements);
   purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
+}
+
+/**
+ * @param {string} attrName
+ * @return {boolean}
+ */
+export function isBindingAttribute(attrName) {
+  return attrName[0] == '[' && attrName[attrName.length - 1] == ']';
 }
 
 /**
