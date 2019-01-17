@@ -33,21 +33,22 @@
   <h2>Named Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
-      target="_blank">
-    <p>Credit card (credit)</p>
-    <input id="payment-card" type="text" mask="payment-card" placeholder="Card number">
+      target="_blank"
+      id="form-a">
+    <p>Credit card (<code>payment-card</code>)</p>
+    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" placeholder="Card number">
 
-    <p>mm/dd/yyyy (date-mm-dd-yyyy)</p>
-    <input name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
+    <p>mm/dd/yyyy (<code>date-mm-dd-yyyy</code>)</p>
+    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
 
-    <p>dd/mm/yyyy (date-dd-mm-yyyy)</p>
-    <input name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
+    <p>dd/mm/yyyy (<code>date-dd-mm-yyyy</code>)</p>
+    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
 
-    <p>yyyy-mm-dd (date-yyyy-mm-dd)</p>
-    <input name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
+    <p>yyyy-mm-dd (<code>date-yyyy-mm-dd</code>)</p>
+    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
 
-    <p>mm/yy (date-mm-yy)</p>
-    <input name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
+    <p>mm/yy (<code>date-mm-yy</code>)</p>
+    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
 
     <input type="submit">
   </form>
@@ -55,27 +56,138 @@
   <h2>Custom Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
-      target="_blank">
+      target="_blank"
+      id="form-b">
     <p>Plain text (no mask)</p>
-    <input name="text" type="text">
+    <input id="b-text" name="text" type="text">
 
     <p>Single character</p>
-    <input name="char" mask="L" type="text">
+    <input id="b-char" name="char" mask="L" type="text">
 
-    <p>Phone</p>
-    <input name="phone1" type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+    <p>Phone 2</p>
+    <input id="b-phone2" name="b-phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" placeholder="+1(555)555-5555">
+    <p>Phone (German)</p>
+    <input id="b-phone3" name="b-phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" placeholder="+49(0000)0000-0000">
 
     <p>US Postal Code</p>
-    <input name="us-postal" mask="00000 00000-0000" placeholder="10024" type="text">
+    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" placeholder="10024" type="tel">
 
     <p>Canadian Postal Code</p>
-    <input name="ca-postal" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
 
-    <p>15 or 16 digit Credit Card (switches on length)</p>
-    <input mask="0000_000000_00000 0000_0000_0000_0000 " placeholder="0000 0000 0000 0000" type="text">
+    <p>US or Canada postal code</p>
+    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" placeholder="Post Code" type="text">
 
-    <p>15 or 16 digit Credit Card (switches on 37 or 34)</p>
-    <input mask="3400_000000_00000 3700_000000_00000 0000_0000_0000_0000" type="text">
+    <p>Dollars</p>
+    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="text">
+
+    <input type="submit">
+  </form>
+
+
+  <h2>Full form</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-c">
+    <p>Name</p>
+    <input id="c-name" name="name" type="text">
+
+    <p>Address Line 1</p>
+    <input id="c-addressline1" name="addressline1" type="text">
+
+    <p>Address Line 2</p>
+    <input id="c-addressline2" name="addressline2" type="text">
+
+    <p>City</p>
+    <input id="c-city" name="city" type="text">
+
+    <p>Zip Code</p>
+    <input id="c-zip" name="zip" mask="00000 00000-0000" placeholder="10024" type="text">
+
+    <p>Phone</p>
+    <input id="c-phone" name="phone" mask="+1(000)000-0000" placeholder="+1(555)555-5555" type="tel">
+
+    <p>Dollars</p>
+    <input id="c-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel">
+
+    <p>Payment card</p>
+    <input id="c-card" name="card" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel">
+
+    <input type="submit">
+  </form>
+
+  <h2>Forms with initial values</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-d">
+    <p>Postal Codes</p>
+    <table>
+      <thead><th>value</th><th>mask</th><th>masked</th></thead>
+      <tbody>
+        <tr><td>10001</td><td>00000 00000-0000</td><td><input id="d-post-code-us1" value="10001" name="post-code-us1" mask="00000 00000-0000" placeholder="10024" type="tel"></td></tr>
+        <tr><td>10001-1234</td><td>00000 00000-0000</td><td><input id="d-post-code-us2" value="10001-1234" name="post-code-us2" mask="00000 00000-0000" placeholder="10024" type="tel"></td></tr>
+        <tr><td>A1A 1A1</td><td>L0L_0L0</td><td><input id="d-post-code-ca1" value="A1A 1A1" name="post-code-ca1" mask="L0L_0L0" placeholder="A1A 1A1" type="text"></td></tr>
+        <tr><td>10001</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both1" value="10001" name="post-code-both1" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+        <tr><td>10001-1234</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both2" value="10001-1234" name="post-code-both2" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+        <tr><td>A1A 1A1</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both3" value="A1A 1A1" name="post-code-both3" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+      </tbody>
+    </table>
+    <p>Phone</p>
+    <table>
+      <thead><th>value</th><th>masked <code>+1(000)000-0000</code></th></thead>
+      <tbody>
+        <tr><td><code>+18006492568</code></td><td><input id="d-phone1" name="phone1" value="+18006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>18006492568</code></td><td><input id="d-phone2" name="phone2" value="18006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>8006492568</code></td><td><input id="d-phone3" name="phone3" value="8006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>(800)649-2568</code></td><td><input id="d-phone4" name="phone4" value="(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>(800)649-2568</code></td><td><input id="d-phone5" name="phone5" value="(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>1(800)649-2568</code></td><td><input id="d-phone6" name="phone6" value="1(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>1-800-649-2568</code></td><td><input id="d-phone7" name="phone7" value="1-800-649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+      </tbody>
+    </table>
+
+    <p>Dollars</p>
+    <table>
+      <thead><th>value</th><th>masked <code>$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00</code></th></thead>
+      <tbody>
+      <tr><td>1</td><td><input id="d-dollars1" name="d-dollars1" value="1" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12</td><td><input id="d-dollars2" name="d-dollars2" value="12" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123</td><td><input id="d-dollars3" name="d-dollars3" value="123" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>1234</td><td><input id="d-dollars4" name="d-dollars4" value="1234" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12345</td><td><input id="d-dollars5" name="d-dollars5" value="12345" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123456</td><td><input id="d-dollars6" name="d-dollars6" value="123456" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>1234567</td><td><input id="d-dollars7" name="d-dollars7" value="1234567" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12345678</td><td><input id="d-dollars8" name="d-dollars8" value="12345678" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123456789</td><td><input id="d-dollars9" name="d-dollars9" value="123456789" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+    </table>
+
+    <p>Payment card</p>
+    <!-- https://www.paypalobjects.com/en_AU/vhelp/paypalmanager_help/credit_card_numbers.htm -->
+    <table>
+      <thead><th>card type</th><th>masked</th></thead>
+      <tbody>
+        <tr><td>American Express</td><td><input id="d-payment-card1" name="payment-card1" value="378282246310005" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>American Express</td><td><input id="d-payment-card2" name="payment-card2" value="371449635398431" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>American Express Corporate</td><td><input id="d-payment-card3" name="payment-card3" value="378734493671000" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Australian BankCard</td><td><input id="d-payment-card4" name="payment-card4" value="5610591081018250" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Diners Club</td><td><input id="d-payment-card5" name="payment-card5" value="30569309025904" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Diners Club</td><td><input id="d-payment-card6" name="payment-card6" value="38520000023237" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Discover</td><td><input id="d-payment-card7" name="payment-card7" value="6011111111111117" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Discover</td><td><input id="d-payment-card8" name="payment-card8" value="6011000990139424" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>JCB</td><td><input id="d-payment-card9" name="payment-card9" value="3530111333300000" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>JCB</td><td><input id="d-payment-card10" name="payment-card10" value="3566002020360505" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>MasterCard</td><td><input id="d-payment-card11" name="payment-card11" value="5555555555554444" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>MasterCard</td><td><input id="d-payment-card12" name="payment-card12" value="5105105105105100" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card13" name="payment-card13" value="4111111111111111" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card14" name="payment-card14" value="4012888888881881" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card15" name="payment-card15" value="4222222222222" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+      </tbody>
+    </table>
+    <input type="submit">
+  </form>
+
 
     <input type="submit">
   </form>

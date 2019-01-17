@@ -123,7 +123,7 @@ export class Mask {
     } else {
       const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
       config.alias = 'custom';
-      config.mask = () => inputmaskMask;
+      config.customMask = inputmaskMask;
     }
 
     this.controller_ = Inputmask(config);
@@ -169,7 +169,13 @@ function convertAmpMaskToInputmask(ampMask) {
       .split(MASK_SEPARATOR_CHAR)
       .map(m => m.replace(/_/g, ' '));
   return masks.map(mask => {
-    return mask.split('').map(c => MaskCharsToInputmask[c] || c).join('');
+    let escapeNext = false;
+    return mask.split('').map(c => {
+      const escape = escapeNext;
+      escapeNext = (c == MaskChars.ESCAPE);
+
+      return (escape ? c : MaskCharsToInputmask[c]) || c;
+    }).join('');
   });
 }
 
