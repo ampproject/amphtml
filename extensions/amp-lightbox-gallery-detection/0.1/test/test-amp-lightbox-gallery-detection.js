@@ -18,16 +18,16 @@ import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
   LIGHTBOXABLE_ATTR,
+  RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
-  SHRUNK_AREA_DELTA_RATIO,
   Scanner,
   VIEWPORT_AREA_RATIO,
   meetsCriteria,
+  meetsSizingCriteria,
   scanDoc,
 } from '../amp-lightbox-gallery-detection';
 import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {tryResolve} from '../../../../src/utils/promise';
 
 
@@ -52,35 +52,14 @@ describes.realWin(TAG, {
 
   const criteriaMethod = c => 'meets' + capitalize(c) + 'Criteria';
 
-  function mockViewportSize(width, height) {
-    env.sandbox.stub(Services, 'viewportForDoc').returns({
-      getSize() {
-        return {width, height};
-      },
-    });
-  }
-
   function mockCriteriaMet(criteria, isMet) {
     env.sandbox.stub(Criteria, criteriaMethod(criteria)).returns(isMet);
   }
 
   const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
 
-  function mockAllCriteriaMet(isMet, opt_el) {
+  function mockAllCriteriaMet(isMet) {
     stubAllCriteriaMet().returns(isMet);
-  }
-
-  function mockNaturalDimensions(ampImg, naturalWidth, naturalHeight) {
-    env.sandbox.stub(ampImg, 'querySelector').withArgs('img').returns({
-      nodeType: /* ELEMENT */ 1,
-      naturalWidth,
-      naturalHeight,
-    });
-  }
-
-  function mockRenderDimensions(ampImg, width, height) {
-    env.sandbox.stub(ampImg, 'getLayoutBox').returns(
-        layoutRectLtwh(0, 0, width, height));
   }
 
   function mockScannedImages(images) {
@@ -283,33 +262,73 @@ describes.realWin(TAG, {
       });
     });
 
-    const areaDeltaPerc = SHRUNK_AREA_DELTA_RATIO * 100;
+  });
 
-    it(`accepts images ${areaDeltaPerc}%+ larger than viewport area`, () => {
+  describe('meetsSizingCriteria', () => {
+    const areaDeltaPerc = RENDER_AREA_RATIO * 100;
+
+    it(`accepts images ${areaDeltaPerc}%+ of size than render area`, () => {
       const vw = 1000;
       const vh = 600;
 
-      mockViewportSize(vw, vh);
+      const renderWidth = 1000;
+      const renderHeight = 200;
 
-      const minArea = (vw * vh) * (1 + SHRUNK_AREA_DELTA_RATIO);
+      const renderArea = renderWidth * renderHeight;
+
+      const minArea = (renderArea) * RENDER_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
       [
-        minDim,
+        minDim + 1,
         minDim + 10,
         minDim + 100,
       ].forEach(naturalWidth => {
         [
-          minDim,
+          minDim + 1,
           minDim + 10,
           minDim + 100,
         ].forEach(naturalHeight => {
-          const el = html`<amp-img src="bla.png"></amp-img>`;
+          expect(meetsSizingCriteria(
+              renderWidth,
+              renderHeight,
+              naturalWidth,
+              naturalHeight,
+              vw,
+              vh)).to.be.true;
+        });
+      });
+    });
 
-          mockRenderDimensions(el, vw / 2, vh / 2);
-          mockNaturalDimensions(el, naturalWidth, naturalHeight);
+    it(`rejects images < ${areaDeltaPerc}%+ of size of render area`, () => {
+      const vw = 1000;
+      const vh = 600;
 
-          expect(meetsCriteria(el)).to.be.true;
+      const renderWidth = 100;
+      const renderHeight = 100;
+
+      const renderArea = renderWidth * renderHeight;
+
+      const minArea = (renderArea) * (RENDER_AREA_RATIO - 0.1);
+      const minDim = Math.sqrt(minArea);
+
+      [
+        minDim,
+        minDim - 10,
+        minDim - 100,
+      ].forEach(naturalWidth => {
+        [
+          minDim,
+          minDim - 10,
+          minDim - 100,
+        ].forEach(naturalHeight => {
+          expect(meetsSizingCriteria(
+              renderWidth,
+              renderHeight,
+              naturalWidth,
+              naturalHeight,
+              vw,
+              vh)).to.be.false;
         });
       });
     });
@@ -320,10 +339,11 @@ describes.realWin(TAG, {
       const vw = 1000;
       const vh = 600;
 
-      mockViewportSize(vw, vh);
-
       const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
+
+      const naturalWidth = 100;
+      const naturalHeight = 100;
 
       [
         minDim,
@@ -335,15 +355,116 @@ describes.realWin(TAG, {
           minDim + 10,
           minDim + 100,
         ].forEach(renderHeight => {
-          const el = html`<amp-img src="bla.png"></amp-img>`;
-
-          mockRenderDimensions(el, renderWidth, renderHeight);
-          mockNaturalDimensions(el, renderWidth, renderHeight);
-
-          expect(meetsCriteria(el)).to.be.true;
+          expect(meetsSizingCriteria(
+              renderWidth,
+              renderHeight,
+              naturalWidth,
+              naturalHeight,
+              vw,
+              vh)).to.be.true;
         });
       });
 
+    });
+
+    it(`rejects images that cover < ${minAreaPerc}% of the viewport`, () => {
+      const vw = 1000;
+      const vh = 600;
+
+      const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
+      const minDim = Math.sqrt(minArea);
+
+      [
+        minDim - 1,
+        minDim - 10,
+        minDim - 100,
+      ].forEach(renderWidth => {
+        [
+          minDim - 1,
+          minDim - 10,
+          minDim - 100,
+        ].forEach(renderHeight => {
+          expect(meetsSizingCriteria(
+              renderWidth,
+              renderHeight,
+              /* naturalWidth */ renderWidth,
+              /* naturalHeight */ renderHeight,
+              vw,
+              vh)).to.be.false;
+        });
+      });
+    });
+
+    it('accepts images with height > than viewport\'s', () => {
+      const vw = 1000;
+      const vh = 600;
+
+      const renderWidth = vw;
+      const renderHeight = vh;
+
+      [
+        vh + 1,
+        vh + 10,
+        vh + 100,
+      ].forEach(naturalHeight => {
+        expect(meetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            /* naturalWidth */ renderWidth,
+            naturalHeight,
+            vw,
+            vh)).to.be.true;
+      });
+    });
+
+    it('accepts images with width > than viewport\'s', () => {
+      const vw = 1000;
+      const vh = 600;
+
+      const renderWidth = vw;
+      const renderHeight = vh;
+
+      [
+        vw + 1,
+        vw + 10,
+        vw + 100,
+      ].forEach(naturalWidth => {
+        expect(meetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            /* naturalHeight */ renderHeight,
+            vw,
+            vh)).to.be.true;
+      });
+    });
+
+    it('rejects images with dimensions <= than viewport\'s', () => {
+      const vw = 1000;
+      const vh = 600;
+
+      const renderWidth = 100;
+      const renderHeight = 100;
+
+      [
+        renderWidth,
+        renderWidth - 10,
+        renderWidth - 100,
+      ].forEach(naturalWidth => {
+        [
+          renderHeight,
+          renderHeight - 10,
+          renderHeight - 100,
+        ].forEach(naturalHeight => {
+          expect(meetsSizingCriteria(
+              renderWidth,
+              renderHeight,
+              naturalWidth,
+              naturalHeight,
+              vw,
+              vh)).to.be.false;
+        });
+      });
     });
 
   });

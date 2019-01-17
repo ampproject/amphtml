@@ -185,6 +185,11 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-lightbox-gallery-detection',
+    version: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-list',
     version: '0.1',
     options: {hasCss: true},

@@ -34,7 +34,10 @@ const TAG = 'amp-lightbox-gallery-detection';
 export const REQUIRED_EXTENSION = 'amp-lightbox-gallery';
 export const LIGHTBOXABLE_ATTR = 'lightbox';
 
-export const SHRUNK_AREA_DELTA_RATIO = 0.3;
+/** Factor of naturalArea vs renderArea to lightbox. */
+export const RENDER_AREA_RATIO = 1.2;
+
+/** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.4;
 
 const ACTIONABLE_ANCESTORS = 'a[href], amp-selector, amp-script';
@@ -59,30 +62,21 @@ export class Criteria {
    * @return {!Element}
    */
   static meetsSizingCriteria(element) {
-    const viewport = Services.viewportForDoc(element);
-
     const {naturalWidth, naturalHeight} =
         dev().assertElement(element.querySelector('img'));
+
     const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
-    const {width: viewportWidth, height: viewportHeight} = viewport.getSize();
 
-    const viewportArea = viewportWidth * viewportHeight;
+    const viewport = Services.viewportForDoc(element);
+    const {width: vw, height: vh} = viewport.getSize();
 
-    const naturalArea = naturalWidth * naturalHeight;
-    const renderArea = renderWidth * renderHeight;
-
-    const naturalAreaDelta = naturalArea - renderArea;
-    const naturalAreaDeltaPerc = naturalAreaDelta / naturalArea;
-
-    const isShrunk = naturalAreaDeltaPerc <= SHRUNK_AREA_DELTA_RATIO;
-
-    const isCoveringSignificantArea =
-        (naturalArea / viewportArea) >= VIEWPORT_AREA_RATIO;
-
-    const isLargerThanViewport = naturalWidth > viewportWidth
-      || naturalHeight > viewportHeight;
-
-    return isShrunk || isLargerThanViewport || isCoveringSignificantArea;
+    return meetsSizingCriteria(
+        renderWidth,
+        renderHeight,
+        naturalWidth,
+        naturalHeight,
+        vw,
+        vh);
   }
 
   /**
@@ -102,6 +96,40 @@ export class Criteria {
       matches(element, ACTIONABLE_ANCESTORS) ||
       TAP_ACTION_REGEX.test(element.getAttribute('on') || ''));
   }
+}
+
+
+/**
+ * @param {number} renderWidth
+ * @param {number} renderHeight
+ * @param {number} naturalWidth
+ * @param {number} naturalHeight
+ * @param {number} vw
+ * @param {number} vh
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function meetsSizingCriteria(
+  renderWidth,
+  renderHeight,
+  naturalWidth,
+  naturalHeight,
+  vw,
+  vh) {
+
+  const viewportArea = vw * vh;
+  const naturalArea = naturalWidth * naturalHeight;
+  const renderArea = renderWidth * renderHeight;
+
+  const isShrunk =
+    (naturalArea / renderArea) >= RENDER_AREA_RATIO;
+
+  const isCoveringSignificantArea =
+    (renderArea / viewportArea) >= VIEWPORT_AREA_RATIO;
+
+  const isLargerThanViewport = naturalWidth > vw || naturalHeight > vh;
+
+  return isShrunk || isLargerThanViewport || isCoveringSignificantArea;
 }
 
 
