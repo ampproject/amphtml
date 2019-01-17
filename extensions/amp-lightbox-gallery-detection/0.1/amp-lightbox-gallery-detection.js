@@ -42,7 +42,7 @@ export const RENDER_AREA_RATIO = 1.2;
 /** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.4;
 
-const ACTIONABLE_ANCESTORS = 'a[href], amp-selector, amp-script';
+const ACTIONABLE_ANCESTORS = 'a[href], amp-selector, amp-script, amp-story';
 const TAP_ACTION_REGEX = /(;|\s|^)tap\:/;
 
 

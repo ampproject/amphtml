@@ -250,6 +250,29 @@ describes.realWin(TAG, {
       });
     });
 
+    it('rejects images inside an <amp-story>', () => {
+      mockCriteriaMet('placeholder', true);
+      mockCriteriaMet('sizing', true);
+
+      const renderScenarios = [
+        // immediate container is amp-story
+        html`<amp-story>
+          <amp-img src="bla.png"></amp-img>
+        </amp-story>`,
+
+        // non-immediate ancestor is amp-story
+        html`<amp-story>
+          <div>
+            <amp-img src="bla.png"></amp-img>
+          </div>
+        </amp-story>`,
+      ];
+
+      renderScenarios.forEach(root => {
+        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
+      });
+    });
+
     it('rejects images inside a clickable link', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
