@@ -202,23 +202,23 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sideb
 {% endcall %}
 
 ## Sidebar for Stories
-The sidebar is also usable within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are **disallowed** attributes and features of sidebars within an `amp-story`
+Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are allowed attributes and features of sidebars within an `amp-story`:
 
-- side
-- open
-- toolbar
-- toolbar-target
+### Allowed Attributes
+- [layout](#layout).
+- [data-close-button-aria-label](#data)
+- [common attributes](#common)
 
 ### Behavior
-- The `<amp-sidebar>` must be a direct child of `<amp-story>`
-- The sidebar defaults to the "start" side for regular AMP documents, meaning right for left-right languages and left for right-to-left languages
-- The `<amp-sidebar>` has default background color of white and is overridable in CSS
-- The `<amp-sidebar>` the maximum width of the sidebar is enforced (320px for the desktop experience and otherwise 280px)
-- By default, a 'hamburger' style button that opens/closes the sidebar will appear on the story UI
+- The `<amp-sidebar>` must be a direct child of `<amp-story>`.
+- The sidebar defaults to the "start" side for regular AMP documents, meaning right for left-right languages and left for right-to-left languages.
+- The `<amp-sidebar>` has default background color of white and is overridable in CSS.
+- Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
+- By default, a 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
 
 *Example: Basic Sidebar in a Story*
 
-In the following example, we've placed a simple sidebar in within a story. Remember that you will need to link to both the sidebar and story in the head of the document in order to use these components together.
+The following example shows a simple `amp-sidebar` within an `amp-story`.
 
 ```html
 ...
@@ -226,7 +226,7 @@ In the following example, we've placed a simple sidebar in within a story. Remem
     <amp-story standalone>
       <amp-sidebar id="sidebar1" layout="nodisplay">
         <ul>
-          <li><a href=https://www.ampproject.org"> External Link </a></li>
+          <li><a "href=https://www.ampproject.org"> External Link </a></li>
           <li>Nav item 2</li>
           <li>Nav item 3</li>
         </ul>
@@ -247,7 +247,7 @@ In the following example, we've placed a simple sidebar in within a story. Remem
 
 Indicates what side of the page the sidebar should open from, either `left` or `right`.  If a `side` is not specified, the `side` value will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => `right`); if no `dir` exists, the `side` defaults to `left`.
 
-##### layout
+##### layout<a name="layout"></a>
 
 Specifies the display layout of the sidebar, which must be `nodisplay`.
 
@@ -256,7 +256,7 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 This attribute is present when the sidebar is open.
 
 
-##### data-close-button-aria-label
+##### data-close-button-aria-label<a name="data"></a>
 
 Optional attribute used to set ARIA label for the close button added for accessibility.
 
@@ -269,7 +269,7 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">`, and accepts an id of an element on the page.  The `toolbar-target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#toolbar) section for more information on using toolbars.
 
-##### common attributes
+##### common attributes<a name="common"></a>
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
