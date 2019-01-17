@@ -44,7 +44,7 @@ export function uzou(global, data) {
   container.appendChild(d);
 
   const uzouInjector = {
-    url: (
+    url: encodeURIComponent(
       widgetParams['url'] ||
       global.context.sourceUrl ||
       global.context.canonicalUrl
