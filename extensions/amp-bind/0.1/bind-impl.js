@@ -1177,12 +1177,11 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const selects = closestByTag(element, 'select');
-    if (!selects.length) {
+    const select = closestByTag(element, 'select');
+    if (!select) {
       return;
     }
     // Set corresponding selectedIndex on <select> parent.
-    const select = selects[0];
     const index = toArray(select.options).indexOf(element);
     if (index >= 0) {
       select.selectedIndex = index;
