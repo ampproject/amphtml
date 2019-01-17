@@ -62,6 +62,9 @@ export let VariableDef;
 export let VariablesDef;
 
 /**
+ * Supported Behaviors:
+ *  -- clickTarget -- Specifies where to open the click, defaults to '_blank'
+ *
  * @typedef {{
  *   clickTarget: (string|undefined)
  * }}

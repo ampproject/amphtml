@@ -111,8 +111,7 @@ export class AmpAdExit extends AMP.BaseElement {
       ? '_top'
       : '_blank';
     openWindowDialog(this.win, substituteVariables(target.finalUrl),
-      clickTarget);
-    
+        clickTarget);
   }
 
 
