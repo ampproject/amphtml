@@ -19,7 +19,7 @@ import {getMode} from '../../../src/mode';
 /**
  * The CMP config should looks like
  * {
- *   'consentInstanceId': string, // The key to store consent information
+ *   'storageKey': string, // The key to store consent information
  *   'checkConsentHref': url, // remote endpoint
  *   'promptUISrc': url, // the src for prompt iframe window
  * }
@@ -29,7 +29,7 @@ export const CMP_CONFIG = ({});
 
 if (getMode().test || getMode().localDev) {
   CMP_CONFIG['_ping_'] = {
-    'consentInstanceId': '_ping_',
+    'storageKey': '_ping_',
     'checkConsentHref': '/get-consent-v1',
     'promptUISrc': '/test/manual/diy-consent.html',
   };

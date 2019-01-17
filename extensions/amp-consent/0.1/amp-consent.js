@@ -123,10 +123,6 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     /**
-     * TODO (@zhouyx): Migrate to the new consent config format.
-     * Need to support the deprecated format as well.
-     * Have ConsentConfig.getConsentConfig auto convert configuration format.
-     *
      * Deprecated Format
      * {
      *   'consentInstanceId': {
@@ -135,7 +131,7 @@ export class AmpConsent extends AMP.BaseElement {
      *   }
      * }
      *
-     * New proposed Format
+     * New Format
      * {
      *   'storageKey': ...
      *   'checkConsentHref': ...
@@ -144,7 +140,7 @@ export class AmpConsent extends AMP.BaseElement {
      * }
      */
 
-    const policyConfig = config.getPolicyConfig();
+    const policyConfig = this.consentConfig_['policy'] || dict({});
 
     this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentId_);
 

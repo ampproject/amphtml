@@ -316,6 +316,7 @@ export class ConsentInstance {
     });
     cidPromise.then(userId => {
       const request = /** @type {!JsonObject} */ ({
+        // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
         'ampUserId': userId,
       });
