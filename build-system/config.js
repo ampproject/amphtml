@@ -62,7 +62,7 @@ const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
 const testPaths = commonIntegrationTestPaths.concat([
-  'test/*/!(e2e)/**/*.js',
+  'test/integration/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);
