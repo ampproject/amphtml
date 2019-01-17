@@ -1387,7 +1387,7 @@ export function factory($, window, document, undefined) {
                 }
             }
             if ($.isFunction(opts.postValidation) && result !== false && !strict && fromSetValid !== true && validateOnly !== true) {
-                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts);
+                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts, getMaskSet());
                 if (postResult !== undefined) {
                     if (postResult.refreshFromBuffer && postResult.buffer) {
                         var refresh = postResult.refreshFromBuffer;

@@ -22,6 +22,9 @@ import {
 import {MaskInterface} from './mask-interface';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {
+  factory as inputmaskDateExtensionsFactory,
+} from '../../../third_party/inputmask/inputmask.date.extensions';
+import {
   factory as inputmaskDependencyFactory,
 } from '../../../third_party/inputmask/inputmask.dependencyLib';
 import {
@@ -33,6 +36,22 @@ import {
 
 const NamedMasksToInputmask = {
   [NamedMasks.PAYMENT_CARD]: 'payment-card',
+  [NamedMasks.DATE_DD_MM_YYYY]: {
+    alias: 'datetime',
+    inputFormat: 'dd/mm/yyyy',
+  },
+  [NamedMasks.DATE_MM_DD_YYYY]: {
+    alias: 'datetime',
+    inputFormat: 'mm/dd/yyyy',
+  },
+  [NamedMasks.DATE_MM_YY]: {
+    alias: 'datetime',
+    inputFormat: 'mm/yy',
+  },
+  [NamedMasks.DATE_YYYY_MM_DD]: {
+    alias: 'datetime',
+    inputFormat: 'yyyy-mm-dd',
+  },
 };
 
 const MaskCharsToInputmask = {
@@ -68,8 +87,9 @@ export class Mask {
         inputmaskDependencyFactory(win, doc);
     Inputmask = Inputmask || inputmaskFactory(
         InputmaskDependencyLib, win, doc, undefined);
-    inputmaskPaymentCardAliasFactory(Inputmask);
     inputmaskCustomAliasFactory(Inputmask);
+    inputmaskDateExtensionsFactory(Inputmask);
+    inputmaskPaymentCardAliasFactory(Inputmask);
 
     Inputmask.extendDefaults({
       // A list of supported input type attribute values
