@@ -1653,7 +1653,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
           TestElement);
       win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
-      LOADING_ELEMENTS_.push('amp-test-loader'.toUpperCase());
+      const tagUpperCase = 'amp-test-loader'.toUpperCase();
+      if (!LOADING_ELEMENTS_.includes(tagUpperCase)) {
+        LOADING_ELEMENTS_.push(tagUpperCase);
+      }
       resources = Services.resourcesForDoc(doc);
       resources.isBuildOn_ = true;
       resourcesMock = sandbox.mock(resources);
@@ -1699,7 +1702,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should disable when element is not whitelisted', () => {
       stubInA4A(false);
-      LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
+
+      const tagUpperCase = 'amp-test-loader'.toUpperCase();
+      const location = LOADING_ELEMENTS_.indexOf(tagUpperCase);
+      if (location >= 0) {
+        LOADING_ELEMENTS_.splice(location, 1);
+      }
+
       expect(element.isLoadingEnabled_()).to.be.false;
     });
 
