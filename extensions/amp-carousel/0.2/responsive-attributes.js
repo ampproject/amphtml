@@ -65,6 +65,11 @@ export class ResponsiveAttributes {
    * @param {string} newValue The new value for the attribute.
    */
   updateAttribute(name, newValue) {
+    // Not an attribute we are managing.
+    if (!this.config_[name]) {
+      return;
+    }
+
     const prevMqlv = this.mediaQueryListsAndValues_[name];
     // Need to explicitly clear the onchange. Otherwise the underlying
     // MediqaQueryLists will still be active with their callbacks.
@@ -89,19 +94,26 @@ export class ResponsiveAttributes {
    * @private
    */
   getMediaQueryListsAndValues_(value) {
-    return value.split(',').map(part => {
-      // Find the value portion by looking at the end.
-      const {index} = /[a-z0-9.]+$/.exec(part);
-      const value = part.slice(index);
-      // The media query is everything before the value.
-      const mediaQuery = part.slice(0, index).trim();
-      const mediaQueryList = window.matchMedia(mediaQuery);
+    return value.split(',')
+        .map(part => {
+          // Find the value portion by looking at the end.
+          const result = /[a-z0-9.]+$/.exec(part);
+          if (!result) {
+            return;
+          }
 
-      return {
-        mediaQueryList,
-        value,
-      };
-    });
+          const {index} = result;
+          const value = part.slice(index);
+          // The media query is everything before the value.
+          const mediaQuery = part.slice(0, index).trim();
+          const mediaQueryList = window.matchMedia(mediaQuery);
+
+          return {
+            mediaQueryList,
+            value,
+          };
+        })
+        .filter(item => item);
   }
 
   /**
