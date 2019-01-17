@@ -28,6 +28,7 @@ import {
   scanDoc,
 } from '../amp-lightbox-gallery-detection';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {tryResolve} from '../../../../src/utils/promise';
 
@@ -571,12 +572,12 @@ describes.realWin(TAG, {
   describe('isDocValid', () => {
 
     it('rejects documents without schema', () => {
-      expect(isDocValid(env.win.document)).to.be.false;
+      expect(isDocValid(env.ampdoc)).to.be.false;
     });
 
     it('rejects schema with invalid @type', () => {
       mockSchemaType('hamberder');
-      expect(isDocValid(env.win.document)).to.be.false;
+      expect(isDocValid(env.ampdoc)).to.be.false;
     });
 
     [
@@ -589,7 +590,27 @@ describes.realWin(TAG, {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
-        expect(isDocValid(env.win.document)).to.be.true;
+        expect(isDocValid(env.ampdoc)).to.be.true;
+      });
+
+      it(`rejects schema with @type=${type} but lightbox explicit`, () => {
+        const doc = env.win.document;
+
+        const extensionScript = createElementWithAttributes(doc, 'script', {
+          'custom-element': REQUIRED_EXTENSION,
+        });
+
+        const lightboxable = createElementWithAttributes(doc, 'amp-img', {
+          [LIGHTBOXABLE_ATTR]: '',
+        });
+
+        doc.head.appendChild(extensionScript);
+        doc.body.appendChild(lightboxable);
+
+        mockSchemaType(type);
+
+        expect(isDocValid(env.ampdoc)).to.be.false;
+
       });
 
     });

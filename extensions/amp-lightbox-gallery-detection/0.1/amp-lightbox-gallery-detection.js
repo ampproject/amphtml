@@ -165,13 +165,25 @@ export function meetsCriteria(element) {
 
 
 /**
- * @param {!Document} doc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
  * @visibleForTesting
  */
-export function isDocValid(doc) {
-  const schemaTag = toArray(doc.head.querySelectorAll('script'))
+export function isDocValid(ampdoc) {
+  const scriptTags = toArray(ampdoc.getHeadNode().querySelectorAll('script'));
+
+  const schemaTag = scriptTags
       .find(t => t.getAttribute('type') == 'application/ld+json');
+
+  const currentScriptTag = scriptTags
+      .find(t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
+
+  const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
+
+  if (currentScriptTag &&
+      ampdoc.getRootNode().querySelector(lightboxedElementsSelector)) {
+    return false;
+  }
 
   if (!schemaTag) {
     return false;
@@ -231,15 +243,14 @@ function applyToScanned(ampdoc, images) {
  * @return {!Promise}
  */
 export function scanDoc(ampdoc) {
-  const doc = ampdoc.win.document;
-
-  if (!isDocValid(doc)) {
+  if (!isDocValid(ampdoc)) {
     return Promise.resolve();
   }
 
-  const maybeApply = () => Scanner.getAllImages(doc).then(images => {
-    applyToScanned(ampdoc, images);
-  });
+  const maybeApply = () => Scanner.getAllImages(ampdoc.win.document)
+      .then(images => {
+        applyToScanned(ampdoc, images);
+      });
 
   ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, maybeApply);
 
