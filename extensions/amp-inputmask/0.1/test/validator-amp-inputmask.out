@@ -33,6 +33,8 @@ FAIL
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <!-- Valid: mask attr -->
 |      <input mask="L0L_0L0">
+|      <!-- Valid: empty mask attr -->
+|      <input mask="">
 |      <!-- Valid: mask attr with the mask-output attr -->
 |      <input mask="L0L_0L0" mask-output="raw">
 |      <!-- Valid: mask attr with type=text -->
@@ -53,14 +55,10 @@ FAIL
 |      <input mask="date-mm-yy" type="tel">
 |      <!-- Valid: mask attr with named mask "date-yyyy-mm-dd" -->
 |      <input mask="date-yyyy-mm-dd" type="tel">
-|      <!-- Valid: mask attr with named mask with spaces -->
-|      <!-- Valid: mask attr with named mask "payment-card" with spaces -->
-|      <input mask="payment-card " type="tel">
-|      <input mask=" payment-card" type="tel">
-|      <input mask=" payment-card " type="tel">
-|      <input mask="  payment-card  " type="tel">
 |      <!-- Valid: mask attr with multiple custom masks -->
 |      <input mask="00000 00000-0000" type="tel">
+|      <!-- Valid: mask attr with named mask literal with escape char -->
+|      <input mask="00000 p\ayment-card" type="tel">
 |    </form>
 |
 |
@@ -68,52 +66,62 @@ FAIL
 |      <!-- Invalid: mask-output attr without mask attr -->
 |      <input mask-output="raw" type="text">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:68:4 The attribute 'mask-output' may not appear in tag 'input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:66:4 The attribute 'mask-output' may not appear in tag 'input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=date -->
 |      <input mask="L0L_0L0" type="date">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:70:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'date'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:68:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'date'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=email -->
 |      <input mask="L0L_0L0" type="email">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:72:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'email'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:70:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'email'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=number -->
 |      <input mask="L0L_0L0" type="number">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:74:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'number'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:72:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'number'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=button -->
 |      <input mask="L0L_0L0" type="button">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:76:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:74:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=range -->
 |      <input mask="L0L_0L0" type="range">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:78:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'range'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:76:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'range'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=hidden -->
 |      <input mask="L0L_0L0" type="hidden">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:80:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'hidden'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:78:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'hidden'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=password -->
 |      <input mask="L0L_0L0" type="password">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:82:4 The attribute 'type' in tag 'input [mask]' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:80:4 The attribute 'type' in tag 'input [mask] (custom mask)' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with div[contenteditable] -->
 |      <div contenteditable mask="L0L_0L0"></div>
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:84:4 The attribute 'contenteditable' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:82:4 The attribute 'contenteditable' may not appear in tag 'div'. [DISALLOWED_HTML]
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:84:4 The attribute 'mask' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:82:4 The attribute 'mask' may not appear in tag 'div'. [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with multiple masks that includes named mask -->
 |      <input mask="LOL_0L0 payment-card"></div>
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:86:4 The attribute 'mask' in tag 'input [mask]' is set to the invalid value 'LOL_0L0 payment-card'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:84:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value 'LOL_0L0 payment-card'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with multiple named masks -->
 |      <input mask="payment-card payment-card"></div>
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:88:4 The attribute 'mask' in tag 'input [mask]' is set to the invalid value 'payment-card payment-card'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:86:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value 'payment-card payment-card'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |      <input mask="payment-card date-mm-yy"></div>
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:89:4 The attribute 'mask' in tag 'input [mask]' is set to the invalid value 'payment-card date-mm-yy'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:87:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value 'payment-card date-mm-yy'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+|      <input mask="payment-card  date-mm-yy"></div>
+>>     ^~~~~~~~~
+amp-inputmask/0.1/test/validator-amp-inputmask.html:88:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value 'payment-card date-mm-yy'. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+|      <!-- Invalid: mask attr with spaces named masks -->
+|      <input mask="payment-card "></div>
+>>     ^~~~~~~~~
+amp-inputmask/0.1/test/validator-amp-inputmask.html:90:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value 'payment-card '. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
+|      <input mask=" payment-card "></div>
+>>     ^~~~~~~~~
+amp-inputmask/0.1/test/validator-amp-inputmask.html:91:4 The attribute 'mask' in tag 'input [mask] (custom mask)' is set to the invalid value ' payment-card '. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [DISALLOWED_HTML]
 |    </form>
 |    </form>
 |
