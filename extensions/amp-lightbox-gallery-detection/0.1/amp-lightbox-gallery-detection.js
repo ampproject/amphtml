@@ -50,8 +50,8 @@ const TAP_ACTION_REGEX = /(;|\s|^)tap\:/;
 export class Criteria {
 
   /**
-   * @param {boolean} element
-   * @return {!Element}
+   * @param {!Element} element
+   * @return {boolean}
    */
   static meetsAll(element) {
     return Criteria.meetsPlaceholderCriteria(element) &&
@@ -60,8 +60,8 @@ export class Criteria {
   }
 
   /**
-   * @param {boolean} element
-   * @return {!Element}
+   * @param {!Element} element
+   * @return {boolean}
    */
   static meetsSizingCriteria(element) {
     const {naturalWidth, naturalHeight} =
@@ -140,7 +140,7 @@ export class Scanner {
 
   /**
    * @param {!Document} doc
-   * @return {!Promise<!Element>}
+   * @return {!Promise<!Array<!Element>>}
    */
   static getAllImages(doc) {
     const imgs = toArray(doc.querySelectorAll('amp-img'))
@@ -165,18 +165,34 @@ export function meetsCriteria(element) {
 
 
 /**
+ * @param {!IArrayLike<T>} haystack
+ * @param {function(T):boolean} needleCb
+ * @return {?T}
+ * @template T
+ */
+function find(haystack, needleCb) {
+  for (let i = 0; i < haystack.length; i++) {
+    if (needleCb(haystack[i])) {
+      return haystack[i];
+    }
+  }
+  return null;
+}
+
+
+/**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
  * @visibleForTesting
  */
 export function isDocValid(ampdoc) {
-  const scriptTags = toArray(ampdoc.getHeadNode().querySelectorAll('script'));
+  const scriptTags = ampdoc.getHeadNode().querySelectorAll('script');
 
-  const schemaTag = scriptTags
-      .find(t => t.getAttribute('type') == 'application/ld+json');
+  const schemaTag = find(scriptTags,
+      t => t.getAttribute('type') == 'application/ld+json');
 
-  const currentScriptTag = scriptTags
-      .find(t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
+  const currentScriptTag = find(scriptTags,
+      t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
 
