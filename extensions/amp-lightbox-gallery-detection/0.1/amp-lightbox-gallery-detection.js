@@ -25,7 +25,12 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closest, iterateCursor, matches} from '../../../src/dom';
+import {
+  closest,
+  closestBySelector,
+  iterateCursor,
+  matches,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
@@ -86,7 +91,7 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsPlaceholderCriteria(element) {
-    return !element.hasAttribute('placeholder');
+    return !closestBySelector(element, '[placeholder]');
   }
 
   /**

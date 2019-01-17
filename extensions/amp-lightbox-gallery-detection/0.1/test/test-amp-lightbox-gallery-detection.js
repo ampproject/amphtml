@@ -102,9 +102,26 @@ describes.realWin(TAG, {
       mockCriteriaMet('actionable', true);
       mockCriteriaMet('sizing', true);
 
-      const element = html`<amp-img src="bla.png" placeholder></amp-img>`;
+      const renderScenarios = [
+        // image is placeholder
+        html`<amp-img src="bla.png" placeholder></amp-img>`,
 
-      expect(meetsCriteria(element)).to.be.false;
+        // immediate ancestor is placeholder
+        html`<div placeholder>
+          <amp-img src="bla.png"></amp-img>
+        </div>`,
+
+        // non-immediate ancestor is placeholder
+        html`<div placeholder>
+          <div>
+            <amp-img src="bla.png"></amp-img>
+          </div>
+        </div>`,
+      ];
+
+      renderScenarios.forEach(root => {
+        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
+      });
     });
 
     it('rejects actionable images by tap action', () => {
