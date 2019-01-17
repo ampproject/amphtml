@@ -21,7 +21,7 @@ import {
   serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {PositionObserver} from './position-observer';
-import {dev} from '../../src/log';
+import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
 import {layoutRectFromDomRect} from '../../src/layout-rect';
@@ -122,15 +122,23 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    const iframe =
+    const adFrame =
         this.getFrameElement_(message.source, request['sentinel']);
-    if (!iframe) {
+    if (!adFrame) {
       dev().info(TAG, 'Ignored message from untrusted iframe:', message);
       return false;
     }
 
+    const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
+    // having no whitelist is legacy behavior so assume all types are allowed
+    if (allowedTypes &&
+        !allowedTypes.split(/\s*,\s*/).includes(request['type'])) {
+      dev().info(TAG, 'Ignored non-whitelisted message type:', message);
+      return false;
+    }
+
     if (!this.msgObservable_.fire(request['type'], this,
-        [iframe, request, message.source, message.origin])) {
+        [adFrame.measurableFrame, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
@@ -154,7 +162,7 @@ export class InaboxMessagingHost {
       'targetRect': targetRect,
     }));
 
-    dev().assert(this.iframeMap_[request.sentinel]);
+    devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
         this.iframeMap_[request.sentinel].observeUnregisterFn ||
         this.positionObserver_.observe(iframe, data =>
@@ -170,7 +178,7 @@ export class InaboxMessagingHost {
    * @param {?JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
-    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/postMessage(
         serializeMessage(MessageType.POSITION, request.sentinel, data),
         origin);
@@ -246,12 +254,12 @@ export class InaboxMessagingHost {
    *
    * @param {?Window} source
    * @param {string} sentinel
-   * @return {?HTMLIFrameElement}
+   * @return {?AdFrameDef}
    * @private
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel].measurableFrame;
+      return this.iframeMap_[sentinel];
     }
     const measurableFrame = this.getMeasureableFrame(source);
     if (!measurableFrame) {
@@ -264,7 +272,7 @@ export class InaboxMessagingHost {
         j < 10; j++, tempWin = tempWin.parent) {
         if (iframe.contentWindow == tempWin) {
           this.iframeMap_[sentinel] = {iframe, measurableFrame};
-          return measurableFrame;
+          return this.iframeMap_[sentinel];
         }
         if (tempWin == window.top) {
           break;
@@ -351,9 +359,14 @@ export class InaboxMessagingHost {
  * @private
  */
 function canInspectWindow_(win) {
+  // TODO: this is not reliable.  The compiler assumes that property reads are
+  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
+  // but since we're not using the closure library I'm not sure how to do this.
+  // See https://github.com/google/closure-compiler/issues/3156
   try {
-    const unused = !!win.location.href && win['test']; // eslint-disable-line no-unused-vars
-    return true;
+    // win['test'] could be truthy but not true the compiler shouldn't be able
+    // to optimize this check away.
+    return !!win.location.href && (win['test'] || true);
   } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }

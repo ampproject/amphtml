@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
     description: 'Text that informs users that the sound is off after they ' +
@@ -75,6 +75,15 @@ export default {
     string: 'More about AMP results',
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Swipe up',
+    description: 'Label for a button to open a drawer containing additional ' +
+        'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Play video',
+    description: 'Label for a button to play the video visible on the page.',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
@@ -147,9 +156,9 @@ export default {
         'Twitter.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
     description: 'Button label for the share target that shares a link via ' +
-        'Whatsapp.',
+        'WhatsApp.',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
@@ -177,4 +186,4 @@ export default {
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-};
+});

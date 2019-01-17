@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForBookendComponent} from './bookend-component-interface';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -57,7 +58,7 @@ export class LandscapeComponent {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in landscapeJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Landscape component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +
@@ -70,7 +71,7 @@ export class LandscapeComponent {
   /** @override */
   build(landscapeJson, element) {
     const url = landscapeJson['url'];
-    const domainName = getSourceOriginForBookendComponent(element, url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const landscape = {
       url,

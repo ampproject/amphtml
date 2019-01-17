@@ -24,10 +24,15 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {dict} from './utils/object';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';
@@ -204,7 +209,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+    onError['call'](undefined, undefined, undefined, undefined,
         undefined, error);
   } catch (errorReportingError) {
     setTimeout(function() {
@@ -270,7 +275,7 @@ export function isBlockedByConsent(errorOrMessage) {
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = /** @type {!Function} */ (reportErrorToServer);
+  win.onerror = /** @type {!Function} */ (onError);
   win.addEventListener('unhandledrejection', event => {
     if (event.reason &&
       (event.reason.message === CANCELLED ||
@@ -291,7 +296,7 @@ export function installErrorReporting(win) {
  * @param {*|undefined} error
  * @this {!Window|undefined}
  */
-function reportErrorToServer(message, filename, line, col, error) {
+function onError(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
     makeBodyVisibleRecovery(this.document);
@@ -314,16 +319,28 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
-    reportingBackoff(() => {
+    reportingBackoff(() =>
+      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data)));
+  }
+}
+
+/**
+ * Passes the given error data to either server or viewer.
+ * @param {!Window} win
+ * @param {!JsonObject} data Data from `getErrorReportData`.
+ * @return {Promise<undefined>}
+ */
+export function reportErrorToServerOrViewer(win, data) {
+  // Report the error to viewer if it has the capability. The data passed
+  // to the viewer is exactly the same as the data passed to the server
+  // below.
+  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+    if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
-    });
-  }
+    }
+  });
 }
 
 /**
@@ -361,9 +378,49 @@ export function maybeReportErrorToViewer(win, data) {
     if (!viewerTrusted) {
       return false;
     }
-    viewer.sendMessage('error', data);
+
+    viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
+}
+
+/**
+ * Strips down the error reporting data to a minimal set
+ * to be sent to the viewer.
+ * @param {!JsonObject} errorReportData
+ * @return {!JsonObject}
+ * @visibleForTesting
+ */
+export function errorReportingDataForViewer(errorReportData) {
+  return dict({
+    'm': errorReportData['m'], // message
+    'a': errorReportData['a'], // isUserError
+    's': errorReportData['s'], // error stack
+    'el': errorReportData['el'], // tagName
+    'v': errorReportData['v'], // runtime
+    'jse': errorReportData['jse'], // detectedJsEngine
+  });
+}
+
+/**
+ * @param {string|undefined}  message
+ * @param {*|undefined} error
+ * @return {string}
+ */
+function buildErrorMessage_(message, error) {
+  if (error) {
+    if (error.message) {
+      message = error.message;
+    } else {
+      // This should never be a string, but sometimes it is.
+      message = String(error);
+    }
+  }
+  if (!message) {
+    message = 'Unknown error';
+  }
+
+  return message;
 }
 
 /**
@@ -379,27 +436,14 @@ export function maybeReportErrorToViewer(win, data) {
  */
 export function getErrorReportData(message, filename, line, col, error,
   hasNonAmpJs) {
-  let expected = false;
-  if (error) {
-    if (error.message) {
-      message = error.message;
-    } else {
-      // This should never be a string, but sometimes it is.
-      message = String(error);
-    }
-    // An "expected" error is still an error, i.e. some features are disabled
-    // or not functioning fully because of it. However, it's an expected
-    // error. E.g. as is the case with some browser API missing (storage).
-    // Thus, the error can be classified differently by log aggregators.
-    // The main goal is to monitor that an "expected" error doesn't deteriorate
-    // over time. It's impossible to completely eliminate it.
-    if (error.expected) {
-      expected = true;
-    }
-  }
-  if (!message) {
-    message = 'Unknown error';
-  }
+  message = buildErrorMessage_(message, error);
+  // An "expected" error is still an error, i.e. some features are disabled
+  // or not functioning fully because of it. However, it's an expected
+  // error. E.g. as is the case with some browser API missing (storage).
+  // Thus, the error can be classified differently by log aggregators.
+  // The main goal is to monitor that an "expected" error doesn't deteriorate
+  // over time. It's impossible to completely eliminate it.
+  let expected = !!(error && error.expected);
   if (/_reported_/.test(message)) {
     return;
   }
@@ -455,7 +499,17 @@ export function getErrorReportData(message, filename, line, col, error,
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
+
+  if (getMode().singlePassType) {
+    data['spt'] = getMode().singlePassType;
+  }
+
   data['rt'] = runtime;
+
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.
@@ -513,7 +567,10 @@ export function getErrorReportData(message, filename, line, col, error,
       data['s'] = error.stack;
     }
 
-    error.message += ' _reported_';
+    // TODO(jridgewell, #18574); Make sure error is always an object.
+    if (error.message) {
+      error.message += ' _reported_';
+    }
   } else {
     data['f'] = filename || '';
     data['l'] = line || '';
@@ -607,11 +664,14 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  if (isExperimentOn(win, 'user-error-reporting')) {
-    const vars = {
+  // Currently this can only be executed in a single-doc mode. Otherwise,
+  // it's not clear which ampdoc the event would belong too.
+  if (Services.ampdocServiceFor(win).isSingleDoc()
+      && isExperimentOn(win, 'user-error-reporting')) {
+    const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
-    };
+    });
     triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
   }
 }

@@ -16,12 +16,14 @@
 
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -42,6 +44,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
+
+    /** @private @const {boolean}*/
+    this.isSafari_ = Services.platformFor(this.win).isSafari();
   }
 
   /** @override */
@@ -55,8 +60,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     urlService.assertHttpsUrl(src, this.element);
 
-    if (urlService.isProxyOrigin(src) ||
-        urlService.isProxyOrigin(win.location.href)) {
+    if ((urlService.isProxyOrigin(src) ||
+        urlService.isProxyOrigin(win.location.href)) && !this.isSafari_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         urlService.assertHttpsUrl(iframeSrc, this.element);
@@ -64,7 +69,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = urlService.parse(docInfo.sourceUrl);
         const canonicalUrl = urlService.parse(docInfo.canonicalUrl);
-        user().assert(
+        userAssert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -78,12 +83,20 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     } else if (urlService.parse(win.location.href).origin ==
       urlService.parse(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
-        return install(this.win, src);
+        return install(this.win, src, this.element);
       });
     } else {
       this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
+    }
+
+    if ((urlService.isProxyOrigin(src) ||
+    urlService.isProxyOrigin(win.location.href)) && this.isSafari_) {
+      // https://webkit.org/blog/8090/workers-at-your-service/
+      this.user().error(TAG,
+          'Did not install ServiceWorker because of safari double keyring ' +
+          'caching as it will not have any effect');
     }
   }
 
@@ -106,7 +119,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    */
   insertIframe_() {
     return this.mutateElement(() => {
-      setStyle(this.element, 'display', 'none');
+      toggle(this.element, false);
       const iframe = this.win.document.createElement('iframe');
       iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
       iframe.src = this.iframeSrc_;
@@ -136,7 +149,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     // Check the url-rewrite config is valid.
-    user().assert(urlMatch && shellUrl,
+    userAssert(urlMatch && shellUrl,
         'Both, "%s" and "%s" must be specified for url-rewrite',
         'data-no-service-worker-fallback-url-match',
         'data-no-service-worker-fallback-shell-url');
@@ -148,13 +161,14 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(urlService.getSourceOrigin(winUrl) ==
+    userAssert(urlService.getSourceOrigin(winUrl) ==
       urlService.parse(shellUrl).origin,
     'Shell source origin "%s" must be the same as source origin "%s"',
     shellUrl, winUrl.href);
 
     // Install URL rewriter.
-    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
+    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl,
+        this.element);
 
     // Cache shell.
     if (urlService.isSecure(shellUrl)) {
@@ -223,8 +237,9 @@ class UrlRewriter_ {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!RegExp} urlMatchExpr
    * @param {string} shellUrl
+   * @param {!Element} element
    */
-  constructor(ampdoc, urlMatchExpr, shellUrl) {
+  constructor(ampdoc, urlMatchExpr, shellUrl, element) {
     /** @const {!Window} */
     this.win = ampdoc.win;
 
@@ -235,7 +250,7 @@ class UrlRewriter_ {
     this.shellUrl_ = shellUrl;
 
     /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(ampdoc);
+    this.urlService_ = Services.urlForDoc(element);
 
     /** @const @private {!Location} */
     this.shellLoc_ = this.urlService_.parse(shellUrl);
@@ -284,25 +299,123 @@ class UrlRewriter_ {
   }
 }
 
-
 /**
  * Installs the service worker at src via direct service worker installation.
  * @param {!Window} win
  * @param {string} src
+ * @param {Element} element
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
-function install(win, src) {
-  return win.navigator.serviceWorker.register(src).then(function(registration) {
+function install(win, src, element) {
+  const scope = element.getAttribute('data-scope') || '/';
+  return win.navigator.serviceWorker.register(src, {
+    scope,
+  }).then(function(registration) {
     if (getMode().development) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
+    // Check if there is a new service worker installing.
+    const installingSw = registration.installing;
+    if (installingSw) {
+      // if not already active, wait till it becomes active
+      installingSw.addEventListener('statechange', evt => {
+        if (evt.target.state === 'activated') {
+          performServiceWorkerOptimizations(
+              registration,
+              win,
+              element
+          );
+        }
+      });
+    } else if (registration.active) {
+      performServiceWorkerOptimizations(registration, win, element);
+    }
+
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
+/**
+ * Initiates AMP service worker based optimizations
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ * @param {Element} element
+ */
+function performServiceWorkerOptimizations(registration, win, element) {
+  sendAmpScriptToSwOnFirstVisit(win, registration);
+  // prefetching outgoing links should be opt in.
+  if (element.hasAttribute('data-prefetch')) {
+    prefetchOutgoingLinks(registration, win);
+  }
+}
+
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {!Window} win
+ * @param {ServiceWorkerRegistration} registration
+ */
+function sendAmpScriptToSwOnFirstVisit(win, registration) {
+  if ('performance' in win) {
+    // Fetch all AMP-scripts used on the page
+    const ampScriptsUsed = win.performance.getEntriesByType('resource')
+        .filter(item => item.initiatorType === 'script' &&
+          startsWith(item.name, urls.cdn))
+        .map(script => script.name);
+    const activeSW = registration.active;
+    // using convention from https://github.com/redux-utilities/flux-standard-action.
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__FIRST-VISIT-CACHING',
+        'payload': ampScriptsUsed,
+      })));
+    }
+  }
+}
+
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ */
+function prefetchOutgoingLinks(registration, win) {
+  const {document} = win;
+  const links = [].map.call(document.querySelectorAll('a[data-rel=prefetch]'),
+      link => link.href);
+  if (supportsPrefetch(document)) {
+    links.forEach(link => {
+      const linkTag = document.createElement('link');
+      linkTag.setAttribute('rel', 'prefetch');
+      linkTag.setAttribute('href', link);
+      document.head.appendChild(linkTag);
+    });
+  } else {
+    const activeSW = registration.active;
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__LINK-PREFETCH',
+        'payload': links,
+      })));
+    }
+  }
+}
+
+/**
+ * Returns whether or not link rel=prefetch is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function supportsPrefetch(doc) {
+  const fakeLink = doc.createElement('link');
+  if (fakeLink.relList && fakeLink.relList.supports) {
+    return fakeLink.relList.supports('prefetch');
+  }
+  return false;
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpInstallServiceWorker);

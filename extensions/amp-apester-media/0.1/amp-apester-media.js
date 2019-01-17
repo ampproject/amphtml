@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {
+  IntersectionObserverApi,
+} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
+  generatePixelURL,
   getPlatform,
   registerEvent,
   setFullscreenOff,
@@ -135,7 +139,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.width_ = getLengthNumeral(width);
     this.height_ = getLengthNumeral(height);
     this.random_ = false;
-    this.mediaAttribute_ = user().assert(
+    this.mediaAttribute_ = userAssert(
         this.element.getAttribute('data-apester-media-id') ||
         (this.random_ = this.element.getAttribute(
             'data-apester-channel-token'
@@ -227,9 +231,10 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /** @param {string} id
-   * @return {string}
+   *  @param {boolean} usePlayer
+   *  @return {string}
    * */
-  constructUrlFromMedia_(id) {
+  constructUrlFromMedia_(id, usePlayer) {
     const queryParams = dict();
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
     queryParams['type'] = this.embedOptions_.playlist
@@ -242,7 +247,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     queryParams['sdk'] = 'amp';
 
     return addParamsToUrl(
-        `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
+        `${this.rendererBaseUrl_}/${usePlayer ? 'v2' : 'interaction'}/`
+         + `${encodeURIComponent(id)}`,
         queryParams
     );
   }
@@ -289,6 +295,23 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
+  /**
+   * @param {JsonObject} publisher
+   */
+  report3rdPartyPixel_(publisher) {
+    if (publisher && publisher['trackingPixel']) {
+      const affiliateId = publisher['trackingPixel']['affiliateId'];
+      const publisherId = publisher['publisherId'];
+      if (affiliateId) {
+        const eventName = 'interactionLoaded';
+        const builder = new CustomEventReporterBuilder(this.element);
+        builder.track(eventName, generatePixelURL(publisherId, affiliateId));
+        const reporter = builder.build();
+        reporter.trigger(eventName);
+      }
+    }
+  }
+
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -305,14 +328,18 @@ class AmpApesterMedia extends AMP.BaseElement {
           const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
             ? payload[Math.floor(Math.random() * payload.length)]
             : payload);
-          const src = this.constructUrlFromMedia_(media['interactionId']);
+
+          const interactionId = media['interactionId'];
+          const usePlayer = media['usePlayer'];
+
+          const src = this.constructUrlFromMedia_(interactionId, usePlayer);
           const iframe = this.constructIframe_(src);
           this.intersectionObserverApi_ = new IntersectionObserverApi(
               this,
               iframe
           );
 
-          this.mediaId_ = media['interactionId'];
+          this.mediaId_ = interactionId;
           this.iframe_ = iframe;
           this.registerToApesterEvents_();
 
@@ -325,18 +352,21 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
-                    if (media['campaignData']) {
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                          /** @type {JsonObject} */ ({
-                            type: 'campaigns',
-                            data: media['campaignData'],
-                          }),
-                          '*'
-                      );
+                    if (this.iframe_) {
+                      this.iframe_.classList
+                          .add('i-amphtml-apester-iframe-ready');
+                      if (media['campaignData']) {
+                        this.iframe_.contentWindow./*OK*/ postMessage(
+                            /** @type {JsonObject} */ ({
+                              type: 'campaigns',
+                              data: media['campaignData'],
+                            }),
+                            '*'
+                        );
+                      }
                     }
                     this.togglePlaceholder(false);
+                    this.report3rdPartyPixel_(media['publisher']);
                     this.ready_ = true;
                     let height = 0;
                     if (media && media['data'] && media['data']['size']) {

@@ -19,10 +19,10 @@
  * details.
  */
 
-import {dev, user} from './log';
+import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
@@ -197,7 +197,7 @@ export function parseLength(s) {
  * @return {!LengthDef}
  */
 export function assertLength(length) {
-  user().assert(
+  userAssert(
       /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
       'Invalid length value: %s', length);
   return /** @type {!LengthDef} */ (length);
@@ -213,7 +213,7 @@ export function assertLength(length) {
  * @return {!LengthDef}
  */
 export function assertLengthOrPercent(length) {
-  user().assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+  userAssert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
       'Invalid length or percent value: %s', length);
   return length;
 }
@@ -227,7 +227,7 @@ export function assertLengthOrPercent(length) {
 export function getLengthUnits(length) {
   assertLength(length);
   dev().assertString(length);
-  const m = user().assert(length.match(/[a-z]+/i),
+  const m = userAssert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
 }
@@ -266,7 +266,7 @@ export function hasNaturalDimensions(tagName) {
  */
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
-  dev().assert(naturalDimensions_[tagName] !== undefined);
+  devAssert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
@@ -326,7 +326,7 @@ export function applyStaticLayout(element) {
   // please take care in making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (dev().assert(
+    const layout = /** @type {!Layout} */ (devAssert(
         parseLayout(completedLayoutAttr)));
     if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
@@ -334,7 +334,10 @@ export function applyStaticLayout(element) {
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
     } else if (layout == Layout.NODISPLAY) {
-      applyNoDisplayLayout(element);
+      toggle(element, false);
+      // TODO(jridgewell): Temporary hack while SSR still adds an inline
+      // `display: none`
+      element['style']['display'] = '';
     }
     return layout;
   }
@@ -352,15 +355,15 @@ export function applyStaticLayout(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
     parseLength(widthAttr) : widthAttr;
-  user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  userAssert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   /** @const {string|null|undefined} */
   const inputHeight = (heightAttr && heightAttr != 'fluid') ?
     parseLength(heightAttr) : heightAttr;
-  user().assert(inputHeight !== undefined, 'Invalid height value: %s',
+  userAssert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
   // Effective layout attributes. These are effectively constants.
@@ -401,26 +404,26 @@ export function applyStaticLayout(element) {
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
-    user().assert(height, 'Expected height to be available: %s', heightAttr);
+    userAssert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
-    user().assert(!width || width == 'auto',
+    userAssert(!width || width == 'auto',
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
   if (layout == Layout.FIXED || layout == Layout.RESPONSIVE ||
       layout == Layout.INTRINSIC) {
-    user().assert(width && width != 'auto',
+    userAssert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
 
   if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
-    user().assert(getLengthUnits(width) == getLengthUnits(height),
+    userAssert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
   } else {
-    user().assert(heightsAttr === null,
+    userAssert(heightsAttr === null,
         'Unexpected "heights" attribute for none-responsive layout');
   }
 
@@ -432,7 +435,10 @@ export function applyStaticLayout(element) {
   if (layout == Layout.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
-    applyNoDisplayLayout(element);
+    toggle(element, false);
+    // TODO(jridgewell): Temporary hack while SSR still adds an inline
+    // `display: none`
+    element['style']['display'] = '';
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -443,7 +449,6 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
-      display: 'block',
       paddingTop:
         ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
     });
@@ -485,13 +490,4 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', 0);
   }
   return layout;
-}
-
-
-/**
- * @param {!Element} element
- */
-function applyNoDisplayLayout(element) {
-  // TODO(jridgewell, #17475): This should be using the [hidden] attribute.
-  setStyle(element, 'display', 'none');
 }

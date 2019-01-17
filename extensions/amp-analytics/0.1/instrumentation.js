@@ -79,7 +79,7 @@ export class InstrumentationService {
    *
    * @param {!Element} target
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   triggerEventForTarget(target, eventType, opt_vars) {
     // TODO(dvoytenko): rename to `triggerEvent`.

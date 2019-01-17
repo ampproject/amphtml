@@ -39,6 +39,7 @@ export const UrlReplacementPolicy = {
  *     to return. If not specified, entire JSON result is returned.
  * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand..
+ * @param {boolean=} opt_refresh Forces refresh of browser cache.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
@@ -46,14 +47,15 @@ export function batchFetchJsonFor(
   ampdoc,
   element,
   opt_expr = '.',
-  opt_urlReplacement = UrlReplacementPolicy.NONE)
+  opt_urlReplacement = UrlReplacementPolicy.NONE,
+  opt_refresh = false)
 {
   assertHttpsUrl(element.getAttribute('src'), element);
-  return requestForBatchFetch(ampdoc, element, opt_urlReplacement)
+  const xhr = Services.batchedXhrFor(ampdoc.win);
+  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
+      .then(data => xhr.fetchJson(data.xhrUrl, data.fetchOpt))
+      .then(res => res.json())
       .then(data => {
-        return Services.batchedXhrFor(ampdoc.win)
-            .fetchJson(data['xhrUrl'], data['fetchOpt']);
-      }).then(res => res.json()).then(data => {
         if (data == null) {
           throw new Error('Response is undefined.');
         }
@@ -64,25 +66,25 @@ export function batchFetchJsonFor(
 /**
  * Handles url replacement and constructs the FetchInitJsonDef required for a
  * fetch.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {!UrlReplacementPolicy} opt_urlReplacement If ALL, replaces all URL
+ * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
- * @return {!Promise<!./service/xhr-impl.FetchRequestDef>}
+ * @param {boolean} refresh Forces refresh of browser cache.
+ * @return {!Promise<!FetchRequestDef>}
  */
-export function requestForBatchFetch(
-  ampdoc,
-  element,
-  opt_urlReplacement) {
+export function requestForBatchFetch(element, replacement, refresh) {
   const url = element.getAttribute('src');
+
   // Replace vars in URL if desired.
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-  const srcPromise = (opt_urlReplacement >= UrlReplacementPolicy.OPT_IN)
-    ? urlReplacements.expandUrlAsync(url) : Promise.resolve(url);
-  return srcPromise.then(xhrUrl => {
+  const urlReplacements = Services.urlReplacementsForDoc(element);
+  const promise = (replacement >= UrlReplacementPolicy.OPT_IN)
+    ? urlReplacements.expandUrlAsync(url)
+    : Promise.resolve(url);
+
+  return promise.then(xhrUrl => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
-    if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
+    if (replacement == UrlReplacementPolicy.OPT_IN) {
       const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError('URL variable substitutions in CORS ' +
@@ -97,6 +99,10 @@ export function requestForBatchFetch(
     } else {
       fetchOpt.requireAmpResponseSourceOrigin = false;
     }
-    return {xhrUrl, fetchOpt};
+    // https://hacks.mozilla.org/2016/03/referrer-and-cache-control-apis-for-fetch/
+    if (refresh) {
+      fetchOpt.cache = 'reload';
+    }
+    return {'xhrUrl': xhrUrl, 'fetchOpt': fetchOpt};
   });
 }

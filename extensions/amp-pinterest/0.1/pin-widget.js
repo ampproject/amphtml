@@ -20,7 +20,7 @@ import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
@@ -35,7 +35,7 @@ export class PinWidget {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    user().assert(rootElement.getAttribute('data-url'),
+    userAssert(rootElement.getAttribute('data-url'),
         'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
@@ -257,7 +257,7 @@ export class PinWidget {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
     } catch (err) {
       return Promise.reject(
-          user().createError('Invalid pinterest url: ' + this.pinUrl)
+          user().createError('Invalid pinterest url: %s', this.pinUrl)
       );
     }
 

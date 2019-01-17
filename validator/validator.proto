@@ -59,6 +59,7 @@ message UrlSpec {
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
 
+  // Deprecated fields, do not resuse.
   // reserved 4;
 }
 
@@ -171,6 +172,17 @@ message BlackListedCDataRegex {
   optional string error_message = 2;
 }
 
+// This spec is used when parsing a media query inside a CSS @media rule.
+message MediaQuerySpec {
+  // If issues_as_error is true, then parsing errors and invalid
+  // types / features will be treated as validator errors, otherwise warnings.
+  optional bool issues_as_error = 1 [default = false];
+  // These are the media query types and features allowed within the stylesheet.
+  // http://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Syntax
+  repeated string type = 2;
+  repeated string feature = 3;
+}
+
 // This spec is used by our CSS parser to determine how the contents of a given
 // AT rule should be parsed, if at all. The term 'rule' here refers to the AT
 // Rule in CSS, not a validation rule.
@@ -190,6 +202,11 @@ message AtRuleSpec {
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
+
+  // A MediaQuerySpec may only be set for an AtRuleSpec with the name
+  // "media". If not set, media queries will be left unparsed, so no errors or
+  // warnings about them will be reported.
+  optional MediaQuerySpec media_query_spec = 3;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -378,17 +395,20 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  extensions 5;
+  // reserved 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
-// prescribes a particular set of validation rules.
+// prescribes a particular set of validation rules. This should be kept in sync
+// with Request.HtmlFormat in
+// github.com/ampproject/amppackager/transformer/request/request.proto.
 message HtmlFormat {
   enum Code {
     UNKNOWN_CODE = 0;  // Never used
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
+    ACTIONS = 5;
     EXPERIMENTAL = 4;  // Currently unused
   }
 }
@@ -397,7 +417,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 33
+// NEXT AVAILABLE TAG: 34
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -417,6 +437,19 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
+
+  // NamedId's are used to uniquely identify specific TagSpecs in the
+  // validator rules in a stable manner. Most TagSpecs have no set NamedId.
+  // If a TagSpec has a NamedId it must be unique. In other words, no two
+  // TagSpec's may have the same NamedId except for the NOT_SET (0) value.
+  // NEXT AVAILABLE TAG: 3
+  enum NamedId {
+    NOT_SET = 0;
+    // By convention, the first "word" in the Id should be the tag_name.
+    LINK_FONT_STYLESHEET = 1;
+    STYLE_AMP_CUSTOM = 2;
+  }
+  optional NamedId named_id = 33 [default = NOT_SET];
 
   // If provided, this is a SCRIPT tag defining an amp custom element
   // extension. The other fields, such as expected attributes, will be
@@ -518,7 +551,7 @@ message TagSpec {
   optional AmpLayout amp_layout = 11;
 
   // Deprecated fields, do not reuse.
-  extensions 14, 26;
+  // reserved 14, 26;
 }
 
 // Defines how much css is allowed on the document including inline styles.
@@ -571,7 +604,7 @@ message ValidatorRules {
   repeated CssLengthSpec css_length_spec = 18;
 
   // Deprecated fields, do not reuse.
-  extensions 2, 5, 11, 12, 14;
+  // reserved 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -743,7 +776,8 @@ message ValidationError {
     CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
     CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
 
-    // reserved 13
+    // Deprecated fields, do not reuse.
+    // reserved 13;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -762,7 +796,8 @@ message ValidationError {
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
 
-  extensions 4;  // Previously used tag ids.
+  // Deprecated fields, do not reuse.
+  // reserved 4;
 }
 
 // Used in the verbose validator to select between multiple generated error
@@ -790,6 +825,18 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // If the AMP document is a transformed AMP document, then this is the
+  // version of the transformers that were used to transform it. If the document
+  // is not transformed, then the transformer_version's value will be 0.
+  // Note: the AMP Pacakager's transformer library specifies the version as
+  // int64. However, JavaScript does not natively support int64 so int32 is
+  // used instead.
+  // https://github.com/ampproject/amppackager/blob/master/transformer/transformers/context.go
+  optional int32 transformer_version = 6 [default = 0];
+  // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
+  // type that has yet to be defined. These are declared on the HTML tag and
+  // parsed by the Validator Engine.
+  repeated string type_identifier = 5;
 }
 
 // Information about the validator returned by ValidatorFactory

@@ -21,9 +21,17 @@ import {
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {
+  SubscriptionAnalyticsEvents,
+} from '../../amp-subscriptions/0.1/analytics';
+import {SubscriptionsScoreFactor}
+  from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -71,6 +79,13 @@ export class GoogleSubscriptionsPlatform {
      * {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter}
      */
     this.serviceAdapter_ = serviceAdapter;
+
+    /**
+     * @private @const
+     * {!../../amp-subscriptions/0.1/analytics.SubscriptionAnalytics}
+     */
+    this.subscriptionAnalytics_ = serviceAdapter.getAnalytics();
+
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
         new DocImpl(ampdoc),
@@ -84,6 +99,40 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
+      this.subscriptionAnalytics_.actionEvent(
+          this.getServiceId(),
+          'link',
+          'success');
+      // TODO(dvoytenko): deprecate separate "link" events.
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.LINK_COMPLETE,
+          this.getServiceId());
+    });
+    this.runtime_.setOnFlowStarted(e => {
+      if (e.flow == 'subscribe') {
+        this.subscriptionAnalytics_.actionEvent(
+            this.getServiceId(),
+            'subscribe',
+            'started');
+      }
+    });
+    this.runtime_.setOnFlowCanceled(e => {
+      if (e.flow == 'linkAccount') {
+        this.onLinkComplete_();
+        this.subscriptionAnalytics_.actionEvent(
+            this.getServiceId(),
+            'link',
+            'rejected');
+        // TODO(dvoytenko): deprecate separate "link" events.
+        this.subscriptionAnalytics_.serviceEvent(
+            SubscriptionAnalyticsEvents.LINK_CANCELED,
+            this.getServiceId());
+      } else if (e.flow == 'subscribe') {
+        this.subscriptionAnalytics_.actionEvent(
+            this.getServiceId(),
+            'subscribe',
+            'rejected');
+      }
     });
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
@@ -101,6 +150,9 @@ export class GoogleSubscriptionsPlatform {
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
 
+    /** @private {boolean} */
+    this.isReadyToPay_ = false;
+
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
   }
@@ -112,6 +164,14 @@ export class GoogleSubscriptionsPlatform {
   onLoginRequest_(linkRequested) {
     if (linkRequested && this.isGoogleViewer_) {
       this.runtime_.linkAccount();
+      this.subscriptionAnalytics_.actionEvent(
+          this.getServiceId(),
+          'link',
+          'started');
+      // TODO(dvoytenko): deprecate separate "link" events.
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.LINK_REQUESTED,
+          this.getServiceId());
     } else {
       this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
           'login'));
@@ -120,8 +180,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onLinkComplete_() {
-    this.runtime_.reset();
-    this.serviceAdapter_.reAuthorizePlatform(this);
+    this.serviceAdapter_.resetPlatforms();
   }
 
   /** @private */
@@ -148,14 +207,24 @@ export class GoogleSubscriptionsPlatform {
    */
   onSubscribeResponse_(response) {
     response.complete().then(() => {
-      this.runtime_.reset();
-      this.serviceAdapter_.reAuthorizePlatform(this);
+      this.serviceAdapter_.resetPlatforms();
     });
+    this.subscriptionAnalytics_.actionEvent(
+        this.getServiceId(),
+        'subscribe',
+        'success');
   }
 
   /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements().then(swgEntitlements => {
+      // Get and store the isReadyToPay signal which is independent of
+      // any entitlments existing.
+      if (swgEntitlements.isReadyToPay) {
+        this.isReadyToPay_ = true;
+      }
+
+      // Get the specifc entitlement we're looking for
       const swgEntitlement = swgEntitlements.getEntitlementForThis();
       if (!swgEntitlement) {
         return null;
@@ -178,14 +247,20 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  activate(entitlement) {
+  activate(entitlement, grantEntitlement) {
+    const best = grantEntitlement || entitlement;
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!entitlement.granted) {
+    if (!best.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!entitlement.isSubscriber()) {
+    } else if (!best.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
+  }
+
+  /** @override */
+  reset() {
+    this.runtime_.reset();
   }
 
   /**
@@ -202,8 +277,15 @@ export class GoogleSubscriptionsPlatform {
   pingback() {}
 
   /** @override */
-  supportsCurrentViewer() {
-    return this.isGoogleViewer_;
+  getSupportedScoreFactor(factorName) {
+    switch (factorName) {
+      case SubscriptionsScoreFactor.SUPPORTS_VIEWER:
+        return this.isGoogleViewer_ ? 1 : 0;
+      case SubscriptionsScoreFactor.IS_READY_TO_PAY:
+        return this.isReadyToPay_ ? 1 : 0;
+      default:
+        return 0;
+    }
   }
 
   /**
@@ -237,8 +319,12 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   executeAction(action) {
-    if (action === 'subscribe') {
+    if (action == 'subscribe') {
       this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
+    if (action == 'login') {
+      this.runtime_.linkAccount();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
@@ -279,18 +365,21 @@ class AmpFetcher {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('subscriptions-google', ampdoc => {
-    const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
-    Services.subscriptionsServiceForDoc(ampdoc).then(service => {
-      service.registerPlatform(PLATFORM_ID,
-          (platformConfig, serviceAdapter) => {
-            return platformService.createPlatform(platformConfig,
-                serviceAdapter);
-          }
-      );
-    });
-    return platformService;
-  });
+  AMP.registerServiceForDoc('subscriptions-google',
+      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+      ampdoc => {
+        const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
+        const element = ampdoc.getHeadNode();
+        Services.subscriptionsServiceForDoc(element).then(service => {
+          service.registerPlatform(PLATFORM_ID,
+              (platformConfig, serviceAdapter) => {
+                return platformService.createPlatform(platformConfig,
+                    serviceAdapter);
+              }
+          );
+        });
+        return platformService;
+      });
 });
 
 

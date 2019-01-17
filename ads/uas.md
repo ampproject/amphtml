@@ -22,7 +22,7 @@ limitations under the License.
 ```html
 <amp-ad width="728" height="90"
     type="uas"
-    json='{"accountId": "132109", "adUnit": "10002912", "sizes": [[728, 90]]}'>
+    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90]]}'>
 </amp-ad> 
 ```
 
@@ -51,7 +51,7 @@ Note that the `width` and `height` mentioned should be maximum of the width-high
 <amp-ad
     width="300" height="250"
     type="uas"
-    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "http://mydomain.com"}'>
+    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "1", "pageURL": "http://mydomain.com"}'>
 </amp-ad>
 ```
 ## Configuration

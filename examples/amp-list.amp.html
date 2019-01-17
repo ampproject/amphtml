@@ -57,6 +57,24 @@
     </template>
   </amp-list>
 
+  <!-- ## Using a script to enclose the template. -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
+    <script type="text/plain" template="amp-mustache">
+      <table>
+        <tr>
+          <td>Comment:</td>
+          <td>{{content}}</td>
+        </tr>
+        {{#replies}}
+          <tr>
+            <td>Reply:</td>
+            <td>{{content}}</td>
+          </tr>
+        {{/replies}}
+      </table>
+    </script>
+  </amp-list>
+
   <!-- ## Using an existing template -->
   <!--
     The template can also be specified using an ID of an existing
@@ -93,6 +111,15 @@
     </div>
   </amp-list>
 
+  <!-- ## Handling Paging -->
+  <!--
+ If the `amp-list` multiple pages ... .
+  -->
+  <amp-list width="auto" height="200" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
 
 
 </body>

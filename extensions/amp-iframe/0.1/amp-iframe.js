@@ -18,11 +18,11 @@ import {ActionTrust} from '../../../src/action-constants';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {
@@ -32,7 +32,6 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
@@ -144,19 +143,19 @@ export class AmpIframe extends AMP.BaseElement {
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
-    user().assert(
+    userAssert(
         urlService.isSecure(src) || protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         element);
     const containerUrl = urlService.parse(containerSrc);
-    user().assert(
+    userAssert(
         !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
         (origin != containerUrl.origin && protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         element);
-    user().assert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
+    userAssert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(hostname, '.ampproject.org')),
     'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
@@ -167,7 +166,7 @@ export class AmpIframe extends AMP.BaseElement {
   assertPosition_() {
     const pos = this.element.getLayoutBox();
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
-    user().assert(pos.top >= minTop,
+    userAssert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
@@ -230,7 +229,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!srcdoc) {
       return;
     }
-    user().assert(
+    userAssert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
@@ -336,13 +335,13 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-      dev().assert(this.iframeLayoutBox_));
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */
   layoutCallback() {
-    user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
+    userAssert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
 
     if (!this.isClickToPlay_) {
@@ -350,7 +349,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isResizable_) {
-      user().assert(this.getOverflowElement(),
+      userAssert(this.getOverflowElement(),
           'Overflow element must be defined for resizable frames: %s',
           this.element);
     }
@@ -653,7 +652,7 @@ export class AmpIframe extends AMP.BaseElement {
       const event =
           createCustomEvent(this.win, 'amp-iframe:message',
               dict({'data': sanitized}));
-      const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+      const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };
     // TODO(choumx): Consider using global listener in iframe-helper.

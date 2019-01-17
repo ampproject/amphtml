@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {dev, rethrowAsync} from './log';
+import {dev, devAssert, rethrowAsync} from './log';
 import {insertAfterOrAtStart, removeElement, waitForBodyPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
@@ -262,7 +262,7 @@ export function setBodyMadeVisibleForTesting(value) {
  * @param {!Document} doc The document who's body we should make visible.
  */
 export function makeBodyVisible(doc) {
-  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
   const set = () => {
     bodyMadeVisible = true;
@@ -279,8 +279,8 @@ export function makeBodyVisible(doc) {
       }).then(services => {
         set();
         if (services.length > 0) {
-          Services.resourcesForDoc(doc)./*OK*/schedulePass(
-              1, /* relayoutAll */ true);
+          const resources = Services.resourcesForDoc(doc.documentElement);
+          resources./*OK*/schedulePass(1, /* relayoutAll */ true);
         }
         try {
           const perf = Services.performanceFor(win);
@@ -296,7 +296,7 @@ export function makeBodyVisible(doc) {
  * @param {!Document} doc The document who's body we should make visible.
  */
 export function makeBodyVisibleRecovery(doc) {
-  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   if (bodyMadeVisible) {
     return;
   }
@@ -323,7 +323,7 @@ function setBodyVisibleStyles(doc) {
  */
 function renderStartedNoInline(doc) {
   try {
-    Services.resourcesForDoc(doc).renderStarted();
+    Services.resourcesForDoc(doc.documentElement).renderStarted();
   } catch (e) {
     // `makeBodyVisible` is called in the error-processing cycle and thus
     // could be triggered when runtime's initialization is incomplete which

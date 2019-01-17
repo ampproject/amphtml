@@ -58,12 +58,21 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // If layout="nodisplay" force autoplay to off
+    const layout = this.getLayout();
+    if (layout === Layout.NODISPLAY) {
+      this.element.removeAttribute('autoplay');
+      this.buildAudioElement();
+    }
+
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
   }
 
-  /** @override */
-  layoutCallback() {
+  /**
+   * Builds the internal <audio> element
+   */
+  buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
@@ -92,6 +101,16 @@ export class AmpAudio extends AMP.BaseElement {
     this.element.appendChild(audio);
     this.audio_ = audio;
 
+    listen(this.audio_, 'playing', () => this.audioPlaying_());
+  }
+
+  /** @override */
+  layoutCallback() {
+    const layout = this.getLayout();
+    if (layout !== Layout.NODISPLAY) {
+      this.buildAudioElement();
+    }
+
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
@@ -110,8 +129,12 @@ export class AmpAudio extends AMP.BaseElement {
       artwork: [{src: artwork}],
     };
 
-    listen(this.audio_, 'playing', () => this.audioPlaying_());
-    return this.loadPromise(audio);
+    return this.loadPromise(this.audio_);
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    return true;
   }
 
   /**
@@ -201,8 +224,8 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     // Update the media session
-    setMediaSession(
-        this.getAmpDoc(), this.metadata_, playHandler, pauseHandler);
+    setMediaSession(this.element, this.win, this.metadata_,
+        playHandler, pauseHandler);
   }
 }
 

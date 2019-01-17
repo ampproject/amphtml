@@ -21,22 +21,31 @@ import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
+import {install as installFetch} from './polyfills/fetch';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
+import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {installCustomElements as installRegisterElement} from
   'document-register-element/build/document-register-element.patched';
 import {isExperimentOn} from './experiments';
 
 installDOMTokenListToggle(self);
+installFetch(self);
 installMathSign(self);
 installObjectAssign(self);
+installObjectValues(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
-  installCustomElements(self, class {});
+  installCustomElements(self);
 } else {
   installRegisterElement(self, 'auto');
 }
+
+// TODO(#18268, erwinm): For whatever reason imports to modules that have no
+// export currently break for singlepass runs. This is a temporary workaround
+// until we figure the issue out.
+export const erwinmHack = 'this export is a temporary hack for single pass';

@@ -20,15 +20,15 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Dutch strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepteer',
+    string: 'Accepteren',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Wijs af',
+    string: 'Weigeren',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Bekijk op origineel domein:',
+    string: 'Bekijk op het originele domein:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'Meer over AMP-resultaten',
@@ -40,7 +40,7 @@ export default {
     string: 'Tik op Terug',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Link kon niet naar naar het klembord gekopieerd worden :(',
+    string: 'Kan de link niet naar het klembord kopiëren :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
     string: 'Link gekopieerd!',
@@ -76,7 +76,7 @@ export default {
     string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Deel',
@@ -89,9 +89,9 @@ export default {
         'kunnen bekijken',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'De pagina kan het best bekeken worden in portretmodus',
+    string: 'De pagina kan het best in portretmodus bekeken worden',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Helaas lijkt het erop dat uw browser deze inhoud niet ondersteunt',
+    string: 'Helaas ondersteunt uw browser deze inhoud niet',
   },
-};
+});

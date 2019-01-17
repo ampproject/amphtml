@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifNewChrome();
-config.run('amp-image-slider', function() {
+import {createPointerEvent} from '../../../../../testing/test-helper';
+
+const t = describe.configure()
+    .ifChrome()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
+t.run('amp-image-slider', function() {
   this.timeout(20000);
   const DEFAULT_TIMEOUT = 1600;
 
@@ -827,25 +832,6 @@ config.run('amp-image-slider', function() {
       // 10 times viewport height + 2 slider height, ensure slider is out
       doc.querySelector('#pad').style.height =
           `${sliderHeights + 10 * viewportHeight}px`;
-    }
-
-    /**
-     * Create a pointer event
-     * Set the event's clientX/Y, pageX/Y, and touches
-     */
-    function createPointerEvent(type, x, y) {
-      const event = new CustomEvent(type);
-      event.clientX = x;
-      event.clientY = y;
-      event.pageX = x;
-      event.pageY = y;
-      event.touches = [{
-        clientX: x,
-        clientY: y,
-        pageX: x,
-        pageY: y,
-      }];
-      return event;
     }
 
     // A collection of convenient event calls

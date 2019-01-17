@@ -20,8 +20,9 @@ import {
   escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
+  tryFocus,
 } from '../dom';
-import {dev, user} from '../log';
+import {dev, user, userAssert} from '../log';
 import {dict} from '../utils/object';
 import {
   getExtraParamsUrl,
@@ -40,12 +41,17 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+const VALID_TARGETS = ['_top', '_blank'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/** @enum {number} */
+/**
+ * @enum {number} Priority reserved for extensions in anchor mutations.
+ * The higher the priority, the sooner it's invoked.
+ */
 export const Priority = {
+  LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
 };
 
@@ -101,9 +107,11 @@ export class Navigation {
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
 
-    const platform = Services.platformFor(this.ampdoc.win);
+    /** @private @const {!./platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.ampdoc.win);
+
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIosSafari_ = this.platform_.isIos() && this.platform_.isSafari();
 
     /** @private @const {boolean} */
     this.isIframed_ =
@@ -115,6 +123,15 @@ export class Navigation {
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
 
+    /**
+     * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
+     * @private @const {!Element|!ShadowRoot}
+     */
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+        ? this.rootNode_.documentElement
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -133,7 +150,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
 
     /**
-     * @type {!PriorityQueue<function(!Element)>}
+     * @type {!PriorityQueue<function(!Element, !Event)>}
      * @private
      * @const
      */
@@ -151,10 +168,10 @@ export class Navigation {
         maybeExpandUrlParams.bind(null, ampdoc), /* capture */ true);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, TAG,
-        new Navigation(this.ampdoc, embedWin.document));
+        new Navigation(ampdoc, embedWin.document));
   }
 
   /**
@@ -169,6 +186,33 @@ export class Navigation {
   }
 
   /**
+   * Opens a new window with the specified target.
+   *
+   * @param {!Window} win A window to use to open a new window.
+   * @param {string} url THe URL to open.
+   * @param {string} target The target for the newly opened window.
+   * @param {boolean} opener Whether or not the new window should have acccess
+   *   to the opener (win).
+   */
+  openWindow(win, url, target, opener) {
+    let options = '';
+    // We don't pass noopener for Chrome since it opens a new window without
+    // tabs. Instead, we remove the opener property from the newly opened
+    // window.
+    // Note: for Safari, we need to use noopener instead of clearing the opener
+    // property.
+    if ((this.platform_.isIos() || !this.platform_.isChrome()) && !opener) {
+      options += 'noopener';
+    }
+
+    const newWin = openWindowDialog(win, url, target, options);
+    // For Chrome, since we cannot use noopener.
+    if (newWin && !opener) {
+      newWin.opener = null;
+    }
+  }
+
+  /**
    * Navigates a window to a URL.
    *
    * If opt_requestedBy matches a feature name in a <meta> tag with attribute
@@ -177,11 +221,27 @@ export class Navigation {
    * @param {!Window} win
    * @param {string} url
    * @param {string=} opt_requestedBy
+   * @param {!{
+   *   target: (string|undefined),
+   *   opener: (boolean|undefined),
+   * }=} opt_options
    */
-  navigateTo(win, url, opt_requestedBy) {
-    const urlService = Services.urlForDoc(this.ampdoc);
+  navigateTo(
+    win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
+    const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+
+    userAssert(
+        VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
+
+    // If we have a target of "_blank", we will want to open a new window. A
+    // target of "_top" should behave like it would on an anchor tag and
+    // update the URL.
+    if (target == '_blank') {
+      this.openWindow(win, url, target, opener);
       return;
     }
 
@@ -254,17 +314,11 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
-      // Handles contextmenu click. Note that currently this only deals
-      // with url variable substitution and expansion, as there is
-      // straightforward way of determining what the user clicked in the
-      // context menu, required for A2A navigation and custom link protocol
-      // handling.
-      // TODO(alabiaga): investigate fix for handling A2A and custom link
-      // protocols.
-      this.expandVarsForAnchor_(target);
+      this.handleContextMenuClick_(target, e);
     }
   }
 
@@ -288,14 +342,39 @@ export class Navigation {
       return;
     }
 
-    // Handle anchor transformations.
-    this.anchorMutators_.forEach(anchorMutator => {
-      anchorMutator(target);
-    });
+    this.anchorMutatorHandlers_(target, e);
     location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {!Event} e
+   * @private
+   */
+  handleContextMenuClick_(target, e) {
+    // Handles contextmenu click. Note that currently this only deals
+    // with url variable substitution and expansion, as there is
+    // straightforward way of determining what the user clicked in the
+    // context menu, required for A2A navigation and custom link protocol
+    // handling.
+    // TODO(alabiaga): investigate fix for handling A2A and custom link
+    // protocols.
+    this.expandVarsForAnchor_(target);
+    this.anchorMutatorHandlers_(target, e);
+  }
+
+  /**
+   * Handle anchor transformations.
+   * @param {!Element} target
+   * @param {!Event} e
+   */
+  anchorMutatorHandlers_(target, e) {
+    this.anchorMutators_.forEach(anchorMutator => {
+      anchorMutator(target, e);
+    });
   }
 
   /**
@@ -412,6 +491,24 @@ export class Navigation {
         if (targetAttr != '_top' && targetAttr != '_blank') {
           target.setAttribute('target', '_blank');
         }
+        return; // bail early.
+      }
+
+      // Accessibility fix for IE browser.
+      // Issue: anchor navigation in IE changes visual focus of the browser
+      // and shifts to the element being linked to,
+      // where the input focus stays where it was.
+      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+      // @see https://github.com/ampproject/amphtml/issues/18671
+      if (Services.platformFor(this.ampdoc.win).isIe()) {
+        const internalTargetElmId = tgtLoc.hash.substring(1);
+        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
+        if (internalElm) {
+          if (!(/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName))) {
+            internalElm.tabIndex = -1;
+          }
+          tryFocus(internalElm);
+        }
       }
       return;
     }
@@ -451,7 +548,7 @@ export class Navigation {
   }
 
   /**
-   * @param {!Function} callback
+   * @param {function(!Element, !Event)} callback
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
@@ -490,8 +587,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
-    // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
-    return Services.urlForDoc(this.rootNode_).parse(url);
+    return Services.urlForDoc(this.serviceContext_).parse(url);
   }
 }
 
@@ -521,7 +617,7 @@ function maybeExpandUrlParams(ampdoc, e) {
       return e.pageY;
     },
   };
-  const newHref = Services.urlReplacementsForDoc(ampdoc).expandUrlSync(
+  const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
       hrefToExpand, vars, undefined, /* opt_whitelist */ {
         // For now we only allow to replace the click location vars
         // and nothing else.

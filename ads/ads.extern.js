@@ -114,9 +114,18 @@ THREE.Vector3.prototype.distanceToSquared
 THREE.Vector3.prototype.length
 THREE.Vector3.prototype.fromArray
 
+THREE.Euler = class {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;}};
+
+THREE.Euler.prototype.set;
+
 THREE.Object3D = class {
   constructor() {
     this.position = new THREE.Vector3();
+    this.rotation = new THREE.Euler();
     this.children = [];}};
 
 THREE.Object3D.prototype.applyMatrix
@@ -198,6 +207,8 @@ data.slot;
 // imaVideo.js
 var google;
 google.ima;
+google.ima.Ad;
+google.ima.Ad.getSkipTimeOffset;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
@@ -222,11 +233,20 @@ google.ima.UiElements;
 google.ima.UiElements.AD_ATTRIBUTION;
 google.ima.UiElements.COUNTDOWN;
 google.ima.AdEvent;
+google.ima.AdEvent.getAd;
+google.ima.AdEvent.getAdData;
 google.ima.AdEvent.Type;
+google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
+google.ima.AdsManager.getRemainingTime;
 google.ima.AdsManager.setVolume;
+google.ima.AdProgressData;
+google.ima.AdProgressData.adPosition;
+google.ima.AdProgressData.totalAds;
 google.ima.settings;
 google.ima.settings.setLocale;
 google.ima.settings.setVpaidMode;
@@ -351,22 +371,8 @@ data.url;
 // criteo.js
 var Criteo;
 Criteo.DisplayAd;
-Criteo.Log.Debug;
-Criteo.CallRTA;
-Criteo.ComputeDFPTargetingForAMP;
-Criteo.PubTag = {};
-Criteo.PubTag.Adapters = {};
-Criteo.PubTag.Adapters.AMP = {};
-Criteo.PubTag.Adapters.AMP.Standalone;
-Criteo.PubTag.RTA = {};
-Criteo.PubTag.RTA.DefaultCrtgContentName;
-Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
 data.tagtype;
-data.networkid;
-data.cookiename;
-data.varname;
 data.zone;
-data.adserver;
 
 // distroscale.js
 data.tid;
@@ -544,6 +550,10 @@ data.item;
 data.geo;
 data.categories;
 
+// pressboard.js
+data.media;
+data.baseUrl;
+
 // pubguru.js
 data.height;
 data.publisher;
@@ -695,6 +705,13 @@ data.channel;
 data.publisher;
 data.dim;
 data.renderer;
+
+// zen.js
+var YandexZen;
+YandexZen.renderWidget;
+data.clid;
+data.successCalback;
+data.failCallback;
 
 // zergnet.js
 window.zergnetWidgetId;

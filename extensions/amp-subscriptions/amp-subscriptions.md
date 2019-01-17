@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental. Only in Canary.</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -54,11 +54,22 @@ The `amp-subscriptions` extensions implements the subscription-style access/payw
 
 ## Relationship to `amp-access`
 
-The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md) and in many features builds on top of `amp-access`. However, it's a much more specialized version of access/paywall protocol. Some of the key differences are:
+The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md)
+and in many features builds on top of `amp-access`. However, it's a much more
+specialized version of access/paywall protocol. Some of the key differences are:
 
-1. Entitlements response is similar to the amp-access authorization, but it's striclty defined and standardized.
-2. The `amp-subscriptions` allows multiple services to be configured for the page to participate in access/paywall decisions. They are executed in parallel and paralized based on which service returns the positive response.
-3. The viewers are allowed to provide a signed authorization response based on an independent agreement with publishers as a proof of access.
+1. The `amp-subscriptions` entitlements response is similar to the amp-access
+authorization, but it's striclty defined and standardized.
+2. The `amp-subscriptions` extension allows multiple services to be configured
+for the page to participate in access/paywall decisions. They are executed
+concurrently and prioritized based on which service returns the positive response.
+3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
+response based on an independent agreement with publishers as a proof of access.
+4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
+
+Because of standardization of markup, multi provider support and improved viewer
+support it is recommended that new publisher and paywall provider implementations
+use `amp-subscriptions`.
 
 ## Services
 
@@ -141,6 +152,7 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   ],
   "score": {
     "supportsViewer": 10,
+    "isReadyToPay": 9
   },
   "fallbackEntitlement": {
     "source": "fallback",
@@ -157,15 +169,23 @@ The `services` property contains an array of service configurations. There must 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
 
-## Selecting platform
-So if no platforms are selected, we compete all the platforms based on platforms like
+## Selecting a Service
+If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected. Each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.  If no `baseScore` is specified it defaults to `0`.
 
-1. Does the platform support the Viewer
+The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
 
-You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+If publisher wishes to ignore a score factor they may either explicitly set it's value to `0` or omit it from the `score` map.
+
+Available scoring factors:
+
+1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view.
+1. `isReadyToPay` returns `1` when the user is known to the service and the service has a form of payment on file allowing a purchase without entering payment details.
+
+All scoring factors have default value of `0`. In the event of a tie the local service wins.
+
 
 ## Error fallback
-In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
+If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 
@@ -242,7 +262,7 @@ Pingback is an endpoint provided by in the "local" service configuration and cal
 
 Pingback is optional. It's only enabled when the "pingbackUrl" property is specified.
 
-As the body, pingback POST request recieves the entitlement object returned by the "winning" authorization endpoint.
+As the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint.
 
 **Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for a CORS preflight check.
 
@@ -258,7 +278,7 @@ Notice, while not explicitly visible, any vendor service can also implement its 
 
 In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
 
-e.g. In order to ask google subscriptions to perform subscribe even when `local` platform is selected:
+e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
 ```
   <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
 ```
@@ -288,6 +308,8 @@ The premium content is marked up using `subscriptions-section="content"` attribu
   This content will be hidden unless the reader is authorized.
 </section>
 ```
+
+*Important*: Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content in the first viewport be allowed to render regardless of subscription state.
 
 The fallback content is marked up using `subscriptions-section="content-not-granted"` attribute. For instance:
 
@@ -337,48 +359,54 @@ The first dialog with matching `subscriptions-display` is shown.
 
 ## Expressions
 
-The `subscriptions-display` uses expressions for actions and dialogs.
+The `subscriptions-display` attribute uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
-
-The expression is executed against the json representation of the entitlement object.
-
-For instance, to show a "subscribe" action to non-subscribers:
+Values in the `data` object of an Entitlements response can be used to build expressions.  In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
 
 ```
-<button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
+<section>
+  <button subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</button>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn">
+    <div>My Account</div>
+    <div>Sign out</div>
+  </div>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn AND NOT data.isSubscriber">
+    <a href='...'>Upgrade your account</a>
+  </div>
+</section>
 ```
+
 
 ## Analytics
 
 The `amp-subscriptions` triggers seven types of analytics signals during the different lifecycle of various subscriptions.
 Following are the events and the conditions when the events are triggered.
 
-1. `subscriptions-platform-activated`:
- - This event is fired when one of the platforms configured is selected and activated to be used(see [Selecting platform](#selecting-platform)).
- - This event is fired with `serviceId` of the selected platform.
+1. `subscriptions-service-activated`:
+ - This event is fired when one of the services configured is selected and activated to be used(see [Selecting a Service](#selecting-a-service)).
+ - This event is fired with `serviceId` of the selected service.
 2. `subscriptions-access-granted`:
- - This event is fired when one of the configured platform is selected and the entitlement from the selected platform grants access to the document.
- - This event is fired with `serviceId` of the selected platform.
+ - This event is fired when one of the configured services is selected and the entitlement from the selected service grants access to the document.
+ - This event is fired with `serviceId` of the selected service.
 3. `subscriptions-access-denied`:
- - This event is fired when one of the configured platform is selected and the entitlement from the selected platform denies access to the document.
- - This event is fired with `serviceId` of the selected platform.
+ - This event is fired when one of the configured services is selected and the entitlement from the selected service denies access to the document.
+ - This event is fired with `serviceId` of the selected service.
 4. `subscriptions-paywall-activated`:
- - After selecting a platform, if the entitlement of the platform does not grant access to the document then `subscriptions-paywall-activated` is triggered.
- - This event is fired with `serviceId` of the selected platform.
-5. `subscriptions-platform-registered`:
- - Since a platform is free to initialize itself at anytime on the page, `subscriptions-platform-registered` event is triggered when `amp-subscriptions` is able to resolve the instance of the platform.
- - This event is fired with `serviceId` of the selected platform.
-6. `subscriptions-platform-re-authorized`:
- - A platform can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the platform `PLATFORM_REAUTHORIZED` is triggered.
- - This event is fired with `serviceId` of the selected platform.
+ - After selecting a service, if the entitlement of the service does not grant access to the document then `subscriptions-paywall-activated` is triggered.
+ - This event is fired with `serviceId` of the selected service.
+5. `subscriptions-service-registered`:
+ - Since a service is free to initialize itself at anytime on the page, `subscriptions-service-registered` event is triggered when `amp-subscriptions` is able to resolve the instance of the service.
+ - This event is fired with `serviceId` of the selected service.
+6. `subscriptions-service-re-authorized`:
+ - A service can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the service ``subscriptions-service-re-authorized` is triggered.
+ - This event is fired with `serviceId` of the selected service.
 7. `subscriptions-action-delegated`:
- - A platform can request its action to be delegated to another service, in such scenerio `subscriptions-action-delegated` is triggered just before handing over the event to the other platform.
- - This event is fired with `serviceId` and `action` of the selected platform.
+ - A service can request its action to be delegated to another service, in such scenario `subscriptions-action-delegated` is triggered just before handing over the event to the other service.
+ - This event is fired with `serviceId` and `action` of the selected service.
 8. `subscriptions-entitlement-resolved`:
- - Once the platform is registered, the entitlments from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the platform is completed.
- - This event is fired with `serviceId` and `action` of the selected platform.
-9. `subscriptions-started`:
+ - Once the service is registered, the entitlements from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
+ - This event is fired with `serviceId` and `action` of the selected service.
+9. `subscriptions-started`:service
  - This event is triggered when `amp-subscriptions` is initialized.
  - This event does not contain any data.
 10. `subscriptions-action-ActionName-started`:
@@ -398,4 +426,3 @@ Following are the events and the conditions when the events are triggered.
 ## Available vendor services
 
 - [amp-subscriptions-google](../amp-subscriptions-google/amp-subscriptions-google.md)
-

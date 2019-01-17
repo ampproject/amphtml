@@ -16,7 +16,7 @@
 
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {
@@ -24,6 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service';
+import {getState} from '../history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -172,7 +173,7 @@ export class History {
    * @return {!Promise}
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     const previousHash = this.ampdoc_.win.location.hash;
     return this.push(() => {
       this.ampdoc_.win.location.replace(previousHash || '#');
@@ -389,8 +390,9 @@ export class HistoryBindingNatural_ {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
-    if (history.state && history.state[HISTORY_PROP_] !== undefined) {
-      this.startIndex_ = Math.min(history.state[HISTORY_PROP_],
+    const state = getState(history);
+    if (state && state[HISTORY_PROP_] !== undefined) {
+      this.startIndex_ = Math.min(state[HISTORY_PROP_],
           this.startIndex_);
     }
 
@@ -472,8 +474,10 @@ export class HistoryBindingNatural_ {
     history.replaceState = this.historyReplaceState_.bind(this);
 
     this.popstateHandler_ = e => {
+      const state = /** @type {!JsonObject} */(
+        /** @type {!PopStateEvent} */(e).state);
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
-          JSON.stringify(e.state));
+        JSON.stringify(state));
       this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -621,14 +625,14 @@ export class HistoryBindingNatural_ {
   /** @private */
   getState_() {
     if (this.supportsState_) {
-      return this.win.history.state;
+      return getState(this.win.history);
     }
     return this.unsupportedState_;
   }
 
   /** @private */
   assertReady_() {
-    dev().assert(!this.waitingState_,
+    devAssert(!this.waitingState_,
         'The history must not be in the waiting state');
   }
 
@@ -711,7 +715,7 @@ export class HistoryBindingNatural_ {
    * @override
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
       // location.replace will fire a popstate event which is not a history
       // event, so temporarily remove the event listener and re-add it after.
@@ -831,7 +835,7 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.win.location.replace(target);
   }
 

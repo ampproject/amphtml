@@ -24,7 +24,7 @@ import {listen} from '../../../src/event-helper';
  * @const {!Array<string>}
  */
 const EVENT_PROPERTIES = [
-  'altKey', 'charCode', 'ctrlKey', 'detail', 'eventPhase', 'keyCode',
+  'altKey', 'charCode', 'ctrlKey', 'detail', 'eventPhase', 'key',
   'layerX', 'layerY', 'metaKey', 'pageX', 'pageY', 'returnValue',
   'shiftKey', 'timeStamp', 'type', 'which',
 ];
@@ -44,7 +44,7 @@ const TOUCH_PROPERTIES = [
 const SCROLL_LOCK = 'scrollLock';
 
 /**
- * @fileoverview Forward touch events from the AMP doc to the viewer.
+ * Forward touch events from the AMP doc to the viewer.
  */
 export class TouchHandler {
 

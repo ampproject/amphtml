@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.25 */
+/** Version: 0.1.22.41 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -267,6 +267,9 @@ class PageConfig {
       productId = productOrPublicationId;
       publicationId = productId.substring(0, div);
       label = productId.substring(div + 1);
+      if (label == '*') {
+        throw new Error('wildcard disallowed');
+      }
     } else {
       // The argument is a publication id.
       publicationId = productOrPublicationId;

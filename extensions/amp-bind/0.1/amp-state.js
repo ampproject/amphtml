@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
@@ -42,15 +43,6 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
-  }
-
-  /** @override */
-  activate(unusedInvocation) {
-    // TODO(choumx): Remove this after a few weeks in production.
-    const TAG = this.getName_();
-    this.user().error(TAG,
-        'Please use AMP.setState() action explicitly, e.g. ' +
-        'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
 
   /** @override */
@@ -85,22 +77,27 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
-    if (this.element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(this.element).then(bind => {
-        dev().assert(bind, 'Bind service can not be found.');
-        bind.makeStateKeyOverridable(this.element.getAttribute('id'));
+    const {element} = this;
+    if (element.hasAttribute('overridable')) {
+      Services.bindForDocOrNull(element).then(bind => {
+        devAssert(bind, 'Bind service can not be found.');
+        bind.makeStateKeyOverridable(element.getAttribute('id'));
       });
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
-    const {children} = this.element;
+    const {children} = element;
     if (children.length > 0) {
       this.parseChildAndUpdateState_();
     }
     if (this.element.hasAttribute('src')) {
       this.fetchAndUpdate_(/* isInit */ true);
     }
+    this.registerAction('refresh', () => {
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    }, ActionTrust.HIGH);
   }
+
 
   /**
    * Parses JSON in child script element and updates state.
@@ -132,9 +129,10 @@ export class AmpState extends AMP.BaseElement {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {boolean} isInit
+   * @param {boolean=} opt_refresh
    * @return {!Promise}
    */
-  fetch_(ampdoc, element, isInit) {
+  fetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
 
     // Require opt-in for URL variable replacements on CORS fetches triggered
@@ -145,19 +143,21 @@ export class AmpState extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
     return batchFetchJsonFor(
-        ampdoc, element, /* opt_expr */ undefined, policy);
+        ampdoc, element, /* opt_expr */ undefined, policy, opt_refresh);
   }
 
   /**
    * @param {boolean} isInit
+   * @param {boolean=} opt_refresh
    * @return {!Promise}
    * @private
    */
-  fetchAndUpdate_(isInit) {
+  fetchAndUpdate_(isInit, opt_refresh) {
     const ampdoc = this.getAmpDoc();
-    return this.fetch_(ampdoc, this.element, isInit).then(json => {
-      this.updateState_(json, isInit);
-    });
+    return this.fetch_(ampdoc, this.element, isInit, opt_refresh)
+        .then(json => {
+          this.updateState_(json, isInit);
+        });
   }
 
   /**
@@ -169,11 +169,11 @@ export class AmpState extends AMP.BaseElement {
     if (json === undefined || json === null) {
       return;
     }
-    const id = user().assert(this.element.id, '<amp-state> must have an id.');
+    const id = userAssert(this.element.id, '<amp-state> must have an id.');
     const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {
-      dev().assert(bind, 'Bind service can not be found.');
+      devAssert(bind, 'Bind service can not be found.');
       bind.setState(state,
           /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });

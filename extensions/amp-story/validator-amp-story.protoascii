@@ -91,6 +91,10 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
     name: "title"
     mandatory: true
   }
@@ -101,6 +105,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-SIDEBAR"
     child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
@@ -205,6 +210,18 @@ tags: {
     value: "stretch"
   }
   attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
+  }
+  attrs: {
     name: "align-items"
     value: "center"
     value: "end"
@@ -299,6 +316,18 @@ tags: {
     value: "zoom-in"
     value: "zoom-out"
   }
+  attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
+  }
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
@@ -324,6 +353,7 @@ tags: {  # <amp-story-bookend>
   tag_name: "AMP-STORY-BOOKEND"
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
+  descendant_tag_list: "amp-story-bookend-allowed-descendants"
   attrs: {
     name: "layout"
     mandatory: true
@@ -336,8 +366,25 @@ tags: {  # <amp-story-bookend>
       protocol: "https"
     }
   }
-  child_tags: {
-    mandatory_num_child_tags: 0
+}
+descendant_tag_list: {
+  name: "amp-story-bookend-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-bookend (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-bookend extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-BOOKEND"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
 }
 tags: {  # amp-story-consent (json)
@@ -431,6 +478,7 @@ descendant_tag_list: {
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-CALL-TRACKING"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
@@ -494,10 +542,12 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
+  tag: "A"
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
@@ -509,6 +559,7 @@ descendant_tag_list: {
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
+  tag: "AMP-TIMEAGO"
   tag: "AMP-VIDEO"
   tag: "ARTICLE"
   tag: "ASIDE"

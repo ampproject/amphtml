@@ -31,13 +31,16 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
-import {dev, rethrowAsync, user} from './log';
-import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
+import {dev, devAssert, rethrowAsync, user} from './log';
+import {
+  getIntersectionChangeEntry,
+} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
+import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
@@ -252,7 +255,7 @@ function createBaseCustomElementClass(win) {
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
-      dev().assert(Ctor);
+      devAssert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
@@ -325,9 +328,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getAmpDoc() {
-      return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_,
-            'no ampdoc yet, since element is not attached'));
+      return devAssert(this.ampdoc_,
+          'no ampdoc yet, since element is not attached');
     }
 
     /**
@@ -338,9 +340,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getResources() {
-      return /** @type {!./service/resources-impl.Resources} */ (
-        dev().assert(this.resources_,
-            'no resources yet, since element is not attached'));
+      return devAssert(this.resources_,
+          'no resources yet, since element is not attached');
     }
 
     /**
@@ -351,9 +352,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getLayers() {
-      return /** @type {!./service/layers-impl.LayoutLayers} */ (
-        dev().assert(this.layers_,
-            'no layers yet, since element is not attached'));
+      return devAssert(this.layers_,
+          'no layers yet, since element is not attached');
     }
 
     /**
@@ -462,9 +462,21 @@ function createBaseCustomElementClass(win) {
      * @return {number} @this {!Element}
      */
     getLayoutPriority() {
-      dev().assert(
+      devAssert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
     }
 
     /**
@@ -478,7 +490,7 @@ function createBaseCustomElementClass(win) {
      */
     build() {
       assertNotTemplate(this);
-      dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
+      devAssert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
@@ -487,20 +499,18 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
-              .then(consentPolicy => {
-                if (!consentPolicy) {
-                  return true;
-                }
-                return consentPolicy.whenPolicyUnblock(
-                    /** @type {string} */ (policyId));
-              }).then(shouldUnblock => {
-                if (shouldUnblock == true) {
-                  resolve(this.implementation_.buildCallback());
-                } else {
-                  reject(blockedByConsentError());
-                }
-              });
+          Services.consentPolicyServiceForDocOrNull(this).then(policy => {
+            if (!policy) {
+              return true;
+            }
+            return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
+          }).then(shouldUnblock => {
+            if (shouldUnblock) {
+              resolve(this.implementation_.buildCallback());
+            } else {
+              reject(blockedByConsentError());
+            }
+          });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
@@ -716,19 +726,30 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
+      this.signals_.signal(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected.  Chrome and Safari can trigger connectedCallback even when
+     * the node is disconnected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+     * connectedCallback will later be called when the disconnected root is
+     * connected to the document tree.
+     *
      * @final @this {!Element}
      */
     connectedCallback() {
-      // Chrome and Safari can trigger connectedCallback even when the node is
-      // disconnected. See #12849, https://crbug.com/821195, and
-      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
-      // connectedCallback will later be called when the disconnected root is
-      // connected to the document tree.
+      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
+        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+      }
+      if (this.isInTemplate_) {
+        return;
+      }
+
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -740,12 +761,6 @@ function createBaseCustomElementClass(win) {
         this.classList.add('amp-notbuilt');
       }
 
-      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
-      }
-      if (this.isInTemplate_) {
-        return;
-      }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
@@ -831,7 +846,7 @@ function createBaseCustomElementClass(win) {
      */
     tryUpgrade_() {
       const impl = this.implementation_;
-      dev().assert(!isStub(impl), 'Implementation must not be a stub');
+      devAssert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
@@ -863,23 +878,53 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when the element is disconnected from the DOM.
+     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      if (this.isInTemplate_) {
-        return;
-      }
-      if (!this.isConnected_ || dom.isConnectedNode(this)) {
-        return;
-      }
-      this.isConnected_ = false;
-      this.getResources().remove(this);
-      this.implementation_.detachedCallback();
+      this.disconnect(/* pretendDisconnected */ false);
     }
 
     /** The Custom Elements V0 sibling to `disconnectedCallback`. */
     detachedCallback() {
       this.disconnectedCallback();
+    }
+
+    /**
+     * Called when an element is disconnected from DOM, or when an ampDoc is
+     * being disconnected (the element itself may still be connected to ampDoc).
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     * If the element is still connected to the document, you'll need to pass
+     * opt_pretendDisconnected.
+     *
+     * @param {boolean} pretendDisconnected Forces disconnection regardless
+     *     of DOM isConnected.
+     */
+    disconnect(pretendDisconnected) {
+      if (this.isInTemplate_ || !this.isConnected_) {
+        return;
+      }
+      if (!pretendDisconnected && dom.isConnectedNode(this)) {
+        return;
+      }
+
+      // This path only comes from Resource#disconnect, which deletes the
+      // Resource instance tied to this element. Therefore, it is no longer
+      // an AMP Element. But, DOM queries for i-amphtml-element assume that
+      // the element is tied to a Resource.
+      if (pretendDisconnected) {
+        this.classList.remove('i-amphtml-element');
+      }
+
+      this.isConnected_ = false;
+      this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
+      this.implementation_.detachedCallback();
     }
 
     /**
@@ -1051,7 +1096,7 @@ function createBaseCustomElementClass(win) {
      */
     layoutCallback() {
       assertNotTemplate(this);
-      dev().assert(this.isBuilt(),
+      devAssert(this.isBuilt(),
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0); // First layout is "load".
@@ -1079,9 +1124,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-          // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1237,6 +1280,7 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.reset(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
@@ -1320,7 +1364,7 @@ function createBaseCustomElementClass(win) {
         if (this.actionQueue_ === undefined) {
           this.actionQueue_ = [];
         }
-        dev().assert(this.actionQueue_).push(invocation);
+        devAssert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
       }
@@ -1336,7 +1380,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      const actionQueue = dev().assert(this.actionQueue_);
+      const actionQueue = devAssert(this.actionQueue_);
       this.actionQueue_ = null;
 
       // Notice, the actions are currently not de-duped.
@@ -1366,10 +1410,15 @@ function createBaseCustomElementClass(win) {
      * @return {?string}
      */
     getConsentPolicy_() {
-      const policyId = this.getAttribute('data-block-on-consent');
+      let policyId = this.getAttribute('data-block-on-consent');
       if (policyId === null) {
-        // data-block-on-consent attribute not set
-        return null;
+        if (shouldBlockOnConsentByMeta(this)) {
+          policyId = 'default';
+          this.setAttribute('data-block-on-consent', policyId);
+        } else {
+          // data-block-on-consent attribute not set
+          return null;
+        }
       }
       if (policyId == '' || policyId == 'default') {
         // data-block-on-consent value not set, up to individual element
@@ -1403,19 +1452,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Must be executed in the mutate context. Removes `display:none` from the
-     * element set via `layout=nodisplay`.
-     * @param {boolean} displayOn
-     */
-    toggleLayoutDisplay(displayOn) {
-      if (displayOn) {
-        this.removeAttribute('hidden');
-      } else {
-        this.setAttribute('hidden', '');
-      }
-    }
-
-    /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
      * @package @final @this {!Element}
@@ -1440,7 +1476,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          placeholder.classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
@@ -1558,7 +1594,8 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (!this.loadingContainer_) {
-        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
+        const doc = this.ownerDocument;
+        devAssert(doc);
 
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
@@ -1720,7 +1757,7 @@ function isInputPlaceholder(element) {
 
 /** @param {!Element} element */
 function assertNotTemplate(element) {
-  dev().assert(!element.isInTemplate_, 'Must never be called in template');
+  devAssert(!element.isInTemplate_, 'Must never be called in template');
 }
 
 

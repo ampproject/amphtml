@@ -26,7 +26,7 @@ AMP video analytics gathers data about how users interact with videos in AMP doc
 | `<amp-video>` | Full support |
 | `<amp-3q-player>` | Partial support<sup>[1]</sup> |
 | `<amp-brid-player>` | Partial support<sup>[1]</sup> |
-| `<amp-brightcove>` | Partial support<sup>[1]</sup> |
+| `<amp-brightcove>` | Full support |
 | `<amp-dailymotion>` | Partial support<sup>[1]</sup> |
 | `<amp-ima-video>` | Partial support<sup>[1]</sup> |
 | `<amp-nexxtv-player>` | Partial support<sup>[1]</sup> |
@@ -51,9 +51,9 @@ The `video-play` trigger is fired when the video begins playing from a user clic
   "myVideoPlay": {
     "on": "video-play",
     "request": "event",
-    "selector": "#myVideo"
+    "selector": "#myVideo",
+    "videoSpec": {/* optional videoSpec */}
   },
-  "videoSpec": {/* optional videoSpec */}
 }
 ```
 
@@ -66,9 +66,9 @@ The `video-pause` trigger is fired when the video stops playing from a user clic
   "myVideoPause": {
     "on": "video-pause",
     "request": "event",
-    "selector": "#myVideo"
+    "selector": "#myVideo",
+    "videoSpec": {/* optional videoSpec */}
   },
-  "videoSpec": {/* optional videoSpec */}
 }
 ```
 
@@ -81,9 +81,9 @@ The `video-ended` trigger is fired when the video has reached the end of playbac
   "myVideoEnded": {
     "on": "video-ended",
     "request": "event",
-    "selector": "#myVideo"
+    "selector": "#myVideo",
+    "videoSpec": {/* optional videoSpec */}
   },
-  "videoSpec": {/* optional videoSpec */}
 }
 ```
 
@@ -104,9 +104,9 @@ The `video-session` trigger is fired when a "video session" has ended. A video s
   "myVideoSession": {
     "on": "video-session",
     "request": "event",
-    "selector": "#myVideo"
+    "selector": "#myVideo",
+    "videoSpec": {/* optional videoSpec */}
   },
-  "videoSpec": {/* optional videoSpec */}
 }
 ```
 
@@ -119,12 +119,33 @@ The `video-seconds-played` trigger is fired every `interval` seconds when the vi
   "myVideoSecondsPlayed": {
     "on": "video-seconds-played",
     "request": "event",
-    "selector": "#myVideo"
+    "selector": "#myVideo",
+    "videoSpec": {
+      "interval": 10, /* required */
+      /* other optional videoSpec properties */
+    }
   },
-  "videoSpec": {
-    "interval": 10, /* required */
-    /* other optional videoSpec properties */
-  }
+}
+```
+
+
+### Video percentage played trigger (`"on": "video-percentage-played"`)
+
+The `video-percentage-played` trigger is fired every `percentages` when the video is playing. The `video-percentage-played` trigger *requires* `percentages` to be set in the `videoSpec`. Use these configurations to fire a request for this event.
+
+Percentages must be set in increments of 5% and must be over zero.
+
+```javascript
+"triggers": {
+  "myVideoPercentagePlayed": {
+    "on": "video-percentage-played",
+    "request": "event",
+    "selector": "#myVideo",
+    "videoSpec": {
+      "percentages": [5, 25, 50, 75, 100], /* required */
+      /* other optional videoSpec properties */
+    }
+  },
 }
 ```
 
@@ -161,7 +182,6 @@ All video analytics triggers expose the following variables. These variables are
 | `state` | String | Indicates the state, which can be one “playing_auto”, “playing_manual”, or “paused”. |
 | `width` | Number | Specifies the width of video (in px). |
 | `playedRangesJson` | String | Represents segments of time the user has watched the video (in JSON format). For example, `[[1, 10], [5, 20]]` |
-| `playedTotal` | Number | Specifies the total playing time for the session (in seconds). |
 
 
 ## Video analytics variables

@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 
@@ -24,8 +24,12 @@ import {stringToBytes, utf8Encode} from '../utils/bytes';
 const TAG = 'Crypto';
 const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
-export class Crypto {
+/**
+ * @typedef {function((string|Uint8Array))}
+ */
+let CryptoPolyfillDef;
 
+export class Crypto {
   /**
    * Creates an instance of Crypto.
    * @param {!Window} win
@@ -57,7 +61,7 @@ export class Crypto {
     /** @private @const {boolean} */
     this.isLegacyWebkit_ = isLegacyWebkit;
 
-    /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
+    /** @private {?Promise<!CryptoPolyfillDef>} */
     this.polyfillPromise_ = null;
   }
 
@@ -76,7 +80,7 @@ export class Crypto {
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_())
-          .then(polyfill => polyfill.sha384(input));
+          .then(polyfillSha384 => polyfillSha384(input));
     }
 
     try {
@@ -88,7 +92,7 @@ export class Crypto {
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
                 if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
-                  dev().error(TAG, FALLBACK_MSG, e);
+                  user().error(TAG, FALLBACK_MSG, e);
                 }
                 return this.loadPolyfill_().then(() => this.sha384(input));
               });
@@ -131,7 +135,7 @@ export class Crypto {
 
   /**
    * Loads Crypto polyfill library.
-   * @return {!Promise<{sha384: function((string|Uint8Array))}>}
+   * @return {!Promise<!CryptoPolyfillDef>}
    * @private
    */
   loadPolyfill_() {
@@ -166,7 +170,7 @@ export class Crypto {
    * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
-    dev().assert(this.isPkcsAvailable());
+    devAssert(this.isPkcsAvailable());
     // Safari 10 and earlier want this as an ArrayBufferView.
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
@@ -187,7 +191,7 @@ export class Crypto {
    *     data and public key
    */
   verifyPkcs(key, signature, data) {
-    dev().assert(this.isPkcsAvailable());
+    devAssert(this.isPkcsAvailable());
     return /** @type {!Promise<boolean>} */ (
       this.subtle.verify(this.pkcsAlgo, key, signature, data)
     );

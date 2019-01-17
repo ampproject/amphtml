@@ -21,7 +21,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 
 const WHITELISTED_VARIABLES = [
@@ -37,7 +37,6 @@ const WHITELISTED_VARIABLES = [
   'CANONICAL_HOSTNAME',
   'CANONICAL_PATH',
   'CANONICAL_URL',
-  'CLIENT_ID',
   'COUNTER',
   'DOCUMENT_CHARSET',
   'DOCUMENT_REFERRER',
@@ -80,9 +79,13 @@ export class A4AVariableSource extends VariableSource {
    */
   constructor(ampdoc, embedWin) {
     super(ampdoc);
+
+    // Use parent URL replacements service for fallback.
+    const headNode = ampdoc.getHeadNode();
+    const urlReplacements = Services.urlReplacementsForDoc(headNode);
+
     /** @private {VariableSource} global variable source for fallback. */
-    this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
-        .getVariableSource();
+    this.globalVariableSource_ = urlReplacements.getVariableSource();
 
     /** @private {!Window} */
     this.win_ = embedWin;
@@ -91,14 +94,14 @@ export class A4AVariableSource extends VariableSource {
   /** @override */
   initialize() {
     this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataSync(
           this.win_,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataAsync(
           this.win_,
@@ -116,6 +119,8 @@ export class A4AVariableSource extends VariableSource {
 
     this.set('HTML_ATTR',
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
+
+    this.set('CLIENT_ID', () => null);
 
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];

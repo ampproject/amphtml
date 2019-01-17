@@ -1,4 +1,5 @@
 {
+  "root": true,
   "parser": "babel-eslint",
   "plugins": [
     "chai-expect",
@@ -17,25 +18,9 @@
     "sourceType": "module"
   },
   "globals": {
-    "it": false,
-    "chai": false,
-    "expect": false,
-    "describe": false,
-    "beforeEach": false,
-    "afterEach": false,
-    "before": false,
-    "after": false,
     "AMP": false,
-    "assert": false,
-    "sinon": true,
-    "sandbox": true,
     "context": false,
-    "global": false,
-    "describes": true,
-    "allowConsoleError": false,
-    "expectAsyncConsoleError": false,
-    "restoreAsyncErrorThrows": false,
-    "stubAsyncErrorThrows": false
+    "global": false
   },
   "settings": {
     "jsdoc": {
@@ -67,13 +52,18 @@
     "amphtml-internal/is-experiment-on": 2,
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-deep-destructuring": 2,
+    "amphtml-internal/no-duplicate-import": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-has-own-property-method": 1,
     "amphtml-internal/no-import": 2,
+    "amphtml-internal/no-import-rename": 2,
+    "amphtml-internal/no-is-amp-alt": 2,
     "amphtml-internal/no-mixed-operators": 2,
+    "amphtml-internal/no-module-exports": 2,
+    "amphtml-internal/no-mixed-interpolation": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-display": 2,
     "amphtml-internal/no-style-property-setting": 2,
@@ -108,7 +98,7 @@
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,
       "ignoreRegExpLiterals": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
+      "ignorePattern": "^} from.*;|= require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
       "ignoreUrls": true
     }],
     "no-alert": 2,
@@ -127,6 +117,7 @@
     "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
+    "no-restricted-globals": [2, "error", "event"],
     "no-script-url": 2,
     "no-self-compare": 2,
     "no-sequences": 2,
@@ -187,6 +178,33 @@
         "jsdoc/require-param-name": 0,
         "jsdoc/require-param-type": 0,
         "jsdoc/require-returns-type": 0
+      },
+      "globals": {
+        "it": false,
+        "chai": false,
+        "expect": false,
+        "describe": false,
+        "beforeEach": false,
+        "afterEach": false,
+        "before": false,
+        "after": false,
+        "assert": false,
+        "sinon": true,
+        "sandbox": true,
+        "describes": true,
+        "allowConsoleError": false,
+        "expectAsyncConsoleError": false,
+        "restoreAsyncErrorThrows": false,
+        "stubAsyncErrorThrows": false,
+        "Key": false
+      }
+    },
+    {
+      "files": ["babel.config.js"],
+      "globals": {
+        "module": false,
+        "process": false,
+        "require": false
       }
     }
   ]

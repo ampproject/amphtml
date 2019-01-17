@@ -24,7 +24,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -37,6 +37,8 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-brid-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -100,9 +102,12 @@ class AmpBridPlayer extends AMP.BaseElement {
     }
 
     let feedType = '';
+    const itemsNum = this.element.hasAttribute('data-dynamic') ? '10' : '1';
 
     if (this.element.hasAttribute('data-video')) {
       feedType = 'video';
+    } else if (this.element.hasAttribute('data-dynamic')) {
+      feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
     } else if (this.element.hasAttribute('data-outstream')) {
@@ -114,7 +119,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         encodeURIComponent(feedType) +
         '/' + encodeURIComponent(this.feedID_) +
         '/' + encodeURIComponent(this.partnerID_) +
-        '/' + encodeURIComponent(this.playerID_) + '/0/1';
+        '/' + encodeURIComponent(this.playerID_) + '/0/' + itemsNum + '/?amp=1';
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -125,16 +130,16 @@ class AmpBridPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    this.partnerID_ = user().assert(
+    this.partnerID_ = userAssert(
         element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         element);
 
-    this.playerID_ = user().assert(element.getAttribute('data-player'),
+    this.playerID_ = userAssert(element.getAttribute('data-player'),
         'The data-player attribute is required for <amp-brid-player> %s',
         element);
 
-    this.feedID_ = user().assert(
+    this.feedID_ = userAssert(
         (element.getAttribute('data-video') ||
             element.getAttribute('data-playlist') ||
             element.getAttribute('data-outstream')),
@@ -161,8 +166,6 @@ class AmpBridPlayer extends AMP.BaseElement {
         'message',
         this.handleBridMessage_.bind(this)
     );
-
-    this.element.appendChild(iframe);
 
     return this.loadPromise(iframe)
         .then(() => this.playerReadyPromise_);
@@ -378,9 +381,14 @@ class AmpBridPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-brid-player', '0.1', AMP => {
-  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpBridPlayer);
 });

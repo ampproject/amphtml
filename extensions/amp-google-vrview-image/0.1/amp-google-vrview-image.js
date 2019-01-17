@@ -17,7 +17,7 @@
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
@@ -44,7 +44,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-google-vrview-image'),
+    userAssert(isExperimentOn(this.win, 'amp-google-vrview-image'),
         'TAG amp-google-vrview-image disabled');
 
     this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
@@ -52,7 +52,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
     // cdn.ampproject.org as an iframe viewer or even possibly compiling
     // it as an AMP element.
-    let src = 'https://storage.googleapis.com/vrview/index.html';
+    let src = 'https://storage.googleapis.com/vrview/2.0/index.html';
     src = addParamToUrl(src, 'image', this.imageSrc_);
     if (this.element.hasAttribute('stereo')) {
       src = addParamToUrl(src, 'is_stereo', 'true');

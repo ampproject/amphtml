@@ -13,20 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {embeddedComponentSelectors} from './amp-story-embedded-component';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
+
+/** @private @const {number} */
+const HOLD_TOUCH_THRESHOLD_MS = 500;
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
+
+const EMBEDDED_COMPONENT_SELECTORS = Object.values(
+    embeddedComponentSelectors()).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -106,8 +117,9 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
+   * @param {boolean=} unusedCanResume
    */
-  stop() {
+  stop(unusedCanResume) {
     this.isRunning_ = false;
   }
 
@@ -121,7 +133,6 @@ export class AdvancementConfig {
 
   /**
    * @return {number}
-   * @protected
    */
   getProgress() {
     return 1;
@@ -161,16 +172,15 @@ export class AdvancementConfig {
 
   /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage} page
-   * @return {!AdvancementConfig}
+   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
+   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
    */
-  static forPage(page) {
-    const rootEl = page.element;
+  static forElement(element) {
+    const rootEl = element.element;
     const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootEl),
+      ManualAdvancement.fromElement(win, rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -242,10 +252,10 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
     this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop();
+      advancementMode.stop(canResume);
     });
   }
 }
@@ -257,14 +267,26 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
+   * @param {!Window} win The Window object.
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(element) {
+  constructor(win, element) {
     super();
+
+    /** @private @const {!Element} */
     this.element_ = element;
-    this.clickListener_ = this.maybePerformNavigation_.bind(this);
-    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
+
+    /** @private {number|string|null} */
+    this.timeoutId_ = null;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
+    /** @private {?number} Last touchstart event's timestamp */
+    this.touchstartTimestamp_ = null;
+
+    this.startListening_();
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -292,35 +314,83 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  start() {
-    super.start();
-    this.element_.addEventListener('click', this.clickListener_, true);
-    if (!this.hasAutoAdvanceStr_) {
-      super.onProgressUpdate();
-    }
-  }
-
-  /** @override */
-  stop() {
-    super.stop();
-    this.element_.removeEventListener('click', this.clickListener_, true);
-  }
-
-  /** @override */
   getProgress() {
     return 1.0;
+  }
+
+  /**
+   * Binds the event listeners.
+   * @private
+   */
+  startListening_() {
+    this.element_
+        .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
+    this.element_
+        .addEventListener('touchend', this.onTouchend_.bind(this), true);
+    this.element_
+        .addEventListener(
+            'click', this.maybePerformNavigation_.bind(this), true);
+  }
+
+  /**
+   * TouchEvent touchstart events handler.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchstart_(event) {
+    // Don't start the paused state if the event should not be handled by this
+    // class. Also ignores any subsequent touchstart that would happen before
+    // touchend was fired, since it'd reset the touchstartTimestamp (ie: user
+    // touches the screen with a second finger).
+    if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
+      return;
+    }
+
+    this.touchstartTimestamp_ = Date.now();
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.timeoutId_ = this.timer_.delay(() => {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }, HOLD_TOUCH_THRESHOLD_MS);
+  }
+
+  /**
+   * TouchEvent touchend events handler.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchend_(event) {
+    // Ignores the event if there's still a user's finger holding the screen.
+    const touchesCount = (event.touches || []).length;
+    if (!this.touchstartTimestamp_ || touchesCount > 0) {
+      return;
+    }
+
+    // Cancels the navigation if user paused the story for over 500ms. Calling
+    // preventDefault on the touchend event ensures the click/tap event won't
+    // fire.
+    if ((Date.now() - this.touchstartTimestamp_) > HOLD_TOUCH_THRESHOLD_MS) {
+      event.preventDefault();
+    }
+
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.touchstartTimestamp_ = null;
+    this.timer_.cancel(this.timeoutId_);
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
+        !this.storeService_.get(StateProperty.EXPANDED_COMPONENT)) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    }
   }
 
   /**
    * Determines whether a click should be used for navigation.  Navigate should
    * occur unless the click is on the system layer, or on an element that
    * defines on="tap:..."
-   * @param {!Event} e 'click' event.
+   * @param {!Event} event 'click' event.
    * @return {boolean} true, if the click should be used for navigation.
    * @private
    */
-  isNavigationalClick_(e) {
-    return !closest(dev().assertElement(e.target), el => {
+  isNavigationalClick_(event) {
+    return !closest(dev().assertElement(event.target), el => {
       return hasTapAction(el);
     }, /* opt_stopAt */ this.element_);
   }
@@ -330,6 +400,7 @@ class ManualAdvancement extends AdvancementConfig {
    * navigation
    * @param {!Event} event
    * @return {boolean}
+   * @private
    */
   isProtectedTarget_(event) {
     return !!closest(dev().assertElement(event.target), el => {
@@ -342,6 +413,52 @@ class ManualAdvancement extends AdvancementConfig {
     }, /* opt_stopAt */ this.element_);
   }
 
+  /**
+   * Checks if the event should be handled by ManualAdvancement, or should
+   * follow its capture phase.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  shouldHandleEvent_(event) {
+    let shouldHandleEvent = false;
+    let tagName;
+
+    closest(dev().assertElement(event.target), el => {
+      tagName = el.tagName.toLowerCase();
+      if (tagName === 'amp-story-page-attachment') {
+        shouldHandleEvent = false;
+        return true;
+      }
+
+      if (tagName === 'amp-story-page') {
+        shouldHandleEvent = true;
+        return true;
+      }
+
+      return false;
+    }, /* opt_stopAt */ this.element_);
+
+    return shouldHandleEvent;
+  }
+
+  /**
+   * For an element to trigger a tooltip it has to be descendant of
+   * amp-story-page but not of amp-story-cta-layer.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  canShowTooltip_(event) {
+    let valid = true;
+    return !!closest(dev().assertElement(event.target), el => {
+      if (el.tagName.toLowerCase() === 'amp-story-cta-layer') {
+        valid = false;
+        return false;
+      }
+      return el.tagName.toLowerCase() === 'amp-story-page' && valid;
+    }, /* opt_stopAt */ this.element_);
+  }
 
   /**
    * Performs a system navigation if it is determined that the specified event
@@ -350,7 +467,21 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
+    const target = dev().assertElement(event.target);
+
+    if (this.canShowTooltip_(event) &&
+      matches(target, EMBEDDED_COMPONENT_SELECTORS)) {
+      // Clicked element triggers a tooltip, so we dispatch the corresponding
+      // event and skip navigation.
+      event.preventDefault();
+      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, target);
+      return;
+    }
+
+    if (!this.isRunning() ||
+      !this.isNavigationalClick_(event) ||
+      this.isProtectedTarget_(event) ||
+      !this.shouldHandleEvent_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -380,6 +511,7 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @private
    */
   getTapDirection_(page) {
     const {left, right} = this.sections_;
@@ -389,6 +521,20 @@ class ManualAdvancement extends AdvancementConfig {
     }
 
     return right.direction;
+  }
+
+  /**
+   * Gets an instance of ManualAdvancement based on the HTML tag of the element.
+   * @param {!Window} win
+   * @param {!Element} rootEl
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   *                              an amp-story tag.
+   */
+  static fromElement(win, rootEl) {
+    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+      return null;
+    }
+    return new ManualAdvancement(win, rootEl);
   }
 }
 
@@ -411,6 +557,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.delayMs_ = delayMs;
 
     /** @private {?number} */
+    this.remainingDelayMs_ = null;
+
+    /** @private {?number} */
     this.startTimeMs_ = null;
 
     /** @private {number|string|null} */
@@ -428,9 +577,17 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.startTimeMs_ = this.getCurrentTimestampMs_();
 
-    this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
+    if (this.remainingDelayMs_) {
+      this.startTimeMs_ =
+          this.getCurrentTimestampMs_() -
+              (this.delayMs_ - this.remainingDelayMs_);
+    } else {
+      this.startTimeMs_ = this.getCurrentTimestampMs_();
+    }
+
+    this.timeoutId_ = this.timer_.delay(
+        () => this.onAdvance(), this.remainingDelayMs_ || this.delayMs_);
 
     this.onProgressUpdate();
 
@@ -441,12 +598,18 @@ class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
 
     if (this.timeoutId_ !== null) {
       this.timer_.cancel(this.timeoutId_);
     }
+
+    // Store the remaining time if the advancement can be resume, ie: if it is
+    // paused.
+    this.remainingDelayMs_ = canResume ?
+      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_() :
+      null;
   }
 
   /** @override */

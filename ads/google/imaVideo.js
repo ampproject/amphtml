@@ -19,6 +19,7 @@ import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
+import {throttle} from '../../src/utils/rate-limit';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -31,7 +32,11 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-/*eslint-disable */
+/**
+ * Icons from Google Material Icons
+ * https://material.io/tools/icons
+ */
+/*eslint-disable*/
 const icons = {
   'play':
     `<path d="M8 5v14l11-7z"></path>
@@ -49,10 +54,12 @@ const icons = {
     `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek':
-    `<circle cx="12" cy="12" r="12" />`,
-}
-const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
+  `<circle cx="12" cy="12" r="12" />`
+};
+
 /*eslint-enable */
+
+const bigPlayDivDisplayStyle = 'table-cell';
 
 // Div wrapping our entire DOM.
 let wrapperDiv;
@@ -65,6 +72,12 @@ let playButtonDiv;
 
 // Div containing player controls.
 let controlsDiv;
+
+// Wrapper for ad countdown element.
+let countdownWrapperDiv;
+
+// Div containing ad countdown timer.
+let countdownDiv;
 
 // Div containing play or pause button.
 let playPauseDiv;
@@ -89,6 +102,9 @@ let progressMarkerDiv;
 
 // Div for fullscreen icon.
 let fullscreenDiv;
+
+// Div for mute/unmute icon.
+let muteUnmuteDiv;
 
 // Div for ad container.
 let adContainerDiv;
@@ -118,8 +134,14 @@ let seekPercent;
 // Flag tracking whether or not content has played to completion.
 let contentComplete;
 
+// Flag tracking whether or not all ads have been played and been completed.
+let allAdsCompleted;
+
 // Flag tracking if an ad request has failed.
 let adRequestFailed;
+
+// IMA SDK Ad object
+let currentAd;
 
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
@@ -148,11 +170,17 @@ let fullscreenWidth;
 // Height the player should be in fullscreen mode.
 let fullscreenHeight;
 
+// "Ad" label used in ad controls.
+let adLabel;
+
 // Flag tracking if ads are currently active.
 let adsActive;
 
 // Flag tracking if playback has started.
 let playbackStarted;
+
+// Boolean tracking if controls are hidden or shown
+let controlsVisible;
 
 // Timer used to hide controls after user action.
 let hideControlsTimeout;
@@ -189,6 +217,9 @@ let userTappedAndDragged;
 // User consent state.
 let consentState;
 
+// Throttle for the showControls() function
+let showControlsThrottled = throttle(window, showControls, 1000);
+
 /**
  * @param {!Object} global
  * @param {!Object} data
@@ -197,6 +228,7 @@ export function imaVideo(global, data) {
 
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
+  adLabel = data.adLabel || 'Ad (%s of %s)';
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -212,7 +244,7 @@ export function imaVideo(global, data) {
     'position': 'relative',
     'width': px(videoWidth),
     'height': px(videoHeight),
-    'display': 'table-cell',
+    'display': bigPlayDivDisplayStyle,
     'vertical-align': 'middle',
     'text-align': 'center',
     'cursor': 'pointer',
@@ -235,17 +267,40 @@ export function imaVideo(global, data) {
     'bottom': '0px',
     'width': '100%',
     'height': '100px',
+    'background-color': 'rgba(7, 20, 30, .7)',
+    'background':
+      'linear-gradient(0, rgba(7, 20, 30, .7) 0%, rgba(7, 20, 30, 0) 100%)',
     'box-sizing': 'border-box',
     'padding': '10px',
     'padding-top': '60px',
-    'background-image': `url(${controlsBg})`,
-    'background-position': 'bottom',
     'color': 'white',
     'display': 'none',
+    'font-family': 'Helvetica, Arial, Sans-serif',
     'justify-content': 'center',
     'align-items': 'center',
     'user-select': 'none',
+    'z-index': '1',
   });
+  controlsVisible = false;
+
+  // Ad progress
+  countdownWrapperDiv = global.document.createElement('div');
+  countdownWrapperDiv.id = 'ima-countdown';
+  setStyles(countdownWrapperDiv, {
+    'align-items': 'center',
+    'box-sizing': 'border-box',
+    'display': 'none',
+    'flex-grow': '1',
+    'font-size': '12px',
+    'height': '20px',
+    'overflow': 'hidden',
+    'padding': '5px',
+    'text-shadow': '0px 0px 10px black',
+    'white-space': 'nowrap',
+  });
+  countdownDiv = global.document.createElement('div');
+  countdownWrapperDiv.appendChild(countdownDiv);
+  controlsDiv.appendChild(countdownWrapperDiv);
   // Play button
   playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
@@ -263,7 +318,6 @@ export function imaVideo(global, data) {
   setStyles(timeDiv, {
     'margin-right': '20px',
     'text-align': 'center',
-    'font-family': 'Helvetica, Arial, Sans-serif',
     'font-size': '14px',
     'text-shadow': '0px 0px 10px black',
   });
@@ -312,12 +366,27 @@ export function imaVideo(global, data) {
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
+
+  // Mute/Unmute button
+  muteUnmuteDiv = createIcon(global, 'volume_max');
+  muteUnmuteDiv.id = 'ima-mute-unmute';
+  setStyles(muteUnmuteDiv, {
+    'width': '30px',
+    'height': '30px',
+    'flex-shrink': '0',
+    'margin-right': '20px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+  });
+  controlsDiv.appendChild(muteUnmuteDiv);
+
   // Fullscreen button
   fullscreenDiv = createIcon(global, 'fullscreen');
   fullscreenDiv.id = 'ima-fullscreen';
   setStyles(fullscreenDiv, {
     'width': '30px',
     'height': '30px',
+    'flex-shrink': '0',
     'font-size': '1.25em',
     'cursor': 'pointer',
     'text-align': 'center',
@@ -385,6 +454,7 @@ export function imaVideo(global, data) {
 
   contentComplete = false;
   adsActive = false;
+  allAdsCompleted = false;
   playbackStarted = false;
   nativeFullscreen = false;
   imaLoadAllowed = true;
@@ -407,14 +477,22 @@ export function imaVideo(global, data) {
     // Create our own tap listener that ignores tap and drag.
     bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
     bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-    bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        'tapwithoutdrag',
+        onBigPlayClick.bind(null, global));
   } else {
-    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        interactEvent,
+        onBigPlayClick.bind(null, global));
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
+  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
   fullscreenDiv.addEventListener(interactEvent,
       toggleFullscreen.bind(null, global));
+
+  // Timeout is 1s, because showControls will hide after 3s
+  showControlsThrottled = throttle(window, showControls, 1000);
 
   const fullScreenEvents = [
     'fullscreenchange',
@@ -439,6 +517,35 @@ export function imaVideo(global, data) {
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
         () => onImaLoadSuccess(global, data), onImaLoadFail);
   }
+}
+
+/**
+ * Adds the appropriate event listener to an element
+ * to represent a hover state.
+ *
+ * NOTE: This does not add a throttler,
+ * since this is applied per element,
+ * and would require wrapping the callback.
+ * Thus, the callback passed should be,
+ * appropriately throttled. See showControlsThrottled.
+ *
+ * @param {!Element} element
+ * @param {!Function} callback
+ */
+export function addHoverEventToElement(element, callback) {
+  element.addEventListener(interactEvent, callback);
+  element.addEventListener(mouseMoveEvent, callback);
+}
+
+/**
+ * Removes the appropriate event listener from an element
+ * that represented a hover state.
+ * @param {!Element} element
+ * @param {!Function} callback
+ */
+export function removeHoverEventFromElement(element, callback) {
+  element.removeEventListener(interactEvent, callback);
+  element.removeEventListener(mouseMoveEvent, callback);
 }
 
 /**
@@ -513,7 +620,7 @@ function onImaLoadSuccess(global, data) {
 function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   imaLoadAllowed = false;
   postMessage({event: VideoEvents.LOAD});
 }
@@ -563,17 +670,23 @@ function changeIcon(element, name, fill = '#FFFFFF') {
  * @param {!Object} global
  * @visibleForTesting
  */
-export function onClick(global) {
-  playbackStarted = true;
-  uiTicker = setInterval(uiTickerClick, 500);
-  setInterval(playerDataTick, 1000);
-  bigPlayDiv.removeEventListener(interactEvent, onClick);
-  setStyle(bigPlayDiv, 'display', 'none');
-  if (adDisplayContainer) {
-    adDisplayContainer.initialize();
+export function onBigPlayClick(global) {
+  if (playbackStarted) {
+    // Resart the video
+    playVideo();
+  } else {
+    // Play the video for the first time
+    playbackStarted = true;
+    uiTicker = setInterval(uiTickerClick, 500);
+    setInterval(playerDataTick, 1000);
+    if (adDisplayContainer) {
+      adDisplayContainer.initialize();
+    }
+    videoPlayer.load();
+    playAds(global);
   }
-  videoPlayer.load();
-  playAds(global);
+
+  setStyle(bigPlayDiv, 'display', 'none');
 }
 
 /**
@@ -635,10 +748,8 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      postMessage({event: VideoEvents.PLAYING});
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -646,7 +757,6 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    postMessage({event: VideoEvents.PLAYING});
     playVideo();
   }
 }
@@ -661,6 +771,13 @@ export function onContentEnded() {
   if (adsLoader) {
     adsLoader.contentComplete();
   }
+
+  // If all ads are not completed,
+  // onContentResume will show the bigPlayDiv
+  if (allAdsCompleted) {
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
+  }
+
   postMessage({event: VideoEvents.PAUSE});
   postMessage({event: VideoEvents.ENDED});
 }
@@ -674,19 +791,25 @@ export function onContentEnded() {
 export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
-  adsRenderingSettings.uiElements =
-  [global.google.ima.UiElements.AD_ATTRIBUTION,
-    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
       onAdError);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.LOADED,
+      onAdLoad);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.AD_PROGRESS,
+      onAdProgress);
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested.bind(null, global));
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+      onAllAdsCompleted);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
@@ -704,8 +827,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
@@ -717,11 +840,39 @@ export function onAdsLoaderError() {
  */
 export function onAdError() {
   postMessage({event: VideoEvents.AD_END});
+  currentAd = null;
   if (adsManager) {
     adsManager.destroy();
   }
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   playVideo();
+}
+
+/**
+ * Called each time a new ad loads. Sets currentAd
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdLoad(global) {
+  currentAd = global.getAd();
+}
+
+/**
+ * Called intermittently as the ad plays, allowing us to display ad counter.
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdProgress(global) {
+  const {adPosition, totalAds} = global.getAdData();
+  const remainingTime = adsManager.getRemainingTime();
+  const remainingMinutes = Math.floor(remainingTime / 60);
+  let remainingSeconds = Math.floor(remainingTime % 60);
+  if (remainingSeconds.toString().length < 2) {
+    remainingSeconds = '0' + remainingSeconds;
+  }
+  const label = adLabel.replace('%s', adPosition).replace('%s', totalAds);
+  countdownDiv.textContent
+    = `${label}: ${remainingMinutes}:${remainingSeconds}`;
 }
 
 /**
@@ -740,10 +891,10 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   postMessage({event: VideoEvents.AD_START});
-  videoPlayer.removeEventListener(interactEvent, showControls);
+  removeHoverEventFromElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
-  hideControls();
+  showAdControls();
   videoPlayer.pause();
 }
 
@@ -754,14 +905,28 @@ export function onContentPauseRequested(global) {
  */
 export function onContentResumeRequested() {
   adsActive = false;
-  videoPlayer.addEventListener(interactEvent, showControls);
+  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
   postMessage({event: VideoEvents.AD_END});
+  resetControlsAfterAd();
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
-    videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
+  } else {
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
   }
+
+  videoPlayer.addEventListener('ended', onContentEnded);
+}
+
+/**
+ * Called by the IMA SDK. Signifies all ads have been played for the video.
+ *
+ * @visibleForTesting
+ */
+export function onAllAdsCompleted() {
+  currentAd = null;
+  allAdsCompleted = true;
 }
 
 /**
@@ -953,6 +1118,51 @@ export function pauseVideo(event = null) {
   }
 }
 
+/**
+ * Handler when the mute/unmute button is clicked
+ */
+export function onMuteUnmuteClick() {
+  if (videoPlayer.muted) {
+    unmuteVideo();
+  } else {
+    muteVideo();
+  }
+}
+
+/**
+ * Function to mute the video
+ */
+export function muteVideo() {
+  if (!videoPlayer.muted) {
+    videoPlayer.volume = 0;
+    videoPlayer.muted = true;
+    if (adsManager) {
+      adsManager.setVolume(0);
+    } else {
+      muteAdsManagerOnLoaded = true;
+    }
+    changeIcon(muteUnmuteDiv, 'mute');
+    postMessage({event: VideoEvents.MUTED});
+  }
+}
+
+/**
+ * Function to unmute the video
+ */
+export function unmuteVideo() {
+  if (videoPlayer.muted) {
+    videoPlayer.volume = 1;
+    videoPlayer.muted = false;
+    if (adsManager) {
+      adsManager.setVolume(1);
+    } else {
+      muteAdsManagerOnLoaded = false;
+    }
+    changeIcon(muteUnmuteDiv, 'volume_max');
+    postMessage({event: VideoEvents.UNMUTED});
+  }
+}
+
 
 /**
  * @param {Object} global
@@ -1049,27 +1259,90 @@ function onFullscreenChange(global) {
 }
 
 /**
+ * Show a subset of controls when ads are playing.
+ * Visible controls are countdownDiv, muteUnmuteDiv, and fullscreenDiv
+ *
+ * @visibleForTesting
+ */
+export function showAdControls() {
+  const hasMobileStyles = videoWidth <= 400;
+  const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
+  const miniControls = hasMobileStyles && isSkippable;
+  // hide non-ad controls
+  const hideElement = button => setStyle(button, 'display', 'none');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(hideElement);
+  // set ad control styles
+  setStyles(controlsDiv, {
+    'height': miniControls ? '20px' : '30px',
+    'justify-content': 'flex-end',
+    'padding': '10px',
+  });
+  const buttonDefaults = {
+    'height': miniControls ? '18px' : '22px',
+  };
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '10px',
+  }));
+  // show ad controls
+  setStyle(countdownWrapperDiv, 'display', 'flex');
+  showControls();
+}
+
+/**
+ * Reinstate access to all controls when ads have ended.
+ *
+ * @visibleForTesting
+ */
+export function resetControlsAfterAd() {
+  // hide ad controls
+  setStyle(countdownWrapperDiv, 'display', 'none');
+  // set non-ad control styles
+  setStyles(controlsDiv, {
+    'justify-content': 'center',
+    'height': '100px',
+    'padding': '60px 10px 10px',
+  });
+  const buttonDefaults = {'height': '30px'};
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '20px',
+  }));
+  // show non-ad controls
+  const showElement = button => setStyle(button, 'display', 'block');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(showElement);
+}
+
+/**
  * Show video controls and reset hide controls timeout.
  *
  * @visibleForTesting
  */
 export function showControls() {
-  setStyle(controlsDiv, 'display', 'flex');
+  if (!controlsVisible) {
+    setStyle(controlsDiv, 'display', 'flex');
+    controlsVisible = true;
+  }
+
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
+    // Be sure to keep the timer greater than showControlsThrottled.
     clearInterval(hideControlsTimeout);
     hideControlsTimeout = setTimeout(hideControls, 3000);
   }
 }
 
 /**
- * Hide video controls.
+ * Hide video controls, except when ads are active.
  *
  * @visibleForTesting
  */
 export function hideControls() {
-  setStyle(controlsDiv, 'display', 'none');
+  if (controlsVisible && !adsActive) {
+    setStyle(controlsDiv, 'display', 'none');
+    controlsVisible = false;
+  }
 }
 
 /**
@@ -1094,7 +1367,7 @@ function onMessage(global, event) {
         playVideo();
       } else {
         // Auto-play support
-        onClick(global);
+        onBigPlayClick(global);
       }
       break;
     case 'pauseVideo':
@@ -1106,24 +1379,10 @@ function onMessage(global, event) {
       }
       break;
     case 'mute':
-      videoPlayer.volume = 0;
-      videoPlayer.muted = true;
-      if (adsManager) {
-        adsManager.setVolume(0);
-      } else {
-        muteAdsManagerOnLoaded = true;
-      }
-      postMessage({event: VideoEvents.MUTED});
+      muteVideo();
       break;
     case 'unMute':
-      videoPlayer.volume = 1;
-      videoPlayer.muted = false;
-      if (adsManager) {
-        adsManager.setVolume(1);
-      } else {
-        muteAdsManagerOnLoaded = false;
-      }
-      postMessage({event: VideoEvents.UNMUTED});
+      unmuteVideo();
       break;
     case 'hideControls':
       if (!adsActive) {
@@ -1145,7 +1404,7 @@ function onMessage(global, event) {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
         });
-        if (adsActive) {
+        if (adsActive && !fullscreen) {
           adsManager.resize(
               msg.args.width, msg.args.height,
               global.google.ima.ViewMode.NORMAL);
@@ -1191,11 +1450,40 @@ function postMessage(data) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
-    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
-    playerState, PlayerStates, playPauseDiv, progressLine,
-    progressMarkerDiv, timeNode, uiTicker, videoPlayer};
+  return {
+    adContainerDiv,
+    allAdsCompleted,
+    adRequestFailed,
+    adsActive,
+    adsManagerWidthOnLoad,
+    adsManagerHeightOnLoad,
+    adsRequest,
+    bigPlayDiv,
+    contentComplete,
+    controlsDiv,
+    controlsVisible,
+    hideControlsTimeout,
+    imaLoadAllowed,
+    interactEvent,
+    playbackStarted,
+    playerState,
+    PlayerStates,
+    playPauseDiv,
+    progressLine,
+    progressMarkerDiv,
+    timeNode,
+    uiTicker,
+    videoPlayer,
+  };
+}
+
+/**
+ * Gets the throttled show controls
+ * @return {Function}
+ * @visibleForTesting
+ */
+export function getShowControlsThrottledForTesting() {
+  return showControlsThrottled;
 }
 
 /**
@@ -1225,6 +1513,24 @@ export function setAdDisplayContainerForTesting(adc) {
 export function setVideoWidthAndHeightForTesting(width, height) {
   videoWidth = width;
   videoHeight = height;
+}
+
+/**
+ * Sets the video muted state
+ * @param {boolean} shouldMute
+ * @visibleForTesting
+ */
+export function setVideoPlayerMutedForTesting(shouldMute) {
+  videoPlayer.muted = shouldMute;
+}
+
+/**
+ * Sets the allAdsCompleted flag.
+ * @param {boolean} newValue
+ * @visibleForTesting
+ */
+export function setAllAdsCompletedForTesting(newValue) {
+  allAdsCompleted = newValue;
 }
 
 /**

@@ -20,10 +20,12 @@ import {Services} from '../../../src/services';
 AMP.extension('amp-access-scroll', '0.1', function(AMP) {
   AMP.registerServiceForDoc(
       'scroll',
+      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
       function(ampdoc) {
-        return Services.accessServiceForDoc(ampdoc).then(accessService => {
+        const element = ampdoc.getHeadNode();
+        return Services.accessServiceForDoc(element).then(accessService => {
           const source = accessService.getVendorSource('scroll');
-          const vendor = new ScrollAccessVendor(ampdoc, accessService, source);
+          const vendor = new ScrollAccessVendor(ampdoc, source);
           const adapter = /** @type {
             !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
           } */ (source.getAdapter());

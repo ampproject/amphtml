@@ -15,15 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
-import {openWindowDialog} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -58,9 +57,9 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-    const typeAttr = user().assert(element.getAttribute('type'),
+    const typeAttr = userAssert(element.getAttribute('type'),
         'The type attribute is required. %s', element);
-    user().assert(!/\s/.test(typeAttr),
+    userAssert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         element);
 
@@ -70,7 +69,7 @@ class AmpSocialShare extends AMP.BaseElement {
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!this.systemShareSupported_()) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     } else {
@@ -79,12 +78,12 @@ class AmpSocialShare extends AMP.BaseElement {
         !!this.win.document.querySelectorAll(
             'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     }
     const typeConfig = getSocialConfig(typeAttr) || dict();
-    this.shareEndpoint_ = user().assert(
+    this.shareEndpoint_ = userAssert(
         element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
         'The data-share-endpoint attribute is required. %s', element);
@@ -92,7 +91,7 @@ class AmpSocialShare extends AMP.BaseElement {
         getDataParamsFromAttributes(element));
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
@@ -134,8 +133,8 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }
@@ -151,11 +150,11 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleActivation_() {
-    user().assert(this.href_ && this.target_, 'Clicked before href is set.');
+    userAssert(this.href_ && this.target_, 'Clicked before href is set.');
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      dev().assert(navigator.share !== undefined,
+      devAssert(navigator.share !== undefined,
           'navigator.share disappeared.');
       // navigator.share() fails 'gulp check-types' validation on Travis
       navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));

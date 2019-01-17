@@ -16,7 +16,7 @@
 
 import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -632,18 +632,16 @@ export function templateContentClone(template) {
 }
 
 /**
- * Iterate over an array-like. Some collections like NodeList are
- * lazily evaluated in some browsers, and accessing `length` forces full
- * evaluation. We can improve performance by iterating until an element is
- * `undefined` to avoid checking the `length` property.
- * Test cases: https://jsperf.com/iterating-over-collections-of-elements
+ * Iterate over an array-like.
+ * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
  * @param {!IArrayLike<T>} iterable
  * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {
-  for (let i = 0, value; (value = iterable[i]) !== undefined; i++) {
-    cb(value, i);
+  const {length} = iterable;
+  for (let i = 0; i < length; i++) {
+    cb(iterable[i], i);
   }
 }
 
@@ -685,6 +683,7 @@ export function openWindowDialog(win, url, target, opt_features) {
  */
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
+            element.hasAttribute('type') &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
 
@@ -734,7 +733,7 @@ export function escapeCssSelectorIdent(ident) {
 export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
   // Ensure it doesn't close the nth-child psuedo class.
-  dev().assert(escaped.indexOf(')') === -1);
+  devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }
 
@@ -801,7 +800,7 @@ export function isAmpElement(element) {
  * @return {!Promise<!Element>}
  */
 export function whenUpgradedToCustomElement(element) {
-  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(element);
@@ -907,4 +906,33 @@ export function isFullscreenElement(element) {
  */
 export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
+}
+
+const PRECEDING_OR_CONTAINS =
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
+
+/**
+ * A sorting comparator that sorts elements in DOM tree order.
+ * A first sibling is sorted to be before its nextSibling.
+ * A parent node is sorted to be before a child.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
+ *
+ * @param {!Element} element1
+ * @param {!Element} element2
+ * @return {number}
+ */
+export function domOrderComparator(element1, element2) {
+  if (element1 === element2) {
+    return 0;
+  }
+
+  const pos = element1.compareDocumentPosition(element2);
+
+  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
+  if (pos & PRECEDING_OR_CONTAINS) {
+    return 1;
+  }
+
+  // if fe2 is following or contained by fe1, then fe1 is before fe2
+  return -1;
 }

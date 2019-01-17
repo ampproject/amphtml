@@ -29,11 +29,10 @@ import {VideoEvents} from '../../../src/video-interface';
 import {
   VideoServiceSignals,
 } from '../../../src/service/video-service-interface';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isFiniteNumber} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
 
 
 /** @private @const {string} */
@@ -100,7 +99,7 @@ export class VideoService {
         video);
 
     if (this.getEntryOrNull(element)) {
-      return dev().assert(this.getEntryOrNull(element));
+      return devAssert(this.getEntryOrNull(element));
     }
 
     if (!video.supportsPlatform()) {
@@ -307,7 +306,7 @@ export class VideoEntry {
 
       const {win} = this.ampdoc_;
       const {element} = this.video_;
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      const actions = Services.actionServiceForDoc(element);
       const name = 'timeUpdate';
       const percent = time / duration;
       const event = createCustomEvent(win, `${TAG}.${name}`,
@@ -323,7 +322,7 @@ export class VideoEntry {
  * @private
  */
 function warnUnimplemented(feature) {
-  dev().warn(TAG, `${feature} unimplemented.`);
+  dev().warn(TAG, '%s unimplemented.', feature);
 }
 
 

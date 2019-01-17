@@ -27,7 +27,7 @@ const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
-const {singlePassCompile} = require('../get-dep-graph');
+const {singlePassCompile} = require('../single-pass');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -54,7 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error:', e.message));
+            console./*OK*/error(colors.red('Compilation error:'), e.message);
             process.exit(1);
           });
     }
@@ -89,14 +89,13 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function formatClosureCompilerError(message) {
   const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
   message = message.replace(javaInvocationLine, '');
-  message = highlight(message, {ignoreIllegals: true}); // never throws
+  message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
   return message;
 }
 
-function compile(entryModuleFilenames, outputDir,
-  outputFilename, options) {
+function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -107,6 +106,8 @@ function compile(entryModuleFilenames, outputDir,
     'third_party/webcomponentsjs/',
     'third_party/rrule/',
     'third_party/react-dates/',
+    'third_party/amp-toolbox-cache-url/',
+    'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
     // Can't seem to suppress `(0, win.eval)` suspicious code warning
@@ -114,10 +115,9 @@ function compile(entryModuleFilenames, outputDir,
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
-
   const baseExterns = [
     'build-system/amp.extern.js',
-    'third_party/closure-compiler/externs/performance_observer.js',
+    'build-system/dompurify.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -130,12 +130,25 @@ function compile(entryModuleFilenames, outputDir,
     define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(entryModuleFilenames, {
+    const compilationOptions = {
       define,
       externs: baseExterns,
       hideWarningsFor,
-    }).then(() => {
+    };
+
+    // Add babel plugin to remove unwanted polyfills in esm build
+    if (options.esmPassCompilation) {
+      compilationOptions['dest'] = './dist/esm/';
+      define.push('ESM_BUILD=true');
+    }
+
+    console/*OK*/.assert(typeof entryModuleFilenames == 'string');
+    const entryModule = entryModuleFilenames;
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(
+        entryModule,
+        compilationOptions
+    ).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
         stream.on('end', resolve);
@@ -206,8 +219,12 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-animation/**/*.js',
       // For amp-bind in the web worker (ww.js).
       'extensions/amp-bind/**/*.js',
+      // Needed to access to Variant interface from other extensions
+      'extensions/amp-experiment/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
+      // Needed to access inputmask impl from other extensions
+      'extensions/amp-inputmask/**/*.js',
       // Needed for AccessService
       'extensions/amp-access/**/*.js',
       // Needed for AmpStoryVariableService
@@ -241,10 +258,16 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
-      'node_modules/dompurify/dist/purify.cjs.js',
+      'third_party/amp-toolbox-cache-url/**/*.js',
+      'third_party/inputmask/**/*.js',
+      'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
+      'node_modules/@ampproject/animations/dist/animations.mjs',
+      'node_modules/@ampproject/worker-dom/dist/' +
+          'unminified.index.safe.mjs.patched.js',
       'node_modules/document-register-element/build/' +
           'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
@@ -318,6 +341,7 @@ function compile(entryModuleFilenames, outputDir,
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
+    externs.push('build-system/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
@@ -340,12 +364,14 @@ function compile(entryModuleFilenames, outputDir,
         rewrite_polyfills: false,
         externs,
         js_module_root: [
-          'node_modules/',
+          // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
+          // resolution or bad things will happen (#18600).
           'build/patched-module/',
           'build/fake-module/',
           'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
+        module_resolution: 'NODE',
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -355,12 +381,15 @@ function compile(entryModuleFilenames, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        jscomp_error: [],
+        // moduleLoad: Demote "module not found" errors to ignore missing files
+        //     in type declarations in the swg.js bundle.
+        jscomp_warning: ['moduleLoad'],
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
         jscomp_off: ['unknownDefines'],
         define,
         hide_warnings_for: hideWarningsFor,
-        jscomp_error: [],
       },
     };
 
@@ -386,12 +415,12 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red(
-              'Compiler error for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(err.message));
+          const {message} = err;
+          console./*OK*/error(colors.red(
+              'Compiler issues for ' + outputFilename + ':\n') +
+              formatClosureCompilerError(message));
           process.exit(1);
         });
-
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream

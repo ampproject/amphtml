@@ -87,6 +87,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
 import {
@@ -108,11 +109,11 @@ import {
 } from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
+import {maybeTrackImpression} from '../src/impression';
 import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -229,6 +230,9 @@ export const realWin = describeEnv(spec => [
  *   body: string,
  *   css: (string|undefined),
  *   hash: (string|undefined),
+ *   amp: (boolean),
+ *   timeout: (number),
+ *   retryOnSaucelabs: (number)
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -343,17 +347,27 @@ function describeEnv(factory) {
 
       afterEach(() => {
         // Tear down all fixtures.
+        let teardown = Promise.resolve();
         fixtures.slice(0).reverse().forEach(fixture => {
-          fixture.teardown(env);
+          teardown = teardown.then(() => fixture.teardown(env));
         });
 
-        // Delete all other keys.
-        for (const key in env) {
-          delete env[key];
-        }
+        return teardown.then(() => {
+          // Delete all other keys.
+          for (const key in env) {
+            delete env[key];
+          }
+        });
       });
 
-      describe(SUB, function() {
+      let d = describe.configure();
+      if (spec.retryOnSaucelabs) {
+        d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
+      }
+      d.run(SUB, function() {
+        if (spec.timeout) {
+          this.timeout(spec.timeout);
+        }
         fn.call(this, env);
       });
     });
@@ -411,9 +425,6 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private {boolean} */
-    this.sandboxOwner_ = false;
   }
 
   /** @override */
@@ -423,23 +434,12 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    // Sandbox.
-    let {sandbox} = global;
-    if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox;
-      this.sandboxOwner_ = true;
-    }
-    env.sandbox = sandbox;
+    env.sandbox = sinon.createSandbox();
   }
 
   /** @override */
   teardown(env) {
-    // Sandbox.
-    if (this.sandboxOwner_) {
-      env.sandbox.restore();
-      delete global.sandbox;
-      this.sandboxOwner_ = false;
-    }
+    env.sandbox.restore();
   }
 }
 
@@ -450,6 +450,13 @@ class IntegrationFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+    if (this.spec.timeout === undefined) {
+      this.spec.timeout =
+          Math.max(window.ampTestRuntimeConfig.mochaTimeout, 5000);
+    }
+    if (this.spec.retryOnSaucelabs === undefined) {
+      this.spec.retryOnSaucelabs = 4;
+    }
 
     /** @const {string} */
     this.hash = spec.hash || '';
@@ -472,10 +479,17 @@ class IntegrationFixture {
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
 
+    let url = this.spec.amp === false
+      ? '/amp4test/compose-html'
+      : '/amp4test/compose-doc';
+    if (this.spec.params) {
+      url = addParamsToUrl(url, this.spec.params);
+    }
+
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc',
-            {body, css, experiments, extensions}) + `#${this.hash}`,
+        src: addParamsToUrl(url, {body, css, experiments, extensions})
+            + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -491,6 +505,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    return RequestBank.tearDown();
   }
 }
 
@@ -591,7 +606,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win, class {});
+          installCustomElements(win);
         }
 
         // Intercept event listeners
@@ -684,6 +699,7 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+    maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach(extensionIdWithVersion => {

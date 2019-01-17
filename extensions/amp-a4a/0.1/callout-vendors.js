@@ -37,6 +37,17 @@ let RtcVendorDef;
 
 /** @const {!Object<string, RtcVendorDef>} */
 export const RTC_VENDORS = {
+////////////////////////////////////////////////////////////////////
+//                                                                //
+//              !!!      IMPORTANT NOTE     !!!                   //
+//                                                                //
+//  If you are adding a new vendor config object to this object,  //
+//  make sure to also update the RTC documentation in these two   //
+//  files under "supported vendors".                              //
+// https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md
+// https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md
+////////////////////////////////////////////////////////////////////
+
   // Add vendors here
   medianet: {
     url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
@@ -62,6 +73,7 @@ export const RTC_VENDORS = {
   lotame: {
     url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
     macros: ['CLIENT_ID', 'AD_NETWORK'],
+    disableKeyAppend: true,
   },
   yieldbot: {
     url: 'https://i.yldbt.com/m/YB_PSN/v1/amp/init?curl=CANONICAL_URL&sn=YB_SLOT&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&aup=ATTR(data-slot)&pvi=PAGEVIEWID&tgt=TGT&adcid=ADCID&href=HREF',
@@ -79,8 +91,8 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   aps: {
-    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
-    macros: ['PUB_ID', 'PARAMS'],
+    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
+    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID'],
     disableKeyAppend: true,
   },
   openwrap: {
@@ -91,9 +103,18 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   criteo: {
-    url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&href=HREF',
+    url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF',
     macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
     disableKeyAppend: true,
+  },
+  navegg: {
+    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    macros: ['NVG_ACC'],
+  },
+  sonobi: {
+    url: 'https://apex.go.sonobi.com/trinity.json?key_maker=%7B%22_DIVIDER_ATTR(data-slot)%7C1%22%3A%22PLACEMENT_ID_DIVIDER_ATTR(width)xATTR(height)%2CATTR(data-multi-size)%22%7D&ref=CANONICAL_URL&lib_name=amp&lib_v=0.1&pv=PAGEVIEWID&amp=1',
+    disableKeyAppend: true,
+    macros: ['PLACEMENT_ID', '_DIVIDER_'],
   },
 };
 

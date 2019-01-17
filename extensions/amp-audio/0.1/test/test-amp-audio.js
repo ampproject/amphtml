@@ -113,6 +113,25 @@ describes.realWin('amp-audio', {
     });
   });
 
+  it('should attach `<audio>` element and execute relevant actions for ' +
+  'layout="nodisplay"', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      preload: 'none',
+      layout: 'nodisplay',
+    }).then(ampAudio => {
+      const audio = ampAudio.querySelector('audio');
+      expect(audio).to.not.be.null;
+
+      const impl = ampAudio.implementation_;
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.true;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
+    });
+  });
+
   it('should load audio through sources', () => {
     return attachAndRun({
       width: 503,
@@ -188,7 +207,7 @@ describes.realWin('amp-audio', {
     const element = doc.createElement('div');
     element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
-    const promise = audio.layoutCallback();
+    const promise = audio.buildAudioElement();
     doc.createElement = savedCreateElement;
     return promise.then(() => {
       expect(element.toggleFallback).to.be.calledOnce;

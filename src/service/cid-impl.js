@@ -27,7 +27,7 @@ import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, rethrowAsync, user} from '../log';
+import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
@@ -49,7 +49,7 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 /**
  * We ignore base cids that are older than (roughly) one year.
  */
-const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+export const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
@@ -165,7 +165,7 @@ export class Cid {
    *      given.
    */
   get(getCidStruct, consent, opt_persistenceConsent) {
-    user().assert(
+    userAssert(
         SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
             && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
         'The CID scope and cookie name must only use the characters ' +
@@ -205,7 +205,7 @@ export class Cid {
 
   /**
    * Returns the "external cid". This is a cid for a specific purpose
-   * (Say Analytics provider X). It is unique per user, that purpose
+   * (Say Analytics provider X). It is unique per user, userAssert, that purpose
    * and the AMP origin site.
    * @param {!GetCidDef} getCidStruct
    * @param {!Promise} persistenceConsent
@@ -422,7 +422,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  userAssert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 

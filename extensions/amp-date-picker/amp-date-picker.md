@@ -161,8 +161,13 @@ This example demonstrates using a overlay date picker in a form where the user c
   </form>
 ```
 
-<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
+On touch devices, an `amp-date-picker` in overlay mode automatically adds the
+`readonly` attribute to its `<input>` elements.
+This prevents the device's on-screen keyboard from opening unncessesarily.
+To opt-out of this behavior, add the `touch-keyboard-editable` attribute to the
+`<amp-date-picker>` element.
 
+<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
 
 ## Selection types
 
@@ -208,6 +213,23 @@ and the user can select a date range with a starting date and ending date.
     <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png"  width="332" height="373">
   </noscript>
 </amp-img>
+
+## Date formats
+
+`amp-date-picker` attributes accept dates in ISO 8601 and RFC 5545 RRULE formats.
+
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formats dates as `YYYY-MM-DD`
+and is the standard for sharing dates between electronic systems.
+For example, ISO 8601 formats the date February 28 2018 as `2018-02-28`.
+
+[RFC 5545 Recurrence Rules (RRULEs)](https://icalendar.org/iCalendar-RFC-5545/3-3-10-recurrence-rule.html)
+standardize a format for specifying repeating dates.
+For example, RFC 5545 formats Halloween as `RRULE:FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=31`.
+More complex dates are also possible, such as the United States Thanksgiving holiday,
+which is every November on the fourth Thursday: `RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=+4TH`.
+The API is not friendly to memorize, but there are various
+[RRULE generators](https://jakubroztocil.github.io/rrule) available online.
+
 
 ## Attributes
 
@@ -299,13 +321,17 @@ an initial end date dynamically.
 
 ##### min
 
-The earliest date that the user may select.
+The earliest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `min` attribute is present, the current date will be the minimum date.
+
+The `min` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ##### max
 
-The latest date that the user may select.
+The latest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `max` attribute is present, the date picker will have no maximum date.
+
+The `max` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 #####  month-format
 
@@ -338,6 +364,12 @@ If no `week-day-format` is present, the weekdays display as the first character 
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
 
+##### maximum-nights
+
+The number of nights that the user's selection may not exceed in a date range.
+The default is `"0"`.
+A value of `"0"` allows the user to select an unlimited number of nights.
+
 ##### minimum-nights
 
 The number of nights that the user must select in a date range. The default is `"1"`.
@@ -353,11 +385,11 @@ The day to specify as the first day of the week (0-6). The default value is `"0"
 
 ##### blocked
 
-A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
 
 ##### highlighted
 
-A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
 Default styling is a blue dot on the date.
 
 ##### day-size
@@ -377,7 +409,7 @@ document that sets a minimum height for the date picker.
 
 ##### allow-blocked-ranges
 
-If present, this attribute prevents the user from selecting a range with a blocked date.
+If present, this attribute allows the user to select a range containing blocked date(s).
 By default, this attribute is not present.
 
 ##### src
@@ -400,11 +432,11 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>date</code></td>
-<td>Specifies the initially selected date. In a date picker with <code>type="range"</code> this has no effect.</td>
+<td>Specifies the initially selected date. In a date picker with <code>type="range"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected a date.</td>
 </tr>
 <tr>
 <td><code>endDate</code></td>
-<td>Specifies the initially selected end date. In a date picker with <code>type="single"</code> this has no effect.</td>
+<td>Specifies the initially selected end date. In a date picker with <code>type="single"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected an end date.</td>
 </tr>
 <tr>
 <td><code>highlighted</code></td>
@@ -412,7 +444,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>startDate</code></td>
-<td>Specifies the initially selected start date for a date picker with <code>type="range"</code>. In a date picker with <code>type="single"</code> this has no effect.</td>
+<td>Specifies the initially selected start date for a date picker with <code>type="range"</code>. In a date picker with <code>type="single"</code> this has no effect. In order to prevent overwriting the user's input, this value has no effect if the user has already selected a start date.</td>
 </tr>
 <tr>
 <td><code>templates</code></td>
@@ -420,6 +452,8 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 </tbody>
 </table>
+
+The `src` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ###### template definition objects
 

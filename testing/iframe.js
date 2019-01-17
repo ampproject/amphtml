@@ -25,7 +25,9 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {install as installCustomElements} from '../src/polyfills/custom-elements';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
@@ -235,7 +237,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow, class {});
+      installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
@@ -475,8 +477,9 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const {createElement} = win.document;
-  win.document.createElement = function(tagName) {
+  const {prototype} = win.Document;
+  const {createElement} = prototype;
+  prototype.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {

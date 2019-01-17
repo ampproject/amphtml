@@ -18,7 +18,7 @@ import {AmpEvents} from '../amp-events';
 import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
@@ -94,7 +94,7 @@ export class Resource {
    */
   static forElement(element) {
     return /** @type {!Resource} */ (
-      dev().assert(Resource.forElementOptional(element),
+      devAssert(Resource.forElementOptional(element),
           'Missing resource prop on %s', element));
   }
 
@@ -113,7 +113,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev().assert(owner.contains(element), 'Owner must contain the element');
+    devAssert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
       Resource.forElementOptional(element).updateOwner(owner);
     }
@@ -439,13 +439,13 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    const oldBox = this.getPageLayoutBox();
+    const oldBox = this.layoutBox_;
     if (this.useLayers_) {
       this.measureViaLayers_();
     } else {
       this.measureViaResources_();
     }
-    const box = this.getPageLayoutBox();
+    const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, box);
@@ -516,6 +516,7 @@ export class Resource {
      * for both 2 and 3, we need for force it.
      */
     layers.remeasure(element, /* opt_force */ true);
+    this.layoutBox_ = this.getPageLayoutBox();
   }
 
   /**
@@ -546,7 +547,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 
@@ -670,7 +670,7 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
-    dev().assert(viewport !== false);
+    devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
@@ -857,9 +857,9 @@ export class Resource {
       return Promise.reject(this.lastLayoutError_);
     }
 
-    dev().assert(this.state_ != ResourceState.NOT_BUILT,
+    devAssert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
-    dev().assert(this.isDisplayed(),
+    devAssert(this.isDisplayed(),
         'Not displayed for layout: %s', this.debugid);
 
     // Unwanted re-layouts are ignored.
@@ -1021,6 +1021,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

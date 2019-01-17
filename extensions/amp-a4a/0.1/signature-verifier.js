@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/types';
 
 /** @visibleForTesting */
@@ -213,7 +213,7 @@ export class SignatureVerifier {
       return Promise.resolve(VerificationStatus.CRYPTO_UNAVAILABLE);
     }
     const signer = this.signers_[signingServiceName];
-    dev().assert(
+    devAssert(
         signer, 'Keyset for service %s not loaded before verification',
         signingServiceName);
     return signer.promise.then(success => {
@@ -306,16 +306,17 @@ export class SignatureVerifier {
               // and there's no meaningful error recovery to be done if they
               // fail, so we don't need to do them at runtime in production.
               // They're included in dev mode as a debugging aid.
-              dev().assert(
+              devAssert(
                   response.status === 200,
                   'Fast Fetch keyset spec requires status code 200');
-              dev().assert(
+              devAssert(
                   response.headers.get('Content-Type') ==
                       'application/jwk-set+json',
                   'Fast Fetch keyset spec requires Content-Type: ' +
                       'application/jwk-set+json');
               return response.json().then(
-                  jwkSet => {
+                  jsonResponse => {
+                    const jwkSet = /** @type {!JsonObject} */ (jsonResponse);
                     // This is supposed to be a JSON Web Key Set, as defined in
                     // Section 5 of RFC 7517. However, the signing service could
                     // misbehave and send an arbitrary JSON value, so we have to

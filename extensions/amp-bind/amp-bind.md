@@ -79,7 +79,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
 There is a limit of 100 operands what can be used in an expression.
-3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
+3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes. 
 
 `amp-bind` takes special care to ensure speed, security and performance on AMP pages.
 
@@ -160,6 +160,17 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 - An `<amp-state>` element's child JSON has a maximum size of 100KB.
 - An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+
+#### Refreshing state
+
+The `refresh` action is supported by this component and can be used to refresh the
+state's contents.
+
+```html
+<amp-state id="amp-state" ...></amp-state>
+<!-- Clicking the button will refresh and refetch the json in amp-state. -->
+<button on="tap:amp-state.refresh"></button>
+```
 
 #### Updating state with `AMP.setState()`
 
@@ -338,7 +349,7 @@ encodeURIComponent('Hello world')</pre>
 `amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
 
 ```html
-<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius" />
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>
 
 <div>
   The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
@@ -349,7 +360,7 @@ A macro can also call other macros <i>defined before itself</i>. A macro cannot 
 
 ### Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). An alternative, XML-compatible syntax can also be used in the form of `data-amp-bind-property`.
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
@@ -372,7 +383,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
@@ -388,12 +399,12 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
   </tr>
 </table>
 
-Notes on Bindings:
+Notes on bindings:
 
 - For security reasons, binding to `innerHTML` is disallowed.
 - All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
 - Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
-
+- Bracket characters `[` and `]` in attribute names can be problematic when writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these cases, use the alternative syntax `data-amp-bind-x="foo"` instead of `[x]="foo"`.
 
 #### Element-specific attributes
 
@@ -414,6 +425,17 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>*</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-date-picker&gt;</code></td>
+    <td>
+      <code>[min]</code><br>
+      <code>[max]</code>
+    </td>
+    <td>
+      Sets the earliest selectable date<br>
+      Sets the latest selectable date
+    </td>
   </tr>
   <tr>
     <td><code>&lt;amp-google-document-embed&gt;</code></td>
@@ -447,7 +469,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
-    <td><code>[selected]</code><sup>*</sup></td>
+    <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
@@ -474,6 +496,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;button&gt;</code></td>
     <td><code>[disabled]</code><br><code>[type]</code><br><code>[value]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;details&gt;</code></td>
+    <td><code>[open]</code></td>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;fieldset&gt;</code></td>

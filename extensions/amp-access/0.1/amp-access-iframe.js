@@ -17,13 +17,12 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;
@@ -53,19 +52,19 @@ export class AccessIframeAdapter {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @const @private {string} */
-    this.iframeSrc_ = user().assert(configJson['iframeSrc'],
+    this.iframeSrc_ = userAssert(configJson['iframeSrc'],
         '"iframeSrc" URL must be specified');
     assertHttpsUrl(this.iframeSrc_, '"iframeSrc"');
 
     /** @const @private {?Array} */
     this.iframeVars_ = configJson['iframeVars'] || null;
     if (this.iframeVars_) {
-      user().assert(isArray(this.iframeVars_),
+      userAssert(isArray(this.iframeVars_),
           '"iframeVars" must be an array');
     }
 
     /** @const @private {!JsonObject} */
-    this.defaultResponse_ = user().assert(configJson['defaultResponse'],
+    this.defaultResponse_ = userAssert(configJson['defaultResponse'],
         '"defaultResponse" must be specified');
 
     /** @private @const {string} */

@@ -22,6 +22,7 @@ import {
   computedStyle,
   px,
   setImportantStyles,
+  setInitialDisplay,
 } from '../../style';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
@@ -108,6 +109,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const doc = this.win.document;
     const {documentElement} = doc;
     documentElement.classList.add('i-amphtml-ios-embed-sd');
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      documentElement.classList.add('i-amphtml-body-minheight');
+    }
 
     const scroller = htmlFor(doc)`
       <div id="i-amphtml-scroller">
@@ -124,6 +128,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     this.wrapper_ = dev().assertElement(scroller.firstElementChild);
 
     // Notice that the -webkit-overflow-scrolling is set later.
+    setInitialDisplay(this.scroller_, 'block');
     setImportantStyles(this.scroller_, {
       'overflow-x': 'hidden',
       'overflow-y': 'auto',
@@ -135,7 +140,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       'margin': '0',
       'width': '100%',
       'box-sizing': 'border-box',
-      'display': 'block',
       'padding-top': '0px', // Will be updated for top offset.
       // The scroller must have a 1px transparent border for two purposes:
       // (1) to cancel out margin collapse in body's children so that position
@@ -146,6 +150,12 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     setImportantStyles(this.wrapper_, {
       'overflow': 'visible',
       'position': 'relative',
+      // Wrapper must additionally have `will-change: transform` to avoid iOS
+      // rendering bug where contents inside the `-webkit-overflow-scrolling`
+      // element would occasionally fail to paint. This bug appears to trigger
+      // more often when Shadow DOM is involved. The cost of this is relatively
+      // low since this only adds one additional layer for the body.
+      'will-change': 'transform',
     });
     // Other properties will be copied from the `<body>`.
 
@@ -290,7 +300,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    return !isExperimentOn(this.win, 'ios-embed-sd-notransfer');
   }
 
   /** @override */
@@ -386,15 +396,35 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   getContentHeight() {
-    // The reparented body inside scroller will have the correct content height.
-    // Body is overflow: hidden so that the scrollHeight include the margins of
-    // body's first and last child.
-    // Body height doesn't include paddingTop on the parent, so we add on the
-    // position of the body from the top of the viewport and subtract the
-    // scrollTop (as position relative to the viewport changes as you scroll).
-    return this.wrapper_./*OK*/scrollHeight
+    // Don't use scrollHeight, since it returns `MAX(viewport_height,
+    // document_height)`, even though we only want the latter. Also, it doesn't
+    // account for margins
+    const scrollingElement = this.wrapper_;
+    const rect = scrollingElement./*OK*/getBoundingClientRect();
+    const style = computedStyle(this.win, scrollingElement);
+    return rect.height
         + this.paddingTop_
-        + this.getBorderTop();
+        + this.getBorderTop()
+        + parseInt(style.marginTop, 10)
+        + parseInt(style.marginBottom, 10);
+  }
+
+  /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      this.vsync_.mutate(() => {
+        setImportantStyles(this.scroller_, {
+          '-webkit-overflow-scrolling': 'auto',
+        });
+        this.vsync_.mutate(() => {
+          setImportantStyles(this.scroller_, {
+            '-webkit-overflow-scrolling': 'touch',
+          });
+        });
+      });
+    }
   }
 
   /** @override */

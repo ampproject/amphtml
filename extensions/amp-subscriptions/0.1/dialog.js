@@ -44,6 +44,9 @@ export class Dialog {
     /** @private {?Element} */
     this.content_ = null;
 
+    /** @private {!Promise} */
+    this.lastAction_ = Promise.resolve();
+
     const doc = this.ampdoc_.win.document;
 
     this.wrapper_ = createElementWithAttributes(
@@ -51,6 +54,7 @@ export class Dialog {
         'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
           'role': 'dialog',
         }));
+    toggle(this.wrapper_, false);
 
     /** @private @const {!Element} */
     this.closeButton_ = createElementWithAttributes(
@@ -67,7 +71,6 @@ export class Dialog {
     // Start hidden.
     this.ampdoc_.getBody().appendChild(this.wrapper_);
     setImportantStyles(this.wrapper_, {
-      display: 'none',
       transform: 'translateY(100%)',
     });
   }
@@ -93,6 +96,34 @@ export class Dialog {
    * @return {!Promise}
    */
   open(content, showCloseAction = true) {
+    return this.action_(() => this.open_(content, showCloseAction));
+  }
+
+  /**
+   * Closes the dialog.
+   * @return {!Promise}
+   */
+  close() {
+    return this.action_(() => this.close_());
+  }
+
+  /**
+   * @param {!Function} action
+   * @return {!Promise}
+   * @private
+   */
+  action_(action) {
+    return this.lastAction_ = this.lastAction_.then(action);
+  }
+
+  /**
+   * Opens the dialog with the specified content.
+   * @param {!Element} content
+   * @param {boolean=} showCloseAction
+   * @return {!Promise}
+   * @private
+   */
+  open_(content, showCloseAction = true) {
     if (this.content_) {
       this.wrapper_.replaceChild(content, this.content_);
     } else {
@@ -104,9 +135,7 @@ export class Dialog {
     }
     this.visible_ = true;
     return this.vsync_.mutatePromise(() => {
-      setImportantStyles(this.wrapper_, {
-        display: 'block',
-      });
+      toggle(this.wrapper_, true);
       this.showCloseAction(/** @type {boolean} */ (showCloseAction));
     }).then(() => {
       // Animate to display.
@@ -133,8 +162,9 @@ export class Dialog {
   /**
    * Closes the dialog.
    * @return {!Promise}
+   * @private
    */
-  close() {
+  close_() {
     if (!this.visible_) {
       return Promise.resolve();
     }
@@ -145,9 +175,7 @@ export class Dialog {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {
-        setImportantStyles(this.wrapper_, {
-          display: 'none',
-        });
+        toggle(this.wrapper_, false);
         this.viewport_.updatePaddingBottom(0);
         this.visible_ = false;
       });

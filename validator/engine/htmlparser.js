@@ -396,7 +396,7 @@ class TagNameStack {
         // Fallthroughs intentional.
         case TagRegion.PRE_DOCTYPE:  // doctype is not manufactured
         case TagRegion.PRE_HTML:
-          this.startTag(new amp.htmlparser.ParsedHtmlTag('HTML', ['⚡', '']));
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('HTML'));
         case TagRegion.PRE_HEAD:
           this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
         case TagRegion.IN_HEAD:

@@ -224,5 +224,16 @@ feature_tests/forms.html:190:6 The tag 'template' may not appear as a descendant
 feature_tests/forms.html:193:6 The tag 'template' may not appear as a descendant of tag 'form div [verify-error][template]'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |      </div>
 |    </form>
+|    <!-- Valid: form with verify-xhr and input with no-verify-->
+|    <form method="post" action-xhr="https://example.com/subscribe" verify-xhr="https://example.com/verify" target="_blank">
+|      <input name="do-not-verify" no-verify>
+|      <input type="submit" value="Subscribe">
+|    </form>
+|    <!-- Invalid: mask attr without the amp-inputmask extension -->
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+|      <input mask="L0L_0L0" type="tel">
+>>     ^~~~~~~~~
+feature_tests/forms.html:203:4 The tag 'input [mask]' requires including the 'amp-inputmask' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|    </form>
 |  </body>
 |  </html>

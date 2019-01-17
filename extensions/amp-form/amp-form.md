@@ -125,10 +125,10 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 
 ## Actions
 
-The `amp-form` element exposes the following actions: 
+The `amp-form` element exposes the following actions:
 
 | Action | Description |
-|--------|-------------| 
+|--------|-------------|
 | `submit` | Allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). |
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
@@ -141,7 +141,7 @@ Learn more about [Actions and Events in AMP](https://www.ampproject.org/docs/int
 The `amp-form` exposes the following events:
 
 | Event | Fired when |
-|-------|-------------| 
+|-------|-------------|
 | `submit` | The form is submitted and before the submission is complete. |
 | `submit-success` | The form submission is done and the response is a success. |
 | `submit-error` | The form submission is done and the response is an error. |
@@ -186,7 +186,7 @@ See the [full example here](../../examples/forms.amp.html).
 The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) config:
 
 | Event                     | Fired when                        |
-|---------------------------|-----------------------------------| 
+|---------------------------|-----------------------------------|
 | `amp-form-submit`         | A form request is initiated.      |
 | `amp-form-submit-success` | A successful response is received (i.e, when the response has a status of `2XX`). |
 | `amp-form-submit-error`   | An unsuccessful response is received (i.e, when the response doesn't have a status of `2XX`). |
@@ -244,7 +244,7 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 ## Success/error response rendering
 
-You can render success or error responses in your form by using [extended templates (e.g., Mustache)](https://www.ampproject.org/docs/fundamentals/spec#extended-templates) and the following response attributes:
+You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success responses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
 
 | Response attribute | Description |
 |-----------|---------------------|
@@ -252,10 +252,10 @@ You can render success or error responses in your form by using [extended templa
 | `submit-error` | an be used to display a submission error if the response is unsuccessful (i.e., does not have a status of `2XX`).  |
 | `submitting` | Can be used to display a message when the form is submitting. The template for this attribute has access to the form's input fields for any display purposes. Please see the [full form example below](#example-submitting) for how to use the `submitting` attribute. |
 
-To render responses:
+### To render responses with templating:
 
 * Apply a response attribute to *any direct child* of the `<form>` element.
-* Render the response in the child element by including a `<template></template>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
+* Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 * Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
 
@@ -264,7 +264,7 @@ To render responses:
 <a id="example-submitting"></a>
 ##### Example: Form displays success, error, and submitting messages
 
-In the following example, the responses are rendered in an inline template inside the form. 
+In the following example, the responses are rendered in an inline template inside the form.
 
 ```html
 <form ...>
@@ -299,7 +299,7 @@ In the following example, the responses are rendered in an inline template insid
 
 The publisher's `action-xhr` endpoint returns the following JSON responses:
 
-On success: 
+On success:
 
 ```json
 {
@@ -309,7 +309,7 @@ On success:
 }
 ```
 
-On error: 
+On error:
 ```json
 {
   "name": "Jane Miller",
@@ -339,6 +339,49 @@ You can render the responses in a referenced template defined earlier in the doc
 
 See the [full example here](../../examples/forms.amp.html).
 
+### To render a successful response with data binding
+
+* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).
+* Use the `event` property to capture the response data.
+* Add the state attribute to the desired element to bind the form response.
+
+The following example demonstrates a form `submit-success` response with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind):
+```html
+  <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Subscribe to our newsletter</p>
+  <form method="post"
+        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        target="_top"
+        on="submit-success: AMP.setState({'subscribe': event.response.name})">
+    <div>
+      <input type="text"
+          name="name"
+          placeholder="Name..."
+          required>
+      <input type="email"
+        name="email"
+        placeholder="Email..."
+        required>
+    </div>
+    <input type="submit" value="Subscribe">
+  </form>
+ ```
+
+ When the form is submitted successfully it will return a JSON response similar to the following:
+
+```json
+{
+  "name": "Jane Miller",
+  "email": "email@example.com"
+}
+```
+Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
+
+```html
+...
+  <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Thanks Jane Miller! You have successfully subscribed.</p>
+...
+```
+
 ### Redirecting after a submission
 
 You can redirect users to a new page after a successful form submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur.  HTTP response headers are configured via your server.
@@ -349,7 +392,7 @@ Make sure to update your `Access-Control-Expose-Headers` response header to incl
 
 ```text
 AMP-Redirect-To: https://example.com/forms/thank-you
-Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
+Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin, AMP-Redirect-To
 ```
 
 
@@ -427,6 +470,10 @@ Here's an example:
             <span>City</span>
             <input type="text" name="city" required>
         </label>
+        <label>
+            <span>Document</span>
+            <input type="file" name="document" no-verify>
+        </label>
         <div class="spinner"></div>
         <input type="submit" value="Submit">
     </fieldset>
@@ -462,6 +509,9 @@ Here is how an error response should look for verification:
   ]
 }
 ```
+
+To remove a field from the `verify-xhr` request, add the `no-verify` attribute
+to the input element.
 
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 

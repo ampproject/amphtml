@@ -2,6 +2,11 @@
   "extends": [
     "config:base"
   ],
+  "node": {
+    "supportPolicy": [
+      "lts_active"
+    ]
+  },
   "statusCheckVerify": true,
   "ignoreDeps": [
     "babel-polyfill",

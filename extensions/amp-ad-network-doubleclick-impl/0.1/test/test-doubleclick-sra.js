@@ -30,7 +30,6 @@ import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {FetchResponseHeaders} from '../../../../src/utils/xhr-utils';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
@@ -45,6 +44,7 @@ import {
   getExperimentIds,
   getForceSafeframe,
   getIdentity,
+  getIsFluid,
   getPageOffsets,
   getSizes,
   getTargetingAndExclusions,
@@ -54,7 +54,7 @@ import {
 } from '../sra-utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dev} from '../../../../src/log';
+import {devAssert} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
@@ -249,6 +249,12 @@ describes.realWin('Doubleclick SRA', config , env => {
         parentElement: {tagName: 'AMP-STICKY-AD'}}}};
       expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
     });
+    it('should combine fluid state', () => {
+      impls[0] = {isFluidRequest: () => true};
+      impls[1] = {isFluidRequest: () => false};
+      impls[2] = {isFluidRequest: () => true};
+      expect(getIsFluid(impls)).to.jsonEqual({'fluid': 'height,0,height'});
+    });
   });
 
   describe('#SRA AMP creative unlayoutCallback', () => {
@@ -381,8 +387,8 @@ describes.realWin('Doubleclick SRA', config , env => {
 
     function generateSraXhrMockCall(
       validInstances, networkId, responses, opt_xhrFail, opt_allInvalid) {
-      dev().assert(validInstances.length > 1);
-      dev().assert(!(opt_xhrFail && opt_allInvalid));
+      devAssert(validInstances.length > 1);
+      devAssert(!(opt_xhrFail && opt_allInvalid));
       // Start with nameframe method, SRA will override to use safeframe.
       const headers = {};
       headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
@@ -419,11 +425,7 @@ describes.realWin('Doubleclick SRA', config , env => {
             });
             return Promise.resolve(slotDataString);
           },
-          headers: new FetchResponseHeaders({
-            getResponseHeader(name) {
-              return headers[name];
-            },
-          }),
+          headers,
         }));
       }
     }
@@ -447,11 +449,10 @@ describes.realWin('Doubleclick SRA', config , env => {
           }).returns(Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
-        headers: new FetchResponseHeaders({
-          getResponseHeader(name) {
-            return headers[name];
-          },
-        }),
+        headers: {
+          get: header => headers[header],
+          has: header => header in headers,
+        },
         text: () => {
           throw new Error('should not be SRA!');
         },
@@ -494,7 +495,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         if (typeof network == 'number') {
           network = {networkId: network, instances: 1};
         }
-        dev().assert(network.instances || network.invalidInstances);
+        devAssert(network.instances || network.invalidInstances);
         const createInstances = (instanceCount, invalid) => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);

@@ -17,7 +17,9 @@ import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
-import {user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
+import {getState} from '../../../src/history';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -33,7 +35,7 @@ export function timeStrToMillis(time) {
   const num = match[1];
   const units = match[2];
 
-  user().assert(
+  userAssert(
       match &&
           match.length == 3 &&
           (units == 's' || units == 'ms'),
@@ -198,6 +200,63 @@ export function removeAttributeInMutate(elementImpl, name) {
  * @param {string|!Location} url
  */
 export function userAssertValidProtocol(element, url) {
-  user().assert(Services.urlForDoc(element).isProtocolValid(url),
+  userAssert(Services.urlForDoc(element).isProtocolValid(url),
       'Unsupported protocol for URL %s', url);
+}
+
+/**
+ * Gets the origin url for elements that display a url. It
+ * trims the protocol prefix and returns only the hostname of the origin.
+ * @param {!Element} element
+ * @param {string} url
+ * @return {string}
+ */
+export function getSourceOriginForElement(element, url) {
+  let domainName;
+
+  try {
+    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
+    // Remove protocol prefix.
+    domainName = Services.urlForDoc(element).parse(domainName).hostname;
+  } catch (e) {
+    // Unknown path prefix in url.
+    domainName = Services.urlForDoc(element).parse(url).hostname;
+  }
+  return domainName;
+}
+
+/** @enum {string} */
+export const HistoryState = {
+  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
+  BOOKEND_ACTIVE: 'ampStoryBookendActive',
+  PAGE_ID: 'ampStoryPageId',
+};
+
+/**
+ * Updates the value for a given state in the window history.
+ * @param {!Window} win
+ * @param {string} stateName
+ * @param {string|boolean|null} value
+ */
+export function setHistoryState(win, stateName, value) {
+  const {history} = win;
+  const state = getState(history) || {};
+  const newHistory = Object.assign({}, /** @type {!Object} */ (state),
+      {[stateName]: value});
+
+  history.replaceState(newHistory, '');
+}
+
+/**
+ * Returns the value of a given state of the window history.
+ * @param {!Window} win
+ * @param {string} stateName
+ * @return {?string}
+ */
+export function getHistoryState(win, stateName) {
+  const {history} = win;
+  if (history && getState(history)) {
+    return getState(history)[stateName];
+  }
+  return null;
 }

@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, user} from '../../../src/log';
-import {getSourceOrigin, isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {devAssert, user, userAssert} from '../../../src/log';
+import {
+  getSourceOrigin,
+  isProtocolValid,
+  parseUrlDeprecated,
+} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -54,8 +58,8 @@ function buildArticleFromJson_(articleJson) {
     return null;
   }
 
-  const articleUrl = dev().assert(articleJson['url']);
-  user().assert(isProtocolValid(articleUrl),
+  const articleUrl = devAssert(articleJson['url']);
+  userAssert(isProtocolValid(articleUrl),
       `Unsupported protocol for article URL ${articleUrl}`);
 
   let domain;
@@ -67,15 +71,15 @@ function buildArticleFromJson_(articleJson) {
   }
 
   const article = {
-    title: dev().assert(articleJson['title']),
+    title: devAssert(articleJson['title']),
     url: articleUrl,
     domainName: domain,
   };
 
   if (articleJson['image']) {
-    user().assert(isProtocolValid(articleJson['image']),
+    userAssert(isProtocolValid(articleJson['image']),
         `Unsupported protocol for article image URL ${articleJson['image']}`);
-    article.image = dev().assert(articleJson['image']);
+    article.image = devAssert(articleJson['image']);
   }
 
   return /** @type {!RelatedArticleDef} */ (article);

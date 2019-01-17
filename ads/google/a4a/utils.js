@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getBinaryType} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getTimingDataSync} from '../../../src/service/variable-source';
 import {
+  getBinaryType,
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {getConsentPolicyState} from '../../../src/consent';
+import {getMode} from '../../../src/mode';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -65,6 +67,9 @@ const visibilityStateCodes = {
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
 
+/** @type {string} */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
+
 /**
  * Element attribute that stores experiment IDs.
  *
@@ -96,16 +101,17 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
- * Returns the value of navigation start using the performance API or 0 if not
- * supported by the browser.
+ * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
  * performance API.
  * @param {!Window} win
+ * @param {string} timingEvent The name of the timing event, e.g.
+ *     'navigationStart' or 'domContentLoadEventStart'.
  * @return {number}
  */
-function getNavStart(win) {
+function getNavigationTiming(win, timingEvent) {
   return (win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart']) || 0;
+      win['performance']['timing'][timingEvent]) || 0;
 }
 
 /**
@@ -201,7 +207,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector =
       r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
-  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
+  const {documentElement} = win.document;
+  return Services.resourcesForDoc(documentElement).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
           r.element.getAttribute('type') == type;
@@ -241,15 +248,23 @@ export function groupAmpAdsByType(win, type, groupFn) {
 export function googlePageParameters(a4a, startTime) {
   const {win} = a4a;
   const ampDoc = a4a.getAmpDoc();
+  // Do not wait longer than 1 second to retrieve referrer to ensure
+  // viewer integration issues do not cause ad requests to hang indefinitely.
+  const referrerPromise = Services.timerFor(win).timeoutPromise(
+      1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
+      .catch(() => {
+        dev().expectedError('AMP-A4A', 'Referrer timeout!');
+        return '';
+      });
+  const domLoading = getNavigationTiming(win, 'domLoading');
   return Promise.all([
-    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
-    Services.viewerForDoc(ampDoc).getReferrerUrl()])
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'), referrerPromise])
       .then(promiseResults => {
         const clientId = promiseResults[0];
-        const documentInfo = Services.documentInfoForDoc(ampDoc);
+        const referrer = promiseResults[1];
+        const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
         // Read by GPT for GA/GPT integration.
-        win.gaGlobal = win.gaGlobal ||
-        {cid: clientId, hid: documentInfo.pageViewId};
+        win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
         const {screen} = win;
         const viewport = Services.viewportForDoc(ampDoc);
         const viewportRect = viewport.getRect();
@@ -285,11 +300,11 @@ export function googlePageParameters(a4a, startTime) {
           'debug_experiment_id':
               (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
                   null,
-          'url': documentInfo.canonicalUrl,
+          'url': canonicalUrl || null,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-          'loc': win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-          'ref': promiseResults[1] || null,
+          'loc': win.location.href == canonicalUrl ? null : win.location.href,
+          'ref': referrer || null,
+          'bdt': domLoading ? startTime - domLoading : null,
         };
       });
 }
@@ -338,7 +353,7 @@ function iframeNestingDepth(win) {
     w = w.parent;
     depth++;
   }
-  dev().assert(w == win.top);
+  devAssert(w == win.top);
   return depth;
 }
 
@@ -406,7 +421,7 @@ function secondWindowFromTop(win) {
     secondFromTop = secondFromTop.parent;
     depth++;
   }
-  dev().assert(secondFromTop.parent == win.top);
+  devAssert(secondFromTop.parent == win.top);
   return secondFromTop;
 }
 
@@ -573,7 +588,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
-  const navStart = getNavStart(win);
+  const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = {
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
@@ -592,7 +607,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
  * Extracts configuration used to build amp-analytics element for active view.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
+ * @param {!Headers} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
  * @return {?JsonObject} config or null if invalid/missing.
@@ -604,7 +619,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   try {
     const analyticsConfig =
         parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
-    dev().assert(Array.isArray(analyticsConfig['url']));
+    devAssert(Array.isArray(analyticsConfig['url']));
     const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
@@ -745,7 +760,7 @@ export function getEnclosingContainerTypes(adElement) {
  * @return {string|undefined} potentially modified url, undefined
  */
 export function maybeAppendErrorParameter(adUrl, parameterValue) {
-  dev().assert(!!adUrl && !!parameterValue);
+  devAssert(!!adUrl && !!parameterValue);
   // Add parameter indicating error so long as the url has not already been
   // truncated and error parameter is not already present.  Note that we assume
   // that added, error parameter length will be less than truncation parameter
@@ -756,7 +771,7 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
     return;
   }
   const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
-  dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
+  devAssert(modifiedAdUrl.length <= MAX_URL_LENGTH);
   return modifiedAdUrl;
 }
 
@@ -788,26 +803,36 @@ export let IdentityToken;
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {?string} consentPolicyId
  * @return {!Promise<!IdentityToken>}
  */
-export function getIdentityToken(win, elementOrAmpDoc) {
+export function getIdentityToken(win, ampDoc, consentPolicyId) {
+  // If configured to use amp-consent, delay request until consent state is
+  // resolved.
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      executeIdentityTokenFetch(win, elementOrAmpDoc);
+      (consentPolicyId
+        ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
+        : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
+          .then(consentState =>
+            consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+            consentState == CONSENT_POLICY_STATE.UNKNOWN ?
+            /** @type{!IdentityToken} */({}) :
+              executeIdentityTokenFetch(win, ampDoc));
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
 }
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} redirectsRemaining (default 1)
  * @param {string=} domain
  * @param {number=} startTime
  * @return {!Promise<!IdentityToken>}
  */
-function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
+function executeIdentityTokenFetch(win, ampDoc, redirectsRemaining = 1,
   domain = undefined, startTime = Date.now()) {
-  const url = getIdentityTokenRequestUrl(win, elementOrAmpDoc, domain);
+  const url = getIdentityTokenRequestUrl(win, ampDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',
     method: 'GET',
@@ -828,7 +853,7 @@ function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
             return {fetchTimeMs};
           }
           return executeIdentityTokenFetch(
-              win, elementOrAmpDoc, redirectsRemaining, altDomain, startTime);
+              win, ampDoc, redirectsRemaining, altDomain, startTime);
         } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
             typeof token == 'string') {
           return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
@@ -845,13 +870,12 @@ function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {string=} domain
  * @return {string} url
  * @visibleForTesting
  */
-export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
-  domain = undefined) {
+export function getIdentityTokenRequestUrl(win, ampDoc, domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
     const matches = IDENTITY_DOMAIN_REGEXP_.exec(
         win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
@@ -859,7 +883,7 @@ export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
   }
   domain = domain || '.google.com';
   const canonical =
-    extractHost(Services.documentInfoForDoc(elementOrAmpDoc).canonicalUrl);
+    extractHost(Services.documentInfoForDoc(ampDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
@@ -874,7 +898,7 @@ export function isCdnProxy(win) {
 
 /**
  * Populates the fields of the given Nameframe experiment config object.
- * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} headers
+ * @param {!Headers} headers
  * @param {!NameframeExperimentConfig} nameframeConfig
  */
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {

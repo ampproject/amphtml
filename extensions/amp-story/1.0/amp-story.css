@@ -15,14 +15,16 @@
  */
 
 @import './amp-story-access.css';
-@import './amp-story-scroll.css';
-@import './amp-story-desktop.css';
+@import './amp-story-desktop-panels.css';
+@import './amp-story-page-attachment.css';
 @import './amp-story-user-overridable.css';
+@import './pagination-buttons.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
+  -webkit-touch-callout: none !important;
 }
 
 amp-consent {
@@ -57,6 +59,8 @@ amp-story {
   text-rendering: geometricPrecision !important;
   user-select: none !important;
   width: 100% !important;
+  /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
+  touch-action: manipulation !important;
 }
 
 html.i-amphtml-story-standalone,
@@ -174,6 +178,25 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
+amp-story amp-sidebar[side][open] {
+  background-color: #ffffff !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+[desktop] amp-sidebar[side][open]{
+  max-width: 320px !important;
+}
+
+amp-story amp-sidebar[side] {
+  max-width: 280px !important;
+  min-width: 280px !important;
+  width: 280px !important;
+  transform: translate3d(100%, 0, 0) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  display: block !important;
+}
+
 .i-amphtml-story-fallback amp-story-page {
   display: none !important;
 }
@@ -197,11 +220,7 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story-page[active] {
-  transition: filter 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-}
-
-.i-amphtml-story-bookend-active amp-story-page[active] {
+[desktop].i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
@@ -226,8 +245,34 @@ amp-story-page[active] {
   }
 
   100% {
-    opacity: 0.55;
+    opacity: 0.75;
   }
+}
+
+.i-amphtml-story-opacity-mask {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0.75 !important;
+  display: block !important;
+  /* Prevent someone from making this a full-screen image */
+  background-image: none !important;
+  background-color: #000 !important;
+  z-index: 100001 !important;
+  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+}
+
+.i-amphtml-story-opacity-mask[hidden] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: block !important;
+  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) reverse !important;
+}
+
+.i-amphtml-sidebar-mask {
+  display: none !important;
 }
 
 /**
@@ -236,7 +281,7 @@ amp-story-page[active] {
  * story.
  * See #14401
  */
-amp-story amp-video::after {
+amp-story-grid-layer amp-video::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -259,6 +304,7 @@ amp-story-cta-layer {
 
 /** Grid level */
 amp-story-grid-layer {
+  box-sizing: border-box !important;
   display: grid !important;
   position: absolute !important;
   top: 0 !important;
@@ -266,6 +312,41 @@ amp-story-grid-layer {
   bottom: 0 !important;
   left: 0 !important;
   z-index: 2 !important;
+  /** Make sure grid layer does not act as a click shield on elements underneath */
+  pointer-events: none !important;
+}
+
+amp-story-grid-layer > * {
+  pointer-events: auto !important;
+}
+
+/** Apply click shield on embedded components on initial load. */
+amp-story-grid-layer amp-twitter::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.i-amphtml-expanded-mode amp-twitter::after {
+  height: 0px !important;
+  width: 0px !important;
+}
+
+.i-amphtml-expanded-mode amp-story-grid-layer,
+.i-amphtml-expanded-mode amp-story-grid-layer * {
+  contain: none !important;
+  z-index: auto !important;
+}
+
+.i-amphtml-expanded-mode amp-twitter {
+  z-index: 1 !important;
+}
+
+.i-amphtml-animate-expand-in {
+  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {
@@ -305,6 +386,7 @@ amp-story-grid-layer {
 }
 
 .i-amphtml-story-grid-template-thirds {
+  height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
                        "middle-third"
@@ -632,4 +714,166 @@ amp-story .amp-video-eq,
   0% { transform: rotate(-130deg) }
   50% { transform: rotate(5deg) }
   to { transform: rotate(-130deg) }
+}
+
+.i-amphtml-story-page-play-button {
+  display: flex !important;
+  align-items: center !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  height: 40px !important;
+  border: 0 !important;
+  margin: 8px 0 0 8px !important; /* Making the click target 48px.*/
+  padding: 0 !important;
+  animation: play-button-fly-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  background-color: transparent !important;
+  z-index: 10000 !important;
+}
+
+.i-amphtml-story-expanded-view-overflow {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 1) !important;
+  position: absolute !important;
+}
+
+.i-amphtml-expanded-view-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 8px !important;
+  height: 24px !important;
+  width: 24px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.7)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  cursor: pointer !important;
+  text-align: center !important;
+}
+
+@keyframes play-button-fly-in {
+  0% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.i-amphtml-story-page-play-button[hidden] {
+  display: none !important;
+}
+
+.i-amphtml-story-page-play-label {
+  color: #fff !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 14px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+}
+
+.i-amphtml-story-page-play-icon {
+  display: inline-block !important;
+  height: 24px !important;
+  width: 24px !important;
+  margin: 0 8px !important;
+  border-radius: 24px !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+/** amp-story-page open attachment message. */
+
+@keyframes open-attachment-fly-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes open-attachment-icon {
+  0% {
+    transform: translateY(5px);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes open-attachment-button-explode {
+  0% {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@keyframes open-attachment-text-color {
+  0% {
+    color: #fff;
+    text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36);
+  }
+  to {
+    color: rgba(0, 0, 0, 0.87);
+    text-shadow: none;
+  }
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 0 !important;
+  width: 100% !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-icon {
+  display: block !important;
+  height: 20px !important;
+  width: 24px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+  animation: open-attachment-icon 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text {
+  position: relative !important;
+  padding: 0 24px !important;
+  height: 32px !important;
+  cursor: pointer !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 15px !important;
+  line-height: 32px !important;
+  pointer-events: auto !important;
+  animation: open-attachment-text-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text::after {
+  content: "";
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #fff !important;
+  border-radius: 32px !important;
+  z-index: -1 !important;
+  animation: open-attachment-button-explode 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
 }

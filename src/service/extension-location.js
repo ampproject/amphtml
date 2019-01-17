@@ -18,6 +18,17 @@ import {getMode} from '../mode';
 import {urls} from '../config';
 
 /**
+ * Internal structure that maintains the state of an extension through loading.
+ *
+ * @typedef {{
+ *   extensionId: (string|undefined),
+ *   extensionVersion: (string|undefined),
+ * }}
+ * @private
+ */
+let ExtensionInfoDef;
+
+/**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
  * @param {boolean=} opt_isLocalDev
@@ -32,6 +43,15 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
     return `${prefix}/dist`;
   }
   return urls.cdn;
+}
+
+/**
+ * Calculates if we need a single pass folder or not.
+ *
+ * @return {string}
+ */
+function getSinglePassExperimentPath() {
+  return getMode().singlePassType ? `${getMode().singlePassType}/` : '';
 }
 
 /**
@@ -52,7 +72,8 @@ export function calculateExtensionScriptUrl(location, extensionId,
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
+  const spPath = getSinglePassExperimentPath();
+  return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
 }
 
 /**
@@ -68,7 +89,23 @@ export function calculateEntryPointScriptUrl(
   location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+    const spPath = getSinglePassExperimentPath();
+    return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
   }
   return `${base}/${entryPoint}.js`;
+}
+
+/**
+ * Parse the extension version from a given script URL.
+ * @param {string} scriptUrl
+ * @return {!ExtensionInfoDef}
+ */
+export function parseExtensionUrl(scriptUrl) {
+  const regex = /^(.*)\/(.*)-([0-9.]+)\.js$/i;
+  const matches = scriptUrl.match(regex);
+
+  return {
+    extensionId: matches ? matches[2] : undefined,
+    extensionVersion: matches ? matches[3] : undefined,
+  };
 }

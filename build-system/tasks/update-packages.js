@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const {exec, getStderr} = require('../exec');
+const {exec, execOrDie, getStderr} = require('../exec');
 
 const yarnExecutable = 'npx yarn';
 
@@ -39,6 +39,24 @@ function writeIfUpdated(patchedName, file) {
 }
 
 /**
+ * @param {string} filePath
+ * @param {string} newFilePath
+ * @param  {...any} args Search and replace string pairs.
+ */
+function replaceInFile(filePath, newFilePath, ...args) {
+  let file = fs.readFileSync(filePath, 'utf8');
+  for (let i = 0; i < args.length; i += 2) {
+    const searchValue = args[i];
+    const replaceValue = args[i + 1];
+    if (!file.includes(searchValue)) {
+      throw new Error(`Expected "${searchValue}" to appear in ${filePath}.`);
+    }
+    file = file.replace(searchValue, replaceValue);
+  }
+  writeIfUpdated(newFilePath, file);
+}
+
+/**
  * Patches Web Animations API by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
@@ -50,15 +68,27 @@ function patchWebAnimations() {
   let file = fs.readFileSync(
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
+  // Replace |requestAnimationFrame| with |window|.
+  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+    if (file.charAt(b - 1) == '.') {
+      return a;
+    }
+    return 'window.' + a;
+  });
+  // Fix web-animations-js code that violates strict mode.
+  // See https://github.com/ampproject/amphtml/issues/18612 and
+  // https://github.com/web-animations/web-animations-js/issues/46
+  file = file.replace(/b.true=a/g, 'b?b.true=a:true');
+
+  // Fix web-animations-js code that attempts to write a read-only property.
+  // See https://github.com/ampproject/amphtml/issues/19783 and
+  // https://github.com/web-animations/web-animations-js/issues/160
+  file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
+
   // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
+  file = 'export function installWebAnimations(window) {\n' +
       'var document = window.document;\n' +
-      file.replace(/requestAnimationFrame/g, function(a, b) {
-        if (file.charAt(b - 1) == '.') {
-          return a;
-        }
-        return 'window.' + a;
-      }) +
+      file +
       '\n' +
       '}\n';
   writeIfUpdated(patchedName, file);
@@ -69,33 +99,59 @@ function patchWebAnimations() {
  * without side effects.
  */
 function patchRegisterElement() {
-  let file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'node_modules/document-register-element' +
-      '/build/document-register-element.patched.js';
-  file = fs.readFileSync(
-      'node_modules/document-register-element/build/' +
-      'document-register-element.node.js').toString();
-  // Eliminate the immediate side effect.
-  if (!/installCustomElements\(global\);/.test(file)) {
-    throw new Error('Expected "installCustomElements(global);" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('installCustomElements(global);', '');
-  // Closure Compiler does not generate a `default` property even though
-  // to interop CommonJS and ES6 modules. This is the same issue typescript
-  // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-  if (!/module.exports = installCustomElements;/.test(file)) {
-    throw new Error('Expected "module.exports = installCustomElements;" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('module.exports = installCustomElements;',
-      'exports.installCustomElements = installCustomElements;');
-  writeIfUpdated(patchedName, file);
+  // compilation: https://github.com/google/closure-compiler/issues/1831
+  const dir = 'node_modules/document-register-element/build/';
+  replaceInFile(
+      dir + 'document-register-element.node.js',
+      dir + 'document-register-element.patched.js',
+      // Elimate the immediate side effect.
+      'installCustomElements(global);',
+      '',
+      // Replace CJS export with ES6 export.
+      'module.exports = installCustomElements;',
+      'export {installCustomElements};');
+}
+
+/**
+ * Closure Compiler doesn't recognize .mjs extension yet, so copy the file to
+ * have a .js file extension.
+ */
+function patchWorkerDom() {
+  const dir = 'node_modules/@ampproject/worker-dom/dist/';
+  fs.copyFileSync(
+      dir + 'unminified.index.safe.mjs',
+      dir + 'unminified.index.safe.mjs.patched.js');
+}
+
+/**
+ * Makes sure ES6 packages in node_modules that are used by the runtime will be
+ * transformed by babelify. The list of packages is dynamically generated by
+ * reading the `dependencies` section of the package.json in the project root.
+ * This is a no-op if transforms are already enabled for a package.
+ * See https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+ */
+function transformEs6Packages() {
+  const rootPackageJsonFile = 'package.json';
+  const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
+  const rootPackageJson = JSON.parse(rootPackageJsonContents);
+  const es6Packages = Object.keys(rootPackageJson['dependencies']);
+  es6Packages.forEach(es6Package => {
+    const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
+    const packageJsonContents = fs.readFileSync(packageJsonFile, 'utf8');
+    const packageJson = JSON.parse(packageJsonContents);
+    if (!packageJson['browserify']) {
+      packageJson['browserify'] = {'transform': ['babelify']};
+      const updatedPackageJson = JSON.stringify(packageJson, null, 2);
+      fs.writeFileSync(packageJsonFile, updatedPackageJson, 'utf8');
+      if (!process.env.TRAVIS) {
+        log(colors.green('Enabled ES6 transforms for runtime dependency'),
+            colors.cyan(es6Package));
+      }
+    }
+  });
 }
 
 /**
@@ -125,7 +181,7 @@ function runYarnCheck() {
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    exec(yarnExecutable);
+    execOrDie(yarnExecutable); // Stop execution when Ctrl + C is detected.
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));
@@ -143,6 +199,8 @@ function updatePackages() {
   }
   patchWebAnimations();
   patchRegisterElement();
+  patchWorkerDom();
+  transformEs6Packages();
 }
 
 gulp.task(

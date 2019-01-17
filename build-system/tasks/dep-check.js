@@ -157,6 +157,15 @@ function getSrcs() {
         .map(getEntryModule)
         // Concat the core binary and integration binary as entry points.
         .concat('src/amp.js', '3p/integration.js'));
+  }).then(files => {
+    // Write all the entry modules into a single file so they can be processed
+    // together.
+    fs.mkdirpSync('./.amp-build');
+    const filename = './.amp-build/gulp-dep-check-collection.js';
+    fs.writeFileSync(filename, files.map(file => {
+      return `import '../${file}';`;
+    }).join('\n'));
+    return [filename];
   });
 }
 
@@ -175,8 +184,13 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babelify, {compact: false});
+  const bundler = browserify(entryModule, {debug: true})
+      .transform(babelify, {
+        compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
+      });
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -190,7 +204,9 @@ function getGraph(entryModule) {
       .pipe(source(entryModule))
       // Unfortunately we need to write the files out.
       .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
+      .on('end', () => {
+        resolve(module);
+      });
   return promise;
 }
 

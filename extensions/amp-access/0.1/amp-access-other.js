@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */
@@ -62,8 +62,8 @@ export class AccessOtherAdapter {
   authorize() {
     dev().fine(TAG, 'Use the authorization fallback for type=other');
     // Disallow authorization for proxy origin (`cdn.ampproject.org`).
-    dev().assert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
-    const response = dev().assert(this.authorizationResponse_);
+    devAssert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
+    const response = devAssert(this.authorizationResponse_);
     return Promise.resolve(response);
   }
 

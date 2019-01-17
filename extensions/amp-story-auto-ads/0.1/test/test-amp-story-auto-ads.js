@@ -71,7 +71,7 @@ describes.realWin('amp-story-auto-ads', {
     it('should fire "story-ad-insert" upon insertion', () => {
       autoAds.uniquePagesCount_ = 10;
       autoAds.adPagesCreated_ = 1;
-      sandbox.stub(autoAds, 'startNextPage_');
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
@@ -83,7 +83,7 @@ describes.realWin('amp-story-auto-ads', {
     it('should fire "story-ad-discard" upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
       autoAds.adPagesCreated_ = 1;
-      sandbox.stub(autoAds, 'startNextPage_');
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
@@ -210,6 +210,39 @@ describes.realWin('amp-story-auto-ads', {
       expect(analyticsStub).to.be.called;
       expect(analyticsStub).to.have.been.calledWithMatch('cool-event',
           {foo: 1});
+    });
+  });
+
+  describe('creation of attributes', () => {
+    it('should not allow blacklisted attributes', () => {
+      Object.assign(autoAds.config_['ad-attributes'], {
+        height: 100,
+        width: 100,
+        layout: 'responsive',
+      });
+
+      const adElement = autoAds.createAdElement_();
+      expect(adElement.hasAttribute('type')).to.be.true;
+      expect(adElement.hasAttribute('data-slot')).to.be.true;
+      expect(adElement.hasAttribute('width')).to.be.false;
+      expect(adElement.hasAttribute('height')).to.be.false;
+      expect(adElement.getAttribute('layout')).to.equal('fill');
+    });
+
+    it('should stringify attributes given as objects', () => {
+      Object.assign(autoAds.config_['ad-attributes'], {
+        'rtc-config': {
+          vendors: {
+            vendor1: {'SLOT_ID': 1},
+            vendor2: {'PAGE_ID': 'abc'},
+          },
+        },
+      });
+
+      const adElement = autoAds.createAdElement_();
+      expect(adElement.getAttribute('rtc-config'))
+          .to.equal('{"vendors":{"vendor1":{"SLOT_ID":1},' +
+          '"vendor2":{"PAGE_ID":"abc"}}}');
     });
   });
 });

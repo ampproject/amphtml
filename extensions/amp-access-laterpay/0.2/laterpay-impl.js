@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -36,6 +36,8 @@ const CONFIG_URLS = {
   },
 };
 
+const LATERPAY_BADGE_URL = 'https://blog.laterpay.net/laterpay-academy/what-is-laterpay';
+
 const DEFAULT_REGION = 'eu';
 
 const CONFIG_BASE_PATH = '/api/v2/fetch/amp/?' +
@@ -50,6 +52,8 @@ const DEFAULT_MESSAGES = {
   defaultButton: 'Buy Now',
   alreadyPurchasedLink: 'I already bought this',
   sandbox: 'Site in test mode. No payment required.',
+  laterpayBadgePrefix: 'Powered by ',
+  laterpayBadgeSuffix: '',
 };
 
 /**
@@ -156,7 +160,7 @@ export class LaterpayVendor {
     /** @private {?Node} */
     this.innerContainer_ = null;
 
-    /** @private {?Node} */
+    /** @private {?Element} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -311,7 +315,7 @@ export class LaterpayVendor {
   getArticleTitle_() {
     const title = this.ampdoc.getRootNode().querySelector(
         this.laterpayConfig_['articleTitleSelector']);
-    user().assert(
+    userAssert(
         title, 'No article title element found with selector %s',
         this.laterpayConfig_['articleTitleSelector']);
     return title.textContent.trim();
@@ -429,13 +433,18 @@ export class LaterpayVendor {
    */
   createLaterpayBadge_() {
     const a = this.createElement_('a');
-    a.href = 'https://laterpay.net';
+    a.href = LATERPAY_BADGE_URL;
     a.target = '_blank';
     a.textContent = 'LaterPay';
     const el = this.createElement_('p');
+    const prefix = this.createElement_('span');
+    prefix.textContent = this.i18n_['laterpayBadgePrefix'];
+    const suffix = this.createElement_('span');
+    suffix.textContent = this.i18n_['laterpayBadgeSuffix'];
     el.className = TAG + '-badge';
-    el.textContent = 'Powered by ';
+    el.appendChild(prefix);
     el.appendChild(a);
+    el.appendChild(suffix);
     return el;
   }
 

@@ -52,7 +52,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev", ImmutableSet.of(
           "assert", "fine", "assertElement", "assertString",
-          "assertNumber", "assertBoolean"),
+          "assertNumber", "assertBoolean", "assertArray"),
       "module$src$log.user", ImmutableSet.of("fine"));
 
 
@@ -80,8 +80,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
-    options.optimizeParameters = true;
-    options.optimizeReturns = true;
     options.optimizeCalls = true;
     if (single_file_compilation) {
       options.renamePrefixNamespace = "_";
@@ -107,9 +105,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected void setRunOptions(CompilerOptions options)
       throws IOException, FlagUsageException {
     super.setRunOptions(options);
-    if (!single_file_compilation) {
-      options.setCodingConvention(new AmpCodingConvention());
-    }
+    options.setCodingConvention(new AmpCodingConvention(single_file_compilation));
   }
 
   /**

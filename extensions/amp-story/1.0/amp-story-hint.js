@@ -172,6 +172,20 @@ export class AmpStoryHint {
       this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
 
+    this.storeService_.subscribe(
+        StateProperty.SYSTEM_UI_IS_VISIBLE_STATE, isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
+
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isOpen => {
+      this.onBookendStateUpdate_(isOpen);
+    });
+
+    this.storeService_.subscribe(
+        StateProperty.EMBEDDED_COMPONENT, tooltipIsOpen => {
+          this.onFocusedStateUpdate_(tooltipIsOpen);
+        });
+
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
@@ -273,6 +287,39 @@ export class AmpStoryHint {
         this.hintContainer_.setAttribute('dir', 'rtl') :
         this.hintContainer_.removeAttribute('dir');
     });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    if (!isVisible) {
+      this.hideAllNavigationHint();
+    }
+  }
+
+  /**
+   * Reacts to bookend state updates.
+   * @param {boolean} isOpen
+   * @private
+   */
+  onBookendStateUpdate_(isOpen) {
+    if (isOpen) {
+      this.hideAllNavigationHint();
+    }
+  }
+
+  /**
+   * Hides navigation if tooltip is open.
+   * @param {boolean} isOpen
+   * @private
+   */
+  onFocusedStateUpdate_(isOpen) {
+    if (isOpen) {
+      this.hideAllNavigationHint();
+    }
   }
 }
 

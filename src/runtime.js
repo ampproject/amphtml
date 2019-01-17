@@ -16,12 +16,23 @@
 
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {
+  BaseTemplate,
+  installTemplatesService,
+  registerExtendedTemplate,
+} from './service/template-impl';
 import {CommonSignals} from './common-signals';
-import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
+import {
+  LogLevel, // eslint-disable-line no-unused-vars
+  dev, devAssert,
+  initLogConstructor,
+  overrideLogLevel,
+  setReportError,
+  user,
+} from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {childElementsByTag, isConnectedNode, waitForBodyPromise} from './dom';
 import {config} from './config';
 import {
   createShadowDomWriter,
@@ -29,7 +40,6 @@ import {
   importShadowBody,
 } from './shadow-embed';
 import {cssText} from '../build/css';
-import {dev, initLogConstructor, setReportError, user} from './log';
 import {
   disposeServicesForDoc,
 } from './service';
@@ -57,7 +67,6 @@ import {installResourcesServiceForDoc} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc, uninstallStylesForDoc} from './style-installer';
-import {installTemplatesService} from './service/template-impl';
 import {installTimerService} from './service/timer-impl';
 import {installUrlForDoc} from './service/url-impl';
 import {installUrlReplacementsServiceForDoc} from
@@ -76,7 +85,6 @@ import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyPromise} from './dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -389,20 +397,21 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  */
 export function adopt(global) {
   return adoptShared(global, global => {
+    const {documentElement} = global.document;
+
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
 
-    const viewer = Services.viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(documentElement);
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = Services.resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(documentElement);
     }
 
-    const viewport = Services.viewportForDoc(global.document);
-
+    const viewport = Services.viewportForDoc(documentElement);
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
@@ -522,7 +531,7 @@ export class MultidocManager {
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    amp.setVisibilityState = function(state) {
+    amp['setVisibilityState'] = function(state) {
       setViewerVisibilityState(viewer, state);
     };
 
@@ -534,7 +543,7 @@ export class MultidocManager {
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
-    amp.postMessage = viewer.receiveMessage.bind(viewer);
+    amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
     /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
     let onMessage;
@@ -544,7 +553,7 @@ export class MultidocManager {
      * messages to the viewer.
      * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp.onMessage = function(callback) {
+    amp['onMessage'] = function(callback) {
       onMessage = callback;
     };
 
@@ -569,7 +578,7 @@ export class MultidocManager {
      * the shadow doc would live on. After calling .close(), we can then simply
      * remove this element.
      */
-    amp.close = () => {
+    amp['close'] = () => {
       this.closeShadowRoot_(shadowRoot);
     };
 
@@ -653,7 +662,7 @@ export class MultidocManager {
           // Start streaming.
           let renderStarted = false;
           const writer = createShadowDomWriter(this.win);
-          amp.writer = writer;
+          amp['writer'] = writer;
           writer.onBody(doc => {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
@@ -932,7 +941,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
       `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
-  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+  devAssert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
   if (!scriptInHead) {
     return false;

@@ -24,6 +24,8 @@ describes.realWin('amp-timeago', {
   let win;
   let element;
 
+  const timeout = ms => new Promise(res => setTimeout(res, ms));
+
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-timeago');
@@ -52,4 +54,32 @@ describes.realWin('amp-timeago', {
     const timeElement = element.querySelector('time');
     expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
   });
+
+  it('should update fuzzy timestamp on viewportCallback', async function() {
+    const date = new Date();
+    date.setSeconds(date.getSeconds() - 10);
+    element.setAttribute('datetime', date.toISOString());
+    element.textContent = date.toString();
+    element.build();
+    await timeout(1000);
+    element.viewportCallback(true);
+    const timeElement = element.querySelector('time');
+    expect(timeElement.textContent).to.equal('11 seconds ago');
+  });
+
+  it('should update after mutation of datetime attribute', () => {
+    const date = new Date();
+    date.setDate(date.getDate() - 2);
+    element.setAttribute('datetime', date.toISOString());
+    element.textContent = date.toString();
+    element.build();
+    date.setDate(date.getDate() + 1);
+    element.setAttribute('datetime', date.toString());
+    element.mutatedAttributesCallback({
+      'datetime': date.toString(),
+    });
+    const timeElement = element.querySelector('time');
+    expect(timeElement.textContent).to.equal('1 day ago');
+  });
+
 });

@@ -17,12 +17,10 @@
 import {
   ADSENSE_EXPERIMENTS,
   ADSENSE_EXP_NAMES,
-} from '../adsense-a4a-config';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {
   URL_EXPERIMENT_MAPPING,
   adsenseIsA4AEnabled,
 } from '../adsense-a4a-config';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {

@@ -16,6 +16,7 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
@@ -482,6 +483,52 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should handle referrer url promise timeout', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        sandbox.stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
+            .returns(new Promise(() => {}));
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => false,
+          },
+        });
+        expectAsyncConsoleError(/Referrer timeout/, 1);
+        return fixture.addElement(elem).then(() => {
+          return expect(
+              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              /[&?]ref=[&$]/);
+        });
+      });
+    });
+
+    it('should include domLoading time', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
+          });
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {
@@ -607,7 +654,7 @@ describe('Google A4A utils', () => {
     beforeEach(() => {
       installXhrService(env.win);
       const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
-      documentInfoStub.withArgs(env.win.document)
+      documentInfoStub.withArgs(env.ampdoc)
           .returns({canonicalUrl: 'http://f.blah.com?some_site'});
     });
 
@@ -624,7 +671,7 @@ describe('Google A4A utils', () => {
 
     it('should ignore response if required fields are missing', () => {
       env.expectFetch(getUrl(), JSON.stringify({newToken: 'abc'}));
-      return getIdentityToken(env.win, env.win.document).then(result => {
+      return getIdentityToken(env.win, env.ampdoc).then(result => {
         expect(result.token).to.not.be.ok;
         expect(result.jar).to.not.be.ok;
         expect(result.pucrd).to.not.be.ok;
@@ -642,7 +689,7 @@ describe('Google A4A utils', () => {
         freshLifetimeSecs: '1234',
         validLifetimeSecs: '5678',
       }));
-      return getIdentityToken(env.win, env.win.document).then(result => {
+      return getIdentityToken(env.win, env.ampdoc).then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('some_jar');
         expect(result.pucrd).to.equal('some_pucrd');
@@ -659,7 +706,7 @@ describe('Google A4A utils', () => {
         freshLifetimeSecs: '1234',
         validLifetimeSecs: '5678',
       }));
-      return getIdentityToken(env.win, env.win.document).then(result => {
+      return getIdentityToken(env.win, env.ampdoc, '').then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('');
         expect(result.pucrd).to.equal('');
@@ -673,7 +720,7 @@ describe('Google A4A utils', () => {
       env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
       env.expectFetch(
           getUrl('google\.fr'), JSON.stringify({altDomain: '.google.com'}));
-      return getIdentityToken(env.win, env.win.document).then(result => {
+      return getIdentityToken(env.win, env.ampdoc).then(result => {
         expect(result.token).to.not.be.ok;
         expect(result.jar).to.not.be.ok;
         expect(result.pucrd).to.not.be.ok;
@@ -688,15 +735,49 @@ describe('Google A4A utils', () => {
         validLifetimeSecs: '5678',
       };
       env.win['goog_identity_prom'] = Promise.resolve(ident);
-      return getIdentityToken(env.win, env.win.document)
+      return getIdentityToken(env.win, env.ampdoc)
           .then(result => expect(result).to.jsonEqual(ident));
     });
 
     it('should handle fetch error', () => {
       sandbox.stub(Services, 'xhrFor').returns(
           {fetchJson: () => Promise.reject('some network failure')});
-      return getIdentityToken(env.win, env.win.document)
+      return getIdentityToken(env.win, env.ampdoc)
           .then(result => expect(result).to.jsonEqual({}));
+    });
+
+    it('should fetch if SUFFICIENT consent', () => {
+      env.expectFetch(getUrl(), JSON.stringify({
+        newToken: 'abc',
+        '1p_jar': 'some_jar',
+        pucrd: 'some_pucrd',
+        freshLifetimeSecs: '1234',
+        validLifetimeSecs: '5678',
+      }));
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
+          }));
+      return getIdentityToken(env.win, env.ampdoc, 'default').then(
+          result => expect(result.token).to.equal('abc'));
+    });
+
+    it('should not fetch if INSUFFICIENT consent', () => {
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
+          }));
+      return expect(getIdentityToken(env.win, env.ampdoc, 'default'))
+          .to.eventually.jsonEqual({});
+    });
+
+    it('should not fetch if UNKNOWN consent', () => {
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+          }));
+      return expect(getIdentityToken(env.win, env.ampdoc, 'default'))
+          .to.eventually.jsonEqual({});
     });
   });
 

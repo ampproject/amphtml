@@ -34,9 +34,8 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject, toArray} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -162,13 +161,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampDoc = this.getAmpDoc();
+    const {element, win} = this;
     const consentPolicyId = super.getConsentPolicy();
     const consentPromise = consentPolicyId
-      ? getConsentPolicyState(ampDoc, consentPolicyId)
+      ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then(initialConsentState => {
-      const {element, win} = this;
       const iframe = getIframe(win, element, 'ima-video',
           {initialConsentState}, {allowFullscreen: true});
 
@@ -186,7 +184,7 @@ class AmpImaVideo extends AMP.BaseElement {
       element.appendChild(iframe);
 
       installVideoManagerForDoc(element);
-      Services.videoManagerForDoc(ampDoc).register(this);
+      Services.videoManagerForDoc(element).register(this);
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
@@ -364,6 +362,11 @@ class AmpImaVideo extends AMP.BaseElement {
   /** @override */
   getPlayedRanges() {
     return this.playerData_.playedRanges;
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 

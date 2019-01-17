@@ -45,12 +45,23 @@ function getUrl(url) {
 }
 
 /**
+ * Checks if the given URL is an AMP cache URL.
+ * @param {string} url
+ * @return {boolean}
+ */
+amp.validator.isAmpCacheUrl = function(url) {
+  return (
+    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 ||
+    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1);
+};
+
+/**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
  * the DOM. This method is exported so it can be unittested.
- * @param {!Document} doc
+ * @param {!Document=} opt_doc
  * @return {!amp.validator.ValidationResult}
  */
-amp.validator.validateInBrowser = function(doc) {
+amp.validator.validateInBrowser = function(opt_doc) {
   const result = new amp.validator.ValidationResult();
   result.status = amp.validator.ValidationResult.Status.UNKNOWN;
 
@@ -66,8 +77,6 @@ amp.validator.validateInBrowser = function(doc) {
 /**
  * Validates a URL input, logging to the console the result.
  * Careful when modifying this; it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js
- * and
  * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
@@ -76,6 +85,12 @@ amp.validator.validateInBrowser = function(doc) {
  */
 amp.validator.validateUrlAndLog = function(
   url, opt_doc, opt_errorCategoryFilter) {
+  if (amp.validator.isAmpCacheUrl(url)) {
+    console.error(
+        'Attempting to validate an AMP cache URL. Please use ' +
+        '#development=1 on the origin URL instead.');
+    return;
+  }
   getUrl(url).then(
       function(html) { // Success
         const validationResult = amp.validator.validateString(html);

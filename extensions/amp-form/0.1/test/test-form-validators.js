@@ -218,8 +218,11 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should hide validation bubble onblur', () => {
+      const mockEvent = {
+        target: {},
+      };
       sandbox.stub(validator.validationBubble_, 'hide');
-      validator.onBlur();
+      validator.onBlur(mockEvent);
       expect(validator.validationBubble_.hide).to.be.calledOnce;
     });
 

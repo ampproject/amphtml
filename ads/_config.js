@@ -81,7 +81,7 @@ export const adConfig = {
   },
 
   'a9': {
-    prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+    prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
   },
 
   'accesstrade': {
@@ -154,6 +154,11 @@ export const adConfig = {
   'adplugg': {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
     renderStartImplemented: true,
+  },
+
+  'adpon': {
+    prefetch: 'https://ad.adpon.jp/amp.js',
+    clientIdScope: 'AMP_ECID_ADPON',
   },
 
   'adreactor': {},
@@ -241,6 +246,12 @@ export const adConfig = {
   'adverticum': {},
 
   'advertserve': {
+    renderStartImplemented: true,
+  },
+
+  'adyoulike': {
+    consentHandlingOverride: true,
+    prefetch: 'https://pixels.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
@@ -447,6 +458,11 @@ export const adConfig = {
     ],
   },
 
+  'freewheel': {
+    prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
+    renderStartImplemented: true,
+  },
+
   'fusion': {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
@@ -631,6 +647,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mox': {
+    prefetch: [
+      'https://ad.mox.tv/js/amp.min.js',
+      'https://ad.mox.tv/mox/mwayss_invocation.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -672,6 +696,15 @@ export const adConfig = {
 
   'nokta': {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
+    renderStartImplemented: true,
+  },
+
+  'onead': {
+    prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
+    renderStartImplemented: true,
+  },
+
+  'onnetwork': {
     renderStartImplemented: true,
   },
 
@@ -719,6 +752,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
@@ -755,6 +792,10 @@ export const adConfig = {
   },
 
   'realclick': {
+    renderStartImplemented: true,
+  },
+
+  'recomad': {
     renderStartImplemented: true,
   },
 
@@ -847,6 +888,10 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  'speakol': {
+    renderStartImplemented: true,
+  },
+
   'spotx': {
     preconnect: 'https://js.spotx.tv',
     renderStartImplemented: true,
@@ -870,10 +915,9 @@ export const adConfig = {
   'taboola': {},
 
   'teads': {
-    prefetch: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1023,6 +1067,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'zen': {
+    prefetch: 'https://zen.yandex.ru/widget-loader',
+    preconnect: [
+      'https://yastatic.net/',
+    ],
+    renderStartImplemented: true,
+  },
+
   'zergnet': {},
 
   'zucks': {
@@ -1032,6 +1084,11 @@ export const adConfig = {
       'https://k.zucks.net',
       'https://static.zucks.net.zimg.jp',
     ],
+  },
+
+  'baidu': {
+    prefetch: 'https://dup.baidustatic.com/js/dm.js',
+    renderStartImplemented: true,
   },
 
 };

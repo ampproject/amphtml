@@ -73,6 +73,10 @@ describe('A4AVariableSource', () => {
         '[{\"id\":\"parent\"}]');
   });
 
+  it('should replace CLIENT_ID with null', () => {
+    return expect(expandSync('CLIENT_ID', ['a'])).to.be.null;
+  });
+
   function undefinedVariable(varName) {
     it('should not replace ' + varName, () => {
       expect(varSource.get(varName)).to.be.undefined;
@@ -95,4 +99,9 @@ describe('A4AVariableSource', () => {
   // Access data.
   undefinedVariable('ACCESS_READER_ID');
   undefinedVariable('AUTHDATA');
+
+  // amp-bind state.
+  // AMP_STATE() is not scoped to the FIE so this cannot be safely removed
+  // without refactoring the implementation in url-replacements-impl.js.
+  undefinedVariable('AMP_STATE');
 });

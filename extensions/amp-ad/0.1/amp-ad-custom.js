@@ -16,17 +16,16 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {ancestorElementsByTag} from '../../../src/dom';
 import {
+  ancestorElementsByTag,
   childElementByTag,
   removeChildren,
 } from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -77,7 +76,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
     // Ensure that the slot value is legal
-    user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
+    userAssert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
 
     this.uiHandler = new AmpAdUIHandler(this);
@@ -159,9 +158,9 @@ export class AmpAdCustom extends AMP.BaseElement {
     }
 
     // If use remote template specified by response
-    user().assert(templateData['templateId'], 'TemplateId not specified');
+    userAssert(templateData['templateId'], 'TemplateId not specified');
 
-    user().assert(
+    userAssert(
         templateData['data'] && typeof templateData['data'] == 'object',
         'Template data not specified');
 

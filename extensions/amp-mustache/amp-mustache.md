@@ -64,18 +64,31 @@ First, the `amp-mustache` has to be declared/loaded like this:
 <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
-Then, the Mustache templates can be defined in the `template` tags like this:
+Then, the Mustache templates can be defined either in a `script` or `template` tag like this:
+
 
 ```html
+<!-- Using template tag. -->
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
+or
 
-How templates are discovered, when they are rendered, how data is provided is  all decided by the
-target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
+<!-- Using script tag. -->
+```html
+<script type="text/plain" template="amp-mustache">
+  Hello {{world}}!
+</script>
+```
+
+Use `template` tag wherever possible, as AMP validation provides useful dev-x hints. Use the `script` template for edge cases and issues with templating in the context of tables. See the "Tables" section further below.
+
+How templates are discovered, when they are rendered, how data is provided is all decided by the target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
 
 ## Restrictions
+
+### Validation
 
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
@@ -84,6 +97,14 @@ that among other things, you can't use `amp-mustache` to:
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
 The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+
+### Sanitization
+
+Mustache output is sanitized for security reasons, which may result in certain elements and attributes being removed.
+
+A console error will be output with details of the sanitized element or attribute. For example:
+
+> [PURIFIER] Removed unsafe attribute: href="javascript:alert"
 
 ## Pitfalls
 
@@ -139,7 +160,17 @@ The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 </table>
 ```
 
-Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`) or using non-table elements like `<div>` instead.
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using a `<script type="text/plain">` tag to define your templates.
+
+```html
+<script type="text/plain" template="amp-mustache">
+  <table>
+    <tr>
+      {{#foo}}<td></td>{{/foo}}
+    </tr>
+  </table>
+</script>
+```
 
 ### Quote escaping
 
@@ -163,9 +194,9 @@ There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to
 
 HTML entities are not preserved in `<template>` elements.
 
-This can be an issue if you want to server-side render a `<template>` containing user-generated text, since user-generated text containing `{{`, `}}`, `{{{`, `}}}` will be treated as a Mustache section. E.g. replacing `{{` with HTML entities `&lcub;&lcub;` won't work because they aren't preserved when the browser parses the `<template>`.
+This can be an issue if you want to server-side render a `<template>` containing user-generated text, since user-generated text containing {% raw %}`{{`, `}}`, `{{{`, `}}}`{% endraw %} will be treated as a Mustache section. E.g. replacing {% raw %}`{{`{% endraw %} with HTML entities `&lcub;&lcub;` won't work because they aren't preserved when the browser parses the `<template>`.
 
-Workarounds include replacing strings like `{{` with different characters or stripping them outright from user-generated content.
+Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with different characters or stripping them outright from user-generated content.
 
 ## Validation
 

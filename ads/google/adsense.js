@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
+import {
+  ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
+} from './utils';
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';
 import {hasOwn} from '../../src/utils/object';
 import {setStyles} from '../../src/style';
-import {user} from '../../src/log';
+import {userAssert} from '../../src/log';
 import {validateData} from '../../3p/3p';
 
 /**
@@ -35,11 +39,12 @@ export function adsense(global, data) {
         'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
         'matchedContentColumnsNum']);
 
-  if (data['autoFormat'] == 'rspv') {
-    user().assert(hasOwn(data, 'fullWidth'),
+  if (data['autoFormat'] == ADSENSE_RSPV_TAG ||
+      data['autoFormat'] == ADSENSE_MCRSPV_TAG) {
+    userAssert(hasOwn(data, 'fullWidth'),
         'Responsive AdSense ad units require the attribute data-full-width.');
 
-    user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+    userAssert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
         `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
       `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
       'responsive AdSense ad units.');

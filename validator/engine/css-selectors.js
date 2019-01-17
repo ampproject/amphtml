@@ -33,7 +33,6 @@ goog.provide('parse_css.parseAnAttrSelector');
 goog.provide('parse_css.parseAnIdSelector');
 goog.provide('parse_css.parseSelectors');
 goog.provide('parse_css.traverseSelectors');
-goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('goog.asserts');
 goog.require('parse_css.ErrorToken');
@@ -151,15 +150,13 @@ parse_css.TypeSelector = class extends parse_css.Selector {
     visitor.visitTypeSelector(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.TypeSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['namespacePrefix'] = this.namespacePrefix;
-    json['elementName'] = this.elementName;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.TypeSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['elementName'] = this.elementName;
+  return json;
+};
 
 /**
  * Helper function for determining whether the provided token is a specific
@@ -240,14 +237,12 @@ parse_css.IdSelector = class extends parse_css.Selector {
     visitor.visitIdSelector(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.IdSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.IdSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * tokenStream.current() must be the hash token.
@@ -300,17 +295,15 @@ parse_css.AttrSelector = class extends parse_css.Selector {
     visitor.visitAttrSelector(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.AttrSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['namespacePrefix'] = this.namespacePrefix;
-    json['attrName'] = this.attrName;
-    json['matchOperator'] = this.matchOperator;
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.AttrSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['attrName'] = this.attrName;
+  json['matchOperator'] = this.matchOperator;
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * Helper for parseAnAttrSelector.
@@ -359,9 +352,6 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   // Now parse the attribute name. This part is mandatory.
   if (!(tokenStream.current().tokenType === parse_css.TokenType.IDENT)) {
-    if (amp.validator.LIGHT) {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
     return newInvalidAttrSelectorError(start);
   }
   const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
@@ -416,10 +406,6 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       const str = /** @type {!parse_css.StringToken} */ (tokenStream.current());
       value = str.value;
       tokenStream.consume();
-    } else {
-      if (amp.validator.LIGHT) {
-        return parse_css.TRIVIAL_ERROR_TOKEN;
-      }
     }
   }
   if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE) {
@@ -428,9 +414,6 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   // The attribute selector must in any case terminate with a close square
   // token.
   if (tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_SQUARE) {
-    if (amp.validator.LIGHT) {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
     return newInvalidAttrSelectorError(start);
   }
   tokenStream.consume();
@@ -476,18 +459,16 @@ parse_css.PseudoSelector = class extends parse_css.Selector {
     visitor.visitPseudoSelector(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.PseudoSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['isClass'] = this.isClass;
-    json['name'] = this.name;
-    if (this.func.length !== 0) {
-      json['func'] = recursiveArrayToJSON(this.func);
-    }
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.PseudoSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['isClass'] = this.isClass;
+  json['name'] = this.name;
+  if (this.func.length !== 0) {
+    json['func'] = recursiveArrayToJSON(this.func);
+  }
+  return json;
+};
 
 /**
  * tokenStream.current() must be the ColonToken. Returns an error if
@@ -521,12 +502,11 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     tokenStream.consume();
     return firstColon.copyPosTo(
         new parse_css.PseudoSelector(isClass, funcToken.value, func));
-  } else if (!amp.validator.LIGHT) {
+  } else {
     return firstColon.copyPosTo(new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         ['style']));
   }
-  return parse_css.TRIVIAL_ERROR_TOKEN;
 };
 
 /**
@@ -555,14 +535,12 @@ parse_css.ClassSelector = class extends parse_css.Selector {
     visitor.visitClassSelector(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.ClassSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.ClassSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
@@ -625,15 +603,13 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
     visitor.visitSimpleSelectorSequence(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.SimpleSelectorSequence.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['typeSelector'] = this.typeSelector.toJSON();
-    json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.SimpleSelectorSequence.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['typeSelector'] = this.typeSelector.toJSON();
+  json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
+  return json;
+};
 
 /**
  * tokenStream.current must be the first token of the sequence.
@@ -677,9 +653,6 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          if (amp.validator.LIGHT) {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
           return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
               ['style']));
@@ -737,16 +710,14 @@ parse_css.Combinator = class extends parse_css.Selector {
     visitor.visitCombinator(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.Combinator.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['combinatorType'] = this.combinatorType;
-    json['left'] = this.left.toJSON();
-    json['right'] = this.right.toJSON();
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.Combinator.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['combinatorType'] = this.combinatorType;
+  json['left'] = this.left.toJSON();
+  json['right'] = this.right.toJSON();
+  return json;
+};
 
 /**
  * The CombinatorType for a given token; helper function used when
@@ -810,9 +781,6 @@ function isSimpleSelectorSequenceStart(token) {
  */
 parse_css.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    if (amp.validator.LIGHT) {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
     return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
         ['style']));
@@ -884,14 +852,12 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
     visitor.visitSelectorsGroup(this);
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.SelectorsGroup.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['elements'] = recursiveArrayToJSON(this.elements);
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.SelectorsGroup.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['elements'] = recursiveArrayToJSON(this.elements);
+  return json;
+};
 
 /**
  * The selectors_group production from
@@ -905,9 +871,6 @@ if (!amp.validator.LIGHT) {
  */
 parse_css.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    if (amp.validator.LIGHT) {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
     return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
         ['style']));
@@ -936,9 +899,6 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     // We're about to claim success and return a selector,
     // but before we do, we check that no unparsed input remains.
     if (!(tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN)) {
-      if (amp.validator.LIGHT) {
-        return parse_css.TRIVIAL_ERROR_TOKEN;
-      }
       return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
           amp.validator.ValidationError.Code
               .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,

@@ -14,11 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('amp.validator.LIGHT');
 goog.provide('amp.validator.VALIDATE_CSS');
-
-/** @define {boolean} */
-amp.validator.LIGHT = false;
 
 /** @define {boolean} */
 amp.validator.VALIDATE_CSS = true;
