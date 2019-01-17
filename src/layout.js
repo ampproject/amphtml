@@ -41,13 +41,13 @@ export const Layout = {
 };
 
 // These are the values of the following Layout values in a regex.
-// layout == Layout.FIXED
-// layout == Layout.FIXED_HEIGHT
-// layout == Layout.RESPONSIVE
-// layout == Layout.FILL
-// layout == Layout.FLEX_ITEM
-// layout == Layout.FLUID
-// layout == Layout.INTRINSIC
+// Layout.FIXED
+// Layout.FIXED_HEIGHT
+// Layout.RESPONSIVE
+// Layout.FILL
+// Layout.FLEX_ITEM
+// Layout.FLUID
+// Layout.INTRINSIC
 const DEFINED_LAYOUT_SIZES = /^(fixed|fixed-height|responsive|fill|flex-item|fluid|intrinsic)$/i;
 
 /**
