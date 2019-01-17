@@ -665,7 +665,7 @@ export class Carousel {
       // to do the mapping.
       const slideIndex = mod(index, slideCount);
       // If an item is at the start of the group, it gets an aligned.
-      const shouldSnap = mod(slideIndex, this.snapBy_ == 0);
+      const shouldSnap = mod(slideIndex, this.snapBy_) == 0;
 
       setStyles(child, {
         'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',

@@ -104,10 +104,10 @@ export function updateLengthStyle(axis, el, length) {
  */
 export function getScrollPosition(axis, el) {
   if (axis == Axis.X) {
-    return el.scrollLeft;
+    return el./*OK*/scrollLeft;
   }
 
-  return el.scrollTop;
+  return el./*OK*/scrollTop;
 }
 
 /**
@@ -118,9 +118,9 @@ export function getScrollPosition(axis, el) {
  */
 export function setScrollPosition(axis, el, position) {
   if (axis == Axis.X) {
-    el.scrollLeft = position;
+    el./*OK*/scrollLeft = position;
   } else {
-    el.scrollTop = position;
+    el./*OK*/scrollTop = position;
   }
 
 }
