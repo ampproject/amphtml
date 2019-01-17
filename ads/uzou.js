@@ -45,7 +45,7 @@ export function uzou(global, data) {
 
   const uzouInjector = {
     url: fixedEncodeURIComponent(
-      widgetParams['url'] ||
+        widgetParams['url'] ||
       global.context.sourceUrl ||
       global.context.canonicalUrl
     ),
@@ -63,7 +63,11 @@ export function uzou(global, data) {
   });
 }
 
-function fixedEncodeURIComponent (str) {
+/**
+ * encode URI based on RFC 3986
+ * @param {string} str url string
+ */
+function fixedEncodeURIComponent(str) {
   return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
     return '%' + c.charCodeAt(0).toString(16);
   });
