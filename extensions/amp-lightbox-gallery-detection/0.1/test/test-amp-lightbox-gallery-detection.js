@@ -22,6 +22,7 @@ import {
   REQUIRED_EXTENSION,
   Scanner,
   VIEWPORT_AREA_RATIO,
+  isDocValid,
   meetsCriteria,
   meetsSizingCriteria,
   scanDoc,
@@ -64,6 +65,15 @@ describes.realWin(TAG, {
 
   function mockScannedImages(images) {
     env.sandbox.stub(Scanner, 'getAllImages').returns(tryResolve(() => images));
+  }
+
+  function mockSchemaType(type) {
+    const {document} = env.win;
+    const script = html`<script type="application/ld+json"></script>`;
+    script.innerText = JSON.stringify({
+      '@type': type,
+    });
+    document.head.appendChild(script);
   }
 
   function spyInstallExtensionsForDoc() {
@@ -474,6 +484,7 @@ describes.realWin(TAG, {
     it('does not load extension if no elements found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
+      mockSchemaType('Article');
       mockScannedImages([]);
 
       yield scanDoc(env.ampdoc);
@@ -485,6 +496,7 @@ describes.realWin(TAG, {
     it('loads extension if at least one element meets criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
+      mockSchemaType('Article');
       mockScannedImages([
         html`<amp-img src="bla.png"></amp-img>`,
       ]);
@@ -523,6 +535,7 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
+      mockSchemaType('Article');
       mockScannedImages([a, b, c]);
 
       yield scanDoc(env.ampdoc);
@@ -551,6 +564,34 @@ describes.realWin(TAG, {
         expect(images.length).to.equal(1);
         expect(images[0]).to.equal(b);
       });
+    });
+
+  });
+
+  describe('isDocValid', () => {
+
+    it('rejects documents without schema', () => {
+      expect(isDocValid(env.win.document)).to.be.false;
+    });
+
+    it('rejects schema with invalid @type', () => {
+      mockSchemaType('hamberder');
+      expect(isDocValid(env.win.document)).to.be.false;
+    });
+
+    [
+      'Article',
+      'NewsArticle',
+      'BlogPosting',
+      'LiveBlogPosting',
+      'DiscussionForumPosting',
+    ].forEach(type => {
+
+      it(`accepts schema with @type=${type}`, () => {
+        mockSchemaType(type);
+        expect(isDocValid(env.win.document)).to.be.true;
+      });
+
     });
 
   });

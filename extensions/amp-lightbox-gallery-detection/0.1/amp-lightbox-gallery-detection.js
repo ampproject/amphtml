@@ -28,6 +28,7 @@ import {Services} from '../../../src/services';
 import {closest, iterateCursor, matches} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {toArray} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 
 
 const TAG = 'amp-lightbox-gallery-detection';
@@ -164,6 +165,35 @@ export function meetsCriteria(element) {
 
 
 /**
+ * @param {!Document} doc
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isDocValid(doc) {
+  const schemaTag = toArray(doc.head.querySelectorAll('script'))
+      .find(t => t.getAttribute('type') == 'application/ld+json');
+
+  if (!schemaTag) {
+    return false;
+  }
+
+  const parsed = tryParseJson(schemaTag./*OK*/innerText);
+
+  if (!parsed) {
+    return false;
+  }
+
+  return [
+    'Article',
+    'NewsArticle',
+    'BlogPosting',
+    'LiveBlogPosting',
+    'DiscussionForumPosting',
+  ].includes(parsed['@type']);
+}
+
+
+/**
  * @param {!Element} el
  * @return {!Promise<?Element>}
  */
@@ -202,6 +232,10 @@ function applyToScanned(ampdoc, images) {
  */
 export function scanDoc(ampdoc) {
   const doc = ampdoc.win.document;
+
+  if (!isDocValid(doc)) {
+    return Promise.resolve();
+  }
 
   const maybeApply = () => Scanner.getAllImages(doc).then(images => {
     applyToScanned(ampdoc, images);
