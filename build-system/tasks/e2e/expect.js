@@ -21,7 +21,7 @@ let installed;
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return
+ * @return {!ExpectStatic}
  */
 export function expect(actual, opt_message) {
   if (!installed) {

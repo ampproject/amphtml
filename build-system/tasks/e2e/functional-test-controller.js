@@ -26,6 +26,7 @@ export class ElementHandle {
   /**
    * Wrap the framework-specific element handle object.
    * @param {!T} element
+   * @param {!T} unusedController
    * @package
    */
   constructor(element, unusedController) {
@@ -111,7 +112,7 @@ export class FunctionalTestController {
    * Navigates to the given URL.
    * {@link https://www.w3.org/TR/webdriver1/#navigate-to}
 
-   * @param {string} url
+   * @param {string} unusedUrl
    * @return {!Promise}
    */
   async navigateTo(unusedUrl) {}
@@ -138,8 +139,8 @@ export class FunctionalTestController {
    * subsequent commands.
    * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
    *
-   * @param {!ElementHandle} handle
-   * @param {function():(!Promise|undefined)}
+   * @param {!ElementHandle} unusedHandle
+   * @param {function():(!Promise|undefined)} unusedFn
    * @return {!Promise}
    */
   async usingFrame(unusedHandle, unusedFn) {}
@@ -158,7 +159,7 @@ export class FunctionalTestController {
    * web element context for future element-centric commands.
    * {@link https://www.w3.org/TR/webdriver1/#find-element}
    *
-   * @param {string} selector
+   * @param {string} unusedSelector
    * @return {!Promise<!ElementHandle>}
    */
   async findElement(unusedSelector) {}
@@ -169,7 +170,7 @@ export class FunctionalTestController {
    * web element context for future element-centric commands.
    * {@link https://www.w3.org/TR/webdriver1/#find-elements}
    *
-   * @param {string} selector
+   * @param {string} unusedSelector
    * @return {!Promise<!Array<!ElementHandle>>}
    */
   async findElements(unusedSelector) {}
@@ -184,7 +185,7 @@ export class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#xpath}
    * {@link https://www.w3.org/TR/webdriver1/#find-element}
    *
-   * @param {string} xpath
+   * @param {string} unusedXpath
    * @return {!Promise<!ElementHandle>}
    */
   async findElementXPath(unusedXpath) {}
@@ -199,7 +200,7 @@ export class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#xpath}
    * {@link https://www.w3.org/TR/webdriver1/#find-elements}
    *
-   * @param {string} xpath
+   * @param {string} unusedXpath
    * @return {!Promise<!Array<!ElementHandle>>}
    */
   async findElementsXPath(unusedXpath) {}
@@ -211,8 +212,8 @@ export class FunctionalTestController {
    * for future element-centric commands.
    * {@link https://www.w3.org/TR/webdriver1/#find-element-from-element}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} selector
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedSelector
    * @return {!Promise<!ElementHandle>}
    */
   async findElementFromElement(unusedHandle, unusedSelector) {}
@@ -224,8 +225,8 @@ export class FunctionalTestController {
    * element-centric commands.
    * {@link https://www.w3.org/TR/webdriver1/#find-elements-from-element}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} selector
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedSelector
    * @return {!Promise<!Array<!ElementHandle>>}
    */
   async findElementsFromElement(unusedHandle, unusedSelector) {}
@@ -236,7 +237,7 @@ export class FunctionalTestController {
    * Radio Button states, or on option elements.
    * {@link https://www.w3.org/TR/webdriver1/#is-element-selected}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @param {boolean=} opt_expect An expected value to wait for
    * @return {!Promise<boolean>}
    */
@@ -247,8 +248,8 @@ export class FunctionalTestController {
    * Note: for boolean attributes, the value returned is "true".
    * {@link https://www.w3.org/TR/webdriver1/#get-element-attribute}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} attribute
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedAttribute
    * @param {string=} opt_expect An expected value to wait for
    * @return {!Promise<string>}
    */
@@ -258,10 +259,10 @@ export class FunctionalTestController {
    * Return the value of the given property name on the given element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-property}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} property
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedProperty
    * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>} property
+   * @return {!Promise<string>}
    */
   async getElementProperty(unusedHandle, unusedProperty, opt_expect) {}
 
@@ -269,8 +270,8 @@ export class FunctionalTestController {
    * Return the value of the given CSS value on the given element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-css-value}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} styleProperty
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedStyleProperty
    * @param {string=} opt_expect An expected value to wait for
    * @return {!Promise<string>} styleProperty
    */
@@ -282,7 +283,7 @@ export class FunctionalTestController {
    * elements by their link text and partial link text.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-text}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @param {(string|RegExp)=} opt_expect An expected value to wait for
    * @return {!Promise<string>}
    */
@@ -292,7 +293,7 @@ export class FunctionalTestController {
    * Return the value of the tag name for the given element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-tag-name}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @return {!Promise<string>}
    */
   async getElementTagName(unusedHandle) {}
@@ -302,7 +303,7 @@ export class FunctionalTestController {
    * the given web element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @return {!Promise<!DOMRectDef>}
    */
   async getElementRect(unusedHandle) {}
@@ -312,7 +313,7 @@ export class FunctionalTestController {
    * given element has the "disabled" attribute.
    * {@link https://www.w3.org/TR/webdriver1/#is-element-enabled}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @param {boolean=} opt_expect An expected value to wait for
    * @return {!Promise<boolean>}
    */
@@ -324,7 +325,7 @@ export class FunctionalTestController {
    * context.
    * {@link https://www.w3.org/TR/webdriver1/#set-window-rect}
    *
-   * @param {!WindowRectDef} rect
+   * @param {!WindowRectDef} unusedRect
    * @return {!Promise}
    */
   async setWindowRect(unusedRect) {}
@@ -333,7 +334,7 @@ export class FunctionalTestController {
    * The Take Screenshot command takes a screenshot of the
    * visible region encompassed by the bounding rectangle of the window.
    * {@link https://www.w3.org/TR/webdriver1/#take-screenshot}
-   * @param {string} path
+   * @param {string} unusedPath
    * @return {!Promise}
    */
   async takeScreenshot(unusedPath) {}
@@ -343,8 +344,8 @@ export class FunctionalTestController {
    * region encompassed by the bounding rectangle of an element.
    * {@link https://www.w3.org/TR/webdriver1/#take-element-screenshot}
    *
-   * @param {!ElementHandle} handle
-   * @param {string} path
+   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedPath
    * @return {!Promise}
    */
   async takeElementScreenshot(unusedHandle, unusedPath) {}
@@ -353,7 +354,7 @@ export class FunctionalTestController {
    * Clicks the given element in its center point.
    * {@link https://www.w3.org/TR/webdriver1/#element-click}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @return {!Promise}
    */
   async click(unusedHandle) {}
@@ -363,8 +364,8 @@ export class FunctionalTestController {
    * is not provided, the active element receives the keys.
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
-   * @param {?ElementHandle} handle
-   * @param {string} keys
+   * @param {?ElementHandle} unusedHandle
+   * @param {string} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -376,7 +377,7 @@ export class FunctionalTestController {
    * to include it.
    * {@link https://github.com/w3c/webdriver/issues/1005#issuecomment-436629425}
    *
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle} unusedHandle
    * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    */
