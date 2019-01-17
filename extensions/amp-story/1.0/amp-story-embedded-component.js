@@ -25,7 +25,7 @@ import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -33,30 +33,94 @@ import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /**
- * Enum of elements that can be expanded.
+ * Action icons to be placed in tooltip.
  * @enum {string}
+ * @private
  */
-const EXPANDABLE_COMPONENTS = {
-  TWITTER: 'amp-twitter',
+const ActionIcon = {
+  LAUNCH: 'i-amphtml-tooltip-action-icon-launch',
+  EXPAND: 'i-amphtml-tooltip-action-icon-expand',
 };
 
 /**
- * Enum containing all interactive component CSS selectors.
+ * Components that can be expanded.
+ * @const {!Object}
+ * @private
+ */
+const EXPANDABLE_COMPONENTS = {
+  'amp-twitter': {
+    componentIcon: 'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.' +
+    'w3.org/2000/svg" width="400" height="400"><g fill="none" fill-rule="eve' +
+    'nodd"><path d="M0 0h400v400H0z"/><path fill="%231da1f2" fill-rule="nonz' +
+    'ero" d="M153.62 301.59c94.34 0 145.94-78.16 145.94-145.94 0-2.22 0-4.43' +
+    '-.15-6.63A104.36 104.36 0 0 0 325 122.47a102.38 102.38 0 0 1-29.46 8.07 ' +
+    '51.47 51.47 0 0 0 22.55-28.37 102.79 102.79 0 0 1-32.57 12.45c-15.9-16.' +
+    '906-41.163-21.044-61.625-10.093-20.461 10.95-31.032 34.266-25.785 56.87' +
+    '3A145.62 145.62 0 0 1 92.4 107.81c-13.614 23.436-6.66 53.419 15.88 68.4' +
+    '7A50.91 50.91 0 0 1 85 169.86v.65c.007 24.416 17.218 45.445 41.15 50.28' +
+    'a51.21 51.21 0 0 1-23.16.88c6.72 20.894 25.976 35.208 47.92 35.62a102.9' +
+    '2 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 ' +
+    '0 78.62 23"/></g></svg>',
+    actionIcon: ActionIcon.EXPAND,
+    // TODO(enriqe): change for i18n label.
+    defaultText: 'View on Twitter',
+    selector: 'amp-twitter',
+  },
+};
+
+/**
+ * Components that can be launched.
+ * @const {!Object}
+ * @private
+ */
+const LAUNCHABLE_COMPONENTS = {
+  'a': {
+    componentIcon: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+    actionIcon: ActionIcon.LAUNCH,
+    selector: 'a[href]',
+  },
+};
+
+/**
+ * Union of expandable and launchable components.
+ * @private
+ * @const {!Object}
+ */
+const INTERACTIVE_COMPONENTS = Object.assign({}, EXPANDABLE_COMPONENTS,
+    LAUNCHABLE_COMPONENTS);
+
+/**
+ * Gets the list of components with their respective selectors.
+ * @param {!Object} components
+ * @return {!Object<string, string>}
+ */
+function getComponentSelectors(components) {
+  const obj = {};
+
+  Object.keys(components).forEach(key => {
+    obj[key] = components[key].selector;
+  });
+
+  return obj;
+}
+
+/**
+ * Contains all interactive component CSS selectors.
  * @type {!Object}
  */
-const interactiveComponents = Object.assign({}, EXPANDABLE_COMPONENTS, {
-  EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
+const interactiveComponentSelectors = Object.assign({},
+    getComponentSelectors(INTERACTIVE_COMPONENTS),
+    {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
-  LINK: 'a[href]',
-});
+    });
 
 /**
  * Selectors that should delegate to AmpStoryEmbeddedComponent.
- * @return {!Object<string, string>}
+ * @return {!Object}
  */
 export function embeddedComponentSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return interactiveComponents;
+  return interactiveComponentSelectors;
 }
 
 /**
@@ -258,7 +322,7 @@ export class AmpStoryEmbeddedComponent {
   maybeCloseExpandedView_(target) {
     if (target && matches(target, '.i-amphtml-expanded-view-close-button')) {
       // Target is expanded and going into hidden mode.
-      this.setState_(ComponentState.HIDDEN, null /** target */);
+      this.closeFocusedState_();
       this.toggleExpandedView_(null);
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
           true /** capture */);
@@ -327,10 +391,7 @@ export class AmpStoryEmbeddedComponent {
     }
 
     this.updateTooltipBehavior_(target);
-    if (target !== this.previousTarget_) {
-      // Only update tooltip when necessary.
-      this.updateTooltipEl_(target);
-    }
+    this.updateTooltipEl_(target);
     this.previousTarget_ = target;
 
     this.resources_.mutateElement(
@@ -364,8 +425,12 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipEl_(target) {
-    this.updateTooltipText_(target);
-    this.updateTooltipIcon_(target);
+    const embedConfig = userAssert(this.getEmbedConfigFor_(target), 'Invalid ' +
+      'embed config for target', target);
+
+    this.updateTooltipText_(target, embedConfig);
+    this.updateTooltipComponentIcon_(target, embedConfig);
+    this.updateTooltipActionIcon_(embedConfig);
     this.positionTooltip_(target);
   }
 
@@ -375,14 +440,13 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipBehavior_(target) {
-    if (matches(target, embeddedComponentSelectors().LINK)) {
+    if (matches(target, LAUNCHABLE_COMPONENTS['a'].selector)) {
       addAttributesToElement(devAssert(this.tooltip_),
           dict({'href': this.getElementHref_(target)}));
       return;
     }
 
-    if (Object.values(EXPANDABLE_COMPONENTS)
-        .includes(target.tagName.toLowerCase())) {
+    if (EXPANDABLE_COMPONENTS[target.tagName.toLowerCase()]) {
       this.tooltip_.addEventListener('click', this.expandComponentHandler_,
           true);
     }
@@ -416,6 +480,21 @@ export class AmpStoryEmbeddedComponent {
     }
 
     return parseUrlDeprecated(elUrl).href;
+  }
+
+  /**
+   * Gets corresponding config for a given embed target.
+   * @param {!Element} target
+   * @return {?Object}
+   */
+  getEmbedConfigFor_(target) {
+    const config = INTERACTIVE_COMPONENTS[target.tagName.toLowerCase()];
+    if (config && matches(target, config.selector)) {
+      return config;
+    }
+
+    user().error(TAG, 'No config matching provided target.');
+    return null;
   }
 
   /**
@@ -458,10 +537,12 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Updates tooltip text content.
    * @param {!Element} target
+   * @param {!Object} embedConfig
    * @private
    */
-  updateTooltipText_(target) {
+  updateTooltipText_(target, embedConfig) {
     const tooltipText = target.getAttribute('data-tooltip-text') ||
+      embedConfig.defaultText ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
@@ -470,19 +551,34 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Updates tooltip icon. If no icon src is declared, it sets a default src and
-   * hides it.
-   * @param {!Element} target
+   * Updates tooltip action icon. This is found on the right of the text.
+   * @param {!Object} embedConfig
    * @private
    */
-  updateTooltipIcon_(target) {
+  updateTooltipActionIcon_(embedConfig) {
+    const actionIcon =
+      this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
+
+    this.resources_.mutateElement(devAssert(actionIcon), () => {
+      actionIcon.classList.toggle(embedConfig.actionIcon, true);
+    });
+  }
+
+  /**
+   * Updates tooltip icon. If no icon src is declared, it sets a default for a
+   * given component type.
+   * @param {!Element} target
+   * @param {!Object} embedConfig
+   * @private
+   */
+  updateTooltipComponentIcon_(target, embedConfig) {
     const iconUrl = target.getAttribute('data-tooltip-icon');
     if (!isProtocolValid(iconUrl)) {
       user().error(TAG, 'The tooltip icon url is invalid');
       return;
     }
     const iconSrc = iconUrl ? parseUrlDeprecated(iconUrl).href :
-      DEFAULT_ICON_SRC;
+      embedConfig.componentIcon;
 
     const existingTooltipIcon =
       this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
@@ -599,9 +695,16 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   clearTooltip_() {
-    this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
-        true);
-    this.tooltip_.removeAttribute('href');
+    this.resources_.mutateElement(devAssert(this.tooltip_), () => {
+      const actionIcon =
+        this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
+      actionIcon.classList.toggle(ActionIcon.LAUNCH, false);
+      actionIcon.classList.toggle(ActionIcon.EXPAND, false);
+
+      this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
+          true);
+      this.tooltip_.removeAttribute('href');
+    });
   }
 
   /**
@@ -632,7 +735,7 @@ export class AmpStoryEmbeddedComponent {
           <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
             <div class="i-amphtml-story-tooltip-icon"><img ref="icon"></div>
             <p class="i-amphtml-tooltip-text" ref="text"></p>
-            <div class="i-amphtml-tooltip-launch-icon"></div>
+            <div class="i-amphtml-tooltip-action-icon"></div>
             <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
           </a>
         </section>`;

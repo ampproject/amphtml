@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-export const MaskChars = {
-  ALPHANUMERIC_REQUIRED: 'A',
-  ALPHANUMERIC_OPTIONAL: 'a',
-  ALPHABETIC_REQUIRED: 'L',
-  ALPHABETIC_OPTIONAL: 'l',
-  ARBITRARY_REQUIRED: 'C',
-  ARBITRARY_OPTIONAL: 'c',
-  NUMERIC_REQUIRED: '0',
-  NUMERIC_OPTIONAL: '9',
-  ESCAPE: '\\',
-};
+'use strict';
 
-export const MASK_SEPARATOR_CHAR = ' ';
+const gulp = require('gulp-help')(require('gulp'));
+const mocha = require('gulp-mocha');
 
-export const NamedMasks = {
-  PAYMENT_CARD: 'payment-card',
-};
+function e2e() {
+  return gulp.src(['test/e2e/*.js'], {read: false})
+      .pipe(mocha({
+        require: ['@babel/register', '../../../testing/e2e/test-module'],
+      }));
+}
 
-/** @enum {string} */
-export const OutputMode = {
-  RAW: 'raw',
-  ALPHANUMERIC: 'alphanumeric',
-};
+gulp.task('e2e', 'Runs e2e tests', function() {
+  return e2e();
+});
