@@ -22,6 +22,35 @@
  * @param {!Object} Inputmask
  */
 export function factory(Inputmask) {
+  Inputmask.extendAliases({
+    'custom': {
+      prefixes: {},
+      mask(opts) {
+        return opts.customMask;
+      },
+      /**
+       * @param {string} value
+       * @param {!Object} opts
+       */
+      onBeforeMask(value, opts) {
+        const processedValue = value.replace(/^0{1,2}/, '').replace(/[\s]/g, '');
+        const {mask} = opts;
+
+        if (typeof mask == 'string') {
+          return removePrefix(processedValue, mask);
+        }
+
+        if (mask.length > 0) {
+          const processedValues = mask
+              .map(m => removePrefix(processedValue, m))
+              .sort((a, b) => a.length - b.length);
+          return processedValues[0];
+        }
+
+        return processedValue;
+      },
+    },
+  });
 
   /**
    * A prefix is defined as non-mask characters at the beginning of a mask
@@ -29,26 +58,44 @@ export function factory(Inputmask) {
    */
   const prefixRe = /^([^\*\[\]a\?9\\]+)[\*\[\]a\?9\\]/i;
 
-  Inputmask.extendAliases({
-    'custom': {
-      /**
-       * @param {string} value
-       * @param {!Object} opts
-       */
-      onBeforeMask(value, opts) {
-        let processedValue = value.replace(/^0{1,2}/, '').replace(/[\s]/g, '');
+  /**
+   * Remove a mask prefix from the input value
+   * TODO(cvializ): move the prefix breakdown into an init value.
+   * @param {string} value
+   * @param {string} mask
+   */
+  function removePrefix(value, mask) {
+    const processedMask = mask.replace(/[\s]/g, '');
+    const match = prefixRe.exec(processedMask);
+    const originalPrefix = match && match[1];
 
-        if (typeof opts.mask == 'string') {
-          const processedMask = opts.mask.replace(/[\s]/g, '');
-          const match = prefixRe.exec(processedMask);
-          const prefix = match && match[1];
-          if (processedValue.indexOf(prefix) == 0) {
-            processedValue = processedValue.replace(prefix, '');
-          }
-        }
+    if (!originalPrefix) {
+      return value;
+    }
 
-        return processedValue;
-      },
-    },
-  });
+    // Break the prefix down into smaller prefix chunks.
+    // The user can paste a value with any subset of the prefix added.
+    const stack = [originalPrefix];
+    const prefixes = {};
+    while (stack.length) {
+      const prefix = stack.pop();
+
+      if (value.indexOf(prefix) == 0) {
+        prefixes[prefix] = true;
+      }
+
+      if (prefix.length > 1) {
+        stack.push(prefix.slice(1));
+        stack.push(prefix.slice(0, -1));
+      }
+    }
+
+    const longestPrefix = Object.keys(prefixes)
+        .sort((a, b) => b.length - a.length)[0];
+    if (longestPrefix) {
+      return value.slice(longestPrefix.length);
+    } else {
+      return value;
+    }
+  }
 }
