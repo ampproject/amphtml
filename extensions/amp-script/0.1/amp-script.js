@@ -15,6 +15,7 @@
  */
 
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
@@ -69,7 +70,16 @@ export class AmpScript extends AMP.BaseElement {
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
     dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
-    upgrade(this.element, authorUrl, workerUrl);
+
+    const xhr = Services.xhrFor(this.win);
+    const fetches = Promise.all([
+      xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
+      xhr.fetchText(authorUrl).then(r => r.text()),
+    ]);
+    upgrade(this.element, fetches.then(results => {
+      // TODO: Handle errors.
+      return [results[0], results[1], authorUrl];
+    }));
     return Promise.resolve();
   }
 
