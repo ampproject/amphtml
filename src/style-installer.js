@@ -78,21 +78,19 @@ export function installStylesForDoc(
  * Remove all style elements present in style map
  * and then deletes the style map.
  *
- * This is created to address shadowRoot reload problems (see #17833)
+ * This is created to address shadowRoot reload problems (see #17833).
  *
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc The ampdoc that should get styles deleted.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc The ampdoc that should get
+ *    styles deleted.
  */
 export function uninstallStylesForDoc(ampdoc) {
   const cssRoot = ampdoc.getHeadNode();
   const styleMap = cssRoot[STYLE_MAP_PROP];
-  if (styleMap) {
-    for (const key in styleMap) {
-      const styleElement = dev().assertElement(styleMap[key]);
-      removeElement(styleElement);
-    }
-    // Delete the map itself
-    delete cssRoot[STYLE_MAP_PROP];
+  if (!styleMap) {
+    return;
   }
+  Object.values(styleMap).forEach(removeElement);
+  delete cssRoot[STYLE_MAP_PROP];
 }
 
 /**
