@@ -29,6 +29,7 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
+ *   singlePassType: (string|undefined)
  * }}
  */
 export let ModeDef;
@@ -80,6 +81,7 @@ function getMode_(win) {
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
       win.location.originalHash || win.location.hash);
+  const singlePassType = AMP_CONFIG.spt;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -111,6 +113,7 @@ function getMode_(win) {
     log: hashQuery['log'],
     version,
     rtvVersion,
+    singlePassType,
   };
 }
 

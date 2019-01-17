@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -160,7 +160,7 @@ export class LaterpayVendor {
     /** @private {?Node} */
     this.innerContainer_ = null;
 
-    /** @private {?Node} */
+    /** @private {?Element} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -315,7 +315,7 @@ export class LaterpayVendor {
   getArticleTitle_() {
     const title = this.ampdoc.getRootNode().querySelector(
         this.laterpayConfig_['articleTitleSelector']);
-    user().assert(
+    userAssert(
         title, 'No article title element found with selector %s',
         this.laterpayConfig_['articleTitleSelector']);
     return title.textContent.trim();

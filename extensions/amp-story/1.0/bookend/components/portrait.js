@@ -16,13 +16,12 @@
 
 import {
   BookendComponentInterface,
-  getSourceOriginForBookendComponent,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -59,7 +58,7 @@ export class PortraitComponent {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields =
         !requiredFields.some(field => !(field in portraitJson));
-    user().assert(
+    userAssert(
         hasAllRequiredFields,
         'Portrait component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +
@@ -72,7 +71,7 @@ export class PortraitComponent {
   /** @override */
   build(portraitJson, element) {
     const url = portraitJson['url'];
-    const domainName = getSourceOriginForBookendComponent(element, url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const portrait = {
       url,

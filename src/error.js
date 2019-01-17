@@ -499,6 +499,11 @@ export function getErrorReportData(message, filename, line, col, error,
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
+
+  if (getMode().singlePassType) {
+    data['spt'] = getMode().singlePassType;
+  }
+
   data['rt'] = runtime;
 
   // Add our a4a id if we are inabox
@@ -659,7 +664,10 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  if (isExperimentOn(win, 'user-error-reporting')) {
+  // Currently this can only be executed in a single-doc mode. Otherwise,
+  // it's not clear which ampdoc the event would belong too.
+  if (Services.ampdocServiceFor(win).isSingleDoc()
+      && isExperimentOn(win, 'user-error-reporting')) {
     const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,

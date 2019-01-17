@@ -56,8 +56,7 @@ export class InaboxHost {
     setReportError(reportError);
 
     if (win[INABOX_IFRAMES] && !Array.isArray(win[INABOX_IFRAMES])) {
-      dev().info(TAG, `Invalid ${INABOX_IFRAMES}`,
-          win[INABOX_IFRAMES]);
+      dev().info(TAG, 'Invalid %s. %s', INABOX_IFRAMES, win[INABOX_IFRAMES]);
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
@@ -88,7 +87,7 @@ export class InaboxHost {
           processMessageFn(message);
         });
       } else {
-        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+        dev().info(TAG, 'Invalid %s %s', PENDING_MESSAGES, queuedMsgs);
       }
     }
     // Empty and ensure that future messages are no longer stored in the array.

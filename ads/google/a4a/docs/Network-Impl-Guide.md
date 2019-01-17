@@ -51,7 +51,7 @@ To support Fast Fetch, ad networks are required to implement the following:
 2. The JavaScript to build the ad request, which must be located within the AMP
 HTML GitHub repository (example implementations:
 [AdSense](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-adsense-impl)
-& [DoubleClick](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
+& [Google Ad Manager](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
 
 ## Detailed design
 
@@ -129,7 +129,7 @@ is allowed by including the following headers in the response:
 
 The [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad)
 element differentiates between different ad network implementations via the
-`type` attribute. For example, the following amp-ad tag utilizes the DoubleClick
+`type` attribute. For example, the following amp-ad tag utilizes the Google Ad Manager
 ad network:
 
 ```html
@@ -175,7 +175,7 @@ To create an ad network implementation, you must perform the following:
       // @return {string} - the ad url
     ```
 
-Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js).
+Examples of network implementations can be seen for [Google Ad Manager](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js).
 Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
 [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js).
 
@@ -211,16 +211,15 @@ Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
     });
     ```
 
-Example configs: [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js#L80)
-and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
-Usage of DoubleClick and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
+Example configs: [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
+Usage of Google Ad Manager and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
 
 #### Create documentation
 
 Create a file named `amp-ad-network-<TYPE>-impl-internal.md`, and within this
 file provide thorough documentation for the use of your implementation.
 
-Examples: See [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md)
+Examples: See [Google Ad Manager](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md)
 and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/amp-ad-network-adsense-impl-internal.md).
 
 #### Create tests

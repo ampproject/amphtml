@@ -59,6 +59,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
+    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig('example.org:basic', true));
     sandbox.stub(serviceAdapter, 'getDialog')
@@ -66,8 +68,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], serviceAdapter,
-        new SubscriptionAnalytics(ampdoc.getRootNode()));
+        serviceConfig.services[0], serviceAdapter);
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
@@ -250,13 +251,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       const executeStub =
         sandbox.stub(localSubscriptionPlatform.actions_, 'execute')
             .callsFake(() => Promise.resolve(true));
-      const entitlementsStub = sandbox.stub(
-          localSubscriptionPlatform.serviceAdapter_,
-          'reAuthorizePlatform');
+      const resetStub = sandbox.stub(
+          serviceAdapter, 'resetPlatforms');
       localSubscriptionPlatform.executeAction(actionString);
       expect(executeStub).to.be.calledWith(actionString);
       return executeStub().then(() => {
-        expect(entitlementsStub).to.be.calledOnce;
+        expect(resetStub).to.be.calledOnce;
       });
     });
   });
@@ -269,6 +269,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
       });
+    });
+
+    it('should reset renderer\'s on reset', () => {
+      const resetStub =
+        sandbox.stub(localSubscriptionPlatform.renderer_, 'reset');
+      localSubscriptionPlatform.reset();
+      expect(resetStub).to.be.calledOnce;
     });
   });
 

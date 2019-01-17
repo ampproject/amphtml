@@ -23,19 +23,14 @@ import ampToolboxCacheUrl from
   '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  getDevelopmentBootstrapBaseUrl,
-} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
-  getService,
-  registerServiceBuilder,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {
-  isProxyOrigin,
-} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -64,15 +59,17 @@ import {urls} from '../../../src/config';
 export class AmpRecaptchaService {
 
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @const @private {!Window} */
-    this.win_ = window;
+    this.win_ = this.ampdoc_.win;
 
-    /** @const @private {!Element} */
-    this.body_ = this.win_.document.body;
+    /** @private {?string} */
+    this.sitekey_ = null;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -100,9 +97,18 @@ export class AmpRecaptchaService {
    * @return {Promise}
    */
   register(sitekey) {
+    if (!this.sitekey_) {
+      this.sitekey_ = sitekey;
+    } else if (this.sitekey_ !== sitekey) {
+      return Promise.reject(
+          new Error('You must supply the same sitekey ' +
+          'to all amp-recaptcha-input elements.')
+      );
+    }
+
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.iframeLoadPromise_ = this.initialize_(sitekey);
+      this.iframeLoadPromise_ = this.initialize_();
     }
     return this.iframeLoadPromise_;
   }
@@ -124,17 +130,15 @@ export class AmpRecaptchaService {
    * Takes in an element resource ID, sitekey, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
-   * @param {string} sitekey
    * @param {string} action
-   * @return {Promise}
+   * @return {!Promise<string>}
    */
-  execute(resourceId, sitekey, action) {
+  execute(resourceId, action) {
     if (!this.iframe_) {
       return Promise.reject(new Error(
           'An iframe is not created. You must register before executing'
       ));
     }
-
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
@@ -145,7 +149,6 @@ export class AmpRecaptchaService {
 
       const message = dict({
         'id': messageId,
-        'sitekey': sitekey,
         'action': 'amp_' + action,
       });
 
@@ -163,11 +166,10 @@ export class AmpRecaptchaService {
   /**
    * Function to create our recaptcha boostrap iframe.
    * Should be assigned to this.iframeLoadPromise_
-   * @param {string} sitekey
    * @private
    */
-  initialize_(sitekey) {
-    return this.createRecaptchaFrame_(sitekey).then(iframe => {
+  initialize_() {
+    return this.createRecaptchaFrame_().then(iframe => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
@@ -183,7 +185,7 @@ export class AmpRecaptchaService {
       ];
       this.executeMap_ = {};
 
-      this.body_.appendChild(this.iframe_);
+      this.win_.document.body.appendChild(this.iframe_);
       return loadPromise(this.iframe_);
     });
   }
@@ -207,11 +209,10 @@ export class AmpRecaptchaService {
   /**
    * Function to create our bootstrap iframe.
    *
-   * @param {string} sitekey
    * @return {!Promise<!Element>}
    * @private
    */
-  createRecaptchaFrame_(sitekey) {
+  createRecaptchaFrame_() {
 
     const iframe = this.win_.document.createElement('iframe');
 
@@ -220,7 +221,7 @@ export class AmpRecaptchaService {
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute('name', JSON.stringify(dict({
-        'sitekey': sitekey,
+        'sitekey': this.sitekey_,
         'sentinel': 'amp-recaptcha',
       })));
       iframe.classList.add('i-amphtml-recaptcha-iframe');
@@ -250,16 +251,23 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      return tryResolve(() => {
-        return getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha');
-      });
+      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
+          .then(curlsSubdomain => {
+            return 'http://' + curlsSubdomain +
+          '.recaptcha.localhost:8000/dist.3p/' +
+          (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
+            : 'current/recaptcha.max') +
+          '.html';
+          });
     }
 
     // Need to have the curls subdomain match the original document url.
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    if (isProxyOrigin(this.win_.location.href)) {
+    const isProxyOrigin = Services.urlForDoc(this.ampdoc_.getHeadNode())
+        .isProxyOrigin(this.win_.location.href);
+    if (isProxyOrigin) {
       curlsSubdomainPromise = tryResolve(() => {
         return this.win_.location.hostname.split('.')[0];
       });
@@ -311,17 +319,21 @@ export class AmpRecaptchaService {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installRecaptchaService(win) {
-  registerServiceBuilder(win, 'amp-recaptcha', AmpRecaptchaService);
+export function installRecaptchaServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'amp-recaptcha',
+      AmpRecaptchaService
+  );
 }
 
 /**
- * @param {!Window} win
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!AmpRecaptchaService}
  */
-export function recaptchaServiceFor(win) {
-  return getService(win, 'amp-recaptcha');
+export function recaptchaServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-recaptcha');
 }
 

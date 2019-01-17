@@ -28,7 +28,8 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {descendsFromStory} from '../../../src/utils/story';
+import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {
@@ -37,6 +38,7 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   setImportantStyles,
   setInitialDisplay,
@@ -96,7 +98,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?Element} */
+    /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
   }
 
@@ -185,6 +187,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    this.configure_();
+
     this.video_ = element.ownerDocument.createElement('video');
 
     const poster = element.getAttribute('poster');
@@ -225,6 +229,20 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @private */
+  configure_() {
+    const {element} = this;
+    if (!descendsFromStory(element)) {
+      return;
+    }
+    [
+      'i-amphtml-disable-mediasession',
+      'i-amphtml-poolbound',
+    ].forEach(className => {
+      element.classList.add(className);
+    });
   }
 
   /** @override */
@@ -317,7 +335,7 @@ class AmpVideo extends AMP.BaseElement {
    * Propagate sources that are cached by the CDN.
    */
   propagateCachedSources_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -349,7 +367,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   propagateLayoutChildren_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -365,7 +383,7 @@ class AmpVideo extends AMP.BaseElement {
 
     sources.forEach(source => {
       // Cached sources should have been moved from <amp-video> to <video>.
-      dev().assert(!this.isCachedByCDN_(source));
+      devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
     });
@@ -437,16 +455,25 @@ class AmpVideo extends AMP.BaseElement {
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
 
-    this.unlisteners_.push(this.forwardEvents(
-        [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video));
+    const forwardEventsUnlisten = this.forwardEvents([
+      VideoEvents.ENDED,
+      VideoEvents.LOADEDMETADATA,
+      VideoEvents.PAUSE,
+      VideoEvents.PLAYING,
+    ], video);
 
-    this.unlisteners_.push(listen(video, 'volumechange', () => {
-      if (this.muted_ != this.video_.muted) {
-        this.muted_ = this.video_.muted;
-        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
-        this.element.dispatchCustomEvent(evt);
+    const mutedOrUnmutedEventUnlisten = listen(video, 'volumechange', () => {
+      const {muted} = this.video_;
+      if (this.muted_ == muted) {
+        return;
       }
-    }));
+      this.muted_ = muted;
+      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+    });
+
+    this.unlisteners_.push(
+        forwardEventsUnlisten,
+        mutedOrUnmutedEventUnlisten);
   }
 
   /** @private */
@@ -553,6 +580,9 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = true;
   }
 
@@ -560,7 +590,18 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = false;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isManagedByPool_() {
+    return this.element.classList.contains('i-amphtml-poolbound');
   }
 
   /**
@@ -697,6 +738,11 @@ class AmpVideo extends AMP.BaseElement {
       posterImg.onload = callback;
       posterImg.src = poster;
     }
+  }
+
+  /** @override */
+  seekTo(timeSeconds) {
+    this.video_.currentTime = timeSeconds;
   }
 }
 

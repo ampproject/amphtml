@@ -18,6 +18,8 @@
  * @fileoverview Embeds an AddThis widget.
  * The data-pub-id and data-widget-id can be found easily in the AddThis
  * dashboard at addthis.com.
+ * For floating tool, pickup floating widget-id from dashboard
+ * and add an attribute: data-widget-type="floating"
  * Example:
  * <code>
  * <amp-addthis
@@ -61,6 +63,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
+
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
@@ -114,6 +117,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {(?Object<string, string>|null)} */
     this.atConfig_ = null;
+
+    /** @private {string} */
+    this.widgetType_ = '';
   }
 
   /**
@@ -124,12 +130,12 @@ class AmpAddThis extends AMP.BaseElement {
     const widgetId = this.element.getAttribute('data-widget-id');
 
     // Required attributes
-    this.pubId_ = user().assert(
+    this.pubId_ = userAssert(
         pubId,
         'The data-pub-id attribute is required for <amp-addthis> %s',
         this.element
     );
-    this.widgetId_ = user().assert(
+    this.widgetId_ = userAssert(
         widgetId,
         'The data-widget-id attribute is required for <amp-addthis> %s',
         this.element
@@ -141,6 +147,7 @@ class AmpAddThis extends AMP.BaseElement {
         ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
+    this.widgetType_ = this.element.getAttribute('data-widget-type');
     this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
@@ -216,6 +223,11 @@ class AmpAddThis extends AMP.BaseElement {
     this.preconnect.url('https://su.addthis.com', opt_onLayout);
   }
 
+  /** @override */
+  isAlwaysFixed() {
+    return this.widgetType_ === 'floating';
+  }
+
   /**
    * @return {Element}
    */
@@ -260,6 +272,7 @@ class AmpAddThis extends AMP.BaseElement {
     );
     const iframeLoadPromise = this.loadPromise(iframe);
     setStyle(iframe, 'margin-bottom', '-5px');
+
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -304,7 +317,7 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {JsonObject<string, string>}
+   * @return {!JsonObject}
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
@@ -327,7 +340,7 @@ class AmpAddThis extends AMP.BaseElement {
   /**
    * @private
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @return {!Object<string, string>}
+   * @return {!JsonObject}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {

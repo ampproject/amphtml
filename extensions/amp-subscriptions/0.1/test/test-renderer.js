@@ -199,16 +199,16 @@ describes.realWin('amp-subscriptions renderer', {
   });
 
   describe('addLoadingBar', () => {
-    let appendChildStub;
+    let insertBeforeStub;
 
     beforeEach(() => {
-      appendChildStub = sandbox.stub(renderer.ampdoc_.getBody(),
-          'appendChild');
+      insertBeforeStub = sandbox.stub(renderer.ampdoc_.getBody(),
+          'insertBefore');
     });
 
     it('shouldn\'t add a progress bar if loading section is found', () => {
       return renderer.addLoadingBar().then(() => {
-        expect(appendChildStub).to.not.be.called;
+        expect(insertBeforeStub).to.not.be.called;
       });
     });
 
@@ -216,10 +216,29 @@ describes.realWin('amp-subscriptions renderer', {
       loading1.remove();
       loading2.remove();
       return renderer.addLoadingBar().then(() => {
-        expect(appendChildStub).to.be.called;
-        const element = appendChildStub.getCall(0).args[0];
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
         expect(element.tagName).to.be.equal('DIV');
         expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.be.null;
+      });
+    });
+
+    it('should add a progress bar before footer', () => {
+      loading1.remove();
+      loading2.remove();
+      const fakeFooter = createElementWithAttributes(doc, 'footer', {});
+      const fakeFooterContainer = createElementWithAttributes(doc, 'div', {});
+      fakeFooterContainer.appendChild(fakeFooter);
+      renderer.ampdoc_.getBody().appendChild(fakeFooterContainer);
+      const footer = createElementWithAttributes(doc, 'footer', {});
+      renderer.ampdoc_.getBody().appendChild(footer);
+      return renderer.addLoadingBar().then(() => {
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.equal(footer);
       });
     });
   });

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 import {parseJson, recreateNonProtoObject} from '../json';
@@ -86,11 +86,12 @@ export class Storage {
    * Returns the promise that's resolved when the operation completes.
    * @param {string} name
    * @param {*} value
+   * @param {boolean=} opt_isUpdate
    * @return {!Promise}
    */
-  set(name, value) {
-    dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
-    return this.setNonBoolean(name, value);
+  set(name, value, opt_isUpdate) {
+    devAssert(typeof value == 'boolean', 'Only boolean values accepted');
+    return this.setNonBoolean(name, value, opt_isUpdate);
   }
 
   /**
@@ -99,10 +100,11 @@ export class Storage {
    * Note: More restrict privacy review is required to store non boolean value.
    * @param {string} name
    * @param {*} value
+   * @param {boolean=} opt_isUpdate
    * @return {!Promise}
    */
-  setNonBoolean(name, value) {
-    return this.saveStore_(store => store.set(name, value));
+  setNonBoolean(name, value, opt_isUpdate) {
+    return this.saveStore_(store => store.set(name, value, opt_isUpdate));
   }
 
   /**
@@ -214,17 +216,26 @@ export class Store {
   }
 
   /**
+   * Set the storage value along with the current timestamp.
+   * When opt_isUpdated is true, timestamp will be the creation timestamp,
+   * the stored value will be updated w/o updating timestamp.
    * @param {string} name
    * @param {*} value
+   * @param {boolean=} opt_isUpdate
    */
-  set(name, value) {
-    dev().assert(name != '__proto__' && name != 'prototype',
+  set(name, value, opt_isUpdate) {
+    devAssert(name != '__proto__' && name != 'prototype',
         'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];
+      let timestamp = Date.now();
+      if (opt_isUpdate) {
+        // Update value w/o timestamp
+        timestamp = item['t'];
+      }
       item['v'] = value;
-      item['t'] = Date.now();
+      item['t'] = timestamp;
     } else {
       this.values_[name] = dict({
         'v': value,

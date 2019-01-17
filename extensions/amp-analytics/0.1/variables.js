@@ -16,12 +16,9 @@
 
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-// TODO(calebcordry) remove this once experiment is launched
-// also remove from dep-check-config whitelist;
-import {isExperimentOn} from '../../../src/experiments';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
@@ -88,11 +85,11 @@ export class ExpansionOptions {
 function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let {length} = str;
-  user().assert(isFiniteNumber(start),
+  userAssert(isFiniteNumber(start),
       'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {
     length = Number(opt_l);
-    user().assert(isFiniteNumber(length),
+    userAssert(isFiniteNumber(length),
         'Length ' + length + ' in substr macro should be a number');
   }
 
@@ -162,9 +159,7 @@ export class VariableService {
    * @return {!Object} contains all registered macros
    */
   getMacros() {
-    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        'url-replacement-v2');
-    return isV2ExpansionOn ? this.macros_ : {};
+    return this.macros_;
   }
 
   /**
@@ -172,7 +167,7 @@ export class VariableService {
    * @param {*} macro
    */
   register_(name, macro) {
-    dev().assert(!this.macros_[name], 'Macro "' + name
+    devAssert(!this.macros_[name], 'Macro "' + name
         + '" already registered.');
     this.macros_[name] = macro;
   }
@@ -270,7 +265,7 @@ export function getNameArgs(key) {
     return {name: '', argList: ''};
   }
   const match = key.match(VARIABLE_ARGS_REGEXP);
-  user().assert(match, 'Variable with invalid format found: ' + key);
+  userAssert(match, 'Variable with invalid format found: ' + key);
 
   return {name: match[1] || match[0], argList: match[2] || ''};
 }

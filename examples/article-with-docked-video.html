@@ -22,6 +22,8 @@
   <!-- ## Setup -->
   <!-- Include the [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video) extension. -->
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <!-- Include the [`amp-video-docking`](https://www.ampproject.org/docs/reference/components/amp-video-docking) extension. -->
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <!-- Include the [`amp-animation`](https://www.ampproject.org/docs/reference/components/amp-animation)
   extension to animate the `<aside>` element on `dock` and `undock`.  -->
   <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
@@ -35,12 +37,13 @@
       margin: 0;
       background: white;
       font-family: sans-serif;
+      line-height: 20px;
+      font-size: 14px;
     }
 
     header {
-      background: white;
-      padding: 10px 20px;
-      border-bottom: 1px solid #ddd;
+      background: rgba(255, 240, 250, 1);
+      color: rgba(255, 50, 100, 1);
       position: fixed;
       left: 0;
       right: 0;
@@ -48,26 +51,39 @@
       z-index: 1;
       line-height: 40px;
       font-size: 18px;
+      z-index: 2;
+      display: flex;
+      padding: 0 40px
+    }
+
+    h1 {
+      padding: 20px;
+      background: rgba(255, 50, 100, 1);
+      color: #fff;
+      margin: 0;
+      font-weight: bold;
+      font-size: 18px;
     }
 
     main {
       margin: 0 auto;
-      padding: 80px 0 0 0;
+      padding: 120px 0 0 0;
       width: 100vw;
+      font-size: 16px;
+      line-height: 24px;
     }
 
     .content {
-      height: 200vh;
-      width: calc(70vw - 20px);
-      padding: 0 20px;
+      width: calc(70vw - 40px);
+      padding: 0 40px 40px;
       box-sizing: border-box;
     }
 
     aside {
-      right: 20px;
+      right: 40px;
       margin-left: 70vw;
       position: fixed;
-      top: 80px;
+      top: 120px;
 
       /*
       Define a viewport-based width for the aside. The docking slot will expand
@@ -78,7 +94,7 @@
 
     .more-content {
       padding: 20px 20px 0;
-      background: #eaeaea;
+      background: #f8f8f8;
 
       /*
       Offset vertical axis by the negative height of the docking slot.
@@ -100,16 +116,51 @@
     }
 
     .more-content li a {
-      display: block;
-      border-top: 1px solid #ddd;
+      display: flex;
+      border-top: 1px solid #eee;
       text-decoration: none;
+      color: rgba(255, 50, 100, 1);
+      align-items: center;
+    }
+    .more-content li a > span {
       padding: 16px 20px;
-      color: #2ac;
+      flex: 1;
+    }
+
+    .docked-placeholder {
+      opacity: 0;
+      position: absolute;
+      background: #f8f8f8;
+    }
+
+    .docked-indicator-icon {
+      fill: #888;
+      width: 48px;
+      height: 48px;
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+    }
+
+    h2 {
+      font-weight: normal;
+      margin: 0;
+      font-size: 36px;
+      padding: 60px 0 20px;
+      line-height: 40px;
     }
 
     h3 {
       margin: 0;
       padding-bottom: 20px;
+    }
+
+    .spacer {
+      height: 80vh;
+      overflow: hidden;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     /* This is only needed for the preview to work on AMP by Example. You don't
@@ -124,7 +175,7 @@
       max-width: calc(70vw - 60px);
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 600px), (max-height: 480px) {
       /* Hide on smaller devices to fallback to standard docking. */
       #dock-slot {
         display: none;
@@ -141,6 +192,10 @@
         width: 100%;
       }
 
+      .more-content {
+        transform: none;
+      }
+
       .content {
         width: 100vw;
       }
@@ -149,6 +204,10 @@
         padding-top: 20px;
       }
     }
+
+    a[name=video] {
+      height: 120px;
+    }
   </style>
 </head>
 
@@ -156,7 +215,7 @@
   <!-- ## Define animations -->
   <!-- To slide down the content below the docking slot, the vertical offset is
   changed into a `20px` positive offset to create padding below the slot. -->
-  <amp-animation layout="nodisplay" id="slideDown">
+  <amp-animation layout="nodisplay" id="slideSidebarDown">
     <script type="application/json">
       {
         "selector": ".more-content",
@@ -169,7 +228,7 @@
           },
           {
             "offset": 1,
-            "transform": "translateY(20px)"
+            "transform": "translateY(40px)"
           }
         ]
       }
@@ -177,7 +236,7 @@
   </amp-animation>
   <!-- To slide up the content once the video is no longer docked, the animation
   reverts the aside content's offset to `-16.85vw`. -->
-  <amp-animation layout="nodisplay" id="slideUp">
+  <amp-animation layout="nodisplay" id="slideSidebarUp">
     <script type="application/json">
       {
         "selector": ".more-content",
@@ -186,7 +245,7 @@
         "easing": "ease-out",
         "keyframes": [{
             "offset": 0,
-            "transform": "translateY(20px)"
+            "transform": "translateY(40px)"
           },
           {
             "offset": 1,
@@ -196,9 +255,15 @@
       }
     </script>
   </amp-animation>
-  <header>My Header</header>
+  <header>
+    <h1>
+      fresh.io
+    </h1>
+  </header>
   <main>
     <div class="content">
+      <div style="height: 80vh"></div>
+      <a name="video"></a>
       <!-- ## Include your video -->
       <!-- In your [`<amp-video>`](https://www.ampproject.org/docs/reference/components/amp-video)
       tag, you should include the `dock` attribute. This attribute specifies that
@@ -206,48 +271,72 @@
       the attribute, we're specifying which docking slot we're using via a CSS
       selector. -->
       <amp-video
-        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
-        artwork="img/bigbuckbunny.jpg"
-        title="Big Buck Bunny"
-        album="Blender"
-        artist="Blender Foundation"
+          src="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FPexels%20Videos%202857.mp4?1541526433834"
+          poster="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FScreen%20Shot%202018-11-06%20at%209.48.17%20AM.png?1541526513440"
+          width="720"
+          height="405"
+          layout="responsive"
+          loop
+          controls dock="#dock-slot">
+      </amp-video>
+      <h2>Grilled Eggplant</h2>
+      <p>
+        <strong>Docking triggers on user interaction, so click on video to activate. ☝</strong>
+      </p>
+      <h3>
+        Ingredients
+      </h3>
+      <ul>
+        <li>1 large eggplant</li>
+        <li>⅓ cup butter or ⅓ cup margarine, melted</li>
+        <li>½ teaspoon garlic salt</li>
+        <li>½ teaspoon italian seasoning</li>
+        <li>½ teaspoon salt</li>
+        <li>¼ teaspoon pepper</li>
+      </ul>
+      <h3>
+        Directions
+      </h3>
+      <ol>
+        <li>Peel the eggplant, and then cut into 3/4-inch slices.</li>
+        <li>Combine butter, garlic salt, and Italian seasonings; stir well.</li>
+        <li>Brush eggplant slices with butter mixture, and sprinkle with salt and pepper.</li>
+        <li>Place eggplant on grill; grill over medium heat 10 minutes or until tender, turning and basting occasionally.</li>
+      </ol>
+      <amp-video
+        src="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FBacking%20Cookies.mp4?1544223694077"
+        poster="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2Fchocolatechip.png?1544224047256"
         width="720"
         height="405"
         layout="responsive"
+        loop
         controls dock="#dock-slot">
       </amp-video>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam facilisis odio vitae sem ornare laoreet. Mauris
-        sodales convallis eros, non imperdiet mauris ullamcorper eget. Aenean tempus augue eu nisl consectetur
-        sagittis. Morbi vel nunc eu leo tristique vehicula. Sed finibus velit luctus, scelerisque mauris luctus,
-        tristique justo. Pellentesque non mauris aliquam, mattis dui in, gravida lorem. Suspendisse consectetur dui
-        quis quam fringilla pulvinar. Nunc sit amet leo porta, tincidunt dui quis, tempus nisl. Suspendisse aliquet,
-        velit ac tincidunt finibus, massa mauris scelerisque dolor, sit amet varius mi felis non ante. Ut imperdiet
-        auctor diam id ultricies. Phasellus fermentum ligula at luctus sodales. Nulla semper felis at tempus sagittis.
-        Curabitur ac risus non turpis sagittis lobortis ut non tortor. Nunc id tempus nisi.</p>
-      <p>Vestibulum sit amet posuere sapien. Fusce ac eleifend sapien. Morbi ut vulputate eros, non ornare erat.
-        Pellentesque quis mi tempor, venenatis sapien non, eleifend ligula. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit. Aliquam vehicula sem eu massa sollicitudin, quis condimentum risus fermentum. Nunc scelerisque
-        posuere nisl ut tempus. Fusce blandit quis tortor nec facilisis.</p>
-      <p>Mauris sed neque at erat tristique gravida. Suspendisse pretium rhoncus ante id efficitur. Praesent ligula
-        purus, mollis sit amet metus non, pulvinar iaculis eros. Integer et nisi rhoncus, aliquet eros non, malesuada
-        urna. Nunc tincidunt felis sed molestie ornare. Vivamus est magna, rutrum sit amet erat et, porttitor aliquam
-        elit. Aenean condimentum urna nec urna dapibus, ultricies iaculis nisl porttitor. Sed vitae turpis est. Ut
-        purus nibh, suscipit a est ut, ullamcorper aliquet velit. Nam egestas urna nec tortor laoreet, eu molestie
-        lectus mattis. Pellentesque ut orci dignissim, molestie augue sed, venenatis diam. Curabitur congue metus
-        euismod, pretium ligula sit amet, blandit orci. Nulla vel pretium urna. Nullam suscipit nisi eget semper
-        pulvinar.</p>
-      <p>Proin non rutrum ipsum. Duis a vestibulum velit, non tincidunt sapien. Orci varius natoque penatibus et magnis
-        dis parturient montes, nascetur ridiculus mus. Donec condimentum malesuada sapien ut aliquet. Donec eleifend
-        metus dui, vel dignissim dolor blandit ac. Quisque nunc erat, egestas nec arcu ac, molestie lobortis mauris.
-        Maecenas non sapien eleifend, efficitur elit quis, mollis augue. Nunc euismod consectetur orci, sed scelerisque
-        massa facilisis a.</p>
-      <p>Curabitur laoreet in metus fermentum pretium. Nunc pretium iaculis scelerisque. Suspendisse at porttitor odio.
-        Sed consequat imperdiet ligula vitae rhoncus. Nullam sagittis dui diam, sit amet convallis augue vestibulum in.
-        Etiam in vestibulum eros. Phasellus semper mattis aliquet. Donec ac massa eget felis suscipit rhoncus a sed
-        metus. Quisque pharetra feugiat dui, at tempor erat volutpat vel. Donec quam ipsum, suscipit quis nisi eu,
-        tincidunt cursus libero. Integer sed pulvinar elit. Suspendisse ex nisi, egestas ac ante fringilla, convallis
-        tempor ipsum. Quisque est odio, gravida ac malesuada vitae, scelerisque vel quam.</p>
+      <h2>Chocolate chip cookies</h2>
+      <p>
+        <strong>Docking triggers on user interaction, so click on video to activate. ☝</strong>
+      </p>
+      <h3>
+        Ingredients
+      </h3>
+      <ul>
+        <li>1 large eggplant</li>
+        <li>⅓ cup butter or ⅓ cup margarine, melted</li>
+        <li>½ teaspoon garlic salt</li>
+        <li>½ teaspoon italian seasoning</li>
+        <li>½ teaspoon salt</li>
+        <li>¼ teaspoon pepper</li>
+      </ul>
+      <h3>
+        Directions
+      </h3>
+      <ol>
+        <li>Peel the eggplant, and then cut into 3/4-inch slices.</li>
+        <li>Combine butter, garlic salt, and Italian seasonings; stir well.</li>
+        <li>Brush eggplant slices with butter mixture, and sprinkle with salt and pepper.</li>
+        <li>Place eggplant on grill; grill over medium heat 10 minutes or until tender, turning and basting occasionally.</li>
+      </ol>
+      <div style="height: 100vh"></div>
     </div>
     <aside>
       <!-- ## Include the docking slot. -->
@@ -256,27 +345,53 @@
       preserving aspect ratio.
 
       Additionally, set the `on` attribute to specify the actions that
-      get executed on docking events. In this case, we'll start the `slideDown`
-      animation on `dock` and the `slideUp` animation on `undock`.-->
+      get executed on docking events. In this case, we'll start the `slideSidebarDown`
+      animation on `dock` and the `slideSidebarUp` animation on `undock`.-->
       <amp-layout
           layout="responsive"
           width="16"
           height="9"
           id="dock-slot"
-          on="dock: slideDown.start; undock: slideUp.start">
+          on="dock: slideSidebarDown.start;
+            undock: slideSidebarUp.start;">
       </amp-layout>
       <!-- ## Define the content under the slot -->
       <!-- This container is negatively offset on the vertical axis to cover
-      the docking slot. Our `slideDown` animation will take care of translating
+      the docking slot. Our `slideSidebarDown` animation will take care of translating
       this content to make room for the docking slot. -->
       <div class="more-content">
         <h3>More Content</h3>
         <ul>
-          <li><a href="#">Was it an alien or something?! Click here to find out!</a></li>
-          <li><a href="#">Baby ducks see water for the first time - Can you BELIEVE what they do?</a></li>
-          <li><a href="#">Grocery stores HATE him: save up to 90% with this one weird trick.</a></li>
-          <li><a href="#">When you read these 99 shocking food facts, you'll never want to eat again.</a></li>
-          <li><a href="#">Scientists say giant asteroid could hit Earth next week, causing mass devastation.</a></li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/100/100" width="80" height="80"></amp-img>
+              <span>Was it an alien or something?! Click here to find out!</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/80/80" width="80" height="80"></amp-img>
+              <span>Baby ducks see water for the first time - Can you BELIEVE what they do?</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/120/120" width="80" height="80"></amp-img>
+              <span>Grocery stores HATE him: save up to 90% with this one weird trick.</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/140/140" width="80" height="80"></amp-img>
+              <span>When you read these 99 shocking food facts, you'll never want to eat again.</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/180/180" width="80" height="80"></amp-img>
+              <span>Scientists say giant asteroid could hit Earth next week, causing mass devastation.</span>
+            </a>
+          </li>
         </ul>
       </div>
     </aside>

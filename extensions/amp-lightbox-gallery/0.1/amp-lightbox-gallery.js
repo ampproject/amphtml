@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -22,7 +21,6 @@ import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
   LightboxThumbnailDataDef,
-  LightboxedCarouselMetadataDef,
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
@@ -36,23 +34,24 @@ import {
   closestBySelector,
   elementByTag,
   escapeCssSelectorIdent,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {
-  concat as concatTransition,
-  numeric,
-  scale,
-  setStyles as setStylesTransition,
-  translate,
-} from '../../../src/transition';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
-import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {px, setStyles, toggle} from '../../../src/style';
+import {htmlFor} from '../../../src/static-template';
+import {
+  numeric,
+  setStyles as setStylesTransition,
+} from '../../../src/transition';
+import {
+  prepareImageAnimation,
+} from '@ampproject/animations/dist/animations.mjs';
+import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -74,14 +73,13 @@ const LightboxControlsModes = {
 const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
 // Use S Curves for entry and exit animations
-const ENTER_CURVE_ = bezierCurve(0.8, 0, 0.2, 1);
-const EXIT_CURVE_ = bezierCurve(0.8, 0, 0.2, 1);
+const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
+const FADE_CURVE = bezierCurve(0.8, 0, 0.2, 1);
 
 const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
-const EPSILON = 0.01; // precision for approx equals
 
 
 /**
@@ -105,6 +103,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {Document} */
+    this.doc_ = this.win.document;
 
     /** @private {boolean} */
     this.isActive_ = false;
@@ -184,19 +185,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
+    return lightboxManagerForDoc(this.element).then(manager => {
       this.manager_ = manager;
       this.history_ = Services.historyForDoc(this.getAmpDoc());
-      this.action_ = Services.actionServiceForDoc(this.getAmpDoc());
+      this.action_ = Services.actionServiceForDoc(this.element);
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
-      this.container_ = this.win.document.createElement('div');
-      this.container_.classList.add('i-amphtml-lbg');
+      this.container_ = htmlFor(this.doc_)`
+        <div class="i-amphtml-lbg">
+          <div class="i-amphtml-lbg-mask"></div>
+        </div>`;
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
-      this.buildMask_();
-      this.registerAction('open', invocation => this.activate(invocation));
+      this.registerDefaultAction(
+          invocation => this.open_(invocation),
+          'open');
     });
   }
 
@@ -215,8 +219,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildControls_() {
-    this.controlsContainer_ = this.win.document.createElement('div');
-    this.controlsContainer_.classList.add('i-amphtml-lbg-controls');
+    this.controlsContainer_ = htmlFor(this.doc_)`
+      <div class="i-amphtml-lbg-controls"></div>`;
     this.buildDescriptionBox_();
     this.buildTopBar_();
     this.buildNavControls_();
@@ -232,7 +236,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   findOrInitializeLightbox_(lightboxGroupId) {
     if (!this.carouselContainer_) {
-      this.carouselContainer_ = this.win.document.createElement('div');
+      this.carouselContainer_ = this.doc_.createElement('div');
       this.container_.appendChild(this.carouselContainer_);
     }
 
@@ -240,17 +244,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.buildControls_();
     }
     return this.findOrBuildCarousel_(lightboxGroupId);
-  }
-
-  /**
-   * Builds the page mask and appends it to the container.
-   * @private
-   */
-  buildMask_() {
-    dev().assert(this.container_);
-    const mask = this.win.document.createElement('div');
-    mask.classList.add('i-amphtml-lbg-mask');
-    this.container_.appendChild(mask);
   }
 
   /**
@@ -288,9 +281,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       };
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
-        const container = this.element.ownerDocument.createElement('div');
-        const imageViewer = this.win.document.createElement('amp-image-viewer');
-        imageViewer.setAttribute('layout', 'fill');
+        const container = this.doc_.createElement('div');
+        const imageViewer = htmlFor(this.doc_)`
+          <amp-image-viewer layout="fill"></amp-image-viewer>`;
         clonedNode.removeAttribute('class');
         imageViewer.appendChild(clonedNode);
         container.appendChild(imageViewer);
@@ -310,21 +303,32 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   findOrBuildCarousel_(lightboxGroupId) {
-    dev().assert(this.container_);
+    devAssert(this.container_);
     const existingCarousel = this.element.querySelector(
         `amp-carousel[amp-lightbox-group=${
           escapeCssSelectorIdent(lightboxGroupId)
         }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
-      return this.mutateElement(() => {
-        const numSlides = this.elementsMetadata_[lightboxGroupId].length;
-        this.toggleNavControls_(numSlides);
-        toggle(dev().assertElement(this.carousel_), true);
-      });
+      return this.showCarousel_(lightboxGroupId);
     } else {
       return this.buildCarousel_(lightboxGroupId);
     }
+  }
+
+  /**
+   * @param {string} lightboxGroupId
+   * @return {!Promise}
+   * @private
+   */
+  showCarousel_(lightboxGroupId) {
+    return this.mutateElement(() => {
+      const numSlides = this.elementsMetadata_[lightboxGroupId].length;
+      const hideControls = numSlides == 1;
+      this.controlsContainer_.classList.toggle('i-amphtml-ghost',
+          hideControls);
+      toggle(dev().assertElement(this.carousel_), true);
+    });
   }
 
   /**
@@ -342,29 +346,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
-      this.carousel_ = this.win.document.createElement('amp-carousel');
-      this.carousel_.setAttribute('type', 'slides');
-      this.carousel_.setAttribute('layout', 'fill');
-      this.carousel_.setAttribute('loop', '');
+      this.carousel_ = htmlFor(this.doc_)`
+        <amp-carousel type="slides" layout="fill" loop></amp-carousel>`;
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
-        this.toggleNavControls_(list.length);
+        const hideControls = list.length == 1;
+        this.controlsContainer_.classList.toggle('i-amphtml-ghost',
+            hideControls);
       });
     });
-  }
-
-  /**
-   * @param {number} noOfChildren
-   * @private
-   */
-  toggleNavControls_(noOfChildren) {
-    if (noOfChildren > 1) {
-      this.controlsContainer_.classList.remove('i-amphtml-lbg-single');
-    } else {
-      this.controlsContainer_.classList.add('i-amphtml-lbg-single');
-    }
   }
 
   /**
@@ -382,18 +374,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-    this.descriptionBox_ = this.win.document.createElement('div');
-    this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
-    this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
+    this.descriptionBox_ = htmlFor(this.doc_)`
+      <div class="i-amphtml-lbg-desc-box i-amphtml-lbg-standard">
+        <div class="i-amphtml-lbg-desc-text"></div>
+        <div class="i-amphtml-lbg-desc-mask"></div>
+      </div>`;
 
-    this.descriptionTextArea_ = this.win.document.createElement('div');
-    this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
+    this.descriptionTextArea_ = this.descriptionBox_.querySelector(
+        '.i-amphtml-lbg-desc-text');
 
-    this.descriptionOverflowMask_ = this.win.document.createElement('div');
-    this.descriptionOverflowMask_.classList.add('i-amphtml-lbg-desc-mask');
-
-    this.descriptionBox_.appendChild(this.descriptionOverflowMask_);
-    this.descriptionBox_.appendChild(this.descriptionTextArea_);
+    this.descriptionOverflowMask_ = this.descriptionBox_.querySelector(
+        '.i-amphtml-lbg-desc-mask');
 
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
@@ -485,8 +476,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (isInStandardMode && descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
-        toggle(dev().assertElement(this.navControls_), false);
-        toggle(dev().assertElement(this.topBar_), false);
+        toggle(user().assertElement(this.navControls_,
+            'E#19457 this.navControls_'), false);
+        toggle(user().assertElement(this.topBar_, 'E#19457 this.topBar_'),
+            false);
       } else if (isInOverflowMode) {
         this.clearDescOverflowState_();
       }
@@ -502,15 +495,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_./*OK*/scrollTop = 0;
     this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
     this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
-    toggle(dev().assertElement(this.navControls_), true);
-    toggle(dev().assertElement(this.topBar_), true);
+    toggle(user().assertElement(this.navControls_,
+        'E#19457 this.navControls_'), true);
+    toggle(user().assertElement(this.topBar_,
+        'E#19457 this.topBar_'), true);
   }
 
   /**
    * @private
    */
   nextSlide_() {
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionNext();
     });
   }
@@ -519,7 +514,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   prevSlide_() {
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionPrev();
     });
   }
@@ -528,9 +523,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildNavControls_() {
-    this.navControls_ = this.win.document.createElement('div');
+    this.navControls_ = this.doc_.createElement('div');
     const nextSlide = this.nextSlide_.bind(this);
     const prevSlide = this.prevSlide_.bind(this);
+
     const nextButton = this.buildButton_('Next',
         'i-amphtml-lbg-button-next', nextSlide);
     const prevButton = this.buildButton_('Prev',
@@ -550,8 +546,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildTopBar_() {
-    dev().assert(this.container_);
-    this.topBar_ = this.win.document.createElement('div');
+    devAssert(this.container_);
+    this.topBar_ = this.doc_.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
 
     const close = this.close_.bind(this);
@@ -581,16 +577,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildButton_(label, className, action) {
-    dev().assert(this.topBar_);
-    const button = this.win.document.createElement('div');
-    button.setAttribute('role', 'button');
-    button.setAttribute('aria-label', label);
+    devAssert(this.topBar_);
 
-    const icon = this.win.document.createElement('span');
-    icon.classList.add('i-amphtml-lbg-icon');
-    button.appendChild(icon);
+    const button = htmlFor(this.doc_)`
+    <div role="button" class="i-amphtml-lbg-button">
+      <span class="i-amphtml-lbg-icon"></span>
+    </div>`;
+
+    button.setAttribute('aria-label', label);
     button.classList.add(className);
-    button.classList.add('i-amphtml-lbg-button');
 
     button.addEventListener('click', event => {
       action();
@@ -667,7 +662,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   setupEventListeners_() {
-    dev().assert(this.container_);
+    devAssert(this.container_);
     const onToggleControls = this.onToggleControls_.bind(this);
     this.unlistenClick_ = listen(dev().assertElement(this.container_),
         'click', onToggleControls);
@@ -713,7 +708,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   getCurrentElement_() {
     const lbgId = this.currentLightboxGroupId_;
-    const currentElement = dev().assert(
+    const currentElement = devAssert(
         this.elementsMetadata_[lbgId][this.currentElemId_]
     );
     return currentElement;
@@ -739,18 +734,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *
    *  // Opens the element referenced by elementId
    *  on="tap:myLightboxGallery.open(id='<elementId>')
-   * @override
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
    */
-  activate(invocation) {
+  open_(invocation) {
     let target = invocation.caller;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
-      user().assert(target,
+      userAssert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
-    this.open_(dev().assertElement(target)).then(() => {
+    this.openLightboxGallery_(dev().assertElement(target)).then(() => {
       return this.history_.push(this.close_.bind(this));
     }).then(historyId => {
       this.historyId_ = historyId;
@@ -763,7 +758,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  open_(element) {
+  openLightboxGallery_(element) {
     this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
@@ -776,15 +771,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         });
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
+        this.getViewport().enterLightboxMode();
       });
     }).then(() => {
-      this.getViewport().enterLightboxMode();
       this.isActive_ = true;
 
       this.updateInViewport(dev().assertElement(this.container_), true);
       this.scheduleLayout(dev().assertElement(this.container_));
 
-      this.win.document.documentElement.addEventListener(
+      this.doc_.documentElement.addEventListener(
           'keydown', this.boundOnKeyDown_);
 
       this.carousel_.addEventListener(
@@ -812,7 +807,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
-    dev().assert(this.carousel_).getImpl()
+    devAssert(this.carousel_).getImpl()
         .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
     this.updateDescriptionBox_();
     return this.enter_();
@@ -837,23 +832,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     return true;
   }
-  /**
-   * This function verifies that the source element is an amp-img and contains
-   * an img element and preserves the natural aspect ratio of the original img.
-   * @param {!Element|null} element
-   * @return {!Promise<boolean>}
-   * @private
-   */
-  shouldAnimate_(element) {
-    const img = elementByTag(dev().assertElement(element), 'img');
-    return this.measureElement(() => {
-      const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
-      const elementHeight = element./*OK*/offsetHeight;
-      const elementWidth = element./*OK*/offsetWidth;
-      const ampImageAspectRatio = elementWidth / elementHeight;
-      return Math.abs(naturalAspectRatio - ampImageAspectRatio) < EPSILON;
-    });
-  }
 
   /**
    * It's possible for the current lightbox to be displaying an image that
@@ -861,21 +839,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * This function checks if the currently lightboxed image is the source image
    * that we transitioned on (in which case it is guaranteed to be in viewport)
    * or if it belongs to a carousel, in which case we sync the carousel.
-   * @return {!Promise<boolean>}
+   * @return {boolean}
    * @private
    */
-  shouldExit_() {
+  shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
     if (!this.transitionTargetIsInViewport_(target)) {
-      return Promise.resolve(false);
+      return false;
     }
     if (!this.elementTypeCanBeAnimated_(target)) {
-      return Promise.resolve(false);
+      return false;
     }
-    return this.shouldAnimate_(target)
-        .then(shouldAnimate => {
-          return shouldAnimate;
-        });
+    return true;
   }
 
   /**
@@ -899,116 +874,170 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     return false;
   }
+
   /**
-   * Animates image from current location to its target location in the
-   * lightbox.
-   * @param {!Element} sourceElement
+   * Transitions the sourceElement into the lightbox or the lightbox to the
+   * sourceElement.
+   * @param {!Element} sourceElement The element that is the source of what is
+   *    rendered in the lightbox.
+   * @param {boolean} enter Whether this is an enter or exit transition.
+   * @return {!Promise} A Promise that resolves once the transition is complete.
    * @private
-   * @return {!Promise}
    */
-  transitionIn_(sourceElement) {
-    const anim = new Animation(this.element);
-    let duration = MIN_TRANSITION_DURATION;
-
-    const transLayer = this.element.ownerDocument.createElement('div');
-    transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-    const sourceImg = childElementByTag(sourceElement, 'img');
-    const clone = sourceImg.cloneNode(true);
-    clone.removeAttribute('class');
-    transLayer.appendChild(clone);
-
+  transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const imageBox = imageViewer.getImageBoxWithOffset();
-          if (!imageBox) {
-            return this.fade_(0, 1);
+          const {width, height} = imageViewer.getImageBoxWithOffset();
+          // Check if our imageBox has a width or height. We may be in the
+          // gallery view if not, and we do not want to animate.
+          if (!width || !height) {
+            return this.fade_(/*fadeIn*/enter);
           }
 
-          // Gradually fade in the black background
-          anim.add(0, setStylesTransition(this.element, {
-            opacity: numeric(0, 1),
-          }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-
-          // Fade in the carousel at the end of the animation while fading out
-          // the transition layer
-          anim.add(MOTION_DURATION_RATIO - 0.01,
-              setStylesTransition(dev().assertElement(this.carousel_), {
-                opacity: numeric(0, 1),
-              }),
-              0.01
-          );
-
-          // At the end of the animation, fade out the transition layer.
-          anim.add(0.9, setStylesTransition(transLayer, {
-            opacity: numeric(1, 0.01),
-          }), 0.1, EXIT_CURVE_);
-
-          return this.measureMutateElement(
-              () => {
-                const rect = layoutRectFromDomRect(sourceElement
-                    ./*OK*/getBoundingClientRect());
-                setStyles(clone, {
-                  position: 'absolute',
-                  top: px(rect.top),
-                  left: px(rect.left),
-                  width: px(rect.width),
-                  height: px(rect.height),
-                  transformOrigin: 'top left',
-                  willChange: 'transform',
-                });
-                const dx = imageBox.left - rect.left;
-                const dy = imageBox.top - rect.top;
-                const scaleX = rect.width != 0 ?
-                  imageBox.width / rect.width : 1;
-                const viewportHeight = this.getViewport().getSize().height;
-                duration = this.getTransitionDuration_(Math.abs(dy),
-                    viewportHeight);
-
-                // Animate the position and scale of the transition image to its
-                // final lightbox destination in the middle of the page
-                anim.add(0, setStylesTransition(clone, {
-                  transform: concatTransition([
-                    translate(numeric(0, dx), numeric(0, dy)),
-                    scale(numeric(1, scaleX)),
-                  ]),
-                }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-              },
-              () => {
-                const carousel = dev().assertElement(this.carousel_);
-                toggle(carousel, true);
-                setStyles(carousel, {
-                  opacity: 0,
-                });
-                sourceElement.classList.add('i-amphtml-ghost');
-                this.getAmpDoc().getBody().appendChild(transLayer);
-              });
-        }).then(() => {
-          return anim.start(duration).thenAlways(() => {
-            return this.mutateElement(() => {
-              setStyles(this.element, {opacity: ''});
-              setStyles(dev().assertElement(this.carousel_), {opacity: ''});
-              sourceElement.classList.remove('i-amphtml-ghost');
-              if (transLayer) {
-                this.getAmpDoc().getBody().removeChild(transLayer);
-              }
-            });
-          });
+          const lightboxImg = imageViewer.getImage();
+          const sourceImg = childElementByTag(sourceElement, 'img');
+          return this.runImgTransition_(
+              enter ? sourceImg : lightboxImg,
+              enter ? lightboxImg : sourceImg,
+              enter);
         });
   }
 
   /**
-   * If no transition image is applicable, fade the lightbox in and out.
-   * @param {number} startOpacity
-   * @param {number} endOpacity
+   * Gets the duration for how long to animate the transition, based on the
+   * distance and size of the viewport.
+   * @param {!Element} srcImg The img to transition from.
+   * @param {!Element} targetImg The img to transition to.
+   * @return {number} How long to animate for, in milliseconds.
+   * @private
+   */
+  getTransitionDurationFromElements_(srcImg, targetImg) {
+    const srcRect = srcImg./*OK*/getBoundingClientRect();
+    const destRect = targetImg./*OK*/getBoundingClientRect();
+    const viewportHeight = this.getViewport().getSize().height;
+    const dy = Math.abs(destRect.top - srcRect.top);
+
+    return this.getTransitionDuration_(Math.abs(dy), viewportHeight);
+  }
+
+  /**
+   * Runs an img transition, both transitioning the `<img>` itself as well as
+   * the lightbox background.
+   * @param {!HTMLImageElement} srcImg The img to transition from.
+   * @param {!HTMLImageElement} targetImg The img to transition to.
+   * @param {boolean} enter Whether this is an enter or exxit transition.
+   * @return {Promise} A Promise that resolves once the transition is complete.
+   * @private
+   */
+  runImgTransition_(srcImg, targetImg, enter) {
+    const carousel = dev().assertElement(this.carousel_);
+    const container = dev().assertElement(this.container_);
+
+    let duration;
+    let motionDuration;
+    let imageAnimation;
+
+    const measure = () => {
+      duration = this.getTransitionDurationFromElements_(srcImg, targetImg);
+      motionDuration = MOTION_DURATION_RATIO * duration;
+      // Prepare the actual image animation.
+      imageAnimation = prepareImageAnimation({
+        styleContainer: this.getAmpDoc().getHeadNode(),
+        srcImg,
+        targetImg,
+        srcImgRect: undefined,
+        targetImgRect: undefined,
+        styles: {
+          'animationDuration': `${motionDuration}ms`,
+          // Matches z-index for `.i-amphtml-lbg`.
+          'zIndex': 2147483642,
+        },
+        keyframesNamespace: undefined,
+        curve: TRANSITION_CURVE,
+      });
+    };
+
+    const mutate = () => {
+      toggle(carousel, enter);
+      // Undo opacity 0 from `openLightboxGallery_`
+      setStyle(this.element, 'opacity', '');
+      // Fade in/out the background in sync with the motion.
+      setStyles(container, {
+        animationName: enter ? 'fadeIn' : 'fadeOut',
+        animationTimingFunction: 'cubic-bezier(0.8, 0, 0.2, 1)',
+        animationDuration: `${motionDuration}ms`,
+        animationFillMode: 'forwards',
+      });
+      // Fade in the carousel at the end of the movement.
+      setStyles(carousel, {
+        animationName: 'fadeIn',
+        animationDelay: `${motionDuration - 0.01}ms`,
+        animationDuration: '0.01ms',
+        animationFillMode: 'forwards',
+      });
+      srcImg.classList.add('i-amphtml-ghost');
+      targetImg.classList.add('i-amphtml-ghost');
+      // Apply the image animation prepared in the measure step.
+      imageAnimation.applyAnimation();
+    };
+
+    const cleanup = () => {
+      toggle(this.element, enter);
+      setStyle(container, 'animationName', '');
+      setStyle(carousel, 'animationName', '');
+      srcImg.classList.remove('i-amphtml-ghost');
+      targetImg.classList.remove('i-amphtml-ghost');
+      imageAnimation.cleanupAnimation();
+    };
+
+    return this.measureMutateElement(measure, mutate)
+        // We want to wait at least `duration`ms after the animation has
+        // started before we clean up. Since we are in an animation frame
+        // (from the measure/mutate), we can use a setTimeout(0) wait until the
+        // browser has painted. After that point, we wait another `duration`ms
+        // to make sure the animation has completed.
+        .then(() => Services.timerFor(this.win).promise(0))
+        .then(() => Services.timerFor(this.win).promise(duration))
+        .then(() => this.mutateElement(cleanup));
+  }
+
+  /**
+   * Animates an image from its current location to its target location in the
+   * lightbox.
+   * @param {!Element} sourceElement
    * @return {!Promise}
    * @private
    */
-  fade_(startOpacity, endOpacity) {
+  transitionImgIn_(sourceElement) {
+    return this.transitionImg_(sourceElement, true);
+  }
+
+  /**
+   * Animate the lightbox image back to its original position in the page..
+   * @return {!Promise}
+   * @private
+   */
+  transitionImgOut_() {
+    const currentElementMetadata = this.getCurrentElement_();
+    const {sourceElement} = currentElementMetadata;
+
+    return this.transitionImg_(sourceElement, false);
+  }
+
+  /**
+   * If no transition image is applicable, fade the lightbox in and out.
+   * @param {boolean} fadeIn Whether the lighbox is fading in or out.
+   * @return {!Promise}
+   * @private
+   */
+  fade_(fadeIn) {
+    const startOpacity = fadeIn ? 0 : 1;
+    const endOpacity = fadeIn ? 1 : 0;
     const duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
     anim.add(0, setStylesTransition(this.element, {
       opacity: numeric(startOpacity, endOpacity),
-    }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+    }), MOTION_DURATION_RATIO, FADE_CURVE);
 
     return anim.start(duration).thenAlways(() => {
       return this.mutateElement(() => {
@@ -1029,129 +1058,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
-      return this.fade_(0, 1);
+      return this.fade_(/*fadeIn*/true);
     }
 
-    const promises = [
-      this.shouldAnimate_(sourceElement),
-      this.getCurrentElement_().imageViewer.signals()
-          .whenSignal(CommonSignals.LOAD_END),
-    ];
-
-    return Promise.all(promises).then(values => {
-      const shouldAnimate = values[0];
-      return shouldAnimate
-        ? this.transitionIn_(sourceElement)
-        : this.fade_(0, 1);
-    });
-  }
-
-  /**
-   * Animate the lightbox image to move back to its original position in the
-   * webpage or carousel.
-   * @private
-   */
-  transitionOut_() {
-    const currentElementMetadata = this.getCurrentElement_();
-    const {sourceElement} = currentElementMetadata;
-    let duration = MIN_TRANSITION_DURATION;
-    const anim = new Animation(this.element);
-    const transLayer = this.element.ownerDocument.createElement('div');
-    transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-
-    // Initialize transition layer and image based on ImageViewer measurements
-    return currentElementMetadata.imageViewer.getImpl()
-        .then(imageViewer => {
-          const imageBox = imageViewer.getImageBoxWithOffset();
-          const image = imageViewer.getImage();
-
-          if (!imageBox) {
-            return this.fade_(1, 0);
-          }
-
-          const clone = image.cloneNode(true);
-          clone.removeAttribute('class');
-          clone.removeAttribute('style');
-
-          setStyles(clone, {
-            position: 'absolute',
-            top: px(imageBox.top),
-            left: px(imageBox.left),
-            width: px(imageBox.width),
-            height: px(imageBox.height),
-            transform: '',
-            transformOrigin: 'top left',
-            willChange: 'transform',
-          });
-          transLayer.appendChild(clone);
-
-          // Gradually fade out the lightbox
-          anim.add(0, setStylesTransition(this.element, {
-            opacity: numeric(1, 0),
-          }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-
-          // Fade out the transition image.
-          anim.add(MOTION_DURATION_RATIO, setStylesTransition(transLayer, {
-            opacity: numeric(1, 0.01),
-          }), 0.2, EXIT_CURVE_);
-
-          const transitionMeasure = () => {
-            const rect = layoutRectFromDomRect(sourceElement
-                ./*OK*/getBoundingClientRect());
-
-            // Move and resize the image back to where it is in the article.
-            const dx = rect.left - imageBox.left;
-            const dy = rect.top - imageBox.top;
-            const scaleX = imageBox.width != 0 ?
-              rect.width / imageBox.width : 1;
-            const viewportHeight = this.getViewport().getSize().height;
-            duration = this.getTransitionDuration_(Math.abs(dy),
-                viewportHeight);
-
-            // Animate the position and scale of the transition image to its
-            // final lightbox destination in the middle of the page
-            /** @const {!TransitionDef<void>} */
-            const moveAndScale = setStylesTransition(clone, {
-              transform: concatTransition([
-                translate(numeric(0, dx), numeric(0, dy)),
-                scale(numeric(1, scaleX)),
-              ]),
-            });
-
-            anim.add(0, (time, complete) => {
-              moveAndScale(time);
-              if (complete) {
-                sourceElement.classList.remove('i-amphtml-ghost');
-              }
-            }, MOTION_DURATION_RATIO, EXIT_CURVE_);
-          };
-
-          const transitionMutate = () => {
-            sourceElement.classList.add('i-amphtml-ghost');
-            this.getAmpDoc().getBody().appendChild(transLayer);
-            setStyles(dev().assertElement(this.carousel_), {
-              opacity: 0,
-            });
-          };
-
-          return this.measureMutateElement(transitionMeasure,
-              transitionMutate);
-
-        }).then(() => {
-          return anim.start(duration).thenAlways(() => {
-            return this.mutateElement(() => {
-              setStyles(this.element, {
-                opacity: '',
-              });
-              setStyles(dev().assertElement(this.carousel_), {
-                opacity: '',
-              });
-              toggle(dev().assertElement(this.carousel_), false);
-              toggle(this.element, false);
-              this.getAmpDoc().getBody().removeChild(transLayer);
-            });
-          });
-        });
+    return this.getCurrentElement_().imageViewer.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.transitionImgIn_(sourceElement));
   }
 
   /**
@@ -1160,14 +1072,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   exit_() {
-    return this.shouldExit_()
-        .then(shouldExit => {
-          if (shouldExit) {
-            return this.transitionOut_();
-          } else {
-            return this.fade_(1, 0);
-          }
-        });
+    if (!this.shouldAnimateOut_()) {
+      return this.fade_(/*fadeIn*/false);
+    }
+
+    return this.transitionImgOut_();
   }
 
   /**
@@ -1205,10 +1114,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const parentCarousel = closestBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel) {
-      const targetSlide = closestBySelector(target, 'div.i-amphtml-slide-item');
-      const targetSlideIndex = toArray(targetSlide.parentNode.children)
-          .indexOf(targetSlide);
-      dev().assert(parentCarousel).getImpl()
+      const slideSelector = '.i-amphtml-slide-item';
+      const allSlides = toArray(
+          scopedQuerySelectorAll(parentCarousel, slideSelector));
+      const targetSlide = dev().assertElement(
+          closestBySelector(target, slideSelector));
+      const targetSlideIndex = allSlides.indexOf(targetSlide);
+      devAssert(parentCarousel).getImpl()
           .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
     }
   }
@@ -1229,7 +1141,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     this.cleanupEventListeners_();
 
-    this.win.document.documentElement.removeEventListener(
+    this.doc_.documentElement.removeEventListener(
         'keydown', this.boundOnKeyDown_);
 
     this.carousel_.removeEventListener(
@@ -1239,17 +1151,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      this.getViewport().leaveLightboxMode();
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
       if (this.gallery_) {
-        this.gallery_.classList.add('i-amphtml-lbg-gallery-hidden');
+        this.gallery_.classList.add('i-amphtml-ghost');
         this.gallery_ = null;
       }
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
-          this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
@@ -1294,7 +1206,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (isGalleryView) {
       return;
     }
-    dev().assert(this.carousel_).getImpl().then(carousel => {
+    devAssert(this.carousel_).getImpl().then(carousel => {
       carousel.goCallback(direction, /* animate */ true, /* autoplay */ false);
     });
   }
@@ -1342,12 +1254,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           escapeCssSelectorIdent(group)
         }]`);
     if (this.gallery_) {
-      this.gallery_.classList.remove('i-amphtml-lbg-gallery-hidden');
+      this.gallery_.classList.remove('i-amphtml-ghost');
       this.updateVideoThumbnails_();
     } else {
       // Build gallery
-      this.gallery_ = this.win.document.createElement('div');
-      this.gallery_.classList.add('i-amphtml-lbg-gallery');
+      this.gallery_ = htmlFor(this.doc_)`
+      <div class="i-amphtml-lbg-gallery"></div>`;
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
 
@@ -1385,7 +1297,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
             timestampDiv.removeChild(timestampDiv.childNodes[1]);
           }
           timestampDiv.appendChild(
-              this.win.document.createTextNode(timestamp));
+              this.doc_.createTextNode(timestamp));
           timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
         });
       });
@@ -1421,6 +1333,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {string} s
    * @param {number} targetLength
    * @param {string} padString
+   * @private
    */
   padStart_(s, targetLength, padString) {
     if (s.length >= targetLength) {
@@ -1438,6 +1351,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Converts seconds to a timestamp formatted string.
    * @param {number} seconds
    * @return {string}
+   * @private
    */
   secondsToTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);
@@ -1458,7 +1372,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     event.stopPropagation();
     Promise.all([
       this.closeGallery_(),
-      dev().assert(this.carousel_).getImpl(),
+      devAssert(this.carousel_).getImpl(),
     ]).then(values => {
       this.currentElemId_ = id;
       values[1].showSlideWhenReady(this.currentElemId_);
@@ -1473,10 +1387,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   createThumbnailElement_(thumbnailObj) {
-    const element = this.win.document.createElement('div');
-    element.classList.add('i-amphtml-lbg-gallery-thumbnail');
-    const imgElement = this.win.document.createElement('img');
-    imgElement.classList.add('i-amphtml-lbg-gallery-thumbnail-img');
+    const element = htmlFor(this.doc_)`
+    <div class="i-amphtml-lbg-gallery-thumbnail">
+      <img class="i-amphtml-lbg-gallery-thumbnail-img"></img>
+    </div>`;
+    const imgElement = childElementByTag(element, 'img');
 
     if (thumbnailObj.srcset) {
       imgElement.setAttribute('srcset', thumbnailObj.srcset.stringify());
@@ -1486,11 +1401,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     element.appendChild(imgElement);
 
     if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
-      const playButtonSpan = this.win.document.createElement('span');
-      playButtonSpan.classList.add('i-amphtml-lbg-thumbnail-play-icon');
-      const timestampDiv = this.win.document.createElement('div');
-      timestampDiv.classList.add('i-amphtml-lbg-thumbnail-timestamp-container');
-      timestampDiv.appendChild(playButtonSpan);
+      const timestampDiv = htmlFor(this.doc_)`
+      <div class="i-amphtml-lbg-thumbnail-timestamp-container">
+        <span class="i-amphtml-lbg-thumbnail-play-icon"></span>
+      <div>`;
+
       thumbnailObj.timestampPromise.then(ts => {
         // Many video players (e.g. amp-youtube) that don't support this API
         // will often return 1. This will sometimes result in erroneous values
@@ -1500,7 +1415,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }
         const timestamp = this.secondsToTimestampString_(ts);
         timestampDiv.appendChild(
-            this.win.document.createTextNode(timestamp));
+            this.doc_.createTextNode(timestamp));
         timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
       });
       element.appendChild(timestampDiv);
@@ -1520,26 +1435,30 @@ export class AmpLightboxGallery extends AMP.BaseElement {
  * @return {!Promise<undefined>}
  */
 export function installLightboxGallery(ampdoc) {
-  return ampdoc.whenBodyAvailable().then(body => {
-    const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
-    if (!existingGallery) {
-      const gallery = ampdoc.win.document.createElement(TAG);
-      gallery.setAttribute('layout', 'nodisplay');
-      gallery.setAttribute('id', DEFAULT_GALLERY_ID);
-      body.appendChild(gallery);
-    }
-  });
+  // Make sure to wait for the ampdoc to finish loading, see:
+  // https://github.com/ampproject/amphtml/issues/19728#issuecomment-446033966
+  return ampdoc.whenReady()
+      .then(() => ampdoc.getBody())
+      .then(body => {
+        const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
+        if (!existingGallery) {
+          const gallery = ampdoc.win.document.createElement(TAG);
+          gallery.setAttribute('layout', 'nodisplay');
+          gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+          body.appendChild(gallery);
+        }
+      });
 }
 
 /**
  * Returns a promise for the LightboxManager.
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element} element
  * @return {!Promise<?LightboxManager>}
  */
-function lightboxManagerForDoc(elementOrAmpDoc) {
+function lightboxManagerForDoc(element) {
   return /** @type {!Promise<?LightboxManager>} */ (
     getElementServiceForDoc(
-        elementOrAmpDoc, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
+        element, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
 }
 
 AMP.extension(TAG, '0.1', AMP => {

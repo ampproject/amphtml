@@ -15,14 +15,14 @@
  */
 import {poll} from '../../../../../testing/iframe';
 
-const baseUrl = 'http://localhost:31862';
+const baseUrl = 'http://localhost:8081';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome =
-    describe.configure().ifNewChrome().skipSinglePass();
+const describeChrome = describe.configure().ifChrome().skipSinglePass();
 
-describeChrome.run('amp-form verifiers', function() {
+// TODO(cvializ, #19647): Broken on SL Chrome 71.
+describeChrome.skip('amp-form verifiers', function() {
   this.timeout(RENDER_TIMEOUT);
 
   describes.integration('verify-error template', {

@@ -27,7 +27,9 @@ exports.mainBinary = 'var global=self;self.AMP=self.AMP||[];' +
     's.animation="none";' +
     's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(name, loadPriority, intermediateDeps) {
+exports.extension = function(name, loadPriority, intermediateDeps,
+  opt_splitMarker) {
+  opt_splitMarker = opt_splitMarker || '';
   let deps = '';
   if (intermediateDeps) {
     deps = 'i:';
@@ -49,7 +51,8 @@ exports.extension = function(name, loadPriority, intermediateDeps) {
     priority = 'p:"high",';
   }
   return `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-      `v:"${VERSION}",f:(function(AMP,_){\n<%= contents %>\n})});`;
+      `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
+      '<%= contents %>\n})});';
 };
 
 exports.none = '<%= contents %>';

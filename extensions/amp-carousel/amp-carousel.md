@@ -29,7 +29,12 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
+    <td>
+      <ul>
+        <li>carousel: fixed, fixed-height, and nodisplay.</li>
+        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
+      </ul>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -113,12 +118,17 @@ A format string that looks like `(%s of %s)`, used as a suffix to the aria-label
 
 Advances the slide to the next slide without user interaction.
 
-If present:
+If present without a value:
 
 - By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
 - Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
 - Requires at least 2 slides for autoplay to occur.
 - Applies only to carousels with `type=slides`.
+
+If present with a value:
+
+- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
+- Removes the `loop` attribute after the requisite number of loops are made.
 
 ##### delay (optional)
 

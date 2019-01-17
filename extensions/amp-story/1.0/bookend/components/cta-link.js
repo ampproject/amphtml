@@ -19,7 +19,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
 /**
@@ -49,12 +49,12 @@ export class CtaLinkComponent {
    * */
   assertValidity(ctaLinksJson, element) {
     const links = ctaLinksJson['links'];
-    user().assert(links && isArray(links) && links.length > 0,
+    userAssert(links && isArray(links) && links.length > 0,
         'CTA link component must be an array and contain at least one link ' +
         'inside it.');
 
     links.forEach(ctaLink => {
-      user().assert('text' in ctaLink && 'url' in ctaLink,
+      userAssert('text' in ctaLink && 'url' in ctaLink,
           'Links in CTA link component must contain `text` field and a `url`.');
 
       userAssertValidProtocol(element, ctaLink['url']);

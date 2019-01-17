@@ -16,14 +16,17 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const octokit = require('@octokit/rest')();
 const path = require('path');
+const requestPost = BBPromise.promisify(require('request').post);
+const url = require('url');
 const {getStdout} = require('../exec');
-const {gitBranchPoint, gitCommitHash, gitOriginUrl} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -31,7 +34,8 @@ const buildArtifactsRepoOptions = {
   owner: 'ampproject',
   repo: 'amphtml-build-artifacts',
 };
-const expectedGitHubProject = 'ampproject/amphtml';
+const expectedGitHubRepoSlug = 'ampproject/amphtml';
+const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
 const {green, red, cyan, yellow} = colors;
 
@@ -53,7 +57,7 @@ async function getMaxBundleSize() {
     });
   }
 
-  return await octokit.repos.getContent(
+  return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
         path: path.join('bundle-size', '.max_size'),
       })
@@ -70,30 +74,55 @@ async function getMaxBundleSize() {
 }
 
 /**
+ * Get the gzipped bundle size of the current build.
+ *
+ * @return {string} the bundle size in KB rounded to 2 decimal points.
+ */
+function getGzippedBundleSize() {
+  const cmd = `npx bundlesize -f "${runtimeFile}"`;
+  log('Running', cyan(cmd) + '...');
+  const output = getStdout(cmd).trim();
+
+  const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
+  if (bundleSizeOutputMatches) {
+    const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
+    log('Bundle size is', cyan(`${bundleSize}KB`));
+    return bundleSize;
+  }
+  throw Error('could not infer bundle size from output.');
+}
+
+/**
+ * Return true if this task is running on Travis as part of a pull request.
+ *
+ * @return {boolean} true if running on Travis as part of a pull request.
+ */
+function isPullRequest() {
+  return process.env.TRAVIS && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+}
+
+/**
  * Get the bundle size of the ancenstor commit from when this branch was split
  * off from the `master` branch.
  *
  * @return {string} the `master` ancestor's bundle size.
  */
 async function getAncestorBundleSize() {
-  const fromMerge =
-      process.env.TRAVIS && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
-  const gitBranchPointSha = gitBranchPoint(fromMerge);
-  const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
-  log('Branch point from master is', cyan(gitBranchPointShortSha));
-  return await octokit.repos.getContent(
+  const gitBranchPoint = gitTravisMasterBaseline();
+  log('Branch point from master is', cyan(shortSha(gitBranchPoint)));
+  return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
-        path: path.join('bundle-size', gitBranchPointSha),
+        path: path.join('bundle-size', gitBranchPoint),
       })
   ).then(result => {
     const ancestorBundleSize =
         Buffer.from(result.data.content, 'base64').toString().trim();
-    log('Bundle size of', cyan(gitBranchPointShortSha), 'is',
+    log('Bundle size of', cyan(shortSha(gitBranchPoint)), 'is',
         cyan(ancestorBundleSize));
     return ancestorBundleSize;
   }).catch(() => {
-    log(yellow('WARNING: Failed to retrieve bundle size of'),
-        cyan(gitBranchPointShortSha));
+    log(yellow('WARNING: Failed to retrieve bundle size of baseline commit'),
+        cyan(shortSha(gitBranchPoint)));
     log(yellow('Falling back to comparing to the max bundle size only'));
     return null;
   });
@@ -103,21 +132,19 @@ async function getAncestorBundleSize() {
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  *
- * @param {string} bundleSize the new bundle size in 99.99KB format.
  * @return {!Promise}
  */
-function storeBundleSize(bundleSize) {
+function storeBundleSize() {
   if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
-    log(yellow('Skipping'), cyan('--store') + ':',
+    log(yellow('Skipping'), cyan('--on_push_build') + ':',
         'this action can only be performed on `push` builds on Travis');
     return;
   }
 
-  const gitOriginUrlValue = gitOriginUrl();
-  if (!gitOriginUrlValue.includes(expectedGitHubProject)) {
-    log('Git origin URL is', cyan(gitOriginUrlValue));
-    log('Skipping storing the bundle size in the artifacts repository on',
-        'GitHub...');
+  if (process.env.TRAVIS_REPO_SLUG !== expectedGitHubRepoSlug) {
+    log(yellow('Skipping'), cyan('--on_push_build') + ':',
+        'this action can only be performed on Travis builds on the',
+        cyan(expectedGitHubRepoSlug), 'repository');
     return;
   }
 
@@ -128,6 +155,7 @@ function storeBundleSize(bundleSize) {
     return;
   }
 
+  const bundleSize = `${getGzippedBundleSize()}KB`;
   const commitHash = gitCommitHash();
   const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
     path: path.join('bundle-size', commitHash),
@@ -138,7 +166,7 @@ function storeBundleSize(bundleSize) {
     token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
   });
 
-  return octokit.repos.getContent(githubApiCallOptions).then(() => {
+  return octokit.repos.getContents(githubApiCallOptions).then(() => {
     log('The file', cyan(`bundle-size/${commitHash}`), 'already exists in the',
         'build artifacts repository on GitHub. Skipping...');
   }).catch(() => {
@@ -146,8 +174,8 @@ function storeBundleSize(bundleSize) {
       message: `bundle-size: ${commitHash} (${bundleSize})`,
       content: Buffer.from(bundleSize).toString('base64'),
     })).then(() => {
-      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
-          'repository on GitHub');
+      log('Stored the new bundle size of', cyan(bundleSize), 'in the ',
+          'artifacts repository on GitHub');
     }).catch(error => {
       log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
           red('the build artifacts repository on GitHub!'));
@@ -191,7 +219,7 @@ function compareBundleSize(maxBundleSize) {
  * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
  * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
  */
-async function checkBundleSize() {
+async function legacyBundleSizeCheck() {
   if (!fs.existsSync(runtimeFile)) {
     log(yellow('Could not find'), cyan(runtimeFile) +
         yellow('. Skipping bundlesize check.'));
@@ -248,7 +276,17 @@ async function checkBundleSize() {
             cyan(maxSize), red('(Δ +') + cyan(sizeDelta) + red('KB)'));
         log(red('This is part of a new effort to reduce AMP\'s binary size ' +
                 '(#14392).'));
-        log(red('Please contact @choumx or @jridgewell for assistance.'));
+        log(green('How to proceed from here:'), 'send a pull request to edit',
+            'the', cyan('bundle-size/.max_size'), 'file in the',
+            cyan('ampproject/amphtml-build-artifacts'), 'repository.');
+        log('Increases to the max size should be in', cyan('0.1KB'),
+            'intervals');
+        log('Direct link to edit this file and create a pull request:',
+            cyan('https://github.com/ampproject/amphtml-build-artifacts/edit/' +
+                 'master/bundle-size/.max_size'));
+        log('Tag @choumx and @jridgewell in the PR description for approval.');
+        log(yellow('Note: this process is being replaced by a GitHub' +
+                   'Application check, instead of running on Travis.'));
         process.exitCode = 1;
         return;
       case STATUS_PASS:
@@ -256,9 +294,81 @@ async function checkBundleSize() {
         break;
     }
   }
+}
 
-  if (argv.store) {
-    return storeBundleSize(newBundleSize);
+/**
+ * Mark a pull request on Travis as skipped, via the AMP bundle-size GitHub App.
+ */
+async function skipBundleSize() {
+  if (isPullRequest()) {
+    const commitHash = gitCommitHash();
+    try {
+      const response = await requestPost(url.resolve(bundleSizeAppBaseUrl,
+          path.join('commit', commitHash, 'skip')));
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw new Error(
+            `${response.statusCode} ${response.statusMessage}: ` +
+            response.body);
+      }
+    } catch (error) {
+      log(red('Could not report a skipped pull request'));
+      log(red(error));
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    log(yellow('Not marking this pull request to skip because that can only be '
+               + 'done on Travis'));
+  }
+}
+
+/**
+ * Report the size to the bundle-size GitHub App, to determine size changes.
+ */
+async function reportBundleSize() {
+  if (isPullRequest()) {
+    const baseSha = gitTravisMasterBaseline();
+    const bundleSize = parseFloat(getGzippedBundleSize());
+    const commitHash = gitCommitHash();
+    try {
+      const response = await requestPost({
+        uri: url.resolve(bundleSizeAppBaseUrl,
+            path.join('commit', commitHash, 'report')),
+        json: true,
+        body: {
+          baseSha,
+          bundleSize,
+        },
+      });
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw new Error(
+            `${response.statusCode} ${response.statusMessage}: ` +
+            response.body);
+      }
+    } catch (error) {
+      log(red('Could not report the bundle size of this pull request'));
+      log(red(error));
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    log(yellow('Not reporting the bundle size of this pull request because '
+               + 'that can only be done on Travis'));
+  }
+}
+
+async function performBundleSizeCheck() {
+  if (argv.on_skipped_build) {
+    return await skipBundleSize();
+  } else {
+    if (argv.on_push_build) {
+      await storeBundleSize();
+    } else if (argv.on_pr_build) {
+      await reportBundleSize();
+    }
+    // TODO(danielrozenberg): remove the legacy check once the app has been
+    // activated and tested on the repository.
+    return await legacyBundleSizeCheck();
   }
 }
 
@@ -266,10 +376,14 @@ async function checkBundleSize() {
 gulp.task(
     'bundle-size',
     'Checks if the minified AMP binary has exceeded its size cap',
-    checkBundleSize,
+    performBundleSizeCheck,
     {
       options: {
-        'store': '  Store bundle size in AMP build artifacts repo (used only '
-            + 'for `master` builds)',
+        'on_push_build': '  Store bundle size in AMP build artifacts repo '
+            + '(also implies --on_pr_build)',
+        'on_pr_build': '  Report the bundle size of this pull request to '
+            + 'GitHub',
+        'on_skipped_build': '  Set the status of this pull request\'s bundle '
+            + 'size check in GitHub to `skipped`',
       },
     });

@@ -23,7 +23,7 @@ import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   numeric,
@@ -88,13 +88,13 @@ class AmpAccordion extends AMP.BaseElement {
 
     this.sections_ = this.getRealChildren();
     this.sections_.forEach((section, index) => {
-      user().assert(
+      userAssert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const sectionComponents = section.children;
-      user().assert(
+      userAssert(
           sectionComponents.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -114,11 +114,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('toggle', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
-          this.toggle_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          userAssert(sectionEl, 'No element found with id: %s', sectionId);
+          this.toggle_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.toggle_(this.sections_[i]);
@@ -128,11 +127,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('expand', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
-          this.expand_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          userAssert(sectionEl, 'No element found with id: %s', sectionId);
+          this.expand_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.expand_(this.sections_[i]);
@@ -142,11 +140,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('collapse', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
-          this.collapse_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          userAssert(sectionEl, 'No element found with id: %s', sectionId);
+          this.collapse_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.collapse_(this.sections_[i]);
@@ -208,10 +205,11 @@ class AmpAccordion extends AMP.BaseElement {
               dev().assertString(this.sessionId_));
       return sessionStr
         ? /** @type {!JsonObject} */ (
-          dev().assert(parseJson(dev().assertString(sessionStr))))
+          devAssert(parseJson(dev().assertString(sessionStr))))
         : dict();
     } catch (e) {
-      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION',
+          'Error setting session state: %s, %s', e.message, e.stack);
       return dict();
     }
   }
@@ -229,7 +227,8 @@ class AmpAccordion extends AMP.BaseElement {
       this.win./*OK*/sessionStorage.setItem(
           dev().assertString(this.sessionId_), sessionStr);
     } catch (e) {
-      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION',
+          'Error setting session state: %s, %s', e.message, e.stack);
     }
   }
 

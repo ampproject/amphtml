@@ -33,7 +33,8 @@ describes.realWin('SlideScroll', {
   });
 
   function getAmpSlideScroll(
-    opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
+    opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true,
+    opt_hasAutoplay = false, opt_autoplayLoops) {
     const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
     const ampSlideScroll = doc.createElement('amp-carousel');
@@ -44,6 +45,13 @@ describes.realWin('SlideScroll', {
     ampSlideScroll.setAttribute('controls', '');
     if (opt_hasLooping) {
       ampSlideScroll.setAttribute('loop', '');
+    }
+    if (opt_hasAutoplay) {
+      if (!opt_autoplayLoops) {
+        ampSlideScroll.setAttribute('autoplay', '');
+      } else {
+        ampSlideScroll.setAttribute('autoplay', opt_autoplayLoops);
+      }
     }
 
     for (let i = 0; i < opt_slideCount; i++) {
@@ -514,24 +522,30 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should handle layout measures (orientation changes)', () => {
-    return getAmpSlideScroll().then(ampSlideScroll => {
-      const impl = ampSlideScroll.implementation_;
-      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth').callsFake(
-          () => {
-            return impl.slideWidth_ == 400 ? 200 : 400;
-          });
-      impl.onLayoutMeasure();
-      expect(getLayoutWidthSpy).to.have.been.called;
-      expect(impl.slideWidth_).to.equal(200);
+  it('should handle layout measures (orientation changes)', async() => {
+    const ampSlideScroll = await getAmpSlideScroll();
+    const impl = ampSlideScroll.implementation_;
+    const getLayoutWidthStub = sandbox.stub(impl, 'getLayoutWidth');
 
-      impl.showSlide_(1);
-      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
-      impl.onLayoutMeasure();
-      expect(getLayoutWidthSpy).to.have.callCount(2);
-      expect(impl.slideWidth_).to.equal(400);
-      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
-    });
+    getLayoutWidthStub.returns(200);
+    impl.onLayoutMeasure();
+    expect(getLayoutWidthStub).to.have.been.calledOnce;
+    expect(impl.slideWidth_).to.equal(200);
+
+    // Show the first slide, make sure the scroll position is correct.
+    impl.showSlide_(1);
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
+
+    // Now do a layout measure letting the component know it changed size.
+    getLayoutWidthStub.returns(400);
+    impl.onLayoutMeasure();
+    expect(getLayoutWidthStub).to.have.callCount(2);
+    expect(impl.slideWidth_).to.equal(400);
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
+
+    // Make sure the scroll position is correct after layoutCallback.
+    await impl.layoutCallback();
+    expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
   });
 
   it('should relayout the current slide on layoutCallback', () => {
@@ -730,6 +744,30 @@ describes.realWin('SlideScroll', {
         expect(setControlsStateSpy).to.have.callCount(2);
         expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
         expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+      });
+    });
+
+    it('do not set `autoplay` status if `autoplay=0` specified', () => {
+      return getAmpSlideScroll(false, 3, true, true, 0).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const setupAutoplaySpy = sandbox.spy(impl, 'setupAutoplay_');
+        expect(setupAutoplaySpy).to.not.have.been.called;
+      });
+    });
+
+    it('removes `autoplay` status after provided loops are made', () => {
+      return getAmpSlideScroll(false, 3, true, true, 2).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const removeAutoplaySpy = sandbox.spy(impl, 'removeAutoplay');
+        impl.showSlide_(1);
+        impl.showSlide_(2);
+        expect(impl.loopsMade_).to.equal(1);
+        impl.showSlide_(0);
+        impl.showSlide_(1);
+        impl.showSlide_(2);
+        expect(impl.loopsMade_).to.equal(2);
+        expect(removeAutoplaySpy).to.have.been.called;
+        expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
       });
     });
 
