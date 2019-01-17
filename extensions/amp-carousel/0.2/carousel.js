@@ -31,9 +31,9 @@ import {
 } from './array-util.js';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getStyle, setStyle, setStyles} from '../../../src/style';
+import {iterateCursor} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -658,7 +658,7 @@ export class Carousel {
     //    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾‾‾
     const coordinate = startAligned || oddVisibleCount ? '0%' : '50%';
 
-    toArray(this.scrollContainer_.children).forEach((child, index) => {
+    iterateCursor(this.scrollContainer_.children, (child, index) => {
       // Note that we are dealing with both spacers, so we need to make sure
       // we are always dealing with the slideIndex. Since we have the same
       // number of each type of spacer as we do slides, we can simply do a mod
