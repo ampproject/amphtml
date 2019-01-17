@@ -202,7 +202,7 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sideb
 {% endcall %}
 
 ## Sidebar for Stories
-The sidebar is also usable within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are **disallowed** attributes and features of sidebars within an `amp-story`
+The sidebar is also usable within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are **disallowed** attributes and features of sidebar within an `amp-story`:
 
 - side
 - open
@@ -218,7 +218,7 @@ The sidebar is also usable within the `amp-story` [component](https://www.amppro
 
 *Example: Basic Sidebar in a Story*
 
-In the following example, we've placed a simple sidebar in within a story. Remember that you will need to link to both the sidebar and story in the head of the document in order to use these components together.
+In the following example, we've placed a simple sidebar in within a story. Remember that you will need to link to both the `amp-sidebar` and `amp-story` scripts in the head of the document in order to use these components together.
 
 ```html
 ...
@@ -226,7 +226,7 @@ In the following example, we've placed a simple sidebar in within a story. Remem
     <amp-story standalone>
       <amp-sidebar id="sidebar1" layout="nodisplay">
         <ul>
-          <li><a href=https://www.ampproject.org"> External Link </a></li>
+          <li><a href="https://www.ampproject.org"> External Link </a></li>
           <li>Nav item 2</li>
           <li>Nav item 3</li>
         </ul>
