@@ -3256,6 +3256,21 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: ACTIONS
+  tag_name: "FOREIGNOBJECT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "height" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "HKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
