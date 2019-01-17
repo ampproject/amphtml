@@ -80,7 +80,6 @@ exports.extensionBundles = [
   {
     name: 'amp-bodymovin-animation',
     version: '0.1',
-    options: {hasCss: false},
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},

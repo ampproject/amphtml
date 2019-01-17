@@ -14,30 +14,16 @@
  * limitations under the License.
  */
 
-export const MaskChars = {
-  ALPHANUMERIC_REQUIRED: 'A',
-  ALPHANUMERIC_OPTIONAL: 'a',
-  ALPHABETIC_REQUIRED: 'L',
-  ALPHABETIC_OPTIONAL: 'l',
-  ARBITRARY_REQUIRED: 'C',
-  ARBITRARY_OPTIONAL: 'c',
-  NUMERIC_REQUIRED: '0',
-  NUMERIC_OPTIONAL: '9',
-  ESCAPE: '\\',
-};
+import {validateData, writeScript} from '../3p/3p';
 
-export const MASK_SEPARATOR_CHAR = ' ';
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function adpon(global, data) {
+  validateData(data, ['fid'], ['debugScript']);
 
-export const NamedMasks = {
-  PAYMENT_CARD: 'payment-card',
-  DATE_DD_MM_YYYY: 'date-dd-mm-yyyy',
-  DATE_MM_DD_YYYY: 'date-mm-dd-yyyy',
-  DATE_MM_YY: 'date-mm-yy',
-  DATE_YYYY_MM_DD: 'date-yyyy-mm-dd',
-};
+  global._adpon = {fid: data['fid']};
 
-/** @enum {string} */
-export const OutputMode = {
-  RAW: 'raw',
-  ALPHANUMERIC: 'alphanumeric',
-};
+  writeScript(global, data['debugScript'] || 'https://ad.adpon.jp/amp.js');
+}

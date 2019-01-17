@@ -171,7 +171,7 @@
       "files": [
         "test/**/*.js",
         "extensions/**/test/**/*.js",
-        "extensions/**/test-e2e/**/*.js",
+        "extensions/**/test-e2e/*.js",        
         "ads/**/test/**/*.js",
         "testing/**/*.js"
       ],
@@ -201,7 +201,8 @@
         "allowConsoleError": false,
         "expectAsyncConsoleError": false,
         "restoreAsyncErrorThrows": false,
-        "stubAsyncErrorThrows": false
+        "stubAsyncErrorThrows": false,
+        "Key": false
       }
     },
     {
