@@ -15,6 +15,8 @@
  * limitations under the license.
  */
 
+const DOC_INPUT_PARAM = 'doc';
+
 // Extracts a dictionary of parameters from window.location.hash.
 function getLocationHashParams() {
   const paramStrings = window.location.hash.substr(1).split('&');
@@ -45,4 +47,32 @@ function setLocationHashParams(params) {
     }
   }
   window.location.hash = out.join('&');
+}
+
+// Base64 encoded ascii to ucs-2 string.
+function atou(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
+
+// Extract queryParams from url and return object.
+function getSearchParams() {
+  const {search} = window.location;
+  if (!search) {
+    return null;
+  }
+  return search.substr(1).split('&').reduce((params, entry) => {
+    const pairs = entry.split('=');
+    params[pairs[0]] = pairs[1];
+    return params;
+  }, {});
+}
+
+// Get query param that may contain an encoded document to be validated. Decode
+// and return.
+function getIncomingDoc() {
+  const params = getSearchParams();
+  if (!params || !params[DOC_INPUT_PARAM]) {
+    return null;
+  }
+  return atou(params[DOC_INPUT_PARAM]);
 }
