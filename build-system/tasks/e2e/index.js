@@ -22,8 +22,7 @@ const mocha = require('gulp-mocha');
 function e2e() {
   return gulp.src([
     'test/e2e/*.js',
-    'extensions/**/*e2e*/*.js',
-    'extensions/**/test-e2e*.js',
+    'extensions/**/test-e2e/*.js',
   ], {read: false})
       .pipe(mocha({
         require: ['@babel/register', '../../../testing/e2e/test-module'],
