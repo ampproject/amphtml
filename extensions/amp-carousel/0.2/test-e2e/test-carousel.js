@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import 'babel-regenerator-runtime';
-import * as describes from '../../../../testing/e2e/describes-e2e';
-
 describes.endtoend('AMP carousel', {
-  engines: ['selenium'],
 }, async env => {
   const slottedClass = 'i-amphtml-carousel-slotted';
 

@@ -24,7 +24,16 @@ function e2e() {
   return gulp.src(config.e2eTestPaths, {read: false})
       .pipe(mocha({
         require: ['@babel/register', '../../../testing/e2e/test-module'],
-      }));
+      })
+          // stop serving on localhost:8000
+          .once('end', () => {
+            process.exit();
+          })
+      );
 }
 
-gulp.task('e2e', 'Runs e2e tests', e2e);
+gulp.task('e2e', 'Runs e2e tests', ['serve'], e2e, {
+  options: {
+    'quiet': '  Do not log HTTP requests (default: false)',
+  },
+});
