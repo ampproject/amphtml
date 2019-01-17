@@ -1209,7 +1209,7 @@ export class AmpStory extends AMP.BaseElement {
       if (this.storyNavigationPath_.length > 0) {
         const pathPrevious =
             this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
-        if (pathPrevious != targetPageId) {
+        if (pathPrevious !== targetPageId) {
           return this.getPageById(pathPrevious);
         }
       }
