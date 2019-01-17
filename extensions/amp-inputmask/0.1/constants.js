@@ -30,6 +30,10 @@ export const MASK_SEPARATOR_CHAR = ' ';
 
 export const NamedMasks = {
   PAYMENT_CARD: 'payment-card',
+  DATE_DD_MM_YYYY: 'date-dd-mm-yyyy',
+  DATE_MM_DD_YYYY: 'date-mm-dd-yyyy',
+  DATE_MM_YY: 'date-mm-yy',
+  DATE_YYYY_MM_DD: 'date-yyyy-mm-dd',
 };
 
 /** @enum {string} */
