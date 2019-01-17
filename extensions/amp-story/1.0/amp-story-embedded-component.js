@@ -139,7 +139,7 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
  * Minimum vertical space needed to position tooltip.
  * @const {number}
  */
-const MIN_VERTICAL_SPACE = 56;
+const MIN_VERTICAL_SPACE = 48;
 
 /**
  * Padding between tooltip and edges of screen.
@@ -642,7 +642,7 @@ export class AmpStoryEmbeddedComponent {
       state.tooltipTop = targetRect.top - MIN_VERTICAL_SPACE;
     } else if (pageRect.height - targetBottomOffset >
         MIN_VERTICAL_SPACE) { // Tooltip fits below target. Place arrow on top of the tooltip.
-      state.tooltipTop = targetRect.bottom + EDGE_PADDING * 2;
+      state.tooltipTop = targetRect.bottom + EDGE_PADDING;
       state.arrowOnTop = true;
     } else { // Element takes whole vertical space. Place tooltip on the middle.
       state.tooltipTop = pageRect.height / 2;
