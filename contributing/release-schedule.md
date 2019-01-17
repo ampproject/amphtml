@@ -121,7 +121,7 @@ There are occasions when we will skip a release of AMP to production, known as a
 If a one week release freeze is announced for Week N:
 - The previous week's release build remains in canary/RC for an extra week, i.e. the release cut in Week N-1 is not pushed to production in Week N as would normally be the case.  Instead, it will be pushed to production in Week N+1.
 - A new release build is *not* made in the production freeze week (Week N).
-- The normal schedule will resume in Week N+1, i.e. a canary is cut in Week N+1 and pushed to production in Week N+1.
+- The normal schedule will resume in Week N+1, i.e. a canary is cut in Week N+1 and pushed to production in Week N+2.
 
 A release freeze will happen due to:
 
