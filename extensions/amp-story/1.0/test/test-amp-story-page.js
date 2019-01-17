@@ -24,6 +24,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 describes.realWin('amp-story-page', {amp: true}, env => {
   let win;
   let element;
+  let gridLayerEl;
   let page;
 
   beforeEach(() => {
@@ -44,7 +45,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
 
     element = win.document.createElement('amp-story-page');
+    gridLayerEl = win.document.createElement('amp-story-grid-layer');
     element.getAmpDoc = () => new AmpDocSingle(win);
+    element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
 
@@ -117,7 +120,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   it('should perform media operations when state becomes active', done => {
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
-    element.appendChild(videoEl);
+    gridLayerEl.appendChild(videoEl);
 
     let mediaPoolMock;
 
@@ -184,7 +187,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   it('should pause/rewind media when state becomes not active', done => {
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
-    element.appendChild(videoEl);
+    gridLayerEl.appendChild(videoEl);
 
     let mediaPoolMock;
 
@@ -224,7 +227,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   it('should pause media when state becomes paused', done => {
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
-    element.appendChild(videoEl);
+    gridLayerEl.appendChild(videoEl);
 
     let mediaPoolMock;
 

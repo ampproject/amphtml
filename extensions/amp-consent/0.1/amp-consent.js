@@ -21,6 +21,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -243,12 +244,15 @@ export class AmpConsent extends AMP.BaseElement {
         if (typeof data['info'] != 'string') {
           user().error(TAG, 'consent-response info only supports string, ' +
               '%s, treated as undefined', data['info']);
+          data['info'] = undefined;
         }
-        if (!data['info']) {
-          // TODO (@zhouyx #20010): Decide what's the behavior on receiving
-          // incorrect message.
-          user().error(TAG,
-              'consent-response info does not allow empty string');
+        if (data['action'] === ACTION_TYPE.DISMISS) {
+          if (data['info']) {
+            this.user().error(TAG,
+                'Consent string value %s not applicable on user dismiss, ' +
+              'stored value will be kept and used', consentString);
+          }
+          data['info'] = undefined;
         }
         consentString = data['info'];
       }
@@ -363,11 +367,8 @@ export class AmpConsent extends AMP.BaseElement {
           CONSENT_ITEM_STATE.REJECTED,
           consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
-      // TODO (@zhouyx #20010): Consider it a user error if
-      // consentString is undefined, but has value before.
       this.consentStateManager_.updateConsentInstanceState(
-          CONSENT_ITEM_STATE.DISMISSED,
-          consentString);
+          CONSENT_ITEM_STATE.DISMISSED);
     }
 
     // Hide current dialog
@@ -451,7 +452,7 @@ export class AmpConsent extends AMP.BaseElement {
     return Services.geoForDocOrNull(this.element).then(geo => {
       userAssert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
+      return (geo.isInCountryGroup(geoGroup) == GEO_IN_GROUP.IN);
     });
   }
 

@@ -4530,6 +4530,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['amp4ads'] = 0;
     this.typeIdentifiers_['⚡4email'] = 0;
     this.typeIdentifiers_['amp4email'] = 0;
+    this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
 
     /**
@@ -4741,6 +4742,7 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    const transformedValueRe = new RegExp(/^\w+;v=(\d+)$/);
     for (const attr of attrs) {
       // Verify this attribute is a type identifier. Other attributes are
       // validated in validateAttributes.
@@ -4753,10 +4755,25 @@ class ParsedValidatorRules {
           if (validationResult.typeIdentifier.indexOf(identifier) === -1) {
             validationResult.typeIdentifier.push(identifier);
           }
-          // The type identifier "transformed" is not considered mandatory
-          // unlike other type identifiers.
-          if (identifier != 'transformed') {
+          // The type identifier "actions" and "transformed" are not considered
+          // mandatory unlike other type identifiers.
+          if (identifier !== 'actions' && identifier !== 'transformed') {
             hasMandatoryTypeIdentifier = true;
+          }
+          // The type identifier "transformed" has restrictions on it's value.
+          // It must be \w+;v=\d+ (e.g. google;v=1).
+          if ((identifier === 'transformed') && (attr.value !== '')) {
+            const reResult = transformedValueRe.exec(attr.value);
+            if (reResult !== null) {
+              validationResult.transformerVersion = parseInt(reResult[1], 10);
+            } else {
+              context.addError(
+                  amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                  context.getLineCol(),
+                  /*params=*/[attr.name, 'html', attr.value],
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
+                  validationResult);
+            }
           }
         } else {
           context.addError(
@@ -4768,7 +4785,8 @@ class ParsedValidatorRules {
       }
     }
     if (!hasMandatoryTypeIdentifier) {
-      // Missing mandatory type identifier (any AMP variant but "transformed").
+      // Missing mandatory type identifier (any AMP variant but "actions" or
+      // "transformed").
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
@@ -4786,7 +4804,6 @@ class ParsedValidatorRules {
   validateHtmlTag(htmlTag, context, validationResult) {
     switch (this.htmlFormat_) {
       case 'AMP':
-      case 'EXPERIMENTAL':
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡', 'amp', 'transformed'], context,
             validationResult);
@@ -4799,6 +4816,20 @@ class ParsedValidatorRules {
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡4email', 'amp4email'], context,
             validationResult);
+        break;
+      case 'ACTIONS':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
+            validationResult);
+        // TODO(honeybadgerdontcare): require "actions" as a type identifier
+        // when publishers are ready. Uncomment code below and update test.
+        // if (validationResult.typeIdentifier.indexOf("actions") === -1) {
+        //   context.addError(
+        //       amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+        //       context.getLineCol(), /*params=*/["actions", 'html'],
+        //       'https://www.ampproject.org/docs/reference/spec#required-markup',
+        //       validationResult);
+        // }
         break;
     }
   }

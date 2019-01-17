@@ -19,6 +19,7 @@ import {
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-info';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -75,7 +76,9 @@ describes.realWin('amp-consent', {
     resetServiceForTesting(win, 'geo');
     registerServiceBuilder(win, 'geo', function() {
       return Promise.resolve({
-        'ISOCountryGroups': ISOCountryGroups,
+        isInCountryGroup: group =>
+          ISOCountryGroups.indexOf(group) >= 0 ?
+            GEO_IN_GROUP.IN : GEO_IN_GROUP.NOT_IN,
       });
     });
 
@@ -321,6 +324,20 @@ describes.realWin('amp-consent', {
       event.source = null;
       win.dispatchEvent(event);
       expect(actionSpy).to.not.be.called;
+    });
+
+    it('ignore info with action dismiss', () => {
+      expectAsyncConsoleError('[amp-consent] ' +
+          'Consent string value %s not applicable on user dismiss, ' +
+          'stored value will be kept and used ');
+      event.data = {
+        'type': 'consent-response',
+        'action': 'dismiss',
+        'info': 'test',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
     });
   });
 

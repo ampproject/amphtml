@@ -80,7 +80,6 @@ exports.extensionBundles = [
   {
     name: 'amp-bodymovin-animation',
     version: '0.1',
-    options: {hasCss: false},
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
@@ -101,7 +100,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     options: {hasCss: true},
     type: TYPES.MISC,
   },
@@ -277,6 +276,7 @@ exports.extensionBundles = [
         'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
+        'amp-story-page-attachment-header',
         'amp-story-unsupported-browser-layer',
         'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',

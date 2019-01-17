@@ -219,6 +219,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-animation/**/*.js',
       // For amp-bind in the web worker (ww.js).
       'extensions/amp-bind/**/*.js',
+      // Needed to access to Variant interface from other extensions
+      'extensions/amp-experiment/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
       // Needed to access inputmask impl from other extensions
