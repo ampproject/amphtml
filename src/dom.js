@@ -520,7 +520,8 @@ export function scopedQuerySelector(root, selector) {
   }
 
   // Only IE.
-  return scopedQuerySelectionFallback(root, selector)[0];
+  const fallbackResult = scopedQuerySelectionFallback(root, selector);
+  return fallbackResult[0] === undefined ? null : fallbackResult[0];
 }
 
 /**
