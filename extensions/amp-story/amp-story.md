@@ -337,7 +337,7 @@ The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-am
 
 ### Landscape orientation and full bleed desktop experience opt in
 
-If the `supports-landscape` attribute is specified on the `<amp-story-page>` element, it will:
+If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
 
   * Allow the story to be seen when a mobile device is held in a landscape orientation.
   * Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
