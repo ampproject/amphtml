@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
+import {
+  HistoryState,
+  createShadowRootWithStyle,
+} from './utils';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
+import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
-
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -43,14 +55,23 @@ const AttachmentState = {
 const getTemplateEl = element => {
   return htmlFor(element)`
     <div class="i-amphtml-story-page-attachment">
-      <div class="i-amphtml-story-page-attachment-header">
-        <span
-            class="i-amphtml-story-page-attachment-close-button" role="button">
-        </span>
-      </div>
       <div class="i-amphtml-story-page-attachment-container">
         <div class="i-amphtml-story-page-attachment-content"></div>
       </div>
+    </div>`;
+};
+
+/**
+ * Drawer's header template.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const getHeaderEl = element => {
+  return htmlFor(element)`
+    <div class="i-amphtml-story-page-attachment-header">
+      <span
+          class="i-amphtml-story-page-attachment-close-button" role="button">
+      </span>
     </div>`;
 };
 
@@ -67,6 +88,12 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.contentEl_ = null;
+
+    /** @private {?Element} */
+    this.headerEl_ = null;
+
+    /** @type {!../../../src/service/history-impl.History} */
+    this.historyService_ = Services.historyForDoc(this.element);
 
     /** @private {!AttachmentState} */
     this.state_ = AttachmentState.CLOSED;
@@ -85,6 +112,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       swipingUp: null,
       isSwipeY: null,
     };
+
+    /** @private {!Array<function()>} */
+    this.touchEventUnlisteners_ = [];
   }
 
   /** @override */
@@ -99,8 +129,12 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO: maybe render the header in Shadow DOM?
     const templateEl = getTemplateEl(this.element);
+
+    const headerShadowRootEl = this.win.document.createElement('div');
+    this.headerEl_ = getHeaderEl(this.element);
+    createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
+    templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
     this.containerEl_ = dev().assertElement(
         templateEl.querySelector('.i-amphtml-story-page-attachment-container'));
@@ -125,18 +159,57 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.querySelector('.i-amphtml-story-page-attachment-close-button')
+    this.headerEl_
+        .querySelector('.i-amphtml-story-page-attachment-close-button')
         .addEventListener('click', () => this.close_(), true /** useCapture */);
 
-    // Enforced by AMP validation rules.
-    const storyPageEl = this.element.parentElement;
+    // Closes the attachment on opacity background clicks.
+    this.element.addEventListener('click', event => {
+      if (event.target.tagName.toLowerCase() === 'amp-story-page-attachment') {
+        this.close_();
+      }
+    }, true /** useCapture */);
 
-    storyPageEl.addEventListener(
-        'touchstart', this.onTouchStart_.bind(this), true /** useCapture */);
-    storyPageEl.addEventListener(
-        'touchmove', this.onTouchMove_.bind(this), true /** useCapture */);
-    storyPageEl.addEventListener(
-        'touchend', this.onTouchEnd_.bind(this), true /** useCapture */);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+  }
+
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    uiState === UIType.MOBILE ?
+      this.startListeningForTouchEvents_() :
+      this.stopListeningForTouchEvents_();
+  }
+
+  /**
+   * @private
+   */
+  startListeningForTouchEvents_() {
+    // Enforced by AMP validation rules.
+    const storyPageEl = dev().assertElement(this.element.parentElement);
+
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this),
+            {capture: true}));
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this),
+            {capture: true}));
+    this.touchEventUnlisteners_.push(
+        listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this),
+            {capture: true}));
+  }
+
+  /**
+   * @private
+   */
+  stopListeningForTouchEvents_() {
+    this.touchEventUnlisteners_.forEach(fn => fn());
+    this.touchEventUnlisteners_ = [];
   }
 
   /**
@@ -337,9 +410,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
   /**
    * Fully opens the attachment from its current position.
-   * @public
+   * @param {boolean=} shouldAnimate
    */
-  open() {
+  open(shouldAnimate = true) {
     if (this.state_ === AttachmentState.OPEN) {
       return;
     }
@@ -351,16 +424,42 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     this.mutateElement(() => {
       resetStyles(this.element, ['transform', 'transition']);
+
+      if (!shouldAnimate) {
+        // Resets the 'transition' property, and removes this override in the
+        // next frame, after the element is positioned.
+        setImportantStyles(this.element, {transition: 'initial'});
+        this.mutateElement(() => resetStyles(this.element, ['transition']));
+      }
+
       this.element.classList.add('i-amphtml-story-page-attachment-open');
       toggle(dev().assertElement(this.containerEl_), true);
     });
+
+    const currentHistoryState = /** @type {!Object} */
+        (getState(this.win.history));
+    const historyState = Object.assign({}, currentHistoryState, {
+      [HistoryState.ATTACHMENT_PAGE_ID]:
+          this.storeService_.get(StateProperty.CURRENT_PAGE_ID),
+    });
+
+    this.historyService_.push(() => this.closeInternal_(), historyState);
+  }
+
+  /**
+   * Does a browser back to close the attachment, to ensure the history state
+   * we added when opening the attachment is popped.
+   * @private
+   */
+  close_() {
+    this.historyService_.goBack();
   }
 
   /**
    * Fully closes the attachment from its current position.
    * @private
    */
-  close_() {
+  closeInternal_() {
     if (this.state_ === AttachmentState.CLOSED) {
       return;
     }

@@ -20,20 +20,19 @@ import {
   NamedMasks,
 } from './constants';
 import {MaskInterface} from './mask-interface';
+import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {
   factory as inputmaskDependencyFactory,
 } from '../../../third_party/inputmask/inputmask.dependencyLib';
 import {
   factory as inputmaskFactory,
 } from '../../../third_party/inputmask/inputmask';
+import {
+  factory as inputmaskPaymentCardAliasFactory,
+} from './inputmask-payment-card-alias';
 
 const NamedMasksToInputmask = {
-  [NamedMasks.EMAIL]: 'email',
-  [NamedMasks.PHONE]: 'phone',
-  [NamedMasks.PHONE_US]: 'phone-us',
-  [NamedMasks.DATE_INTL]: 'dd/mm/yyyy',
-  [NamedMasks.DATE_US]: 'mm/dd/yyyy',
-  [NamedMasks.DATE_ISO]: 'yyyy-mm-dd',
+  [NamedMasks.PAYMENT_CARD]: 'payment-card',
 };
 
 const MaskCharsToInputmask = {
@@ -69,6 +68,8 @@ export class Mask {
         inputmaskDependencyFactory(win, doc);
     Inputmask = Inputmask || inputmaskFactory(
         InputmaskDependencyLib, win, doc, undefined);
+    inputmaskPaymentCardAliasFactory(Inputmask);
+    inputmaskCustomAliasFactory(Inputmask);
 
     Inputmask.extendDefaults({
       // A list of supported input type attribute values
@@ -91,10 +92,17 @@ export class Mask {
       jitMasking: true,
     };
 
-    if (NamedMasksToInputmask[mask]) {
-      config.alias = NamedMasksToInputmask[mask];
+    const trimmedMask = mask.trim();
+    const namedFormat = NamedMasksToInputmask[trimmedMask];
+    if (namedFormat) {
+      if (typeof namedFormat == 'object') {
+        Object.assign(config, namedFormat);
+      } else {
+        config.alias = namedFormat;
+      }
     } else {
-      const inputmaskMask = convertAmpMaskToInputmask(mask);
+      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
+      config.alias = 'custom';
       config.mask = () => inputmaskMask;
     }
 

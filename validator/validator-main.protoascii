@@ -26,7 +26,7 @@ min_validator_revision_required: 360
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 796
+spec_file_revision: 800
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -488,6 +488,25 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+}
+# AMP metadata, name=amp-consent-blocking
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-consent-blocking"
+  mandatory_parent: "HEAD"
+  satisfies: "meta name=amp-consent-blocking"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-consent-blocking"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
 }
 # AMP metadata, name=amp-experiment-token
 # Related to AMP Origin Experiments
@@ -3823,6 +3842,14 @@ tags: {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
+  # The target attribute has no effect, and should not be in POST forms.
+  # However, in the past it was required, so disallowing it would break many
+  # pages. See: https://github.com/ampproject/amphtml/issues/5607
+  attrs: {
+    name: "target"
+    value_casei: "_blank"
+    value_casei: "_top"
+  }
   attrs: {
     name: "verify-xhr"
     value_url: {

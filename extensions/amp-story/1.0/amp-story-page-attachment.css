@@ -21,6 +21,7 @@ amp-story-page-attachment {
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
+  overflow: hidden !important;
   z-index: 4 !important; /** Over amp-story-cta-layer. */
   transform: translate3d(0, 100%, 0) !important;
   /** If you change the duration of this animation, please reflect if in the JavaScript close_ method too. */
@@ -34,25 +35,6 @@ amp-story-page-attachment.i-amphtml-story-page-attachment-open {
 
 .i-amphtml-story-page-attachment {
   height: 100% !important;
-}
-
-.i-amphtml-story-page-attachment-header {
-  position: relative !important;
-  height: 40px !important;
-  background: #fff !important;
-  border-radius: 8px 8px 0 0 !important;
-  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.12) !important;
-  z-index: 1 !important;
-}
-
-.i-amphtml-story-page-attachment-close-button {
-  display: inline-block !important;
-  margin: 8px;
-  height: 24px !important;
-  width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(0, 0, 0, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
-  color: rgba(0, 0, 0, 0.87) !important;
-  cursor: pointer !important;
 }
 
 .i-amphtml-story-page-attachment-container {
@@ -78,4 +60,26 @@ amp-story-page-attachment.i-amphtml-story-page-attachment-open {
 
 .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content > * {
   display: none !important;
+}
+
+[desktop] amp-story-page-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s !important;
+}
+
+[desktop] amp-story-page-attachment.i-amphtml-story-page-attachment-open {
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+[desktop] .i-amphtml-story-page-attachment {
+  height: 60vh !important;
+  width: 800px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 }
