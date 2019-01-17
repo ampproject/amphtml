@@ -31,7 +31,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     element = doc.createElement('div');
     toggleExperiment(win, 'amp-consent-v2', true);
     defaultConfig = dict({
-      'storageKey': 'ABC',
+      'consentInstanceId': 'ABC',
       'checkConsentHref': 'https://response1',
     });
   });
@@ -48,7 +48,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': 'ABC',
+        'consentInstanceId': 'ABC',
         'checkConsentHref': 'https://response1',
       }));
     });
@@ -58,7 +58,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': '_ping_',
+        'consentInstanceId': '_ping_',
         'checkConsentHref': '/get-consent-v1',
         'promptUISrc':
             '/test/manual/diy-consent.html',
@@ -86,7 +86,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       }));
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': 'ABC',
+        'consentInstanceId': 'ABC',
         'promptIfUnknownForGeoGroup': 'eea',
         'checkConsentHref': '/href',
         'clientConfig': {
@@ -101,7 +101,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
 
     it('merge inline config w/ cmp config', () => {
       appendConfigScriptElement(doc, element, dict({
-        'storageKey': '_ping_',
+        'consentInstanceId': '_ping_',
         'promptIfUnknownForGeoGroup': 'eea',
         'checkConsentHref': '/override',
         'clientConfig': {
@@ -120,7 +120,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': '_ping_',
+        'consentInstanceId': '_ping_',
         'checkConsentHref': '/override',
         'promptUISrc':
             '/test/manual/diy-consent.html',
@@ -144,7 +144,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const scriptTypeError = 'amp-consent/consent-config: <script> child ' +
           'must have type="application/json"';
       const consentExistError = 'amp-consent/consent-config: ' +
-          'storageKey to store consent info is required';
+          'consentInstanceId to store consent info is required';
       const multiScriptError =
           'amp-consent/consent-config: Found 2 <script> children. Expected 1';
       const invalidJsonError = 'amp-consent/consent-config: ' +
@@ -206,14 +206,14 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     it('remove not supported policy', () => {
       toggleExperiment(win, 'multi-consent', false);
       appendConfigScriptElement(doc, element, dict({
-        'storageKey': 'ABC',
+        'consentInstanceId': 'ABC',
         'policy': {
           'ABC': undefined,
         },
       }));
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal({
-        'storageKey': 'ABC',
+        'consentInstanceId': 'ABC',
         'policy': {},
       });
     });

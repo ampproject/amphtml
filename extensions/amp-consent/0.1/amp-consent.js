@@ -115,7 +115,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentConfig_ = config.getConsentConfig();
 
     // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ = this.consentConfig_['storageKey'];
+    this.consentId_ = this.consentConfig_['consentInstanceId'];
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ =
@@ -133,7 +133,7 @@ export class AmpConsent extends AMP.BaseElement {
      *
      * New Format
      * {
-     *   'storageKey': ...
+     *   'consentInstanceId': ...
      *   'checkConsentHref': ...
      *   'promptUI': ...
      *   'postPromptUI': ...

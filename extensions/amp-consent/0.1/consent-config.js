@@ -73,22 +73,22 @@ export class ConsentConfig {
       return config;
     }
     // Assert single consent instance
-    const storageKeys = Object.keys(consentsConfigDepr);
+    const keys = Object.keys(consentsConfigDepr);
 
-    userAssert(storageKeys.length <= 1,
+    userAssert(keys.length <= 1,
         '%s: only single consent instance is supported', TAG);
 
-    if (storageKeys.length > 0) {
-      config['storageKey'] = storageKeys[0];
+    if (keys.length > 0) {
+      config['consentInstanceId'] = keys[0];
       // Copy config['consents']['key'] to config
-      const consentInstanceConfigDepr = config['consents'][storageKeys[0]];
-      const keys = Object.keys(consentInstanceConfigDepr);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (!config[key] && ALLOWED_DEPR_CONSENTINSTANCE_ATTRS[key]) {
+      const consentInstanceConfigDepr = config['consents'][keys[0]];
+      const attrs = Object.keys(consentInstanceConfigDepr);
+      for (let i = 0; i < attrs.length; i++) {
+        const attr = attrs[i];
+        if (!config[attr] && ALLOWED_DEPR_CONSENTINSTANCE_ATTRS[attr]) {
           // Do not override if has been specified, or the attr is not supported
           // in consent instance before
-          config[keys[i]] = consentInstanceConfigDepr[keys[i]];
+          config[attrs[i]] = consentInstanceConfigDepr[attrs[i]];
         }
       }
     }
@@ -101,22 +101,22 @@ export class ConsentConfig {
    * Read and parse consent config
    * An example valid config json looks like
    * {
-   *  "storageKey": "ABC",
+   *  "consentInstanceId": "ABC",
    *  "checkConsentHref": "https://fake.com"
    * }
    * @return {!JsonObject}
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-        this.getInlineConfig_());
+        userAssert(this.getInlineConfig_(), '%s: Inline config not found'));
 
     const cmpConfig = this.getCMPConfig_();
 
     const config = /** @type {!JsonObject} */
         (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
 
-    userAssert(config['storageKey'],
-        '%s: storageKey to store consent info is required', TAG);
+    userAssert(config['consentInstanceId'],
+        '%s: consentInstanceId to store consent info is required', TAG);
 
     if (config['policy']) {
       // Only respect 'default' consent policy;
@@ -152,7 +152,7 @@ export class ConsentConfig {
    * Read and format the CMP config
    * The returned CMP config should looks like
    * {
-   *  "storageKey": "foo",
+   *  "consentInstanceId": "foo",
    *  "checkConsentHref": "https://fake.com",
    *  "promptUISrc": "https://fake.com/promptUI.html",
    *  "uiConfig": {
@@ -182,7 +182,7 @@ export class ConsentConfig {
    */
   validateCMPConfig_(config) {
     const assertValues =
-        ['storageKey', 'checkConsentHref', 'promptUISrc'];
+        ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
       devAssert(config[attribute], 'CMP config must specify %s', attribute);
