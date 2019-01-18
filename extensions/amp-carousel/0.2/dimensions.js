@@ -138,7 +138,7 @@ export function overlaps(axis, el, position) {
  * @param {!Alignment} alignment The alignment to look for within the parent
  *    container.
  * @param {!Element} container  The parent container to look in.
- * @param {!Array<Element>} children The children to look among.
+ * @param {!Array<!Element>} children The children to look among.
  * @param {number} startIndex The index to start looking at.
  * @return {number|undefined} The overlapping index, if one exists.
  */

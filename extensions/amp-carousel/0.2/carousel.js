@@ -739,28 +739,32 @@ export class Carousel {
    */
   updateCurrent_() {
     const totalLength = sum(this.getSlideLengths_());
-    const currentIndex = findOverlappingIndex(
+    const overlappingIndex = findOverlappingIndex(
         this.axis_, this.alignment_, this.element_, this.slides_,
         this.currentIndex_);
-    const currentElement = this.slides_[currentIndex];
 
     // Currently not over a slide (e.g. on top of overscroll area).
-    if (!currentElement) {
+    if (overlappingIndex === undefined) {
       return;
     }
 
+    // Pulled out as a separate variable, since Closure gets confused about
+    // whether it can be undefined pas this point when closed over (in
+    // runMutate).
+    const newIndex = overlappingIndex;
     // Update the current offset on each scroll so that we have it up to date
     // in case of a resize.
+    const currentElement = this.slides_[newIndex];
     const dimension = getDimension(this.axis_, currentElement);
     this.currentElementOffset_ = dimension.start;
 
     // We did not move at all.
-    if (currentIndex == this.currentIndex_) {
+    if (newIndex == this.currentIndex_) {
       return;
     }
 
     this.runMutate_(() => {
-      this.updateCurrentIndex_(currentIndex);
+      this.updateCurrentIndex_(newIndex);
       this.moveSlides_(totalLength);
     });
   }
