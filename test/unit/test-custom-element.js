@@ -1705,7 +1705,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       const tagUpperCase = 'amp-test-loader'.toUpperCase();
       if (LOADING_ELEMENTS_.has(tagUpperCase)) {
-        LOADING_ELEMENTS_.remove(tagUpperCase);
+        LOADING_ELEMENTS_.delete(tagUpperCase);
       }
 
       expect(element.isLoadingEnabled_()).to.be.false;
