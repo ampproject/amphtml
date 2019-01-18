@@ -170,7 +170,7 @@ const TAG = 'amp-story-embedded-component';
  * States in which an embedded component could be found in.
  * @enum {number}
  */
-const ComponentState = {
+export const EmbeddedComponentState = {
   HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
   FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
   EXPANDED: 2, // Component is in expanded mode.
@@ -221,54 +221,69 @@ export class AmpStoryEmbeddedComponent {
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
-    this.storeService_.subscribe(StateProperty.EMBEDDED_COMPONENT, target => {
-      this.onEmbeddedComponentUpdate_(target);
-    });
+    this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
+        component => {
+          if (component.state !== EmbeddedComponentState.HIDDEN) {
+            this.onEmbeddedComponentUpdate_(component);
+          }
+        });
 
-    this.state_ = ComponentState.HIDDEN;
+    /** @private {EmbeddedComponentState} */
+    this.state_ = EmbeddedComponentState.HIDDEN;
   }
 
   /**
    * Reacts to embedded component updates.
-   * @param {?Element} target
+   * @param {!Object} component
    * @private
    */
-  onEmbeddedComponentUpdate_(target) {
+  onEmbeddedComponentUpdate_(component) {
     switch (this.state_) {
-      case ComponentState.FOCUSED:
-      case ComponentState.HIDDEN:
-        target ? this.setState_(ComponentState.FOCUSED, target) :
-          this.setState_(ComponentState.HIDDEN, null /** target */);
+      case EmbeddedComponentState.FOCUSED:
+      case EmbeddedComponentState.HIDDEN:
+        component.element ?
+          this.setState_(EmbeddedComponentState.FOCUSED, component) :
+          this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
         break;
-      case ComponentState.EXPANDED:
-        this.maybeCloseExpandedView_(target);
+      case EmbeddedComponentState.EXPANDED:
+        this.maybeCloseExpandedView_(component.element);
         break;
       default:
-        dev().warn(TAG, `ComponentState ${this.state_} does not exist`);
+        dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
     }
   }
 
   /**
    * Sets new state for the embedded component.
-   * @param {ComponentState} state
-   * @param {?Element} target
+   *
+   * Possible state updates:
+   *
+   *    HIDDEN ==> FOCUSED ==> EXPANDED
+   *      /\ _________|           |
+   *      ||______________________|
+   *
+   * @param {EmbeddedComponentState} state
+   * @param {?Object} component
    * @private
    */
-  setState_(state, target) {
+  setState_(state, component) {
     switch (state) {
-      case ComponentState.FOCUSED:
-      case ComponentState.HIDDEN:
+      case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
-        this.onFocusedStateUpdate_(target);
+        this.onFocusedStateUpdate_(component);
         break;
-      case ComponentState.EXPANDED:
+      case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
-        this.toggleExpandedView_(target);
+        break;
+      case EmbeddedComponentState.EXPANDED:
+        this.state_ = state;
+        this.onFocusedStateUpdate_(null);
+        this.toggleExpandedView_(component.element);
         break;
       default:
-        dev().warn(TAG, `ComponentState ${this.state_} does not exist`);
+        dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
     }
   }
@@ -326,7 +341,6 @@ export class AmpStoryEmbeddedComponent {
       this.toggleExpandedView_(null);
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
           true /** capture */);
-      this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
     }
   }
 
@@ -351,7 +365,7 @@ export class AmpStoryEmbeddedComponent {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
-      if (this.storeService_.get(StateProperty.EMBEDDED_COMPONENT)) {
+      if (this.state_ === EmbeddedComponentState.FOCUSED) {
         this.closeFocusedState_();
       }
     });
@@ -365,18 +379,19 @@ export class AmpStoryEmbeddedComponent {
    */
   closeFocusedState_() {
     this.clearTooltip_();
-    this.setState_(ComponentState.HIDDEN, null /** target */);
+    this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
+        {state: EmbeddedComponentState.HIDDEN});
   }
 
   /**
    * Reacts to store updates related to the focused state, when a tooltip is
    * active.
-   * @param {?Element} target
+   * @param {?Object} component
    * @private
    */
-  onFocusedStateUpdate_(target) {
-    if (!target) {
-      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
+  onFocusedStateUpdate_(component) {
+    if (!component) {
       this.resources_.mutateElement(
           devAssert(this.focusedStateOverlay_),
           () => {
@@ -390,9 +405,9 @@ export class AmpStoryEmbeddedComponent {
       this.storyEl_.appendChild(this.buildFocusedState_());
     }
 
-    this.updateTooltipBehavior_(target);
-    this.updateTooltipEl_(target);
-    this.previousTarget_ = target;
+    this.updateTooltipBehavior_(component.element);
+    this.updateTooltipEl_(component);
+    this.previousTarget_ = component.element;
 
     this.resources_.mutateElement(
         devAssert(this.focusedStateOverlay_),
@@ -419,19 +434,18 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Builds tooltip and attaches it depending on the target's content and
-   * position.
-   * @param {!Element} target
+   * Builds and attaches the tooltip.
+   * @param {!Object} component
    * @private
    */
-  updateTooltipEl_(target) {
-    const embedConfig = userAssert(this.getEmbedConfigFor_(target), 'Invalid ' +
-      'embed config for target', target);
+  updateTooltipEl_(component) {
+    const embedConfig = userAssert(this.getEmbedConfigFor_(component.element),
+        'Invalid embed config for target', component.element);
 
-    this.updateTooltipText_(target, embedConfig);
-    this.updateTooltipComponentIcon_(target, embedConfig);
+    this.updateTooltipText_(component.element, embedConfig);
+    this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
-    this.positionTooltip_(target);
+    this.positionTooltip_(component);
   }
 
   /**
@@ -461,10 +475,11 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
-    this.setState_(ComponentState.EXPANDED, this.previousTarget_);
+    this.setState_(EmbeddedComponentState.EXPANDED,
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
 
-    this.storeService_.dispatch(
-        Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
+        {state: EmbeddedComponentState.EXPANDED});
   }
 
   /**
@@ -595,10 +610,10 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Positions tooltip and its pointing arrow according to the position of the
    * target.
-   * @param {!Element} target
+   * @param {!Object} component
    * @private
    */
-  positionTooltip_(target) {
+  positionTooltip_(component) {
     const state = {arrowOnTop: false};
 
     this.resources_.measureMutateElement(this.storyEl_,
@@ -606,11 +621,10 @@ export class AmpStoryEmbeddedComponent {
         () => {
           const storyPage =
               this.storyEl_.querySelector('amp-story-page[active]');
-          const targetRect = target./*OK*/getBoundingClientRect();
           const pageRect = storyPage./*OK*/getBoundingClientRect();
 
-          this.verticalPositioning_(targetRect, pageRect, state);
-          this.horizontalPositioning_(targetRect, pageRect, state);
+          this.horizontalPositioning_(component, pageRect, state);
+          this.verticalPositioning_(component, pageRect, state);
         },
         /** mutate */
         () => {
@@ -626,54 +640,45 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * In charge of deciding where to position the tooltip depending on the
-   * target's position and size, and available space in the page. Also
-   * places the tooltip's arrow on top when the tooltip is below an element.
-   * @param {!ClientRect} targetRect
+   * Positions tooltip and its arrow vertically.
+   * @param {!Object} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private
    */
-  verticalPositioning_(targetRect, pageRect, state) {
-    const targetTopOffset = targetRect.top - pageRect.top;
-    const targetBottomOffset = targetRect.bottom - pageRect.top;
+  verticalPositioning_(component, pageRect, state) {
+    const tooltipHeight = this.tooltip_./*OK*/offsetHeight;
 
-    if (targetTopOffset > MIN_VERTICAL_SPACE) { // Tooltip fits above target.
-      state.tooltipTop = targetRect.top - MIN_VERTICAL_SPACE;
-    } else if (pageRect.height - targetBottomOffset >
-        MIN_VERTICAL_SPACE) { // Tooltip fits below target. Place arrow on top of the tooltip.
-      state.tooltipTop = targetRect.bottom + EDGE_PADDING;
+    state.tooltipTop = component.clientY - tooltipHeight - EDGE_PADDING;
+    if (state.tooltipTop < pageRect.top + MIN_VERTICAL_SPACE) {
+      // Target is too high up screen, place tooltip facing down with
+      // arrow on top.
       state.arrowOnTop = true;
-    } else { // Element takes whole vertical space. Place tooltip on the middle.
-      state.tooltipTop = pageRect.height / 2;
+      state.tooltipTop = component.clientY + EDGE_PADDING;
     }
   }
 
   /**
-   * In charge of positioning the tooltip and the tooltip's arrow horizontally.
-   * @param {!ClientRect} targetRect
+   * Positions tooltip and its arrow horizontally.
+   * @param {!Object} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private
    */
-  horizontalPositioning_(targetRect, pageRect, state) {
-    const targetLeftOffset = targetRect.left - pageRect.left;
-    const elCenterLeft = targetRect.width / 2 + targetLeftOffset;
+  horizontalPositioning_(component, pageRect, state) {
     const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
-    state.tooltipLeft = elCenterLeft - (tooltipWidth / 2);
+    state.tooltipLeft = component.clientX - (tooltipWidth / 2);
     const maxHorizontalLeft = pageRect.width - tooltipWidth - EDGE_PADDING;
 
     // Make sure tooltip is not out of the page.
     state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
     state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
 
-    state.arrowLeftOffset = Math.abs(elCenterLeft - state.tooltipLeft -
+    state.arrowLeftOffset = Math.abs(component.clientX - state.tooltipLeft -
         this.tooltipArrow_./*OK*/offsetWidth / 2);
     // Make sure tooltip arrow is not out of the tooltip.
     state.arrowLeftOffset =
       Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
-
-    state.tooltipLeft += pageRect.left;
   }
 
   /**
