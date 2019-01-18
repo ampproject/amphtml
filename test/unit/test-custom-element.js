@@ -1654,8 +1654,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
       const tagUpperCase = 'amp-test-loader'.toUpperCase();
-      if (!LOADING_ELEMENTS_.includes(tagUpperCase)) {
-        LOADING_ELEMENTS_.push(tagUpperCase);
+      if (!LOADING_ELEMENTS_.has(tagUpperCase)) {
+        LOADING_ELEMENTS_.add(tagUpperCase);
       }
       resources = Services.resourcesForDoc(doc);
       resources.isBuildOn_ = true;
@@ -1704,9 +1704,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       stubInA4A(false);
 
       const tagUpperCase = 'amp-test-loader'.toUpperCase();
-      const location = LOADING_ELEMENTS_.indexOf(tagUpperCase);
-      if (location >= 0) {
-        LOADING_ELEMENTS_.splice(location, 1);
+      if (LOADING_ELEMENTS_.has(tagUpperCase)) {
+        LOADING_ELEMENTS_.remove(tagUpperCase);
       }
 
       expect(element.isLoadingEnabled_()).to.be.false;

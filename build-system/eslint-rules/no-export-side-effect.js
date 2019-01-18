@@ -26,6 +26,8 @@ module.exports = function(context) {
                 return declarator.init;
               }).filter(function(init) {
                 return init && /(?:Call|New)Expression/.test(init.type);
+              }).filter(function(init) {
+                return init && init.callee && init.callee.name !== 'Set';
               }).forEach(function(init) {
                 context.report({
                   node: init,

@@ -97,13 +97,12 @@ export const naturalDimensions_ = {
   'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
-
 /**
  * Elements that the progess can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ = [
+export const LOADING_ELEMENTS_ = new Set([
   'AMP-ANIM',
   'AMP-BRIGHTCOVE',
   'AMP-GOOGLE-DOCUMENT-EMBED',
@@ -121,7 +120,7 @@ export const LOADING_ELEMENTS_ = [
   'AMP-PLAYBUZZ',
   'AMP-VIDEO',
   'AMP-YOUTUBE',
-];
+]);
 
 
 /**
@@ -300,7 +299,7 @@ export function isLoadingAllowed(element) {
   if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
     return true;
   }
-  return LOADING_ELEMENTS_.includes(tagName);
+  return LOADING_ELEMENTS_.has(tagName);
 }
 
 
