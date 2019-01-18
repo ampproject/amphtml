@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {By, Condition, Key, until} from 'selenium-webdriver';
-import {ControllerPromise,ElementHandle} from './functional-test-controller';
-import fs from 'fs';
+const fs = require('fs');
+const {By, Condition, Key, until} = require('selenium-webdriver');
+const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
 
 /**
- * @param {function(): !Promise<T>} value
+ * @param {function(): !Promise<T>} valueFn
  * @param {function(T):boolean} condition
+ * @param {T} opt_mutate
  * @return {!Condition}
  * @template T
  */
@@ -36,8 +37,10 @@ function expectCondition(valueFn, condition, opt_mutate) {
 /**
  * Make the test runner wait until the value returned by the valueFn matches
  * the given condition.
+ * @param {!WebDriver} driver
  * @param {function(): !Promise<T>} valueFn
  * @param {function(T): ?T} condition
+ * @param {T} opt_mutate
  * @return {!Promise<?T>}
  * @template T
  */
@@ -52,7 +55,7 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
 }
 
 /** @implements {FunctionalTestController} */
-export class SeleniumWebDriverController {
+class SeleniumWebDriverController {
   /**
    * @param {!WebDriver} driver
    */
@@ -70,6 +73,7 @@ export class SeleniumWebDriverController {
   getWaitFn_(valueFn) {
     /**
      * @param {function(T): ?T} condition
+     * @param {T} opt_mutate
      * @return {!Promise<?T>}
      */
     return (condition, opt_mutate) => {
@@ -130,7 +134,7 @@ export class SeleniumWebDriverController {
   }
 
   /**
-   * @param {string} url
+   * @param {string} location
    * @return {!Promise}
    * @override
    */
@@ -263,8 +267,8 @@ export class SeleniumWebDriverController {
   }
 
   /**
-   * @param {string} path
    * @param {!ElementHandle} handle
+   * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
    */
@@ -291,7 +295,6 @@ export class SeleniumWebDriverController {
     await this.driver.switchTo().frame(element);
   }
 
-
   /**
    * @return {!Promise}
    * @private
@@ -313,3 +316,7 @@ export class SeleniumWebDriverController {
     await this.switchToParent_();
   }
 }
+
+module.exports = {
+  SeleniumWebDriverController,
+};
