@@ -94,6 +94,11 @@ const integrationTestPaths = [
   'extensions/**/test/integration/**/*.js',
 ];
 
+const e2eTestPaths = [
+  'test/e2e/*.js',
+  'extensions/**/test-e2e/*.js',
+];
+
 const devDashboardTestPaths = [
   'build-system/app-index/test/**/*.js',
 ];
@@ -138,6 +143,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  e2eTestPaths,
   lintGlobs,
   devDashboardTestPaths,
   thirdPartyFrames,

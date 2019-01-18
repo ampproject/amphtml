@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 'use strict';
 
-const config = require('../../config');
-const gulp = require('gulp-help')(require('gulp'));
-const mocha = require('gulp-mocha');
+const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
 
-function e2e() {
-  return gulp.src(config.e2eTestPaths, {read: false})
-      .pipe(mocha({
-        require: ['@babel/register', '../../../testing/e2e/test-module'],
-      }));
-}
+module.exports = {
+  'open attachment UI element': async (page, name) => {
+    await page.waitFor(1600);
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ []);
+  },
 
-gulp.task('e2e', 'Runs e2e tests', e2e);
+  'open attachment': async (page, name) => {
+    await page.tap('.i-amphtml-story-page-open-attachment-text');
+    await page.waitFor(410);
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ []);
+  },
+ };
