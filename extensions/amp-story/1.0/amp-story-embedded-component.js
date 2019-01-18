@@ -668,17 +668,22 @@ export class AmpStoryEmbeddedComponent {
   horizontalPositioning_(component, pageRect, state) {
     const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
     state.tooltipLeft = component.clientX - (tooltipWidth / 2);
-    const maxHorizontalLeft = pageRect.width - tooltipWidth - EDGE_PADDING;
+    const maxHorizontalLeft = pageRect.left + pageRect.width -
+      tooltipWidth - EDGE_PADDING;
 
-    // Make sure tooltip is not out of the page.
+    // Make sure tooltip is inside bounds of the page.
     state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
-    state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
+    state.tooltipLeft = Math.max(state.tooltipLeft,
+        pageRect.left + EDGE_PADDING);
 
     state.arrowLeftOffset = Math.abs(component.clientX - state.tooltipLeft -
         this.tooltipArrow_./*OK*/offsetWidth / 2);
-    // Make sure tooltip arrow is not out of the tooltip.
+
+    // Make sure tooltip arrow is inside bounds of the tooltip.
     state.arrowLeftOffset =
       Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
+    state.arrowLeftOffset =
+      Math.max(state.arrowLeftOffset, 0);
   }
 
   /**
