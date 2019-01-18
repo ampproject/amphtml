@@ -118,6 +118,17 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
+
+        // Allow extension files to depend on their own code.
+        const dir = path.dirname(dep);
+        if (dir.startsWith('extensions/')) {
+          // eg, 'extensions/amp-geo/0.1'
+          const match = /extensions\/[^\/]+\/[^\/]+/.exec(dir);
+          if (match && path.dirname(moduleName).startsWith(match[0])) {
+            return;
+          }
+        }
+
         const inWhitelist = this.whitelist_.some(entry => {
           const pair = entry.split('->');
           const whitelistedModuleName = pair[0];
