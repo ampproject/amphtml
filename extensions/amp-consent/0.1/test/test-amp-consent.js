@@ -19,7 +19,7 @@ import {
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-info';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {

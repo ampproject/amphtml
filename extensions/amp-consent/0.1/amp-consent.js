@@ -21,7 +21,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
