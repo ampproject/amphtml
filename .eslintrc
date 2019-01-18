@@ -168,7 +168,13 @@
   },
   "overrides": [
     {
-      "files": ["test/**/*.js", "extensions/**/test/**/*.js", "ads/**/test/**/*.js", "testing/**/*.js"],
+      "files": [
+        "test/**/*.js",
+        "extensions/**/test/**/*.js",
+        "extensions/**/test-e2e/*.js",        
+        "ads/**/test/**/*.js",
+        "testing/**/*.js"
+      ],
       "rules": {
         "require-jsdoc": 0,
         "jsdoc/check-param-names": 0,
@@ -195,7 +201,8 @@
         "allowConsoleError": false,
         "expectAsyncConsoleError": false,
         "restoreAsyncErrorThrows": false,
-        "stubAsyncErrorThrows": false
+        "stubAsyncErrorThrows": false,
+        "Key": false
       }
     },
     {

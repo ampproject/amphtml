@@ -91,6 +91,7 @@ import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
+import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -254,6 +255,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+import {speakol} from '../ads/speakol';
 
 
 /**
@@ -282,6 +284,7 @@ const AMP_EMBED_ALLOWED = {
   zen: true,
   zergnet: true,
   runative: true,
+  speakol: true,
 };
 
 init(window);
@@ -312,6 +315,7 @@ register('admixer', admixer);
 register('adocean', adocean);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
+register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -487,6 +491,7 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
+register('speakol', speakol);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

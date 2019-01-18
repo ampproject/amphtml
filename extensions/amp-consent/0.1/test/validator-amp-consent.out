@@ -37,16 +37,10 @@ PASS
 |        "DEF": {
 |          "checkConsentHref": "http://localhost:8000/get-consent-v1",
 |          "promptUI": "ui1"
-|        },
-|        "ABC": {
-|          "checkConsentHref": "http://localhost:8000/get-consent-v1"
 |        }
 |      }
 |    }</script>
 |    <div id='ui1'>UI1
-|      <button>Accept</button>
-|    </div>
-|    <div id='ui2'>UI2
 |      <button>Accept</button>
 |    </div>
 |  </amp-consent>

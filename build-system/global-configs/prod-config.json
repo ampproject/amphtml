@@ -52,5 +52,7 @@
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
   "hidden-mutation-observer": 1,
-  "sandbox-ads": 1
+  "sandbox-ads": 1,
+  "amp-list-viewport-resize": 0.1,
+  "amp-list-resizable-children": 1
 }

@@ -1071,6 +1071,14 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
   next();
 });
 
+app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+  const mode = pc.env.SERVE_MODE;
+  if (mode == 'compiled') {
+    req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
+  }
+  next();
+});
+
 /*
  * Start Cache SW LOCALDEV section
  */
