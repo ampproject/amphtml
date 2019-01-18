@@ -1351,7 +1351,7 @@ describes.realWin('amp-story', {
               .then(() => {
                 expect(story.activePage_.element.id).to.equal('cover');
               });
-    });
+        });
 
     it('should update browser history with the story navigation path', () => {
       const pageCount = 2;
@@ -1387,7 +1387,7 @@ describes.realWin('amp-story', {
 
                 expect(story.activePage_.element.id).to.equal('cover');
               });
-    });
+        });
   });
 });
 
