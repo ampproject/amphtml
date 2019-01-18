@@ -30,57 +30,229 @@
 <body>
   <h1>Input Masking</h1>
 
-  <!-- TODO(cvializ) -->
-  <!--
   <h2>Named Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
-      target="_blank">
-    <p>Plain text</p>
-    <input name="text">
+      target="_blank"
+      id="form-a">
+    <p>Credit card (<code>payment-card</code>)</p>
+    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" placeholder="Card number">
 
-    <p>Single character</p>
-    <input name="char" mask="L">
+    <p>mm/dd/yyyy (<code>date-mm-dd-yyyy</code>)</p>
+    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
 
-    <p>Email</p>
-    <input name="email" mask="email" placeholder="alice@example.com" type="search">
+    <p>dd/mm/yyyy (<code>date-dd-mm-yyyy</code>)</p>
+    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
 
-    <p>US and Canada Phone</p>
-    <input name="phone" mask="phone-us" placeholder="+1(555) 555-5555" type="tel"></div>
+    <p>yyyy-mm-dd (<code>date-yyyy-mm-dd</code>)</p>
+    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
 
-    <p>International Phone</p>
-    <input name="phone-intl" mask="phone" placeholder="+1(555) 555-5555" type="tel">
-
-
-    <p>mm/dd/yyyy</p>
-    <input name="date-us" mask="date-us" placeholder="mm/dd/yyyy" type="tel">
-    <p>dd/mm/yyyy</p>
-    <input name="date-intl" mask="date-intl" placeholder="dd/mm/yyyy" type="tel">
-    <p>yyyy-mm-dd</p>
-    <input name="date-iso" mask="date-iso" placeholder="yyyy-mm-dd" type="tel">
+    <p>mm/yy (<code>date-mm-yy</code>)</p>
+    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
 
     <input type="submit">
   </form>
-  -->
+
   <h2>Custom Masks</h2>
   <form method="post"
       action-xhr="/form/echo-json/post"
-      target="_blank">
-    <p>Phone</p>
-    <input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+      target="_blank"
+      id="form-b">
+    <p>Plain text (no mask)</p>
+    <input id="b-text" name="text" type="text">
+
+    <p>Single character</p>
+    <input id="b-char" name="char" mask="L" type="text">
+
+    <p>Phone 2</p>
+    <input id="b-phone2" name="b-phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" placeholder="+1(555)555-5555">
+    <p>Phone (German)</p>
+    <input id="b-phone3" name="b-phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" placeholder="+49(0000)0000-0000">
 
     <p>US Postal Code</p>
-    <input mask="00000 00000-0000" placeholder="10024" type="text">
+    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" placeholder="10024" type="tel">
 
     <p>Canadian Postal Code</p>
-    <input mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
 
-    <p>15 or 16 digit Credit Card (switches on length)</p>
-    <input mask="0000_000000_00000 0000_0000_0000_0000 " placeholder="0000 0000 0000 0000" type="text">
+    <p>US or Canada postal code</p>
+    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" placeholder="Post Code" type="text">
 
-    <p>15 or 16 digit Credit Card (switches on 37 or 34)</p>
-    <input mask="3400_000000_00000 3700_000000_00000 0000_0000_0000_0000" type="text">
+    <p>Dollars</p>
+    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="text">
 
+    <input type="submit">
+  </form>
+
+
+  <h2>Full form</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-c">
+    <p>Name</p>
+    <input id="c-name" name="name" type="text">
+
+    <p>Address Line 1</p>
+    <input id="c-addressline1" name="addressline1" type="text">
+
+    <p>Address Line 2</p>
+    <input id="c-addressline2" name="addressline2" type="text">
+
+    <p>City</p>
+    <input id="c-city" name="city" type="text">
+
+    <p>Zip Code</p>
+    <input id="c-zip" name="zip" mask="00000 00000-0000" placeholder="10024" type="text">
+
+    <p>Phone</p>
+    <input id="c-phone" name="phone" mask="+1(000)000-0000" placeholder="+1(555)555-5555" type="tel">
+
+    <p>Dollars</p>
+    <input id="c-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel">
+
+    <p>Payment card</p>
+    <input id="c-card" name="card" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel">
+
+    <input type="submit">
+  </form>
+
+  <h2>Forms with initial values</h2>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-d">
+    <p>Postal Codes</p>
+    <table>
+      <thead><th>value</th><th>mask</th><th>masked</th></thead>
+      <tbody>
+        <tr><td>10001</td><td>00000 00000-0000</td><td><input id="d-post-code-us1" value="10001" name="post-code-us1" mask="00000 00000-0000" placeholder="10024" type="tel"></td></tr>
+        <tr><td>10001-1234</td><td>00000 00000-0000</td><td><input id="d-post-code-us2" value="10001-1234" name="post-code-us2" mask="00000 00000-0000" placeholder="10024" type="tel"></td></tr>
+        <tr><td>A1A 1A1</td><td>L0L_0L0</td><td><input id="d-post-code-ca1" value="A1A 1A1" name="post-code-ca1" mask="L0L_0L0" placeholder="A1A 1A1" type="text"></td></tr>
+        <tr><td>10001</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both1" value="10001" name="post-code-both1" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+        <tr><td>10001-1234</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both2" value="10001-1234" name="post-code-both2" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+        <tr><td>A1A 1A1</td><td>00000 00000-0000 L0L_0L0</td><td><input id="d-post-code-both3" value="A1A 1A1" name="post-code-both3" mask="00000 00000-0000 L0L_0L0" placeholder="Post code" type="text"></td></tr>
+      </tbody>
+    </table>
+    <p>Phone</p>
+    <table>
+      <thead><th>value</th><th>masked <code>+1(000)000-0000</code></th></thead>
+      <tbody>
+        <tr><td><code>+18006492568</code></td><td><input id="d-phone1" name="phone1" value="+18006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>18006492568</code></td><td><input id="d-phone2" name="phone2" value="18006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>8006492568</code></td><td><input id="d-phone3" name="phone3" value="8006492568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>(800)649-2568</code></td><td><input id="d-phone4" name="phone4" value="(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>(800)649-2568</code></td><td><input id="d-phone5" name="phone5" value="(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>1(800)649-2568</code></td><td><input id="d-phone6" name="phone6" value="1(800)649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+        <tr><td><code>1-800-649-2568</code></td><td><input id="d-phone7" name="phone7" value="1-800-649-2568" type="tel" mask="+1(000)000-0000" placeholder="+1(555)555-5555"></td></tr>
+      </tbody>
+    </table>
+
+    <p>Dollars</p>
+    <table>
+      <thead><th>value</th><th>masked <code>$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00</code></th></thead>
+      <tbody>
+      <tr><td>1</td><td><input id="d-dollars1" name="d-dollars1" value="1" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12</td><td><input id="d-dollars2" name="d-dollars2" value="12" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123</td><td><input id="d-dollars3" name="d-dollars3" value="123" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>1234</td><td><input id="d-dollars4" name="d-dollars4" value="1234" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12345</td><td><input id="d-dollars5" name="d-dollars5" value="12345" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123456</td><td><input id="d-dollars6" name="d-dollars6" value="123456" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>1234567</td><td><input id="d-dollars7" name="d-dollars7" value="1234567" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>12345678</td><td><input id="d-dollars8" name="d-dollars8" value="12345678" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+      <tr><td>123456789</td><td><input id="d-dollars9" name="d-dollars9" value="123456789" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="tel"></td></tr>
+    </table>
+
+    <p>Payment card</p>
+    <!-- https://www.paypalobjects.com/en_AU/vhelp/paypalmanager_help/credit_card_numbers.htm -->
+    <table>
+      <thead><th>card type</th><th>masked</th></thead>
+      <tbody>
+        <tr><td>American Express</td><td><input id="d-payment-card1" name="payment-card1" value="378282246310005" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>American Express</td><td><input id="d-payment-card2" name="payment-card2" value="371449635398431" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>American Express Corporate</td><td><input id="d-payment-card3" name="payment-card3" value="378734493671000" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Australian BankCard</td><td><input id="d-payment-card4" name="payment-card4" value="5610591081018250" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Diners Club</td><td><input id="d-payment-card5" name="payment-card5" value="30569309025904" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Diners Club</td><td><input id="d-payment-card6" name="payment-card6" value="38520000023237" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Discover</td><td><input id="d-payment-card7" name="payment-card7" value="6011111111111117" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Discover</td><td><input id="d-payment-card8" name="payment-card8" value="6011000990139424" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>JCB</td><td><input id="d-payment-card9" name="payment-card9" value="3530111333300000" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>JCB</td><td><input id="d-payment-card10" name="payment-card10" value="3566002020360505" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>MasterCard</td><td><input id="d-payment-card11" name="payment-card11" value="5555555555554444" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>MasterCard</td><td><input id="d-payment-card12" name="payment-card12" value="5105105105105100" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card13" name="payment-card13" value="4111111111111111" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card14" name="payment-card14" value="4012888888881881" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+        <tr><td>Visa</td><td><input id="d-payment-card15" name="payment-card15" value="4222222222222" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel"></td></tr>
+      </tbody>
+    </table>
+    <input type="submit">
+  </form>
+
+
+  <h2>All <code>&lt;amp-story&gt;</code> locale phone numbers</h2>
+  <p>Some have multiple formats possible</p>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-e">
+    <table>
+      <thead><th>Country</th><th>format</th><th>field</th></thead>
+      <tbody>
+        <tr><td>Algeria</td><td><code>+213-00-000-0000</code></td><td><input type="tel" id="e-phone-dz" name="phone-dz" mask="+213-00-000-0000" data-cc="DZ" data-cd="Algeria"></td></tr>
+        <tr><td>Argentina</td><td><code>+54(000)000-0000</code></td><td><input type="tel" id="e-phone-ar" name="phone-ar" mask="+54(000)000-0000" data-cc="AR" data-cd="Argentina"></td></tr>
+        <tr><td>Bahrain</td><td><code>+973-0000-0000</code></td><td><input type="tel" id="e-phone-bh" name="phone-bh" mask="+\973-0000-0000" data-cc="BH" data-cd="Bahrain"></td></tr>
+        <tr><td>Belize</td><td><code>+501-000-0000</code></td><td><input type="tel" id="e-phone-bz" name="phone-bz" mask="+501-000-0000" data-cc="BZ" data-cd="Belize"></td></tr>
+        <tr><td>Bolivia</td><td><code>+591-0-000-0000</code></td><td><input type="tel" id="e-phone-bo" name="phone-bo" mask="+5\91-0-000-0000" data-cc="BO" data-cd="Bolivia"></td></tr>
+        <tr><td>Brazil</td><td><code>+55-00-0000-0000</code></td><td><input type="tel" id="e-phone-br" name="phone-br" mask="+55-00-0000-0000 +55-00-00000-0000" data-cc="BR" data-cd="Brazil"></td></tr>
+        <tr><td>Chile</td><td><code>+56-0-0000-0000</code></td><td><input type="tel" id="e-phone-cl" name="phone-cl" mask="+56-0-0000-0000" data-cc="CL" data-cd="Chile"></td></tr>
+        <tr><td>China (PRC)</td><td><code>+86(000)0000-0000</code></td><td><input type="tel" id="e-phone-cn" name="phone-cn" mask="+86(000)0000-0000 +86(000)0000-000 +86-00-00000-00000" data-cc="CN" data-cd="China (PRC)"></td></tr>
+        <tr><td>Colombia</td><td><code>+57(000)000-0000</code></td><td><input type="tel" id="e-phone-co" name="phone-co" mask="+57(000)000-0000" data-cc="CO" data-cd="Colombia"></td></tr>
+        <tr><td>Costa Rica</td><td><code>+506-0000-0000</code></td><td><input type="tel" id="e-phone-cr" name="phone-cr" mask="+506-0000-0000" data-cc="CR" data-cd="Costa Rica"></td></tr>
+        <tr><td>Cuba</td><td><code>+53-0-000-0000</code></td><td><input type="tel" id="e-phone-cu" name="phone-cu" mask="+53-0-000-0000" data-cc="CU" data-cd="Cuba"></td></tr>
+        <tr><td>Ecuador</td><td><code>+593-0-000-0000</code></td><td><input type="tel" id="e-phone-ec" name="phone-ec" mask="+5\93-0-000-0000 +5\93-00-000-0000" data-cc="EC" data-cd="Ecuador"></td></tr>
+        <tr><td>Egypt</td><td><code>+20(000)000-0000</code></td><td><input type="tel" id="e-phone-eg" name="phone-eg" mask="+20(000)000-0000" data-cc="EG" data-cd="Egypt"></td></tr>
+        <tr><td>El Salvador</td><td><code>+503-00-00-0000</code></td><td><input type="tel" id="e-phone-sv" name="phone-sv" mask="+503-00-00-0000" data-cc="SV" data-cd="El Salvador"></td></tr>
+        <tr><td>France</td><td><code>+33-0-00-00-00-00</code></td><td><input type="tel" id="e-phone-fr" name="phone-fr" mask="+33-0-00-00-00-00" data-cc="FR" data-cd="France"></td></tr>
+        <tr><td>Germany</td><td><code>+49-000-000</code></td><td><input type="tel" id="e-phone-de" name="phone-de" mask="+4\9-000-000 +4\9(000)00-00 +4\9(000)00-000 +4\9(000)00-0000 +4\9(000)000-0000 +4\9(0000)000-0000" data-cc="DE" data-cd="Germany"></td></tr>
+        <tr><td>Guatemala</td><td><code>+502-0-000-0000</code></td><td><input type="tel" id="e-phone-gt" name="phone-gt" mask="+502-0-000-0000" data-cc="GT" data-cd="Guatemala"></td></tr>
+        <tr><td>Honduras</td><td><code>+504-0000-0000</code></td><td><input type="tel" id="e-phone-hn" name="phone-hn" mask="+504-0000-0000" data-cc="HN" data-cd="Honduras"></td></tr>
+        <tr><td>India</td><td><code>+91(0000)000-000</code></td><td><input type="tel" id="e-phone-in" name="phone-in" mask="+\91(0000)000-000" data-cc="IN" data-cd="India"></td></tr>
+        <tr><td>Indonesia</td><td><code>+62(800)000-0000</code></td><td><input type="tel" id="e-phone-id" name="phone-id" mask="+62(800)000-0000 +62-00-000-00 +62-00-000-000 +62-00-000-0000 +62(800)000-000 +62(800)000-00-000" data-cc="ID" data-cd="Indonesia"></td></tr>
+        <tr><td>Iraq</td><td><code>+964(000)000-0000</code></td><td><input type="tel" id="e-phone-iq" name="phone-iq" mask="+\964(000)000-0000" data-cc="IQ" data-cd="Iraq"></td></tr>
+        <tr><td>Italy</td><td><code>+39(000)0000-00-00</code></td><td><input type="tel" id="e-phone-it" name="phone-it" mask=" +3\9(000)0000-00-00 +3\9(000)0000-000 +3\9(000)000-000 +3\9(000)00-000 +3\9(000)00-00 +3\9(00)00-00 +3\9(300)000-00-00 +3\9(300)00-00-00" data-cc="IT" data-cd="Italy"></td></tr>
+        <tr><td>Japan</td><td><code>+81(000)000-000</code></td><td><input type="tel" id="e-phone-jp" name="phone-jp" mask="+81(000)000-000 +81-00-0000-0000" data-cc="JP" data-cd="Japan"></td></tr>
+        <tr><td>Jordan</td><td><code>+962-0-0000-0000</code></td><td><input type="tel" id="e-phone-jo" name="phone-jo" mask="+\962-0-0000-0000" data-cc="JO" data-cd="Jordan"></td></tr>
+        <tr><td>Korea (South)</td><td><code>+82-00-000-0000</code></td><td><input type="tel" id="e-phone-kr" name="phone-kr" mask="+82-00-000-0000" data-cc="KR" data-cd="Korea (South)"></td></tr>
+        <tr><td>Kuwait</td><td><code>+965-0000-0000</code></td><td><input type="tel" id="e-phone-kw" name="phone-kw" mask="+\965-0000-0000" data-cc="KW" data-cd="Kuwait"></td></tr>
+        <tr><td>Lebanon</td><td><code>+961-00-000-000</code></td><td><input type="tel" id="e-phone-lb" name="phone-lb" mask="+\961-00-000-000 +\961-0-000-000" data-cc="LB" data-cd="Lebanon"></td></tr>
+        <tr><td>Libya</td><td><code>+218-00-000-000</code></td><td><input type="tel" id="e-phone-ly" name="phone-ly" mask="+218-00-000-000 +218-21-000-0000" data-cc="LY" data-cd="Libya"></td></tr>
+        <tr><td>Mexico</td><td><code>+52-00-00-0000</code></td><td><input type="tel" id="e-phone-mx" name="phone-mx" mask="+52-00-00-0000 +52(000)000-0000" data-cc="MX" data-cd="Mexico"></td></tr>
+        <tr><td>Morocco</td><td><code>+212-00-0000-000</code></td><td><input type="tel" id="e-phone-ma" name="phone-ma" mask="+212-00-0000-000" data-cc="MA" data-cd="Morocco"></td></tr>
+        <tr><td>Netherlands</td><td><code>+31-00-000-0000</code></td><td><input type="tel" id="e-phone-nl" name="phone-nl" mask="+31-00-000-0000" data-cc="NL" data-cd="Netherlands"></td></tr>
+        <tr><td>Nicaragua</td><td><code>+505-0000-0000</code></td><td><input type="tel" id="e-phone-ni" name="phone-ni" mask="+505-0000-0000" data-cc="NI" data-cd="Nicaragua"></td></tr>
+        <tr><td>Norway</td><td><code>+47(000)00-000</code></td><td><input type="tel" id="e-phone-no" name="phone-no" mask="+47(000)00-000" data-cc="NO" data-cd="Norway"></td></tr>
+        <tr><td>Oman</td><td><code>+968-00-000-000</code></td><td><input type="tel" id="e-phone-om" name="phone-om" mask="+\968-00-000-000" data-cc="OM" data-cd="Oman"></td></tr>
+        <tr><td>Panama</td><td><code>+507-000-0000</code></td><td><input type="tel" id="e-phone-pa" name="phone-pa" mask="+507-000-0000" data-cc="PA" data-cd="Panama"></td></tr>
+        <tr><td>Paraguay</td><td><code>+595(000)000-000</code></td><td><input type="tel" id="e-phone-py" name="phone-py" mask="+5\95(000)000-000" data-cc="PY" data-cd="Paraguay"></td></tr>
+        <tr><td>Peru</td><td><code>+51(000)000-000</code></td><td><input type="tel" id="e-phone-pe" name="phone-pe" mask="+51(000)000-000" data-cc="PE" data-cd="Peru"></td></tr>
+        <tr><td>Portugal</td><td><code>+351-00-000-0000</code></td><td><input type="tel" id="e-phone-pt" name="phone-pt" mask="+351-00-000-0000" data-cc="PT" data-cd="Portugal"></td></tr>
+        <tr><td>Qatar</td><td><code>+974-0000-0000</code></td><td><input type="tel" id="e-phone-qa" name="phone-qa" mask="+\974-0000-0000" data-cc="QA" data-cd="Qatar"></td></tr>
+        <tr><td>Russia</td><td><code>+7(000)000-00-00</code></td><td><input type="tel" id="e-phone-ru" name="phone-ru" mask="+7(000)000-00-00" data-cc="RU" data-cd="Russia"></td></tr>
+        <tr><td>Saudi Arabia</td><td><code>+966-5-0000-0000</code></td><td><input type="tel" id="e-phone-sa" name="phone-sa" mask="+\966-5-0000-0000 +\966-0-000-000" data-cc="SA" data-cd="Saudi Arabia"></td></tr>
+        <tr><td>Spain</td><td><code>+34(000)000-000</code></td><td><input type="tel" id="e-phone-es" name="phone-es" mask="+34(000)000-000" data-cc="ES" data-cd="Spain"></td></tr>
+        <tr><td>Syrian Arab Republic</td><td><code>+963-00-0000-000</code></td><td><input type="tel" id="e-phone-sy" name="phone-sy" mask="+\963-00-0000-000" data-cc="SY" data-cd="Syrian Arab Republic"></td></tr>
+        <tr><td>Taiwan</td><td><code>+886-0000-0000</code></td><td><input type="tel" id="e-phone-tw" name="phone-tw" mask="+886-0000-0000 +886-0-0000-0000" data-cc="TW" data-cd="Taiwan"></td></tr>
+        <tr><td>Tunisia</td><td><code>+216-00-000-000</code></td><td><input type="tel" id="e-phone-tn" name="phone-tn" mask="+216-00-000-000" data-cc="TN" data-cd="Tunisia"></td></tr>
+        <tr><td>Turkey</td><td><code>+90(000)000-0000</code></td><td><input type="tel" id="e-phone-tr" name="phone-tr" mask="+\90(000)000-0000" data-cc="TR" data-cd="Turkey"></td></tr>
+        <tr><td>United Arab Emirates</td><td><code>+971-50-000-0000</code></td><td><input type="tel" id="e-phone-ae" name="phone-ae" mask="+\971-50-000-0000 +\971-0-000-0000" data-cc="AE" data-cd="United Arab Emirates"></td></tr>
+        <tr><td>United Kingdom<!-- https://www.area-codes.org.uk/more/about-uk-area-codes.php --></td><td><code>+44-00-0000-0000</code></td><td><input type="tel" id="e-phone-uk" name="phone-uk" mask="+44-00-0000-0000" data-cc="UK" data-cd="United Kingdom"></td></tr>
+        <tr><td>Uruguay</td><td><code>+598-0-000-00-00</code></td><td><input type="tel" id="e-phone-uy" name="phone-uy" mask="+5\98-0-000-00-00" data-cc="UY" data-cd="Uruguay"></td></tr>
+        <tr><td>USA and Canada</td><td><code>+1(000)000-0000</code></td><td><input type="tel" id="e-phone-us" name="phone-us" mask="+1(000)000-0000" data-cd="USA and Canada"></td></tr>
+        <tr><td>Venezuela</td><td><code>+58(000)000-0000</code></td><td><input type="tel" id="e-phone-ve" name="phone-ve" mask="+58(000)000-0000" data-cc="VE" data-cd="Venezuela"></td></tr>
+        <tr><td>Vietnam</td><td><code>+84(000)0000-000</code></td><td><input type="tel" id="e-phone-vn" name="phone-vn" mask="+84(000)0000-000 +84-00-0000-000" data-cc="VN" data-cd="Vietnam"></td></tr>
+        <tr><td>Yemen</td><td><code>+967-000-000-000</code></td><td><input type="tel" id="e-phone-ye" name="phone-ye" mask="+\967-000-000-000 +\967-0-000-000 +\967-00-000-000" data-cc="YE" data-cd="Yemen"></td></tr>
+      </tbody>
+    </table>
     <input type="submit">
   </form>
 

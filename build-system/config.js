@@ -62,7 +62,7 @@ const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
 const testPaths = commonIntegrationTestPaths.concat([
-  'test/**/*.js',
+  'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);
@@ -92,6 +92,11 @@ const integrationTestPaths = [
   'test/integration/**/*.js',
   'test/unit/test-error.js',
   'extensions/**/test/integration/**/*.js',
+];
+
+const e2eTestPaths = [
+  'test/e2e/*.js',
+  'extensions/**/test-e2e/*.js',
 ];
 
 const devDashboardTestPaths = [
@@ -138,6 +143,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  e2eTestPaths,
   lintGlobs,
   devDashboardTestPaths,
   thirdPartyFrames,

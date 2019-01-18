@@ -29,10 +29,10 @@
     "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
   },
   "atinternet": {
-    "base": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
+    "base": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
-    "pageview": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=!level2&medium=amp&&ref=_document_referrer_",
-    "click": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=!level2&p=!label&s2=!level2Click&type=click&click=!type&medium=amp&&ref=_document_referrer_"
+    "pageview": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=!level2&medium=amp&&ref=_document_referrer_",
+    "click": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=!level2&p=!label&s2=!level2Click&type=click&click=!type&medium=amp&&ref=_document_referrer_"
   },
   "baiduanalytics": {
     "host": "https://hm.baidu.com",
