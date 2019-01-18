@@ -17,6 +17,7 @@
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 const {Builder, Capabilities} = require('selenium-webdriver');
+const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -62,6 +63,7 @@ function describeEnv(factory) {
     });
     return describeFunc(name, function() {
       const env = Object.create(null);
+      let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(() => {
         let totalPromise = undefined;
@@ -80,6 +82,8 @@ function describeEnv(factory) {
       });
 
       afterEach(function() {
+        clearLastExpectError();
+        clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.
         fixtures.slice(0).reverse().forEach(fixture => {
           // TODO(cvializ): handle errors better
@@ -95,7 +99,19 @@ function describeEnv(factory) {
         }
       });
 
+      after(function() {
+        clearTimeout(asyncErrorTimerId);
+      });
+
+
       describe(SUB, function() {
+        // If there is an async expect error, throw it in the final state.
+        asyncErrorTimerId = setTimeout(() => {
+          const lastExpectError = getLastExpectError();
+          if (lastExpectError) {
+            throw lastExpectError;
+          }
+        }, this.timeout() - 1);
         fn.call(this, env);
       });
     });
