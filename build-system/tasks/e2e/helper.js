@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import 'babel-regenerator-runtime';
-import * as describes from './describes-e2e';
-import {Key} from 'selenium-webdriver';
-import {expect} from './expect';
+require('babel-regenerator-runtime');
+const describes = require('./describes-e2e');
+const {expect} = require('./expect');
+const {Key} = require('selenium-webdriver');
 
 global.describes = describes;
 global.expect = expect;
