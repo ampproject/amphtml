@@ -190,7 +190,11 @@ function find(haystack, needleCb) {
  * @return {boolean}
  * @visibleForTesting
  */
-export function isDocValid(ampdoc) {
+export function isEnabledForDoc(ampdoc) {
+  if (!Services.viewerForDoc(ampdoc).isEmbedded()) {
+    return false;
+  }
+
   const scriptTags = ampdoc.getHeadNode().querySelectorAll('script');
 
   const schemaTag = find(scriptTags,
@@ -264,7 +268,7 @@ function applyToScanned(ampdoc, images) {
  * @return {!Promise}
  */
 export function scanDoc(ampdoc) {
-  if (!isDocValid(ampdoc)) {
+  if (!isEnabledForDoc(ampdoc)) {
     return Promise.resolve();
   }
 

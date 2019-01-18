@@ -22,7 +22,7 @@ import {
   REQUIRED_EXTENSION,
   Scanner,
   VIEWPORT_AREA_RATIO,
-  isDocValid,
+  isEnabledForDoc,
   meetsCriteria,
   meetsSizingCriteria,
   scanDoc,
@@ -75,6 +75,12 @@ describes.realWin(TAG, {
       '@type': type,
     });
     document.head.appendChild(script);
+  }
+
+  function mockIsEmbedded(isEmbedded) {
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
+      isEmbedded() { return isEmbedded; },
+    });
   }
 
   function spyInstallExtensionsForDoc() {
@@ -526,6 +532,7 @@ describes.realWin(TAG, {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType('Article');
+      mockIsEmbedded(true);
       mockScannedImages([]);
 
       yield scanDoc(env.ampdoc);
@@ -538,6 +545,7 @@ describes.realWin(TAG, {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType('Article');
+      mockIsEmbedded(true);
       mockScannedImages([
         html`<amp-img src="bla.png"></amp-img>`,
       ]);
@@ -558,6 +566,7 @@ describes.realWin(TAG, {
       ]);
 
       mockAllCriteriaMet(false);
+      mockIsEmbedded(true);
 
       yield scanDoc(env.ampdoc);
 
@@ -578,6 +587,7 @@ describes.realWin(TAG, {
 
       mockSchemaType('Article');
       mockScannedImages([a, b, c]);
+      mockIsEmbedded(true);
 
       yield scanDoc(env.ampdoc);
 
@@ -609,15 +619,17 @@ describes.realWin(TAG, {
 
   });
 
-  describe('isDocValid', () => {
+  describe('isEnabledForDoc', () => {
 
     it('rejects documents without schema', () => {
-      expect(isDocValid(env.ampdoc)).to.be.false;
+      mockIsEmbedded(true);
+      expect(isEnabledForDoc(env.ampdoc)).to.be.false;
     });
 
     it('rejects schema with invalid @type', () => {
+      mockIsEmbedded(true);
       mockSchemaType('hamberder');
-      expect(isDocValid(env.ampdoc)).to.be.false;
+      expect(isEnabledForDoc(env.ampdoc)).to.be.false;
     });
 
     [
@@ -630,7 +642,8 @@ describes.realWin(TAG, {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
-        expect(isDocValid(env.ampdoc)).to.be.true;
+        mockIsEmbedded(true);
+        expect(isEnabledForDoc(env.ampdoc)).to.be.true;
       });
 
       it(`rejects schema with @type=${type} but lightbox explicit`, () => {
@@ -648,9 +661,16 @@ describes.realWin(TAG, {
         doc.body.appendChild(lightboxable);
 
         mockSchemaType(type);
+        mockIsEmbedded(true);
 
-        expect(isDocValid(env.ampdoc)).to.be.false;
+        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
 
+      });
+
+      it(`rejects schema with @type=${type} for non-embedded docs`, () => {
+        mockSchemaType(type);
+        mockIsEmbedded(false);
+        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
       });
 
     });
