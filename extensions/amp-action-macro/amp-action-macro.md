@@ -31,13 +31,13 @@ limitations under the License.
 </table>
 
 [TOC]
- 
+
 ## Overview
 
 The `amp-action-macro` component allows for the creation of reusable actions.
 
 ## Example
- 
+
 ```html
 <amp-action-macro
     id="closeNavigations"
@@ -49,12 +49,20 @@ The `amp-action-macro` component allows for the creation of reusable actions.
  <div on="tap:closeNavigations">Close all</div>
 ```
 
+```html
+<!--
+  You can provide arguments in the caller, overriding the default arguments in the action macro. The action macro
+  defaults applying for the omitted arguments.
+-->
+ <button on="tap:closeNavigations({nav3: 'close'})">Close all three</button>
+```
+
 ## Attributes
- 
+
 ##### id
- 
+
 Used to uniquely identify the action. This is referenced in an action invokation.
- 
+
 ##### action
 
 The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).

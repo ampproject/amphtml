@@ -35,7 +35,6 @@ import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
-
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -105,6 +104,14 @@ let ActionInfoArgsDef;
 
 /**
  * @typedef {{
+ *   action: !ActionInfoDef,
+ *   call: string
+ * }}
+ */
+let ActionMacroDef;
+
+/**
+ * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
@@ -161,7 +168,7 @@ export class ActionInvocation {
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event object that triggered this action.
-   * @param {ActionTrust} trust The trust level of this invocation's trigger.
+   * @param {!ActionTrust} trust The trust level of this invocation's trigger.
    * @param {?string} actionEventType The AMP event name that triggered this.
    * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} sequenceId An identifier for this action's sequence (all
@@ -181,7 +188,7 @@ export class ActionInvocation {
     this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
-    /** @const {ActionTrust} */
+    /** @const {!ActionTrust} */
     this.trust = trust;
     /** @const {?string} */
     this.actionEventType = actionEventType;
@@ -232,6 +239,9 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
+    /** @const @private {?Object<string, !ActionInfoDef>} */
+    this.actionMacros_ = map();
+
     /**
      * Optional whitelist of actions, e.g.:
      *
@@ -269,6 +279,16 @@ export class ActionService {
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
         new ActionService(ampdoc, embedWin.document));
+  }
+
+  /**
+   * @param {string} id
+   * @param {!ActionInfoDef} actionMap
+   */
+  addActionMacroDef(id, actionMap) {
+    userAssert(this.actionMacros_[id] == null,
+        `Action macro ${id} is already defined`);
+    this.actionMacros_[id] = actionMap;
   }
 
   /**
@@ -528,6 +548,7 @@ export class ActionService {
     }
   }
 
+
   /**
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
@@ -640,12 +661,50 @@ export class ActionService {
     let actionMap = node[ACTION_MAP_];
     if (actionMap === undefined) {
       actionMap = null;
-      if (node.hasAttribute('on')) {
-        actionMap = parseActionMap(node.getAttribute('on'), node);
+      const hasAction = node.hasAttribute('on');
+      if (hasAction) {
+        const action = node.getAttribute('on');
+        const actionMacroDef = this.getActionMacroDef_(action);
+
+        actionMap = parseActionMap(
+            !!actionMacroDef ? actionMacroDef.call : action,
+            node, actionMacroDef ? actionMacroDef.action.args : null);
+
+        node[ACTION_MAP_] = actionMap;
       }
-      node[ACTION_MAP_] = actionMap;
     }
     return actionMap;
+  }
+
+  /**
+   * Check if an action call references an action macro and if so returns
+   * the details of that action macro.
+   * @param {string} actionCall
+   * @private
+   * @return {?ActionMacroDef}
+   */
+  getActionMacroDef_(actionCall) {
+    // An action macro has the following formats:
+    //   event:action-macro-id()
+    //   event.action-macro-id
+    //   event.action-macro-id(arg1=1, arg2=2)
+    const actionMacroCall = /^\w+:(\w+[a-zA-Z'-]+)((\(.*\))?)$/;
+    const matchActionResults = actionCall.match(actionMacroCall);
+    if (matchActionResults) {
+      const macroActionId = matchActionResults[1];
+      const action = this.actionMacros_[macroActionId];
+      const {target, method} = action;
+      devAssert(action, 'macro action reference does not exist');
+      // Replace the macro id reference with the target and method name.
+      // <amp-action-macro id="action-macro-id" action="target.method()"
+      // e.g. event:action-macro-id() will become event:target.method()
+      const call = actionCall.replace(
+          macroActionId, `${target}.${method}`);
+
+      return {call, action};
+    }
+
+    return null;
   }
 
   /**
@@ -820,10 +879,12 @@ function notImplemented() {
 /**
  * @param {string} s
  * @param {!Element} context
+ * @param {?Object=} opt_defaultArgs arguments to use for the arguments
+ *   not provided by the caller.
  * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
-export function parseActionMap(s, context) {
+export function parseActionMap(s, context, opt_defaultArgs) {
   const assertAction = assertActionForParser.bind(null, s, context);
   const assertToken = assertTokenForParser.bind(null, s, context);
 
@@ -849,7 +910,7 @@ export function parseActionMap(s, context) {
 
       const actions = [];
 
-      // Handlers for event
+      // Handlers for event.
       do {
         const target = assertToken(
             toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
@@ -869,6 +930,11 @@ export function parseActionMap(s, context) {
           if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
             toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
+          }
+          // Override the default args set on the macro with the ones provided
+          // by the caller.
+          if (opt_defaultArgs) {
+            args = Object.assign(opt_defaultArgs, args);
           }
         }
 
@@ -906,7 +972,7 @@ export function parseActionMap(s, context) {
  * @param {!ParserTokenizer} toks
  * @param {!Function} assertToken
  * @param {!Function} assertAction
- * @return {ActionInfoArgsDef}
+ * @return {?ActionInfoArgsDef}
  * @private
  */
 function tokenizeMethodArguments(toks, assertToken, assertAction) {

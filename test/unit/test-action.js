@@ -647,6 +647,7 @@ describe('Action method', () => {
   let sandbox;
   let action;
   let getDefaultActionAlias;
+  let id;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
@@ -656,7 +657,7 @@ describe('Action method', () => {
     onEnqueue = sandbox.spy();
     getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
-    const id = ('E' + Math.random()).replace('.', '');
+    id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
     parent = document.createElement('parent');
     child = document.createElement('child');
@@ -672,7 +673,6 @@ describe('Action method', () => {
     document.body.removeChild(parent);
     sandbox.restore();
   });
-
 
   it('should invoke on the AMP element', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', /* args */ null,
@@ -734,6 +734,55 @@ describe('Action method', () => {
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
+  });
+
+  describe('macros', () => {
+    let actionMacroDef;
+    let expectedActionMap;
+
+    beforeEach(() => {
+      const actionMacroId = 'action-macro-id';
+      actionMacroDef = {
+        event: 'amp-action-event',
+        target: id,
+        method: 'method1',
+        args: {arg0: 0, arg1: 1},
+        str: `${actionMacroId}.method1`,
+      };
+      action.actionMacros_['action-macro-id'] = actionMacroDef;
+      // The expected action map used when generating the action invocation.
+      // Note the merged properties with the action macro defined above.
+      expectedActionMap = {
+        args: {'arg0': 0, 'arg1': 2},
+        event: 'tap',
+        method: 'method1',
+        str: 'tap:' + id + '.method1(arg1=2)',
+        target: id,
+      };
+      // A caller that references an action macro, providing only
+      // argument.
+      targetElement.setAttribute('on', `tap:${actionMacroId}(arg1=2)`);
+    });
+
+    it('should define the correct action map on invocation', () => {
+      action.trigger(targetElement, 'tap', null);
+      expect(action.getActionMap_(targetElement)['tap'][0])
+          .eql(expectedActionMap);
+    });
+
+    it('should throw an error if action macro is already registered', () => {
+      const actionMacroDef = {};
+      expect(() => {
+        action.addActionMacroDef('action-macro-id', actionMacroDef);
+      }).to.throw(/is already defined/);
+    });
+
+    it('should allow registering action macros', () => {
+      const actionMacroDef = {};
+      action.addActionMacroDef('action-macro-id-1', actionMacroDef);
+      expect(action.actionMacros_['action-macro-id-1']).to.eql({});
+    });
+
   });
 });
 
