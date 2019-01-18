@@ -1331,7 +1331,28 @@ describes.realWin('amp-story', {
               });
         });
 
-<<<<<<< HEAD
+    it('should begin at the specified page fragment parameter value', () => {
+      win.location.hash = 'page=page-1';
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2','page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should begin at initial page when fragment parameter value is wrong',
+        () => {
+          win.location.hash = 'page=BADVALUE';
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+    });
+
     it('should update browser history with the story navigation path', () => {
       const pageCount = 2;
       createPages(story.element, pageCount, ['cover', 'page-1']);
@@ -1347,44 +1368,26 @@ describes.realWin('amp-story', {
 
     it('should navigate to the correct previous page after navigating away',
         () => {
-=======
-    it('should begin at the specified page fragment parameter value', () => {
-      win.location.hash = 'page=page-1';
-      createPages(story.element, 4, ['cover', 'page-1', 'page-2','page-3']);
-
-      return story.layoutCallback()
-          .then(() => {
-            expect(story.activePage_.element.id).to.equal('page-1');
-          });
-    });
-
-    it('should begin at initial page when fragment parameter value is wrong',
-        () => {
-          win.location.hash = 'page=BADVALUE';
->>>>>>> master
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
           return story.layoutCallback()
               .then(() => {
-<<<<<<< HEAD
                 const currentLocation = win.location;
                 story.getPageById('cover')
                     .element.setAttribute('advance-to', 'page-3');
                 story.activePage_.element.dispatchEvent(
                     new MouseEvent('click', {clientX: 200}));
 
-
                 win.location = 'https://example.com/';
                 win.location = currentLocation;
 
                 story.activePage_.element.dispatchEvent(
                     new MouseEvent('click', {clientX: 0}));
-=======
->>>>>>> master
+
                 expect(story.activePage_.element.id).to.equal('cover');
               });
-        });
+    });
   });
 });
 
