@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-'use strict';
+require('babel-regenerator-runtime');
+const describes = require('./describes-e2e');
+const {expect} = require('./expect');
+const {Key} = require('selenium-webdriver');
 
-const config = require('../../config');
-const gulp = require('gulp-help')(require('gulp'));
-const mocha = require('gulp-mocha');
-
-function e2e() {
-  return gulp.src(config.e2eTestPaths, {read: false})
-      .pipe(mocha({
-        require: [
-          '@babel/register',
-          '../../../build-system/tasks/e2e/helper',
-        ],
-      }));
-}
-
-gulp.task('e2e', 'Runs e2e tests', e2e);
+global.describes = describes;
+global.expect = expect;
+global.Key = Key;
