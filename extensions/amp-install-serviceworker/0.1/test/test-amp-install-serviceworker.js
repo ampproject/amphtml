@@ -86,7 +86,7 @@ describes.realWin('amp-install-serviceworker', {
         serviceWorker: {
           register: (src, options) => {
             expect(calledSrc).to.be.undefined;
-            expect(options.scope).to.be.equal('/');
+            expect(options.scope).to.be.undefined;
             calledSrc = src;
             return p;
           },

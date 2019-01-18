@@ -65,6 +65,10 @@ The URL of the ServiceWorker to register, which must use `https` protocol.
 
 The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol.
 
+##### data-scope (optional)
+
+The scope of the service worker to be installed.
+
 ##### layout
 
 Must have the value `nodisplay`.

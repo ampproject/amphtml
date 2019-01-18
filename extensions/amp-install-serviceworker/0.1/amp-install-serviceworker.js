@@ -307,35 +307,37 @@ class UrlRewriter_ {
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src, element) {
-  const scope = element.getAttribute('data-scope') || '/';
-  return win.navigator.serviceWorker.register(src, {
-    scope,
-  }).then(function(registration) {
-    if (getMode().development) {
-      user().info(TAG, 'ServiceWorker registration successful with scope: ',
-          registration.scope);
-    }
-    // Check if there is a new service worker installing.
-    const installingSw = registration.installing;
-    if (installingSw) {
-      // if not already active, wait till it becomes active
-      installingSw.addEventListener('statechange', evt => {
-        if (evt.target.state === 'activated') {
-          performServiceWorkerOptimizations(
-              registration,
-              win,
-              element
-          );
+  const options = {};
+  if (element.hasAttribute('data-scope')) {
+    options.scope = element.getAttribute('data-scope');
+  }
+  return win.navigator.serviceWorker.register(src, options)
+      .then(function(registration) {
+        if (getMode().development) {
+          user().info(TAG, 'ServiceWorker registration successful with scope: ',
+              registration.scope);
         }
-      });
-    } else if (registration.active) {
-      performServiceWorkerOptimizations(registration, win, element);
-    }
+        // Check if there is a new service worker installing.
+        const installingSw = registration.installing;
+        if (installingSw) {
+          // if not already active, wait till it becomes active
+          installingSw.addEventListener('statechange', evt => {
+            if (evt.target.state === 'activated') {
+              performServiceWorkerOptimizations(
+                  registration,
+                  win,
+                  element
+              );
+            }
+          });
+        } else if (registration.active) {
+          performServiceWorkerOptimizations(registration, win, element);
+        }
 
-    return registration;
-  }, function(e) {
-    user().error(TAG, 'ServiceWorker registration failed:', e);
-  });
+        return registration;
+      }, function(e) {
+        user().error(TAG, 'ServiceWorker registration failed:', e);
+      });
 }
 
 /**
