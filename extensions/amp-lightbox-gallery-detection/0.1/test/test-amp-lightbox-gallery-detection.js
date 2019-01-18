@@ -603,17 +603,20 @@ describes.realWin(TAG, {
     it('filters out images that fail to load', () => {
       const doc = env.win.document;
 
-      const a = html`<amp-img src="bla.png"></amp-img>`;
-      const b = html`<amp-img src="bla.png"></amp-img>`;
+      const shouldNotLoad = html`<amp-img src="bla.png"></amp-img>`;
+      const shouldLoad = html`<amp-img src="bla.png"></amp-img>`;
 
-      sandbox.stub(doc, 'querySelectorAll').withArgs('amp-img').returns([a, b]);
+      sandbox.stub(doc, 'querySelectorAll').withArgs('amp-img').returns([
+        shouldNotLoad,
+        shouldLoad,
+      ]);
 
-      a.signals().rejectSignal(CommonSignals.LOAD_END, new Error());
-      b.signals().signal(CommonSignals.LOAD_END);
+      shouldNotLoad.signals().rejectSignal(CommonSignals.LOAD_END, new Error());
+      shouldLoad.signals().signal(CommonSignals.LOAD_END);
 
       return Scanner.getAllImages(doc).then(images => {
         expect(images.length).to.equal(1);
-        expect(images[0]).to.equal(b);
+        expect(images[0]).to.equal(shouldLoad);
       });
     });
 
