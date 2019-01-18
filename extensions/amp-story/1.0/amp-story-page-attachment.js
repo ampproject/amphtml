@@ -163,6 +163,14 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         .querySelector('.i-amphtml-story-page-attachment-close-button')
         .addEventListener('click', () => this.close_(), true /** useCapture */);
 
+    // Always open links in a new tab.
+    this.contentEl_.addEventListener('click', event => {
+      const {target} = event;
+      if (target.tagName.toLowerCase() === 'a') {
+        target.setAttribute('target', '_blank');
+      }
+    }, true /** useCapture */);
+
     // Closes the attachment on opacity background clicks.
     this.element.addEventListener('click', event => {
       if (event.target.tagName.toLowerCase() === 'amp-story-page-attachment') {
