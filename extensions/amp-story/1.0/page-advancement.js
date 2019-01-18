@@ -444,19 +444,25 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer.
+   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
    * @param {!Event} event
    * @return {boolean}
    * @private
    */
   canShowTooltip_(event) {
     let valid = true;
+    let tagName;
+
     return !!closest(dev().assertElement(event.target), el => {
-      if (el.tagName.toLowerCase() === 'amp-story-cta-layer') {
+      tagName = el.tagName.toLowerCase();
+
+      if (tagName === 'amp-story-cta-layer' ||
+          tagName === 'amp-story-page-attachment') {
         valid = false;
         return false;
       }
-      return el.tagName.toLowerCase() === 'amp-story-page' && valid;
+
+      return tagName === 'amp-story-page' && valid;
     }, /* opt_stopAt */ this.element_);
   }
 
