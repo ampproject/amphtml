@@ -265,6 +265,16 @@ export class FunctionalTestController {
    */
   async getElementProperty(unusedHandle, unusedProperty, opt_expect) {}
 
+
+  /**
+   * Returns the rect for a given Element.
+   * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   */
+  async getElementRect(unusedHandle) {}
+
   /**
    * Return the value of the given CSS value on the given element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-css-value}

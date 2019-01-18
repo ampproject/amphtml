@@ -18,6 +18,7 @@
 import * as cd from 'chromedriver'; // eslint-disable-line no-unused-vars
 import {Builder, Capabilities} from 'selenium-webdriver';
 import {SeleniumWebDriverController} from './selenium-webdriver-controller';
+import {clearLastExpectError, getLastExpectError} from './expect';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -62,6 +63,7 @@ function describeEnv(factory) {
     });
     return describeFunc(name, function() {
       const env = Object.create(null);
+      let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(() => {
         let totalPromise = undefined;
@@ -80,6 +82,8 @@ function describeEnv(factory) {
       });
 
       afterEach(function() {
+        clearLastExpectError();
+        clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.
         fixtures.slice(0).reverse().forEach(fixture => {
           // TODO(cvializ): handle errors better
@@ -95,7 +99,19 @@ function describeEnv(factory) {
         }
       });
 
+      after(function() {
+        clearTimeout(asyncErrorTimerId);
+      });
+
+
       describe(SUB, function() {
+        // If there is an async expect error, throw it in the final state.
+        asyncErrorTimerId = setTimeout(() => {
+          const lastExpectError = getLastExpectError();
+          if (lastExpectError) {
+            throw lastExpectError;
+          }
+        }, this.timeout() - 1);
         fn.call(this, env);
       });
     });
