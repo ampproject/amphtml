@@ -56,6 +56,15 @@ export const UIType = {
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    state: !EmbeddedComponentState,
+ *    clientX: number,
+ *    clientY: number,
+ * }}
+ */
+export let InteractiveComponentDef;
 
 /**
  * @typedef {{
@@ -71,7 +80,7 @@ export const UIType = {
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
- *    interactiveEmbeddedComponentState: !Object,
+ *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    landscapeState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
@@ -214,6 +223,7 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
           }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
+      data = /** @type {InteractiveComponentDef} */ (data);
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             [StateProperty.PAUSED_STATE]:

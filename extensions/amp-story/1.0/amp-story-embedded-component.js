@@ -16,6 +16,7 @@
 
 import {
   Action,
+  InteractiveComponentDef,
   StateProperty,
   UIType,
   getStoreService,
@@ -222,7 +223,7 @@ export class AmpStoryEmbeddedComponent {
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
-        component => {
+        /** @param {!InteractiveComponentDef} component */ component => {
           if (component.state !== EmbeddedComponentState.HIDDEN) {
             this.onEmbeddedComponentUpdate_(component);
           }
@@ -234,7 +235,7 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Reacts to embedded component updates.
-   * @param {!Object} component
+   * @param {!InteractiveComponentDef} component
    * @private
    */
   onEmbeddedComponentUpdate_(component) {
@@ -264,7 +265,7 @@ export class AmpStoryEmbeddedComponent {
    *      ||______________________|
    *
    * @param {EmbeddedComponentState} state
-   * @param {?Object} component
+   * @param {?InteractiveComponentDef} component
    * @private
    */
   setState_(state, component) {
@@ -387,7 +388,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to store updates related to the focused state, when a tooltip is
    * active.
-   * @param {?Object} component
+   * @param {?InteractiveComponentDef} component
    * @private
    */
   onFocusedStateUpdate_(component) {
@@ -435,7 +436,7 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Builds and attaches the tooltip.
-   * @param {!Object} component
+   * @param {!InteractiveComponentDef} component
    * @private
    */
   updateTooltipEl_(component) {
@@ -476,7 +477,8 @@ export class AmpStoryEmbeddedComponent {
     event.stopPropagation();
 
     this.setState_(EmbeddedComponentState.EXPANDED,
-        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
+        /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+            StateProperty.INTERACTIVE_COMPONENT_STATE)));
 
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
         {state: EmbeddedComponentState.EXPANDED});
@@ -610,7 +612,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Positions tooltip and its pointing arrow according to the position of the
    * target.
-   * @param {!Object} component
+   * @param {!InteractiveComponentDef} component
    * @private
    */
   positionTooltip_(component) {
@@ -641,26 +643,27 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Positions tooltip and its arrow vertically.
-   * @param {!Object} component
+   * @param {!InteractiveComponentDef} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private
    */
   verticalPositioning_(component, pageRect, state) {
     const tooltipHeight = this.tooltip_./*OK*/offsetHeight;
+    const verticalOffset = EDGE_PADDING * 3;
 
-    state.tooltipTop = component.clientY - tooltipHeight - EDGE_PADDING;
+    state.tooltipTop = component.clientY - tooltipHeight - verticalOffset;
     if (state.tooltipTop < pageRect.top + MIN_VERTICAL_SPACE) {
       // Target is too high up screen, place tooltip facing down with
       // arrow on top.
       state.arrowOnTop = true;
-      state.tooltipTop = component.clientY + EDGE_PADDING;
+      state.tooltipTop = component.clientY + verticalOffset;
     }
   }
 
   /**
    * Positions tooltip and its arrow horizontally.
-   * @param {!Object} component
+   * @param {!InteractiveComponentDef} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private

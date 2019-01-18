@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
+import {EmbeddedComponentState} from './amp-story-embedded-component';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {
@@ -181,9 +182,10 @@ export class AmpStoryHint {
       this.onBookendStateUpdate_(isOpen);
     });
 
-    this.storeService_.subscribe(
-        StateProperty.EMBEDDED_COMPONENT, tooltipIsOpen => {
-          this.onFocusedStateUpdate_(tooltipIsOpen);
+    this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
+        /** @param {./amp-story-store-service.InteractiveComponentDef} component */ component => {
+          this.onFocusedStateUpdate_(
+              component.state === EmbeddedComponentState.FOCUSED);
         });
 
     this.vsync_.mutate(() => {

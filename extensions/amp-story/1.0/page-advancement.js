@@ -15,6 +15,7 @@
  */
 import {
   Action,
+  InteractiveComponentDef,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
@@ -379,9 +380,9 @@ class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-        this.storeService_.get(
-            StateProperty.INTERACTIVE_COMPONENT_STATE).state !==
-            EmbeddedComponentState.EXPANDED) {
+    /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+        StateProperty.INTERACTIVE_COMPONENT_STATE)).state !==
+        EmbeddedComponentState.EXPANDED) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -479,12 +480,11 @@ class ManualAdvancement extends AdvancementConfig {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
+      const embedComponent = /** @type {InteractiveComponentDef} */
+        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
-        state:
-          this.storeService_.get(
-              StateProperty.INTERACTIVE_COMPONENT_STATE).state ||
-          EmbeddedComponentState.FOCUSED,
+        state: embedComponent.state || EmbeddedComponentState.FOCUSED,
         clientX: event.clientX,
         clientY: event.clientY,
       });
