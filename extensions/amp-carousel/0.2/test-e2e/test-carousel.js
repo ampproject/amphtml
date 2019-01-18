@@ -63,14 +63,14 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/render.png');
   });
 
-  it('should layout the two adjacent slides', async() => {
+  it.skip('should layout the two adjacent slides', async() => {
     // TODO(sparhami) Verify this is on the right of the 0th slide
     await waitForCarouselImg(1);
     // TODO(sparhami) Verify this is on the left of the 0th slide
     await waitForCarouselImg(SLIDE_COUNT - 1);
   });
 
-  it('should snap when scrolling', async() => {
+  it.skip('should snap when scrolling', async() => {
     const el = await controller.findElement(scrollerSelector);
     const firstSlide = await getSlide(0);
 
@@ -90,7 +90,7 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/snapped.png');
   });
 
-  it('should reset the window after scroll', async() => {
+  it.skip('should reset the window after scroll', async() => {
     const el = await controller.findElement(scrollerSelector);
     const firstSlide = await getSlide(0);
 
@@ -117,7 +117,7 @@ describes.endtoend('AMP carousel', {
   it('should have the correct scroll position when resizing', async() => {
     // Note: 513 seems to be the smallest settable width.
     controller.setWindowRect({
-      width: 300,
+      width: 600,
       height: 1000,
     });
 
@@ -128,7 +128,7 @@ describes.endtoend('AMP carousel', {
     await waitForCarouselImg(1);
     await expect(controller.getElementRect(firstSlide)).to.include({
       'x': 0,
-      'width': 300,
+      'width': 600,
     });
 
     controller.setWindowRect({
@@ -145,7 +145,7 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/after-resize.png');
   });
 
-  describe('looping', () => {
+  describe.skip('looping', () => {
     it('should show the last slide when looping', async() => {
       const el = await controller.findElement(scrollerSelector);
       const lastSlide = await getSlide(SLIDE_COUNT - 1);

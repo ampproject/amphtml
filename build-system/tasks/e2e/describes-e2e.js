@@ -15,10 +15,10 @@
  */
 
 // import to install chromedriver
-import * as cd from 'chromedriver'; // eslint-disable-line no-unused-vars
-import {Builder, Capabilities} from 'selenium-webdriver';
-import {SeleniumWebDriverController} from './selenium-webdriver-controller';
-import {clearLastExpectError, getLastExpectError} from './expect';
+require('chromedriver'); // eslint-disable-line no-unused-vars
+const {Builder, Capabilities} = require('selenium-webdriver');
+const {clearLastExpectError, getLastExpectError} = require('./expect');
+const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -31,12 +31,12 @@ const TIMEOUT = 20000;
  *  fixtures: (!Array<string>|undefined),
  * }}
  */
-export let TestSpec;
+let TestSpec;
 
 /**
  * An end2end test using selenium web driver on a regular amp page
  */
-export const endtoend = describeEnv(spec => [
+const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
   // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
@@ -150,13 +150,13 @@ class FixtureInterface {
   isOn() {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    * @return {!Promise|undefined}
    */
   setup(unusedEnv) {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    */
   teardown(unusedEnv) {}
 }
@@ -195,13 +195,20 @@ class AmpPageFixture {
 
     // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
+
     // const chromeOptions = {'args': ['--headless']};
+
     // capabilities.set('chromeOptions', chromeOptions);
 
+
     const builder = new Builder().withCapabilities(capabilities);
+
     return builder.build().then(driver => {
+
       env.controller = new SeleniumWebDriverController(driver);
+
       this.driver_ = driver;
+
     });
   }
 
@@ -211,3 +218,8 @@ class AmpPageFixture {
     this.driver_ = null;
   }
 }
+
+module.exports = {
+  TestSpec,
+  endtoend,
+};
