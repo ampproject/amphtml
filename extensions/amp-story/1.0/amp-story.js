@@ -29,10 +29,10 @@ import './amp-story-grid-layer';
 import './amp-story-page';
 import {
   Action,
+  InteractiveComponentDef,
   StateProperty,
   UIType,
   getStoreService,
-  InteractiveComponentDef,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
