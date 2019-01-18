@@ -125,7 +125,7 @@ If a one week release freeze is announced for Week N:
 
 A release freeze will happen due to:
 
-- Times when there are not enough people available to push the AMP release to production and monitor it.  Currently most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (4 July), Thanksgiving (4th Thursday in November), Christmas (December 25) and New Year's Eve/Day (December 31/January 1).
+- Times when there are not enough people available to push the AMP release to production and monitor it.  Currently most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (July 4), Thanksgiving (fourth Thursday in November), Christmas (25 December) and New Year's Eve/Day (December 31/January 1).
 - An emergency situation, such as a security or privacy issue as determined by the [Technical Steering Committee (TSC)](https://github.com/ampproject/meta-tsc) or the people performing the release.
 - Other situations when stability of the codebase is deemed to be particularly important as determined by the TSC.
 
