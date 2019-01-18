@@ -45,17 +45,13 @@ export class AmpWpmPlayer extends AMP.BaseElement {
    */
   parseAttributes_() {
     /**
-   * @description Method that parses attributes,
-   * and ensures that all of the required parameters are present
-   * @function
-   * @private
-   *
-   * @param {*} name
-   * @param {*} required
-   * @param {*} parseFunction
-   */
+     * @private
+     * @param {*} name
+     * @param {*} required
+     * @param {*} parseFunction
+     */
     const parseAttribute = (name, required, parseFunction) => {
-      const value = this.element.getAttribute(name);
+      const value = this.element_.getAttribute(name);
 
       if (value) {
         return parseFunction(value);
@@ -64,6 +60,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       }
     };
 
+    /**
+     * Method that parses a json object from the html attribute
+     * specified in the name parameter
+     * @private
+     * @param {string} name
+     * @param {boolean} required Specifies weather to throw and error when the attribute is not preset
+     *
+     * @return {Object}
+     */
     parseAttribute.json = (name, required) =>
       parseAttribute(
           name,
@@ -71,6 +76,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
           value => JSON.parse(decodeURIComponent(value))
       );
 
+    /**
+     * Method that parses a boolean from the html attribute
+     * specified in the name parameter
+     * @private
+     * @param {string} name
+     * @param {boolean} required Specifies weather to throw and error when the attribute is not preset
+     *
+     * @return {boolean}
+     */
     parseAttribute.boolean = (name, required) =>
       parseAttribute(
           name,
@@ -78,6 +92,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
           value => value.toLowerCase() === 'true',
       );
 
+    /**
+     * Method that parses a string from the html attribute
+     * specified in the name parameter
+     * @private
+     * @param {string} name
+     * @param {boolean} required Specifies weather to throw and error when the attribute is not preset
+     *
+     * @return {string}
+     */
     parseAttribute.string = (name, required) =>
       parseAttribute(
           name,
@@ -85,6 +108,15 @@ export class AmpWpmPlayer extends AMP.BaseElement {
           value => value,
       );
 
+    /**
+     * Method that parses a number from the html attribute
+     * specified in the name parameter
+     * @private
+     * @param {string} name
+     * @param {boolean} required Specifies weather to throw and error when the attribute is not preset
+     *
+     * @return {number}
+     */
     parseAttribute.number = (name, required) =>
       parseAttribute(
           name,
@@ -93,44 +125,44 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       );
 
     const clip = parseAttribute.json('clip') || {};
-    const output = {
+    return {
       ampcontrols: true,
       forceUrl4stat: this.win.location.href,
       target: 'playerTarget',
       ...clip,
+      adv: parseAttribute.boolean('adv'),
+      url: parseAttribute.string('url'),
+      title: parseAttribute.string('title'),
+      screenshot: parseAttribute.string('screenshot'),
+      forcerelated: parseAttribute.boolean('forcerelated'),
+      hiderelated: parseAttribute.boolean('hiderelated'),
+      hideendscreen: parseAttribute.boolean('hideendscreen'),
+      mediaEmbed: parseAttribute.string('mediaEmbed'),
+      extendedrelated: parseAttribute.boolean('extendedrelated'),
+      skin: parseAttribute.json('skin'),
+      showlogo: parseAttribute.boolean('showlogo'),
+      watermark: parseAttribute.boolean('watermark'),
+      qoeEventsConfig: parseAttribute.json('qoeEventsConfig'),
+      advVastDuration: parseAttribute.number('advVastDuration'),
+      vastTag: parseAttribute.string('vastTag'),
+      embedTrackings: parseAttribute.json('embedTrackings'),
+      id: parseAttribute.string('id'),
+
+      autoplay: parseAttribute.boolean(VideoAttributes.AUTOPLAY) || false, // TODO: czy to tutaj wgl ma byc? tutaj raczej nie, ale gdzies tak!
+      ampnoaudio: parseAttribute.boolean(VideoAttributes.NO_AUDIO),
+      dock: parseAttribute.boolean(VideoAttributes.DOCK),
+      rotateToFullscreen: parseAttribute.boolean(
+          VideoAttributes.ROTATE_TO_FULLSCREEN,
+      ),
     };
-
-    output.adv = parseAttribute.boolean('adv');
-    output.url = parseAttribute.string('url');
-    output.title = parseAttribute.string('title');
-    output.screenshot = parseAttribute.string('screenshot');
-    output.forcerelated = parseAttribute.boolean('forcerelated');
-    output.hiderelated = parseAttribute.boolean('hiderelated');
-    output.hideendscreen = parseAttribute.boolean('hideendscreen');
-    output.mediaEmbed = parseAttribute.string('mediaEmbed');
-    output.extendedrelated = parseAttribute.boolean('extendedrelated');
-    output.skin = parseAttribute.json('skin');
-    output.showlogo = parseAttribute.boolean('showlogo');
-    output.watermark = parseAttribute.boolean('watermark');
-    output.qoeEventsConfig = parseAttribute.json('qoeEventsConfig');
-    output.advVastDuration = parseAttribute.number('advVastDuration');
-    output.vastTag = parseAttribute.string('vastTag');
-    output.embedTrackings = parseAttribute.json('embedTrackings');
-    output.id = parseAttribute.string('id');
-
-    // output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY); // TODO: czy to tutaj wgl ma byc?
-    output.ampnoaudio = parseAttribute.boolean(VideoAttributes.NO_AUDIO);
-    output.dock = parseAttribute.boolean(VideoAttributes.DOCK);
-    output.rotateToFullscreen = parseAttribute.boolean(
-        VideoAttributes.ROTATE_TO_FULLSCREEN,
-    );
-
-    return output;
   }
 
   /**
+   * Method that calls wp video api for the url of the placeholder image
    * @private
-   * @param {*} videoID
+   * @param {string} videoID
+   *
+   * @return {promise}
    */
   getScreenshotUrl_(videoID) {
     return new Promise(res => {
@@ -150,37 +182,43 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   }
 
   /**
-   *
+   * Method that sends postMessage to iframe that contains the player.
+   * Message is prepended with proper header.
+   * If the frame is not ready all messages will be saved in queue and
+   * sent whe runQueue method is called.
    * @private
-   * @param {*} name
-   * @param {*} data
-   * @param {*} skipQueue
+   * @param {string} name name of the command
+   * @param {string} data optional data to send with the command
+   * @param {boolean} skipQueue if this parameter is present the message will
+   * send the command even when the frame is not read
    */
   sendCommand_(name, data, skipQueue = false) {
-    if (this.frameReady || skipQueue) {
+    if (this.frameReady_ || skipQueue) {
       this.contentWindow_.postMessage(data
-        ? `${this.header}${name}@PAYLOAD@${data}`
-        : `${this.header}${name}`, '*');
+        ? `${this.header_}${name}@PAYLOAD@${data}`
+        : `${this.header_}${name}`, '*');
     } else {
-      this.messageQueue.push({name, data});
+      this.messageQueue_.push({name, data});
     }
   }
 
   /**
+   * Method that sends messages that were saved in queue
    * @private
    */
   runQueue_() {
-    while (this.messageQueue.length) {
-      const command = this.messageQueue.shift();
+    while (this.messageQueue_.length) {
+      const command = this.messageQueue_.shift();
 
       this.sendCommand_(command.name, command.data);
     }
   }
 
   /**
+   * Method that adds a listener for messages from iframe
    * @private
-   * @param {*} messageName
-   * @param {*} callback
+   * @param {string} messageName Name of the message this callback listenes for
+   * @param {function(string)} callback
    */
   addMessageListener_(messageName, callback) {
     this.messageListeners_.push(data => {
@@ -195,19 +233,66 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.element = element;
+    /** @private {!Element} */
+    this.element_ = element;
 
-    this.messageQueue = [];
-    this.frameReady = false;
-    this.playingState = PlayingStates.PAUSED;
+    /** @private {!Array<Object<string, string>>} */
+    this.messageQueue_ = [];
+
+    /** @private {bool} */
+    this.frameReady_ = false;
+
+    /** @private {string} */
+    this.playingState_ = PlayingStates.PAUSED;
+
+    /** @private {!Array<function>} */
     this.messageListeners_ = [];
+
+    /** @private {?Object} */
+    this.attributes_;
+
+    /** @private {string} */
+    this.frameId_;
+
+    /** @private {string} */
+    this.frameUrl_;
+
+    /** @private {string} */
+    this.videoId_;
+
+    /** @private {string} */
+    this.header_;
+
+    /** @private {element} */
+    this.container_;
+
+    /** @private {url} */
+    this.placeholderUrl_;
+
+    /** @private {element} */
+    this.iframe_;
+
+    /** @private {!Object} */
+    this.contentWindow_;
+
+    /** @private {number} */
+    this.position_;
+
+    /** @private {Array<Array<number>>} */
+    this.playedRanges_;
+
+    /** @private {Object} */
+    this.metadata_;
+
+    /** @private {!Window} */
+    this.win;
   }
 
   /** @override */
   buildCallback() {
     this.win.addEventListener('message', e => {
-      if (e.data.startsWith(this.header)) {
-        const message = e.data.replace(this.header, '');
+      if (e.data.startsWith(this.header_)) {
+        const message = e.data.replace(this.header_, '');
 
         this.messageListeners_.forEach(listener => {
           listener(message);
@@ -215,34 +300,33 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       }
     });
 
-    this.attributes = this.parseAttributes_();
+    this.attributes_ = this.parseAttributes_();
 
-    this.frameId = this.attributes.id || `${Math.random() * 10e17}`;
-    this.frameUrl = new URL('https://std.wpcdn.pl/wpjslib/AMP-270-init-iframe/playerComponentFrame.html'); // TODO: zmiana na niebrancha
-    this.frameUrl.searchParams.set('frameId', this.frameId);
-    this.frameUrl.searchParams.set('debug', 'ampPlayerComponent');
+    this.frameId_ = this.attributes_.id || `${Math.random() * 10e17}`;
+    this.frameUrl_ = new URL('https://std.wpcdn.pl/wpjslib/AMP-270-init-iframe/playerComponentFrame.html'); // TODO: zmiana na niebrancha
+    this.frameUrl_.searchParams.set('frameId', this.frameId_);
+    this.frameUrl_.searchParams.set('debug', 'ampPlayerComponent');
 
-    if (this.attributes.url) {
-      this.videoId = /mid=(\d*)/g.exec(this.attributes.url)[1];
+    if (this.attributes_.url) {
+      this.videoId_ = /mid=(\d*)/g.exec(this.attributes_.url)[1];
     } else {
-      this.videoId = this.attributes.clip;
+      this.videoId_ = this.attributes_.clip;
     }
 
-    if (!this.videoId) {
+    if (!this.videoId_) {
       throw new Error('No clip specified');
     }
-
-    this.header = `WP.AMP.PLAYER.${this.frameId}.`;
+    this.header_ = `WP.AMP.PLAYER.${this.frameId_}.`;
 
     this.registerAction('showControls', () => { this.showControls(); });
     this.registerAction('hideControls', () => { this.hideControls(); });
     this.registerAction('getMetadata', () => { this.getMetadata(); });
 
     this.container_ = this.win.document.createElement('div');
-    this.element.appendChild(this.container_);
+    this.element_.appendChild(this.container_);
 
-    this.placeholderUrl = this.attributes.screenshot
-      || this.getScreenshotUrl_(this.videoId);
+    this.placeholderUrl_ = this.attributes_.screenshot
+      || this.getScreenshotUrl_(this.videoId_);
   }
 
   /** @override */
@@ -262,9 +346,13 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     const image = this.win.document.createElement('amp-img');
     image.setAttribute('layout', 'fill');
-    // this.placeholderUrl.then(url => {
-    image.setAttribute('src', this.placeholderUrl);
-    // });
+    if (this.placeholderUrl_.then) {
+      this.placeholderUrl_.then(url => {
+        image.setAttribute('src', url);
+      });
+    } else {
+      image.setAttribute('src', this.placeholderUrl_);
+    }
 
     placeholder.appendChild(image);
     return placeholder;
@@ -275,95 +363,101 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     const that = this;
 
     this.addMessageListener_('FRAME_READY', () => {
-      that.contentWindow_ = that.iframe
+      that.contentWindow_ = that.iframe_
           .querySelector('iframe')
           .contentWindow;
 
-      that.sendCommand_('init', JSON.stringify(that.attributes), true);
+      that.sendCommand_('init', JSON.stringify(that.attributes_), true);
     });
 
     this.addMessageListener_('PLAYER_READY', () => {
-      that.frameReady = true;
+      that.frameReady_ = true;
 
-      that.element.dispatchCustomEvent(VideoEvents.LOAD);
+      that.element_.dispatchCustomEvent(VideoEvents.LOAD);
       this.runQueue_();
       that.togglePlaceholder(false);
     });
 
     this.addMessageListener_('START_MOVIE', () => {
-      that.element.dispatchCustomEvent(VideoEvents.PLAYING);
-      that.element.dispatchCustomEvent(VideoEvents.RELOAD);
-      that.playingState = PlayingStates.PLAYING_AUTO;
+      that.element_.dispatchCustomEvent(VideoEvents.PLAYING);
+      that.element_.dispatchCustomEvent(VideoEvents.RELOAD);
+      that.playingState_ = PlayingStates.PLAYING_AUTO;
       that.togglePlaceholder(false);
 
     });
 
     this.addMessageListener_('USERPLAY', () => {
-      that.element.dispatchCustomEvent(VideoEvents.PLAYING);
-      that.playingState = PlayingStates.PLAYING_MANUAL;
+      that.element_.dispatchCustomEvent(VideoEvents.PLAYING);
+      that.playingState_ = PlayingStates.PLAYING_MANUAL;
     });
 
     this.addMessageListener_('USERPAUSE', () => {
-      that.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      that.playingState = PlayingStates.PAUSED;
+      that.element_.dispatchCustomEvent(VideoEvents.PAUSE);
+      that.playingState_ = PlayingStates.PAUSED;
     });
 
     this.addMessageListener_('END_MOVIE', () => {
-      that.element.dispatchCustomEvent(VideoEvents.ENDED);
-      that.playingState = PlayingStates.PAUSED;
+      that.element_.dispatchCustomEvent(VideoEvents.ENDED);
+      that.playingState_ = PlayingStates.PAUSED;
     });
 
     this.addMessageListener_('START_ADV_QUEUE', () => {
-      that.element.dispatchCustomEvent(VideoEvents.AD_START);
+      that.element_.dispatchCustomEvent(VideoEvents.AD_START);
       that.togglePlaceholder(false);
     });
 
     this.addMessageListener_('END_ADV_QUEUE', () => {
-      that.element.dispatchCustomEvent(VideoEvents.AD_END);
+      that.element_.dispatchCustomEvent(VideoEvents.AD_END);
     });
 
     this.addMessageListener_('USER.ACTION', () => {
-      if (that.playingState === PlayingStates.PLAYING_AUTO) {
-        that.playingState = PlayingStates.PLAYING_MANUAL;
+      if (that.playingState_ === PlayingStates.PLAYING_AUTO) {
+        that.playingState_ = PlayingStates.PLAYING_MANUAL;
       }
     });
 
     this.addMessageListener_('POSITION', data => {
-      that.position = parseInt(data, 10);
+      that.position_ = parseInt(data, 10);
     });
 
     this.addMessageListener_('PLAYED.RANGES', data => {
-      that.playedRanges = JSON.parse(data);
+      that.playedRanges_ = JSON.parse(data);
     });
 
     this.addMessageListener_('METADATA', data => {
       that.metadata_ = JSON.parse(data);
     });
 
-    this.iframe = this.win.document.createElement('amp-iframe');
-    this.iframe.setAttribute('layout', 'fill');
-    this.iframe.setAttribute(
+    this.iframe_ = this.win.document.createElement('amp-iframe');
+    this.iframe_.setAttribute('layout', 'fill');
+    this.iframe_.setAttribute(
         'sandbox',
         'allow-scripts allow-same-origin allow-popups',
     );
-    this.iframe.setAttribute('src', this.frameUrl.toLocaleString());
-    this.iframe.setAttribute('frameborder', 0);
-    this.iframe.setAttribute('allowfullscreen', true);
+    this.iframe_.setAttribute('src', this.frameUrl_.toLocaleString());
+    this.iframe_.setAttribute('frameborder', 0);
+    this.iframe_.setAttribute('allowfullscreen', true);
 
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', 'true');
-    placeholder.setAttribute('src', this.placeholderUrl);
+    if (this.placeholderUrl_.then) {
+      this.placeholderUrl_.then(url => {
+        placeholder.setAttribute('src', url);
+      });
+    } else {
+      placeholder.setAttribute('src', this.placeholderUrl_);
+    }
 
-    this.iframe.appendChild(placeholder);
-    this.container_.appendChild(this.iframe);
+    this.iframe_.appendChild(placeholder);
+    this.container_.appendChild(this.iframe_);
 
-    installVideoManagerForDoc(this.element);
+    installVideoManagerForDoc(this.element_);
     Services.videoManagerForDoc(
         this.getAmpDoc(),
     ).register(this);
 
-    this.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    this.element_.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /** @override */
@@ -373,16 +467,16 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.iframe) {
-      this.removeElement(this.iframe);
-      this.iframe = null;
+    if (this.iframe_) {
+      this.removeElement(this.iframe_);
+      this.iframe_ = null;
     }
     return true;
   }
 
   /** @override */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.frameUrl.toLocaleString(), onLayout);
+    this.preconnect.url(this.frameUrl_.toLocaleString(), onLayout);
   }
 
   /** @override */
@@ -392,14 +486,14 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+    this.element_.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
   play(isAutoplay) {
     this.sendCommand_('play');
 
-    this.playingState = isAutoplay
+    this.playingState_ = isAutoplay
       ? PlayingStates.PLAYING_AUTO
       : PlayingStates.PLAYING_MANUAL;
   }
@@ -407,24 +501,24 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   /** @override */
   pause() {
     this.sendCommand_('pause');
-    this.playingState = PlayingStates.PAUSED;
+    this.playingState_ = PlayingStates.PAUSED;
   }
 
   /** @override */
   mute() {
     this.sendCommand_('mute');
-    this.element.dispatchCustomEvent(VideoEvents.MUTED);
+    this.element_.dispatchCustomEvent(VideoEvents.MUTED);
   }
 
   /** @override */
   unmute() {
     this.sendCommand_('unmute');
-    this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+    this.element_.dispatchCustomEvent(VideoEvents.UNMUTED);
   }
 
   /** @override */
   showControls() {
-    if (this.playingState === PlayingStates.PLAYING_AUTO) {
+    if (this.playingState_ === PlayingStates.PLAYING_AUTO) {
       this.sendCommand_('popupControls');
     } else {
       this.sendCommand_('showControls');
@@ -438,17 +532,17 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe);
+    fullscreenEnter(this.iframe_);
   }
 
   /** @override */
   fullscreenExit() {
-    fullscreenExit(this.iframe);
+    fullscreenExit(this.iframe_);
   }
 
   /** @override */
   isFullscreen() {
-    return isFullscreenElement(this.iframe);
+    return isFullscreenElement(this.iframe_);
   }
 
   /** @override */
@@ -458,7 +552,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    return this.position;
+    return this.position_;
   }
 
   /** @override */
@@ -468,7 +562,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return this.playedRanges || [];
+    return this.playedRanges_ || [];
   }
 
   /** @override */

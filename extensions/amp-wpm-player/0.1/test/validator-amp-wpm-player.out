@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -16,6 +16,28 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-wpm-player layout="responsive" width="150" height="80"></amp-wpm-player>
+|    <!-- Valid: clip is is optional when url is used  -->
+|    <amp-wpm-player
+|      layout="responsive"
+|      width="150"
+|      height="80"
+|      url="https://wp.tv/?mid=2013067">
+|    </amp-wpm-player>
+|
+|    <!-- Valid: url is is optional when clip is used -->
+|    <amp-wpm-player
+|      layout="responsive"
+|      width="150"
+|      height="80"
+|      clip= "">
+|    </amp-wpm-player>
+|    <!-- Invalid: url or clip is needed -->
+|    <amp-wpm-player
+>>   ^~~~~~~~~
+amp-wpm-player/0.1/test/validator-amp-wpm-player.html:34:2 The tag 'amp-wpm-player' is missing a mandatory attribute - pick one of ['url', 'clip']. (see https://www.ampproject.org/docs/reference/components/amp-wpm-player) [AMP_TAG_PROBLEM]
+|      layout="responsive"
+|      width="150"
+|      height="80">
+|    </amp-wpm-player>
 |  </body>
 |  </html>
