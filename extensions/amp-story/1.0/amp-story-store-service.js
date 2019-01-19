@@ -15,7 +15,6 @@
  */
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {EmbeddedComponentState} from './amp-story-embedded-component';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -54,6 +53,16 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+};
+
+/**
+ * States in which an embedded component could be found in.
+ * @enum {number}
+ */
+export const EmbeddedComponentState = {
+  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
+  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
+  EXPANDED: 2, // Component is in expanded mode.
 };
 
 /**
@@ -179,6 +188,8 @@ export const Action = {
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+  [StateProperty.INTERACTIVE_COMPONENT_STATE]:
+    (old, curr) => old.element !== curr.element || old.state !== curr.state,
 };
 
 

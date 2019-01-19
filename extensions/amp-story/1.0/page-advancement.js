@@ -15,19 +15,19 @@
  */
 import {
   Action,
+  EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {
-  EmbeddedComponentState,
-  embeddedComponentSelectors,
-} from './amp-story-embedded-component';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {
+  embeddedComponentSelectors,
+} from './amp-story-embedded-component';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 

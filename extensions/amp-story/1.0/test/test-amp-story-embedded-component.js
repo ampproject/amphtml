@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  EmbeddedComponentState,
+} from '../amp-story-store-service';
 import {
   AmpStoryEmbeddedComponent,
-  EmbeddedComponentState,
 } from '../amp-story-embedded-component';
 import {EventType} from '../events';
 import {Services} from '../../../../src/services';

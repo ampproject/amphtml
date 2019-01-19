@@ -16,6 +16,7 @@
 
 import {
   Action,
+  EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
   UIType,
@@ -168,16 +169,6 @@ let tooltipElementsDef;
 const TAG = 'amp-story-embedded-component';
 
 /**
- * States in which an embedded component could be found in.
- * @enum {number}
- */
-export const EmbeddedComponentState = {
-  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
-  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
-  EXPANDED: 2, // Component is in expanded mode.
-};
-
-/**
  * Embedded components found in amp-story.
  */
 export class AmpStoryEmbeddedComponent {
@@ -224,9 +215,7 @@ export class AmpStoryEmbeddedComponent {
 
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
-          if (component.state !== EmbeddedComponentState.HIDDEN) {
-            this.onEmbeddedComponentUpdate_(component);
-          }
+          this.onEmbeddedComponentUpdate_(component);
         });
 
     /** @private {EmbeddedComponentState} */
@@ -241,13 +230,17 @@ export class AmpStoryEmbeddedComponent {
   onEmbeddedComponentUpdate_(component) {
     switch (this.state_) {
       case EmbeddedComponentState.FOCUSED:
-      case EmbeddedComponentState.HIDDEN:
-        component.element ?
-          this.setState_(EmbeddedComponentState.FOCUSED, component) :
+        component.state === EmbeddedComponentState.EXPANDED ?
+          this.setState_(EmbeddedComponentState.EXPANDED, component) :
           this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
         break;
+      case EmbeddedComponentState.HIDDEN:
+        this.setState_(EmbeddedComponentState.FOCUSED, component);
+        break;
       case EmbeddedComponentState.EXPANDED:
-        this.maybeCloseExpandedView_(component.element);
+        component.state === EmbeddedComponentState.HIDDEN ?
+          this.setState_(EmbeddedComponentState.HIDDEN, null /** component */) :
+          this.maybeCloseExpandedView_(component.element);
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
@@ -338,7 +331,7 @@ export class AmpStoryEmbeddedComponent {
   maybeCloseExpandedView_(target) {
     if (target && matches(target, '.i-amphtml-expanded-view-close-button')) {
       // Target is expanded and going into hidden mode.
-      this.closeFocusedState_();
+      this.close_();
       this.toggleExpandedView_(null);
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
           true /** capture */);
@@ -367,7 +360,7 @@ export class AmpStoryEmbeddedComponent {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
       if (this.state_ === EmbeddedComponentState.FOCUSED) {
-        this.closeFocusedState_();
+        this.close_();
       }
     });
 
@@ -375,12 +368,11 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Hides the tooltip layer.
+   * Clears tooltip UI and updates store state to hidden.
    * @private
    */
-  closeFocusedState_() {
+  close_() {
     this.clearTooltip_();
-    this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
         {state: EmbeddedComponentState.HIDDEN});
   }
@@ -476,12 +468,8 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
-    this.setState_(EmbeddedComponentState.EXPANDED,
-        /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-            StateProperty.INTERACTIVE_COMPONENT_STATE)));
-
-    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
-        {state: EmbeddedComponentState.EXPANDED});
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState.EXPANDED, element: this.previousTarget_});
   }
 
   /**
@@ -698,7 +686,7 @@ export class AmpStoryEmbeddedComponent {
     if (!closest(dev().assertElement(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
-      this.closeFocusedState_();
+      this.close_();
     }
   }
 

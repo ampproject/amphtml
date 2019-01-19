@@ -15,14 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
-import {EmbeddedComponentState} from './amp-story-embedded-component';
-import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
 import {
+  EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {LocalizedStringId} from './localization';
+import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
