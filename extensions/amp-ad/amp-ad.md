@@ -318,6 +318,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PulsePoint](../../ads/pulsepoint.md)
 - [Purch](../../ads/purch.md)
 - [Rambler&Co](../../ads/capirs.md)
+- [RbInfoxSg](../../ads/rbinfox.md)
 - [Realclick](../../ads/realclick.md)
 - [recomAD](../../ads/recomad.md)
 - [Red for Publishers](../../ads/rfp.md)
