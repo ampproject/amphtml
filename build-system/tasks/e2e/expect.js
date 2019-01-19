@@ -14,16 +14,29 @@
  * limitations under the License.
  */
 
-import {ControllerPromise} from './functional-test-controller';
-import chai, {expect as chaiExpect} from 'chai';
+const chai = require('chai');
+const {ControllerPromise} = require('./functional-test-controller');
 
 let installed;
+let lastExpectError;
+
+function clearLastExpectError() {
+  lastExpectError = null;
+}
+
+/**
+ * @return {?Error}
+ */
+function getLastExpectError() {
+  return lastExpectError;
+}
+
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return
+ * @return {!ExpectStatic}
  */
-export function expect(actual, opt_message) {
+function expect(actual, opt_message) {
   if (!installed) {
     installed = true;
     // See https://www.chaijs.com/guide/helpers/ for details on implementation
@@ -35,7 +48,7 @@ export function expect(actual, opt_message) {
     chai.use(installBelowWrapper);
   }
 
-  return chaiExpect(actual, opt_message);
+  return chai.expect(actual, opt_message);
 }
 
 function installEqualWrapper(chai, utils) {
@@ -51,8 +64,7 @@ function installEqualWrapper(chai, utils) {
 function installIncludeWrapper(chai, utils) {
   const {Assertion} = chai;
 
-  const condition = (expected, value) => value.indexOf(expected) > -1;
-  const overwrite = overwriteWithCondition(utils, condition);
+  const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
       'include', overwrite, inheritChainingBehavior);
   Assertion.overwriteChainableMethod(
@@ -143,8 +155,56 @@ function overwriteWithCondition(utils, condition) {
   };
 }
 
+// TODO: This should always be used instead of overwriteWithCondition.
+function overwriteAlwaysUseSuper(utils) {
+  const {flag} = utils;
+
+  return function(_super) {
+    return async function() {
+      const obj = this._obj;
+      const isControllerPromise = obj instanceof ControllerPromise;
+      if (!isControllerPromise) {
+        return _super.apply(this, arguments);
+      }
+      const {waitForValue} = obj;
+      if (!waitForValue) {
+        const result = await obj;
+        flag(this, 'object', result);
+        return _super.apply(this, arguments);
+      }
+
+      const resultPromise = waitForValue(obj => {
+        try {
+          flag(this, 'object', obj);
+          // Run the code that checks the condition.
+          _super.apply(this, arguments);
+          // Let waitForValue know we are done.
+          return true;
+        } catch (e) {
+          // The condition checking code threw an error, so we are not done
+          // yet. Save the error so that it can be grabbed in case the test
+          // times out.
+          lastExpectError = e;
+          return false;
+        } finally {
+          flag(this, 'object', resultPromise);
+        }
+      });
+
+      flag(this, 'object', resultPromise);
+      return resultPromise;
+    };
+  };
+}
+
 function inheritChainingBehavior(_super) {
   return function() {
     _super.apply(this, arguments);
   };
 }
+
+module.exports = {
+  clearLastExpectError,
+  expect,
+  getLastExpectError,
+};
