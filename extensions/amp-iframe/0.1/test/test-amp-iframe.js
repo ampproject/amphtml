@@ -468,6 +468,68 @@ describes.realWin('amp-iframe', {
       });
     });
 
+    it('should allow resize events w/o allow-same-origin', function* () {
+      const ampIframe = createAmpIframe(env, {
+        src: iframeSrc,
+        sandbox: 'allow-scripts',
+        width: 100,
+        height: 100,
+        resizable: '',
+      });
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = ampIframe.implementation_;
+      return new Promise((resolve, unusedReject) => {
+        impl.updateSize_ = (height, width) => {
+          resolve({height, width});
+        };
+        const iframe = ampIframe.querySelector('iframe');
+        iframe.contentWindow.postMessage({
+          sentinel: 'amp-test',
+          type: 'requestHeight',
+          height: 217,
+          width: 113,
+        }, '*');
+      }).then(res => {
+        expect(res.height).to.equal(217);
+        expect(res.width).to.equal(113);
+      });
+    });
+
+    it('should allow resize events w/ srcdoc', function* () {
+      const srcdoc = `
+        <!doctype html>>
+        <html>
+         <body>
+          <script>
+              window.parent.postMessage({
+                sentinel: 'amp',
+                type: 'embed-size',
+                height: 200,
+                width: 300,
+              }, '*');
+          </script>
+         </body>
+        </html>
+      `;
+      const ampIframe = createAmpIframe(env, {
+        srcdoc,
+        sandbox: 'allow-scripts',
+        width: 100,
+        height: 100,
+        resizable: '',
+      });
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = ampIframe.implementation_;
+      return new Promise((resolve, unusedReject) => {
+        impl.updateSize_ = (height, width) => {
+          resolve({height, width});
+        };
+      }).then(res => {
+        expect(res.height).to.equal(200);
+        expect(res.width).to.equal(300);
+      });
+    });
+
     it('should resize amp-iframe', function* () {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
