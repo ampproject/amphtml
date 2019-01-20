@@ -17,6 +17,7 @@
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
+  ENABLED_SCHEMA_TYPES,
   LIGHTBOXABLE_ATTR,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
@@ -65,7 +66,8 @@ describes.realWin(TAG, {
   }
 
   function mockScannedImages(images) {
-    env.sandbox.stub(Scanner, 'getAllImages').returns(tryResolve(() => images));
+    env.sandbox.stub(Scanner, 'getAllImages').returns(
+        images.map(img => tryResolve(() => img)));
   }
 
   function mockSchemaType(type) {
@@ -197,6 +199,7 @@ describes.realWin(TAG, {
       ];
 
       renderScenarios.forEach(root => {
+        env.win.document.body.appendChild(root);
         expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
       });
     });
@@ -223,6 +226,7 @@ describes.realWin(TAG, {
       ];
 
       renderScenarios.forEach(root => {
+        env.win.document.body.appendChild(root);
         expect(meetsCriteria(ampImgFromTree(root))).to.be.true;
       });
     });
@@ -232,15 +236,19 @@ describes.realWin(TAG, {
       mockCriteriaMet('sizing', true);
 
       const renderScenarios = [
-        // immediate container is amp-selector
+        // immediate container is amp-selector > [option]
         html`<amp-selector>
-          <amp-img src="bla.png"></amp-img>
+          <div option>
+            <amp-img src="bla.png"></amp-img>
+          </div>
         </amp-selector>`,
 
-        // non-immediate ancestor is amp-selector
+        // non-immediate ancestor is amp-selector > [option]
         html`<amp-selector>
-          <div>
-            <amp-img src="bla.png"></amp-img>
+          <div option>
+            <div>
+              <amp-img src="bla.png"></amp-img>
+            </div>
           </div>
         </amp-selector>`,
       ];
@@ -531,7 +539,7 @@ describes.realWin(TAG, {
     it('does not load extension if no elements found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType('Article');
+      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockIsEmbedded(true);
       mockScannedImages([]);
 
@@ -544,7 +552,7 @@ describes.realWin(TAG, {
     it('loads extension if at least one element meets criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType('Article');
+      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockIsEmbedded(true);
       mockScannedImages([
         html`<amp-img src="bla.png"></amp-img>`,
@@ -574,7 +582,7 @@ describes.realWin(TAG, {
           .to.not.have.been.called;
     });
 
-    it('sets attribute for images that meet criteria', function* () {
+    it('sets attribute only for images that meet criteria', function* () {
       const a = html`<amp-img src="a.png"></amp-img>`;
       const b = html`<amp-img src="b.png"></amp-img>`;
       const c = html`<amp-img src="c.png"></amp-img>`;
@@ -585,15 +593,45 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
-      mockSchemaType('Article');
+      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockScannedImages([a, b, c]);
       mockIsEmbedded(true);
 
       yield scanDoc(env.ampdoc);
 
-      expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.equal('');
+      expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
       expect(b.getAttribute(LIGHTBOXABLE_ATTR)).to.not.be.ok;
-      expect(c.getAttribute(LIGHTBOXABLE_ATTR)).to.equal('');
+      expect(c.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
+    });
+
+    it('sets unique group for images that meet criteria', function* () {
+      const a = html`<amp-img src="a.png"></amp-img>`;
+      const b = html`<amp-img src="b.png"></amp-img>`;
+      const c = html`<amp-img src="c.png"></amp-img>`;
+
+      mockAllCriteriaMet(true);
+
+      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockScannedImages([a, b, c]);
+      mockIsEmbedded(true);
+
+      yield scanDoc(env.ampdoc);
+
+      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
+      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
+      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
+
+      expect(aAttr).to.be.ok;
+      expect(aAttr).to.not.equal(bAttr);
+      expect(aAttr).to.not.equal(cAttr);
+
+      expect(bAttr).to.be.ok;
+      expect(bAttr).to.not.equal(aAttr);
+      expect(bAttr).to.not.equal(cAttr);
+
+      expect(cAttr).to.be.ok;
+      expect(cAttr).to.not.equal(aAttr);
+      expect(cAttr).to.not.equal(bAttr);
     });
 
   });
@@ -614,9 +652,10 @@ describes.realWin(TAG, {
       shouldNotLoad.signals().rejectSignal(CommonSignals.LOAD_END, new Error());
       shouldLoad.signals().signal(CommonSignals.LOAD_END);
 
-      return Scanner.getAllImages(doc).then(images => {
-        expect(images.length).to.equal(1);
-        expect(images[0]).to.equal(shouldLoad);
+      return Promise.all(Scanner.getAllImages(doc)).then(images => {
+        expect(images.length).to.equal(2);
+        expect(images[0]).to.not.be.ok;
+        expect(images[1]).to.equal(shouldLoad);
       });
     });
 
@@ -635,13 +674,7 @@ describes.realWin(TAG, {
       expect(isEnabledForDoc(env.ampdoc)).to.be.false;
     });
 
-    [
-      'Article',
-      'NewsArticle',
-      'BlogPosting',
-      'LiveBlogPosting',
-      'DiscussionForumPosting',
-    ].forEach(type => {
+    ENABLED_SCHEMA_TYPES.forEach(type => {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);

@@ -52,15 +52,6 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
-
-    /** @private {function()} */
-    this.detectIfLightboxable_ = once(() => {
-      if (!isExperimentOn(this.win, 'amp-lightbox-gallery-detection')) {
-        return;
-      }
-      Services.extensionsFor(this.win).installExtensionForDoc(
-          this.getAmpDoc(), 'amp-lightbox-gallery-detection');
-    });
   }
 
   /** @override */
@@ -141,7 +132,6 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.detectIfLightboxable_();
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);

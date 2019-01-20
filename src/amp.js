@@ -29,6 +29,7 @@ import {
   installRuntimeServices,
 } from './runtime';
 import {cssText} from '../build/css';
+import {detectAutoLightbox} from './auto-lightbox';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
@@ -121,6 +122,7 @@ if (shouldMainBootstrapRun) {
 
         maybeValidate(self);
         makeBodyVisible(self.document);
+        detectAutoLightbox(ampdoc);
       });
       startupChunk(self.document, function finalTick() {
         perf.tick('e_is');

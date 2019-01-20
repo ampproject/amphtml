@@ -25,21 +25,26 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {
-  closest,
-  closestBySelector,
-  iterateCursor,
-  matches,
-} from '../../../src/dom';
+import {closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
 
-const TAG = 'amp-lightbox-gallery-detection';
+const TAG = 'amp-auto-lightbox';
 
 export const REQUIRED_EXTENSION = 'amp-lightbox-gallery';
 export const LIGHTBOXABLE_ATTR = 'lightbox';
+
+export const VISITED_ATTR = 'data-amp-auto-lightbox-visited';
+
+export const ENABLED_SCHEMA_TYPES = [
+  'Article',
+  'NewsArticle',
+  'BlogPosting',
+  'LiveBlogPosting',
+  'DiscussionForumPosting',
+];
 
 /** Factor of naturalArea vs renderArea to lightbox. */
 export const RENDER_AREA_RATIO = 1.2;
@@ -47,8 +52,8 @@ export const RENDER_AREA_RATIO = 1.2;
 /** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.4;
 
-const ACTIONABLE_ANCESTORS = 'a[href], amp-selector, amp-script, amp-story';
-const TAP_ACTION_REGEX = /(;|\s|^)tap\:/;
+const ACTIONABLE_ANCESTORS =
+    'a[href], amp-selector > [option], amp-script, amp-story';
 
 
 /** @visibleForTesting */
@@ -99,9 +104,11 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsActionableCriteria(element) {
-    return !closest(element, element =>
-      matches(element, ACTIONABLE_ANCESTORS) ||
-      TAP_ACTION_REGEX.test(element.getAttribute('on') || ''));
+    if (closestBySelector(element, ACTIONABLE_ANCESTORS)) {
+      return false;
+    }
+    const actions = Services.actionServiceForDoc(element);
+    return !actions.hasAction(element, 'tap');
   }
 }
 
@@ -145,16 +152,18 @@ export class Scanner {
 
   /**
    * @param {!Document} doc
-   * @return {!Promise<!Array<!Element>>}
+   * @return {<!Array<!Promise<!Element>>}
    */
   static getAllImages(doc) {
-    const imgs = toArray(doc.querySelectorAll('amp-img'))
-        .filter(img => !img.hasAttribute(LIGHTBOXABLE_ATTR));
+    const imgs = toArray(doc.querySelectorAll('amp-img')).filter(img =>
+      !img.hasAttribute(LIGHTBOXABLE_ATTR) &&
+      !img.hasAttribute(VISITED_ATTR));
 
-    const promises = imgs.map(whenLoadedOrNull);
+    imgs.forEach(img => {
+      img.setAttribute(VISITED_ATTR, '');
+    });
 
-    return Promise.all(promises).then(imagesOrNull =>
-      imagesOrNull.filter(i => !!i));
+    return imgs.map(whenLoadedOrNull);
   }
 }
 
@@ -220,13 +229,7 @@ export function isEnabledForDoc(ampdoc) {
     return false;
   }
 
-  return [
-    'Article',
-    'NewsArticle',
-    'BlogPosting',
-    'LiveBlogPosting',
-    'DiscussionForumPosting',
-  ].includes(parsed['@type']);
+  return ENABLED_SCHEMA_TYPES.includes(parsed['@type']);
 }
 
 
@@ -243,20 +246,22 @@ function whenLoadedOrNull(el) {
 }
 
 
+/** @private {number} */
+let uid = 0;
+
+
+/** @return {number} */
+function generateLightboxUid() {
+  return `i-amphtml-auto-lightbox-${uid++}`;
+}
+
+
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} images
+ * @param {!Element} img
  */
-function applyToScanned(ampdoc, images) {
-  const lightboxable = images.filter(meetsCriteria);
-
-  if (lightboxable.length <= 0) {
-    return;
-  }
-
-  iterateCursor(lightboxable, element => {
-    element.setAttribute(LIGHTBOXABLE_ATTR, '');
-  });
+function apply(ampdoc, img) {
+  img.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
 
   Services.extensionsFor(ampdoc.win)
       .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
@@ -272,14 +277,22 @@ export function scanDoc(ampdoc) {
     return Promise.resolve();
   }
 
-  const maybeApply = () => Scanner.getAllImages(ampdoc.win.document)
-      .then(images => {
-        applyToScanned(ampdoc, images);
-      });
+  const maybeApplyAll = () => Scanner.getAllImages(ampdoc.win.document)
+      .map(imgPromise => imgPromise.then(imgOrNull => {
+        if (!imgOrNull) {
+          return;
+        }
+        const img = dev().assertElement(imgOrNull);
+        if (!Criteria.meetsAll(img)) {
+          return;
+        }
+        apply(ampdoc, img);
+      }));
 
-  ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, maybeApply);
+  // TODO(alanorozco): Notify `amp-lightbox-gallery`
+  ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, maybeApplyAll);
 
-  return maybeApply();
+  return maybeApplyAll();
 }
 
 
