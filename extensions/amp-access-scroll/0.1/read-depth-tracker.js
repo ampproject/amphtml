@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import {PositionObserverFidelity}
-  from '../../../src/service/position-observer/position-observer-worker';
-import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getServiceForDoc} from '../../../src/service';
-import {installPositionObserverServiceForDoc}
-  from '../../../src/service/position-observer/position-observer-impl';
+import {installViewportServiceForDoc}
+  from '../../../src/service/viewport/viewport-impl';
 
 export class ReadDepthTracker {
   /**
@@ -35,7 +32,7 @@ export class ReadDepthTracker {
     this.ampdoc_ = ampdoc;
 
     /** @private {string?} */
-    this.lastIntersectingSnippet_ = null;
+    this.lastReadSnippet_ = null;
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
@@ -43,42 +40,47 @@ export class ReadDepthTracker {
     /** @private {string} */
     this.connectHostname_ = connectHostname;
 
-    /** @private {function(string)} */
+    /** @private {function(string?)} */
     this.debouncedUpdateLastRead_ = debounce(
         ampdoc.win,
         this.updateLastRead.bind(this),
         1000
     );
 
-    installPositionObserverServiceForDoc(ampdoc);
-    const positionObserver = getServiceForDoc(ampdoc, 'position-observer');
+    this.findTopParagraph_ = this.findTopParagraph.bind(this);
 
-    const paragraphs = ampdoc.getBody().getElementsByTagName('p');
-    for (let i = 0; i < paragraphs.length; i++) {
-      const p = paragraphs[i];
-      positionObserver.observe(p, PositionObserverFidelity.LOW, position =>
-        this.checkPosition(p, position)
-      );
-    }
+    installViewportServiceForDoc(ampdoc);
+    this.viewport_ = getServiceForDoc(ampdoc, 'viewport');
+    this.viewport_.onChanged(this.findTopParagraph_);
+
+    this.paragraphs_ = ampdoc.getBody().getElementsByTagName('p');
   }
 
   /**
-   * Checks position of a paragraph and decides whether to update server.
-   * @param {Element} paragraph
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} position PositionObserver entry
+   * Reviews positions of each paragraph relative to vieport, finds top.
    */
-  checkPosition(paragraph, position) {
-    // Ignore if position does not intersect with the top of the viewport
-    if (position.relativePos !== RelativePositions.TOP) {
-      return;
-    }
+  findTopParagraph() {
+    Promise.all([].slice.call(this.paragraphs_)
+        .map(p => this.viewport_.getClientRectAsync(p)))
+        .then(rects => {
+          for (let i = rects.length - 1; i >= 0; i--) {
+            if (rects[i].bottom <= 0) {
+              this.recordLatestRead(this.paragraphs_[i]);
+              break;
+            }
+          }
+        });
+  }
 
-    // Update the snippet representing latest intersecting paragraph
-    const prevSnippet = this.lastIntersectingSnippet_;
-    this.lastIntersectingSnippet_ = paragraph./*OK*/innerText.substring(0, 50);
-    if (prevSnippet && prevSnippet !== this.lastIntersectingSnippet_) {
-      // Send update to server if the latest snippet has changed
-      this.debouncedUpdateLastRead_(prevSnippet);
+  /**
+   * Checks whether latest read paragraph has changed and updates it if so.
+   * @param {Element} paragraph
+   */
+  recordLatestRead(paragraph) {
+    const prevSnippet = this.lastReadSnippet_;
+    this.lastReadSnippet_ = paragraph./*OK*/innerText.substring(0, 50);
+    if (prevSnippet !== this.lastReadSnippet_) {
+      this.debouncedUpdateLastRead_(this.lastReadSnippet_);
     }
   }
 

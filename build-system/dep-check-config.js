@@ -308,10 +308,7 @@ exports.rules = [
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
       'extensions/amp-access-scroll/0.1/read-depth-tracker.js->' +
-          'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-access-scroll/0.1/read-depth-tracker.js->' +
-          'src/service/position-observer/position-observer-worker.js',
-
+          'src/service/viewport/viewport-impl.js',
     ],
   },
   {
