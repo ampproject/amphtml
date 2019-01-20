@@ -156,6 +156,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adpon': {
+    prefetch: 'https://ad.adpon.jp/amp.js',
+    clientIdScope: 'AMP_ECID_ADPON',
+  },
+
   'adreactor': {},
 
   'adsense': {
@@ -881,6 +886,10 @@ export const adConfig = {
 
   'sovrn': {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  'speakol': {
+    renderStartImplemented: true,
   },
 
   'spotx': {

@@ -63,6 +63,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
+
 import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to

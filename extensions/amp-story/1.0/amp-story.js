@@ -41,16 +41,23 @@ import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {
+  HistoryState,
+  getHistoryState,
+  removeAttributeInMutate,
+  setAttributeInMutate,
+  setHistoryState,
+} from './utils';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -91,10 +98,9 @@ import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
-import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -142,12 +148,6 @@ const Attributes = {
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
-};
-
-/** @enum {string} */
-const HistoryStates = {
-  PAGE_ID: 'ampStoryPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
 };
 
 /**
@@ -242,8 +242,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
-    /** Instantiates the tooltip in case its needed. */
-    new AmpStoryTooltip(this.win, this.element);
+    /** Instantiate in case there are embedded components. */
+    new AmpStoryEmbeddedComponent(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -257,7 +257,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
-    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
 
     /** @const @private {!AmpStoryVariableService} */
@@ -651,7 +651,7 @@ export class AmpStory extends AMP.BaseElement {
       const {deltaX, deltaY} = gesture.data;
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
+          this.storeService_.get(StateProperty.EMBEDDED_COMPONENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
@@ -765,9 +765,6 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
-        firstPageEl.id;
-
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -782,11 +779,14 @@ export class AmpStory extends AMP.BaseElement {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
+          if (isExperimentOn(this.win, 'amp-story-branching')) {
+            this.initializeStoryNavigationPath_();
+          }
         })
         .then(() => this.initializeBookend_())
         .then(() => {
           const bookendInHistory =
-              !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
+              !!getHistoryState(this.win, HistoryState.BOOKEND_ACTIVE);
           if (bookendInHistory) {
             return this.hasBookend_().then(hasBookend => {
               if (hasBookend) {
@@ -795,9 +795,18 @@ export class AmpStory extends AMP.BaseElement {
             });
           }
         })
-        .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
+        .then(() =>
+          this.switchTo_(
+              this.getInitialPageId_(firstPageEl), NavigationDirection.NEXT))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
+          const shouldReOpenAttachmentForPageId =
+              getHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID);
+
+          if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
+            this.activePage_.openAttachment(false /** shouldAnimate */);
+          }
+
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
@@ -818,6 +827,34 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.markStoryAsLoaded_());
 
     return storyLayoutPromise;
+  }
+
+  /**
+   * Retrieves the initial pageId to begin the story with. In order, the
+   * initial page for a story should be either a valid page ID in the URL
+   * fragment, the page ID in the history, or the first page of the story.
+   * @param {!Element} firstPageEl
+   * @return {string}
+   * @private
+   */
+  getInitialPageId_(firstPageEl) {
+    const isActualPage =
+      pageId =>
+        findIndex(this.pages_, page => page.element.id === pageId) >= 0;
+    const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
+
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      const maybePageId = parseQueryString(this.win.location.hash)['page'];
+      if (maybePageId && isActualPage(maybePageId)) {
+        return maybePageId;
+      }
+    }
+
+    if (historyPage && isActualPage(historyPage)) {
+      return historyPage;
+    }
+
+    return firstPageEl.id;
   }
 
   /**
@@ -1195,21 +1232,29 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateStoryNavigationPath_(targetPageId, direction) {
-    const targetPage = this.getPageById(targetPageId);
     if (direction === NavigationDirection.PREVIOUS) {
       this.storyNavigationPath_.pop();
       if (this.storyNavigationPath_.length > 0) {
         const pathPrevious =
-            this.storyNavigationPath_[this.storyNavigationPath_.length - 1] ||
-            this.storyNavigationPath_[0];
-        if (pathPrevious.element.id != targetPageId) {
-          return pathPrevious;
+            this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
+        if (pathPrevious !== targetPageId) {
+          return this.getPageById(pathPrevious);
         }
       }
     } else if (direction === NavigationDirection.NEXT) {
-      this.storyNavigationPath_.push(targetPage);
+      const topOfStack =
+          this.storyNavigationPath_[this.storyNavigationPath_.length - 1];
+      // If the user navigates the away from the page, the top of storyStack
+      // will be the same as ampStoryPageId in the history state.
+      if (targetPageId !== topOfStack) {
+        this.storyNavigationPath_.push(targetPageId);
+      }
     }
-    return targetPage;
+    setHistoryState(
+        this.win,
+        HistoryState.NAVIGATION_PATH,
+        this.storyNavigationPath_);
+    return this.getPageById(targetPageId);
   }
 
   /**
@@ -1344,7 +1389,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.setHistoryState_(HistoryStates.PAGE_ID, pageId);
+    setHistoryState(this.win, HistoryState.PAGE_ID, pageId);
   }
 
   /**
@@ -1527,18 +1572,18 @@ export class AmpStory extends AMP.BaseElement {
       }
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        this.openOpacityMask_();
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
-        this.openOpacityMask_();
       } else {
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
+      this.openOpacityMask_();
       actions.execute(this.sidebar_, 'open', /* args */ null,
           /* source */ null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
-      this.openOpacityMask_();
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1553,10 +1598,10 @@ export class AmpStory extends AMP.BaseElement {
       maskEl.addEventListener('click', () => {
         const actions = Services.actionServiceForDoc(this.element);
         if (this.sidebar_) {
+          this.closeOpacityMask_();
           actions.execute(this.sidebar_, 'close', /* args */ null,
               /* source */ null, /* caller */ null, /* event */ null,
               ActionTrust.HIGH);
-          this.closeOpacityMask_();
         }
       });
       this.maskElement_ = maskEl;
@@ -1693,36 +1738,7 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-    this.setHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
-  }
-
-  /**
-   * Updates the value for a given state in the window history.
-   * @param {string} stateName
-   * @param {string|boolean} value
-   * @private
-   */
-  setHistoryState_(stateName, value) {
-    const {history} = this.win;
-    const state = getState(history) || {};
-    const newHistory = Object.assign({}, /** @type {!Object} */ (state),
-        {[stateName]: value});
-
-    history.replaceState(newHistory, '');
-  }
-
-  /**
-   * Returns the value of a given state of the window history.
-   * @param {string} stateName
-   * @return {?string}
-   * @private
-   */
-  getHistoryState_(stateName) {
-    const {history} = this.win;
-    if (history && getState(history)) {
-      return getState(history)[stateName];
-    }
-    return null;
+    setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
   /**
@@ -1898,7 +1914,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build(!!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE));
+    this.bookend_
+        .build(!!getHistoryState(this.win, HistoryState.BOOKEND_ACTIVE));
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
@@ -2120,6 +2137,18 @@ export class AmpStory extends AMP.BaseElement {
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
     this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+  }
+
+  /**
+   * Checks for the the storyNavigationPath stack in the history.
+   * @private
+   */
+  initializeStoryNavigationPath_() {
+    const historyNavigationPath =
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
+    if (historyNavigationPath) {
+      this.storyNavigationPath_ = historyNavigationPath;
+    }
   }
 
   /** @private */

@@ -544,24 +544,24 @@
     {
       "flaky": true,
       // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
       "name": "amp-story: tooltip",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component.js"
     },
     {
       "flaky": true,
       // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component-desktop.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
@@ -573,14 +573,32 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
-    "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
-    "name": "amp-story: sidebar",
-    "viewport": {"width": 1440, "height": 900},
-    "loading_complete_css": [
-      ".i-amphtml-story-loaded",
-      ".i-amphtml-story-sidebar-control.i-amphtml-story-button"
-    ],
-    "interactive_tests": "examples/visual-tests/amp-story/amp-story-sidebar.js"
+      "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
+      "name": "amp-story: sidebar",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-sidebar-control.i-amphtml-story-button"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-sidebar.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment.html",
+      "name": "amp-story: page attachment",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment.html",
+      "name": "amp-story: page attachment desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
   ]
 }

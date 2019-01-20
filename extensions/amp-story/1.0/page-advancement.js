@@ -20,10 +20,10 @@ import {
 } from './amp-story-store-service';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
-import {TOOLTIP_TRIGGERABLE_SELECTORS} from './amp-story-tooltip';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {embeddedComponentSelectors} from './amp-story-embedded-component';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 
@@ -35,6 +35,9 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
+
+const EMBEDDED_COMPONENT_SELECTORS = Object.values(
+    embeddedComponentSelectors()).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -283,9 +286,6 @@ class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -375,7 +375,8 @@ class ManualAdvancement extends AdvancementConfig {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
-    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
+        !this.storeService_.get(StateProperty.EXPANDED_COMPONENT)) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -443,19 +444,25 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer.
+   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
    * @param {!Event} event
    * @return {boolean}
    * @private
    */
   canShowTooltip_(event) {
     let valid = true;
+    let tagName;
+
     return !!closest(dev().assertElement(event.target), el => {
-      if (el.tagName.toLowerCase() === 'amp-story-cta-layer') {
+      tagName = el.tagName.toLowerCase();
+
+      if (tagName === 'amp-story-cta-layer' ||
+          tagName === 'amp-story-page-attachment') {
         valid = false;
         return false;
       }
-      return el.tagName.toLowerCase() === 'amp-story-page' && valid;
+
+      return tagName === 'amp-story-page' && valid;
     }, /* opt_stopAt */ this.element_);
   }
 
@@ -469,11 +476,11 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.canShowTooltip_(event) &&
-      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      matches(target, EMBEDDED_COMPONENT_SELECTORS)) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
-      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
+      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, target);
       return;
     }
 

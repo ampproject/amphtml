@@ -180,14 +180,21 @@ amp-story-page[active] {
 
 amp-story amp-sidebar[side][open] {
   background-color: #ffffff !important;
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
-  display: block !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 [desktop] amp-sidebar[side][open]{
   max-width: 320px !important;
+}
+
+amp-story amp-sidebar[side] {
+  max-width: 280px !important;
+  min-width: 280px !important;
+  width: 280px !important;
+  transform: translate3d(100%, 0, 0) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  display: block !important;
 }
 
 .i-amphtml-story-fallback amp-story-page {
@@ -248,7 +255,8 @@ amp-story-page[distance="2"] {
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  opacity: 0.55 !important;
+  opacity: 0.75 !important;
+  display: block !important;
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
@@ -310,6 +318,35 @@ amp-story-grid-layer {
 
 amp-story-grid-layer > * {
   pointer-events: auto !important;
+}
+
+/** Apply click shield on embedded components on initial load. */
+amp-story-grid-layer amp-twitter::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.i-amphtml-expanded-mode amp-twitter::after {
+  height: 0px !important;
+  width: 0px !important;
+}
+
+.i-amphtml-expanded-mode amp-story-grid-layer,
+.i-amphtml-expanded-mode amp-story-grid-layer * {
+  contain: none !important;
+  z-index: auto !important;
+}
+
+.i-amphtml-expanded-mode amp-twitter {
+  z-index: 1 !important;
+}
+
+.i-amphtml-animate-expand-in {
+  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {
@@ -692,6 +729,27 @@ amp-story .amp-video-eq,
   animation: play-button-fly-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   background-color: transparent !important;
   z-index: 10000 !important;
+}
+
+.i-amphtml-story-expanded-view-overflow {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 1) !important;
+  position: absolute !important;
+}
+
+.i-amphtml-expanded-view-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 8px !important;
+  height: 24px !important;
+  width: 24px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.7)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  cursor: pointer !important;
+  text-align: center !important;
 }
 
 @keyframes play-button-fly-in {
