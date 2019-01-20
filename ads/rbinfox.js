@@ -52,7 +52,7 @@ function getBlockId(src) {
 
 /**
  * @param {!Window} global
- * @param {!string} src
+ * @param {string} src
  */
 function addToQueue(global, src) {
   const blockId = getBlockId(src);
@@ -62,6 +62,6 @@ function addToQueue(global, src) {
 	  const renderTo = 'infox_' + blockId;
 	  // Create container
 	  createContainer(global, renderTo);
-	  window['INFOX' + blockId].renderTo(renderTo);
+	  global['INFOX' + blockId].renderTo(renderTo);
   });
 }
