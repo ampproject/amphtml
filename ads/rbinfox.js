@@ -34,7 +34,7 @@ export function rbinfox(global, data) {
 
 /**
  * @param {!Window} global
- * @param {string} blockId
+ * @param {string} renderTo
  */
 function createContainer(global, renderTo) {
   const d = global.document.createElement('div');
@@ -54,19 +54,17 @@ function getBlockId(src) {
 
 /**
  * @param {!Window} global
- * @param {!String} src
+ * @param {!string} src
  */
 function addToQueue(global, src) {
-  var blockId = getBlockId(src);
-  var ctx = n + blockId; 
+  let blockId = getBlockId(src);
+  let ctx = n + blockId; 
   global[ctx] = global[ctx] || [];
   global[ctx].push(() => {
-	var renderTo = "infox_" + blockId;
-    // Create container
-	createContainer(global, renderTo);
-	
-	window["INFOX"+blockId].renderTo(renderTo);
-	
+	  let renderTo = 'infox_' + blockId;
+	  // Create container
+	  createContainer(global, renderTo);
+	  window['INFOX' + blockId].renderTo(renderTo);
   });
 }
 
