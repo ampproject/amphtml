@@ -18,7 +18,6 @@ import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 const jsnPrefix = 'https://rb.infox.sg/';
 const n = 'infoxContextAsyncCallbacks';
 
-
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -51,20 +50,18 @@ function getBlockId(src) {
   return parts[parts.length - 1];
 }
 
-
 /**
  * @param {!Window} global
  * @param {!string} src
  */
 function addToQueue(global, src) {
-  let blockId = getBlockId(src);
-  let ctx = n + blockId; 
+  const blockId = getBlockId(src);
+  const ctx = n + blockId;
   global[ctx] = global[ctx] || [];
   global[ctx].push(() => {
-	  let renderTo = 'infox_' + blockId;
+	  const renderTo = 'infox_' + blockId;
 	  // Create container
 	  createContainer(global, renderTo);
 	  window['INFOX' + blockId].renderTo(renderTo);
   });
 }
-
