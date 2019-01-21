@@ -237,6 +237,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [Broadstreet Ads](../../ads/broadstreetads.md)
+- [CA A.J.A.](../../ads/caaja.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
 - [Cedato](../../ads/cedato.md)
