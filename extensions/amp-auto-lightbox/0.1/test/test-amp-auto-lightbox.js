@@ -539,7 +539,7 @@ describes.realWin(TAG, {
       mockIsEmbedded(true);
       mockScannedImages([]);
 
-      yield scanDoc(env.ampdoc);
+      yield Promise.all(scanDoc(env.ampdoc));
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
@@ -556,7 +556,7 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      yield scanDoc(env.ampdoc);
+      yield Promise.all(scanDoc(env.ampdoc));
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.have.been.calledOnce;
@@ -572,7 +572,7 @@ describes.realWin(TAG, {
       mockAllCriteriaMet(false);
       mockIsEmbedded(true);
 
-      yield scanDoc(env.ampdoc);
+      yield Promise.all(scanDoc(env.ampdoc));
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
@@ -593,7 +593,7 @@ describes.realWin(TAG, {
       mockScannedImages([a, b, c]);
       mockIsEmbedded(true);
 
-      yield scanDoc(env.ampdoc);
+      yield Promise.all(scanDoc(env.ampdoc));
 
       expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
       expect(b.getAttribute(LIGHTBOXABLE_ATTR)).to.not.be.ok;
@@ -611,7 +611,7 @@ describes.realWin(TAG, {
       mockScannedImages([a, b, c]);
       mockIsEmbedded(true);
 
-      yield scanDoc(env.ampdoc);
+      yield Promise.all(scanDoc(env.ampdoc));
 
       const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
       const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);

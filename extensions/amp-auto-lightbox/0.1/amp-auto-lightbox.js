@@ -153,7 +153,7 @@ export class Scanner {
 
   /**
    * @param {!Document} doc
-   * @return {<!Array<!Promise<!Element>>}
+   * @return {!Array<!Promise<?Element>>}
    */
   static getAllImages(doc) {
     const imgs = toArray(doc.querySelectorAll('amp-img')).filter(img =>
@@ -193,6 +193,7 @@ function find(haystack, needleCb) {
   }
   return null;
 }
+
 
 /** @visibleForTesting */
 export class Schema {
@@ -239,8 +240,8 @@ function usesLightboxExplicitly(ampdoc) {
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
 
-  return currentScriptTag &&
-    ampdoc.getRootNode().querySelector(lightboxedElementsSelector);
+  return !!currentScriptTag &&
+    !!ampdoc.getRootNode().querySelector(lightboxedElementsSelector);
 }
 
 
@@ -283,7 +284,7 @@ function whenLoadedOrNull(el) {
 let uid = 0;
 
 
-/** @return {number} */
+/** @return {string} */
 function generateLightboxUid() {
   return `i-amphtml-auto-lightbox-${uid++}`;
 }
@@ -303,11 +304,11 @@ function apply(ampdoc, img) {
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Promise}
+ * @return {!Array<!Promise>}
  */
 export function scanDoc(ampdoc) {
   if (!isEnabledForDoc(ampdoc)) {
-    return Promise.resolve();
+    return [];
   }
 
   const maybeApplyAll = () => Scanner.getAllImages(ampdoc.win.document)
