@@ -27,6 +27,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
@@ -50,7 +51,7 @@ export const ENABLED_SCHEMA_TYPES = [
 export const RENDER_AREA_RATIO = 1.2;
 
 /** Factor of renderArea vs viewportArea to lightbox. */
-export const VIEWPORT_AREA_RATIO = 0.4;
+export const VIEWPORT_AREA_RATIO = 0.3;
 
 const ACTIONABLE_ANCESTORS =
     'a[href], amp-selector > [option], amp-script, amp-story';
@@ -193,6 +194,55 @@ function find(haystack, needleCb) {
   return null;
 }
 
+/** @visibleForTesting */
+export class Schema {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {?string}
+   */
+  static getDocumentType(ampdoc) {
+    const schemaTags = ampdoc.getHeadNode().querySelectorAll(
+        'script[type="application/ld+json"]');
+
+    if (schemaTags.length <= 0) {
+      return null;
+    }
+
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+
+    for (let i = 0; i < schemaTags.length; i++) {
+      const schemaTag = schemaTags[i];
+      const parsed = tryParseJson(schemaTag./*OK*/innerText);
+
+      if (parsed &&
+        'url' in parsed &&
+        parsed['url'] == canonicalUrl) {
+
+        return parsed['@type'];
+      }
+    }
+
+    return null;
+  }
+}
+
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {boolean}
+ */
+function usesLightboxExplicitly(ampdoc) {
+  const scriptTags = ampdoc.getHeadNode().querySelectorAll('script');
+
+  const currentScriptTag = find(scriptTags,
+      t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
+
+  const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
+
+  return currentScriptTag &&
+    ampdoc.getRootNode().querySelector(lightboxedElementsSelector);
+}
+
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -200,36 +250,19 @@ function find(haystack, needleCb) {
  * @visibleForTesting
  */
 export function isEnabledForDoc(ampdoc) {
-  if (!Services.viewerForDoc(ampdoc).isEmbedded()) {
+  const {win} = ampdoc;
+  if (!Services.viewerForDoc(ampdoc).isEmbedded() &&
+      // allow `localDev` in lieu of viewer for manual testing, except in tests
+      // where we need all checks.
+      (!getMode(win).localDev || getMode(win).test)) {
     return false;
   }
 
-  const scriptTags = ampdoc.getHeadNode().querySelectorAll('script');
-
-  const schemaTag = find(scriptTags,
-      t => t.getAttribute('type') == 'application/ld+json');
-
-  const currentScriptTag = find(scriptTags,
-      t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
-
-  const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
-
-  if (currentScriptTag &&
-      ampdoc.getRootNode().querySelector(lightboxedElementsSelector)) {
+  if (usesLightboxExplicitly(ampdoc)) {
     return false;
   }
 
-  if (!schemaTag) {
-    return false;
-  }
-
-  const parsed = tryParseJson(schemaTag./*OK*/innerText);
-
-  if (!parsed) {
-    return false;
-  }
-
-  return ENABLED_SCHEMA_TYPES.includes(parsed['@type']);
+  return ENABLED_SCHEMA_TYPES.includes(Schema.getDocumentType(ampdoc));
 }
 
 

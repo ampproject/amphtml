@@ -22,12 +22,13 @@ import {
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
+  Schema,
   VIEWPORT_AREA_RATIO,
   isEnabledForDoc,
   meetsCriteria,
   meetsSizingCriteria,
   scanDoc,
-} from '../amp-lightbox-gallery-detection';
+} from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
@@ -71,12 +72,7 @@ describes.realWin(TAG, {
   }
 
   function mockSchemaType(type) {
-    const {document} = env.win;
-    const script = html`<script type="application/ld+json"></script>`;
-    script.innerText = JSON.stringify({
-      '@type': type,
-    });
-    document.head.appendChild(script);
+    env.sandbox.stub(Schema, 'getDocumentType').returns(type);
   }
 
   function mockIsEmbedded(isEmbedded) {
