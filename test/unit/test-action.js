@@ -741,19 +741,17 @@ describe('Action method', () => {
     let expectedActionMap;
 
     beforeEach(() => {
-      const actionMacroId = 'action-macro-id';
       actionMacroDef = {
-        event: 'amp-action-event',
-        target: id,
-        method: 'method1',
         args: {arg0: 0, arg1: 1},
-        str: `${actionMacroId}.method1`,
+        event: 'amp-action-event',
+        method: 'method1',
+        str: 'action-macro-id.method1',
+        target: id,
       };
-      action.actionMacros_['action-macro-id'] = actionMacroDef;
+      action.addActionMacroDef('action-macro-id', id + '.method1');
       // The expected action map used when generating the action invocation.
-      // Note the merged properties with the action macro defined above.
       expectedActionMap = {
-        args: {'arg0': 0, 'arg1': 2},
+        args: {'arg1': 2},
         event: 'tap',
         method: 'method1',
         str: 'tap:' + id + '.method1(arg1=2)',
@@ -761,7 +759,12 @@ describe('Action method', () => {
       };
       // A caller that references an action macro, providing only one
       // argument.
-      targetElement.setAttribute('on', `tap:${actionMacroId}(arg1=2)`);
+      targetElement.setAttribute('on', 'tap:action-macro-id(arg1=2)');
+      const ampActionMacro = document.createElement('amp-action-macro');
+      ampActionMacro.setAttribute('id', id);
+      ampActionMacro.setAttribute('action', 'action-macro-id.method1');
+      const rootNode = action.ampdoc.getRootNode();
+      rootNode.querySelector = unused => ampActionMacro;
     });
 
     it('should define the correct action map on invocation', () => {

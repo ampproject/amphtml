@@ -16,8 +16,6 @@
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseActionMap} from '../../../src/service/action-impl';
-import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -40,13 +38,9 @@ export class AmpActionMacro extends AMP.BaseElement {
   buildCallback() {
     userAssert(isExperimentOn(this.win, 'amp-action-macro'),
         'Experiment is off');
-    toggle(this.element, /* opt_display */ false);
     this.actions_ = Services.actionServiceForDoc(this.element);
-    this.element.setAttribute('aria-hidden', 'true');
 
-    // Don't parse or fetch in prerender mode.
-    Services.viewerForDoc(this.getAmpDoc())
-        .whenFirstVisible().then(() => this.initialize_());
+    this.initialize_();
   }
 
   /** @override */
@@ -63,7 +57,7 @@ export class AmpActionMacro extends AMP.BaseElement {
    */
   initialize_() {
     const {element} = this;
-    this.parseActionMap_(element);
+    this.addActionMacro_(element);
   }
 
   /**
@@ -71,25 +65,10 @@ export class AmpActionMacro extends AMP.BaseElement {
    * This action is then referenced in the caller referencing the action macro.
    * @param {!Element} element
    */
-  parseActionMap_(element) {
+  addActionMacro_(element) {
     const id = element.getAttribute('id');
     const action = element.getAttribute('action');
-    // The action map constructed here is not the final action map used for
-    // invocation but is merged with the action map parsed in action service
-    // when the caller referencing the action macro is called. Reason being
-    // that allow the callers to define event that triggers the action as
-    // as well as allow the callers to omit arguments, defaulting to the
-    // arguments defined in the macro. Also note the temporary placeholder for
-    // the event name for the macro, 'action-macro-event', eventually replaced
-    // with the proper event in the runtime call.
-    const actionMap =
-        parseActionMap(`action-macro-event:${action}`, element);
-    this.actions_.addActionMacroDef(id, actionMap['action-macro-event'][0]);
-  }
-
-  /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+    this.actions_.addActionMacroDef(id, action);
   }
 
   /** @override */
