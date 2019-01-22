@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {
+  layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
@@ -106,11 +107,28 @@ export class ViewportBindingInabox {
     /** @const {!Window} */
     this.win = win;
 
+    /** @const {!../../service/platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.win);
+
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
+
+    /** @const {function()} */
+    this.onTopWindowChangeListener_ = () => {
+      const oldViewportRect = this.viewportRect_;
+      this.viewportRect_ = this.getViewportRect_();
+      this.updateBoxRect_(layoutRectFromDomRect(
+          this.win.frameElement.getBoundingClientRect()));
+      if (isResized(this.viewportRect_, oldViewportRect)) {
+        this.resizeObservable_.fire();
+      }
+      if (isMoved(this.viewportRect_, oldViewportRect)) {
+        this.scrollObservable_.fire();
+      }
+    };
 
     const boxWidth = win./*OK*/innerWidth;
     const boxHeight = win./*OK*/innerHeight;
@@ -154,7 +172,12 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
-    this.listenForPosition_();
+    if (this.canInspectTopWindow_()) {
+      this.listenForPositionSameDomain_();
+    }
+    else {
+      this.listenForPosition_();
+    }
   }
 
   /** @private */
@@ -176,6 +199,78 @@ export class ViewportBindingInabox {
             this.fireScrollThrottle_();
           }
         });
+  }
+
+  /**
+   * Get the viewport rect by polling the top level window directly.
+   * Only used when the inabox iframe is within the same domain (otherwise will
+   * fail due to xdomain restrictions).
+   */
+  getViewportRect_() {
+    const topWin = this.win.top;
+    const topDoc = topWin.document;
+    const scrollingElement =
+        topDoc./*OK*/scrollingElement ||
+        (this.platform_.isWebKit() && topDoc.body) ||
+        topDoc.documentElement;
+    const scrollLeft = scrollingElement./*OK*/scrollLeft ||
+        topWin./*OK*/pageXOffset;
+    const scrollTop = scrollingElement./*OK*/scrollTop ||
+        topWin./*OK*/pageYOffset;
+    return layoutRectLtwh(
+        Math.round(scrollLeft),
+        Math.round(scrollTop),
+        topWin./*OK*/innerWidth,
+        topWin./*OK*/innerHeight);
+  }
+
+  /**
+   * Returns true if top win's properties can be accessed and win is defined.
+   * This functioned is used to determine if the host window is cross-domained
+   * from the perspective of the current window.
+   * @return {boolean}
+   * @private
+   */
+  canInspectTopWindow_() {
+    // TODO: This should be changed in the future.
+    // See https://github.com/google/closure-compiler/issues/3156
+    try {
+      // win['test'] could be truthy but not true the compiler shouldn't be able
+      // to optimize this check away.
+      return !!this.win.top.location.href && (this.win.top['test'] || true);
+    } catch (unusedErr) { // eslint-disable-line no-unused-vars
+      return false;
+    }
+  }
+
+  /** @visibleForTesting */
+  setUpNativeListener() {
+    // Set up listener and send the 1st ping immediately but only after the
+    // resources service is properly registered (since it's registered after the
+    // inabox services so it won't be available immediately).
+    return Services.resourcesPromiseForDoc(this.win.document.documentElement)
+        .then(() => {
+          this.win.top.addEventListener(
+              'scroll', this.onTopWindowChangeListener_, true);
+          this.win.top.addEventListener(
+              'resize', this.onTopWindowChangeListener_, true);
+          this.onTopWindowChangeListener_();
+        });
+  }
+
+  /** @private */
+  listenForPositionSameDomain_() {
+    this.setUpNativeListener();
+  }
+
+  /** @override */
+  disconnect() {
+    if (this.canInspectTopWindow_()) {
+      this.win.top.removeEventListener(
+          'scroll', this.onTopWindowChangeListener_, true);
+      this.win.top.removeEventListener(
+          'resize', this.onTopWindowChangeListener_, true);
+    }
   }
 
   /** @override */
@@ -283,6 +378,12 @@ export class ViewportBindingInabox {
 
   /** @override */
   getRootClientRectAsync() {
+    if (this.canInspectTopWindow_()) {
+      return new Promise(resolve => {
+        resolve(layoutRectFromDomRect(
+            this.win.frameElement.getBoundingClientRect()));
+      });
+    }
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.requestOnce(
@@ -378,7 +479,6 @@ export class ViewportBindingInabox {
     return dev().assertElement(this.win.document.body);
   }
 
-  /** @override */ disconnect() {/* no-op */}
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}

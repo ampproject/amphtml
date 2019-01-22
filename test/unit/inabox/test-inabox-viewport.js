@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {
   ViewportBindingInabox,
@@ -23,6 +24,7 @@ import {
 import {
   installIframeMessagingClient,
 } from '../../../src/inabox/inabox-iframe-messaging-client';
+import {installPlatformService} from '../../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 
@@ -36,6 +38,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let positionCallback;
   let onScrollCallback;
   let onResizeCallback;
+  let topWindowObservable;
   let measureSpy;
 
   function stubIframeClientMakeRequest(
@@ -66,8 +69,23 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.innerWidth = 200;
     win.innerHeight = 150;
+    topWindowObservable = new Observable();
+    win.top = {
+      addEventListener(event, listener) {
+        if (topWindowObservable.getHandlerCount() == 0) {
+          topWindowObservable.add(listener);
+        }
+      },
+    };
+    const iframeElement = {
+      getBoundingClientRect() {
+        return layoutRectLtwh(10, 20, 100, 100);
+      },
+    };
+    win.frameElement = iframeElement;
 
     installIframeMessagingClient(win);
+    installPlatformService(win);
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
@@ -85,6 +103,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should work for size, layoutRect and position observer', () => {
+    sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
     stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -156,6 +175,100 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
+
+  it('should work for size, layoutRect and position observed - friendly',
+      () => {
+        sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+        sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
+            new Promise(resolve => { resolve(); }));
+
+        onScrollCallback = sandbox.spy();
+        onResizeCallback = sandbox.spy();
+        let viewportRect = layoutRectLtwh(0, 0, 100, 100);
+        let targetRect = layoutRectLtwh(10, 20, 50, 50);
+        let getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
+        let getFrameRectStub =
+            sandbox.stub(win.frameElement, 'getBoundingClientRect');
+        getViewportRectStub.returns(viewportRect);
+        getFrameRectStub.returns(targetRect);
+
+        positionCallback = data => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              ({viewportRect, targetRect} = data);
+              getViewportRectStub.returns(viewportRect);
+              getFrameRectStub.returns(targetRect);
+              topWindowObservable.fire();
+              resolve();
+            }, 100);
+          });
+        };
+
+        binding.onScroll(onScrollCallback);
+        binding.onResize(onResizeCallback);
+
+        // Initial state
+        expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
+        expect(binding.getLayoutRect(element))
+            .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
+
+        // We connect later because the friendly frame case will immediately
+        // fire without waiting for scroll event (or a postMessage like above)
+        return binding.setUpNativeListener().then(() => {
+        // Initial position received from above
+          expect(onScrollCallback).to.not.be.called;
+          expect(onResizeCallback).to.be.calledOnce;
+          expect(measureSpy).to.be.calledOnce;
+          expect(binding.getLayoutRect(element))
+              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+          sandbox.reset();
+        }).then(() => {
+        // Scroll, viewport position changed
+          return positionCallback({
+            viewportRect: layoutRectLtwh(0, 10, 100, 100),
+            targetRect: layoutRectLtwh(10, 10, 50, 50),
+          });
+        }).then(() => {
+          expect(onScrollCallback).to.be.calledOnce;
+          expect(onResizeCallback).to.not.be.called;
+          expect(measureSpy).to.not.be.called;
+          expect(binding.getLayoutRect(element))
+              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+          sandbox.reset();
+        }).then(() => {
+        // Resize, viewport size changed
+          return positionCallback({
+            viewportRect: layoutRectLtwh(0, 10, 200, 100),
+            targetRect: layoutRectLtwh(10, 10, 50, 50),
+          });
+        }).then(() => {
+          expect(onScrollCallback).to.not.be.called;
+          expect(onResizeCallback).to.be.calledOnce;
+          expect(measureSpy).to.not.be.called;
+          expect(binding.getLayoutRect(element))
+              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+          sandbox.reset();
+          // DOM change, target position changed
+          sandbox.restore();
+          getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
+          getFrameRectStub =
+              sandbox.stub(win.frameElement, 'getBoundingClientRect');
+          sandbox.stub(
+              Services.resourcesForDoc(win.document), 'get').returns([element]);
+        }).then(() => {
+          return positionCallback({
+            viewportRect: layoutRectLtwh(0, 10, 200, 100),
+            targetRect: layoutRectLtwh(20, 10, 50, 50),
+          });
+        }).then(() => {
+          expect(onScrollCallback).to.not.be.called;
+          expect(onResizeCallback).to.not.be.called;
+          expect(measureSpy).to.be.calledOnce;
+          expect(binding.getLayoutRect(element))
+              .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+        });
+      });
+
 
   it('should center content, resize and remeasure on overlay mode', () => {
     const allResourcesMock = Array(5).fill(undefined).map(() => ({
@@ -300,6 +413,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position async from host', () => {
+    sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
     const requestSpy = stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -310,6 +424,20 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
+    });
+  });
+
+  it('should request the position directly from host if friendly', () => {
+    // this is implicit but we make it explicit anyway for clarity
+    sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+    const iframeElement = {
+      getBoundingClientRect() {
+        return layoutRectLtwh(10, 20, 100, 100);
+      },
+    };
+    win.frameElement = iframeElement;
+    return binding.getRootClientRectAsync().then(rect => {
+      expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
     });
   });
 });
