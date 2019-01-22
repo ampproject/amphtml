@@ -52,37 +52,40 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.content_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.content_);
-    this.content_.classList.add('i-amphtml-fit-text-content');
-    setStyles(this.content_, {zIndex: 2});
-
     this.contentWrapper_ = this.element.ownerDocument.createElement('div');
-    setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
-    this.content_.appendChild(this.contentWrapper_);
 
-    this.measurer_ = this.element.ownerDocument.createElement('div');
-    // Note that "measurer" cannot be styled with "bottom:0".
-    setStyles(this.measurer_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      zIndex: 1,
-      visibility: 'hidden',
-      lineHeight: `${LINE_HEIGHT_EM_}em`,
+    return this.mutateElement(() => {
+      this.applyFillContent(this.content_);
+      this.content_.classList.add('i-amphtml-fit-text-content');
+      setStyles(this.content_, {zIndex: 2});
+
+      setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
+      this.content_.appendChild(this.contentWrapper_);
+
+      this.measurer_ = this.element.ownerDocument.createElement('div');
+      // Note that "measurer" cannot be styled with "bottom:0".
+      setStyles(this.measurer_, {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1,
+        visibility: 'hidden',
+        lineHeight: `${LINE_HEIGHT_EM_}em`,
+      });
+
+      this.getRealChildNodes().forEach(node => {
+        this.contentWrapper_.appendChild(node);
+      });
+      this.measurer_./*OK*/innerHTML = this.contentWrapper_./*OK*/innerHTML;
+      this.element.appendChild(this.content_);
+      this.element.appendChild(this.measurer_);
+
+      this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
+          'min-font-size')) || 6;
+
+      this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
+          'max-font-size')) || 72;
     });
-
-    this.getRealChildNodes().forEach(node => {
-      this.contentWrapper_.appendChild(node);
-    });
-    this.measurer_./*OK*/innerHTML = this.contentWrapper_./*OK*/innerHTML;
-    this.element.appendChild(this.content_);
-    this.element.appendChild(this.measurer_);
-
-    this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
-        'min-font-size')) || 6;
-
-    this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
-        'max-font-size')) || 72;
   }
 
   /** @override */
