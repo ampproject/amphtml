@@ -16,7 +16,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Verifies that type identifier `actions` is valid on an AMP actions document.
+|    Tests Actions rules pertaining to AMP-LIST.
 |  -->
 |  <!doctype html>
 |  <html ⚡ actions>
@@ -27,6 +27,12 @@ PASS
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-viewer-assistance" src="https://cdn.ampproject.org/v0/amp-viewer-assistance-0.1.js"></script>
+|    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+>>   ^~~~~~~~~
+actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [DEPRECATION]
+|    <!-- Valid -->
 |    <script id="amp-viewer-assistance" type="application/json">
 |    {
 |      "actionsOnGoogle" : {
@@ -36,6 +42,34 @@ PASS
 |    </script>
 |  </head>
 |  <body>
-|  Hello, world.
+|    <!-- Valid: Example 1-->
+|    <amp-list width="auto" height="100" layout="fixed-height"
+|      src="https://someserver.json">
+|      <template type="amp-mustache">
+|        <div class="url-entry">
+|          <a href="https://somelink.com">{{blah}}</a>
+|        </div>
+|      </template>
+|    </amp-list>
+|
+|    <!-- Valid: [src] is fine -->
+|    <amp-list width="auto" height="100" layout="fixed-height"
+|      [src]="{{src}}">
+|      <template type="amp-mustache">
+|        <div class="url-entry">
+|          <a href="https://somelink.com">{{blah}}</a>
+|        </div>
+|      </template>
+|    </amp-list>
+|
+|    <!-- Valid: Should allow cross-origin -->
+|    <amp-list width="auto" height="100" layout="fixed-height"
+|      src="https://someserver.json" cross-origin="amp-viewer-auth-token-via-post" credentials="123">
+|      <template type="amp-mustache">
+|        <div class="url-entry">
+|          <a href="https://somelink.com">{{blah}}</a>
+|        </div>
+|      </template>
+|    </amp-list>
 |  </body>
 |  </html>

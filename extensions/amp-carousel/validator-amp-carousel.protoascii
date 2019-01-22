@@ -29,13 +29,8 @@ tags: {  # amp-carousel
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-carousel>
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
-  tag_name: "AMP-CAROUSEL"
-  requires_extension: "amp-carousel"
+attr_lists: {
+  name: "amp-carousel-common"
   attrs: {
     name: "arrows"
     value: ""
@@ -57,13 +52,22 @@ tags: {  # <amp-carousel>
     name: "loop"
     value: ""
   }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
+}
+tags: {  # <amp-carousel type=slides>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [type=slides]"
+  requires_extension: "amp-carousel"
   attrs: {
     name: "type"
     value: "slides"
-    value: "carousel"
   }
-  # <amp-bind>
-  attrs: { name: "[slide]" }
+  attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
@@ -76,44 +80,44 @@ tags: {  # <amp-carousel>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-carousel> lightbox
+tags: {  # <amp-carousel type=carousel>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [type=carousel]"
+  requires_extension: "amp-carousel"
+  attrs: {
+    name: "type"
+    value: "carousel"
+    mandatory: true
+  }
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {  # <amp-carousel lightbox type=slides>
   html_format: AMP
   tag_name: "AMP-CAROUSEL"
-  spec_name: "AMP-CAROUSEL [lightbox]"
+  spec_name: "AMP-CAROUSEL [lightbox] [type=slides]"
   requires_extension: "amp-carousel"
   requires_extension: "amp-lightbox-gallery"
-  attrs: {
-    name: "arrows"
-    value: ""
-  }
-  attrs: {
-    name: "autoplay"
-    value: ""
-  }
-  attrs: { name: "controls" }
-  attrs: {
-    name: "delay"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "dots"
-    value: ""
-  }
   attrs: {
     name: "lightbox"
     mandatory: true
   }
   attrs: {
-    name: "loop"
-    value: ""
-  }
-  attrs: {
     name: "type"
     value: "slides"
-    value: "carousel"
   }
-  # <amp-bind>
-  attrs: { name: "[slide]" }
+  attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
@@ -124,6 +128,36 @@ tags: {  # <amp-carousel> lightbox
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [child]"
+  }
+}
+tags: {  # <amp-carousel lightbox type=carousel>
+  html_format: AMP
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [lightbox] [type=carousel]"
+  requires_extension: "amp-carousel"
+  requires_extension: "amp-lightbox-gallery"
+  attrs: {
+    name: "lightbox"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "carousel"
+    mandatory: true
+  }
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
   }
   reference_points: {
     tag_spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
