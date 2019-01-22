@@ -202,10 +202,10 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sideb
 {% endcall %}
 
 ## Sidebar for Stories
-Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/). However there are certain restrictions on what attributes and features are allowed. The following are allowed attributes and features of sidebars within an `amp-story`.
+Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/). However, there are certain restrictions on what attributes and features are allowed. The following are allowed attributes and features of sidebars within an `amp-story`.
 
 ### Allowed Attributes
-- [layout](#layout).
+- [layout](#layout)
 - [data-close-button-aria-label](#data)
 - [common attributes](#common)
 
