@@ -86,7 +86,10 @@ async function e2e() {
 
   return gulp.src(config.e2eTestPaths, {read: false})
       .pipe(mocha({
-        require: ['@babel/register', '../../../testing/e2e/test-module'],
+        require: [
+          '@babel/register',
+          '../../../build-system/tasks/e2e/helper',
+        ],
       })
           // stop serving on localhost:8000
           .once('end', () => {
