@@ -223,7 +223,8 @@ export const VENDOR_ANALYTICS_CONFIG = {
 
 You can specify which variable groups are enabled by including `{enabled: true}` for the specified `varGroups` within the provider's `<amp-analytics>` configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
 
-In the example below, both group1 and group2 have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
+In the example below, both `group1` and `group2` have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
+
 ```html
 /* Included on publisher page */
 <amp-analytics type="myVendor" id="myVendor" data-credentials="include">
