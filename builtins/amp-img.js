@@ -15,13 +15,11 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
-import {once} from '../src/utils/function';
 import {registerElement} from '../src/service/custom-element-registry';
 import {setImportantStyles} from '../src/style';
 
