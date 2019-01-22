@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
+import {StateChangeType, AdvacementChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -28,6 +28,15 @@ const Events = {
   STORY_UNMUTED: 'story-audio-unmuted',
 };
 
+/** @enum {string} */
+const AdvancementMode = {
+  GO_TO_PAGE: 'goToPageAction',
+  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
+  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
+  MANUAL_ADVANCE: 'manualAdvance',
+  ADVANCE_TO: 'advanceTo',
+  ADVANCE_TO_ADS: 'advanceToAds',
+};
 
 /**
  * Intermediate handler for amp-story specific analytics.
@@ -70,6 +79,33 @@ export class AmpStoryAnalytics {
     this.triggerEvent_(event);
   }
 
+  /**
+   * @param {!./navigation-state.AdvancementChangeTypeDef} advancementChangeType
+   */
+  onAdvacementModeStateChange(advancementChangeType) {
+      switch (advancementChangeType.type) {
+      case AdvacementChangeType.GO_TO_PAGE:
+        this.triggerEvent_(AdvancementMode.PAGE_VISIBLE);
+        break;
+      case AdvacementChangeType.AUTO_ADVANCE_TIME:
+        this.triggerEvent_(AdvancementMode.AUTO_ADVANCE_TIME);
+        break;
+      case AdvacementChangeType.AUTO_ADVANCE_MEDIA:
+        this.triggerEvent_(AdvancementMode.AUTO_ADVANCE_MEDIA);
+        break;
+      case AdvacementChangeType.MANUAL_ADVANCE:
+        this.triggerEvent_(AdvancementMode.MANUAL_ADVANCE);
+        break;
+      case AdvacementChangeType.ADVANCE_TO:
+        this.triggerEvent_(AdvancementMode.ADVANCE_TO);
+        break;
+      case AdvacementChangeType.ADVANCE_TO_ADS:
+        this.triggerEvent_(AdvancementMode.ADVANCE_TO_ADS);
+        break;
+    }
+  }
+
+  }
   /**
    * @param {string} eventType
    * @private

@@ -158,7 +158,7 @@ const AdvancementMode = {
   MANUAL_ADVANCE: 'manualAdvance',
   ADVANCE_TO: 'advanceTo',
   ADVANCE_TO_ADS: 'advanceToAds',
-}
+};
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -405,9 +405,9 @@ export class AmpStory extends AMP.BaseElement {
         const {args} = invocation;
         if (args) {
           this.switchTo_(
-            args['id'],
-            NavigationDirection.NEXT,
-            AdvancementMode.GO_TO_PAGE);
+              args['id'],
+              NavigationDirection.NEXT,
+              AdvancementMode.GO_TO_PAGE);
         }
       });
     }
@@ -1091,11 +1091,12 @@ export class AmpStory extends AMP.BaseElement {
    * Switches to a particular page.
    * @param {string} targetPageId
    * @param {!NavigationDirection} direction
+   * @param {AdvancementMode} advanceMode
    * @return {!Promise}
    * @private
    */
   switchTo_(targetPageId, direction, advanceMode) {
-    if (advanceMode) this.advanceMode_ = advanceMode;
+    if (advanceMode) {this.advanceMode_ = advanceMode;}
 
     const targetPage =
         (isExperimentOn(this.win, 'amp-story-branching')) ?
@@ -1174,8 +1175,9 @@ export class AmpStory extends AMP.BaseElement {
         });
 
         if (targetPage.isAd()) {
-          this.advanceMode_= AdvancementMode.ADVANCE_TO_ADS;
+          this.advanceMode_ = AdvancementMode.ADVANCE_TO_ADS;
           setAttributeInMutate(this, Attributes.AD_SHOWING);
+          this.advancement_ = AdvancementMode.ADVANCE_TO_ADS;
         } else {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1187,8 +1189,6 @@ export class AmpStory extends AMP.BaseElement {
           if (!isAutoAdvance) {
             this.systemLayer_.updateProgress(targetPageId,
                 this.advancement_.getProgress());
-          } else {
-            this.advanceMode = AdvancementMode.AUTO_ADVANCE_AFTER;
           }
         }
 
@@ -1198,7 +1198,7 @@ export class AmpStory extends AMP.BaseElement {
             this.getPageCount(),
             targetPage.element.id,
             oldPage.element.id,
-            direction,
+            this.advanceMode_,
             targetPage.getNextPageId() === null /* isFinalPage */
         );
 

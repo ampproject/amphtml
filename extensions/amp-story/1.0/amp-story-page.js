@@ -799,6 +799,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
+    // const advancementMode = this.advancement_.constructor.name;
+    // console.log('hello this is from amp-story-page switchTo_');
+    console.log(advancementMode);
     const payload = dict({
       'targetPageId': targetPageId,
       'direction': direction});

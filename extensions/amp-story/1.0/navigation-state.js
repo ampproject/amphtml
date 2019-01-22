@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// import {NavigationDirection} from './amp-story-page';
 import {Observable} from '../../../src/observable';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-
 
 /**
  * Types of state changes that can be consumed.
@@ -28,6 +28,14 @@ export const StateChangeType = {
   END: 3,
 };
 
+export const AdvacementChangeType = {
+  GO_TO_PAGE: 0,
+  AUTO_ADVANCE_TIME: 1,
+  AUTO_ADVANCE_MEDIA: 2
+  MANUAL_ADVANCE: 3
+  ADVANCE_TO: 4,
+  ADVANCE_TO_ADS: 5,
+}
 
 /** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
@@ -84,14 +92,19 @@ export class NavigationState {
    * @param {number} pageIndex
    * @param {number} totalPages
    * @param {string} pageId
+   * @param {string} previousPageId
    * @param {boolean} isFinalPage
+
    * TODO(alanorozco): pass whether change was automatic or on user action.
    */
-  updateActivePage(pageIndex, totalPages, pageId, isFinalPage) {
+  updateActivePage(
+    pageIndex, totalPages, pageId, previousPageId, isFinalPage) {
     const changeValue = {
       pageIndex,
       pageId,
       totalPages,
+      previousPageId,
+      // advancementMode,
       storyProgress: pageIndex / totalPages,
     };
 
@@ -104,6 +117,11 @@ export class NavigationState {
         }
       });
     }
+  }
+
+  updateAdvancement(advancementMode){
+    const changeVaue = {advancementMode};
+    this.fire_(StateChangeType.)
   }
 
   /**

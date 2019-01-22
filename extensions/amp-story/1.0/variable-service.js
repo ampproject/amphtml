@@ -30,7 +30,7 @@ const Variable = {
   STORY_IS_MUTED: 'storyIsMuted',
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviosPageId',
-  STORY_ADVANCEMENT_MODE: 'storyAdvancementMode'
+  STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
 };
 
 
@@ -51,7 +51,7 @@ export class AmpStoryVariableService {
       [Variable.STORY_PROGRESS]: null,
       [Variable.STORY_IS_MUTED]: null,
       [Variable.STORY_PREVIOUS_PAGE_ID]: null,
-      [Variable.STORY_ADVANCEMENT_MODE]: null
+      [Variable.STORY_ADVANCEMENT_MODE]: null,
     });
   }
 
@@ -85,6 +85,7 @@ export class AmpStoryVariableService {
   onAdvancementModeChange(advancementMode) {
     this.variables_[Variable.STORY_ADVANCEMENT_MODE] = mode;
   }
+
   /**
    * @return {!StoryVariableDef}
    */
