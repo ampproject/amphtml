@@ -574,10 +574,14 @@ export class Carousel {
   /**
    * Resets the transforms for all the slides, putting them back in their
    * natural position.
+   * @param {number} totalLength The total length of all the slides.
    * @private
    */
-  resetSlideTransforms_() {
-    this.slides_.forEach(slide => this.setElementTransform_(slide, 0, 0));
+  resetSlideTransforms_(totalLength) {
+    const revolutions = 0; // Sets the slide back to the initial position.
+    this.slides_.forEach(slide => {
+      this.setElementTransform_(slide, revolutions, totalLength);
+    });
   }
 
   /**
@@ -794,7 +798,7 @@ export class Carousel {
     this.runMutate_(() => {
       this.restingIndex_ = this.currentIndex_;
 
-      this.resetSlideTransforms_();
+      this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();
       this.moveSlides_(totalLength);
       this.restoreScrollStart_();
