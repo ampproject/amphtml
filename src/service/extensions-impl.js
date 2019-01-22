@@ -685,7 +685,10 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+  // is DCE'd from production builds.
+  if ((false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
+      getMode().test) {
     installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
