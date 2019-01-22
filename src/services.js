@@ -328,7 +328,7 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!Promise<!./service/resources-impl.Resources>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/resources-impl.Resources>} */ (

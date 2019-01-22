@@ -107,7 +107,7 @@ export class ViewportBindingInabox {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../../service/platform-impl.Platform} */
+    /** @const {!../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
     /** @private @const {!Observable} */
