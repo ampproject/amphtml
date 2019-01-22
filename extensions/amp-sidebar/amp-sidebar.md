@@ -202,19 +202,21 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sideb
 {% endcall %}
 
 ## Sidebar for Stories
-Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/). However, there are certain restrictions on what attributes and features are allowed. The following are allowed attributes and features of sidebars within an `amp-story`.
-
-### Allowed Attributes
-- [layout](#layout)
-- [data-close-button-aria-label](#data)
-- [common attributes](#common)
+Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
 
 ### Behavior
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
 - The sidebar defaults to the "start" side for regular AMP documents, meaning right for left-right languages and left for right-to-left languages.
 - The `<amp-sidebar>` has default background color of white and is overridable in CSS.
 - Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
-- By default, a 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
+- A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
+
+There are certain restrictions on what attributes and features are allowed in order to provide a consistent UI experience across the story platform. The following are allowed attributes and features of an `amp-sidebar` within an `amp-story`.
+
+### Allowed Attributes
+- [layout](#layout)
+- [data-close-button-aria-label](#data)
+- [common attributes](#common)
 
 *Example: Basic Sidebar in a Story*
 
