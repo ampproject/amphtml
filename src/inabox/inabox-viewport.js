@@ -121,7 +121,7 @@ export class ViewportBindingInabox {
       const oldViewportRect = this.viewportRect_;
       this.viewportRect_ = this.getViewportRect_();
       this.updateBoxRect_(layoutRectFromDomRect(
-          this.win.frameElement.getBoundingClientRect()));
+          this.win.frameElement./*OK*/getBoundingClientRect()));
       if (isResized(this.viewportRect_, oldViewportRect)) {
         this.resizeObservable_.fire();
       }
@@ -381,7 +381,7 @@ export class ViewportBindingInabox {
     if (this.canInspectTopWindow_()) {
       return new Promise(resolve => {
         resolve(layoutRectFromDomRect(
-            this.win.frameElement.getBoundingClientRect()));
+            this.win.frameElement./*OK*/getBoundingClientRect()));
       });
     }
     if (!this.requestPositionPromise_) {

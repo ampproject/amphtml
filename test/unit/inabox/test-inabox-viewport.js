@@ -187,17 +187,14 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         let viewportRect = layoutRectLtwh(0, 0, 100, 100);
         let targetRect = layoutRectLtwh(10, 20, 50, 50);
         let getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
-        let getFrameRectStub =
-            sandbox.stub(win.frameElement, 'getBoundingClientRect');
+        win.frameElement.getBoundingClientRect = () => targetRect;
         getViewportRectStub.returns(viewportRect);
-        getFrameRectStub.returns(targetRect);
 
         positionCallback = data => {
           return new Promise(resolve => {
             setTimeout(() => {
               ({viewportRect, targetRect} = data);
               getViewportRectStub.returns(viewportRect);
-              getFrameRectStub.returns(targetRect);
               topWindowObservable.fire();
               resolve();
             }, 100);
@@ -251,8 +248,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           // DOM change, target position changed
           sandbox.restore();
           getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
-          getFrameRectStub =
-              sandbox.stub(win.frameElement, 'getBoundingClientRect');
           sandbox.stub(
               Services.resourcesForDoc(win.document), 'get').returns([element]);
         }).then(() => {
