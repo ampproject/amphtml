@@ -70,7 +70,7 @@
   <amp-list width="auto" height="400"
     layout="fixed-height"
     src="/infinite-scroll?items=2&left=20"
-    load-more="auto"
+    load-more="manual"
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="pin-container">
@@ -81,9 +81,15 @@
         </div>
       </div>
     </template>
-    <!-- <amp-list-load-more load-more-button>
-      <button>CLICK ME</button>
-    </amp-list-load-more> -->
+    <amp-list-load-more load-more-button>
+      <div>CLICK ME</div>
+    </amp-list-load-more>
+    <amp-list-load-more load-more-loading>
+      <div>LOADING</div>
+    </amp-list-load-more>
+    <amp-list-load-more load-more-failed>
+      <div>OOPS</div>
+    </amp-list-load-more>
     <div fallback>
       FALLBACK
     </div>
