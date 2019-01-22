@@ -29,6 +29,8 @@ const Variable = {
   STORY_PAGE_COUNT: 'storyPageCount',
   STORY_IS_MUTED: 'storyIsMuted',
   STORY_PROGRESS: 'storyProgress',
+  STORY_PREVIOUS_PAGE_ID: 'storyPreviosPageId',
+  STORY_ADVANCEMENT_MODE: 'storyAdvancementMode'
 };
 
 
@@ -48,6 +50,8 @@ export class AmpStoryVariableService {
       [Variable.STORY_PAGE_COUNT]: null,
       [Variable.STORY_PROGRESS]: null,
       [Variable.STORY_IS_MUTED]: null,
+      [Variable.STORY_PREVIOUS_PAGE_ID]: null,
+      [Variable.STORY_ADVANCEMENT_MODE]: null
     });
   }
 
@@ -57,12 +61,13 @@ export class AmpStoryVariableService {
   onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId, storyProgress, totalPages} =
+        const {pageIndex, pageId, storyProgress, totalPages, previousPageId} =
             stateChangeEvent.value;
         this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
         this.variables_[Variable.STORY_PAGE_ID] = pageId;
         this.variables_[Variable.STORY_PROGRESS] = storyProgress;
         this.variables_[Variable.STORY_PAGE_COUNT] = totalPages;
+        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = previousPageId;
         break;
     }
   }
@@ -74,6 +79,12 @@ export class AmpStoryVariableService {
     this.variables_[Variable.STORY_IS_MUTED] = isMuted;
   }
 
+  /**
+   * @param {string} advancementMode
+   */
+  onAdvancementModeChange(advancementMode) {
+    this.variables_[Variable.STORY_ADVANCEMENT_MODE] = mode;
+  }
   /**
    * @return {!StoryVariableDef}
    */

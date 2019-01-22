@@ -150,6 +150,16 @@ const Attributes = {
   SUPPORTS_LANDSCAPE: 'supports-landscape',
 };
 
+/** @enum {string} */
+const AdvancementMode = {
+  GO_TO_PAGE: 'goToPageAction',
+  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
+  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
+  MANUAL_ADVANCE: 'manualAdvance',
+  ADVANCE_TO: 'advanceTo',
+  ADVANCE_TO_ADS: 'advanceToAds',
+}
+
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -259,6 +269,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
+
+    /** @private {string} */
+    this.advanceMode_ = null;
 
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
@@ -391,7 +404,10 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+          this.switchTo_(
+            args['id'],
+            NavigationDirection.NEXT,
+            AdvancementMode.GO_TO_PAGE);
         }
       });
     }
@@ -1078,7 +1094,9 @@ export class AmpStory extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  switchTo_(targetPageId, direction) {
+  switchTo_(targetPageId, direction, advanceMode) {
+    if (advanceMode) this.advanceMode_ = advanceMode;
+
     const targetPage =
         (isExperimentOn(this.win, 'amp-story-branching')) ?
           this.updateStoryNavigationPath_(targetPageId, direction) :
@@ -1156,7 +1174,7 @@ export class AmpStory extends AMP.BaseElement {
         });
 
         if (targetPage.isAd()) {
-          this.storeService_.dispatch(Action.TOGGLE_AD, true);
+          this.advanceMode_= AdvancementMode.ADVANCE_TO_ADS;
           setAttributeInMutate(this, Attributes.AD_SHOWING);
         } else {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
@@ -1169,6 +1187,8 @@ export class AmpStory extends AMP.BaseElement {
           if (!isAutoAdvance) {
             this.systemLayer_.updateProgress(targetPageId,
                 this.advancement_.getProgress());
+          } else {
+            this.advanceMode = AdvancementMode.AUTO_ADVANCE_AFTER;
           }
         }
 
@@ -1177,6 +1197,8 @@ export class AmpStory extends AMP.BaseElement {
             pageIndex,
             this.getPageCount(),
             targetPage.element.id,
+            oldPage.element.id,
+            direction,
             targetPage.getNextPageId() === null /* isFinalPage */
         );
 
