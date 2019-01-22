@@ -330,9 +330,6 @@ export const adConfig = {
   'caaja': {
     renderStartImplemented: true,
     prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
-    preconnect: [
-      'https://cdn.as.amanad.adtdp.com',
-    ],
   },
 
   'caajainfeed': {
