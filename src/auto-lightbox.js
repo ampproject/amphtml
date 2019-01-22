@@ -28,9 +28,6 @@ export function detectAutoLightbox(ampdoc) {
     return;
   }
   chunk(ampdoc, () => {
-    if (!ampdoc.getRootNode().querySelector('amp-img')) {
-      return;
-    }
     Services.extensionsFor(win)
         .installExtensionForDoc(ampdoc, 'amp-auto-lightbox');
   }, ChunkPriority.LOW);

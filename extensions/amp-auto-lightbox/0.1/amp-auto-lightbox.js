@@ -26,7 +26,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
@@ -156,15 +156,21 @@ export class Scanner {
    * @return {!Array<!Promise<?Element>>}
    */
   static getAllImages(doc) {
-    const imgs = toArray(doc.querySelectorAll('amp-img')).filter(img =>
-      !img.hasAttribute(LIGHTBOXABLE_ATTR) &&
-      !img.hasAttribute(VISITED_ATTR));
+    const potentialImgsSelector =
+        `amp-img:not([${LIGHTBOXABLE_ATTR}]):not(${VISITED_ATTR})`;
 
-    imgs.forEach(img => {
-      img.setAttribute(VISITED_ATTR, '');
-    });
+    const imgs = toArray(doc.querySelectorAll(potentialImgsSelector));
 
-    return imgs.map(whenLoadedOrNull);
+    return imgs.map(img =>
+      whenLoadedOrNull(img).then(imgOrNull => {
+        if (!imgOrNull) {
+          return imgOrNull;
+        }
+        return devAssert(imgOrNull).getImpl().then(impl =>
+          impl.mutateElement(() => {
+            img.setAttribute(VISITED_ATTR, '');
+          }).then(() => imgOrNull));
+      }));
   }
 }
 
@@ -272,11 +278,8 @@ export function isEnabledForDoc(ampdoc) {
  * @return {!Promise<?Element>}
  */
 function whenLoadedOrNull(el) {
-  return new Promise(resolve => {
-    el.signals().whenSignal(CommonSignals.LOAD_END)
-        .then(() => { resolve(el); })
-        .catch(() => { resolve(null); });
-  });
+  return el.signals().whenSignal(CommonSignals.LOAD_END)
+      .then(() => el, () => null);
 }
 
 
