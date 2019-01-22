@@ -21,6 +21,7 @@ import {
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
+import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
@@ -251,10 +252,12 @@ export class LightboxManager {
     }
 
     this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
-    if (this.meetsHeuristicsForTap_(element)) {
-      const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
-      element.setAttribute('on', `tap:${gallery.id}.activate`);
+    if (!this.meetsHeuristicsForTap_(element)) {
+      return;
     }
+    const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
+    const actions = Services.actionServiceForDoc(element);
+    actions.setActions(element, `tap:${gallery.id}.activate`);
   }
 
   /**
