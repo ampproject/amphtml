@@ -759,7 +759,7 @@ describe('Action method', () => {
         str: 'tap:' + id + '.method1(arg1=2)',
         target: id,
       };
-      // A caller that references an action macro, providing only
+      // A caller that references an action macro, providing only one
       // argument.
       targetElement.setAttribute('on', `tap:${actionMacroId}(arg1=2)`);
     });

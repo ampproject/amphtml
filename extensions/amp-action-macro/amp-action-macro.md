@@ -1,5 +1,5 @@
 <!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -51,8 +51,7 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 
 ```html
 <!--
-  You can provide arguments in the caller, overriding the default arguments in the action macro. The action macro
-  defaults applying for the omitted arguments.
+  You can provide arguments in the caller, overriding the default arguments in the action macro. The action macro defaults apply for the omitted arguments.
 -->
  <button on="tap:closeNavigations({nav3: 'close'})">Close all three</button>
 ```
@@ -71,10 +70,15 @@ e.g.
 
 ```html
  <amp-action-macro
-    id="action1"
+    id="navigate-action"
     action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
+
  <amp-action-macro
-    id="action1"
+    id="refresh-amp-list"
     action="ampList.refresh()"></amp-action-macro>
  <amp-list id="ampList" src="...">...</amp-list>
+
+ <button on="tap:navigate-action"></button>
+
+ <button on="tap:refresh-amp-list"></button>
  ```

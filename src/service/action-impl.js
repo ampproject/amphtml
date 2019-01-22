@@ -104,8 +104,8 @@ let ActionInfoArgsDef;
 
 /**
  * @typedef {{
- *   action: !ActionInfoDef,
- *   call: string
+ *   action: string,
+ *   actionInfo: !ActionInfoDef,
  * }}
  */
 let ActionMacroDef;
@@ -667,8 +667,8 @@ export class ActionService {
         const actionMacroDef = this.getActionMacroDef_(action);
 
         actionMap = parseActionMap(
-            !!actionMacroDef ? actionMacroDef.call : action,
-            node, actionMacroDef ? actionMacroDef.action.args : null);
+            !!actionMacroDef ? actionMacroDef.action : action,
+            node, actionMacroDef ? actionMacroDef.actionInfo.args : null);
 
         node[ACTION_MAP_] = actionMap;
       }
@@ -692,16 +692,15 @@ export class ActionService {
     const matchActionResults = actionCall.match(actionMacroCall);
     if (matchActionResults) {
       const macroActionId = matchActionResults[1];
-      const action = this.actionMacros_[macroActionId];
-      const {target, method} = action;
-      devAssert(action, 'macro action reference does not exist');
-      // Replace the macro id reference with the target and method name.
-      // <amp-action-macro id="action-macro-id" action="target.method()"
-      // e.g. event:action-macro-id() will become event:target.method()
-      const call = actionCall.replace(
+      const actionInfo = this.actionMacros_[macroActionId];
+      const {target, method} = actionInfo;
+      devAssert(actionInfo, 'macro action reference does not exist');
+      // Replace the action macro id with the target and method name, as
+      // that is the actual action to be called.
+      const action = actionCall.replace(
           macroActionId, `${target}.${method}`);
 
-      return {call, action};
+      return {action, actionInfo};
     }
 
     return null;
@@ -877,20 +876,20 @@ function notImplemented() {
 
 
 /**
- * @param {string} s
+ * @param {string} action
  * @param {!Element} context
  * @param {?Object=} opt_defaultArgs arguments to use for the arguments
  *   not provided by the caller.
  * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
-export function parseActionMap(s, context, opt_defaultArgs) {
-  const assertAction = assertActionForParser.bind(null, s, context);
-  const assertToken = assertTokenForParser.bind(null, s, context);
+export function parseActionMap(action, context, opt_defaultArgs) {
+  const assertAction = assertActionForParser.bind(null, action, context);
+  const assertToken = assertTokenForParser.bind(null, action, context);
 
   let actionMap = null;
 
-  const toks = new ParserTokenizer(s);
+  const toks = new ParserTokenizer(action);
   let tok;
   let peek;
   do {
@@ -944,7 +943,7 @@ export function parseActionMap(s, context, opt_defaultArgs) {
           method,
           args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
-          str: s,
+          str: action,
         });
 
         peek = toks.peek();
