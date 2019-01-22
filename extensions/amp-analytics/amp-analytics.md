@@ -199,9 +199,9 @@ The runtime then merges all the provided configuration to determine the final co
 
 Variable Groups is a feature that allows analytics providers to group a predefined set of variables that can easily be enabled by a user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
 
-Analytics providers need to create a new varGroups object inside of the configRewriter configuration to enable this feature. Publishers can then include any named analytic provider created varGroups they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
+Analytics providers need to create a new `varGroups` object inside of the `configRewriter` configuration to enable this feature. Publishers can then include any named analytic provider created `varGroups` they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
 
-For example we may have a vendor who's configuration looks like this:
+For example we may have a vendor whose configuration looks like this:
 ```js
 // This is predefined by vendor.
 export const VENDOR_ANALYTICS_CONFIG = {
@@ -221,7 +221,9 @@ export const VENDOR_ANALYTICS_CONFIG = {
 }
 ```
 
-You can specify which variable groups you want enabled by including `{enabled: true}` for the specified variable groups within the provider's <amp-analytics> configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
+You can specify which variable groups are enabled by including `{enabled: true}` for the specified `varGroups` within the provider's `<amp-analytics>` configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
+
+In the example below, both group1 and group2 have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
 ```html
 /* Included on publisher page */
 <amp-analytics type="myVendor" id="myVendor" data-credentials="include">
@@ -242,7 +244,7 @@ You can specify which variable groups you want enabled by including `{enabled: t
 </amp-analytics>
 ```
 
-In the above example, both group1 and group2 have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url. In this example the request body would look something like this:
+In this example the request body would look something like this:
 ```json
 /* Sent to configuration rewriter server. */
 "configRewriter": {
