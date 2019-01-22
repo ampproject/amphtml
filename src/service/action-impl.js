@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+  RAW_OBJECT_ARGS_KEY,
+} from '../action-constants';
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
-import {dev, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
@@ -31,6 +35,7 @@ import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
+
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -42,9 +47,6 @@ const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
 const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
-
-/** @const {string} */
-const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
@@ -400,7 +402,7 @@ export class ActionService {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugId = target.tagName + '#' + targetId;
-    dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
+    devAssert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
     'AMP element or a whitelisted target element is expected: %s', debugId);
 
@@ -610,7 +612,7 @@ export class ActionService {
       }
       const actionInfos = this.matchActionInfos_(n, actionEventType);
       if (actionInfos && isEnabled(n)) {
-        return {node: n, actionInfos: dev().assert(actionInfos)};
+        return {node: n, actionInfos: devAssert(actionInfos)};
       }
       n = n.parentElement;
     }
@@ -733,22 +735,35 @@ export class ActionService {
   }
 }
 
-
 /**
  * Returns `true` if the given action invocation is whitelisted in the given
- * whitelist.
+ * whitelist. Default actions' alias, 'activate', are automatically
+ * whitelisted if their corresponding registered alias is whitelisted.
  * @param {!ActionInvocation} invocation
  * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
  * @return {boolean}
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
-  return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*' || tagOrTarget === invocation.tagOrTarget) &&
-        method === invocation.method;
+  let {method} = invocation;
+  const {node, tagOrTarget} = invocation;
+  // Use alias if default action is invoked.
+  if (method === DEFAULT_ACTION
+      && (typeof node.getDefaultActionAlias == 'function')) {
+    method = node.getDefaultActionAlias();
+  }
+  const lcMethod = method.toLowerCase();
+  const lcTagOrTarget = tagOrTarget.toLowerCase();
+  return whitelist.some(w => {
+    if (w.tagOrTarget.toLowerCase() === lcTagOrTarget
+        || (w.tagOrTarget === '*')) {
+      if (w.method.toLowerCase() === lcMethod) {
+        return true;
+      }
+    }
+    return false;
   });
 }
-
 
 /**
  * A clone of an event object with its function properties replaced.
@@ -798,7 +813,7 @@ function cloneWithoutFunctions(original, opt_dest) {
 
 /** @private */
 function notImplemented() {
-  dev().assert(null, 'Deferred events cannot access native event functions.');
+  devAssert(null, 'Deferred events cannot access native event functions.');
 }
 
 
@@ -840,7 +855,7 @@ export function parseActionMap(s, context) {
             toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
 
         // Method: ".method". Method is optional.
-        let method = DEFAULT_METHOD_;
+        let method = DEFAULT_ACTION;
         let args = null;
 
         peek = toks.peek();
@@ -1007,7 +1022,7 @@ export function dereferenceExprsInArgs(args, event) {
  * @private
  */
 function assertActionForParser(s, context, condition, opt_message) {
-  return user().assert(condition, 'Invalid action definition in %s: [%s] %s',
+  return userAssert(condition, 'Invalid action definition in %s: [%s] %s',
       context, s, opt_message || '');
 }
 

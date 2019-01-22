@@ -24,6 +24,7 @@ import {
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
@@ -33,6 +34,7 @@ import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -355,6 +357,42 @@ describes.realWin('amp-story', {
               '',
           );
         });
+  });
+
+  it('should update bookend status in browser history', () => {
+    const pageCount = 1;
+    createPages(story.element, pageCount, ['last-page']);
+
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+
+          return expect(replaceStateStub).to.have.been.calledWith(
+              {ampStoryBookendActive: true}, '',
+          );
+        });
+  });
+
+
+  it('should not block layoutCallback when bookend xhr fails', () => {
+    createPages(story.element, 1, ['page-1']);
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+
+    const bookendXhr = sandbox
+        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
+        .returns(Promise.reject());
+
+    story.buildCallback();
+
+    return story.layoutCallback().then(() => {
+      expect(bookendXhr).to.have.been.calledOnce;
+    }).catch(error => {
+      expect(error).to.be.undefined;
+    });
   });
 
   it('should NOT update page id in browser history if ad', () => {
@@ -1202,4 +1240,154 @@ describes.realWin('amp-story', {
           });
     });
   });
+  describe('amp-story branching', () => {
+
+    beforeEach(() => {toggleExperiment(win, 'amp-story-branching', true);});
+    afterEach(() => {toggleExperiment(win, 'amp-story-branching', false);});
+
+    it('should advance to specified page with advanced-to attribute', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+
+            story.getPageById('cover')
+                .element.setAttribute('advance-to', 'page-3');
+
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            expect(story.activePage_.element.id).to.equal('page-3');
+          });
+    });
+
+    it('should navigate to the target page when a goToPage action is executed',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+                expect(story.activePage_.element.id).to.equal('page-2');
+              });
+        });
+
+    it('should navigate back to the correct previous page after goToPage',
+        () => {
+          createPages(story.element, 4,
+              ['cover', 'page-1', 'page-2', 'page-3']);
+          story.buildCallback();
+
+          return story.layoutCallback()
+              .then(() => {
+                story.element.setAttribute('id', 'story');
+
+                const actionButton = createElementWithAttributes(
+                    win.document,
+                    'button',
+                    {'id': 'actionButton',
+                      'on': 'tap:story.goToPage(id=page-2)'});
+                element.querySelector('#cover').appendChild(actionButton);
+                // Click on the actionButton to trigger the goToPage action.
+                actionButton.click();
+
+                // Moves backwards.
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it.skip(
+        'should navigate back to the correct previous page after advance-to',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+
+                expect(story.activePage_.element.id).to.equal('cover');
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                // Move backwards.
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should begin at the specified page fragment parameter value', () => {
+      win.location.hash = 'page=page-1';
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2','page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should begin at initial page when fragment parameter value is wrong',
+        () => {
+          win.location.hash = 'page=BADVALUE';
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should update browser history with the story navigation path', () => {
+      const pageCount = 2;
+      createPages(story.element, pageCount, ['cover', 'page-1']);
+
+      return story.layoutCallback()
+          .then(() => {
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            return expect(replaceStateStub).to.have.been.calledWith(
+                {ampStoryNavigationPath: ['cover', 'page-1']});
+          });
+    });
+
+    it('should navigate to the correct previous page after navigating away',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                const currentLocation = win.location;
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                win.location = 'https://example.com/';
+                win.location = currentLocation;
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+  });
 });
+

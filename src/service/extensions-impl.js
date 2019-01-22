@@ -26,7 +26,7 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync} from '../log';
 import {
   getAmpdoc,
   installServiceInEmbedIfEmbeddable,
@@ -265,7 +265,7 @@ export class Extensions {
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
-      dev().assert(!holder.loaded && !holder.error);
+      devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
     oldScriptElement.removeAttribute('custom-element');
@@ -283,7 +283,7 @@ export class Extensions {
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
-      const element = dev().assert(extension.elements[elementName],
+      const element = devAssert(extension.elements[elementName],
           'Element not found: %s', elementName);
       return element.implementationClass;
     });
@@ -685,7 +685,10 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+  // is DCE'd from production builds.
+  if ((false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
+      getMode().test) {
     installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');

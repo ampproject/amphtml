@@ -15,7 +15,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -62,7 +62,7 @@ export function getAmpAdRenderOutsideViewport(element) {
       'of [0, 3], but got ' + rawValue;
   const viewportNumber =
       user().assertNumber(parseFloat(rawValue), errorMessage);
-  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+  userAssert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
   return viewportNumber;
 }
 

@@ -164,6 +164,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
     this.htmlFormat = 'AMP4EMAIL';
   }
+  if (this.ampHtmlFile.indexOf('actions_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-actions-') != -1) {
+    this.htmlFormat = 'ACTIONS';
+  }
   /**
    * If set to false, output will be generated without inlining the input
    * document.
@@ -340,6 +344,21 @@ describe('ValidatorOutput', () => {
     {assert.fail(
         '', '', 'expectedSubstr:\n' + expectedSubstr +
           '\nsaw:\n' + observed, '');}
+  });
+});
+
+describe('ValidationResultTransformerVersion', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Confirm that the transformer version in attribute "transformed" is
+  // set to ValidationResult.transformer_version.
+  it('produces expected output with hash in the URL', () => {
+    const test = new ValidatorTestCase(
+        'transformed_feature_tests/minimum_valid_amp.html');
+    const result =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    assertStrictEqual(1, result.transformerVersion);
   });
 });
 

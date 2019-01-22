@@ -28,7 +28,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -41,6 +41,10 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+
+const TAG = 'amp-dailymotion';
+
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -146,7 +150,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
+    this.videoid_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
         this.element);
@@ -164,7 +168,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
 
     this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 
@@ -423,9 +427,14 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-dailymotion', '0.1', AMP => {
-  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpDailymotion);
 });

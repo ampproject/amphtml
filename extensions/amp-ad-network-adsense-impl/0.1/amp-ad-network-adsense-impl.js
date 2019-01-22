@@ -57,7 +57,7 @@ import {
   setStyle,
   setStyles,
 } from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
@@ -319,7 +319,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
     // But not all tests arrange to call upgradeCallback.
-    // dev().assert(slotId != undefined);
+    // devAssert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
     const slotname = this.element.getAttribute('data-ad-slot');
@@ -337,14 +337,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
-      format,
+      'format': format,
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
-      adk,
+      'adk': adk,
       'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
@@ -393,9 +393,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return googleAdUrl(
           this, ADSENSE_BASE_URL, startTime, Object.assign(
               {
-                adsid: identity.token || null,
-                jar: identity.jar || null,
-                pucrd: identity.pucrd || null,
+                'adsid': identity.token || null,
+                'jar': identity.jar || null,
+                'pucrd': identity.pucrd || null,
               },
               parameters), experimentIds);
     });
@@ -468,12 +468,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
-      dev().assert(this.iframe);
+      devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
-      dev().assert(!this.ampAnalyticsElement_);
+      devAssert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
             this.win,

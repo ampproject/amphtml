@@ -19,7 +19,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -45,6 +45,7 @@ const BackButtonStates = {
 
 /** @const {!Object<string, !ButtonStateDef>} */
 const ForwardButtonStates = {
+  HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
@@ -132,13 +133,20 @@ class PaginationButton {
   }
 
   /**
+   * @return {!ButtonStateDef}
+   */
+  getState() {
+    return this.state_;
+  }
+
+  /**
    * @param {!Event} e
    * @private
    */
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.win_, this.element, dev().assert(this.state_.triggers),
+      dispatch(this.win_, this.element, devAssert(this.state_.triggers),
           /* payload */ undefined, {bubbles: true});
       return;
     }
@@ -173,7 +181,16 @@ export class PaginationButtons {
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
 
-    this.initializeListeners_(hasBookend);
+    /** @private {?ButtonStateDef} */
+    this.backButtonStateToRestore_ = null;
+
+    /** @private {?ButtonStateDef} */
+    this.forwardButtonStateToRestore_ = null;
+
+    /** @private {function():Promise<boolean>} */
+    this.hasBookend_ = hasBookend;
+
+    this.initializeListeners_();
   }
 
   /**
@@ -198,50 +215,87 @@ export class PaginationButtons {
   }
 
   /**
-   * @param {function():Promise<boolean>} hasBookend
+   * @private
    */
-  initializeListeners_(hasBookend) {
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX,
         pageIndex => {
-          const totalPages =
-            /**@type {number}*/ (this.storeService_.get(
-                StateProperty.PAGES_COUNT));
-          const bookendActive =
-              this.storeService_.get(StateProperty.BOOKEND_STATE);
-
-          if (pageIndex === 0) {
-            this.backButton_.updateState(BackButtonStates.HIDDEN);
-          }
-
-          if (pageIndex > 0 && !bookendActive) {
-            this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-          }
-
-          if (pageIndex < totalPages - 1) {
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
-          }
-
-          if (pageIndex === totalPages - 1 && !bookendActive) {
-            this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-          }
-
-          if (pageIndex === totalPages - 1) {
-            hasBookend().then(hasBookend => {
-              if (!hasBookend) {
-                this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-              }
-            });
-          }
+          this.onCurrentPageIndexUpdate_(pageIndex);
         });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
-      if (isActive) {
-        this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
-        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-      } else {
-        this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-        this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-      }
-    });
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    if (isActive) {
+      this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
+      this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+    } else {
+      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
+      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
+    }
+  }
+
+  /**
+   * @param {number} pageIndex
+   * @private
+   */
+  onCurrentPageIndexUpdate_(pageIndex) {
+    const totalPages =
+      /**@type {number}*/ (this.storeService_.get(StateProperty.PAGES_COUNT));
+    const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
+
+    if (pageIndex === 0) {
+      this.backButton_.updateState(BackButtonStates.HIDDEN);
+    }
+
+    if (pageIndex > 0 && !bookendActive) {
+      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
+    }
+
+    if (pageIndex < totalPages - 1) {
+      this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
+    }
+
+    if (pageIndex === totalPages - 1 && !bookendActive) {
+      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
+    }
+
+    if (pageIndex === totalPages - 1) {
+      this.hasBookend_().then(hasBookend => {
+        if (!hasBookend) {
+          this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+        }
+      });
+    }
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    if (isVisible) {
+      this.backButton_.updateState(devAssert(this.backButtonStateToRestore_));
+      this.forwardButton_.updateState(
+          devAssert(this.forwardButtonStateToRestore_));
+    } else {
+      this.backButtonStateToRestore_ = this.backButton_.getState();
+      this.backButton_.updateState(BackButtonStates.HIDDEN);
+      this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
+      this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
+    }
   }
 }

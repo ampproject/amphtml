@@ -40,6 +40,7 @@ import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
+import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
@@ -467,6 +468,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
+    }
+
+    /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
@@ -486,20 +499,18 @@ function createBaseCustomElementClass(win) {
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          Services.consentPolicyServiceForDocOrNull(this.getAmpDoc())
-              .then(consentPolicy => {
-                if (!consentPolicy) {
-                  return true;
-                }
-                return consentPolicy.whenPolicyUnblock(
-                    /** @type {string} */ (policyId));
-              }).then(shouldUnblock => {
-                if (shouldUnblock == true) {
-                  resolve(this.implementation_.buildCallback());
-                } else {
-                  reject(blockedByConsentError());
-                }
-              });
+          Services.consentPolicyServiceForDocOrNull(this).then(policy => {
+            if (!policy) {
+              return true;
+            }
+            return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
+          }).then(shouldUnblock => {
+            if (shouldUnblock) {
+              resolve(this.implementation_.buildCallback());
+            } else {
+              reject(blockedByConsentError());
+            }
+          });
         }
       }).then(() => {
         this.preconnect(/* onLayout */false);
@@ -1113,9 +1124,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-          // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1401,10 +1410,15 @@ function createBaseCustomElementClass(win) {
      * @return {?string}
      */
     getConsentPolicy_() {
-      const policyId = this.getAttribute('data-block-on-consent');
+      let policyId = this.getAttribute('data-block-on-consent');
       if (policyId === null) {
-        // data-block-on-consent attribute not set
-        return null;
+        if (shouldBlockOnConsentByMeta(this)) {
+          policyId = 'default';
+          this.setAttribute('data-block-on-consent', policyId);
+        } else {
+          // data-block-on-consent attribute not set
+          return null;
+        }
       }
       if (policyId == '' || policyId == 'default') {
         // data-block-on-consent value not set, up to individual element

@@ -502,6 +502,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 
 .i-amphtml-loading-container {
   display: block !important;
+  pointer-events: none;
   z-index: 1;
 }
 
@@ -662,9 +663,21 @@ amp-instagram {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics:not(.i-amphtml-element),
-amp-story-auto-ads:not(.i-amphtml-element){
-  display: none !important;
+amp-analytics, amp-story-auto-ads {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+html.i-amphtml-fie > amp-analytics {
+  /* Remove position fixed if it's in iframe.
+  * So runtime can measure layoutBox correctly
+  */
+  position: initial !important;
 }
 
 /**
@@ -849,10 +862,19 @@ amp-story .i-amphtml-loader {
 /**
  * Make amp-addthis tool floating if user give data-widget-type
  */
-
-amp-addthis[data-widget-type="floating"] {
-  position: fixed !important;
-  width:100% !important;
-  height:50px;
-  bottom:0;
+@media only screen and (max-width: 980px) {
+  amp-addthis[data-widget-type="floating"] {
+    position: fixed !important;
+    width: 100% !important;
+    height: 50px;
+    bottom: 0;
+  }
+}
+@media only screen and (min-width: 981px) {
+  amp-addthis[data-widget-type="floating"] {
+    position: fixed !important;
+    width: 100% !important;
+    height: 300px!important;
+    top: 200px;
+  }
 }

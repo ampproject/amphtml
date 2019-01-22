@@ -22,7 +22,7 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from './url';
-import {dev, user} from './log';
+import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
 
@@ -57,7 +57,7 @@ const TRUSTED_REFERRER_HOSTS = [
  * @return {!Promise}
  */
 export function getTrackImpressionPromise() {
-  return user().assert(trackImpressionPromise,
+  return userAssert(trackImpressionPromise,
       'E#19457 trackImpressionPromise');
 }
 
@@ -93,8 +93,9 @@ export function maybeTrackImpression(win) {
   ]).then(results => {
     const isTrustedViewer = results[0];
     const isTrustedReferrer = results[1];
-    // Currently this feature is launched for trusted viewer and trusted
-    // referrer, but still experiment guarded for all AMP docs.
+    // Enable the feature in the case of trusted viewer,
+    // or trusted referrer
+    // or with experiment turned on
     if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;

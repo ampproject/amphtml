@@ -16,7 +16,7 @@
 
 import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -486,6 +486,23 @@ export function childElementsByTag(parent, tagName) {
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
+/**
+ * Finds all elements that matche `selector`, scoped inside `root`
+ * for user-agents that do not support native scoping.
+ *
+ * This method isn't required for modern builds, can be removed.
+ *
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {!NodeList<!Element>}
+ */
+function scopedQuerySelectionFallback(root, selector) {
+  const unique = 'i-amphtml-scoped';
+  root.classList.add(unique);
+  const element = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return element;
+}
 
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
@@ -503,16 +520,12 @@ export function scopedQuerySelector(root, selector) {
   }
 
   // Only IE.
-  const unique = 'i-amphtml-scoped';
-  root.classList.add(unique);
-  const element = root./*OK*/querySelector(`.${unique} ${selector}`);
-  root.classList.remove(unique);
-  return element;
+  const fallbackResult = scopedQuerySelectionFallback(root, selector);
+  return fallbackResult[0] === undefined ? null : fallbackResult[0];
 }
 
-
 /**
- * Finds the every element that matches `selector`, scoped inside `root`.
+ * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
  * @param {!Element} root
  * @param {string} selector
@@ -527,11 +540,7 @@ export function scopedQuerySelectorAll(root, selector) {
   }
 
   // Only IE.
-  const unique = 'i-amphtml-scoped';
-  root.classList.add(unique);
-  const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
-  root.classList.remove(unique);
-  return elements;
+  return scopedQuerySelectionFallback(root, selector);
 }
 
 
@@ -733,7 +742,7 @@ export function escapeCssSelectorIdent(ident) {
 export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
   // Ensure it doesn't close the nth-child psuedo class.
-  dev().assert(escaped.indexOf(')') === -1);
+  devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }
 
@@ -800,7 +809,7 @@ export function isAmpElement(element) {
  * @return {!Promise<!Element>}
  */
 export function whenUpgradedToCustomElement(element) {
-  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(element);

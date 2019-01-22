@@ -26,7 +26,7 @@ import {getExistingServiceForDocInEmbedScope, getParentWindowFrameElement}
   from '../../../src/service';
 import {getFriendlyIframeEmbedOptional}
   from '../../../src/friendly-iframe-embed';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
@@ -136,7 +136,7 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
-      user().assert(this.element.id, `The ${TAG} element must have an id.`);
+      userAssert(this.element.id, `The ${TAG} element must have an id.`);
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
@@ -209,7 +209,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   executeInvocation_(invocation) {
-    const service = user().assert(
+    const service = userAssert(
         getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
         'Cannot execute action because the GWD service is not registered.');
 

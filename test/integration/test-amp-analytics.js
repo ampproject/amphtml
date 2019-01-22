@@ -17,16 +17,15 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe.configure().run('amp' +
-    '-analytics', function() {
-  this.timeout(5000);
-
+describe('amp-analytics', function() {
   describes.integration('basic pageview', {
     body: `
       <script>
         // initialize _cid cookie with a CLIENT_ID
         document.cookie='_cid=amp-12345';
       </script>
+      <!-- put amp-analytics > 3 viewports away from viewport -->
+      <div style="height: 400vh"></div>
       <amp-analytics>
         <script type="application/json">
         {
@@ -278,7 +277,7 @@ describe.configure().run('amp' +
         expect(timerStart + 1000).to.be.at.most(parseInt(q['timestamp'], 10));
         // Verify that timerStart is about current time
         expect(timerStart - startTime).to.be.above(-1000).and.below(1000);
-        expect(parseFloat(q['timerDuration'])).to.be.at.least(1000).below(1100);
+        expect(parseFloat(q['timerDuration'])).to.be.at.least(950).below(1100);
       });
     });
   });
@@ -565,6 +564,81 @@ describe.configure().run('amp' +
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.not.be.ok;
+      });
+    });
+  });
+
+  describes.integration('configRewriter', {
+    body:
+      `<amp-analytics type="_fake_">
+          <script type="application/json">
+          {
+            "vars": {
+              "url" : "${RequestBank.getUrl()}"
+            },
+            "configRewriter": {
+              "varGroups": {
+                "feature2": {
+                  "enabled": true
+                }
+              }
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
+    it('should use config from server', () => {
+      return RequestBank.withdraw().then(req => {
+        // The config here should have been rewritten by the /analytics/rewriter
+        // endpoint. This logic is located in the file
+        // /build-system/routes/analytics.js
+        const body = JSON.parse(req.body);
+        expect(body.reqBody.configRewriter.vars).to.deep.equal({
+          name: 'cats',
+          title: 'AMP TEST',
+          title2: 'AMP TEST',
+        });
+        expect(body.rewritten).to.be.true;
+        expect(body.testId).to.equal(12358);
+      });
+    });
+  });
+
+  describes.integration('configRewriter without publisher config', {
+    body:
+      `<amp-analytics type="_fake_">
+          <script type="application/json">
+          {
+            "vars": {
+              "url" : "${RequestBank.getUrl()}"
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
+    it('should use config from server', () => {
+      return RequestBank.withdraw().then(req => {
+        // The config here should have been rewritten by the /analytics/rewriter
+        // endpoint. This logic is located in the file
+        // /build-system/routes/analytics.js
+        const body = JSON.parse(req.body);
+        expect(body.reqBody.configRewriter.vars).to.deep.equal({
+          title2: 'AMP TEST',
+        });
+        expect(body.rewritten).to.be.true;
+        expect(body.testId).to.equal(12358);
       });
     });
   });

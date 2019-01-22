@@ -25,7 +25,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -37,6 +37,8 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-wistia-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -86,7 +88,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const {element} = this;
-    const mediaId = user().assert(
+    const mediaId = userAssert(
         element.getAttribute('data-media-hashed-id'),
         'The data-media-hashed-id attribute is required ' +
             'for <amp-wistia-player> %s',
@@ -316,9 +318,14 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
 
-AMP.extension('amp-wistia-player', '0.1', AMP => {
-  AMP.registerElement('amp-wistia-player', AmpWistiaPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpWistiaPlayer);
 });

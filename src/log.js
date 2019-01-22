@@ -405,6 +405,20 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument is not an array.
+   * The array can be empty.
+   *
+   * @param {*} shouldBeArray
+   * @param {string=} opt_message The assertion message
+   * @return {!Array} The array value
+   */
+  assertArray(shouldBeArray, opt_message) {
+    this.assert(Array.isArray(shouldBeArray),
+        (opt_message || 'Array expected') + ': %s', shouldBeArray);
+    return /** @type {!Array} */ (shouldBeArray);
+  }
+
+  /**
    * Throws an error if the first argument isn't a boolean.
    *
    * For more details see `assert`.
@@ -711,8 +725,8 @@ export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
   if (getMode().minified) {
     return shouldBeTrueish;
   }
-  return dev().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
-      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+  return dev()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
+      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }
 
 /**
@@ -745,6 +759,6 @@ export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
  */
 export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
   opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
-  return user().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
-      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+  return user()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
+      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }

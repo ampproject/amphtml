@@ -63,7 +63,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
+
+import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
 // prevent unnecessary HTTP requests, get accurate analytics, etc., and hence
@@ -128,12 +129,12 @@ class AmpAddThis extends AMP.BaseElement {
     const widgetId = this.element.getAttribute('data-widget-id');
 
     // Required attributes
-    this.pubId_ = user().assert(
+    this.pubId_ = userAssert(
         pubId,
         'The data-pub-id attribute is required for <amp-addthis> %s',
         this.element
     );
-    this.widgetId_ = user().assert(
+    this.widgetId_ = userAssert(
         widgetId,
         'The data-widget-id attribute is required for <amp-addthis> %s',
         this.element

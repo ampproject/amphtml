@@ -21,14 +21,11 @@ import {
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {Timeout} from './timeout';
-import {VideoDockingEvents} from './events';
+import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
 import {closestBySelector} from '../../../src/dom';
-import {
-  createCustomEvent,
-  listen,
-} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {once} from '../../../src/utils/function';
 import {
@@ -55,8 +52,8 @@ const BREAKPOINTS = [
 ];
 
 
-const TIMEOUT = 1000;
-const TIMEOUT_AFTER_INTERACTION = 1000;
+const TIMEOUT = 1200;
+const TIMEOUT_AFTER_INTERACTION = 800;
 
 
 /**
@@ -175,11 +172,21 @@ export class Controls {
     this.isSticky_ = false;
 
     /** @private {function():!Timeout} */
-    this.getHideTimeout_ =
-        once(() => new Timeout(this.ampdoc_.win, () => this.hide()));
+    this.getHideTimeout_ = once(() => new Timeout(this.ampdoc_.win, () => {
+      this.hide(/* respectSticky */ true);
+    }));
 
     /** @private @const {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
+    this.videoUnlisteners_ = [];
+
+    /** @private {?UnlistenDef} */
+    this.mouseMoveUnlistener_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.mouseOutUnlistener_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.area_ = null;
 
     /** @private {?../../../src/video-interface.VideoOrBaseElementDef} */
     this.video_ = null;
@@ -202,10 +209,15 @@ export class Controls {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/layout-rect.LayoutRectDef} area
    */
-  setVideo(video) {
-    this.video_ = video;
-    this.listen_(video);
+  setVideo(video, area) {
+    this.area_ = area;
+
+    if (this.video_ != video) {
+      this.video_ = video;
+      this.listen_(video);
+    }
   }
 
   /**
@@ -219,7 +231,7 @@ export class Controls {
 
     const {element} = video;
 
-    this.unlisteners_.push(
+    this.videoUnlisteners_.push(
         this.listenWhenEnabled_(this.dismissButton_, click, () => {
           this.container.dispatchEvent(
               createCustomEvent(this.ampdoc_.win,
@@ -260,7 +272,7 @@ export class Controls {
    * @private
    */
   isPlaying_() {
-    dev().assert(this.video_);
+    devAssert(this.video_);
     return this.manager_().getPlayingState(this.video_) != PlayingStates.PAUSED;
   }
 
@@ -308,8 +320,8 @@ export class Controls {
 
   /** @private */
   unlisten_() {
-    while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop().call();
+    while (this.videoUnlisteners_.length > 0) {
+      this.videoUnlisteners_.pop().call();
     }
   }
 
@@ -320,15 +332,25 @@ export class Controls {
 
   /** @private */
   showOnTapOrHover_() {
-    const onTapOrHover = () => this.show_();
     const {overlay} = this;
+    const boundShow = () => this.show_();
 
-    this.listenWhenEnabled_(overlay, 'mouseup', onTapOrHover);
-    this.listenWhenEnabled_(overlay, 'mouseover', onTapOrHover);
+    this.listenWhenEnabled_(overlay, 'click', boundShow);
+    this.listenWhenEnabled_(overlay, 'mouseover', boundShow);
   }
 
   /** @private */
   show_() {
+    // Delay by one animation frame to stop mouseover-click sequence mistrigger.
+    // See https://jsbin.com/rohesijowi/1/edit?output on Chrome (Blink) on a
+    // touch device/device mode.
+    this.ampdoc_.win.requestAnimationFrame(() => {
+      this.showOnNextAnimationFrame_();
+    });
+  }
+
+  /** @private */
+  showOnNextAnimationFrame_() {
     const {
       container,
       overlay,
@@ -341,6 +363,8 @@ export class Controls {
     toggle(container, true);
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
+
+    this.listenToMouseMove_();
 
     if (this.isPlaying_()) {
       swap(playButton, pauseButton);
@@ -404,29 +428,69 @@ export class Controls {
    * @private
    */
   isControlsTarget_(target) {
-    return !!closestBySelector(target, '.amp-video-docked-controls');
+    return target == this.overlay ||
+      !!closestBySelector(target, '.amp-video-docked-controls');
   }
 
   /**
-   * @param {boolean=} respectSticky
-   * @param {boolean=} immediately Disables transition
+   * @param {boolean=} opt_respectSticky
+   * @param {boolean=} opt_immediately Disables transition
    * @public
    */
-  hide(respectSticky = false, immediately = false) {
+  hide(opt_respectSticky, opt_immediately) {
     const ampVideoDockedControlsShown = 'amp-video-docked-controls-shown';
     const {container, overlay} = this;
     if (!container.classList.contains(ampVideoDockedControlsShown)) {
       return;
     }
-    if (respectSticky && this.isSticky_) {
+    if (opt_respectSticky && this.isSticky_) {
       return;
     }
-    if (immediately) {
+    if (opt_immediately) {
       toggle(container, false);
       toggle(overlay, false);
     }
     overlay.classList.remove('amp-video-docked-controls-bg');
     container.classList.remove(ampVideoDockedControlsShown);
+  }
+
+  /** @private */
+  listenToMouseMove_() {
+    if (this.mouseMoveUnlistener_) {
+      return;
+    }
+
+    this.mouseMoveUnlistener_ = listen(this.overlay, 'mousemove', () => {
+      this.show_();
+    });
+
+    this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', e => {
+      devAssert(this.area_);
+
+      const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));
+      const {left, top, right, bottom} = this.area_;
+
+      // check bounding box as not to trigger this while mouse hovers over
+      // buttons
+      if (!(x < left || x > right || y < top || y > bottom)) {
+        return;
+      }
+
+      this.hide(/* respectSticky */ true);
+      this.unlistenToMouseMovement_();
+    });
+  }
+
+  /** @private */
+  unlistenToMouseMovement_() {
+    if (this.mouseMoveUnlistener_) {
+      this.mouseMoveUnlistener_();
+      this.mouseMoveUnlistener_ = null;
+    }
+    if (this.mouseOutUnlistener_) {
+      this.mouseOutUnlistener_();
+      this.mouseOutUnlistener_ = null;
+    }
   }
 
   /** @public */

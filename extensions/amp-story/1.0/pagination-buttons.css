@@ -145,6 +145,8 @@
 
 /* Do not display when hidden. */
 .i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
+    .i-amphtml-story-button-move,
+.i-amphtml-story-next-hover > .i-amphtml-story-button-hidden >
     .i-amphtml-story-button-move {
   opacity: 0 !important;
 }

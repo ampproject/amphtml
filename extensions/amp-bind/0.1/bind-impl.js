@@ -21,20 +21,21 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
+import {closestByTag, iterateCursor} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 const TAG = 'amp-bind';
 
@@ -172,10 +173,10 @@ export class Bind {
           if (opt_win) {
             // In FIE, scan the document node of the iframe window.
             const {document} = opt_win;
-            return waitForBodyPromise(document).then(() => document);
+            return whenDocumentReady(document).then(() => document);
           } else {
             // Otherwise, scan the root node of the ampdoc.
-            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+            return ampdoc.whenReady().then(() => ampdoc.getRootNode());
           }
         })
         .then(root => {
@@ -685,7 +686,7 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
+    const doc = devAssert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
@@ -1076,17 +1077,23 @@ export class Bind {
 
     switch (property) {
       case 'text':
-        element.textContent = String(newValue);
-        // If this is a <title> element in the <head>, update document title.
+        let updateTextContent = true;
+        const stringValue = String(newValue);
+
+        // textContent on <textarea> only works before interaction.
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+          // Don't also update textContent to avoid disrupting focus.
+          updateTextContent = false;
+        }
+        // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
-          this.localWin_.document.title = String(newValue);
+          this.localWin_.document.title = stringValue;
         }
-        // Setting `textContent` on TEXTAREA element only works if user
-        // has not interacted with the element, therefore `value` also needs
-        // to be set (but `value` is not an attribute on TEXTAREA)
-        if (tag == 'TEXTAREA') {
-          element.value = String(newValue);
+        // Default behavior.
+        if (updateTextContent) {
+          element.textContent = stringValue;
         }
         break;
 
@@ -1115,7 +1122,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty = (tag == 'INPUT' && property in element);
+        const updateProperty = (tag === 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -1133,6 +1140,11 @@ export class Bind {
             element.removeAttribute(property);
             mutated = true;
           }
+          if (mutated) {
+            // Safari-specific workaround for updating <select> elements
+            // when a child option[selected] attribute changes.
+            this.updateSelectForSafari_(element, property, newValue);
+          }
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
               element, property, String(newValue), updateProperty);
@@ -1144,6 +1156,36 @@ export class Bind {
         break;
     }
     return null;
+  }
+
+  /**
+   * Hopefully we can delete this with Safari 13+.
+   * @param {!Element} element
+   * @param {string} property
+   * @param {BindExpressionResultDef} newValue
+   */
+  updateSelectForSafari_(element, property, newValue) {
+    // We only care about option[selected].
+    if (element.tagName !== 'OPTION' || property !== 'selected') {
+      return;
+    }
+    // We only care if this option was selected, not deselected.
+    if (!newValue) {
+      return;
+    }
+    // Workaround only needed for Safari.
+    if (!Services.platformFor(this.win_).isSafari()) {
+      return;
+    }
+    const select = closestByTag(element, 'select');
+    if (!select) {
+      return;
+    }
+    // Set corresponding selectedIndex on <select> parent.
+    const index = toArray(select.options).indexOf(element);
+    if (index >= 0) {
+      select.selectedIndex = index;
+    }
   }
 
   /**

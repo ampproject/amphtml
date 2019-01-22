@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -44,6 +44,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
+
+    /** @private @const {boolean}*/
+    this.isSafari_ = Services.platformFor(this.win).isSafari();
   }
 
   /** @override */
@@ -57,8 +60,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     urlService.assertHttpsUrl(src, this.element);
 
-    if (urlService.isProxyOrigin(src) ||
-        urlService.isProxyOrigin(win.location.href)) {
+    if ((urlService.isProxyOrigin(src) ||
+        urlService.isProxyOrigin(win.location.href)) && !this.isSafari_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         urlService.assertHttpsUrl(iframeSrc, this.element);
@@ -66,7 +69,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = urlService.parse(docInfo.sourceUrl);
         const canonicalUrl = urlService.parse(docInfo.canonicalUrl);
-        user().assert(
+        userAssert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -86,6 +89,14 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
+    }
+
+    if ((urlService.isProxyOrigin(src) ||
+    urlService.isProxyOrigin(win.location.href)) && this.isSafari_) {
+      // https://webkit.org/blog/8090/workers-at-your-service/
+      this.user().error(TAG,
+          'Did not install ServiceWorker because of safari double keyring ' +
+          'caching as it will not have any effect');
     }
   }
 
@@ -138,7 +149,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     // Check the url-rewrite config is valid.
-    user().assert(urlMatch && shellUrl,
+    userAssert(urlMatch && shellUrl,
         'Both, "%s" and "%s" must be specified for url-rewrite',
         'data-no-service-worker-fallback-url-match',
         'data-no-service-worker-fallback-shell-url');
@@ -150,7 +161,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(urlService.getSourceOrigin(winUrl) ==
+    userAssert(urlService.getSourceOrigin(winUrl) ==
       urlService.parse(shellUrl).origin,
     'Shell source origin "%s" must be the same as source origin "%s"',
     shellUrl, winUrl.href);
@@ -288,7 +299,6 @@ class UrlRewriter_ {
   }
 }
 
-
 /**
  * Installs the service worker at src via direct service worker installation.
  * @param {!Window} win
@@ -297,32 +307,37 @@ class UrlRewriter_ {
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src, element) {
-  return win.navigator.serviceWorker.register(src).then(function(registration) {
-    if (getMode().development) {
-      user().info(TAG, 'ServiceWorker registration successful with scope: ',
-          registration.scope);
-    }
-    // Check if there is a new service worker installing.
-    const installingSw = registration.installing;
-    if (installingSw) {
-      // if not already active, wait till it becomes active
-      installingSw.addEventListener('statechange', evt => {
-        if (evt.target.state === 'activated') {
-          performServiceWorkerOptimizations(
-              registration,
-              win,
-              element
-          );
+  const options = {};
+  if (element.hasAttribute('data-scope')) {
+    options.scope = element.getAttribute('data-scope');
+  }
+  return win.navigator.serviceWorker.register(src, options)
+      .then(function(registration) {
+        if (getMode().development) {
+          user().info(TAG, 'ServiceWorker registration successful with scope: ',
+              registration.scope);
         }
-      });
-    } else if (registration.active) {
-      performServiceWorkerOptimizations(registration, win, element);
-    }
+        // Check if there is a new service worker installing.
+        const installingSw = registration.installing;
+        if (installingSw) {
+          // if not already active, wait till it becomes active
+          installingSw.addEventListener('statechange', evt => {
+            if (evt.target.state === 'activated') {
+              performServiceWorkerOptimizations(
+                  registration,
+                  win,
+                  element
+              );
+            }
+          });
+        } else if (registration.active) {
+          performServiceWorkerOptimizations(registration, win, element);
+        }
 
-    return registration;
-  }, function(e) {
-    user().error(TAG, 'ServiceWorker registration failed:', e);
-  });
+        return registration;
+      }, function(e) {
+        user().error(TAG, 'ServiceWorker registration failed:', e);
+      });
 }
 
 /**
@@ -332,7 +347,7 @@ function install(win, src, element) {
  * @param {Element} element
  */
 function performServiceWorkerOptimizations(registration, win, element) {
-  sendAmpScriptToSwOnFirstVisit(win);
+  sendAmpScriptToSwOnFirstVisit(win, registration);
   // prefetching outgoing links should be opt in.
   if (element.hasAttribute('data-prefetch')) {
     prefetchOutgoingLinks(registration, win);
@@ -343,20 +358,23 @@ function performServiceWorkerOptimizations(registration, win, element) {
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
  * @param {!Window} win
+ * @param {ServiceWorkerRegistration} registration
  */
-function sendAmpScriptToSwOnFirstVisit(win) {
+function sendAmpScriptToSwOnFirstVisit(win, registration) {
   if ('performance' in win) {
     // Fetch all AMP-scripts used on the page
     const ampScriptsUsed = win.performance.getEntriesByType('resource')
         .filter(item => item.initiatorType === 'script' &&
           startsWith(item.name, urls.cdn))
         .map(script => script.name);
-    const controllerSw = win.navigator.serviceWorker.controller;
+    const activeSW = registration.active;
     // using convention from https://github.com/redux-utilities/flux-standard-action.
-    controllerSw.postMessage(JSON.stringify(dict({
-      'type': 'AMP__FIRST-VISIT-CACHING',
-      'payload': ampScriptsUsed,
-    })));
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__FIRST-VISIT-CACHING',
+        'payload': ampScriptsUsed,
+      })));
+    }
   }
 }
 
@@ -378,10 +396,13 @@ function prefetchOutgoingLinks(registration, win) {
       document.head.appendChild(linkTag);
     });
   } else {
-    registration.active.postMessage(JSON.stringify(dict({
-      'type': 'AMP__LINK-PREFETCH',
-      'payload': links,
-    })));
+    const activeSW = registration.active;
+    if (activeSW.postMessage) {
+      activeSW.postMessage(JSON.stringify(dict({
+        'type': 'AMP__LINK-PREFETCH',
+        'payload': links,
+      })));
+    }
   }
 }
 

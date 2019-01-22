@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 
@@ -39,9 +39,8 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
-   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -59,32 +58,32 @@ export class LocalSubscriptionPlatform {
 
     /** @private @const {string} */
     this.authorizationUrl_ = assertHttpsUrl(
-        user().assert(
+        userAssert(
             this.serviceConfig_['authorizationUrl'],
             'Service config does not have authorization Url'
         ),
         'Authorization Url'
     );
 
-    /** @private {!UrlBuilder} */
+    /** @private @const {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(
         this.ampdoc_,
         this.serviceAdapter_.getReaderId('local'));
 
-    /** @private {!./analytics.SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = subscriptionAnalytics;
+    /** @private @const {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = serviceAdapter.getAnalytics();
 
-    user().assert(this.serviceConfig_['actions'],
+    userAssert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
 
-    /** @private {!Actions} */
+    /** @private @const {!Actions} */
     this.actions_ = new Actions(
         this.ampdoc_, this.urlBuilder_,
         this.subscriptionAnalytics_,
         this.validateActionMap(this.serviceConfig_['actions'])
     );
 
-    /** @private {!LocalSubscriptionPlatformRenderer}*/
+    /** @private @const {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog(), this.serviceAdapter_);
 
@@ -107,9 +106,9 @@ export class LocalSubscriptionPlatform {
    * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
-    user().assert(actionMap['login'],
+    userAssert(actionMap['login'],
         'Action "login" is not present in action map');
-    user().assert(actionMap['subscribe'],
+    userAssert(actionMap['subscribe'],
         'Action "subscribe" is not present in action map');
     return actionMap;
   }
@@ -200,7 +199,7 @@ export class LocalSubscriptionPlatform {
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+    const pingbackUrl = /** @type {string} */ (devAssert(this.pingbackUrl_,
         'pingbackUrl is null'));
 
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
