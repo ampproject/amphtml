@@ -76,9 +76,10 @@ describes.realWin(TAG, {
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
   }
 
-  function mockIsEmbedded(isEmbedded) {
+  function mockIsEmbeddedAndTrustedViewer(isEmbedded) {
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded() { return isEmbedded; },
+      isTrustedViewer() { return isEmbedded; },
     });
   }
 
@@ -250,6 +251,40 @@ describes.realWin(TAG, {
             </div>
           </div>
         </amp-selector>`,
+
+        // non-immediate ancestor is amp-selector [option]
+        html`<amp-selector>
+          <div>
+            <div option>
+              <div>
+                <amp-img src="bla.png"></amp-img>
+              </div>
+            </div>
+          </div>
+        </amp-selector>`,
+      ];
+
+      renderScenarios.forEach(root => {
+        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
+      });
+    });
+
+    it('rejects images inside a <button>', () => {
+      mockCriteriaMet('placeholder', true);
+      mockCriteriaMet('sizing', true);
+
+      const renderScenarios = [
+        // immediate container is button
+        html`<button>
+          <amp-img src="bla.png"></amp-img>
+        </button>`,
+
+        // non-immediate ancestor is button
+        html`<button>
+          <div>
+            <amp-img src="bla.png"></amp-img>
+          </div>
+        </button>`,
       ];
 
       renderScenarios.forEach(root => {
@@ -539,7 +574,7 @@ describes.realWin(TAG, {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
       mockScannedImages([]);
 
       yield Promise.all(scanDoc(env.ampdoc));
@@ -552,7 +587,7 @@ describes.realWin(TAG, {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
       mockScannedImages([
         html`<amp-img src="bla.png"></amp-img>`,
       ]);
@@ -573,7 +608,7 @@ describes.realWin(TAG, {
       ]);
 
       mockAllCriteriaMet(false);
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
 
       yield Promise.all(scanDoc(env.ampdoc));
 
@@ -594,7 +629,7 @@ describes.realWin(TAG, {
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockScannedImages([a, b, c]);
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
 
       yield Promise.all(scanDoc(env.ampdoc));
 
@@ -612,7 +647,7 @@ describes.realWin(TAG, {
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockScannedImages([a, b, c]);
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
 
       yield Promise.all(scanDoc(env.ampdoc));
 
@@ -665,12 +700,12 @@ describes.realWin(TAG, {
   describe('isEnabledForDoc', () => {
 
     it('rejects documents without schema', () => {
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
       expect(isEnabledForDoc(env.ampdoc)).to.be.false;
     });
 
     it('rejects schema with invalid @type', () => {
-      mockIsEmbedded(true);
+      mockIsEmbeddedAndTrustedViewer(true);
       mockSchemaType('hamberder');
       expect(isEnabledForDoc(env.ampdoc)).to.be.false;
     });
@@ -679,7 +714,7 @@ describes.realWin(TAG, {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
-        mockIsEmbedded(true);
+        mockIsEmbeddedAndTrustedViewer(true);
         expect(isEnabledForDoc(env.ampdoc)).to.be.true;
       });
 
@@ -698,7 +733,7 @@ describes.realWin(TAG, {
         doc.body.appendChild(lightboxable);
 
         mockSchemaType(type);
-        mockIsEmbedded(true);
+        mockIsEmbeddedAndTrustedViewer(true);
 
         expect(isEnabledForDoc(env.ampdoc)).to.be.false;
 
@@ -706,7 +741,7 @@ describes.realWin(TAG, {
 
       it(`rejects schema with @type=${type} for non-embedded docs`, () => {
         mockSchemaType(type);
-        mockIsEmbedded(false);
+        mockIsEmbeddedAndTrustedViewer(false);
         expect(isEnabledForDoc(env.ampdoc)).to.be.false;
       });
 

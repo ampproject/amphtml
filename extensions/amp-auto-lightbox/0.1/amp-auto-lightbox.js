@@ -37,7 +37,7 @@ const TAG = 'amp-auto-lightbox';
 export const REQUIRED_EXTENSION = 'amp-lightbox-gallery';
 export const LIGHTBOXABLE_ATTR = 'lightbox';
 
-export const VISITED_ATTR = 'data-amp-auto-lightbox-visited';
+export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
 export const ENABLED_SCHEMA_TYPES = [
   'Article',
@@ -54,7 +54,7 @@ export const RENDER_AREA_RATIO = 1.2;
 export const VIEWPORT_AREA_RATIO = 0.3;
 
 const ACTIONABLE_ANCESTORS =
-    'a[href], amp-selector > [option], amp-script, amp-story';
+    'a[href], amp-selector [option], amp-script, amp-story, button';
 
 
 /** @visibleForTesting */
@@ -161,6 +161,7 @@ export class Scanner {
 
     const imgs = toArray(doc.querySelectorAll(potentialImgsSelector));
 
+    // mark as visited so we don't rescan items on DOM_UPDATE
     return imgs.map(img => img.signals().whenSignal(CommonSignals.LOAD_END)
         .then(
             () =>
@@ -249,10 +250,11 @@ export class Mutation {
  * @return {boolean}
  */
 function usesLightboxExplicitly(ampdoc) {
-  const scriptTags = ampdoc.getHeadNode().querySelectorAll('script');
+  const requiredExtensionSelector =
+      `script[custom-element="${REQUIRED_EXTENSION}"]`;
 
-  const currentScriptTag = find(scriptTags,
-      t => t.getAttribute('custom-element') == REQUIRED_EXTENSION);
+  const currentScriptTag =
+      ampdoc.getRootNode().querySelector(requiredExtensionSelector);
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
 
@@ -268,7 +270,8 @@ function usesLightboxExplicitly(ampdoc) {
  */
 export function isEnabledForDoc(ampdoc) {
   const {win} = ampdoc;
-  if (!Services.viewerForDoc(ampdoc).isEmbedded() &&
+  const viewer = Services.viewerForDoc(ampdoc);
+  if ((!viewer.isEmbedded() || !viewer.isTrustedViewer()) &&
       // allow `localDev` in lieu of viewer for manual testing, except in tests
       // where we need all checks.
       (!getMode(win).localDev || getMode(win).test)) {
