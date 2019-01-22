@@ -76,10 +76,12 @@ describes.realWin(TAG, {
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
   }
 
-  function mockIsEmbeddedAndTrustedViewer(isEmbedded) {
+  function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded() { return isEmbedded; },
-      isTrustedViewer() { return isEmbedded; },
+      isTrustedViewer() {
+        return opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
+      },
     });
   }
 
@@ -741,7 +743,15 @@ describes.realWin(TAG, {
 
       it(`rejects schema with @type=${type} for non-embedded docs`, () => {
         mockSchemaType(type);
-        mockIsEmbeddedAndTrustedViewer(false);
+        mockIsEmbeddedAndTrustedViewer(
+            /* isEmbedded */ false, /* isTrusted */ true);
+        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+      });
+
+      it(`rejects schema with @type=${type} for untrusted viewer`, () => {
+        mockSchemaType(type);
+        mockIsEmbeddedAndTrustedViewer(
+            /* isEmbedded */ true, /* isTrusted */ false);
         expect(isEnabledForDoc(env.ampdoc)).to.be.false;
       });
 
