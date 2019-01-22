@@ -66,6 +66,18 @@ describe('ResponsiveAttributes', () => {
     expect(spy).to.have.been.calledWith('baz');
   });
 
+  it('should handle empty groups' , () => {
+    const spy = sandbox.spy();
+    const ra = new ResponsiveAttributes({
+      'one': spy,
+    });
+
+    ra.updateAttribute(
+        'one', '(min-width: 600px) foo, , baz');
+    expect(spy).to.have.been.calledOnce;
+    expect(spy).to.have.been.calledWith('baz');
+  });
+
   it('should update when the matching value changes', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
 

@@ -63,14 +63,14 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/render.png');
   });
 
-  it.skip('should layout the two adjacent slides', async() => {
+  it('should layout the two adjacent slides', async() => {
     // TODO(sparhami) Verify this is on the right of the 0th slide
     await waitForCarouselImg(1);
     // TODO(sparhami) Verify this is on the left of the 0th slide
     await waitForCarouselImg(SLIDE_COUNT - 1);
   });
 
-  it.skip('should snap when scrolling', async() => {
+  it('should snap when scrolling', async() => {
     const el = await controller.findElement(scrollerSelector);
     const firstSlide = await getSlide(0);
 
@@ -90,7 +90,7 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/snapped.png');
   });
 
-  it.skip('should reset the window after scroll', async() => {
+  it('should reset the window after scroll', async() => {
     const el = await controller.findElement(scrollerSelector);
     const firstSlide = await getSlide(0);
 
@@ -145,7 +145,7 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/after-resize.png');
   });
 
-  describe.skip('looping', () => {
+  describe('looping', () => {
     it('should show the last slide when looping', async() => {
       const el = await controller.findElement(scrollerSelector);
       const lastSlide = await getSlide(SLIDE_COUNT - 1);
