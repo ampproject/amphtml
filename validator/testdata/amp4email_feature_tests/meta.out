@@ -1,0 +1,39 @@
+FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Make sure representative meta tags used in the email context are indeed
+|    allowed or disallowed.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="email.contentIds" content="foobar42">
+|    <meta name="amp-allowed-url-macros" content="">
+>>   ^~~~~~~~~
+amp4email_feature_tests/meta.html:26:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-allowed-url-macros'. [DISALLOWED_HTML]
+|    <meta name="amp-action-whitelist" content="a,b,c,d,e">
+>>   ^~~~~~~~~
+amp4email_feature_tests/meta.html:27:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-action-whitelist'. [DISALLOWED_HTML]
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>

@@ -417,7 +417,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 34
+// NEXT AVAILABLE TAG: 35
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -515,6 +515,12 @@ message TagSpec {
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 18;
 
+  // This TagSpec will only validate against attributes explicitly
+  // listed within the TagSpec (attrs and attr_lists). No attributes
+  // from $GLOBAL_ATTRS and $AMP_LAYOUT_ATTRS are valid unless explicitly
+  // added as an attribute within the TagSpec. The field `amp_layout` is not
+  // allowed to be set when `explicit_attrs_only` is true.
+  optional bool explicit_attrs_only = 34 [default = false];
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
   // Top level attr lists of shared tags, identified by unique key

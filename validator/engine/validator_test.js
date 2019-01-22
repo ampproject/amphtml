@@ -987,6 +987,14 @@ describe('ValidatorRulesMakeSense', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
 
+    // When explicit_attrs_only is true, then amp_layout must not be set.
+    if (tagSpec.explicitAttrsOnly) {
+      it('\'' + tagSpecName + '\' has explicit_attrs_only set to true ' +
+          'and must not have any amp_layouts', () => {
+        expect(tagSpec.ampLayout === null).toBe(true);
+      });
+    }
+
     // attr_specs within tag.
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
