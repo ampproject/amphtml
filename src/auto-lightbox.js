@@ -22,7 +22,7 @@ import {isExperimentOn} from './experiments';
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function detectAutoLightbox(ampdoc) {
+export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
   if (!isExperimentOn(win, 'amp-auto-lightbox')) {
     return;
