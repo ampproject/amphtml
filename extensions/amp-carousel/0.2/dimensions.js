@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 
 /**
@@ -84,6 +85,16 @@ export function getStart(axis, el) {
 }
 
 /**
+ * @param {!Axis} axis The Axis to get the offset for.
+ * @param {!Element} el The Element to get the offset for.
+ * @return {number} The offsetLeft or offsetTop for the Element, depending on
+ *    the axis.
+ */
+export function getOffsetStart(axis, el) {
+  return axis == Axis.X ? el./*OK*/offsetLeft : el./*OK*/offsetTop;
+}
+
+/**
  * @param {!Axis} axis The axis along which to set the length.
  * @param {!Element} el The Element to set the length for.
  * @param {number} length The length value, in pixels, to set.
@@ -95,6 +106,68 @@ export function updateLengthStyle(axis, el, length) {
     setStyle(el, 'height', `${length}px`);
   }
 }
+
+/**
+ * Sets a transform translate style for a given delta along a given axis.
+ * @param {!Axis} axis The axis along which to translate.
+ * @param {!Element} el The Element to translate.
+ * @param {number} delta How much to move the Element.
+ */
+export function setTransformTranslateStyle(axis, el, delta) {
+  const deltaX = axis == Axis.X ? delta : 0;
+  const deltaY = axis == Axis.X ? 0 : delta;
+  setStyle(el, 'transform', `translate(${deltaX}px, ${deltaY}px)`);
+}
+
+/**
+ * @param {!Axis} axis The axis to check for overlap.
+ * @param {!Element} el The Element to check for overlap.
+ * @param {number} position A position to check.
+ * @return {boolean} If the element overlaps the position along the given axis.
+ */
+export function overlaps(axis, el, position) {
+  const {start, end} = getDimension(axis, el);
+  return start <= position && position <= end;
+}
+
+/**
+ * Finds the index of a child that overlaps a point within the parent,
+ * determined by an axis and alignment. A startIndex is used to look at the
+ * children that are more likely to overlap first.
+ * @param {!Axis} axis The axis to look along.
+ * @param {!Alignment} alignment The alignment to look for within the parent
+ *    container.
+ * @param {!Element} container  The parent container to look in.
+ * @param {!Array<!Element>} children The children to look among.
+ * @param {number} startIndex The index to start looking at.
+ * @return {number|undefined} The overlapping index, if one exists.
+ */
+export function findOverlappingIndex(
+  axis, alignment, container, children, startIndex) {
+  const pos = alignment == Alignment.START ?
+    getStart(axis, container) + 1 :
+    getCenter(axis, container);
+
+  // First look at the start index, since is the most likely to overlap.
+  if (overlaps(axis, children[startIndex], pos)) {
+    return startIndex;
+  }
+
+  // Move outwards, since the closer indicies are more likely to overlap.
+  for (let i = 1; i < children.length / 2; i++) {
+    const nextIndex = mod(startIndex + i, children.length);
+    const prevIndex = mod(startIndex - i, children.length);
+
+    if (overlaps(axis, children[nextIndex], pos)) {
+      return nextIndex;
+    }
+
+    if (overlaps(axis, children[prevIndex], pos)) {
+      return prevIndex;
+    }
+  }
+}
+
 
 /**
  * Gets the current scroll position for an element along a given axis.
