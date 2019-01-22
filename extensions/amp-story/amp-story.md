@@ -313,7 +313,7 @@ A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
 
 ##### supports-landscape [optional]
 
-Enables landscape orientation support on mobile devices, and a full bleed landscape experience on desktop devices.
+Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.
 
 ##### background-audio [optional]
 
@@ -344,15 +344,16 @@ If the `supports-landscape` attribute is specified on the `<amp-story>` element,
 
 Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
-<div class="flex-images">
+<figure class="centered-fig">
   <span class="special-char">Before:</span>
-  <amp-img alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
+  <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
   <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/lamp-story-desktop-three-panels.gif" /></noscript>
-  </amp-img>
+  </amp-anim>
   <span class="special-char">After:</span>
-  <amp-img alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript></amp-img>
-</div>
+  <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
+  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
+  </amp-anim>
+</figure>
 
 ## Pages: `amp-story-page`
 
