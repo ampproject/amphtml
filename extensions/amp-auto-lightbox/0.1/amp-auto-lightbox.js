@@ -183,22 +183,6 @@ export function meetsCriteria(element) {
 }
 
 
-/**
- * @param {!IArrayLike<T>} haystack
- * @param {function(T):boolean} needleCb
- * @return {?T}
- * @template T
- */
-function find(haystack, needleCb) {
-  for (let i = 0; i < haystack.length; i++) {
-    if (needleCb(haystack[i])) {
-      return haystack[i];
-    }
-  }
-  return null;
-}
-
-
 /** @visibleForTesting */
 export class Schema {
   /**
