@@ -26,7 +26,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
@@ -161,16 +161,13 @@ export class Scanner {
 
     const imgs = toArray(doc.querySelectorAll(potentialImgsSelector));
 
-    return imgs.map(img =>
-      whenLoadedOrNull(img).then(imgOrNull => {
-        if (!imgOrNull) {
-          return imgOrNull;
-        }
-        return devAssert(imgOrNull).getImpl().then(impl =>
-          impl.mutateElement(() => {
-            img.setAttribute(VISITED_ATTR, '');
-          }).then(() => imgOrNull));
-      }));
+    return imgs.map(img => img.signals().whenSignal(CommonSignals.LOAD_END)
+        .then(
+            () =>
+              Mutation.mutate(img, () => {
+                img.setAttribute(VISITED_ATTR, '');
+              }).then(() => img),
+            () => null));
   }
 }
 
@@ -234,6 +231,19 @@ export class Schema {
 }
 
 
+/** @visibleForTesting */
+export class Mutation {
+  /**
+   * @param {!Element} ampEl
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  static mutate(ampEl, mutator) {
+    return ampEl.getImpl().then(impl => impl.mutateElement(mutator));
+  }
+}
+
+
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
@@ -273,16 +283,6 @@ export function isEnabledForDoc(ampdoc) {
 }
 
 
-/**
- * @param {!Element} el
- * @return {!Promise<?Element>}
- */
-function whenLoadedOrNull(el) {
-  return el.signals().whenSignal(CommonSignals.LOAD_END)
-      .then(() => el, () => null);
-}
-
-
 /** @private {number} */
 let uid = 0;
 
@@ -296,12 +296,15 @@ function generateLightboxUid() {
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} img
+ * @return {!Promise}
  */
 function apply(ampdoc, img) {
-  img.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
-
-  Services.extensionsFor(ampdoc.win)
-      .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+  return Mutation.mutate(img, () => {
+    img.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
+  }).then(() => {
+    Services.extensionsFor(ampdoc.win)
+        .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+  });
 }
 
 
@@ -323,7 +326,7 @@ export function scanDoc(ampdoc) {
         if (!Criteria.meetsAll(img)) {
           return;
         }
-        apply(ampdoc, img);
+        return apply(ampdoc, img);
       }));
 
   // TODO(alanorozco): Notify `amp-lightbox-gallery`

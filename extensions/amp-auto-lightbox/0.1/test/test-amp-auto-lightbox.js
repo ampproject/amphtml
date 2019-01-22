@@ -19,6 +19,7 @@ import {
   Criteria,
   ENABLED_SCHEMA_TYPES,
   LIGHTBOXABLE_ATTR,
+  Mutation,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
@@ -98,6 +99,8 @@ describes.realWin(TAG, {
 
   beforeEach(() => {
     html = htmlFor(env.win.document);
+    env.sandbox.stub(Mutation, 'mutate').callsFake((_, mutator) =>
+      tryResolve(() => mutator()));
   });
 
   describe('meetsCriteria', () => {
@@ -640,10 +643,12 @@ describes.realWin(TAG, {
       const shouldNotLoad = html`<amp-img src="bla.png"></amp-img>`;
       const shouldLoad = html`<amp-img src="bla.png"></amp-img>`;
 
-      sandbox.stub(doc, 'querySelectorAll').withArgs('amp-img').returns([
-        shouldNotLoad,
-        shouldLoad,
-      ]);
+      sandbox.stub(doc, 'querySelectorAll')
+          .withArgs(sinon.match(selector => /^amp-img/.test(selector)))
+          .returns([
+            shouldNotLoad,
+            shouldLoad,
+          ]);
 
       shouldNotLoad.signals().rejectSignal(CommonSignals.LOAD_END, new Error());
       shouldLoad.signals().signal(CommonSignals.LOAD_END);
