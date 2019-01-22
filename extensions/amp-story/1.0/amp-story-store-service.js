@@ -189,7 +189,11 @@ export const Action = {
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
-    (old, curr) => old.element !== curr.element || old.state !== curr.state,
+      /**
+       * @param {InteractiveComponentDef} old
+       * @param {InteractiveComponentDef} curr
+       */
+      (old, curr) => old.element !== curr.element || old.state !== curr.state,
 };
 
 
