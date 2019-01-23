@@ -27,7 +27,7 @@ import {
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 
@@ -255,6 +255,22 @@ export class ConsentInstance {
         // If state has changed. do not store outdated value.
         return;
       }
+
+      const consentStr = consentInfo['consentString'];
+      if (consentStr && consentStr.length > 188) {
+        // Verify the length of consentString.
+        // Limit to 500bytes
+        // 188 * 2 (utf8Encode) * 4/3 (base64) = 500
+        user().error(TAG,
+            'Cannot store consentString which length exceeds 188' +
+            'Previous stored consentInfo will be cleared');
+        // If new consentInfo value cannot be stored, need to remove previous
+        // value
+        storage.remove(this.storageKey_);
+        // TODO: Good to have a way to inform CMP service in this case
+        return;
+      }
+
       const value = composeStoreValue(
           consentInfo, this.isAmpConsentV2ExperimentOn_);
       if (value == null) {
