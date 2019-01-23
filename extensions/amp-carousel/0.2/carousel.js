@@ -711,14 +711,16 @@ export class Carousel {
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
-    [slides_, replacementSpacers_].forEach(elements => {
-      elements.forEach((el, i) => {
-        const distance = loop_ ?
-          wrappingDistance(currentIndex_, i, elements) :
-          Math.abs(currentIndex_ - i);
-        const tooFar = distance > sideSlideCount;
-        el.hidden = tooFar;
-      });
+    slides_.forEach((el, i) => {
+      const distance = loop_ ?
+        wrappingDistance(currentIndex_, i, slides_) :
+        Math.abs(currentIndex_ - i);
+      const tooFar = distance > sideSlideCount;
+      el.hidden = tooFar;
+    });
+
+    replacementSpacers_.forEach(el => {
+      el.hidden = sideSlideCount < (slides_.length - 1);
     });
 
     beforeSpacers_.forEach((el, i) => {
