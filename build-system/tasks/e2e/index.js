@@ -51,7 +51,7 @@ async function launchWebServer_() {
   return deferred;
 }
 
-async function cleanUp_() {
+function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
     webServerProcess_.kill('SIGINT');
   }
@@ -83,7 +83,7 @@ async function e2e() {
   // run tests
   mocha.run(async failures => {
     // end web server
-    await cleanUp_();
+    cleanUp_();
 
     // end task
     if (failures) {
