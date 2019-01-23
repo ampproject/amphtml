@@ -30,6 +30,7 @@ import {
 } from './runtime';
 import {cssText} from '../build/css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
@@ -118,6 +119,7 @@ if (shouldMainBootstrapRun) {
       });
       startupChunk(self.document, function final() {
         installPullToRefreshBlocker(self);
+        installAutoLightboxExtension(ampdoc);
 
         maybeValidate(self);
         makeBodyVisible(self.document);
