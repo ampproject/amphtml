@@ -25,7 +25,7 @@ limitations under the License.
 </amp-embed>
 ```
 
-## Configuration
+## Configuration ##
 
 For semantics of configuration, please see [Rb.Infox documentation](https://adm.infox.sg).
 
