@@ -265,6 +265,9 @@ exports.rules = [
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/doc-impl.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/entitlement.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/score-factors.js',
+
+      // Shared events between auto-ligthbox and lightbox-gallery
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js->extensions/amp-lightbox-gallery/0.1/events.js',
     ],
   },
   {
