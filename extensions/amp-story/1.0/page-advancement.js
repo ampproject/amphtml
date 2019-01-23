@@ -182,7 +182,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
     const supportedAdvancementModes = [
       ManualAdvancement.fromElement(win, rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
+      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
 
@@ -556,8 +556,11 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
    */
-  constructor(win, delayMs) {
+  constructor(win, delayMs, element) {
     super();
+
+    /** @private @const {!Element} */
+    this.element_ = element;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
@@ -573,6 +576,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     /** @private {number|string|null} */
     this.timeoutId_ = null;
+
+    if (element.ownerDocument.defaultView) {
+      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+      this.storeService_ =
+        getStoreService(element.ownerDocument.defaultView);
+    }
   }
 
   /**

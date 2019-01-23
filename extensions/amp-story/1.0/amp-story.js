@@ -36,7 +36,7 @@ import {
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryAnalytics} from './analytics';
+import {AmpStoryAnalytics, AdvancementMode} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -381,9 +381,9 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
-    this.navigationState_.observe(changeEvent => {
-        this.variableService_.onNavigationStateChange(changeEvent);
-        this.analytics_.onNavigationStateChange(changeEvent);
+    this.navigationState_.observe(stateChangeEvent => {
+        this.variableService_.onNavigationStateChange(stateChangeEvent);
+        this.analytics_.onNavigationStateChange(stateChangeEvent);
       });
 
     // Removes title in order to prevent incorrect titles appearing on link
@@ -548,7 +548,8 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(
         StateProperty.ADVANCEMENT_MODE, mode => {
-          this.analytics_.onAdvacementModeStateChange(mode);
+          this.analytics_.onAdvancementModeStateChange(mode);
+          this.variableService_.onAdvancementModeStateChange(advancementMode)
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -1087,12 +1088,10 @@ export class AmpStory extends AMP.BaseElement {
    * Switches to a particular page.
    * @param {string} targetPageId
    * @param {!NavigationDirection} direction
-   * @param {AdvancementMode} advanceMode
    * @return {!Promise}
    * @private
    */
-  switchTo_(targetPageId, direction, advanceMode) {
-    if (advanceMode) {this.advanceMode_ = advanceMode;}
+  switchTo_(targetPageId, direction) {
 
     const targetPage =
         (isExperimentOn(this.win, 'amp-story-branching')) ?
