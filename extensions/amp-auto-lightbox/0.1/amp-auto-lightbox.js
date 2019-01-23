@@ -289,7 +289,8 @@ function usesLightboxExplicitly(ampdoc) {
   const requiredExtensionSelector =
       `script[custom-element="${REQUIRED_EXTENSION}"]`;
 
-  const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
+  const lightboxedElementsSelector =
+      `[${LIGHTBOXABLE_ATTR}]:not(${VISITED_ATTR})`;
 
   const querySelector = selector =>
     ampdoc.getRootNode().querySelector(selector);
