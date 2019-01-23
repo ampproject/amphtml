@@ -81,17 +81,15 @@ async function e2e() {
   await launchWebServer_();
 
   // run tests
-  mocha.run(async failures => {
+  mocha.run(failures => {
     // end web server
     cleanUp_();
 
     // end task
     if (failures) {
-      process.exitCode = 0;
       return rejecter();
     }
 
-    process.exitCode = 1;
     return resolver();
   });
 
