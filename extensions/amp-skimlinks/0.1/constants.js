@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const AMP_SKIMLINKS_VERSION = '1.0.2';
+export const AMP_SKIMLINKS_VERSION = '1.0.3';
 export const XCUST_ATTRIBUTE_NAME = 'data-skimlinks-custom-tracking-id';
 export const WAYPOINT_BASE_URL = 'https://go.skimresources.com';
 export const PLATFORM_NAME = 'amp@' + AMP_SKIMLINKS_VERSION;
