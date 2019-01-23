@@ -424,6 +424,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/19945',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
   },
+  {
+    id: 'amp-auto-lightbox',
+    name: 'Automatically detects images to place in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
 ];
 
 if (getMode().localDev) {
