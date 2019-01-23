@@ -261,7 +261,6 @@ const forbiddenTerms = {
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-access-scroll/0.1/read-depth-tracker.js',
       'src/runtime.js',
       'src/service/viewport/viewport-impl.js',
     ],

@@ -16,9 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {debounce} from '../../../src/utils/rate-limit';
-import {getServiceForDoc} from '../../../src/service';
-import {installViewportServiceForDoc}
-  from '../../../src/service/viewport/viewport-impl';
 
 export class ReadDepthTracker {
   /**
@@ -43,31 +40,37 @@ export class ReadDepthTracker {
     /** @private {function(string?)} */
     this.debouncedUpdateLastRead_ = debounce(
         ampdoc.win,
-        this.updateLastRead.bind(this),
+        this.updateLastRead_.bind(this),
         1000
     );
 
-    this.findTopParagraph_ = this.findTopParagraph.bind(this);
-
-    installViewportServiceForDoc(ampdoc);
-    this.viewport_ = getServiceForDoc(ampdoc, 'viewport');
-    this.viewport_.onChanged(this.findTopParagraph_);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+    this.viewport_.onChanged(this.findTopParagraph_.bind(this));
 
     this.paragraphs_ = ampdoc.getBody().getElementsByTagName('p');
   }
 
   /**
    * Reviews positions of each paragraph relative to vieport, finds top.
+   * @private
    */
-  findTopParagraph() {
+  findTopParagraph_() {
     Promise.all([].slice.call(this.paragraphs_)
         .map(p => this.viewport_.getClientRectAsync(p)))
         .then(rects => {
+          let lastIdxAboveViewport = null;
+          let lastPosition = null;
           for (let i = rects.length - 1; i >= 0; i--) {
-            if (rects[i].bottom <= 0) {
-              this.recordLatestRead(this.paragraphs_[i]);
-              break;
+            const bottomPosition = rects[i].bottom;
+            if (bottomPosition <= 0 &&
+              (lastPosition === null || lastPosition < bottomPosition)
+            ) {
+              lastIdxAboveViewport = i;
+              lastPosition = bottomPosition;
             }
+          }
+          if (lastIdxAboveViewport !== null) {
+            this.recordLatestRead_(this.paragraphs_[lastIdxAboveViewport]);
           }
         });
   }
@@ -75,8 +78,9 @@ export class ReadDepthTracker {
   /**
    * Checks whether latest read paragraph has changed and updates it if so.
    * @param {Element} paragraph
+   * @private
    */
-  recordLatestRead(paragraph) {
+  recordLatestRead_(paragraph) {
     const prevSnippet = this.lastReadSnippet_;
     this.lastReadSnippet_ = paragraph./*OK*/innerText.substring(0, 50);
     if (prevSnippet !== this.lastReadSnippet_) {
@@ -87,8 +91,9 @@ export class ReadDepthTracker {
   /**
    * Sends latest read snippet to server.
    * @param {...*} arg
+   * @private
    */
-  updateLastRead(...arg) {
+  updateLastRead_(...arg) {
     const snippet = arg[0].toString();
     this.accessSource_.buildUrl((
       `${this.connectHostname_}/amp/updatedepth`
