@@ -433,6 +433,9 @@ export class AmpList extends AMP.BaseElement {
   createContainer_() {
     const container = this.win.document.createElement('div');
     container.setAttribute('role', 'list');
+    // In the load-more case, we allow the container to be height auto
+    // in order to reasonably make space for the load-more button and
+    // load-more related UI elements underneath.
     if (!this.loadMoreEnabled_) {
       this.applyFillContent(container, true);
     }
