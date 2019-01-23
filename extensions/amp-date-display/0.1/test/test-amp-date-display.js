@@ -34,6 +34,8 @@ describes.realWin('amp-date-display', {
     element = win.document.createElement('amp-date-display');
     win.document.body.appendChild(element);
     impl = element.implementation_;
+    env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
+    env.sandbox.stub(impl, 'boundRendered_');
   });
 
   // Unfortunately, we cannot test the most interesting case of UTC datetime
