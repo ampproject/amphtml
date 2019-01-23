@@ -21,7 +21,6 @@ import {
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
-import {LightboxGalleryEvents} from '../events';
 import {Services} from '../../../../src/services';
 import {
   childElement,
