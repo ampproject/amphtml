@@ -18,9 +18,9 @@
  * @param {*} candidate
  * @return {boolean}
  */
-export const isString = candidate => {
+export function isString(candidate) {
   return Object.prototype.toString.call(candidate) === '[object String]';
-};
+}
 
 
 
