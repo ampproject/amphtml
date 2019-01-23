@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {endsWith} from '../../../src/string';
 import {getChildJsonConfig} from '../../../src/json';
 import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
@@ -22,6 +23,7 @@ import {
   DEFAULT_CONFIG,
   GLOBAL_DOMAIN_BLACKLIST,
   OPTIONS_ERRORS,
+  WAYPOINT_BASE_URL,
 } from './constants';
 
 /**
@@ -46,6 +48,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
     linkSelector: getLinkSelector_(element),
+    waypointBaseUrl: getWaypointBaseUrl(element),
     config: getConfig_(element),
   };
 }
@@ -148,6 +151,29 @@ function getInternalDomains_(docInfo) {
 }
 
 /**
+ *
+ * @param {!Element} element
+ * @return {?string}
+ */
+function getWaypointBaseUrl(element) {
+  let customSubDomain = element.getAttribute('custom-redirect-domain');
+  if (customSubDomain) {
+    // Remove potential HTTP protocol
+    customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\//, '');
+    // Remove potential trailing slash
+    customSubDomain = endsWith(customSubDomain, '/') ?
+      customSubDomain.slice(0, -1) :
+      customSubDomain;
+
+    // Use http since publisher CNAME to go.redirectingat.com does not support
+    // https.
+    return `http://${customSubDomain}`;
+  }
+
+  return WAYPOINT_BASE_URL;
+}
+
+/**
  * @param {!Element} element
  * @return {!Object}
  */
@@ -166,8 +192,6 @@ function getConfig_(element) {
         DEFAULT_CONFIG.linksTrackingUrl,
       nonAffiliateTrackingUrl: customConfigJson['nonAffiliateTrackingUrl'] ||
         DEFAULT_CONFIG.nonAffiliateTrackingUrl,
-      waypointUrl: customConfigJson['waypointUrl'] ||
-        DEFAULT_CONFIG.waypointUrl,
       beaconUrl: customConfigJson['beaconUrl'] ||
         DEFAULT_CONFIG.beaconUrl,
     };

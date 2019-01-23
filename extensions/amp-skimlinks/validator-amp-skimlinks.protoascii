@@ -45,6 +45,9 @@ tags: {  # <amp-skimlinks>
     mandatory: true
   }
   attrs: {
+    name: "custom-redirect-domain"
+  }
+  attrs: {
     name: "tracking"
     value: "false"
     value: "true"
