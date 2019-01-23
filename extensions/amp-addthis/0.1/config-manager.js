@@ -154,8 +154,7 @@ export class ConfigManager {
       switch (mode) {
         case 1:
           // "regular old" amp-addthis mode
-          if (widgetId &&
-          dashboardConfig.widgets[widgetId]) {
+          if (widgetId && dashboardConfig.widgets[widgetId]) {
             this.activeToolsMonitor_.record(dashboardConfig.widgets[widgetId]);
           }
           break;
