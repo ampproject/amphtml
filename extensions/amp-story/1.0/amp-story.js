@@ -150,16 +150,6 @@ const Attributes = {
   SUPPORTS_LANDSCAPE: 'supports-landscape',
 };
 
-/** @enum {string} */
-const AdvancementMode = {
-  GO_TO_PAGE: 'goToPageAction',
-  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
-  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
-  MANUAL_ADVANCE: 'manualAdvance',
-  ADVANCE_TO: 'advanceTo',
-  ADVANCE_TO_ADS: 'advanceToAds',
-};
-
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -391,10 +381,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
-    this.navigationState_.observe(stateChangeEvent => {
-      this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analytics_.onNavigationStateChange(stateChangeEvent);
-    });
+    this.navigationState_.observe(changeEvent => {
+        this.variableService_.onNavigationStateChange(changeEvent);
+        this.analytics_.onNavigationStateChange(changeEvent);
+      });
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -404,10 +394,11 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
+          this.storeService_.dispatch(
+            Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
           this.switchTo_(
               args['id'],
-              NavigationDirection.NEXT,
-              AdvancementMode.GO_TO_PAGE);
+              NavigationDirection.NEXT);
         }
       });
     }
@@ -554,6 +545,11 @@ export class AmpStory extends AMP.BaseElement {
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
           this.onSupportedBrowserStateUpdate_(isBrowserSupported);
         });
+
+    this.storeService_.subscribe(
+        StateProperty.ADVANCEMENT_MODE, mode => {
+          this.analytics_.onAdvacementModeStateChange(mode);
+    });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
@@ -1198,7 +1194,6 @@ export class AmpStory extends AMP.BaseElement {
             this.getPageCount(),
             targetPage.element.id,
             oldPage.element.id,
-            this.advanceMode_,
             targetPage.getNextPageId() === null /* isFinalPage */
         );
 

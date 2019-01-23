@@ -134,6 +134,7 @@ export const StateProperty = {
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   PAGES_COUNT: 'pagesCount',
+  ADVANCEMENT_MODE: 'advancementMode',
 };
 
 
@@ -143,6 +144,7 @@ export const Action = {
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
+  SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -298,10 +300,14 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+            // [StateProperty.ADVANCEMENT_MODE]: data.advancementMode,
           }));
     case Action.SET_PAGES_COUNT:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAGES_COUNT]: data}));
+    case Action.SET_ADVANCEMENT_MODE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.ADVANCEMENT_MODE]: data}));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -426,6 +432,7 @@ export class AmpStoryStoreService {
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
       [StateProperty.PAGES_COUNT]: 0,
+      [StateProperty.ADVANCEMENT_MODE]: '',
     });
   }
 

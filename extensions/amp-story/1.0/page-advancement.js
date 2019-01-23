@@ -18,6 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
+import {AdvancementMode} from './analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -509,6 +510,8 @@ class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE, AdvancementMode.ManualAdvancement);
   }
 
   /**
@@ -583,6 +586,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
+
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_TIME);
 
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
@@ -731,6 +737,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
         .then(() => this.startWhenBuilt_());
+
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_MEDIA);
   }
 
   /** @private */

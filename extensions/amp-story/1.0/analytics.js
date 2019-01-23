@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType, AdvacementChangeType} from './navigation-state';
+import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -29,7 +29,7 @@ const Events = {
 };
 
 /** @enum {string} */
-const AdvancementMode = {
+export const AdvancementMode = {
   GO_TO_PAGE: 'goToPageAction',
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
@@ -80,32 +80,13 @@ export class AmpStoryAnalytics {
   }
 
   /**
-   * @param {!./navigation-state.AdvancementChangeTypeDef} advancementChangeType
+   * @param {AdvancementMode} mode
    */
-  onAdvacementModeStateChange(advancementChangeType) {
-      switch (advancementChangeType.type) {
-      case AdvacementChangeType.GO_TO_PAGE:
-        this.triggerEvent_(AdvancementMode.PAGE_VISIBLE);
-        break;
-      case AdvacementChangeType.AUTO_ADVANCE_TIME:
-        this.triggerEvent_(AdvancementMode.AUTO_ADVANCE_TIME);
-        break;
-      case AdvacementChangeType.AUTO_ADVANCE_MEDIA:
-        this.triggerEvent_(AdvancementMode.AUTO_ADVANCE_MEDIA);
-        break;
-      case AdvacementChangeType.MANUAL_ADVANCE:
-        this.triggerEvent_(AdvancementMode.MANUAL_ADVANCE);
-        break;
-      case AdvacementChangeType.ADVANCE_TO:
-        this.triggerEvent_(AdvancementMode.ADVANCE_TO);
-        break;
-      case AdvacementChangeType.ADVANCE_TO_ADS:
-        this.triggerEvent_(AdvancementMode.ADVANCE_TO_ADS);
-        break;
-    }
+  onAdvacementModeStateChange(mode) {
+    console.log(mode)
+    this.triggerEvent_(mode);
   }
 
-  }
   /**
    * @param {string} eventType
    * @private
@@ -115,7 +96,7 @@ export class AmpStoryAnalytics {
     variablesPromise.then(
         variables => {
           triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!JsonObject} */ (variables));
+              /** @type {!Object<string, string>} */ (variables));
         },
         reason => {
           dev().error('AMP-STORY', 'Could not get analytics variables', reason);

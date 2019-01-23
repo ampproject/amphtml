@@ -82,7 +82,7 @@ export class AmpStoryVariableService {
   /**
    * @param {string} advancementMode
    */
-  onAdvancementModeChange(advancementMode) {
+  onAdvancementModeStateChange(advancementMode) {
     this.variables_[Variable.STORY_ADVANCEMENT_MODE] = mode;
   }
 
