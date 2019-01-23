@@ -39,8 +39,32 @@ test('it should change this to self in a ternary condition with outputs window.g
   });
 });
 
-test('it should not change if statements outputs window.global:this', async t => {
-  const name = 'if-with-globals'
+test('it should change if `this` is inside an arrow function', async t => {
+  const name = 'this-in-function'
+  const input = await(fixtureContent(`${name}/input.js`));
+  const output = await(fixtureContent(`${name}/output.js`));
+  transform({
+    contents: input
+  }, null, (err, file) => {
+    const result = file.contents.toString('utf-8');
+    t.is(result, output);
+  });
+});
+
+test('it should not change `this` of a nested scope', async t => {
+  const name = 'nested-scopes'
+  const input = await(fixtureContent(`${name}/input.js`));
+  const output = await(fixtureContent(`${name}/output.js`));
+  transform({
+    contents: input
+  }, null, (err, file) => {
+    const result = file.contents.toString('utf-8');
+    t.is(result, output);
+  });
+});
+
+test('it should not change if `this` is inside a function', async t => {
+  const name = 'this-in-arrow-function'
   const input = await(fixtureContent(`${name}/input.js`));
   const output = await(fixtureContent(`${name}/output.js`));
   transform({

@@ -40,27 +40,24 @@ function transform(file, encoding, callback) {
 
   traverse(ast, {
     enter(path) {
-      if (path.node.type !== 'ConditionalExpression') {
-        return;
-      }
+      // Find the closest encosing function that is not an arrow.
+      // Arrows inherit their parent's `this` context.
+      let parent = path;
       const {node} = path;
-      const {consequent, alternate} = node;
-      if (consequent.type !== 'MemberExpression') {
+      if (node.type === 'ThisExpression') {
+        while ((parent = parent.getFunctionParent())) {
+          if (parent.isFunction() && !parent.isArrowFunctionExpression()) {
+            return;
+          }
+        }
+        // collect the changes in an array
+        changes.push({
+          start: node.start,
+          end: node.end,
+          value: 'self',
+        });
         return;
       }
-      if (alternate.type !== 'ThisExpression') {
-        return;
-      }
-      const {object, property} = consequent;
-      if (object.name !== 'window' && property.name !== 'global') {
-        return;
-      }
-      // collect the changes in an array
-      changes.push({
-        start: alternate.start,
-        end: alternate.end,
-        value: 'self',
-      });
     },
   });
 
