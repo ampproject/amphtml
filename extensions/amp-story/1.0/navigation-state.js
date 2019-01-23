@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import {NavigationDirection} from './amp-story-page';
 import {Observable} from '../../../src/observable';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+
 
 /**
  * Types of state changes that can be consumed.
@@ -28,9 +28,9 @@ export const StateChangeType = {
   END: 3,
 };
 
+
 /** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
-
 
 /**
  * State store to decouple navigation changes from consumers.
@@ -85,7 +85,6 @@ export class NavigationState {
    * @param {string} pageId
    * @param {string} previousPageId
    * @param {boolean} isFinalPage
-
    * TODO(alanorozco): pass whether change was automatic or on user action.
    */
   updateActivePage(
@@ -95,7 +94,6 @@ export class NavigationState {
       pageId,
       totalPages,
       previousPageId,
-      // advancementMode,
       storyProgress: pageIndex / totalPages,
     };
 

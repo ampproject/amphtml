@@ -300,7 +300,6 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-            // [StateProperty.ADVANCEMENT_MODE]: data.advancementMode,
           }));
     case Action.SET_PAGES_COUNT:
       return /** @type {!State} */ (Object.assign(

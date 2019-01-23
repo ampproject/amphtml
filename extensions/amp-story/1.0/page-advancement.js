@@ -496,6 +496,9 @@ class ManualAdvancement extends AdvancementConfig {
 
     event.stopPropagation();
 
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     const pageRect = this.element_./*OK*/getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
@@ -510,8 +513,6 @@ class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
-    this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
   }
 
   /**

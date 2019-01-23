@@ -393,9 +393,7 @@ export class AmpStory extends AMP.BaseElement {
         if (args) {
           this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
-          this.switchTo_(
-              args['id'],
-              NavigationDirection.NEXT);
+          this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
     }
@@ -1089,7 +1087,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
-
     const targetPage =
         (isExperimentOn(this.win, 'amp-story-branching')) ?
           this.updateStoryNavigationPath_(targetPageId, direction) :
@@ -1162,7 +1159,7 @@ export class AmpStory extends AMP.BaseElement {
 
           if (oldPage.isAd()) {
             this.storeService_.dispatch(
-                StateProperty.SET_ADVANCEMENT_MODE,
+                Action.SET_ADVANCEMENT_MODE,
                 AdvancementMode.ADVANCE_TO_ADS);
           } else {
             const advanceAttr =
@@ -1171,7 +1168,7 @@ export class AmpStory extends AMP.BaseElement {
                 Attributes.ADVANCE_TO;
             if (oldPage.element.hasAttribute(advanceAttr)) {
               this.storeService_.dispatch(
-                  StateProperty.SET_ADVANCEMENT_MODE,
+                  Action.SET_ADVANCEMENT_MODE,
                   AdvancementMode.ADVANCE_TO);
             }
           }
