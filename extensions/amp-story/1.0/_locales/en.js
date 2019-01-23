@@ -165,10 +165,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label for the expandable share widget shown in the ' +
         'desktop UI.',
   },
-  [LocalizedStringId.AMP_STORY_TOOLTIP_OPEN_IN_TWITTER]: {
-    string: 'View on Twitter',
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
+    string: 'Expand Tweet',
     description: 'Label in the tooltip text for when a Twitter embed is ' +
-        'clicked',
+        'expandable',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string: 'Expand your window to view this experience',

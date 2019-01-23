@@ -63,7 +63,7 @@ const EXPANDABLE_COMPONENTS = {
     '2 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 ' +
     '0 78.62 23"/></g></svg>',
     actionIcon: ActionIcon.EXPAND,
-    defaultText: 'AMP_STORY_TOOLTIP_OPEN_IN_TWITTER',
+    defaultText: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
 };
@@ -543,7 +543,7 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText = target.getAttribute('data-tooltip-text') ||
       Services.localizationService(this.win_).getLocalizedString(
-          LocalizedStringId[embedConfig.defaultText]) ||
+          embedConfig.defaultText) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
