@@ -100,6 +100,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.waypoint_ = new Waypoint(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_),
+        this.skimOptions_,
         this.trackingService_,
         this.referrer_
     );
