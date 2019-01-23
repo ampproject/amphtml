@@ -785,6 +785,7 @@ export function getBinaryTypeNumericalCode(type) {
     'production': '0',
     'control': '1',
     'canary': '2',
+    'rc': '3',
   }[type] || null;
 }
 
