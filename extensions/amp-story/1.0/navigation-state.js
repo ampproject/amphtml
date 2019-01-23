@@ -32,6 +32,7 @@ export const StateChangeType = {
 /** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
 
+
 /**
  * State store to decouple navigation changes from consumers.
  */
