@@ -21,6 +21,7 @@ import {
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
+import {LightboxGalleryEvents} from '../events';
 import {Services} from '../../../../src/services';
 import {
   childElement,
@@ -99,6 +100,8 @@ export class LightboxManager {
      */
     this.counter_ = 0;
 
+    // TODO(alanorozco): Improve performance of visited lookup by setting
+    // mapped unique ids.
     /**
      * List of lightbox elements that have already been scanned.
      * @private {!Array<!Element>}
@@ -115,11 +118,21 @@ export class LightboxManager {
     if (this.scanPromise_) {
       return this.scanPromise_;
     }
+
     this.scanPromise_ = this.scanLightboxables_();
+
+    const root = this.ampdoc_.getRootNode();
+
     // Rescan whenever DOM changes happen.
-    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
+
+    // Process elements with the lightbox attribute set dynamically.
+    root.addEventListener(LightboxGalleryEvents.SET_ATTR, ({target}) => {
+      this.processLightboxElement_(target);
+    });
+
     return this.scanPromise_;
   }
 
@@ -346,6 +359,8 @@ export class LightboxManager {
     switch (type) {
       case 'AMP-AD':
         return LIGHTBOX_THUMBNAIL_AD;
+      // TODO(alanorozco): This can be replaced by a check of video service
+      // registration signal, were this list to grow larger.
       case 'AMP-VIDEO':
       case 'AMP-YOUTUBE':
         return LIGHTBOX_THUMBNAIL_VIDEO;

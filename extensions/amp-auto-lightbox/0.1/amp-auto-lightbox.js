@@ -24,6 +24,7 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
+import {LightboxGalleryEvents} from '../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -366,13 +367,16 @@ function generateLightboxUid() {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
  * @return {!Promise<!Element>}
+ * @visibleForTesting
  */
-function apply(ampdoc, element) {
+export function apply(ampdoc, element) {
   return Mutation.mutate(element, () => {
     element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
   }).then(() => {
     Services.extensionsFor(ampdoc.win)
         .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+
+    element.dispatchCustomEvent(LightboxGalleryEvents.SET_ATTR);
 
     return element;
   });

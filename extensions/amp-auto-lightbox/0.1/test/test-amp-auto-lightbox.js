@@ -25,12 +25,14 @@ import {
   Scanner,
   Schema,
   VIEWPORT_AREA_RATIO,
+  apply,
   meetsCriteria,
   meetsSizingCriteria,
   resolveIsEnabledForDoc,
   runCandidates,
   scanDoc,
 } from '../amp-auto-lightbox';
+import {LightboxGalleryEvents} from '../../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -812,6 +814,55 @@ describes.realWin(TAG, {
         });
       });
 
+    });
+
+  });
+
+  describe('apply', () => {
+
+    it('sets attribute', function* () {
+      const element = html`<amp-img src="chabuddy.g"></amp-img>`;
+
+      yield apply(env.ampdoc, element);
+
+      expect(element.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
+    });
+
+    it('sets unique group for each element', function* () {
+      const a = html`<amp-img src="a.png"></amp-img>`;
+      const b = html`<amp-img src="b.png"></amp-img>`;
+      const c = html`<amp-img src="c.png"></amp-img>`;
+
+      yield apply(env.ampdoc, a);
+      yield apply(env.ampdoc, b);
+      yield apply(env.ampdoc, c);
+
+      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
+      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
+      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
+
+      expect(aAttr).to.be.ok;
+      expect(aAttr).to.not.equal(bAttr);
+      expect(aAttr).to.not.equal(cAttr);
+
+      expect(bAttr).to.be.ok;
+      expect(bAttr).to.not.equal(aAttr);
+      expect(bAttr).to.not.equal(cAttr);
+
+      expect(cAttr).to.be.ok;
+      expect(cAttr).to.not.equal(aAttr);
+      expect(cAttr).to.not.equal(bAttr);
+    });
+
+    it('dispatches event', function* () {
+      const element = html`<amp-img src="chabuddy.g"></amp-img>`;
+      element.dispatchCustomEvent = env.sandbox.spy();
+
+      yield apply(env.ampdoc, element);
+
+      expect(
+          element.dispatchCustomEvent.withArgs(LightboxGalleryEvents.SET_ATTR))
+          .to.have.been.calledOnce;
     });
 
   });
