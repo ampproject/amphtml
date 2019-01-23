@@ -1069,7 +1069,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * TODO: debounce this.
    * @private
    */
   setupLoadMoreAuto_() {
@@ -1089,8 +1088,9 @@ export class AmpList extends AMP.BaseElement {
     const lastItem = dev().assertElement(this.container_.lastChild);
     this.viewport_.getClientRectAsync(lastItem)
         .then(positionRect => {
-          const vr = this.viewport_.getRect();
-          if (vr.bottom + 3 * vr.height > positionRect.bottom) {
+          const viewportHeight = this.viewport_.getHeight();
+          const viewportTop = this.viewport_.getScrollTop();
+          if (viewportTop + 3 * viewportHeight > positionRect.bottom) {
             return this.loadMoreCallback_();
           }
         }).then(() => {
