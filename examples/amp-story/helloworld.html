@@ -1,11 +1,13 @@
 <!doctype html>
 <html amp lang="en">
   <head>
+    <title> hello </title>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <title>My Story</title>
+            <script async custom-element="amp-analytics"
+        src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="helloworld.html">
@@ -28,6 +30,29 @@
 
   <body>
     <amp-story standalone>
+      <amp-analytics type="googleanalytics" id="googleanalytics1">
+     <script type="application/json">
+       {
+          "vars": {
+            "account": "UA-sdfsfds-8"
+          },
+          "triggers": {
+            "trackPageview": {
+              "on": "story-page-visible",
+              "request": "pageview",
+              "extraUrlParams": {
+                "cd1": "${storyPageIndex}",
+                "cd2": "${storyPageId}",
+                "cd3": "${storyPageCount}",
+                "cd4": "${storyProgress}",
+                "cd5": "${storyIsMuted}",
+                "cd6": "${storyAdvancementMode}"
+              }
+            }
+          }
+        }
+      </script>
+      </amp-analytics>
 
       <amp-story-page id="cover" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">

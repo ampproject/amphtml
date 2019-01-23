@@ -58,7 +58,7 @@ export class AmpStoryAnalytics {
    * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
    */
   onNavigationStateChange(stateChangeEvent) {
-    console.log("navigation");
+    console.log('navigation');
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
         this.triggerEvent_(Events.PAGE_VISIBLE);
@@ -76,7 +76,7 @@ export class AmpStoryAnalytics {
    * @param {boolean} isMuted
    */
   onMutedStateChange(isMuted) {
-    console.log("muted");
+    console.log('muted');
     const event = isMuted ? Events.STORY_MUTED : Events.STORY_UNMUTED;
     this.triggerEvent_(event);
   }
@@ -85,7 +85,7 @@ export class AmpStoryAnalytics {
    * @param {AdvancementMode} mode
    */
   onAdvancementModeStateChange(mode) {
-    console.log("advancement");
+    console.log('advancement');
     this.triggerEvent_(mode);
   }
 
@@ -98,7 +98,7 @@ export class AmpStoryAnalytics {
     variablesPromise.then(
         variables => {
           triggerAnalyticsEvent(this.element_, eventType,
-          /** @type {!JsonObject} */ (variables));        },
+          /** @type {!JsonObject} */ (variables)); },
         reason => {
           dev().error('AMP-STORY', 'Could not get analytics variables', reason);
         });

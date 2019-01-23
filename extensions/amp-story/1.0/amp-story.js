@@ -35,8 +35,8 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+import {AdvancementMode, AmpStoryAnalytics} from './analytics';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryAnalytics, AdvancementMode} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -382,9 +382,9 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
-        this.variableService_.onNavigationStateChange(stateChangeEvent);
-        this.analytics_.onNavigationStateChange(stateChangeEvent);
-      });
+      this.variableService_.onNavigationStateChange(stateChangeEvent);
+      this.analytics_.onNavigationStateChange(stateChangeEvent);
+    });
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -395,7 +395,7 @@ export class AmpStory extends AMP.BaseElement {
         const {args} = invocation;
         if (args) {
           this.storeService_.dispatch(
-            Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
+              Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
           this.switchTo_(
               args['id'],
               NavigationDirection.NEXT);
@@ -549,8 +549,8 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(
         StateProperty.ADVANCEMENT_MODE, mode => {
           this.analytics_.onAdvancementModeStateChange(mode);
-          this.variableService_.onAdvancementModeStateChange(advancementMode)
-    });
+          this.variableService_.onAdvancementModeStateChange(mode);
+        });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
@@ -1170,9 +1170,8 @@ export class AmpStory extends AMP.BaseElement {
         });
 
         if (targetPage.isAd()) {
-          this.advanceMode_ = AdvancementMode.ADVANCE_TO_ADS;
+          this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
-          this.advancement_ = AdvancementMode.ADVANCE_TO_ADS;
         } else {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);

@@ -511,7 +511,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     this.onTapNavigation(this.getTapDirection_(page));
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE, AdvancementMode.ManualAdvancement);
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.ManualAdvancement);
   }
 
   /**
@@ -597,7 +597,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
     super.start();
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_TIME);
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_TIME);
 
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
@@ -655,7 +655,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     if (!autoAdvanceStr) {
       return null;
     }
@@ -665,7 +665,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, Number(delayMs));
+    return new TimeBasedAdvancement(win, Number(delayMs), rootEl);
   }
 }
 
@@ -748,7 +748,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
         .then(() => this.startWhenBuilt_());
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_MEDIA);
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_MEDIA);
   }
 
   /** @private */
