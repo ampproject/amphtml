@@ -1075,7 +1075,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   setupLoadMoreAuto_() {
-    this.viewport_.onScroll(() => this.maybeLoadMoreItems_());
+    this.viewport_.onChanged(() => this.maybeLoadMoreItems_());
   }
 
   /**
