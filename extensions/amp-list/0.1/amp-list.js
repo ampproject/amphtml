@@ -823,10 +823,13 @@ export class AmpList extends AMP.BaseElement {
         if (targetHeight + loadMoreHeight > height) {
           this.attemptChangeHeight(targetHeight + loadMoreHeight)
               .catch(() => {});
-        }
-        const autoLoad = this.element.getAttribute('load-more') === 'auto';
-        if (autoLoad) {
-          this.maybeLoadMoreItems_();
+        } else {
+          // If there were not enough items to fill the list, consider
+          // automatically loading more if load-more="auto" is enabled
+          const autoLoad = this.element.getAttribute('load-more') === 'auto';
+          if (autoLoad) {
+            this.maybeLoadMoreItems_();
+          }
         }
       } else {
         if (targetHeight > height) {
