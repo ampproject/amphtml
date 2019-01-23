@@ -96,7 +96,7 @@ amp-lightbox-gallery .amp-carousel-button {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  /* 
+  /*
    * The highest z-index supported by most browsers - 5. See: css/Z_INDEX.md
    * Note: Since the lightbox gallery may not be the last thing in the DOM,
    * this may fail to correctly stack on top of elements with the same z-index.
@@ -311,4 +311,9 @@ amp-lightbox-gallery .i-amphtml-slide-item > * {
   to {
     max-height: 100%;
   }
+}
+
+.i-amphtml-ghost .i-amphtml-lbg-button-gallery {
+  /* Hide for element count = 1 */
+  visibility: hidden;
 }

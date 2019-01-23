@@ -24,9 +24,9 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
-import {LightboxGalleryEvents} from '../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
@@ -381,7 +381,8 @@ export function apply(ampdoc, element) {
     Services.extensionsFor(ampdoc.win)
         .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
 
-    element.dispatchCustomEvent(LightboxGalleryEvents.SET_ATTR);
+    element.dispatchEvent(createCustomEvent(ampdoc.win,
+        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true}));
 
     return element;
   });
@@ -423,7 +424,11 @@ export function scanDoc(ampdoc) {
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+      // Prevent recursion.
+      if (target.hasAttribute(LIGHTBOXABLE_ATTR)) {
+        return;
+      }
       scanDoc(ampdoc);
     });
     scanDoc(ampdoc);

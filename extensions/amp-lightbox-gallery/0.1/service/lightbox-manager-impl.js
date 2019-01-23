@@ -120,19 +120,10 @@ export class LightboxManager {
     }
 
     this.scanPromise_ = this.scanLightboxables_();
-
-    const root = this.ampdoc_.getRootNode();
-
     // Rescan whenever DOM changes happen.
-    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
-
-    // Process elements with the lightbox attribute set dynamically.
-    root.addEventListener(LightboxGalleryEvents.SET_ATTR, ({target}) => {
-      this.processLightboxElement_(target);
-    });
-
     return this.scanPromise_;
   }
 

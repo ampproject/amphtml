@@ -39,6 +39,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
+import { AmpEvents } from '../../../../src/amp-events';
 
 
 const TAG = 'amp-lightbox-gallery-detection';
@@ -56,6 +57,8 @@ describes.realWin(TAG, {
   const {any} = sinon.match;
 
   const capitalize = str => str.replace(/^([a-z])/, (_, m) => m.toUpperCase());
+
+  const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
 
   const ampImgFromTree = el =>
     el.tagName == 'AMP-IMG' ? el : el.querySelector('amp-img');
@@ -611,7 +614,7 @@ describes.realWin(TAG, {
     it('does not load extension if no candidates found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([]);
 
@@ -624,7 +627,7 @@ describes.realWin(TAG, {
     it('loads extension if >= 1 candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([
         mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
@@ -665,7 +668,7 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -683,7 +686,7 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -754,7 +757,7 @@ describes.realWin(TAG, {
       });
     });
 
-    ENABLED_SCHEMA_TYPES.forEach(type => {
+    schemaTypes.forEach(type => {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
@@ -856,12 +859,13 @@ describes.realWin(TAG, {
 
     it('dispatches event', function* () {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
-      element.dispatchCustomEvent = env.sandbox.spy();
+
+      element.dispatchEvent = env.sandbox.spy();
 
       yield apply(env.ampdoc, element);
 
-      expect(
-          element.dispatchCustomEvent.withArgs(LightboxGalleryEvents.SET_ATTR))
+      expect(element.dispatchEvent.withArgs(sinon.match(({type}) =>
+        type == AmpEvents.DOM_UPDATE)))
           .to.have.been.calledOnce;
     });
 
