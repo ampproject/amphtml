@@ -15,9 +15,10 @@
  */
 
 // import to install chromedriver
-import * as cd from 'chromedriver'; // eslint-disable-line no-unused-vars
-import {Builder, Capabilities} from 'selenium-webdriver';
-import {SeleniumWebDriverController} from './selenium-webdriver-controller';
+require('chromedriver'); // eslint-disable-line no-unused-vars
+const {Builder, Capabilities} = require('selenium-webdriver');
+const {clearLastExpectError, getLastExpectError} = require('./expect');
+const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -30,12 +31,12 @@ const TIMEOUT = 20000;
  *  fixtures: (!Array<string>|undefined),
  * }}
  */
-export let TestSpec;
+let TestSpec;
 
 /**
  * An end2end test using selenium web driver on a regular amp page
  */
-export const endtoend = describeEnv(spec => [
+const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
   // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
@@ -62,6 +63,7 @@ function describeEnv(factory) {
     });
     return describeFunc(name, function() {
       const env = Object.create(null);
+      let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(() => {
         let totalPromise = undefined;
@@ -80,6 +82,8 @@ function describeEnv(factory) {
       });
 
       afterEach(function() {
+        clearLastExpectError();
+        clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.
         fixtures.slice(0).reverse().forEach(fixture => {
           // TODO(cvializ): handle errors better
@@ -95,7 +99,19 @@ function describeEnv(factory) {
         }
       });
 
+      after(function() {
+        clearTimeout(asyncErrorTimerId);
+      });
+
+
       describe(SUB, function() {
+        // If there is an async expect error, throw it in the final state.
+        asyncErrorTimerId = setTimeout(() => {
+          const lastExpectError = getLastExpectError();
+          if (lastExpectError) {
+            throw lastExpectError;
+          }
+        }, this.timeout() - 1);
         fn.call(this, env);
       });
     });
@@ -134,13 +150,13 @@ class FixtureInterface {
   isOn() {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    * @return {!Promise|undefined}
    */
   setup(unusedEnv) {}
 
   /**
-   * @param {!Object} env
+   * @param {!Object} unusedEnv
    */
   teardown(unusedEnv) {}
 }
@@ -195,3 +211,8 @@ class AmpPageFixture {
     this.driver_ = null;
   }
 }
+
+module.exports = {
+  TestSpec,
+  endtoend,
+};

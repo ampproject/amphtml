@@ -21,7 +21,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -115,7 +115,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentConfig_ = config.getConsentConfig();
 
     // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ = this.consentConfig_['storageKey'];
+    this.consentId_ = this.consentConfig_['consentInstanceId'];
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ =
@@ -123,10 +123,6 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     /**
-     * TODO (@zhouyx): Migrate to the new consent config format.
-     * Need to support the deprecated format as well.
-     * Have ConsentConfig.getConsentConfig auto convert configuration format.
-     *
      * Deprecated Format
      * {
      *   'consentInstanceId': {
@@ -135,16 +131,16 @@ export class AmpConsent extends AMP.BaseElement {
      *   }
      * }
      *
-     * New proposed Format
+     * New Format
      * {
-     *   'storageKey': ...
+     *   'consentInstanceId': ...
      *   'checkConsentHref': ...
      *   'promptUI': ...
      *   'postPromptUI': ...
      * }
      */
 
-    const policyConfig = config.getPolicyConfig();
+    const policyConfig = this.consentConfig_['policy'] || dict({});
 
     this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentId_);
 

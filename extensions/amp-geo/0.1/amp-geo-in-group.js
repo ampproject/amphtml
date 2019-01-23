@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import 'babel-regenerator-runtime';
-import * as describes from './describes-e2e';
-import {Key} from 'selenium-webdriver';
-import {expect} from './expect';
-
-global.describes = describes;
-global.expect = expect;
-global.Key = Key;
+/**
+ * @enum {number}
+ */
+export const GEO_IN_GROUP = {
+  NOT_DEFINED: 1,
+  IN: 2,
+  NOT_IN: 3,
+};
