@@ -186,12 +186,9 @@
 
      <amp-consent id='ABC' layout='nodisplay'>
       <script type="application/json">{
-        "consents": {
-          "myConsentId": {
-            "checkConsentHref": "http://localhost:8000/get-consent-v1",
-            "promptUI": "ui1"
-          }
-        },
+        "consentInstanceId": "myConsentId",
+        "checkConsentHref": "http://localhost:8000/get-consent-v1",
+        "promptUI": "ui1",
         "clientConfig": {
           "mytest": "test",
           "anothertest": "test2"
