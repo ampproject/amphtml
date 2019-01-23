@@ -124,7 +124,7 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenLoadMore_ = null;
     /**@private {boolean} */
-    this.loadMoreLoading_ = false;
+    this.resizeFailed_ = false;
 
 
     this.registerAction('refresh', () => {
@@ -822,14 +822,17 @@ export class AmpList extends AMP.BaseElement {
         const loadMoreHeight = this.getLoadMoreButton_()./*OK*/offsetHeight;
         if (targetHeight + loadMoreHeight > height) {
           this.attemptChangeHeight(targetHeight + loadMoreHeight)
-              .catch(() => {});
-        } else {
-          // If there were not enough items to fill the list, consider
-          // automatically loading more if load-more="auto" is enabled
-          const autoLoad = this.element.getAttribute('load-more') === 'auto';
-          if (autoLoad) {
-            this.maybeLoadMoreItems_();
-          }
+              .then(() => {
+                this.resizeFailed_ = false;
+                // If there were not enough items to fill the list, consider
+                // automatically loading more if load-more="auto" is enabled
+                if (this.element.getAttribute('load-more') === 'auto') {
+                  this.maybeLoadMoreItems_();
+                }
+              })
+              .catch(() => {
+                this.resizeFailed_ = true;
+              });
         }
       } else {
         if (targetHeight > height) {
@@ -1087,10 +1090,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   maybeLoadMoreItems_() {
-    if (this.loadMoreLoading_) {
+    if (this.resizeFailed_) {
       return;
     }
-    this.loadMoreLoading_ = true;
     const lastItem = dev().assertElement(this.container_.lastChild);
     this.viewport_.getClientRectAsync(lastItem)
         .then(positionRect => {
@@ -1099,8 +1101,6 @@ export class AmpList extends AMP.BaseElement {
           if (viewportTop + 3 * viewportHeight > positionRect.bottom) {
             return this.loadMoreCallback_();
           }
-        }).then(() => {
-          this.loadMoreLoading_ = false;
         });
 
   }
