@@ -16,18 +16,88 @@
 
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const config = require('../../config');
+const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
-const mocha = require('gulp-mocha');
+const Mocha = require('mocha');
+const tryConnect = require('try-net-connect');
+const {execScriptAsync} = require('../../exec');
 
-function e2e() {
-  return gulp.src(config.e2eTestPaths, {read: false})
-      .pipe(mocha({
-        require: [
-          '@babel/register',
-          '../../../build-system/tasks/e2e/helper',
-        ],
-      }));
+const HOST = 'localhost';
+const PORT = 8000;
+const WEBSERVER_TIMEOUT_RETRIES = 10;
+
+let webServerProcess_;
+
+async function launchWebServer_() {
+  webServerProcess_ = execScriptAsync(
+      `gulp serve --host ${HOST} --port ${PORT}\
+      ${argv.quiet ? '--quiet' : ''}`);
+
+  let resolver;
+  const deferred = new Promise(resolverIn => {
+    resolver = resolverIn;
+  });
+
+  tryConnect({
+    host: HOST,
+    port: PORT,
+    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
+  }).on('connected', () => {
+    return resolver(webServerProcess_);
+  });
+
+  return deferred;
 }
 
-gulp.task('e2e', 'Runs e2e tests', e2e);
+function cleanUp_() {
+  if (webServerProcess_ && !webServerProcess_.killed) {
+    webServerProcess_.kill('SIGINT');
+  }
+}
+
+async function e2e() {
+  // set up promise to return
+  let resolver, rejecter;
+  const deferred = new Promise((resolverIn, rejecterIn) => {
+    resolver = resolverIn;
+    rejecter = rejecterIn;
+  });
+
+  // create mocha instance
+  require('@babel/register');
+  require('./helper');
+  const mocha = new Mocha();
+
+  // add test files to mocha
+  config.e2eTestPaths.forEach(path => {
+    glob.sync(path).forEach(file => {
+      mocha.addFile(file);
+    });
+  });
+
+  // start up web server
+  await launchWebServer_();
+
+  // run tests
+  mocha.run(failures => {
+    // end web server
+    cleanUp_();
+
+    // end task
+    if (failures) {
+      return rejecter();
+    }
+
+    return resolver();
+  });
+
+  return deferred;
+}
+
+gulp.task('e2e', 'Runs e2e tests', e2e, {
+  options: {
+    'quiet': '  Do not log HTTP requests (default: false)',
+  },
+});
