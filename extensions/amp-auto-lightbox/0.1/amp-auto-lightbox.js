@@ -195,7 +195,7 @@ function whenLoaded(element) {
 export class Scanner {
 
   /**
-   * Gets load promises for all unvisited lightbox candidates.
+   * Gets all unvisited lightbox candidates.
    * @param {!Document} doc
    * @return {!Array<!Element>}
    */
