@@ -260,9 +260,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
 
-    /** @private {string} */
-    this.advanceMode_ = null;
-
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
@@ -1162,6 +1159,22 @@ export class AmpStory extends AMP.BaseElement {
           this.getPageIndex(oldPage) < pageIndex ?
             setAttributeInMutate(oldPage, Attributes.VISITED) :
             removeAttributeInMutate(oldPage, Attributes.VISITED);
+
+          if (oldPage.isAd()) {
+            this.storeService_.dispatch(
+                StateProperty.SET_ADVANCEMENT_MODE,
+                AdvancementMode.ADVANCE_TO_ADS);
+          } else {
+            const advanceAttr =
+              isExperimentOn(this.win, 'amp-story-branching') ?
+                Attributes.PUBLIC_ADVANCE_TO :
+                Attributes.ADVANCE_TO;
+            if (oldPage.element.hasAttribute(advanceAttr)) {
+              this.storeService_.dispatch(
+                  StateProperty.SET_ADVANCEMENT_MODE,
+                  AdvancementMode.ADVANCE_TO);
+            }
+          }
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {

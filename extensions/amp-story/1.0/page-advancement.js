@@ -511,7 +511,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     this.onTapNavigation(this.getTapDirection_(page));
     this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE, AdvancementMode.ManualAdvancement);
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
   }
 
   /**
@@ -555,12 +555,10 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
+   * @param {!Element} element
    */
   constructor(win, delayMs, element) {
     super();
-
-    /** @private @const {!Element} */
-    this.element_ = element;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
@@ -651,6 +649,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
+   * @param {!Element} rootEl
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
@@ -706,6 +705,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
+
+    if (element.ownerDocument.defaultView) {
+      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+      this.storeService_ =
+        getStoreService(element.ownerDocument.defaultView);
+    }
   }
 
   /**

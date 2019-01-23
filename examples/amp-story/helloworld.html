@@ -30,30 +30,6 @@
 
   <body>
     <amp-story standalone>
-      <amp-analytics type="googleanalytics" id="googleanalytics1">
-     <script type="application/json">
-       {
-          "vars": {
-            "account": "UA-sdfsfds-8"
-          },
-          "triggers": {
-            "trackPageview": {
-              "on": "story-page-visible",
-              "request": "pageview",
-              "extraUrlParams": {
-                "cd1": "${storyPageIndex}",
-                "cd2": "${storyPageId}",
-                "cd3": "${storyPageCount}",
-                "cd4": "${storyProgress}",
-                "cd5": "${storyIsMuted}",
-                "cd6": "${storyAdvancementMode}"
-              }
-            }
-          }
-        }
-      </script>
-      </amp-analytics>
-
       <amp-story-page id="cover" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">
           <h1>Hello World</h1>
