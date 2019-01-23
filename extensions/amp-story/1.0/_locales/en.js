@@ -168,7 +168,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',
     description: 'Label in the tooltip text for when a Twitter embed is ' +
-        'expandable',
+        'expandable.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string: 'Expand your window to view this experience',
