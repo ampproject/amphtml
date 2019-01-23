@@ -25,14 +25,17 @@ import {
   Scanner,
   Schema,
   VIEWPORT_AREA_RATIO,
-  isEnabledForDoc,
   meetsCriteria,
   meetsSizingCriteria,
+  resolveIsEnabledForDoc,
+  runCandidates,
   scanDoc,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
 
 
@@ -61,15 +64,15 @@ describes.realWin(TAG, {
     env.sandbox.stub(Criteria, criteriaMethod(criteria)).returns(isMet);
   }
 
-  const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
+  const stubAllCriteriaMet = () =>
+    env.sandbox.stub(Criteria, 'meetsAll');
 
   function mockAllCriteriaMet(isMet) {
     stubAllCriteriaMet().returns(isMet);
   }
 
-  function mockScannedImages(images) {
-    env.sandbox.stub(Scanner, 'getAllImages').returns(
-        images.map(img => tryResolve(() => img)));
+  function mockCandidates(candidates) {
+    env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
   }
 
   function mockSchemaType(type) {
@@ -77,10 +80,15 @@ describes.realWin(TAG, {
   }
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
+    const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
+    const viewerHostname = isTrusted ? 'google.com' : 'tacos.al.pastor';
+
     env.sandbox.stub(Services, 'viewerForDoc').returns({
-      isEmbedded() { return isEmbedded; },
-      isTrustedViewer() {
-        return opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
+      isEmbedded() {
+        return isEmbedded;
+      },
+      getViewerOrigin() {
+        return tryResolve(() => `https://${viewerHostname}`);
       },
     });
   }
@@ -100,15 +108,37 @@ describes.realWin(TAG, {
     return sinon.match(subject => subject == comparison);
   }
 
+  function mockCandidatesForLengthCheck() {
+    return ['foo'];
+  }
+
+  function mockLoadedSignal(element, isLoadedSuccessfully) {
+    const signals = new Signals();
+    element.signals = () => signals;
+    if (isLoadedSuccessfully) {
+      signals.signal(CommonSignals.LOAD_END);
+    } else {
+      signals.rejectSignal(CommonSignals.LOAD_END, 'Mocked rejection');
+    }
+    return element;
+  }
+
   beforeEach(() => {
     html = htmlFor(env.win.document);
+
     env.sandbox.stub(Mutation, 'mutate').callsFake((_, mutator) =>
-      tryResolve(() => mutator()));
+      tryResolve(mutator));
+
+    env.sandbox.stub(Services, 'urlForDoc').returns({
+      parse(url) {
+        return parseUrlDeprecated(url);
+      },
+    });
   });
 
   describe('meetsCriteria', () => {
 
-    it('rejects placeholder images', () => {
+    it('rejects placeholder elements', () => {
       mockCriteriaMet('actionable', true);
       mockCriteriaMet('sizing', true);
 
@@ -134,7 +164,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects actionable images by tap action', () => {
+    it('rejects elements actionable by tap', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -206,7 +236,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('accepts images with a non-tap action', () => {
+    it('accepts elements with a non-tap action', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -233,7 +263,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images inside an <amp-selector>', () => {
+    it('rejects elements inside an <amp-selector>', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -271,7 +301,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images inside a <button>', () => {
+    it('rejects elements inside a <button>', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -294,7 +324,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images inside an <amp-script>', () => {
+    it('rejects elements inside an <amp-script>', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -317,7 +347,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images inside an <amp-story>', () => {
+    it('rejects elements inside an <amp-story>', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -340,7 +370,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images inside a clickable link', () => {
+    it('rejects elements inside a clickable link', () => {
       mockCriteriaMet('placeholder', true);
       mockCriteriaMet('sizing', true);
 
@@ -368,7 +398,7 @@ describes.realWin(TAG, {
   describe('meetsSizingCriteria', () => {
     const areaDeltaPerc = RENDER_AREA_RATIO * 100;
 
-    it(`accepts images ${areaDeltaPerc}%+ of size than render area`, () => {
+    it(`accepts elements ${areaDeltaPerc}%+ of size than render area`, () => {
       const vw = 1000;
       const vh = 600;
 
@@ -401,7 +431,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it(`rejects images < ${areaDeltaPerc}%+ of size of render area`, () => {
+    it(`rejects elements < ${areaDeltaPerc}%+ of size of render area`, () => {
       const vw = 1000;
       const vh = 600;
 
@@ -436,7 +466,7 @@ describes.realWin(TAG, {
 
     const minAreaPerc = VIEWPORT_AREA_RATIO * 100;
 
-    it(`accepts images that cover ${minAreaPerc}%+ of the viewport`, () => {
+    it(`accepts elements that cover ${minAreaPerc}%+ of the viewport`, () => {
       const vw = 1000;
       const vh = 600;
 
@@ -468,7 +498,7 @@ describes.realWin(TAG, {
 
     });
 
-    it(`rejects images that cover < ${minAreaPerc}% of the viewport`, () => {
+    it(`rejects elements that cover < ${minAreaPerc}% of the viewport`, () => {
       const vw = 1000;
       const vh = 600;
 
@@ -496,7 +526,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('accepts images with height > than viewport\'s', () => {
+    it('accepts elements with height > than viewport\'s', () => {
       const vw = 1000;
       const vh = 600;
 
@@ -518,7 +548,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('accepts images with width > than viewport\'s', () => {
+    it('accepts elements with width > than viewport\'s', () => {
       const vw = 1000;
       const vh = 600;
 
@@ -540,7 +570,7 @@ describes.realWin(TAG, {
       });
     });
 
-    it('rejects images with dimensions <= than viewport\'s', () => {
+    it('rejects elements with dimensions <= than viewport\'s', () => {
       const vw = 1000;
       const vh = 600;
 
@@ -572,56 +602,60 @@ describes.realWin(TAG, {
 
   describe('scanDoc', () => {
 
-    it('does not load extension if no elements found', function* () {
+    function waitForAllScannedToBeResolved() {
+      return scanDoc(env.ampdoc).then(scanned => Promise.all(scanned));
+    }
+
+    it('does not load extension if no candidates found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockIsEmbeddedAndTrustedViewer(true);
-      mockScannedImages([]);
+      mockCandidates([]);
 
-      yield Promise.all(scanDoc(env.ampdoc));
+      yield waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
     });
 
-    it('loads extension if at least one element meets criteria', function* () {
+    it('loads extension if >= 1 candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
       mockIsEmbeddedAndTrustedViewer(true);
-      mockScannedImages([
-        html`<amp-img src="bla.png"></amp-img>`,
+      mockCandidates([
+        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
       ]);
 
       mockAllCriteriaMet(true);
 
-      yield Promise.all(scanDoc(env.ampdoc));
+      yield waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.have.been.calledOnce;
     });
 
-    it('does not load extension if no elements meet criteria', function* () {
+    it('does not load extension if no candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockScannedImages([
-        html`<amp-img src="bla.png"></amp-img>`,
+      mockCandidates([
+        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
       ]);
 
       mockAllCriteriaMet(false);
       mockIsEmbeddedAndTrustedViewer(true);
 
-      yield Promise.all(scanDoc(env.ampdoc));
+      yield waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
     });
 
-    it('sets attribute only for images that meet criteria', function* () {
-      const a = html`<amp-img src="a.png"></amp-img>`;
-      const b = html`<amp-img src="b.png"></amp-img>`;
-      const c = html`<amp-img src="c.png"></amp-img>`;
+    it('sets attribute only for candidates that meet criteria', function* () {
+      const a = mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true);
+      const b = mockLoadedSignal(html`<amp-img src="b.png"></amp-img>`, true);
+      const c = mockLoadedSignal(html`<amp-img src="c.png"></amp-img>`, true);
 
       const allCriteriaMet = stubAllCriteriaMet();
 
@@ -630,28 +664,28 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
-      mockScannedImages([a, b, c]);
+      mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
-      yield Promise.all(scanDoc(env.ampdoc));
+      yield waitForAllScannedToBeResolved();
 
       expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
       expect(b.getAttribute(LIGHTBOXABLE_ATTR)).to.not.be.ok;
       expect(c.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
     });
 
-    it('sets unique group for images that meet criteria', function* () {
-      const a = html`<amp-img src="a.png"></amp-img>`;
-      const b = html`<amp-img src="b.png"></amp-img>`;
-      const c = html`<amp-img src="c.png"></amp-img>`;
+    it('sets unique group for candidates that meet criteria', function* () {
+      const a = mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true);
+      const b = mockLoadedSignal(html`<amp-img src="b.png"></amp-img>`, true);
+      const c = mockLoadedSignal(html`<amp-img src="c.png"></amp-img>`, true);
 
       mockAllCriteriaMet(true);
 
       mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
-      mockScannedImages([a, b, c]);
+      mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
-      yield Promise.all(scanDoc(env.ampdoc));
+      yield waitForAllScannedToBeResolved();
 
       const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
       const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
@@ -672,44 +706,50 @@ describes.realWin(TAG, {
 
   });
 
-  describe('Scanner', () => {
+  describe('runCandidates', () => {
 
-    it('filters out images that fail to load', () => {
-      const doc = env.win.document;
+    it('filters out candidates that fail to load', () => {
+      const shouldNotLoad = mockLoadedSignal(
+          html`<amp-img src="bla.png"></amp-img>`,
+          false);
 
-      const shouldNotLoad = html`<amp-img src="bla.png"></amp-img>`;
-      const shouldLoad = html`<amp-img src="bla.png"></amp-img>`;
+      const shouldLoad = mockLoadedSignal(
+          html`<amp-img src="bla.png"></amp-img>`,
+          true);
 
-      sandbox.stub(doc, 'querySelectorAll')
-          .withArgs(sinon.match(selector => /^amp-img/.test(selector)))
-          .returns([
-            shouldNotLoad,
-            shouldLoad,
-          ]);
+      const candidates = [shouldNotLoad, shouldLoad];
 
-      shouldNotLoad.signals().rejectSignal(CommonSignals.LOAD_END, new Error());
-      shouldLoad.signals().signal(CommonSignals.LOAD_END);
+      mockAllCriteriaMet(true);
 
-      return Promise.all(Scanner.getAllImages(doc)).then(images => {
-        expect(images.length).to.equal(2);
-        expect(images[0]).to.not.be.ok;
-        expect(images[1]).to.equal(shouldLoad);
-      });
+      return Promise.all(runCandidates(env.ampdoc, candidates))
+          .then(candidates => {
+            expect(candidates.length).to.equal(2);
+            expect(candidates[0]).to.not.be.ok;
+            expect(candidates[1]).to.equal(shouldLoad);
+          });
     });
 
   });
 
-  describe('isEnabledForDoc', () => {
+  describe('resolveIsEnabledForDoc', () => {
 
     it('rejects documents without schema', () => {
       mockIsEmbeddedAndTrustedViewer(true);
-      expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+
+      return resolveIsEnabledForDoc(env.ampdoc,
+          mockCandidatesForLengthCheck()).then(isEnabled => {
+        expect(isEnabled).to.be.false;
+      });
     });
 
     it('rejects schema with invalid @type', () => {
       mockIsEmbeddedAndTrustedViewer(true);
       mockSchemaType('hamberder');
-      expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+
+      return resolveIsEnabledForDoc(env.ampdoc,
+          mockCandidatesForLengthCheck()).then(isEnabled => {
+        expect(isEnabled).to.be.false;
+      });
     });
 
     ENABLED_SCHEMA_TYPES.forEach(type => {
@@ -717,7 +757,11 @@ describes.realWin(TAG, {
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
-        expect(isEnabledForDoc(env.ampdoc)).to.be.true;
+
+        return resolveIsEnabledForDoc(env.ampdoc,
+            mockCandidatesForLengthCheck()).then(isEnabled => {
+          expect(isEnabled).to.be.true;
+        });
       });
 
       it(`rejects schema with @type=${type} but lightbox explicit`, () => {
@@ -737,22 +781,35 @@ describes.realWin(TAG, {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
 
-        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+        return resolveIsEnabledForDoc(env.ampdoc,
+            mockCandidatesForLengthCheck()).then(isEnabled => {
+          expect(isEnabled).to.be.false;
+        });
 
       });
 
       it(`rejects schema with @type=${type} for non-embedded docs`, () => {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(
-            /* isEmbedded */ false, /* isTrusted */ true);
-        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+            /* isEmbedded */ false,
+            /* isTrusted */ true);
+
+        return resolveIsEnabledForDoc(
+            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
+          expect(isEnabled).to.be.false;
+        });
       });
 
       it(`rejects schema with @type=${type} for untrusted viewer`, () => {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(
-            /* isEmbedded */ true, /* isTrusted */ false);
-        expect(isEnabledForDoc(env.ampdoc)).to.be.false;
+            /* isEmbedded */ true,
+            /* isTrusted */ false);
+
+        return resolveIsEnabledForDoc(
+            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
+          expect(isEnabled).to.be.false;
+        });
       });
 
     });

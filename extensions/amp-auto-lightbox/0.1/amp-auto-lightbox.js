@@ -30,6 +30,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -37,8 +38,10 @@ const TAG = 'amp-auto-lightbox';
 export const REQUIRED_EXTENSION = 'amp-lightbox-gallery';
 export const LIGHTBOXABLE_ATTR = 'lightbox';
 
+/** Attribute to mark scanned lightbox candidates as not to revisit. */
 export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
+/** Types of document by schema where auto-lightbox is enabled. */
 export const ENABLED_SCHEMA_TYPES = [
   'Article',
   'NewsArticle',
@@ -51,10 +54,27 @@ export const ENABLED_SCHEMA_TYPES = [
 export const RENDER_AREA_RATIO = 1.2;
 
 /** Factor of renderArea vs viewportArea to lightbox. */
-export const VIEWPORT_AREA_RATIO = 0.3;
+export const VIEWPORT_AREA_RATIO = 0.25;
 
+/**
+ * Ancestors considered "actionable", i.e. that are bound to a default onclick
+ * action (e.g. `button`) or where it cannot be determined whether they're
+ * actionable or not (e.g. `amp-script`).
+ */
 const ACTIONABLE_ANCESTORS =
-    'a[href], amp-selector [option], amp-script, amp-story, button';
+    'a[href],' +
+    'amp-selector [option],' +
+    'amp-script,' +
+    'amp-story,' +
+    'button,' +
+    // TODO(alanorozco): Allow and possibly group carousels where images are the
+    // only content.
+    'amp-carousel';
+
+
+const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+
+const NOOP = () => {};
 
 
 /** @visibleForTesting */
@@ -144,7 +164,30 @@ export function meetsSizingCriteria(
 
   const isLargerThanViewport = naturalWidth > vw || naturalHeight > vh;
 
-  return isShrunk || isLargerThanViewport || isCoveringSignificantArea;
+  return isShrunk ||
+    isLargerThanViewport ||
+    isCoveringSignificantArea;
+}
+
+
+/**
+ * Marks a lightbox candidate as visited as not to rescan on DOM update.
+ * @param {!Element} candidate
+ * @return {!Promise<!Element>}
+ */
+function markAsVisited(candidate) {
+  return Mutation.mutate(candidate, () => {
+    candidate.setAttribute(VISITED_ATTR, '');
+  });
+}
+
+
+/**
+ * @param {!Element} element
+ * @return {!Promise<!Element>}
+ */
+function whenLoaded(element) {
+  return element.signals().whenSignal(CommonSignals.LOAD_END);
 }
 
 
@@ -152,23 +195,15 @@ export function meetsSizingCriteria(
 export class Scanner {
 
   /**
+   * Gets load promises for all unvisited lightbox candidates.
    * @param {!Document} doc
-   * @return {!Array<!Promise<?Element>>}
+   * @return {!Array<!Element>}
    */
-  static getAllImages(doc) {
-    const potentialImgsSelector =
-        `amp-img:not([${LIGHTBOXABLE_ATTR}]):not(${VISITED_ATTR})`;
-
-    const imgs = toArray(doc.querySelectorAll(potentialImgsSelector));
-
-    // mark as visited so we don't rescan items on DOM_UPDATE
-    return imgs.map(img => img.signals().whenSignal(CommonSignals.LOAD_END)
-        .then(
-            () =>
-              Mutation.mutate(img, () => {
-                img.setAttribute(VISITED_ATTR, '');
-              }).then(() => img),
-            () => null));
+  static getCandidates(doc) {
+    const selector = `amp-img:not([${LIGHTBOXABLE_ATTR}]):not(${VISITED_ATTR})`;
+    const candidates = toArray(doc.querySelectorAll(selector));
+    candidates.forEach(markAsVisited);
+    return candidates;
   }
 }
 
@@ -183,9 +218,15 @@ export function meetsCriteria(element) {
 }
 
 
-/** @visibleForTesting */
+/**
+ * Parses document schema defined as ld+json.
+ * @visibleForTesting
+ */
 export class Schema {
+
   /**
+   * Gets document type (field `@type`) where schema is defined for the
+   * canonical URL.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {?string}
    */
@@ -216,7 +257,11 @@ export class Schema {
 }
 
 
-/** @visibleForTesting */
+/**
+ * Wrapper for an element-implementation-mutate sequence for readability and
+ * mocking in tests.
+ * @visibleForTesting
+ */
 export class Mutation {
   /**
    * @param {!Element} ampEl
@@ -230,43 +275,77 @@ export class Mutation {
 
 
 /**
+ * Determines whether a document uses `amp-lightbox-gallery` explicitly by
+ * including the extension and explicitly lightboxing at least one element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
  */
 function usesLightboxExplicitly(ampdoc) {
+  // TODO(alanorozco): Backport into Extensions service.
   const requiredExtensionSelector =
       `script[custom-element="${REQUIRED_EXTENSION}"]`;
 
-  const currentScriptTag =
-      ampdoc.getRootNode().querySelector(requiredExtensionSelector);
-
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]`;
 
-  return !!currentScriptTag &&
-    !!ampdoc.getRootNode().querySelector(lightboxedElementsSelector);
+  const querySelector = selector =>
+    ampdoc.getRootNode().querySelector(selector);
+
+  return !!querySelector(requiredExtensionSelector) &&
+    !!querySelector(lightboxedElementsSelector);
 }
+
+
+const resolveFalse = () => tryResolve(() => false);
+const resolveTrue = () => tryResolve(() => true);
 
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Array<!Element>} candidates
+ * @return {!Promise<boolean>}
+ */
+function isEmbeddedAndTrusted(ampdoc, candidates) {
+  // Allow `localDev` in lieu of viewer for manual testing, except in tests
+  // where we need all checks.
+  const {win} = ampdoc;
+  if (getMode(win).localDev && !getMode(win).test) {
+    return resolveTrue();
+  }
+
+  const viewer = Services.viewerForDoc(ampdoc);
+  if (!viewer.isEmbedded()) {
+    return resolveFalse();
+  }
+
+  // An attached node is required for viewer origin check. If no candidates are
+  // present, short-circuit.
+  if (candidates.length <= 0) {
+    return resolveFalse();
+  }
+
+  return viewer.getViewerOrigin().then(origin => {
+    const {parse} = Services.urlForDoc(candidates[0]);
+    const {hostname} = parse(origin);
+    return GOOGLE_DOMAIN_RE.test(hostname);
+  });
+}
+
+
+/**
+ * Determines whether auto-lightbox is enabled for a document.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Array<!Element>} candidates
  * @return {boolean}
  * @visibleForTesting
  */
-export function isEnabledForDoc(ampdoc) {
-  const {win} = ampdoc;
-  const viewer = Services.viewerForDoc(ampdoc);
-  if ((!viewer.isEmbedded() || !viewer.isTrustedViewer()) &&
-      // allow `localDev` in lieu of viewer for manual testing, except in tests
-      // where we need all checks.
-      (!getMode(win).localDev || getMode(win).test)) {
-    return false;
-  }
-
+export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
-    return false;
+    return resolveFalse();
   }
-
-  return ENABLED_SCHEMA_TYPES.includes(Schema.getDocumentType(ampdoc));
+  if (!ENABLED_SCHEMA_TYPES.includes(Schema.getDocumentType(ampdoc))) {
+    return resolveFalse();
+  }
+  return isEmbeddedAndTrusted(ampdoc, candidates);
 }
 
 
@@ -274,57 +353,71 @@ export function isEnabledForDoc(ampdoc) {
 let uid = 0;
 
 
-/** @return {string} */
+/**
+ * Generates a unique id for lightbox grouping.
+ * @return {string}
+ */
 function generateLightboxUid() {
   return `i-amphtml-auto-lightbox-${uid++}`;
 }
 
 
 /**
+ * Lightboxes an element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Element} img
- * @return {!Promise}
+ * @param {!Element} element
+ * @return {!Promise<!Element>}
  */
-function apply(ampdoc, img) {
-  return Mutation.mutate(img, () => {
-    img.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
+function apply(ampdoc, element) {
+  return Mutation.mutate(element, () => {
+    element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
   }).then(() => {
     Services.extensionsFor(ampdoc.win)
         .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
+
+    return element;
   });
 }
 
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Array<!Promise>}
+ * @param {!Array<!Element>} candidates
+ * @return {!Array<!Promise<!Element|undefined>>}
+ */
+export function runCandidates(ampdoc, candidates) {
+  return candidates.map(candidate =>
+    whenLoaded(candidate).then(() => {
+      if (!meetsCriteria(candidate)) {
+        return;
+      }
+      return apply(ampdoc, candidate);
+    }, NOOP));
+}
+
+
+/**
+ * Scans a document on initialization to lightbox elements that meet criteria.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<!Array<!Promise>>}
  */
 export function scanDoc(ampdoc) {
-  if (!isEnabledForDoc(ampdoc)) {
-    return [];
-  }
+  const candidates = Scanner.getCandidates(ampdoc.win.document);
 
-  const maybeApplyAll = () => Scanner.getAllImages(ampdoc.win.document)
-      .map(imgPromise => imgPromise.then(imgOrNull => {
-        if (!imgOrNull) {
-          return;
-        }
-        const img = dev().assertElement(imgOrNull);
-        if (!Criteria.meetsAll(img)) {
-          return;
-        }
-        return apply(ampdoc, img);
-      }));
-
-  // TODO(alanorozco): Notify `amp-lightbox-gallery`
-  ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, maybeApplyAll);
-
-  return maybeApplyAll();
+  return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
+    if (!isEnabled) {
+      return [];
+    }
+    return runCandidates(ampdoc, candidates);
+  });
 }
 
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+      scanDoc(ampdoc);
+    });
     scanDoc(ampdoc);
   });
 });
