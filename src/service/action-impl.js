@@ -24,7 +24,7 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {escapeCssSelectorIdent, isEnabled} from '../dom';
+import {escapeCssSelectorIdent, isEnabled, iterateCursor} from '../dom';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
@@ -105,7 +105,7 @@ let ActionInfoArgsDef;
 /**
  * @typedef {{
  *   action: string,
- *   actionInfoDef: !ActionInfoDef,
+ *   callerProvidedArgs: !Array<!Array<!Object>>,
  * }}
  */
 let ActionMacroDef;
@@ -664,11 +664,10 @@ export class ActionService {
       const hasAction = node.hasAttribute('on');
       if (hasAction) {
         const action = node.getAttribute('on');
-        const actionMacroDef = this.getActionMacroDef_(action);
-
+        const actionMacroDefs = this.getActionMacroDefs_(action);
         actionMap = parseActionMap(
-            !!actionMacroDef ? actionMacroDef.action : action,
-            node, actionMacroDef ? actionMacroDef.actionInfoDef.args : null);
+            actionMacroDefs ? actionMacroDefs.action : action,
+            node, actionMacroDefs ? actionMacroDefs.args : null);
 
         node[ACTION_MAP_] = actionMap;
       }
@@ -683,29 +682,43 @@ export class ActionService {
    * @private
    * @return {?ActionMacroDef}
    */
-  getActionMacroDef_(actionCall) {
+  getActionMacroDefs_(actionCall) {
     // An action macro has the following formats:
     //   event:action-macro-id()
     //   event.action-macro-id
     //   event.action-macro-id(arg1=1, arg2=2)
     const actionMacroCall = /^\w+:(\w+[a-zA-Z'-]+)((\(.*\))?)$/;
     const matchActionResults = actionCall.match(actionMacroCall);
+    const event = actionCall.split(":")[0];
     if (matchActionResults) {
       const macroActionId = matchActionResults[1];
       const actionInfo = this.actionMacros_[macroActionId];
       const ampActionMacroEl = this.ampdoc.getRootNode().querySelector(
           `amp-action-macro[id=${escapeCssSelectorIdent(macroActionId)}]`);
-      const actionMap = parseActionMap(`action-macro-event:${actionInfo}`,
+      const actionMap = parseActionMap(`${event}:${actionInfo}`,
           devAssert(ampActionMacroEl));
-      const actionInfoDef = actionMap['action-macro-event'][0];
-      const {target, method} = actionInfoDef;
-      devAssert(actionInfoDef, 'macro action reference does not exist');
-      // Replace the action macro id with the target and method name, as
-      // that is the actual action to be called.
-      const action = actionCall.replace(
-          macroActionId, `${target}.${method}`);
+      const callerProvidedArgs = [];
+      // Extract args.
+      const argumnts =
+          matchActionResults[2].substring(1, matchActionResults[2].length - 1).split(':');
+        argumnts.forEach(args => {
+        const callerArgs = []
+        if (args !== '') {
+          args.split(',').forEach(arg => {
+            const keyValue = arg.split('=');
+            const key = keyValue[0];
+            const value = keyValue[1];
+            const obj = map();
+            obj[`${key}`] = value;
+            callerArgs.push(obj);
+          });
+          // devAssert(actionInfoDef, 'macro action reference does not exist');
+          callerProvidedArgs.push(callerArgs);
+        }
+      });
 
-      return {action, actionInfoDef};
+      const action = `${event}:${actionInfo}`;
+      return {action, callerProvidedArgs};
     }
 
     return null;
