@@ -25,6 +25,8 @@ describes.endtoend('AMP carousel', {
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
+  const pageWidth = 600;
+  const pageHeight = 1200;
 
   let controller;
 
@@ -36,11 +38,21 @@ describes.endtoend('AMP carousel', {
     controller = env.controller;
 
     await enableExperiments(controller);
+    await controller.setWindowRect({
+      width: pageWidth,
+      height: pageHeight,
+    });
     await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-carousel-0-2/basic.amp.html');
   });
 
   it('should render correctly', async() => {
+    const el = await getScrollingElement(controller);
+
+    // We should have space for SLIDE_COUNT - 1 on either side + 1 for the
+    // current slide.
+    await expect(prop(el, 'scrollWidth'))
+        .to.equal(pageWidth * (2 * (SLIDE_COUNT - 1) + 1));
     await waitForCarouselImg(controller, 0);
     await controller.takeScreenshot('screenshots/render.png');
   });
