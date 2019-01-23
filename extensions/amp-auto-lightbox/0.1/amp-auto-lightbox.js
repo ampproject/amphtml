@@ -204,7 +204,8 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(doc) {
-    const selector = `amp-img:not([${LIGHTBOXABLE_ATTR}]):not(${VISITED_ATTR})`;
+    const selector =
+        `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
     const candidates = toArray(doc.querySelectorAll(selector));
     candidates.forEach(markAsVisited);
     return candidates;
@@ -290,7 +291,7 @@ function usesLightboxExplicitly(ampdoc) {
       `script[custom-element="${REQUIRED_EXTENSION}"]`;
 
   const lightboxedElementsSelector =
-      `[${LIGHTBOXABLE_ATTR}]:not(${VISITED_ATTR})`;
+      `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
   const querySelector = selector =>
     ampdoc.getRootNode().querySelector(selector);
