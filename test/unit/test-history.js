@@ -528,6 +528,28 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
       expect(onStateUpdated.getCall(3).args[0].stackIndex).to.equal(h);
     });
   });
+
+  it('should update path from URL parameter', () => {
+    const path = '/path';
+    const query = '?query=1';
+    return history.replace({url: path + query}).then(() => {
+      expect(document.location.pathname).to.equal(path);
+      expect(document.location.search).to.equal(query);
+    });
+  });
+
+  it('should strip fragment from URL parameter', () => {
+    return history.replace({url: '/path?query=1#fragment'}).then(() => {
+      expect(document.location.hash).to.equal('');
+    });
+  });
+
+  it('should append the fragment parameter to the URL parameter', () => {
+    const fragment = 'test';
+    return history.replace({url: '/path?query=1', fragment}).then(() => {
+      expect(document.location.hash).to.equal(`#${fragment}`);
+    });
+  });
 });
 
 
@@ -546,6 +568,7 @@ describe('HistoryBindingVirtual', () => {
     viewer = {
       onMessage: sandbox.stub().returns(() => {}),
       sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve()),
+      hasCapability: sandbox.stub().returns(false),
     };
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStateUpdated(onStateUpdated);
@@ -653,6 +676,37 @@ describe('HistoryBindingVirtual', () => {
         expect(onStateUpdated).to.be.calledOnce;
         expect(onStateUpdated)
             .to.be.calledWithMatch({stackIndex: 123, title: 'different'});
+      });
+    });
+
+    it('supports full URL replacement', () => {
+      viewer.hasCapability.withArgs('fullReplaceHistory').returns(true);
+      viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory',
+              {stackIndex: 123, title: 'title', url: '/page'})
+          .returns(Promise.resolve(
+              {stackIndex: 123, title: 'different', url: '/otherpage'}));
+
+      return history.replace(
+          {stackIndex: 123, title: 'title', url: '/page'}).then(state => {
+        expect(state).to.deep.equal(
+            {stackIndex: 123, title: 'different', url: '/otherpage'});
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch(
+            {stackIndex: 123, title: 'different', url: '/otherpage'});
+      });
+    });
+
+    it('does not support full URL replacement', () => {
+      viewer.hasCapability.withArgs('fullReplaceHistory').returns(false);
+
+      return history.replace(
+          {stackIndex: 123, title: 'title', url: '/page'}).then(state => {
+        expect(state).to.deep.equal({stackIndex: 0});
+
+        expect(viewer.sendMessageAwaitResponse).to.not.be.called;
+        expect(onStateUpdated).to.not.be.called;
       });
     });
   });
