@@ -17,12 +17,10 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const config = require('../../config');
+const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
-const log = require('fancy-log');
-const mocha = require('gulp-mocha');
-const sleep = require('sleep-promise');
+const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {execScriptAsync} = require('../../exec');
 
@@ -31,75 +29,76 @@ const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 
 let webServerProcess_;
-/**
- * Launches a background AMP webserver for unminified js using gulp.
- *
- * Waits until the server is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @return {!Promise} a Promise that resolves when the web server is launched
- *     and reachable.
- */
-async function launchWebServer() {
+
+async function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}
+      `gulp serve --host ${HOST} --port ${PORT}\
       ${argv.quiet ? '--quiet' : ''}`);
 
-  webServerProcess_.on('close', code => {
-    code = code || 0;
-    if (code != 0) {
-      log('fatal', colors.cyan("'serve'"),
-          `errored with code ${code}. Cannot continue with e2e tests`);
-    }
+  let resolver;
+  const deferred = new Promise(resolverIn => {
+    resolver = resolverIn;
   });
 
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
-    resolver = resolverIn;
-    rejecter = rejecterIn;
-  });
   tryConnect({
     host: HOST,
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
   }).on('connected', () => {
     return resolver(webServerProcess_);
-  }).on('timeout', rejecter);
+  });
+
   return deferred;
 }
 
 async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
-    // Explicitly exit the webserver.
-    webServerProcess_.kill('SIGKILL');
-    // The child node process has an asynchronous stdout. See #10409.
-    await sleep(100);
+    webServerProcess_.kill('SIGINT');
   }
 }
 
-async function e2e() {
-  try {
-    await launchWebServer();
-  } catch (reason) {
-    log('fatal', `Failed to start a web server: ${reason}`);
-  }
+async function e2e2() {
+  // set up promise to return
+  let resolver, rejecter;
+  const deferred = new Promise((resolverIn, rejecterIn) => {
+    resolver = resolverIn;
+    rejecter = rejecterIn;
+  });
 
-  return gulp.src(config.e2eTestPaths, {read: false})
-      .pipe(mocha({
-        require: [
-          '@babel/register',
-          '../../../build-system/tasks/e2e/helper',
-        ],
-      })
-          // stop serving on localhost:8000
-          .once('end', () => {
-            console.log('end event was hit');
-            cleanUp_();
-          })
-      );
+  // create mocha instance
+  require('@babel/register');
+  require('./helper');
+  const mocha = new Mocha();
+
+  // add test files to mocha
+  config.e2eTestPaths.forEach(path => {
+    glob.sync(path).forEach(file => {
+      mocha.addFile(file);
+    });
+  });
+
+  // start up web server
+  await launchWebServer_();
+
+  // run tests
+  mocha.run(async failures => {
+    // end web server
+    await cleanUp_();
+
+    // end task
+    if (failures) {
+      process.exitCode = 0;
+      return rejecter();
+    }
+
+    process.exitCode = 1;
+    return resolver();
+  });
+
+  return deferred;
 }
 
-gulp.task('e2e', 'Runs e2e tests', ['serve'], e2e, {
+gulp.task('e2e', 'Runs e2e tests', e2e2, {
   options: {
     'quiet': '  Do not log HTTP requests (default: false)',
   },
