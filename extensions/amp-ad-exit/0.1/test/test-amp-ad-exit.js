@@ -98,7 +98,7 @@ const EXIT_CONFIG = {
     clickTargetTest: {
       'finalUrl': 'http://localhost:8000/simple',
       behaviors: {
-          clickTarget: '_top'
+        clickTarget: '_top',
       },
     },
   },
