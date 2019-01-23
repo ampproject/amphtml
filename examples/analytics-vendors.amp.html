@@ -86,6 +86,7 @@
       <option>oewadirect</option>
       <option>oracleInfinityAnalytics</option>
       <option>parsely</option>
+      <option>permutive</option>
       <option>piano</option>
       <option>piStats</option>
       <option>pressboard</option>
@@ -976,6 +977,24 @@ For complete documentation and additional examples please see: https://marketing
 }
 </script>
 </amp-analytics>
+
+<!-- Permutive example -->
+<amp-analytics type="permutive" id="permutive">
+<script type="application/json">
+  {
+    "vars": {
+      "namespace": "YOUR_PERMUTIVE_AMP_NAMESPACE",
+      "key": "YOUR_PERMUTIVE_PUBLIC_API_KEY"
+    },
+    "extraUrlParams": {
+      "properties.article.id": "1234",
+      "properties'article.title": "xyz",
+      "properties.article.tags!list": "tag1,tag2,tag3"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Permutive example -->
 
 <!-- Start Piano example -->
 <amp-analytics type="piano" id="piano">

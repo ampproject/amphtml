@@ -1,0 +1,1 @@
+let a = true?window.global:window.location;

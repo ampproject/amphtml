@@ -38,7 +38,7 @@ const wrappers = require('./build-system/compile-wrappers');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
-const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
+const {createModuleCompatibleBundle} = require('./build-system/tasks/create-module-compatible-scripts/');
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
@@ -999,11 +999,7 @@ function dist() {
         }
       }).then(() => {
         if (argv.esm) {
-          return Promise.all([
-            createModuleCompatibleES5Bundle('v0.js'),
-            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-            createModuleCompatibleES5Bundle('shadow-v0.js'),
-          ]);
+          return createModuleCompatibleBundle('dist/**/*.js', 'dist');
         } else {
           return Promise.resolve();
         }

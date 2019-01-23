@@ -51,6 +51,13 @@ export class VisibilityModel {
       this.spec_['visiblePercentageMax'] = 0;
     }
 
+    /**
+     * Accumulate visibility counters but do not fire the trigger until the
+     * ready promise resolves.
+     * @private @const {boolean}
+     */
+    this.ignoreVisibilityForReport_ = spec['reportWhen'] !== undefined;
+
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
 
@@ -74,6 +81,9 @@ export class VisibilityModel {
 
     /** @const @private {time} */
     this.createdTime_ = Date.now();
+
+    // TODO(warrengm): Consider refactoring so that the ready defaults are
+    // false.
 
     /** @private {boolean} */
     this.ready_ = true;
@@ -297,7 +307,11 @@ export class VisibilityModel {
     if (!this.eventResolver_) {
       return;
     }
-    const conditionsMet = this.updateCounters_(visibility);
+
+    // When ignoreVisibilityForReport_ is true, we update counters but fire the
+    // event when the report ready promise is resolved.
+    const conditionsMet =
+        this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
