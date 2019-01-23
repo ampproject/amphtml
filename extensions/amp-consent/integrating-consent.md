@@ -1,6 +1,7 @@
-# Integrate your Consent Management Platform (CMP) with AMP Consent (Draft)
+# Integrate your Consent Management Platform (CMP) with AMP Consent
 
 ## Overview
+The feature is still in experimental mode. Please opt-in using the `amp-consent-v2` flag.
 
 If you operate a CMP to help publishers to manage their user consents, you may want to integrate your service in `amp-consent`. This will enable your customers to use your service in AMP HTML pages.
 
@@ -13,8 +14,9 @@ To add your consent management service to AMP runtime, it is expected that you d
 * Be aware of the restrictions that the AMP runtime applies to ensure a good user experience. These includes
     * Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`100vw`, `30vh`), and the fullScreen after user interactions.
     * A placeholder will be displayed before the consent prompt iframe is ready.
-    * Enforce the size of the stored consent information. 500kB is the current limit. Please file an issue if you find that not sufficient.
+    * Enforce the size of the stored consent information. 188 character length is the current limit. Please file an issue if you find that not sufficient.
 * Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking>` metaTag, or the `data-block-on-consent` attribute.
+* Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via provided APIs. It's up to the CMP and service provider vendors to agree on the format of the consent info string.
 * Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding support to your CMP service to AMP. A great start point is to follow the `_ping_` CMP service implementation that the AMP team creates for testing purpose.
 
 ## Add remote endpoint support
@@ -28,33 +30,71 @@ The prompt iframe and the parent AMP page will communicate through postMessages 
 #### Requesting UI state change
 Iframes can send a `consent-ui` message to the parent AMP page to request UI state change.
 
+##### ready
+
 ``` javascript
 window.parent.postMessage({
   type: 'consent-ui',
-  action: 'ready/enter-fullscreen'
+  action: 'ready'
 }, '*');
 ```
 
 Action `'ready'` informs the AMP runtime to hide the placeholder and show the consent prompt instead.
+
+##### enter-fullscreen
+``` javascript
+window.parent.postMessage({
+  type: 'consent-ui',
+  action: 'enter-fullscreen'
+}, '*');
+```
 
 Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to fullscreen.
 
 #### Informing Consent response
 Iframes can send a `consent-response` message to the parent AMP page to inform the user [actions](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#prompt-actions) along with additional consent information.
 
+* The user action is always required by AMP runtime. It allows the user to block/unblock any AMP component by user consent, not only components that read the additional consent information string.
+
+
+* If the user action value equals to `accept` or `reject`. AMP will strictly respect the incoming `info` value. If the `info` value is undefined, any previously value will be discarded.
+
+
+##### accept
+
 ``` javascript
 window.parent.postMessage({
   type: 'consent-response',
-  action: 'accept/reject/dismiss',
-  info: /string/
+  action: 'accept',
+  info: /string/, /* optional */
 }, '*');
 ```
 
-* The user action is always required by AMP runtime. It allows the user to block/unblock any AMP component by user consent, not only components that read the additional consent information string.
+The user action `accept` informs AMP runtime to unblock all components that are waiting the user consent.
 
-* If the user action value equals to `dismiss`, the `info` value should not be defined. This is because the `info` string is not useful when the user decides to not give any information.
+##### reject
 
-* If the user action value equals to `accept` or `reject`. AMP will strictly respect the incoming `info` value. If the `info` value is undefined, any previously value will be discarded.
+``` javascript
+window.parent.postMessage({
+  type: 'consent-response',
+  action: 'reject',
+  info: /string/,  /* optional */
+}, '*');
+```
+
+The user action `reject` informs AMP runtime that the user has declined to give consent. AMP runtime will unblock components based on the consent blocking policy configuration.
+
+
+##### dismiss
+``` javascript
+window.parent.postMessage({
+  type: 'consent-response',
+  action: 'dismiss',
+}, '*');
+```
+
+The user action `dismiss` informs AMP runtime that no info on user consent has been gathered. The `info` value is not supported. This is because the `info` string is not useful when the user decides to not give any information.
+
 
 #### Client information passed to iframe
 When the iframe is created, the following information will be passed to the iframe via the name attribute.
@@ -62,13 +102,16 @@ When the iframe is created, the following information will be passed to the ifra
 * `consentState`: The stored consent state if there's any. The value will be `'accepted'/'rejected'/'unknown'`. A friendly reminder is to be aware of the difference between the consent state string value (`'accepted'/'rejected'/'unknown'`) and the user action string value (`'accept'/'reject'/'dismiss'`).
 * `consentString`: The stored consent info string if there's any.
 
-The name attribute value will equal to
+One can get access to the client information via the name attribute inside the iframe.
 ``` javascript
-  JSON.stringify({
-    'clientConfig': {*},
-    'consentState': {string=},
-    'consentString': {string=}
-  });
+  /* Expect info to be an object of format
+   * {
+   *  'clientConfig': *,
+   *  'consentState': 'accepted'/'rejected'/'unknown'/undefined,
+   *  'consentString': string/undefined,
+   * };
+   */
+   info = JSON.parse(window.name);
 ```
 
 ## Adding your configuration to AMP
