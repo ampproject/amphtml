@@ -23,7 +23,7 @@ describes.endtoend('GitHub search results', {
     await controller.navigateTo('https://github.com/');
   });
 
-  it('should contain a result for the search term', async() => {
+  it.skip('should contain a result for the search term', async() => {
     const searchButtonHandle =
       await controller.findElement('.header-search-input');
     await controller.type(searchButtonHandle, 'TestCafe');
@@ -46,7 +46,7 @@ describes.endtoend('GitHub login', {
     await controller.navigateTo('https://github.com/login');
   });
 
-  it('should fail to login with no credentials', async() => {
+  it.skip('should fail to login with no credentials', async() => {
     const loginButton =
       await controller.findElement('.btn.btn-primary.btn-block');
     await controller.click(loginButton);
