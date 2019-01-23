@@ -17,10 +17,10 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -96,49 +96,42 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @const {!../../../src/service/template-impl.Templates} */
+    /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /** @private {?Element} */
+    this.container_ = null;
   }
 
   /** @override */
   buildCallback() {
     if (!isExperimentOn(this.win, 'amp-date-display')) {
-      user().warn(TAG, 'Experiment %s is not turned on.', TAG);
+      user().error(TAG, 'Experiment %s is not turned on.', TAG);
       return;
     }
 
-    // Store this in buildCallback() because `this.element` sometimes
-    // is missing attributes in the constructor.
+    this.container_ = this.element.ownerDocument.createElement('div');
+    this.element.appendChild(devAssert(this.container_));
 
     // Note: One of datetime, timestamp-ms, timestamp-seconds is required.
 
-    /** @private {string} */
     this.datetime_ = this.element.getAttribute('datetime') || '';
 
-    /** @private {number} */
     this.timestampSeconds_ = Number(
-        this.element.getAttribute('timestamp-seconds')
-    );
+        this.element.getAttribute('timestamp-seconds'));
 
-    /** @private {number} */
     this.timestampMiliseconds_ = Number(
-        this.element.getAttribute('timestamp-ms')
-    );
+        this.element.getAttribute('timestamp-ms'));
 
-    /** @private {string} */
     this.displayIn_ = this.element.getAttribute('display-in') || '';
 
-    /** @private {number} */
     this.offsetSeconds_ =
       Number(this.element.getAttribute('offset-seconds')) ||
       DEFAULT_OFFSET_SECONDS;
 
-    /** @private {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
-
     const data = /** @type {!JsonObject} */(this.getDataForTemplate_());
-
     this.templates_
         .findAndRenderTemplate(this.element, data)
         .then(this.boundRendered_);
@@ -176,20 +169,15 @@ export class AmpDateDisplay extends AMP.BaseElement {
       epoch = Date.now();
     } else if (this.datetime_) {
       epoch = Date.parse(this.datetime_);
-      userAssert(
-          !isNaN(epoch),
-          `Invalid date: '${this.datetime_}'`
-      );
+      userAssert(!isNaN(epoch), 'Invalid date: %s', this.datetime_);
     } else if (this.timestampMiliseconds_) {
       epoch = this.timestampMiliseconds_;
     } else if (this.timestampSeconds_) {
       epoch = this.timestampSeconds_ * 1000;
     }
 
-    userAssert(
-        epoch !== undefined,
-        'One of datetime, timestamp-ms, or timestamp-seconds is required'
-    );
+    userAssert(epoch !== undefined,
+        'One of datetime, timestamp-ms, or timestamp-seconds is required');
 
     return epoch;
   }
@@ -295,16 +283,18 @@ export class AmpDateDisplay extends AMP.BaseElement {
    * @private
    */
   rendered_(element) {
-    removeChildren(this.element);
-    this.element.appendChild(element);
+    this.mutateElement(() => {
+      removeChildren(devAssert(this.container_));
+      this.container_.appendChild(element);
 
-    const event = createCustomEvent(
-        this.win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-    );
-    this.element.dispatchEvent(event);
+      const event = createCustomEvent(
+          this.win,
+          AmpEvents.DOM_UPDATE,
+          /* detail */ null,
+          {bubbles: true}
+      );
+      this.element.dispatchEvent(event);
+    });
   }
 }
 
