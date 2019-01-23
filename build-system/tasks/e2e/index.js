@@ -57,7 +57,7 @@ async function cleanUp_() {
   }
 }
 
-async function e2e2() {
+async function e2e() {
   // set up promise to return
   let resolver, rejecter;
   const deferred = new Promise((resolverIn, rejecterIn) => {
@@ -98,7 +98,7 @@ async function e2e2() {
   return deferred;
 }
 
-gulp.task('e2e', 'Runs e2e tests', e2e2, {
+gulp.task('e2e', 'Runs e2e tests', e2e, {
   options: {
     'quiet': '  Do not log HTTP requests (default: false)',
   },
