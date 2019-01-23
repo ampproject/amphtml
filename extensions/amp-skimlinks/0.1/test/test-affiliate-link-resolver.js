@@ -18,11 +18,13 @@ import {
   AFFILIATE_STATUS,
   AffiliateLinkResolver,
 } from '../affiliate-link-resolver';
-import {DOMAIN_RESOLVER_API_URL} from '../constants';
+import {DEFAULT_CONFIG} from '../constants';
 import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
+
+const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 
 describes.fakeWin(
     'AffiliateLinkResolver',
@@ -46,7 +48,15 @@ describes.fakeWin(
 
       beforeEach(() => {
         trackingService = helpers.createTrackingWithStubAnalytics();
-        waypoint = new Waypoint(env.ampdoc, trackingService, 'referrer');
+        const skimOptions = {
+          config: {waypointUrl: 'https://go.skimresources.com/'},
+        };
+        waypoint = new Waypoint(
+            env.ampdoc,
+            skimOptions,
+            trackingService,
+            'referrer'
+        );
       });
 
       afterEach(() => {
@@ -199,7 +209,11 @@ describes.fakeWin(
         describe('Does correct request to domain resolver API', () => {
           beforeEach(() => {
             mock = env.sandbox.mock(xhr);
-            resolver = new AffiliateLinkResolver(xhr, {pubcode}, waypoint);
+            const skimOptions = {
+              pubcode,
+              config: {beaconUrl: DOMAIN_RESOLVER_API_URL},
+            };
+            resolver = new AffiliateLinkResolver(xhr, skimOptions, waypoint);
           });
 
           afterEach(() => {
@@ -273,9 +287,13 @@ describes.fakeWin(
             const stubXhr = helpers.createStubXhr({
               'merchant_domains': ['merchant1.com', 'merchant2.com'],
             });
+            const skimOptions = {
+              excludedDomains: ['excluded-merchant.com'],
+              config: {beaconUrl: DOMAIN_RESOLVER_API_URL},
+            };
             resolver = new AffiliateLinkResolver(
                 stubXhr,
-                {excludedDomains: ['excluded-merchant.com']},
+                skimOptions,
                 waypoint
             );
           });
@@ -406,7 +424,8 @@ describes.fakeWin(
         });
 
         describe('getAnchorDomain_', () => {
-          const resolver = new AffiliateLinkResolver({}, {}, waypoint);
+          const skimOptions = {config: {beaconUrl: DOMAIN_RESOLVER_API_URL}};
+          const resolver = new AffiliateLinkResolver({}, skimOptions, waypoint);
 
           it('Removes  http protocol', () => {
             const anchor = helpers.createAnchor('http://test.com');

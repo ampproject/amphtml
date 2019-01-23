@@ -60,7 +60,15 @@ describes.fakeWin(
           canonicalUrl: 'canonical_url',
         });
         env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns('-120');
-        waypoint = new Waypoint(env.ampdoc, trackingService, 'referrer_url');
+        const skimOptions = {
+          config: {waypointUrl: 'https://go.skimresources.com/'},
+        };
+        waypoint = new Waypoint(
+            env.ampdoc,
+            skimOptions,
+            trackingService,
+            'referrer_url'
+        );
       });
 
       afterEach(() => {
