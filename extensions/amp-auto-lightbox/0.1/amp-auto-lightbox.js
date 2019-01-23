@@ -42,14 +42,17 @@ export const LIGHTBOXABLE_ATTR = 'lightbox';
 /** Attribute to mark scanned lightbox candidates as not to revisit. */
 export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
-/** Types of document by schema where auto-lightbox is enabled. */
-export const ENABLED_SCHEMA_TYPES = [
-  'Article',
-  'NewsArticle',
-  'BlogPosting',
-  'LiveBlogPosting',
-  'DiscussionForumPosting',
-];
+/**
+ * Types of document by schema where auto-lightbox is enabled.
+ * @private @const {!Object<string, boolean>}
+ */
+export const ENABLED_SCHEMA_TYPES = {
+  'Article': true,
+  'NewsArticle': true,
+  'BlogPosting': true,
+  'LiveBlogPosting': true,
+  'DiscussionForumPosting': true,
+};
 
 /** Factor of naturalArea vs renderArea to lightbox. */
 export const RENDER_AREA_RATIO = 1.2;
@@ -342,7 +345,7 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  if (!ENABLED_SCHEMA_TYPES.includes(Schema.getDocumentType(ampdoc))) {
+  if (!ENABLED_SCHEMA_TYPES[Schema.getDocumentType(ampdoc)]) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
