@@ -153,7 +153,7 @@ function getInternalDomains_(docInfo) {
 /**
  *
  * @param {!Element} element
- * @return {?string}
+ * @return {string}
  */
 function getWaypointBaseUrl(element) {
   let customSubDomain = element.getAttribute('custom-redirect-domain');
