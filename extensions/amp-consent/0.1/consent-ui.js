@@ -15,30 +15,37 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
 } from '../../../src/dom';
+import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
+import {getServicePromiseForDoc} from '../../../src/service';
+import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
+const CONSENT_STATE_MANAGER = 'consentStateManager';
 
 // Classes for consent UI
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
-  loading: 'i-amphtml-consent-loading',
-  fill: 'i-amphtml-consent-fill',
-  placeholder: 'i-amphtml-consent-placeholder',
+  loading: 'i-amphtml-consent-ui-loading',
+  fill: 'i-amphtml-consent-ui-fill',
+  placeholder: 'i-amphtml-consent-ui-placeholder',
+  mask: 'i-amphtml-consent-ui-mask',
 };
 
 export class ConsentUI {
@@ -71,8 +78,22 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
+    /** @private {boolean} */
+    this.overlayEnabled_ = isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
+      config['uiConfig'] &&
+      config['uiConfig']['overlay'] === true;
+
+    /** @private {boolean} */
+    this.scrollEnabled_ = true;
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -82,6 +103,9 @@ export class ConsentUI {
 
     /** @private {?Deferred} */
     this.iframeReady_ = null;
+
+    /** @private {?JsonObject} */
+    this.clientConfig_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -124,6 +148,7 @@ export class ConsentUI {
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
+      this.clientConfig_ = config['clientConfig'] || null;
     }
   }
 
@@ -148,6 +173,9 @@ export class ConsentUI {
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
+
+          this.maybeShowOverlay_();
+
           this.showIframe_();
         });
       });
@@ -156,13 +184,18 @@ export class ConsentUI {
         if (!this.ui_) {
           return;
         }
-        toggle(this.ui_, true);
+
         if (!this.isPostPrompt_) {
+
+          this.maybeShowOverlay_();
+
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
           this.baseInstance_.scheduleLayout(this.ui_);
         }
+
+        toggle(this.ui_, true);
       };
 
       // If the UI is an AMP Element, wait until it's built before showing it,
@@ -197,7 +230,17 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      // Need to remove from fixed layer and add it back to update element's top
+      // Hide the overlay
+      this.maybeHideOverlay_();
+      // Enable the scroll, in case we were fullscreen with no overlay
+      this.enableScroll_();
+
+      // NOTE (torch2424): This is very sensitive. Fixed layer applies
+      // a `top: calc(0px)` in order to fix some bugs, thus
+      // We should be careful in moving this around as
+      // `removeFromFixedLayer` will remove the `top` styling.
+      // This will preserve The animation,
+      // and prevent element flashing.
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
       this.isVisible_ = false;
@@ -214,6 +257,8 @@ export class ConsentUI {
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
+
+    this.disableScroll_();
 
     this.isFullscreen_ = true;
   }
@@ -238,15 +283,44 @@ export class ConsentUI {
    * @return {!Element}
    */
   createPlaceholder_() {
-    // TODO(@zhouyx): Allow publishers to provide placeholder upon request
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
-    const {classList} = placeholder;
-    classList.add(consentUiClasses.fill);
-    classList.add(consentUiClasses.placeholder);
+    placeholder.classList.add(consentUiClasses.placeholder);
+
+    const loadingSpinner = htmlFor(placeholder)`
+      <svg viewBox="0 0 40 40">
+        <defs>
+          <linearGradient id="grad">
+            <stop stop-color="rgb(105, 105, 105)"></stop>
+            <stop offset="100%"
+            stop-color="rgb(105, 105, 105)"
+            stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
+      </svg>`;
+
+    placeholder.appendChild(loadingSpinner);
     return placeholder;
   }
 
+  /**
+   * Get the client information that needs to be passed to cmp iframe
+   * @return {!Promise<JsonObject>}
+   */
+  getClientInfoPromise_() {
+    const consentStatePromise =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+    return consentStatePromise.then(consentStateManager => {
+      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
+        return dict({
+          'clientConfig': this.clientConfig_,
+          'consentState': getConsentStateValue(consentInfo['consentState']),
+          'consentString': consentInfo['consentString'],
+        });
+      });
+    });
+  }
 
   /**
    * Apply placeholder
@@ -261,11 +335,21 @@ export class ConsentUI {
           dev().assertElement(this.placeholder_), null);
     }
     classList.add(consentUiClasses.loading);
-    toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
-    this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-    insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    return this.iframeReady_.promise;
+
+    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
+      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
+      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+    });
+
+    return Promise.all([
+      iframePromise,
+      this.iframeReady_.promise,
+      this.baseInstance_.mutateElement(() => {
+        toggle(dev().assertElement(this.placeholder_), true);
+      }),
+    ]);
   }
 
   /**
@@ -318,7 +402,66 @@ export class ConsentUI {
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
+    this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * Shows the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
+   * @private
+   */
+  maybeShowOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
+    if (!this.maskElement_) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add(consentUiClasses.mask);
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+    this.disableScroll_();
+  }
+
+  /**
+   * Hides the overlay (mask element, and lock scrolling)
+   * if the overlay is enabled
+   * @private
+   */
+  maybeHideOverlay_() {
+    if (!this.overlayEnabled_) {
+      return;
+    }
+
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+    this.enableScroll_();
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  disableScroll_() {
+    if (this.scrollEnabled_) {
+      this.viewport_.enterOverlayMode();
+      this.scrollEnabled_ = false;
+    }
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  enableScroll_() {
+    if (!this.scrollEnabled_) {
+      this.viewport_.leaveOverlayMode();
+      this.scrollEnabled_ = true;
+    }
   }
 
   /**
@@ -327,12 +470,14 @@ export class ConsentUI {
    *
    * Required message from iframe to hide placeholder and display iframe
    * {
-   *   type: 'consent-ui-ready'
+   *   type: 'consent-ui',
+   *   action: 'ready'
    * }
    *
    * Enter Fullscreen
    * {
-   *   type: 'consent-ui-enter-fullscreen'
+   *   type: 'consent-ui',
+   *   action: 'enter-fullscreen'
    * }
    *
    * @param {!Event} event
@@ -344,15 +489,15 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data || !data['type']) {
+    if (!data || data['type'] != 'consent-ui') {
       return;
     }
 
-    if (data['type'] === 'consent-ui-ready') {
+    if (data['action'] === 'ready') {
       this.iframeReady_.resolve();
     }
 
-    if (data['type'] === 'consent-ui-enter-fullscreen') {
+    if (data['action'] === 'enter-fullscreen') {
 
       // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {

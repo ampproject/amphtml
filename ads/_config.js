@@ -24,7 +24,6 @@
  *   consentHandlingOverride: (boolean|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
- *   mcFullWidthHeightRatio: (number|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -60,12 +59,6 @@ let AdNetworkConfigDef;
  *   // If absent, it means the network does not support full width ad units.
  *   // Example value: 1.2
  *   fullWidthHeightRatio: number
- *
- *   // The width / height ratio for matched content full width ad units.
- *   // If absent, it means the network does not support matched content full
- *   // width ad unit.
- *   // Example value: 0.27
- *   mcFullWidthHeightRatio: number
  * }
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
@@ -163,6 +156,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adpon': {
+    prefetch: 'https://ad.adpon.jp/amp.js',
+    clientIdScope: 'AMP_ECID_ADPON',
+  },
+
   'adreactor': {},
 
   'adsense': {
@@ -173,7 +171,6 @@ export const adConfig = {
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
-    mcFullWidthHeightRatio: 0.27,
     consentHandlingOverride: true,
   },
 
@@ -650,6 +647,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mox': {
+    prefetch: [
+      'https://ad.mox.tv/js/amp.min.js',
+      'https://ad.mox.tv/mox/mwayss_invocation.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -696,6 +701,10 @@ export const adConfig = {
 
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
+    renderStartImplemented: true,
+  },
+
+  'onnetwork': {
     renderStartImplemented: true,
   },
 
@@ -877,6 +886,10 @@ export const adConfig = {
 
   'sovrn': {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  },
+
+  'speakol': {
+    renderStartImplemented: true,
   },
 
   'spotx': {

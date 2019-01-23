@@ -17,14 +17,6 @@
       margin: 8px;
     }
 
-    [load-more-button], [load-more-failed], [load-more-loading] {
-      background: gray;
-      color: #fff;
-      cursor: pointer;
-      z-index: 2;
-      padding: 16px;
-    }
-
     .pin-container {
       border-radius: 8px;
       background-color: #fefefe;
@@ -57,6 +49,7 @@
       flex-direction: row;
       align-items: flex-start;
       justify-content: flex-start;
+      align-content: flex-start;
     }
 
   </style>
@@ -72,7 +65,7 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3&latency=100"
+    src="/infinite-scroll?items=2&left=20"
     load-more="auto"
     load-more-bookmark="next">
     <template type="amp-mustache">
@@ -84,18 +77,6 @@
         </div>
       </div>
     </template>
-    <div overflow>
-      OVERFLOW
-    </div>
-    <div load-more-button>
-      SEE MORE
-    </div>
-    <div load-more-loading>
-      LOADING
-    </div>
-    <div load-more-failed>
-      LOAD FAILED
-    </div>
     <div load-more-end>
       LOAD ENDED
     </div>
@@ -104,7 +85,28 @@
     </div>
   </amp-list>
 
-
+  <h1>Second List</h1>
+  <amp-list width="auto" height="200"
+    layout="fixed-height"
+    src="/infinite-scroll?items=5&left=3"
+    load-more="auto"
+    load-more-bookmark="next">
+    <template type="amp-mustache">
+      <div class="pin-container">
+        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
+        <div class="title">{{title}}</div>
+        <div class="description">
+          At vero eos et accusamus et iusto odio dignissimos ducimus...
+        </div>
+      </div>
+    </template>
+    <div load-more-end>
+      LOAD ENDED
+    </div>
+    <div fallback>
+      FALLBACK
+    </div>
+  </amp-list>
 </article>
 </body>
 </html>

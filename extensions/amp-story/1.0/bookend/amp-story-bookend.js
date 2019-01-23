@@ -34,7 +34,7 @@ import {LocalizedStringId} from '../localization';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
-import {dev, user} from '../../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
@@ -63,27 +63,32 @@ const BOOKEND_VERSION_KEY = 'bookendVersion';
  */
 const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
-/** @private @const {!../simple-template.ElementDef} */
-const ROOT_TEMPLATE = {
-  tag: 'section',
-  attrs: dict({
-    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
-        HIDDEN_CLASSNAME}),
-  children: [
-    // Overflow container that gets pushed to the bottom when content height is
-    // smaller than viewport.
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
-      children: [
-        // Holds bookend content.
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
-        },
-      ],
-    },
-  ],
+/**
+ * @param {string} hidden
+ * @return {!../simple-template.ElementDef}
+ */
+const buildRootTemplate = hidden => {
+  return /** @type {!../simple-template.ElementDef} */ ({
+    tag: 'section',
+    attrs: dict({
+      'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+          hidden}),
+    children: [
+      // Overflow container that gets pushed to the bottom when content height
+      // is smaller than viewport.
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+        children: [
+          // Holds bookend content.
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
+          },
+        ],
+      },
+    ],
+  });
 };
 
 /** @private @const {!../simple-template.ElementDef} */
@@ -211,15 +216,18 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * Builds the bookend components and appends it to the provided story.
+   * @param {boolean} skipAnimation Skips opening animation of the bookend.
    */
-  build() {
+  build(skipAnimation = false) {
     if (this.isBuilt_) {
       return;
     }
 
     this.isBuilt_ = true;
 
-    this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
+    this.bookendEl_ =
+        renderAsElement(this.win.document, buildRootTemplate(skipAnimation ?
+          '' : HIDDEN_CLASSNAME));
 
     createShadowRootWithStyle(this.element, this.bookendEl_, CSS);
 
@@ -334,17 +342,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      this.getShadowRoot().removeAttribute('desktop');
-      this.getShadowRoot().removeAttribute('desktop-fullbleed');
-
-      switch (uiState) {
-        case UIType.DESKTOP:
-          this.getShadowRoot().setAttribute('desktop', '');
-          break;
-        case UIType.DESKTOP_FULLBLEED:
-          this.getShadowRoot().setAttribute('desktop-fullbleed', '');
-          break;
-      }
+      [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -493,7 +493,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /** @private */
   assertBuilt_() {
-    dev().assert(this.isBuilt(), 'Bookend component needs to be built.');
+    devAssert(this.isBuilt(), 'Bookend component needs to be built.');
   }
 
   /**
@@ -569,7 +569,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
@@ -584,7 +584,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
     const image = jsonLd && isArray(jsonLd['image']) ? jsonLd['image'] : null;
 
     if (image != null && image.length >= 0) {
-      user().assert(urlService.isProtocolValid(image[0]),
+      userAssert(urlService.isProtocolValid(image[0]),
           `Unsupported protocol for story image URL ${image[0]}`);
       metadata.imageUrl = image[0];
     }

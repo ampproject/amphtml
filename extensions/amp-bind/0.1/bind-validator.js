@@ -235,6 +235,11 @@ function createElementRules_() {
     'AMP-DATE-PICKER': {
       'max': null,
       'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,
@@ -325,6 +330,9 @@ function createElementRules_() {
       'disabled': null,
       'type': null,
       'value': null,
+    },
+    'DETAILS': {
+      'open': null,
     },
     'FIELDSET': {
       'disabled': null,

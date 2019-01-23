@@ -17,14 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
-  adoptServiceForEmbed,
-  adoptServiceForEmbedIfEmbeddable,
-  getAmpdoc,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  setParentWindow,
-} from '../service';
-import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
@@ -34,7 +26,14 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync} from '../log';
+import {
+  getAmpdoc,
+  installServiceInEmbedIfEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  setParentWindow,
+} from '../service';
 import {getMode} from '../mode';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
@@ -66,7 +65,7 @@ const LOADER_PROP = '__AMP_EXT_LDR';
 const LOAD_TIMEOUT = 8000;
 
 /**
- * The structure that contains the declaration of a custom element.
+ * Contains data for the declaration of a custom element.
  *
  * @typedef {{
  *   implementationClass:
@@ -78,11 +77,19 @@ let ExtensionElementDef;
 
 
 /**
+ * Contains data for the declaration of an extension service.
+ *
+ * @typedef {{serviceName: string, serviceClass: function(new:Object, !./ampdoc-impl.AmpDoc)}}
+ */
+let ExtensionServiceDef;
+
+
+/**
  * The structure that contains the resources declared by an extension.
  *
  * @typedef {{
  *   elements: !Object<string, !ExtensionElementDef>,
- *   services: !Array<string>,
+ *   services: !Object<string, !ExtensionServiceDef>,
  * }}
  */
 let ExtensionDef;
@@ -258,7 +265,7 @@ export class Extensions {
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
-      dev().assert(!holder.loaded && !holder.error);
+      devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
     oldScriptElement.removeAttribute('custom-element');
@@ -276,7 +283,7 @@ export class Extensions {
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
-      const element = dev().assert(extension.elements[elementName],
+      const element = devAssert(extension.elements[elementName],
           'Element not found: %s', elementName);
       return element.implementationClass;
     });
@@ -339,7 +346,10 @@ export class Extensions {
    */
   addService(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();
-    holder.extension.services.push(name);
+    holder.extension.services.push(/** @type {!ExtensionServiceDef} */ ({
+      serviceName: name,
+      serviceClass: implementationClass,
+    }));
     this.addDocFactory(ampdoc => {
       registerServiceBuilderForDoc(
           ampdoc,
@@ -440,8 +450,8 @@ export class Extensions {
       opt_preinstallCallback(childWin);
     }
 
-    // Adopt embeddable services.
-    adoptStandardServicesForEmbed(childWin);
+    // Install embeddable standard services.
+    installStandardServicesInEmbed(childWin, parentWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -457,23 +467,9 @@ export class Extensions {
 
       // Install CSS.
       const promise = this.preloadExtension(extensionId).then(extension => {
-        // An extension element/service that's declared in an FIE but _not_
-        // in the parent is not immediately installed. See addDocFactory().
-        // This is a problem for adoptServiceForEmbedIfEmbeddable(), which
-        // requires a service to be registered on an AmpDoc before adoption by
-        // the embed window.
-        // To fix this, make sure the extension is installed in the AmpDoc.
-        // Ideally, we'd be able to install a service in the FIE _without_
-        // installing it in the AmpDoc. See #19344.
-        const frameElement = /** @type {!Node} */ (dev().assert(
-            childWin.frameElement, 'frameElement not found for embed'));
-        const ampdoc = getAmpdoc(frameElement);
-        this.installExtensionInDoc_(ampdoc, extensionId);
-        return extension;
-      }).then(extension => {
         // Adopt embeddable extension services.
         extension.services.forEach(service => {
-          adoptServiceForEmbedIfEmbeddable(childWin, service);
+          installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
         });
 
         // Adopt the custom elements.
@@ -689,7 +685,10 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+  // is DCE'd from production builds.
+  if ((false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
+      getMode().test) {
     installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
@@ -700,17 +699,25 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
+ * @param {!Window} parentWin
  * @visibleForTesting
  */
-export function adoptStandardServicesForEmbed(childWin) {
-  // The order of service adoptations is important.
-  // TODO(dvoytenko): Refactor service registration if this set becomes
-  // to pass the "embeddable" flag if this set becomes too unwieldy.
-  adoptServiceForEmbed(childWin, 'url');
-  adoptServiceForEmbed(childWin, 'action');
-  adoptServiceForEmbed(childWin, 'standard-actions');
-  adoptServiceForEmbed(childWin, 'navigation');
-  adoptServiceForEmbed(childWin, 'timer');
+export function installStandardServicesInEmbed(childWin, parentWin) {
+  const frameElement = dev().assertElement(childWin.frameElement,
+      'frameElement not found for embed');
+  const standardServices = [
+    // The order of service adoptations is important.
+    Services.urlForDoc(frameElement),
+    Services.actionServiceForDoc(frameElement),
+    Services.standardActionsForDoc(frameElement),
+    Services.navigationForDoc(frameElement),
+    Services.timerFor(parentWin),
+  ];
+  const ampdoc = getAmpdoc(frameElement);
+  standardServices.forEach(service => {
+    // Static functions must be invoked on the class, not the instance.
+    service.constructor.installInEmbedWindow(childWin, ampdoc);
+  });
 }
 
 

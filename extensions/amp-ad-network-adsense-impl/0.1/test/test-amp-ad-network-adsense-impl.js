@@ -311,7 +311,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             exp ? '' : 'immediate');
         expect(impl.ampAnalyticsElement_).to.be.ok;
         // Exact format of amp-analytics element covered in
-        // test/functional/test-analytics.js.
+        // test/unit/test-analytics.js.
         // Just ensure extensions is loaded, and analytics element appended.
       });
     });
@@ -851,7 +851,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(promise).to.exist;
       yield promise;
 
-      expect(adsense.attemptChangeSize).to.be.calledWith(1387, VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(1290, VIEWPORT_WIDTH);
     });
   });
 
@@ -982,14 +982,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               'mcrspv', {width: 375, height: 320}))
-          .to.be.equal(1387);
+          .to.be.equal(1290);
     });
 
     it('get matched content responsive height for iPhone 5', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               'mcrspv', {width: 320, height: 320}))
-          .to.be.equal(1200);
+          .to.be.equal(1100);
     });
   });
 

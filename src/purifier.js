@@ -38,7 +38,7 @@ let DomPurifyDef;
 const DomPurify = purify(self);
 
 /** @private @const {string} */
-const TAG = 'purifier';
+const TAG = 'PURIFIER';
 
 /** @private @const {string} */
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
@@ -230,14 +230,14 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-/** @const {!JsonObject} */
-const PURIFY_CONFIG = dict({
-  'USE_PROFILES': {
-    'html': true,
-    'svg': true,
-    'svgFilters': true,
+const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
+  USE_PROFILES: {
+    html: true,
+    svg: true,
+    svgFilters: true,
   },
 });
+
 
 /**
  * Monotonically increasing counter used for keying nodes.
@@ -262,18 +262,23 @@ export function purifyHtml(dirty, diffing = false) {
 /**
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
- * @return {!JsonObject}
+ *
+ * NOTE: see that we use DomPurifyConfig found in
+ * build-system/dompurify.extern.js as the exact type. This is to prevent
+ * closure compiler from optimizing these fields here in this file and in the
+ * 3rd party library file. See #19624 for further information.
+ * @return {!DomPurifyConfig}
  */
 export function purifyConfig() {
-  const config = Object.assign({}, PURIFY_CONFIG, {
-    'ADD_ATTR': WHITELISTED_ATTRS,
-    'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
+    ADD_ATTR: WHITELISTED_ATTRS,
+    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
-    'FORCE_BODY': true,
+    FORCE_BODY: true,
     // Avoid need for serializing to/from string by returning Node directly.
-    'RETURN_DOM': true,
-  });
-  return /** @type {!JsonObject} */ (config);
+    RETURN_DOM: true,
+  }));
+  return /** @type {!DomPurifyConfig} */ (config);
 }
 
 /**
@@ -334,6 +339,7 @@ export function addPurifyHooks(purifier, diffing) {
 
   /**
    * @param {!Node} unusedNode
+   * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
   const afterSanitizeElements = function(unusedNode) {
     // DOMPurify doesn't have a attribute-specific tag whitelist API and
@@ -343,6 +349,16 @@ export function addPurifyHooks(purifier, diffing) {
       delete allowedTags[tag];
     });
     allowedTagsChanges.length = 0;
+
+    // Output user errors for each removed element.
+    this.removed.forEach(r => {
+      if (r.element) {
+        const {nodeName} = r.element;
+        if (nodeName !== 'REMOVE') { // <remove> is added by DOMPurify.
+          user().error(TAG, 'Removed unsafe element:', r.element.nodeName);
+        }
+      }
+    });
   };
 
   /**
@@ -397,8 +413,7 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
+    const classicBinding = isBindingAttribute(attrName);
     const alternativeBinding = startsWith(attrName, BIND_PREFIX);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
@@ -422,8 +437,6 @@ export function addPurifyHooks(purifier, diffing) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
-      user().error(TAG, `Removing "${attrName}" attribute with invalid `
-          + `value in <${tagName} ${attrName}="${attrValue}">.`);
       data.keepAttr = false;
     }
 
@@ -447,12 +460,21 @@ export function addPurifyHooks(purifier, diffing) {
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
     remove(this.removed, r => {
-      if (r.from === node && r.attribute) {
-        const {name, value} = r.attribute;
-        if (name.toLowerCase() === 'on') {
-          node.setAttribute('on', value);
-          return true; // Delete from `removed` array once processed.
-        }
+      // Ignore attributes belonging to other nodes.
+      if (r.from !== node) {
+        return false;
+      }
+      if (!r.attribute) {
+        return false;
+      }
+      const {name, value} = r.attribute;
+      if (name.toLowerCase() === 'on') {
+        node.setAttribute('on', value);
+        return true; // Delete from `removed` array once processed.
+      }
+      // Output user error for sanitized attributes.
+      if (!isBindingAttribute(name)) {
+        user().error(TAG, `Removed unsafe attribute: ${name}="${value}"`);
       }
       return false;
     });
@@ -462,6 +484,14 @@ export function addPurifyHooks(purifier, diffing) {
   purifier.addHook('afterSanitizeElements', afterSanitizeElements);
   purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
+}
+
+/**
+ * @param {string} attrName
+ * @return {boolean}
+ */
+export function isBindingAttribute(attrName) {
+  return attrName[0] == '[' && attrName[attrName.length - 1] == ']';
 }
 
 /**

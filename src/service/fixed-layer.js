@@ -125,12 +125,15 @@ export class FixedLayer {
       return;
     }
 
-
-
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
+      // Rare but may happen if the document is being concurrently disposed.
+      if (!stylesheet) {
+        dev().error(TAG, 'Aborting setup due to null stylesheet.');
+        return;
+      }
       const {ownerNode} = stylesheet;
       if (stylesheet.disabled ||
               !ownerNode ||
@@ -887,13 +890,14 @@ class TransferLayerBody {
     const bodyAttrs = body.attributes;
     const layerAttrs = layer.attributes;
     for (let i = 0; i < bodyAttrs.length; i++) {
-      const {name, value} = bodyAttrs[i];
+      const attr = bodyAttrs[i];
       // Style is not copied because the fixed-layer must have very precise
       // styles to enable smooth scrolling.
-      if (name === 'style') {
+      if (attr.name === 'style') {
         continue;
       }
-      layer.setAttribute(name, value);
+      // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
+      layerAttrs.setNamedItem(attr.cloneNode(false));
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];

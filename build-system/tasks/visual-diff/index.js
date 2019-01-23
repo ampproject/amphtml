@@ -25,8 +25,13 @@ const path = require('path');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
+const {
+  gitBranchName,
+  gitCommitterEmail,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {gitBranchName, gitCommitterEmail, gitTravisCommitRangeStart} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -79,8 +84,7 @@ function setPercyBranch() {
   if (!process.env['PERCY_BRANCH'] &&
       (!argv.master || !process.env['TRAVIS'])) {
     const userName = gitCommitterEmail();
-    const branchName = process.env['TRAVIS'] ?
-      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
+    const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }
@@ -97,7 +101,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitTravisCommitRangeStart();
+    process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
   }
 }
 
@@ -288,7 +292,7 @@ async function runVisualTests(assetGlobs, webpages) {
   log('info', 'Started Percy build', colors.cyan(buildId));
   if (process.env['PERCY_TARGET_COMMIT']) {
     log('info', 'The Percy build is baselined on top of commit',
-        colors.cyan(process.env['PERCY_TARGET_COMMIT']));
+        colors.cyan(shortSha(process.env['PERCY_TARGET_COMMIT'])));
   }
 
   try {

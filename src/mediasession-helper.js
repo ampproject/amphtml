@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from './services';
-import {dev, user} from './log';
+import {devAssert, userAssert} from './log';
 import {isArray, isObject} from './types';
 import {tryParseJson} from './json';
 
@@ -40,13 +40,15 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element
+ * @param {!Window} win
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(ampdoc, metadata, playHandler, pauseHandler) {
-  const {win} = ampdoc;
+export function setMediaSession(
+  element, win, metadata, playHandler, pauseHandler
+) {
   const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
@@ -54,7 +56,7 @@ export function setMediaSession(ampdoc, metadata, playHandler, pauseHandler) {
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
     // Add metadata
-    validateMetadata(ampdoc, metadata);
+    validateMetadata(element, metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -132,20 +134,20 @@ export function parseFavicon(doc) {
 }
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element
  * @param {!MetadataDef} metadata
  * @private
  */
-function validateMetadata(ampdoc, metadata) {
-  const urlService = Services.urlForDoc(ampdoc);
+function validateMetadata(element, metadata) {
+  const urlService = Services.urlForDoc(element);
   // Ensure src of artwork has valid protocol
   if (metadata && metadata.artwork) {
     const {artwork} = metadata;
-    dev().assert(isArray(artwork));
+    devAssert(isArray(artwork));
     artwork.forEach(item => {
       if (item) {
         const src = isObject(item) ? item.src : item;
-        user().assert(urlService.isProtocolValid(src));
+        userAssert(urlService.isProtocolValid(src));
       }
     });
   }
