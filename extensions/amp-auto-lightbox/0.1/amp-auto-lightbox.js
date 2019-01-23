@@ -347,7 +347,8 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  if (!ENABLED_SCHEMA_TYPES[Schema.getDocumentType(ampdoc)]) {
+  const docType = Schema.getDocumentType(ampdoc);
+  if (!docType || !ENABLED_SCHEMA_TYPES[docType]) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
