@@ -344,6 +344,18 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Evaluate the given function
+   * @param {function()} fn
+   * @param {...} unusedArgs
+   * @return {!ControllerPromise}
+   * @override
+   */
+  eval_(fn, unusedArgs) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    return this.driver.executeScript.apply(this.driver, [fn].concat(args));
+  }
+
+  /**
    * @param {!ElementHandle} handle
    * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data

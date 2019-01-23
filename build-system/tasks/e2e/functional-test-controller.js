@@ -392,6 +392,15 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async scroll(unusedHandle, opt_scrollToOptions) {}
+
+  /**
+   * Evaluate the given function
+   * @param {function()} unusedFn
+   * @param {...} unusedArgs
+   * @return {!ControllerPromise}
+   * @package
+   */
+  async eval_(unusedFn, ...unusedArgs) {}
 }
 
 

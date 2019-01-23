@@ -29,6 +29,7 @@ describes.endtoend('AMP carousel', {
   const pageHeight = 1200;
 
   let controller;
+  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -36,8 +37,9 @@ describes.endtoend('AMP carousel', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
-    await enableExperiments(controller);
+    await enableExperiments(controller, ampDriver);
     await controller.setWindowRect({
       width: pageWidth,
       height: pageHeight,

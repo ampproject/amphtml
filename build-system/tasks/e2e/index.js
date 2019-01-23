@@ -16,7 +16,6 @@
 
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const config = require('../../config');
 const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
