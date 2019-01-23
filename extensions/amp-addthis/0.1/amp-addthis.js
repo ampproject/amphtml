@@ -60,7 +60,7 @@ import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {
-  getMode, isProductCode, isPubId, isWidgetId,
+  getAddThisMode, isProductCode, isPubId, isWidgetId,
 } from './addthis-utils/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -137,7 +137,7 @@ class AmpAddThis extends AMP.BaseElement {
     const pubId = this.element.getAttribute('data-pub-id') || '';
     const widgetId = this.element.getAttribute('data-widget-id') || '';
     const productCode = this.element.getAttribute('data-product-code') || '';
-    if (getMode({pubId, widgetId, productCode}) === -1) {
+    if (getAddThisMode({pubId, widgetId, productCode}) === -1) {
       if (isPubId(pubId)) {
         if (!isProductCode(productCode) && !isWidgetId(widgetId)) {
           userAssert(

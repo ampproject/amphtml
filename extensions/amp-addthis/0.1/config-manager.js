@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
-import {getMode} from './addthis-utils/mode';
+import {getAddThisMode} from './addthis-utils/mode';
 
 import {dict} from '../../../src/utils/object';
 
@@ -150,7 +150,7 @@ export class ConfigManager {
     if (dashboardConfig &&
       dashboardConfig.widgets &&
       Object.keys(dashboardConfig.widgets).length > 0) {
-      const mode = getMode({pubId, widgetId, productCode});
+      const mode = getAddThisMode({pubId, widgetId, productCode});
       switch (mode) {
         case 1:
           // "regular old" amp-addthis mode

@@ -28,7 +28,11 @@ import {dict} from '../../../../src/utils/object';
 import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
-import {getMode, isProductCode, isPubId, isWidgetId} from '../addthis-utils/mode';
+import {
+  getAddThisMode,
+  isProductCode,
+  isPubId,
+  isWidgetId} from '../addthis-utils/mode';
 import {getSessionId} from '../addthis-utils/session';
 import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
@@ -460,16 +464,16 @@ describes.realWin('amp-addthis', {
     const mode8 = {pubId, productCode: ''};
     const mode9 = {pubId, widgetId: '', productCode: ''};
 
-    expect(getMode({})).to.equal(-1);
-    expect(getMode(mode1)).to.equal(1);
-    expect(getMode(mode2)).to.equal(2);
-    expect(getMode(mode3)).to.equal(3);
-    expect(getMode(mode4)).to.equal(-1);
-    expect(getMode(mode5)).to.equal(-1);
-    expect(getMode(mode6)).to.equal(-1);
-    expect(getMode(mode7)).to.equal(-1);
-    expect(getMode(mode8)).to.equal(-1);
-    expect(getMode(mode9)).to.equal(-1);
+    expect(getAddThisMode({})).to.equal(-1);
+    expect(getAddThisMode(mode1)).to.equal(1);
+    expect(getAddThisMode(mode2)).to.equal(2);
+    expect(getAddThisMode(mode3)).to.equal(3);
+    expect(getAddThisMode(mode4)).to.equal(-1);
+    expect(getAddThisMode(mode5)).to.equal(-1);
+    expect(getAddThisMode(mode6)).to.equal(-1);
+    expect(getAddThisMode(mode7)).to.equal(-1);
+    expect(getAddThisMode(mode8)).to.equal(-1);
+    expect(getAddThisMode(mode9)).to.equal(-1);
   });
 
   it('isPubId: pretty much knows if a thing is a pub id or not', () => {

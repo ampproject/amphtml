@@ -29,8 +29,8 @@ import {isString} from './string';
  * @param {{pubId: string, widgetId: string, productCode: string}} _
  * @return {number} -1 indicates an error has occurred
  */
-export const getMode = _ => {
-  const {hasPubId, hasWidgetId, hasProductCode} = getModeObject(_);
+export const getAddThisMode = _ => {
+  const {hasPubId, hasWidgetId, hasProductCode} = getAddThisModeObject(_);
   if (hasPubId) {
     if (hasWidgetId && !hasProductCode) {
       return 1;
@@ -51,7 +51,7 @@ export const getMode = _ => {
  * hasProductCode:boolean
  * }}
  */
-export const getModeObject = ({pubId, widgetId, productCode}) => {
+export const getAddThisModeObject = ({pubId, widgetId, productCode}) => {
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);
