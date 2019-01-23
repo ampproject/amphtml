@@ -324,8 +324,7 @@ function isEmbeddedAndTrusted(ampdoc, candidates) {
   }
 
   return viewer.getViewerOrigin().then(origin => {
-    const {parse} = Services.urlForDoc(candidates[0]);
-    const {hostname} = parse(origin);
+    const {hostname} = Services.urlForDoc(candidates[0]).parse(origin);
     return GOOGLE_DOMAIN_RE.test(hostname);
   });
 }
@@ -335,7 +334,7 @@ function isEmbeddedAndTrusted(ampdoc, candidates) {
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<!Element>} candidates
- * @return {boolean}
+ * @return {!Promise<boolean>}
  * @visibleForTesting
  */
 export function resolveIsEnabledForDoc(ampdoc, candidates) {
