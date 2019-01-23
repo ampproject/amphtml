@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
@@ -32,14 +33,12 @@ import {
   runCandidates,
   scanDoc,
 } from '../amp-auto-lightbox';
-import {LightboxGalleryEvents} from '../../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
-import { AmpEvents } from '../../../../src/amp-events';
 
 
 const TAG = 'amp-lightbox-gallery-detection';
