@@ -43,6 +43,14 @@ export const getMode = _ => {
   return -1;
 };
 
+/**
+ * @param {{pubId: string, widgetId: string, productCode: string}} _
+ * @return {{
+ * hasPubId:boolean,
+ * hasWidgetId:boolean,
+ * hasProductCode:boolean
+ * }}
+ */
 export const getModeObject = ({pubId, widgetId, productCode}) => {
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
