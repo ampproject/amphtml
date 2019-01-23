@@ -22,7 +22,7 @@ const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../../exec');
+const {execOrDie, execScriptAsync} = require('../../exec');
 
 const HOST = 'localhost';
 const PORT = 8000;
@@ -30,7 +30,12 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 
 let webServerProcess_;
 
-async function launchWebServer_() {
+function installPackages_() {
+  execOrDie('npx yarn --cwd build-system/tasks/e2e',
+      {'stdio': 'ignore'});
+}
+
+function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT}\
       ${argv.quiet ? '--quiet' : ''}`);
@@ -58,6 +63,9 @@ function cleanUp_() {
 }
 
 async function e2e() {
+  // install e2e-specific modules
+  installPackages_();
+
   // set up promise to return
   let resolver, rejecter;
   const deferred = new Promise((resolverIn, rejecterIn) => {
