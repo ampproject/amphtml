@@ -345,16 +345,21 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
   {
-    "consents": {
-      "my-consent": {
-        "checkConsentHref": "https://example.com/api/show-consent"
-      }
+    "checkConsentHref"
+    "consentInstanceId": "ping2"
+    "geo": abc,
+    "extraConfig" : {
+      'id': xxx
+      'config': asdsdfasd,
     },
+    "postPromptUI": 'test'
+  }
+
+  {
+    "consentInstanceId": xxx
+    "checkConsentHref": "https://example.com/api/show-consent"
     "policy": {
       "default": {
-        "waitFor": {
-          "my-consent": []
-        },
         "timeout": {
           "seconds": 5,
           "fallbackAction": "reject"
