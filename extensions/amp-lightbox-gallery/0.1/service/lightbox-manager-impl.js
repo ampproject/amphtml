@@ -15,13 +15,13 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
+import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
-import {LightboxGalleryEvents} from '../events';
 import {Services} from '../../../../src/services';
 import {
   childElement,
@@ -129,7 +129,7 @@ export class LightboxManager {
     });
 
     // Process elements where the `lightbox` attr is dynamically set.
-    root.addEventListener(LightboxGalleryEvents.NEWLY_SET, ({target}) => {
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
       this.processLightboxElement_(dev().assertElement(target));
     });
 

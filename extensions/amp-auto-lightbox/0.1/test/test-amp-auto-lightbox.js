@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
@@ -32,7 +33,6 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {LightboxGalleryEvents} from '../../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -863,8 +863,7 @@ describes.realWin(TAG, {
 
       yield apply(env.ampdoc, element);
 
-      expect(
-          element.dispatchCustomEvent.withArgs(LightboxGalleryEvents.NEWLY_SET))
+      expect(element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET))
           .to.have.been.calledOnce;
     });
 

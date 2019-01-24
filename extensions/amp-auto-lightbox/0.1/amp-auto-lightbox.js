@@ -23,8 +23,8 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/common-signals';
-import {LightboxGalleryEvents} from '../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -382,7 +382,7 @@ export function apply(ampdoc, element) {
     Services.extensionsFor(ampdoc.win)
         .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
 
-    element.dispatchCustomEvent(LightboxGalleryEvents.NEWLY_SET);
+    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
 
     return element;
   });
