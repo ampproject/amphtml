@@ -863,6 +863,14 @@ export class VideoDocking {
       return;
     }
 
+    const currentlyDocked = this.currentlyDocked_;
+
+    if (currentlyDocked &&
+      targetsEqual(target, currentlyDocked.target) &&
+      currentlyDocked.step >= 0) {
+      return;
+    }
+
     this.dockInTwoSteps_(video, target);
   }
 
@@ -888,14 +896,6 @@ export class VideoDocking {
    * @private
    */
   dock_(video, target, step) {
-    const currentlyDocked = this.currentlyDocked_;
-
-    if (currentlyDocked &&
-      targetsEqual(target, currentlyDocked.target) &&
-      currentlyDocked.step >= step) {
-      return;
-    }
-
     dev().info(TAG, 'dock', {video, target, step});
 
     const {element} = video;
