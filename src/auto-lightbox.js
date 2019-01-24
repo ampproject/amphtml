@@ -23,7 +23,7 @@ import {isExperimentOn} from './experiments';
 export const AutoLightboxEvents = {
   // Triggered when the lightbox attribute is newly set on an item in order to
   // process by the renderer extension (e.g. amp-lightbox-gallery).
-  NEWLY_SET: 'amp-auto-ligthbox:newly-set',
+  NEWLY_SET: 'amp-auto-lightbox:newly-set',
 };
 
 
