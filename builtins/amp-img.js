@@ -22,6 +22,7 @@ import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
 import {setImportantStyles} from '../src/style';
+import { generate } from 'rxjs';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -132,7 +133,9 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    this.maybeGenerateSizes_();
+    if (isExperimentOn(this.win, 'amp-img-auto-sizes')) {
+      this.maybeGenerateSizes_();
+    }
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
@@ -144,7 +147,8 @@ export class AmpImg extends BaseElement {
    */
   maybeGenerateSizes_() {
     // No need to generate sizes if already present.
-    if (this.element.hasAttribute('sizes')) {
+    const sizes = this.element.getAttribute('sizes');
+    if (sizes && sizes !== 'auto') {
       return;
     }
     // Sizes is useless without the srcset attribute or if the srcset
@@ -178,6 +182,7 @@ export class AmpImg extends BaseElement {
         const ratio = width / viewportWidth * 100;
         entry = `(max-width: ${viewportWidth}px) ${ratio}vw, `;
         // TODO(cathyxz): handle media queries (is it efficient to getStyles?).
+        // TODO(cathyxz): rerun this onMeasureChanged?
 
         break;
       case Layout.INTRINSIC:
@@ -188,8 +193,8 @@ export class AmpImg extends BaseElement {
         break;
     }
 
-    const sizes = entry + defaultSize;
-    this.img_.setAttribute('sizes', sizes);
+    const generatedSizes = entry + defaultSize;
+    this.img_.setAttribute('sizes', generatedSizes);
   }
 
   /** @override */
