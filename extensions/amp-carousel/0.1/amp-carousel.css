@@ -119,6 +119,16 @@ amp-carousel .amp-carousel-button.amp-disabled {
   -webkit-overflow-scrolling: touch !important;
 }
 
+/**
+ * Make sure the scrollbar does not take up space on desktop, which will cause
+ * the bottom of the slides to be cutoff. Padding + overflow is used to hide
+ * the scrollbars for all browsers.
+ * TODO(sparhami) Find a solution for the clipping on all browsers.
+ */
+.i-amphtml-slides-container::-webkit-scrollbar {
+  display: none !important;
+}
+
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
 .i-amphtml-slides-container.i-amphtml-no-scroll {
   overflow-x: hidden !important;
