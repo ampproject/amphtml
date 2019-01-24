@@ -233,14 +233,14 @@ export class Schema {
    * Gets document type (field `@type`) where schema is defined for the
    * canonical URL.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @return {?string}
+   * @return {string|undefined}
    */
   static getDocumentType(ampdoc) {
     const schemaTags = ampdoc.getHeadNode().querySelectorAll(
         'script[type="application/ld+json"]');
 
     if (schemaTags.length <= 0) {
-      return null;
+      return;
     }
 
     const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
@@ -249,15 +249,10 @@ export class Schema {
       const schemaTag = schemaTags[i];
       const parsed = tryParseJson(schemaTag./*OK*/innerText);
 
-      if (parsed &&
-        'url' in parsed &&
-        parsed['url'] == canonicalUrl) {
-
+      if (parsed && parsed['url'] == canonicalUrl) {
         return parsed['@type'];
       }
     }
-
-    return null;
   }
 }
 
