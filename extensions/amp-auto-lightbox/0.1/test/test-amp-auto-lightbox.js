@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
@@ -25,11 +26,12 @@ import {
   Scanner,
   Schema,
   VIEWPORT_AREA_RATIO,
+  apply,
   meetsCriteria,
   meetsSizingCriteria,
   resolveIsEnabledForDoc,
   runCandidates,
-  scanDoc,
+  scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
@@ -54,6 +56,8 @@ describes.realWin(TAG, {
   const {any} = sinon.match;
 
   const capitalize = str => str.replace(/^([a-z])/, (_, m) => m.toUpperCase());
+
+  const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
 
   const ampImgFromTree = el =>
     el.tagName == 'AMP-IMG' ? el : el.querySelector('amp-img');
@@ -600,16 +604,16 @@ describes.realWin(TAG, {
 
   });
 
-  describe('scanDoc', () => {
+  describe('scan', () => {
 
     function waitForAllScannedToBeResolved() {
-      return scanDoc(env.ampdoc).then(scanned => Promise.all(scanned));
+      return scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
     }
 
     it('does not load extension if no candidates found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([]);
 
@@ -622,7 +626,7 @@ describes.realWin(TAG, {
     it('loads extension if >= 1 candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([
         mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
@@ -663,7 +667,7 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -681,7 +685,7 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      mockSchemaType(ENABLED_SCHEMA_TYPES[0]);
+      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -752,7 +756,7 @@ describes.realWin(TAG, {
       });
     });
 
-    ENABLED_SCHEMA_TYPES.forEach(type => {
+    schemaTypes.forEach(type => {
 
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
@@ -812,6 +816,55 @@ describes.realWin(TAG, {
         });
       });
 
+    });
+
+  });
+
+  describe('apply', () => {
+
+    it('sets attribute', function* () {
+      const element = html`<amp-img src="chabuddy.g"></amp-img>`;
+
+      yield apply(env.ampdoc, element);
+
+      expect(element.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
+    });
+
+    it('sets unique group for each element', function* () {
+      const a = html`<amp-img src="a.png"></amp-img>`;
+      const b = html`<amp-img src="b.png"></amp-img>`;
+      const c = html`<amp-img src="c.png"></amp-img>`;
+
+      yield apply(env.ampdoc, a);
+      yield apply(env.ampdoc, b);
+      yield apply(env.ampdoc, c);
+
+      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
+      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
+      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
+
+      expect(aAttr).to.be.ok;
+      expect(aAttr).to.not.equal(bAttr);
+      expect(aAttr).to.not.equal(cAttr);
+
+      expect(bAttr).to.be.ok;
+      expect(bAttr).to.not.equal(aAttr);
+      expect(bAttr).to.not.equal(cAttr);
+
+      expect(cAttr).to.be.ok;
+      expect(cAttr).to.not.equal(aAttr);
+      expect(cAttr).to.not.equal(bAttr);
+    });
+
+    it('dispatches event', function* () {
+      const element = html`<amp-img src="chabuddy.g"></amp-img>`;
+
+      element.dispatchCustomEvent = env.sandbox.spy();
+
+      yield apply(env.ampdoc, element);
+
+      expect(element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET))
+          .to.have.been.calledOnce;
     });
 
   });
