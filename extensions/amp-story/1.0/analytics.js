@@ -35,7 +35,7 @@ export const AdvancementMode = {
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
   MANUAL_ADVANCE: 'manualAdvance',
   ADVANCE_TO: 'advanceTo',
-  ADVANCE_TO_ADS: 'advanceToAds',
+  ADVANCE_TO_ADS: 'manualAdvanceFromAd',
 };
 
 /**
@@ -77,13 +77,6 @@ export class AmpStoryAnalytics {
   onMutedStateChange(isMuted) {
     const event = isMuted ? Events.STORY_MUTED : Events.STORY_UNMUTED;
     this.triggerEvent_(event);
-  }
-
-  /**
-   * @param {AdvancementMode} mode
-   */
-  onAdvancementModeStateChange(mode) {
-    this.triggerEvent_(mode);
   }
 
   /**

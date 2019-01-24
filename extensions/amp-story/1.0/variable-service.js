@@ -29,7 +29,7 @@ const Variable = {
   STORY_PAGE_COUNT: 'storyPageCount',
   STORY_IS_MUTED: 'storyIsMuted',
   STORY_PROGRESS: 'storyProgress',
-  STORY_PREVIOUS_PAGE_ID: 'storyPreviosPageId',
+  STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
 };
 

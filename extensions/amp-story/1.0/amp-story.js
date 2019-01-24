@@ -543,7 +543,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(
         StateProperty.ADVANCEMENT_MODE, mode => {
-          this.analytics_.onAdvancementModeStateChange(mode);
           this.variableService_.onAdvancementModeStateChange(mode);
         });
 
