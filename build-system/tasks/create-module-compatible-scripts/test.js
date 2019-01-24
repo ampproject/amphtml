@@ -15,24 +15,25 @@
  * limitations under the License.
  */
 
-const test = require('ava');
 const fs = require('fs');
+const test = require('ava');
 const util = require('util');
 const {transform} = require('./index.js');
 
 const readFile = util.promisify(fs.readFile);
 const fixtureContent = async name => {
   return await readFile(require.resolve(`./fixtures/${name}`), {
-    encoding: 'utf-8'
+    encoding: 'utf-8',
   });
-}
+};
 
-test('it should change this to self in a ternary condition with outputs window.global:this', async t => {
-  const name = 'ternary-with-globals'
-  const input = await(fixtureContent(`${name}/input.js`));
-  const output = await(fixtureContent(`${name}/output.js`));
+test('it should change this to self in ternary condition ' +
+  'with window.global:this', async t => {
+  const name = 'ternary-with-globals';
+  const input = await (fixtureContent(`${name}/input.js`));
+  const output = await (fixtureContent(`${name}/output.js`));
   transform({
-    contents: input
+    contents: input,
   }, null, (err, file) => {
     const result = file.contents.toString('utf-8');
     t.is(result, output);
@@ -40,11 +41,11 @@ test('it should change this to self in a ternary condition with outputs window.g
 });
 
 test('it should change if `this` is inside an arrow function', async t => {
-  const name = 'this-in-function'
-  const input = await(fixtureContent(`${name}/input.js`));
-  const output = await(fixtureContent(`${name}/output.js`));
+  const name = 'this-in-function';
+  const input = await (fixtureContent(`${name}/input.js`));
+  const output = await (fixtureContent(`${name}/output.js`));
   transform({
-    contents: input
+    contents: input,
   }, null, (err, file) => {
     const result = file.contents.toString('utf-8');
     t.is(result, output);
@@ -52,11 +53,11 @@ test('it should change if `this` is inside an arrow function', async t => {
 });
 
 test('it should not change `this` of a nested scope', async t => {
-  const name = 'nested-scopes'
-  const input = await(fixtureContent(`${name}/input.js`));
-  const output = await(fixtureContent(`${name}/output.js`));
+  const name = 'nested-scopes';
+  const input = await (fixtureContent(`${name}/input.js`));
+  const output = await (fixtureContent(`${name}/output.js`));
   transform({
-    contents: input
+    contents: input,
   }, null, (err, file) => {
     const result = file.contents.toString('utf-8');
     t.is(result, output);
@@ -64,23 +65,24 @@ test('it should not change `this` of a nested scope', async t => {
 });
 
 test('it should not change if `this` is inside a function', async t => {
-  const name = 'this-in-arrow-function'
-  const input = await(fixtureContent(`${name}/input.js`));
-  const output = await(fixtureContent(`${name}/output.js`));
+  const name = 'this-in-arrow-function';
+  const input = await (fixtureContent(`${name}/input.js`));
+  const output = await (fixtureContent(`${name}/output.js`));
   transform({
-    contents: input
+    contents: input,
   }, null, (err, file) => {
     const result = file.contents.toString('utf-8');
     t.is(result, output);
   });
 });
 
-test('it should not change ternary conditions with outputs !== window.global:this', async t => {
-  const name = 'ternary-without-globals'
-  const input = await(fixtureContent(`${name}/input.js`));
-  const output = await(fixtureContent(`${name}/output.js`));
+test('it should not change ternary conditions with ' +
+  'outputs !== window.global:this', async t => {
+  const name = 'ternary-without-globals';
+  const input = await (fixtureContent(`${name}/input.js`));
+  const output = await (fixtureContent(`${name}/output.js`));
   transform({
-    contents: input
+    contents: input,
   }, null, (err, file) => {
     const result = file.contents.toString('utf-8');
     t.is(result, output);

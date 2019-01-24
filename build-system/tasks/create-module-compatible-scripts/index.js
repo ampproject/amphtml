@@ -15,21 +15,22 @@
  */
 
 const $$ = require('gulp-load-plugins')();
-const MagicString = require('magic-string');
 const colors = require('ansi-colors');
 const gulp = $$.help(require('gulp'));
 const log = require('fancy-log');
+const MagicString = require('magic-string');
 const parser = require('@babel/parser');
 const through = require('through2');
 const traverse = require('@babel/traverse').default;
 
 /**
  * Takes the file given by gulp and parses its ast to find ternary condition,
- * returning either `window.global` or `this`. In order to make the script compatible with
- * `<script type=module` we replace the `this` found in the condition with `self`.
+ * returning either `window.global` or `this`.
+ * In order to make the script compatible with `<script type=module`
+ * we replace the `this` found in the condition with `self`.
  * @param {Buffer|string} file
  * @param {string=} encoding
- * @param {function(Error, object)} callback - Call this function (optionally with an
+ * @param {function(Error, Object)} callback - Call this function (optionally with an
  * error argument and data) when you are done processing the supplied chunk.
  */
 function transform(file, encoding, callback) {
@@ -82,11 +83,15 @@ function transformTopLevelGlobalScope() {
  * inserted by closure compiler from
  * https://github.com/google/closure-compiler/blob/36f332788d54803c3c1afe06a9d84bf4b9f4945b/src/com/google/javascript/jscomp/js/util/global.js#L44
  * Read more here: http://exploringjs.com/es6/ch_modules.html#_browsers-scripts-versus-modules
+ * @param {Object} srcGlob
+ * @param {string} destFolder
  */
 exports.createModuleCompatibleBundle = function(srcGlob, destFolder) {
   return new Promise(resolve => {
     const {green} = colors;
-    log(green('Starting post closure compiler transform to make scripts module safe.'));
+    log(green(
+        'Starting post closure compiler transform to make scripts module safe.'
+    ));
     gulp.src(srcGlob)
         .pipe($$.sourcemaps.init({loadMaps: true}))
         .pipe(transformTopLevelGlobalScope())

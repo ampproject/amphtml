@@ -1,1 +1,2 @@
-let a = true?window.global:window.location;
+const a = true ? window.global : window.location;
+console.log(a);

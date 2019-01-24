@@ -1,15 +1,20 @@
-var global = true ? this : global;
+const global = true ? this : global;
 function test() {
-  var notTopLevel = this;
-  for (i=0; i<10; i++) {
+  const notTopLevel = this;
+  for (let i = 0; i < 10; i++) {
     const a = this;
-    blah = this;
+    const blah = this;
+    console.log(a, blah);
   }
+  console.log(notTopLevel);
 }
 () => {
-  var topLevel = this;
-  for (i=0; i<10; i++) {
+  const topLevel = this;
+  for (let i = 0; i < 10; i++) {
     const a = this;
-    blah = this;
+    const blah = this;
+    console.log(a, blah);
   }
-}
+  console.log(topLevel);
+};
+console.log(test);
