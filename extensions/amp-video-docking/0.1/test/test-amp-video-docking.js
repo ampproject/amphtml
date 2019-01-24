@@ -143,7 +143,7 @@ describes.repeated('', {
     }
 
     function stubDock() {
-      return sandbox.stub(docking, 'dockInTwoSteps_');
+      return sandbox.stub(docking, 'dockInTransferLayerStep_');
     }
 
     beforeEach(() => {
