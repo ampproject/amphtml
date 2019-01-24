@@ -33,6 +33,7 @@ import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
+import { LightboxGalleryEvents } from '../events';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,
@@ -119,10 +120,19 @@ export class LightboxManager {
     }
 
     this.scanPromise_ = this.scanLightboxables_();
+
+    const root = this.ampdoc_.getRootNode();
+
     // Rescan whenever DOM changes happen.
-    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
+
+    // Process elements where the `lightbox` attr is dynamically set.
+    root.addEventListener(LightboxGalleryEvents.NEWLY_SET, ({target}) => {
+      this.processLightboxElement_(target);
+    });
+
     return this.scanPromise_;
   }
 

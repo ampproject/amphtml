@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
@@ -33,6 +32,7 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
+import {LightboxGalleryEvents} from '../../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -859,12 +859,12 @@ describes.realWin(TAG, {
     it('dispatches event', function* () {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
 
-      element.dispatchEvent = env.sandbox.spy();
+      element.dispatchCustomEvent = env.sandbox.spy();
 
       yield apply(env.ampdoc, element);
 
-      expect(element.dispatchEvent.withArgs(sinon.match(({type}) =>
-        type == AmpEvents.DOM_UPDATE)))
+      expect(
+          element.dispatchCustomEvent.withArgs(LightboxGalleryEvents.NEWLY_SET))
           .to.have.been.calledOnce;
     });
 

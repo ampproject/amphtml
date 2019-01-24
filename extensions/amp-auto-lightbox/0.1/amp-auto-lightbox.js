@@ -24,9 +24,9 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {CommonSignals} from '../../../src/common-signals';
+import {LightboxGalleryEvents} from '../../amp-lightbox-gallery/0.1/events';
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
@@ -382,8 +382,7 @@ export function apply(ampdoc, element) {
     Services.extensionsFor(ampdoc.win)
         .installExtensionForDoc(ampdoc, REQUIRED_EXTENSION);
 
-    element.dispatchEvent(createCustomEvent(ampdoc.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true}));
+    element.dispatchCustomEvent(LightboxGalleryEvents.NEWLY_SET);
 
     return element;
   });
