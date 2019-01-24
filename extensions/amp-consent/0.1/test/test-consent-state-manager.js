@@ -125,7 +125,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       it('update consent string that exceeds max size', function* () {
         expectAsyncConsoleError(/Cannot store consentString/);
         manager.registerConsentInstance('test', {});
-        const MAX_LENGTH = 188;
+        const MAX_LENGTH = 150;
         let testStr = 'a';
         for (let i = 0; i < MAX_LENGTH; i++) {
           testStr += 'a';
@@ -249,7 +249,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
         it('remove consetninfo when consentStr length exceeds', function* () {
           expectAsyncConsoleError(/Cannot store consentString/);
-          const MAX_LENGTH = 188;
+          const MAX_LENGTH = 150;
           let testStr = 'a';
           for (let i = 0; i < MAX_LENGTH; i++) {
             testStr += 'a';

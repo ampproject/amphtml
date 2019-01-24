@@ -257,12 +257,12 @@ export class ConsentInstance {
       }
 
       const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > 188) {
+      if (consentStr && consentStr.length > 150) {
         // Verify the length of consentString.
-        // Limit to 500bytes
-        // 188 * 2 (utf8Encode) * 4/3 (base64) = 500
+        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
+        // TODO: Need utf8Encode if necessary.
         user().error(TAG,
-            'Cannot store consentString which length exceeds 188' +
+            'Cannot store consentString which length exceeds 150 ' +
             'Previous stored consentInfo will be cleared');
         // If new consentInfo value cannot be stored, need to remove previous
         // value
