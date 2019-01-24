@@ -401,6 +401,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
+  {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
+  },
 ];
 
 if (getMode().localDev) {
