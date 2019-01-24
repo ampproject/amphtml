@@ -411,15 +411,15 @@ export function runCandidates(ampdoc, candidates) {
  * Scans a document on initialization to lightbox elements that meet criteria.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element=} opt_root
- * @return {!Promise<!Array<!Promise>>}
+ * @return {!Promise<!Array<!Promise>|undefined>}
  */
 export function scan(ampdoc, opt_root) {
   const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
 
   return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
     if (!isEnabled) {
-      dev().info(TAG, 'disabled for doc');
-      return [];
+      dev().info(TAG, 'disabled');
+      return;
     }
     return runCandidates(ampdoc, candidates);
   });

@@ -130,7 +130,7 @@ export class LightboxManager {
 
     // Process elements where the `lightbox` attr is dynamically set.
     root.addEventListener(LightboxGalleryEvents.NEWLY_SET, ({target}) => {
-      this.processLightboxElement_(target);
+      this.processLightboxElement_(dev().assertElement(target));
     });
 
     return this.scanPromise_;

@@ -607,7 +607,7 @@ describes.realWin(TAG, {
   describe('scan', () => {
 
     function waitForAllScannedToBeResolved() {
-      return scan(env.ampdoc).then(scanned => Promise.all(scanned));
+      return scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
     }
 
     it('does not load extension if no candidates found', function* () {
