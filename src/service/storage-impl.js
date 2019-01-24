@@ -143,6 +143,9 @@ export class Storage {
     return this.getStore_()
         .then(store => {
           mutator(store);
+          // Need to encode stored object to avoid plain text,
+          // but doesn't need to be base64encode. Can convert to some other
+          // encoding method for further improvement.
           const blob = btoa(JSON.stringify(store.obj));
           return this.binding_.saveBlob(this.origin_, blob);
         })
