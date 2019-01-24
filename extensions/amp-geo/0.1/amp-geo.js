@@ -48,21 +48,13 @@ import {Services} from '../../../src/services';
  */
 import {ampGeoPresets} from './amp-geo-presets';
 
+import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-
-/**
- * @enum {number}
- */
-export const GEO_IN_GROUP = {
-  NOT_DEFINED: 1,
-  IN: 2,
-  NOT_IN: 3,
-};
 
 /** @const */
 const TAG = 'amp-geo';
@@ -119,6 +111,11 @@ export class AmpGeo extends AMP.BaseElement {
     /** @private {Array<string>} */
     this.definedGroups_ = [];
     /** @Private {} */
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /** @override */
