@@ -1143,6 +1143,35 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 
 See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
 
+## Localization
+
+To localize your story, include the language code in the`lang` attribute on the `<html>` tag of your story, such as `<html lang="en">` for English.  The supported language codes are:
+
+* ar (Arabic)
+* de (German)
+* en-GB (English, UK)
+* en (English, US)
+* es-419 (Spanish, Central/Latin America)
+* es (Spanish, Spain)
+* fr-CA (French, Canada)
+* fr (French, France)
+* hi (Hindi)
+* id (Indonesian)
+* it (Italian)
+* ja (Japanese)
+* ko (Korean)
+* nl (Dutch)
+* no (Norwegian)
+* pt-BR (Portuguese, Brazil)
+* pt (Portuguese, Portugal)
+* ru (Russian)
+* tr (Turkish)
+* vi (Vietnamese)
+* zh-TW (Traditional Chinese)
+* zh (Simplified Chinese)
+
+Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html lang="ar" dir="rtl">`.
+
 ## Related resources
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
