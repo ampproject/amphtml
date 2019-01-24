@@ -15,10 +15,10 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
-import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
 import {setImportantStyles} from '../src/style';
@@ -132,8 +132,64 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
+
     this.element.appendChild(this.img_);
+  }
+
+  /**
+   * TODO: auto-generate sizes
+   * @private
+   */
+  maybeGenerateSizes_() {
+    // No need to generate sizes if already present.
+    if (this.element.hasAttribute('sizes')) {
+      return;
+    }
+    // Sizes is useless without the srcset attribute or if the srcset
+    // attribute uses the x descriptor.
+    const srcset = this.element.getAttribute('srcset');
+    if (!srcset || RegExp('[0-9]+x,.*').test(srcset)) {
+      return;
+    }
+
+    // Basic implementation
+    const width = this.getLayoutWidth();
+    const viewportWidth = this.getViewport().getWidth();
+    let defaultSize = '100vw';
+    let entry = `(max-width: ${viewportWidth}px) ${width}px, `;
+
+    // Add one entry for the current viewport size
+    const layout = this.getLayout();
+    switch (layout) {
+      // For fixed layout, the final width will be the same regardless
+      // of viewport size
+      case Layout.FIXED:
+        defaultSize = width + 'px';
+        break;
+      // These layouts will always fill the parent with, and keep the same
+      // ratio with the viewport width unless there are media queries.
+      case Layout.FIXED_HEIGHT:
+      case Layout.FLEX_ITEM:
+      case Layout.FILL:
+      case Layout.RESPONSIVE:
+
+        const ratio = width / viewportWidth * 100;
+        entry = `(max-width: ${viewportWidth}px) ${ratio}vw, `;
+        // TODO(cathyxz): handle media queries (is it efficient to getStyles?).
+
+        break;
+      case Layout.INTRINSIC:
+        // TODO: see if it's possible to implement reasonable sizes for this.
+        // Likely not because height is not bounded by viewport dimensions.
+        break;
+      default:
+        break;
+    }
+
+    const sizes = entry + defaultSize;
+    this.img_.setAttribute('sizes', sizes);
   }
 
   /** @override */
