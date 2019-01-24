@@ -819,7 +819,7 @@ export class AmpForm {
     // Construct the fetch response to reuse the methods in-place for
     // amp CORs validation.
     this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
-    return this.handleSubmitSuccess_(tryResolve(() => response['html']));
+    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -1044,8 +1044,8 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
         if (this.ssrTemplateHelper_.isSupported()) {
-          renderTemplatePromise =
-              this.templates_.findAndSetHtmlForTemplate(container, data);
+          renderTemplatePromise = this.templates_
+              .findAndSetHtmlForTemplate(container, data['html']);
         } else {
           renderTemplatePromise =
               this.templates_.findAndRenderTemplate(container, data);
