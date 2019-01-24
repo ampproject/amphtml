@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
-import {isExperimentOn} from './experiments';
-
 
 /** @const @enum {string} */
-export const AutoLightboxEvents = {
+export const LightboxGalleryEvents = {
   // Triggered when the lightbox attribute is newly set on an item in order to
-  // process by the renderer extension (e.g. amp-lightbox-gallery).
-  NEWLY_SET: 'amp-auto-lightbox:newly-set',
+  // process.
+  NEWLY_SET: 'amp-lbg:newly-set',
 };
-
-
-/**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- */
-export function installAutoLightboxExtension(ampdoc) {
-  const {win} = ampdoc;
-  if (!isExperimentOn(win, 'amp-auto-lightbox')) {
-    return;
-  }
-  chunk(ampdoc, () => {
-    Services.extensionsFor(win)
-        .installExtensionForDoc(ampdoc, 'amp-auto-lightbox');
-  }, ChunkPriority.LOW);
-}
