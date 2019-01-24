@@ -1077,6 +1077,8 @@ export class VideoDocking {
       setImportantStyles(element, {
         'width': px(width),
         'height': px(height),
+        'min-width': px(width),
+        'min-height': px(height),
       });
       if (opt_positioned) {
         setImportantStyles(element, {
