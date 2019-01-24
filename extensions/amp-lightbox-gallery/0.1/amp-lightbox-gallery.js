@@ -323,10 +323,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   showCarousel_(lightboxGroupId) {
     return this.mutateElement(() => {
-      const numSlides = this.elementsMetadata_[lightboxGroupId].length;
-      const hideControls = numSlides == 1;
-      this.controlsContainer_.classList.toggle('i-amphtml-ghost',
-          hideControls);
+      const {length} = this.elementsMetadata_[lightboxGroupId];
+      this.maybeEnableMultipleItemControls_(length);
       toggle(dev().assertElement(this.carousel_), true);
     });
   }
@@ -352,11 +350,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
-        const hideControls = list.length == 1;
-        this.controlsContainer_.classList.toggle('i-amphtml-ghost',
-            hideControls);
+        this.maybeEnableMultipleItemControls_(list.length);
       });
     });
+  }
+
+  /**
+   * @param {number} itemLength
+   * @private
+   */
+  maybeEnableMultipleItemControls_(itemLength) {
+    const isDisabled = itemLength <= 1;
+    const {controlsContainer_} = this;
+    const ghost = 'i-amphtml-ghost';
+    controlsContainer_.classList.toggle(ghost, isDisabled);
+    controlsContainer_.querySelector('.i-amphtml-lbg-button-gallery')
+        .classList.toggle(ghost, isDisabled);
   }
 
   /**
