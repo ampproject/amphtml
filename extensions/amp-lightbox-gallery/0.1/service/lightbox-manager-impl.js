@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
