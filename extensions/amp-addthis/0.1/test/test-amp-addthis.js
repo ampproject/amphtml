@@ -25,14 +25,14 @@ import {ConfigManager} from '../config-manager';
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
-import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
-import {getKeywordsString} from './../addthis-utils/classify';
 import {
   getAddThisMode,
   isProductCode,
   isPubId,
   isWidgetId} from '../addthis-utils/mode';
+import {getConfigManager} from '../amp-addthis';
+import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
+import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
@@ -486,18 +486,19 @@ describes.realWin('amp-addthis', {
     expect(isPubId(null)).to.equal(false);
   });
 
-  it('isProductCode: pretty much knows if a thing is a product code or not', () => {
-    expect(isProductCode(1)).to.equal(false);
-    expect(isProductCode(String('mayb'))).to.equal(false);
-    expect(isProductCode(String('shin'))).to.equal(true);
-    expect(isProductCode('maybe')).to.equal(false);
-    expect(isProductCode('shin')).to.equal(true);
-    expect(isProductCode('shfs')).to.equal(true);
-    expect(isProductCode({})).to.equal(false);
-    expect(isProductCode([])).to.equal(false);
-    expect(isProductCode(void 0)).to.equal(false);
-    expect(isProductCode(null)).to.equal(false);
-  });
+  it('isProductCode: pretty much knows if a thing is a product code or not',
+      () => {
+        expect(isProductCode(1)).to.equal(false);
+        expect(isProductCode(String('mayb'))).to.equal(false);
+        expect(isProductCode(String('shin'))).to.equal(true);
+        expect(isProductCode('maybe')).to.equal(false);
+        expect(isProductCode('shin')).to.equal(true);
+        expect(isProductCode('shfs')).to.equal(true);
+        expect(isProductCode({})).to.equal(false);
+        expect(isProductCode([])).to.equal(false);
+        expect(isProductCode(void 0)).to.equal(false);
+        expect(isProductCode(null)).to.equal(false);
+      });
 
   it('isWidgetId: pretty much knows if a thing is a widget id or not', () => {
     expect(isWidgetId(1)).to.equal(false);
@@ -525,16 +526,17 @@ describes.realWin('amp-addthis', {
     expect(isString(null)).to.equal(false);
   });
 
-  it('getSessionId: returns a string of 16 characters containing 0-9 a-f', () => {
-    expect(isString(getSessionId())).to.equal(true);
-    expect(getSessionId().length).to.equal(16);
-    expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
+  it('getSessionId: returns a string of 16 characters containing 0-9 a-f',
+      () => {
+        expect(isString(getSessionId())).to.equal(true);
+        expect(getSessionId().length).to.equal(16);
+        expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
-    // within the same session, ids match
-    const a = getSessionId();
-    const b = getSessionId();
-    expect(a).to.equal(b);
-  });
+        // within the same session, ids match
+        const a = getSessionId();
+        const b = getSessionId();
+        expect(a).to.equal(b);
+      });
 
   it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
     expect(isString(createCUID())).to.equal(true);
@@ -543,11 +545,11 @@ describes.realWin('amp-addthis', {
     const b = createCUID();
     expect(a).to.not.equal(b);
 
-    let o = {};
+    const o = {};
     for (let i = 0; i < 100000; i += 1) {
       const c = createCUID().length;
       if (!o[c]) {
-        o[c]= 0;
+        o[c] = 0;
       }
       o[c] = o[c] + 1;
     }
