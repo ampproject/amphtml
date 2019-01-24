@@ -17,8 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -105,11 +104,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, 'amp-date-display')) {
-      user().error(TAG, 'Experiment %s is not turned on.', TAG);
-      return;
-    }
-
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(devAssert(this.container_));
 
