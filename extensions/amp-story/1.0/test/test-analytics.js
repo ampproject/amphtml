@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AdvancementMode, AmpStoryAnalytics} from '../analytics';
+import {AmpStoryAnalytics} from '../analytics';
 import {StateChangeType} from '../navigation-state';
 
 
@@ -34,13 +34,5 @@ describes.fakeWin('amp-story analytics', {}, env => {
     });
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
-  });
-
-  it('should trigger `manualAdvance` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent_');
-
-    analytics.onAdvancementModeStateChange(AdvancementMode.MANUAL_ADVANCE);
-
-    expect(trigger).to.have.been.calledWith('manualAdvance');
   });
 });
