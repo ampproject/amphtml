@@ -346,7 +346,7 @@ class SeleniumWebDriverController {
   /**
    * Evaluate the given function
    * @param {function()} fn
-   * @param {...} unusedArgs
+   * @param {...*} unusedArgs
    * @return {!ControllerPromise}
    * @override
    */

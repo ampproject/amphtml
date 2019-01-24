@@ -15,7 +15,6 @@
  */
 
 import {
-  enableExperiments,
   getScrollingElement,
   getSlides,
   getSpacersForSlide,
@@ -24,8 +23,9 @@ import {
 describes.endtoend('AMP carousel mixed length slides', {
 }, async env => {
   const pageWidth = 600;
-  const pageHeight = 1200;
+  const pageHeight = 500;
   let controller;
+  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -38,8 +38,12 @@ describes.endtoend('AMP carousel mixed length slides', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
-    await enableExperiments(controller);
+    await controller.navigateTo('http://localhost:8000/');
+    await ampDriver.toggleExperiment('layers', true);
+    await ampDriver.toggleExperiment('amp-carousel-v2', true);
+
     await controller.setWindowRect({
       width: pageWidth,
       height: pageHeight,

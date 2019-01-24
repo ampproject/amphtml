@@ -396,7 +396,7 @@ class FunctionalTestController {
   /**
    * Evaluate the given function
    * @param {function()} unusedFn
-   * @param {...} unusedArgs
+   * @param {...*} unusedArgs
    * @return {!ControllerPromise}
    * @package
    */

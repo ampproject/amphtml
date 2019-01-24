@@ -15,7 +15,6 @@
  */
 
 import {
-  enableExperiments,
   getScrollingElement,
   getSlide,
   waitForCarouselImg,
@@ -24,6 +23,7 @@ import {
 describes.endtoend('AMP Carousel responsive attributes', {
 }, async env => {
   let controller;
+  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -31,8 +31,12 @@ describes.endtoend('AMP Carousel responsive attributes', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
-    await enableExperiments(controller);
+    await controller.navigateTo('http://localhost:8000/');
+    await ampDriver.toggleExperiment('layers', true);
+    await ampDriver.toggleExperiment('amp-carousel-v2', true);
+
     await controller.setWindowRect({
       width: 1000,
       height: 600,
