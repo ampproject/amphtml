@@ -916,8 +916,7 @@ export class VideoDocking {
         .then(() => {
           if (opt_isTransferLayerStep) {
             // Do not enable controls during transfer layer steps, which would
-            // essentially make controls appear during transition, causing
-            // conflict with current cursor position.
+            // make them appear on hover during transition.
             return;
           }
           this.getControls_().enable();
