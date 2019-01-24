@@ -28,8 +28,8 @@ export class ReadDepthTracker {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {string?} */
-    this.lastReadSnippet_ = null;
+    /** @private {number?} */
+    this.lastReadIndex_ = null;
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
@@ -37,15 +37,15 @@ export class ReadDepthTracker {
     /** @private {string} */
     this.connectHostname_ = connectHostname;
 
-    /** @private {function(string?)} */
-    this.debouncedUpdateLastRead_ = debounce(
+    /** @private {function()} */
+    const debouncedFindTopParagraph_ = debounce(
         ampdoc.win,
-        this.updateLastRead_.bind(this),
+        this.findTopParagraph_.bind(this),
         1000
     );
 
     this.viewport_ = Services.viewportForDoc(ampdoc);
-    this.viewport_.onChanged(this.findTopParagraph_.bind(this));
+    this.viewport_.onChanged(debouncedFindTopParagraph_);
 
     this.paragraphs_ = ampdoc.getBody().getElementsByTagName('p');
   }
@@ -70,31 +70,31 @@ export class ReadDepthTracker {
             }
           }
           if (lastIdxAboveViewport !== null) {
-            this.recordLatestRead_(this.paragraphs_[lastIdxAboveViewport]);
+            this.recordLatestRead_(lastIdxAboveViewport);
           }
         });
   }
 
   /**
-   * Checks whether latest read paragraph has changed and updates it if so.
-   * @param {Element} paragraph
+   * If the latest read paragraph has changed, record it and update server.
+   * @param {number} paragraphIdx
    * @private
    */
-  recordLatestRead_(paragraph) {
-    const prevSnippet = this.lastReadSnippet_;
-    this.lastReadSnippet_ = paragraph./*OK*/innerText.substring(0, 50);
-    if (prevSnippet !== this.lastReadSnippet_) {
-      this.debouncedUpdateLastRead_(this.lastReadSnippet_);
+  recordLatestRead_(paragraphIdx) {
+    if (this.lastReadIndex_ !== paragraphIdx) {
+      this.lastReadIndex_ = paragraphIdx;
+      this.updateLastRead_(
+          this.paragraphs_[paragraphIdx]./*OK*/innerText.substring(0, 50)
+      );
     }
   }
 
   /**
    * Sends latest read snippet to server.
-   * @param {...*} arg
+   * @param {string} snippet
    * @private
    */
-  updateLastRead_(...arg) {
-    const snippet = arg[0].toString();
+  updateLastRead_(snippet) {
     this.accessSource_.buildUrl((
       `${this.connectHostname_}/amp/updatedepth`
       + '?rid=READER_ID'
