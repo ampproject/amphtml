@@ -478,7 +478,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return mediaSet;
     }
 
-    iterateCursor(fie.win.document.querySelectorAll(selector),
+    iterateCursor(scopedQuerySelectorAll(fie.win.document, selector),
         el => mediaSet.push(el));
     return mediaSet;
   }
