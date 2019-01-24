@@ -95,11 +95,11 @@ export class AmpAdExit extends AMP.BaseElement {
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
 
+    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
-    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
