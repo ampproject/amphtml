@@ -791,6 +791,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rbinfox': {
+	    renderStartImplemented: true,
+  },
+
   'realclick': {
     renderStartImplemented: true,
   },
