@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {By, Condition, Key, until} from 'selenium-webdriver';
-import {ControllerPromise,ElementHandle} from './functional-test-controller';
-import fs from 'fs';
+const fs = require('fs');
+const {By, Condition, Key, until} = require('selenium-webdriver');
+const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
+const {expect} = require('chai');
 
 /**
- * @param {function(): !Promise<T>} value
+ * @param {function(): !Promise<T>} valueFn
  * @param {function(T):boolean} condition
+ * @param {T} opt_mutate
  * @return {!Condition}
  * @template T
  */
@@ -36,8 +38,10 @@ function expectCondition(valueFn, condition, opt_mutate) {
 /**
  * Make the test runner wait until the value returned by the valueFn matches
  * the given condition.
+ * @param {!WebDriver} driver
  * @param {function(): !Promise<T>} valueFn
  * @param {function(T): ?T} condition
+ * @param {T} opt_mutate
  * @return {!Promise<?T>}
  * @template T
  */
@@ -52,7 +56,7 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
 }
 
 /** @implements {FunctionalTestController} */
-export class SeleniumWebDriverController {
+class SeleniumWebDriverController {
   /**
    * @param {!WebDriver} driver
    */
@@ -70,6 +74,7 @@ export class SeleniumWebDriverController {
   getWaitFn_(valueFn) {
     /**
      * @param {function(T): ?T} condition
+     * @param {T} opt_mutate
      * @return {!Promise<?T>}
      */
     return (condition, opt_mutate) => {
@@ -109,11 +114,10 @@ export class SeleniumWebDriverController {
    * @override
    */
   async findElementXPath(xpath) {
-    const {browser} = this;
     const byXpath = By.xpath(xpath);
 
-    await browser.wait(until.elementLocated(byXpath));
-    const webElement = await browser.findElement(byXpath);
+    await this.driver.wait(until.elementLocated(byXpath));
+    const webElement = await this.driver.findElement(byXpath);
     return new ElementHandle(webElement, this);
   }
 
@@ -123,16 +127,15 @@ export class SeleniumWebDriverController {
    * @override
    */
   async findElementsXPath(xpath) {
-    const {browser} = this;
     const byXpath = By.xpath(xpath);
 
-    await browser.wait(until.elementLocated(byXpath));
-    const webElements = await browser.findElements(byXpath);
+    await this.driver.wait(until.elementLocated(byXpath));
+    const webElements = await this.driver.findElements(byXpath);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
   /**
-   * @param {string} url
+   * @param {string} location
    * @return {!Promise}
    * @override
    */
@@ -203,6 +206,19 @@ export class SeleniumWebDriverController {
   }
 
   /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @override
+   */
+  getElementRect(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+        webElement.getRect(),
+        this.getWaitFn_(() => webElement.getRect()));
+  }
+
+  /**
+   * Sets width/height of the browser area.
    * @param {!WindowRectDef} rect
    * @return {!Promise}
    * @override
@@ -212,7 +228,54 @@ export class SeleniumWebDriverController {
       width,
       height,
     } = rect;
-    await this.driver.manage().window().setRect({width, height});
+
+    // Calculate the window borders, so we can set the correct size to get the
+    // desired content size.
+    const results = await Promise.all([
+      this.driver.manage().window().getRect(),
+      this.driver.findElement(By.tagName('html')),
+    ]);
+    // No Array destructuring allowed?
+    const winRect = results[0];
+    const htmlElement = results[1];
+    const htmlElementSizes = await Promise.all([
+      htmlElement.getAttribute('clientWidth'),
+      htmlElement.getAttribute('clientHeight'),
+    ]);
+    // No Array destructuring allowed?
+    const clientWidth = htmlElementSizes[0];
+    const clientHeight = htmlElementSizes[1];
+
+    const horizBorder = winRect.width - clientWidth;
+    const vertBorder = winRect.height - clientHeight;
+
+    await this.driver.manage().window().setRect({
+      width: width + horizBorder,
+      height: height + vertBorder,
+    });
+
+    // Verify the size. The browser may refuse to resize smaller than some
+    // size when not running headless. It is better to fail here rather than
+    // have the developer wonder why their test is failing on an unrelated
+    // expect. TODO: support running browsers in a headless mode, otherwise
+    // mobile resolutions cannot be tested due to the minimum width/height
+    // browsers impose. If non headless mode is supported, these asserts are
+    // still necessary, because the test may fail if the user is debugging them
+    // due to the min size and we want to make sure it fails fast.
+    const updatedWinRect = await this.driver.manage().window().getRect();
+    const resultWidth = updatedWinRect.width - horizBorder;
+    const resultHeight = updatedWinRect.height - vertBorder;
+    // TODO(sparhami) These are throwing errors, but are not causing the test
+    // to fail immediately,.Figure out why, we want the test to fail here
+    // instead of continuing.
+    expect(resultWidth).to.equal(
+        width,
+        'Failed to resize the window to the requested width. Expected: ' +
+        `${width}, actual: ${resultWidth}.`);
+    expect(resultHeight).to.equal(
+        height,
+        'Failed to resize the window to the requested height. Expected: ' +
+        `${height}, actual: ${resultHeight}.`);
   }
 
   /**
@@ -255,6 +318,22 @@ export class SeleniumWebDriverController {
   }
 
   /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @return {!Promise}
+   * @override
+   */
+  async scrollBy(handle, opt_scrollToOptions) {
+    const webElement = handle.getElement();
+    const scrollBy = (element, opt_scrollToOptions) => {
+      element./*OK*/scrollBy(opt_scrollToOptions);
+    };
+
+    return await this.driver.executeScript(
+        scrollBy, webElement, opt_scrollToOptions);
+  }
+
+  /**
    * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
@@ -265,8 +344,8 @@ export class SeleniumWebDriverController {
   }
 
   /**
-   * @param {string} path
    * @param {!ElementHandle} handle
+   * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
    */
@@ -293,7 +372,6 @@ export class SeleniumWebDriverController {
     await this.driver.switchTo().frame(element);
   }
 
-
   /**
    * @return {!Promise}
    * @private
@@ -315,3 +393,7 @@ export class SeleniumWebDriverController {
     await this.switchToParent_();
   }
 }
+
+module.exports = {
+  SeleniumWebDriverController,
+};
