@@ -1,7 +1,7 @@
 # Integrate your Consent Management Platform (CMP) with AMP Consent
 
 ## Overview
-The feature is still in experimental mode. Please opt-in using the `amp-consent-v2` flag.
+The feature is still in experimental mode. Please opt-in using the `amp-consent-v2` flag. To opt-in, you can either run `AMP.toggleExperiment('amp-consent-v2')` in console, or turn on the experiment from the [experiments managing page](https://cdn.ampproject.org/experiments.html).
 
 If you operate a CMP to help publishers to manage their user consents, you may want to integrate your service in `amp-consent`. This will enable your customers to use your service in AMP HTML pages.
 
@@ -12,10 +12,10 @@ To add your consent management service to AMP runtime, it is expected that you d
 * Make sure the prompted consent collecting page communicates well with the AMP runtime using the provided APIs.
 * Check in your consent configuration to the AMP code base.
 * Be aware of the restrictions that the AMP runtime applies to ensure a good user experience. These includes
-    * Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`100vw`, `30vh`), and the fullScreen after user interactions.
+    * Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`width: 100vw`, `height: 30vh`), and the fullScreen (`width: 100vw`, `height: 100%`) after user interactions.
     * A placeholder will be displayed before the consent prompt iframe is ready.
     * Enforce the size of the stored consent information. 188 character length is the current limit. Please file an issue if you find that not sufficient.
-* Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking>` metaTag, or the `data-block-on-consent` attribute.
+* Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. **Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking>` metaTag, or the `data-block-on-consent` attribute.**
 * Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via provided APIs. It's up to the CMP and service provider vendors to agree on the format of the consent info string.
 * Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding support to your CMP service to AMP. A great start point is to follow the `_ping_` CMP service implementation that the AMP team creates for testing purpose.
 
