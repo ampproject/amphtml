@@ -1036,27 +1036,34 @@ export class AmpForm {
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
+    let renderTemplatePromise;
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        p = this.templates_.findAndRenderTemplate(container, data)
-            .then(rendered => {
-              rendered.id = messageId;
-              rendered.setAttribute('i-amphtml-rendered', '');
-              return this.resources_.mutateElement(devAssert(container),
-                  () => {
-                    container.appendChild(rendered);
-                    const renderedEvent = createCustomEvent(
-                        this.win_,
-                        AmpEvents.DOM_UPDATE,
-                        /* detail */ null,
-                        {bubbles: true});
-                    container.dispatchEvent(renderedEvent);
-                  });
-            });
+        if (this.ssrTemplateHelper_.isSupported()) {
+          renderTemplatePromise =
+              this.templates_.findAndSetHtmlForTemplate(container, data);
+        } else {
+          renderTemplatePromise =
+              this.templates_.findAndRenderTemplate(container, data);
+        }
+        p = renderTemplatePromise.then(rendered => {
+          rendered.id = messageId;
+          rendered.setAttribute('i-amphtml-rendered', '');
+          return this.resources_.mutateElement(devAssert(container),
+              () => {
+                container.appendChild(rendered);
+                const renderedEvent = createCustomEvent(
+                    this.win_,
+                    AmpEvents.DOM_UPDATE,
+                    /* detail */ null,
+                    {bubbles: true});
+                container.dispatchEvent(renderedEvent);
+              });
+        });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
