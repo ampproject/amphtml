@@ -350,9 +350,9 @@ class SeleniumWebDriverController {
    * @return {!ControllerPromise}
    * @override
    */
-  eval_(fn, unusedArgs) {
+  eval(fn, unusedArgs) {
     const args = Array.prototype.slice.call(arguments, 1);
-    return this.driver.executeScript.apply(this.driver, [fn].concat(args));
+    return this.driver.executeScript(fn, ...args);
   }
 
   /**

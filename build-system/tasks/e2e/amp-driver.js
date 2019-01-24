@@ -19,10 +19,10 @@
  */
 class AmpDriver {
   /**
-   *
    * @param {!../functional-test-controller.FunctionalTestController} controller
    */
   constructor(controller) {
+    /** @private @const */
     this.controller_ = controller;
   }
 
@@ -30,9 +30,10 @@ class AmpDriver {
    * Toggles an experiment in an AMP document. Uses the current domain.
    * @param {string} name
    * @param {boolean} toggle
+   * @return {!Promise}
    */
   async toggleExperiment(name, toggle) {
-    return this.controller_.eval_((name, toggle) => {
+    await this.controller_.eval((name, toggle) => {
       window.AMP.toggleExperiment(name, toggle);
     }, name, toggle);
   }

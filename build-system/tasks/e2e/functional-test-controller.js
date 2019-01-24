@@ -397,10 +397,10 @@ class FunctionalTestController {
    * Evaluate the given function
    * @param {function()} unusedFn
    * @param {...*} unusedArgs
-   * @return {!ControllerPromise}
+   * @return {!Promise}
    * @package
    */
-  async eval_(unusedFn, ...unusedArgs) {}
+  async eval(unusedFn, ...unusedArgs) {}
 }
 
 
