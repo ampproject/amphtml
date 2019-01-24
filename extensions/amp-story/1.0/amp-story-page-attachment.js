@@ -24,11 +24,12 @@ import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {
   HistoryState,
   createShadowRootWithStyle,
-  setHistoryState,
 } from './utils';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
@@ -90,6 +91,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.headerEl_ = null;
+
+    /** @type {!../../../src/service/history-impl.History} */
+    this.historyService_ = Services.historyForDoc(this.element);
 
     /** @private {!AttachmentState} */
     this.state_ = AttachmentState.CLOSED;
@@ -158,6 +162,14 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     this.headerEl_
         .querySelector('.i-amphtml-story-page-attachment-close-button')
         .addEventListener('click', () => this.close_(), true /** useCapture */);
+
+    // Always open links in a new tab.
+    this.contentEl_.addEventListener('click', event => {
+      const {target} = event;
+      if (target.tagName.toLowerCase() === 'a') {
+        target.setAttribute('target', '_blank');
+      }
+    }, true /** useCapture */);
 
     // Closes the attachment on opacity background clicks.
     this.element.addEventListener('click', event => {
@@ -432,18 +444,30 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       toggle(dev().assertElement(this.containerEl_), true);
     });
 
-    setHistoryState(
-        this.win,
-        HistoryState.ATTACHMENT_PAGE_ID,
-        /** @type {string} */
-        (this.storeService_.get(StateProperty.CURRENT_PAGE_ID)));
+    const currentHistoryState = /** @type {!Object} */
+        (getState(this.win.history));
+    const historyState = Object.assign({}, currentHistoryState, {
+      [HistoryState.ATTACHMENT_PAGE_ID]:
+          this.storeService_.get(StateProperty.CURRENT_PAGE_ID),
+    });
+
+    this.historyService_.push(() => this.closeInternal_(), historyState);
+  }
+
+  /**
+   * Does a browser back to close the attachment, to ensure the history state
+   * we added when opening the attachment is popped.
+   * @private
+   */
+  close_() {
+    this.historyService_.goBack();
   }
 
   /**
    * Fully closes the attachment from its current position.
    * @private
    */
-  close_() {
+  closeInternal_() {
     if (this.state_ === AttachmentState.CLOSED) {
       return;
     }
@@ -461,7 +485,5 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       setTimeout(
           () => toggle(dev().assertElement(this.containerEl_), false), 250);
     });
-
-    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
   }
 }

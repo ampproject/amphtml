@@ -27,7 +27,7 @@ import {
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 
@@ -91,15 +91,6 @@ export class ConsentStateManager {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
-    }
-
-    if (state == CONSENT_ITEM_STATE.DISMISSED) {
-      if (consentStr) {
-        user().error(TAG,
-            'Consent string value %s will be ignored on user dismiss',
-            consentStr);
-        consentStr = undefined;
-      }
     }
 
     this.instance_.update(state, consentStr);
@@ -225,21 +216,25 @@ export class ConsentInstance {
    * @param {string=} consentString
    */
   update(state, consentString) {
-    const localStateValue =
+    const localState =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
     const calculatedState =
-        recalculateConsentStateValue(state, localStateValue);
+        recalculateConsentStateValue(state, localState);
 
-    // TODO(@zhouyx) Make consentString init value to null
-    consentString = consentString || localConsentStr || undefined;
+    if (state === CONSENT_ITEM_STATE.DISMISSED) {
+      // If state is dismissed, use the old consent string.
+      this.localConsentInfo_ =
+          constructConsentInfo(calculatedState, localConsentStr);
+      return;
+    }
+
     const newConsentInfo = constructConsentInfo(calculatedState, consentString);
     const oldConsentInfo = this.localConsentInfo_;
     this.localConsentInfo_ = newConsentInfo;
 
-    if (state === CONSENT_ITEM_STATE.DISMISSED ||
-        isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
+    if (isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
       // Only update/save to localstorage if it's not dismiss
       // And the value is different from what is stored.
       return;
@@ -316,6 +311,7 @@ export class ConsentInstance {
     });
     cidPromise.then(userId => {
       const request = /** @type {!JsonObject} */ ({
+        // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
         'ampUserId': userId,
       });
