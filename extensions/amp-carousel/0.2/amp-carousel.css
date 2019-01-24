@@ -42,6 +42,16 @@ amp-carousel {
   --visible-count: 1;
 }
 
+/**
+ * Make sure the scrollbar does not take up space on desktop, which will cause
+ * the bottom of the slides to be cutoff. Padding + overflow is used to hide
+ * the scrollbars for all browsers.
+ * TODO(sparhami) Find a solution for the clipping on all browsers.
+ */
+.i-amphtml-carousel-scroll::-webkit-scrollbar {
+  height: 0;
+}
+
 .i-amphtml-carousel-scroll[horizontal="true"] {
   flex-direction: row;
   scroll-snap-type-x: mandatory; /* Firefox, IE */
