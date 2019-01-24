@@ -399,8 +399,10 @@ export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
       if (!meetsCriteria(candidate)) {
+        dev().info(TAG, 'discarded', candidate);
         return;
       }
+      dev().info(TAG, 'apply', candidate);
       return apply(ampdoc, candidate);
     }, NOOP));
 }
@@ -417,6 +419,7 @@ export function scan(ampdoc, opt_root) {
 
   return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
     if (!isEnabled) {
+      dev().info(TAG, 'disabled for doc');
       return [];
     }
     return runCandidates(ampdoc, candidates);
