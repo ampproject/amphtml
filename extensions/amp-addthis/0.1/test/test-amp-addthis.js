@@ -29,7 +29,8 @@ import {
   getAddThisMode,
   isProductCode,
   isPubId,
-  isWidgetId} from '../addthis-utils/mode';
+  isWidgetId,
+} from '../addthis-utils/mode';
 import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
@@ -59,13 +60,11 @@ describes.realWin('amp-addthis', {
   });
 
   function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
-    const {
-      shareConfig = {},
-    } = configuration;
-    const elementAttributes = {
+    const {shareConfig = {}} = configuration;
+    const elementAttributes = dict({
       'width': '320px',
       'height': '90px',
-    };
+    });
     if (configuration.pubId) {
       elementAttributes['data-pub-id'] = configuration.pubId;
     }
@@ -81,7 +80,7 @@ describes.realWin('amp-addthis', {
     const at = createElementWithAttributes(
         doc,
         'amp-addthis',
-        dict({...elementAttributes})
+        elementAttributes
     );
     if (opt_responsive) {
       at.setAttribute('layout', 'responsive');
