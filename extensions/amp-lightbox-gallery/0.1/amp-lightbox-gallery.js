@@ -34,6 +34,7 @@ import {
   closestBySelector,
   elementByTag,
   escapeCssSelectorIdent,
+  scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
@@ -361,11 +362,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   maybeEnableMultipleItemControls_(itemLength) {
     const isDisabled = itemLength <= 1;
-    const {controlsContainer_} = this;
     const ghost = 'i-amphtml-ghost';
-    controlsContainer_.classList.toggle(ghost, isDisabled);
-    controlsContainer_.querySelector('.i-amphtml-lbg-button-gallery')
-        .classList.toggle(ghost, isDisabled);
+    [
+      '.i-amphtml-lbg-button-next',
+      '.i-amphtml-lbg-button-prev',
+      '.i-amphtml-lbg-button-gallery',
+    ].forEach(selector => {
+      dev().assertElement(
+          scopedQuerySelector(this.controlsContainer_, selector))
+          .classList.toggle(ghost, isDisabled);
+    });
   }
 
   /**
