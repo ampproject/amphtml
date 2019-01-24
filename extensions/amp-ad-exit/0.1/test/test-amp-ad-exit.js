@@ -97,8 +97,8 @@ const EXIT_CONFIG = {
     },
     clickTargetTest: {
       'finalUrl': 'http://localhost:8000/simple',
-      behaviors: {
-        clickTarget: '_top',
+      'behaviors': {
+        'clickTarget': '_top',
       },
     },
   },
@@ -308,7 +308,7 @@ describes.realWin('amp-ad-exit', {
 
   it('should attempt same-tab navigation', () => {
     const open = sandbox.stub(win, 'open').callsFake(() => {
-      return {name: 'sameWin'};
+      return {name: 'fakeWin'};
     });
 
     element.implementation_.executeAction({

@@ -283,6 +283,7 @@ export class AmpAdExit extends AMP.BaseElement {
           filters:
               (target['filters'] || []).map(
                   f => this.userFilters_[f]).filter(f => f),
+          behaviors: (target['behaviors']) || {},
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {

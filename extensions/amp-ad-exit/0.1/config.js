@@ -43,7 +43,7 @@ export let AmpAdExitConfig;
  *   trackingUrls: (!Array<string>|undefined),
  *   vars: (VariablesDef|undefined),
  *   filters: (!Array<string>|undefined),
- *   behavior: (BehaviorDef|undefined)
+ *   behaviors: (BehaviorsDef|undefined)
  * }}
  */
 export let NavigationTargetConfig;
@@ -70,7 +70,7 @@ export let VariablesDef;
  *   clickTarget: (string|undefined)
  * }}
  */
-export let BehaviorDef;
+export let BehaviorsDef;
 
 /**
  * @typedef {{
