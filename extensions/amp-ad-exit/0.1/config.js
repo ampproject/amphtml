@@ -18,7 +18,7 @@ import {FilterType} from './filters/filter';
 import {
   IFRAME_TRANSPORTS,
 } from '../../amp-analytics/0.1/iframe-transport-vendors';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -101,40 +101,40 @@ export const TransportMode = {
 /**
  * Checks whether the object conforms to the AmpAdExitConfig spec.
  *
- * @param {*} config The config to validate.
- * @return {!./config.AmpAdExitConfig}
+ * @param {?JsonObject} config The config to validate.
+ * @return {!JsonObject}
  */
 export function assertConfig(config) {
-  user().assert(typeof config == 'object');
-  if (config.filters) {
-    assertFilters(config.filters);
+  userAssert(typeof config == 'object');
+  if (config['filters']) {
+    assertFilters(config['filters']);
   } else {
-    config.filters = {};
+    config['filters'] = {};
   }
-  if (config.transport) {
-    assertTransport(config.transport);
+  if (config['transport']) {
+    assertTransport(config['transport']);
   } else {
-    config.transport = {};
+    config['transport'] = {};
   }
-  assertTargets(config.targets, config);
-  return /** @type {!AmpAdExitConfig} */ (config);
+  assertTargets(config['targets'], /** @type {!JsonObject} */ (config));
+  return /** @type {!JsonObject} */ (config);
 }
 
 /**
  * Asserts a transport.
- * @param {!Object} transport
+ * @param {!JsonObject} transport
  */
 function assertTransport(transport) {
   for (const t in transport) {
-    user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
+    userAssert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
         `Unknown transport option: '${t}'`);
-    user().assert(typeof transport[t] == 'boolean');
+    userAssert(typeof transport[t] == 'boolean');
   }
 }
 
 /**
  * Asserts an array of filters.
- * @param {*} filters
+ * @param {!JsonObject} filters
  */
 function assertFilters(filters) {
   const validFilters = [
@@ -143,9 +143,9 @@ function assertFilters(filters) {
     FilterType.INACTIVE_ELEMENT,
   ];
   for (const name in filters) {
-    user().assert(typeof filters[name] == 'object',
+    userAssert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
-    user().assert(validFilters.indexOf(filters[name].type) != -1,
+    userAssert(validFilters.indexOf(filters[name].type) != -1,
         'Supported filters: ' + validFilters.join(', '));
   }
 }
@@ -153,11 +153,11 @@ function assertFilters(filters) {
 /**
  * Asserts targets and its config
  *
- * @param {!Object} targets
- * @param {*} config
+ * @param {!JsonObject} targets
+ * @param {!JsonObject} config
  */
 function assertTargets(targets, config) {
-  user().assert(typeof targets == 'object', '\'targets\' must be an object');
+  userAssert(typeof targets == 'object', '\'targets\' must be an object');
   for (const target in targets) {
     assertTarget(target, targets[target], config);
   }
@@ -167,23 +167,23 @@ function assertTargets(targets, config) {
  * Asserts target
  *
  * @param {string} name
- * @param {!Object} target
- * @param {*} config
+ * @param {!JsonObject} target
+ * @param {!JsonObject} config
  */
 function assertTarget(name, target, config) {
-  user().assert(
-      typeof target.finalUrl == 'string',
+  userAssert(
+      typeof target['finalUrl'] == 'string',
       'finalUrl of target \'%s\' must be a string', name);
-  if (target.filters) {
-    target.filters.forEach(filter => {
-      user().assert(
-          config.filters[filter], 'filter \'%s\' not defined', filter);
+  if (target['filters']) {
+    target['filters'].forEach(filter => {
+      userAssert(
+          config['filters'][filter], 'filter \'%s\' not defined', filter);
     });
   }
-  if (target.vars) {
+  if (target['vars']) {
     const pattern = /^_[a-zA-Z0-9_-]+$/;
-    for (const variable in target.vars) {
-      user().assert(
+    for (const variable in target['vars']) {
+      userAssert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
     }

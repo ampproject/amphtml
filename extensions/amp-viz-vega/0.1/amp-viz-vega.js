@@ -18,7 +18,7 @@ import * as dom from '../../../src/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
@@ -72,7 +72,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-viz-vega'),
+    userAssert(isExperimentOn(this.win, 'amp-viz-vega'),
         'Experiment amp-viz-vega disabled');
 
     /**
@@ -85,12 +85,12 @@ export class AmpVizVega extends AMP.BaseElement {
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
-    user().assert(this.inlineData_ || this.src_,
+    userAssert(this.inlineData_ || this.src_,
         '%s: neither `src` attribute nor a ' +
         'valid <script type="application/json"> child was found for Vega data.',
         this.getName_());
 
-    user().assert(!(this.inlineData_ && this.src_),
+    userAssert(!(this.inlineData_ && this.src_),
         '%s: both `src` attribute and a valid ' +
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
@@ -139,11 +139,11 @@ export class AmpVizVega extends AMP.BaseElement {
   loadData_() {
     // Validation in buildCallback should ensure one and only one of
     // src_/inlineData_ is ever set.
-    dev().assert(!this.src_ != !this.inlineData_);
+    devAssert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
       this.data_ = tryParseJson(this.inlineData_, err => {
-        user().assert(!err, 'data could not be ' +
+        userAssert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
       });
       return Promise.resolve();
@@ -175,11 +175,11 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    user().assert(scripts.length == 1, '%s: more than one ' +
+    userAssert(scripts.length == 1, '%s: more than one ' +
         '<script> tags found. Only one allowed.', this.getName_());
 
     const child = scripts[0];
-    user().assert(dom.isJsonScriptTag(child), '%s: data should ' +
+    userAssert(dom.isJsonScriptTag(child), '%s: data should ' +
         'be put in a <script type="application/json"> tag.', this.getName_());
 
     return child.textContent;

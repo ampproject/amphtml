@@ -502,6 +502,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 
 .i-amphtml-loading-container {
   display: block !important;
+  pointer-events: none;
   z-index: 1;
 }
 
@@ -672,6 +673,13 @@ amp-analytics, amp-story-auto-ads {
   visibility: hidden;
 }
 
+html.i-amphtml-fie > amp-analytics {
+  /* Remove position fixed if it's in iframe.
+  * So runtime can measure layoutBox correctly
+  */
+  position: initial !important;
+}
+
 /**
  * Iframe allows setting frameborder, so we need to set box-sizing to border-box
  * or otherwise the iframe will oevrflow its parent when there is a border.
@@ -801,13 +809,12 @@ amp-accordion > section[expanded] > :last-child {
 }
 
 /* load-more elements should be hidden by default */
-amp-list[load-more] > [load-more-loading],
-amp-list[load-more] > [load-more-failed],
-amp-list[load-more] > [load-more-button],
-amp-list[load-more] > [load-more-end],
-amp-list[load-more] > [load-more-button] > .i-amphtml-loader
+amp-list[load-more] [load-more-loading],
+amp-list[load-more] [load-more-failed],
+amp-list[load-more] [load-more-button],
+amp-list[load-more] [load-more-end]
 {
-  visibility: hidden;
+  display: none;
 }
 
 /**
@@ -855,10 +862,19 @@ amp-story .i-amphtml-loader {
 /**
  * Make amp-addthis tool floating if user give data-widget-type
  */
-
-amp-addthis[data-widget-type="floating"] {
-  position: fixed !important;
-  width:100% !important;
-  height:50px;
-  bottom:0;
+@media only screen and (max-width: 980px) {
+  amp-addthis[data-widget-type="floating"] {
+    position: fixed !important;
+    width: 100% !important;
+    height: 50px;
+    bottom: 0;
+  }
+}
+@media only screen and (min-width: 981px) {
+  amp-addthis[data-widget-type="floating"] {
+    position: fixed !important;
+    width: 100% !important;
+    height: 300px!important;
+    top: 200px;
+  }
 }

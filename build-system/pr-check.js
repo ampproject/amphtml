@@ -30,8 +30,17 @@ const colors = require('ansi-colors');
 const config = require('./config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {
+  gitBranchName,
+  gitDiffColor,
+  gitDiffCommitLog,
+  gitDiffNameOnlyMaster,
+  gitDiffStatMaster,
+  gitMergeBaseMaster,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
-const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -87,18 +96,26 @@ function timedExecOrDie(cmd) {
 }
 
 /**
- * Returns a list of files in the commit range within this pull request (PR)
- * after filtering out commits to master from other PRs.
- * @return {!Array<string>}
+ * Prints a summary of files changed by, and commits included in the PR.
  */
-function filesInPr() {
-  const files = gitDiffNameOnlyMaster();
-  const changeSummary = gitDiffStatMaster();
-  console.log(fileLogPrefix,
-      'Testing the following changes at commit',
-      colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
-  console.log(changeSummary);
-  return files;
+function printChangeSummary() {
+  if (process.env.TRAVIS) {
+    console.log(fileLogPrefix, colors.cyan('origin/master'),
+        'is currently at commit',
+        colors.cyan(shortSha(gitTravisMasterBaseline())));
+    console.log(fileLogPrefix,
+        'Testing the following changes at commit',
+        colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
+  }
+
+  const filesChanged = gitDiffStatMaster();
+  console.log(filesChanged);
+
+  const branchPoint = gitMergeBaseMaster();
+  console.log(fileLogPrefix, 'Commit log since branch',
+      colors.cyan(gitBranchName()), 'was forked from',
+      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
+  console.log(gitDiffCommitLog() + '\n');
 }
 
 /**
@@ -112,7 +129,7 @@ function isValidatorWebuiFile(filePath) {
 }
 
 /**
- * Determines whether the given file belongs to the Validator webui,
+ * Determines whether the given file belongs to the build system,
  * that is, the 'BUILD_SYSTEM' target.
  * @param {string} filePath
  * @return {boolean}
@@ -133,6 +150,22 @@ function isBuildSystemFile(filePath) {
       !isVisualDiffFile(filePath))
       // OWNERS.yaml files should trigger build system to run tests
       || isOwnersFile(filePath);
+}
+
+/**
+ * Determines whether the given file belongs to the build system, but also
+ * affects the runtime.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isBuildSystemAndRuntimeFile(filePath) {
+  return isBuildSystemFile(filePath) &&
+      // These build system files are involved in the compilation/bundling and
+      // are likely to affect the runtime as well.
+      (
+        filePath.startsWith('build-system/babel-plugins') ||
+        filePath.startsWith('build-system/runner')
+      );
 }
 
 /**
@@ -261,10 +294,12 @@ function determineBuildTargets(filePaths) {
       'VISUAL_DIFF']);
   }
   const targetSet = new Set();
-  for (let i = 0; i < filePaths.length; i++) {
-    const p = filePaths[i];
+  for (const p of filePaths) {
     if (isBuildSystemFile(p)) {
       targetSet.add('BUILD_SYSTEM');
+      if (isBuildSystemAndRuntimeFile(p)) {
+        targetSet.add('RUNTIME');
+      }
     } else if (isValidatorWebuiFile(p)) {
       targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
@@ -375,7 +410,9 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --headless --coverage');
+        // TODO(choumx, #19658): --headless disabled for integration tests on
+        // Travis until Chrome 72.
+        timedExecOrDie(cmd + ' --coverage');
       } else {
         startSauceConnect();
         timedExecOrDie(cmd + ' --saucelabs');
@@ -388,7 +425,9 @@ const command = {
   runSinglePassCompiledIntegrationTests: function() {
     timedExecOrDie('rm -R dist');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
-    timedExecOrDie('gulp test --integration --nobuild --headless '
+    // TODO(choumx, #19658): --headless disabled for integration tests on
+    // Travis until Chrome 72.
+    timedExecOrDie('gulp test --integration --nobuild '
         + '--compiled --single_pass');
     timedExecOrDie('rm -R dist');
   },
@@ -552,6 +591,7 @@ function main() {
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
     process.env['LOCAL_PR_CHECK'] = true;
+    printChangeSummary();
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -569,7 +609,8 @@ function main() {
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const files = filesInPr();
+  printChangeSummary();
+  const files = gitDiffNameOnlyMaster();
   const buildTargets = determineBuildTargets(files);
 
   // Exit early if flag-config files are mixed with runtime files.

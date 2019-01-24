@@ -21,6 +21,7 @@ import {
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
+import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
@@ -28,7 +29,7 @@ import {
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {dev, user} from '../../../../src/log';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
@@ -129,8 +130,8 @@ export class LightboxManager {
    * @return {boolean}
    */
   meetsHeuristicsForTap_(element) {
-    dev().assert(element);
-    dev().assert(element.hasAttribute('lightbox'));
+    devAssert(element);
+    devAssert(element.hasAttribute('lightbox'));
 
     if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
@@ -243,7 +244,7 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element),
+    userAssert(this.baseElementIsSupported_(element),
         'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
@@ -251,10 +252,12 @@ export class LightboxManager {
     }
 
     this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
-    if (this.meetsHeuristicsForTap_(element)) {
-      const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
-      element.setAttribute('on', `tap:${gallery.id}.activate`);
+    if (!this.meetsHeuristicsForTap_(element)) {
+      return;
     }
+    const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
+    const actions = Services.actionServiceForDoc(element);
+    actions.setActions(element, `tap:${gallery.id}.activate`);
   }
 
   /**
@@ -275,7 +278,7 @@ export class LightboxManager {
    */
   getElementsForLightboxGroup(lightboxGroupId) {
     return this.maybeInit()
-        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
+        .then(() => devAssert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**

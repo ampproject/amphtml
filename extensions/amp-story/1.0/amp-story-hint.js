@@ -182,8 +182,8 @@ export class AmpStoryHint {
     });
 
     this.storeService_.subscribe(
-        StateProperty.TOOLTIP_ELEMENT, tooltipIsOpen => {
-          this.onTooltipStateUpdate_(tooltipIsOpen);
+        StateProperty.EMBEDDED_COMPONENT, tooltipIsOpen => {
+          this.onFocusedStateUpdate_(tooltipIsOpen);
         });
 
     this.vsync_.mutate(() => {
@@ -316,7 +316,7 @@ export class AmpStoryHint {
    * @param {boolean} isOpen
    * @private
    */
-  onTooltipStateUpdate_(isOpen) {
+  onFocusedStateUpdate_(isOpen) {
     if (isOpen) {
       this.hideAllNavigationHint();
     }

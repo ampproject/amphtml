@@ -164,6 +164,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
     this.htmlFormat = 'AMP4EMAIL';
   }
+  if (this.ampHtmlFile.indexOf('actions_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-actions-') != -1) {
+    this.htmlFormat = 'ACTIONS';
+  }
   /**
    * If set to false, output will be generated without inlining the input
    * document.
@@ -340,6 +344,21 @@ describe('ValidatorOutput', () => {
     {assert.fail(
         '', '', 'expectedSubstr:\n' + expectedSubstr +
           '\nsaw:\n' + observed, '');}
+  });
+});
+
+describe('ValidationResultTransformerVersion', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Confirm that the transformer version in attribute "transformed" is
+  // set to ValidationResult.transformer_version.
+  it('produces expected output with hash in the URL', () => {
+    const test = new ValidatorTestCase(
+        'transformed_feature_tests/minimum_valid_amp.html');
+    const result =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    assertStrictEqual(1, result.transformerVersion);
   });
 });
 
@@ -968,6 +987,14 @@ describe('ValidatorRulesMakeSense', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
 
+    // When explicit_attrs_only is true, then amp_layout must not be set.
+    if (tagSpec.explicitAttrsOnly) {
+      it('\'' + tagSpecName + '\' has explicit_attrs_only set to true ' +
+          'and must not have any amp_layouts', () => {
+        expect(tagSpec.ampLayout === null).toBe(true);
+      });
+    }
+
     // attr_specs within tag.
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
@@ -1128,10 +1155,11 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // We want to be certain not to allow SCRIPT tagspecs which don't either
-      // define a src attribute OR define a JSON type.
+      // define a src attribute OR define a JSON or TEXT/PLAIN type.
       if (tagSpec.tagName === 'SCRIPT') {
         let hasSrc = false;
         let hasJson = false;
+        let hasTextPlain = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
@@ -1144,11 +1172,15 @@ describe('ValidatorRulesMakeSense', () => {
                   value === 'application/json') {
                 hasJson = true;
               }
+              if (value == 'text/plain') {
+                hasTextPlain = true;
+              }
             }
           }
         }
-        it('script tags must be json or src', () => {
-          expect(hasSrc || hasJson).toBe(true);
+        it('script tags must have either a src attribute or type json or '
+           + 'text/plain', () => {
+          expect(hasSrc || hasJson || hasTextPlain).toBe(true);
         });
       }
       // cdata_regex and mandatory_cdata

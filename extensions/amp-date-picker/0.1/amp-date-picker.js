@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -92,6 +92,7 @@ const attributesToForward = [
   'month-format',
   'number-of-months',
   'minimum-nights',
+  'maximum-nights',
 ];
 
 /** @enum {string} */
@@ -238,7 +239,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.renderInfo = this.renderInfo.bind(this);
 
     /** @const */
-    this.renderDay = this.renderDay.bind(this);
+    this.renderDay = this.renderDay_.bind(this);
 
     /** @private {?Promise<string>} */
     this.infoTemplatePromise_ = null;
@@ -399,7 +400,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
     if (this.fullscreen_) {
-      user().assert(this.mode_ == DatePickerMode.STATIC,
+      userAssert(this.mode_ == DatePickerMode.STATIC,
           'amp-date-picker mode must be "static" to use fullscreen attribute');
     }
 
@@ -488,7 +489,17 @@ export class AmpDatePicker extends AMP.BaseElement {
       newState['max'] = max;
     }
 
-    this.setState_(newState);
+    let p = null;
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.clearRenderedTemplates_();
+      this.cleanupSrcTemplates_();
+
+      p = this.setupSrcAttributes_();
+      this.setupTemplates_();
+    }
+
+    Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -1476,7 +1487,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Render a day in the calendar view.
    * @param {!moment} date
    */
-  renderDay(date) {
+  renderDay_(date) {
     const key = date.format(DEFAULT_FORMAT);
     const cachedDay = this.renderedTemplates_[key];
     if (cachedDay) {

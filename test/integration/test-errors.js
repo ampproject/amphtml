@@ -23,10 +23,12 @@ import {
 /** @const {number} */
 const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
-// TODO(@cramforce): Find out why it does not work with obfuscated
-// props.
-const t = describe.configure().retryOnSaucelabs()
-    .skipIfPropertiesObfuscated();
+const t = describe.configure()
+    .retryOnSaucelabs()
+    // TODO(@cramforce): Find out why it does not work with obfuscated props.
+    .skipIfPropertiesObfuscated()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
 t.run('error page', function() {
   this.timeout(TIMEOUT);
 
@@ -58,7 +60,7 @@ t.run('error page', function() {
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.configure().ifNewChrome().run('should fail to load #' + id, () => {
+    it.configure().ifChrome().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));

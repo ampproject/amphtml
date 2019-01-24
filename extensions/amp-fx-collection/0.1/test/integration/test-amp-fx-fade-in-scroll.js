@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifNewChrome();
+const config = describe.configure().ifChrome();
 config.run('amp-fx-collection', function() {
-  this.timeout(100000);
 
   const css = `
     .spacer {
@@ -47,6 +46,7 @@ config.run('amp-fx-collection', function() {
     body: defaultBody,
     css,
     extensions,
+    timeout: 20000,
   }, env => {
 
     let win;
@@ -96,6 +96,7 @@ config.run('amp-fx-collection', function() {
     body: marginSpecifiedBody,
     css,
     extensions,
+    timeout: 15000,
   }, env => {
 
     let win;
@@ -134,6 +135,7 @@ config.run('amp-fx-collection', function() {
     body: repeatSpecifiedBody,
     css,
     extensions,
+    timeout: 20000,
   }, env => {
 
     let win;

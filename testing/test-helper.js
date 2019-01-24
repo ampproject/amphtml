@@ -135,16 +135,13 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
+// Use a browserId to avoid cross-browser race conditions
+// when testing in Saucelabs.
+/** @const {string} */
+const browserId = (Date.now() + Math.random()).toString(32);
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank';
-
-/**
- * Append user agent to request-bank deposit/withdraw IDs to avoid
- * cross-browser race conditions when testing in Saucelabs.
- * @const {string}
- */
-const userAgent = encodeURIComponent(window.navigator.userAgent);
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/' + browserId;
 
 /**
  * A server side temporary request storage which is useful for testing
@@ -152,17 +149,18 @@ const userAgent = encodeURIComponent(window.navigator.userAgent);
  */
 export class RequestBank {
 
+  static getBrowserId() {
+    return browserId;
+  }
+
   /**
    * Returns the URL for depositing a request.
    *
-   * @param id an unique identifier of the request.
+   * @param {number|string|undefined} requestId
    * @returns {string}
    */
-  static getUrl(id) {
-    if (id.indexOf('/') >= 0) {
-      throw new Error('ID "' + id + '" should not contain "/"');
-    }
-    return `${REQUEST_URL}/deposit/${userAgent}-${id}/`;
+  static getUrl(requestId) {
+    return `${REQUEST_URL}/deposit/${requestId}/`;
   }
 
   /**
@@ -173,19 +171,91 @@ export class RequestBank {
    *   headers: JsonObject
    *   body: string
    * }
-   * @param id
+   * @param {number|string|undefined} requestId
    * @returns {Promise<JsonObject>}
    */
-  static withdraw(id) {
-    if (id.indexOf('/') >= 0) {
-      throw new Error('ID "' + id + '" should not contain "/"');
-    }
-    const url = `${REQUEST_URL}/withdraw/${userAgent}-${id}/`;
+  static withdraw(requestId) {
+    const url = `${REQUEST_URL}/withdraw/${requestId}/`;
     return xhrServiceForTesting(window).fetchJson(url, {
       method: 'GET',
       ampCors: false,
       credentials: 'omit',
     }).then(res => res.json());
+  }
+
+  static tearDown() {
+    const url = `${REQUEST_URL}/teardown/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    });
+  }
+}
+
+export class BrowserController {
+  constructor(win) {
+    this.win_ = win;
+    this.doc_ = this.win_.document;
+  }
+
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementBuild(selector, timeout = 5000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to build`,
+        () => {
+          const someNotBuilt = [].some.call(elements,
+              e => e.classList.contains('i-amphtml-notbuilt'));
+          return !someNotBuilt;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementLayout(selector, timeout = 10000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to layout`,
+        () => {
+          // AMP elements set `readyState` to complete when their
+          // layoutCallback() promise is resolved.
+          const someNotReady = [].some.call(elements,
+              e => e.readyState !== 'complete');
+          return !someNotReady;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  click(selector) {
+    const element = this.doc_.querySelector(selector);
+    if (element) {
+      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
+    }
+  }
+
+  scrollTo(px) {
+    this.win_.scrollTo(0, px);
   }
 }
 

@@ -19,7 +19,7 @@ import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 
 
@@ -75,9 +75,6 @@ export class PlatformStore {
     /** @private {?Deferred} */
     this.grantStatusPromise_ = null;
 
-    /** @private @const {!Observable} */
-    this.onGrantStateResolvedCallbacks_ = new Observable();
-
     /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
 
@@ -115,6 +112,11 @@ export class PlatformStore {
    * @return {PlatformStore}
    */
   resetPlatformStore() {
+    // Reset individual platforms to ensure their UX clears.
+    for (const platformKey in this.subscriptionPlatforms_) {
+      this.subscriptionPlatforms_[platformKey].reset();
+    }
+    // Then create new platform store withe the newply reset platforms in it.
     return new PlatformStore(
         this.serviceIds_,
         this.scoreConfig_,
@@ -148,7 +150,7 @@ export class PlatformStore {
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
-    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
+    devAssert(platform, `Platform for id ${serviceId} is not resolved`);
     return platform;
   }
 
@@ -206,6 +208,9 @@ export class PlatformStore {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
+    if (entitlement.granted) {
+      this.saveGrantEntitlement_(entitlement);
+    }
     this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
   }
 
@@ -215,7 +220,7 @@ export class PlatformStore {
    * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
-    dev().assert(this.entitlements_[serviceId],
+    devAssert(this.entitlements_[serviceId],
         `Platform ${serviceId} has not yet resolved with entitlements`);
     return this.entitlements_[serviceId];
   }
@@ -226,7 +231,7 @@ export class PlatformStore {
    * @return {!Promise<!./entitlement.Entitlement>} entitlement
    */
   getEntitlementPromiseFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
+    devAssert(this.entitlementDeferredMap_[serviceId],
         `Platform ${serviceId} is not declared`);
     return this.entitlementDeferredMap_[serviceId].promise;
   }
@@ -257,7 +262,6 @@ export class PlatformStore {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(({entitlement}) => {
         if (entitlement.granted) {
-          this.saveGrantEntitlement_(entitlement);
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
           this.grantStatusPromise_.resolve(false);
@@ -281,7 +285,6 @@ export class PlatformStore {
           && !this.grantStatusEntitlement_.isSubscriber()
           && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
-      this.onGrantStateResolvedCallbacks_.fire();
     }
   }
 
@@ -299,9 +302,10 @@ export class PlatformStore {
           || this.areAllPlatformsResolved_()) {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
-      this.onGrantStateResolvedCallbacks_.add(() => {
+      this.onEntitlementResolvedCallbacks_.add(() => {
         // Grant entitlement only if subscriber
-        if (this.grantStatusEntitlement_.isSubscriber()
+        if ((this.grantStatusEntitlement_
+             && this.grantStatusEntitlement_.isSubscriber())
             || this.areAllPlatformsResolved_()) {
           this.grantStatusEntitlementPromise_.resolve(
               this.grantStatusEntitlement_);
@@ -411,7 +415,7 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatform_() {
-    dev().assert(this.areAllPlatformsResolved_(),
+    devAssert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
     // Subscriber wins immediately.

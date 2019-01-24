@@ -15,15 +15,13 @@
 #
 
 tags: {  # amp-video-docking
-  attr_lists: "common-extension-attrs"
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-video-docking"
   extension_spec: {
     name: "amp-video-docking"
-    requires_usage: NONE
     version: "0.1"
     version: "latest"
   }
-  html_format: AMP
-  requires_extension: "amp-video"
-  spec_name: "amp-video-docking for amp-video"
-  tag_name: "SCRIPT"
+  attr_lists: "common-extension-attrs"
 }

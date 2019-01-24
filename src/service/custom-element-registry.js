@@ -18,7 +18,7 @@ import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
-import {user} from '../log';
+import {userAssert} from '../log';
 
 
 /**
@@ -49,7 +49,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // Already registered this instance.
     return;
   }
-  user().assert(knownElements[name] == ElementStub,
+  userAssert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
   knownElements[name] = toClass;

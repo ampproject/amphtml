@@ -70,13 +70,11 @@ export function getStoredConsentInfo(value) {
     // legacy format
     return getLegacyStoredConsentInfo(value);
   }
-
   if (!isObject(value)) {
     throw dev().createError('Invalid stored consent value');
   }
 
   const consentState = convertValueToState(value[STORAGE_KEY.STATE]);
-
   return constructConsentInfo(consentState,
       value[STORAGE_KEY.STRING],
       (value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1));
@@ -122,6 +120,9 @@ export function composeStoreValue(consentInfo, opt_forceNew) {
     obj[STORAGE_KEY.STATE] = 1;
   } else if (consentState == CONSENT_ITEM_STATE.REJECTED) {
     obj[STORAGE_KEY.STATE] = 0;
+  } else {
+    // Only store consentString and dirtyBit with reject/accept action
+    return null;
   }
 
   if (consentInfo['consentString']) {
@@ -161,7 +162,7 @@ export function calculateLegacyStateValue(consentState) {
  * @param {?ConsentInfoDef} infoB
  * @return {boolean}
  */
-export function isConsentInfoStoredValueChanged(infoA, infoB) {
+export function isConsentInfoStoredValueSame(infoA, infoB) {
   if (!infoA && !infoB) {
     return true;
   }
@@ -213,4 +214,34 @@ function convertValueToState(value) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
+}
+
+/**
+ *
+ * @param {!ConsentInfoDef} info
+ * @return {boolean}
+ */
+export function hasStoredValue(info) {
+  if (info['consentString']) {
+    return true;
+  }
+  return info['consentState'] === CONSENT_ITEM_STATE.ACCEPTED ||
+      info['consentState'] === CONSENT_ITEM_STATE.REJECTED;
+}
+
+/**
+ * Convert the CONSENT_ITEM_STATE back to readable string
+ * @param {!CONSENT_ITEM_STATE} enumState
+ * @return {string}
+ */
+export function getConsentStateValue(enumState) {
+  if (enumState === CONSENT_ITEM_STATE.ACCEPTED) {
+    return 'accepted';
+  }
+
+  if (enumState === CONSENT_ITEM_STATE.REJECTED) {
+    return 'rejected';
+  }
+
+  return 'unknown';
 }

@@ -18,11 +18,19 @@ const defaultPlugins = [
   require.resolve(
       './babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve(
+      './babel-plugins/babel-plugin-transform-html-template'),
+  require.resolve(
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
+  require.resolve(
+      './babel-plugins/babel-plugin-is_minified-constant-transformer'),
 ];
 
 module.exports = {
-  plugins: (isEsmBuild, isCommonJsModule) => {
+  plugins: ({
+    isEsmBuild,
+    isCommonJsModule,
+    isForTesting,
+  }) => {
     let pluginsToApply = defaultPlugins;
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
@@ -42,6 +50,16 @@ module.exports = {
     if (isCommonJsModule) {
       pluginsToApply = pluginsToApply.concat([
         [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
+      ]);
+    }
+    if (!isForTesting) {
+      pluginsToApply = pluginsToApply.concat([
+        require.resolve(
+            './babel-plugins/babel-plugin-is_dev-constant-transformer'
+        ),
+        require.resolve(
+            './babel-plugins/babel-plugin-amp-mode-transformer'
+        ),
       ]);
     }
     return pluginsToApply;

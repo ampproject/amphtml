@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.40 */
+/** Version: 0.1.22.42 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1751,7 +1751,7 @@ const AnalyticsEvent = {
 
 class AnalyticsContext {
  /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  * @param {!Array=} data
   */
   constructor(data = []) {
 
@@ -1910,7 +1910,7 @@ class AnalyticsContext {
   }
 
   /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   * @return {!Array}
    */
   toArray() {
     return [
@@ -1931,7 +1931,7 @@ class AnalyticsContext {
 
 class AnalyticsRequest {
  /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  * @param {!Array=} data
   */
   constructor(data = []) {
 
@@ -1972,7 +1972,7 @@ class AnalyticsRequest {
   }
 
   /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   * @return {!Array}
    */
   toArray() {
     return [
@@ -2505,16 +2505,16 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {!Document} doc The document object.
+ * @param {*} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
 function injectStyleSheet(doc, styleText) {
-  const styleElement = createElement(doc, 'style', {
+  const styleElement = createElement(doc.getWin().document, 'style', {
     'type': styleType,
   });
   styleElement.textContent = styleText;
-  doc.head.appendChild(styleElement);
+  doc.getHead().appendChild(styleElement);
   return styleElement;
 }
 
@@ -2535,6 +2535,16 @@ function isConnected(node) {
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
   return root && root.contains(node) || false;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser$1(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
 }
 
 /**
@@ -3292,6 +3302,229 @@ class ActivityIframeView extends View {
  * limitations under the License.
  */
 
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
+
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    assert(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!BufferSource} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+function utf8EncodeSync(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
+
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function parseJson(json) {
+  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Parses the given `json` string without throwing an exception if not valid.
+ * Returns `undefined` if parsing fails.
+ * Returns the `Object` corresponding to the JSON string when parsing succeeds.
+ * @param {*} json JSON string to parse
+ * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ *     with the error if parsing fails.
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function tryParseJson(json, opt_onFailed) {
+  try {
+    return parseJson(json);
+  } catch (e) {
+    if (opt_onFailed) {
+      opt_onFailed(e);
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Provides helper methods to decode and verify JWT tokens.
+ */
+class JwtHelper {
+  constructor() {
+  }
+
+  /**
+   * Decodes JWT token and returns its payload.
+   * @param {string} encodedToken
+   * @return {?JsonObject|undefined}
+   */
+  decode(encodedToken) {
+    return this.decodeInternal_(encodedToken).payload;
+  }
+
+  /**
+   * @param {string} encodedToken
+   * @return {!JwtTokenInternalDef}
+   * @private
+   */
+  decodeInternal_(encodedToken) {
+    // See https://jwt.io/introduction/
+    /**
+     * Throws error about invalid token.
+     */
+    function invalidToken() {
+      throw new Error(`Invalid token: "${encodedToken}"`);
+    }
+
+    // Encoded token has three parts: header.payload.sig
+    // Note! The padding is not allowed by JWT spec:
+    // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
+    const parts = encodedToken.split('.');
+    if (parts.length != 3) {
+      invalidToken();
+    }
+    const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
+    const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
+    return {
+      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      verifiable: `${parts[0]}.${parts[1]}`,
+      sig: parts[2],
+    };
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 /**
  * The holder of the entitlements for a service.
@@ -3691,6 +3924,8 @@ class PurchaseData {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
+    this.data = raw;
+    /** @const {string} */
     this.signature = signature;
   }
 
@@ -3711,6 +3946,22 @@ class PurchaseData {
     };
   }
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -3811,251 +4062,13 @@ class DeferredAccountCreationResponse {
  * limitations under the License.
  */
 
-/**
- * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
- */
-const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
-
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into a Uint8Array with the corresponding bytes.
- * If you have a string of characters, you probably want to be using utf8Encode.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function stringToBytes(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    assert(charCode <= 255, 'Characters must be in range [0,255]');
-    bytes[i] = charCode;
-  }
-  return bytes;
-}
-
-
-/**
- * Converts a 8-bit bytes array into a string
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function bytesToString(bytes) {
-  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
-  // stack overflow. #10495, https://jsperf.com/bytesToString-2
-  const array = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    array[i] = String.fromCharCode(bytes[i]);
-  }
-  return array.join('');
-}
-
-
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
- * @return {string}
- */
-function utf8DecodeSync(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(bytes);
-  }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
-  return decodeURIComponent(escape(asciiString));
-}
-
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
- * @return {!Uint8Array}
- */
-function utf8EncodeSync(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
-  }
-  return stringToBytes(unescape(encodeURIComponent(string)));
-}
-
-
-/**
- * Converts a string which is in base64url encoding into a Uint8Array
- * containing the decoded value.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function base64UrlDecodeToBytes(str) {
-  const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
-  return stringToBytes(encoded);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Simple wrapper around JSON.parse that casts the return value
- * to JsonObject.
- * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
-}
-
-/**
- * Parses the given `json` string without throwing an exception if not valid.
- * Returns `undefined` if parsing fails.
- * Returns the `Object` corresponding to the JSON string when parsing succeeds.
- * @param {*} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
- *     with the error if parsing fails.
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function tryParseJson(json, opt_onFailed) {
-  try {
-    return parseJson(json);
-  } catch (e) {
-    if (opt_onFailed) {
-      opt_onFailed(e);
-    }
-    return undefined;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * Provides helper methods to decode and verify JWT tokens.
- */
-class JwtHelper {
-  constructor() {
-  }
-
-  /**
-   * Decodes JWT token and returns its payload.
-   * @param {string} encodedToken
-   * @return {?JsonObject|undefined}
-   */
-  decode(encodedToken) {
-    return this.decodeInternal_(encodedToken).payload;
-  }
-
-  /**
-   * @param {string} encodedToken
-   * @return {!JwtTokenInternalDef}
-   * @private
-   */
-  decodeInternal_(encodedToken) {
-    // See https://jwt.io/introduction/
-    /**
-     * Throws error about invalid token.
-     */
-    function invalidToken() {
-      throw new Error(`Invalid token: "${encodedToken}"`);
-    }
-
-    // Encoded token has three parts: header.payload.sig
-    // Note! The padding is not allowed by JWT spec:
-    // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
-    const parts = encodedToken.split('.');
-    if (parts.length != 3) {
-      invalidToken();
-    }
-    const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
-    const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
-    return {
-      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
-      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
-      verifiable: `${parts[0]}.${parts[1]}`,
-      sig: parts[2],
-    };
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 
 /** @enum {string} */
 const SubscriptionFlows = {
   SHOW_OFFERS: 'showOffers',
   SHOW_SUBSCRIBE_OPTION: 'showSubscribeOption',
   SHOW_ABBRV_OFFER: 'showAbbrvOffer',
+  SHOW_CONTRIBUTION_OPTIONS: 'showContributionOptions',
   SUBSCRIBE: 'subscribe',
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
@@ -4322,7 +4335,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.40',
+    '_client': 'SwG 0.1.22.42',
   });
 }
 
@@ -4706,6 +4719,99 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
 
 
 /**
+ * The class for Contributions flow.
+ */
+class ContributionsFlow {
+
+  /**
+   * @param {*} deps
+   * @param {*} options
+   */
+  constructor(deps, options) {
+    /** @private @const {*} */
+    this.deps_ = deps;
+
+    /** @private @const {*} */
+    this.options_ = options;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {*} */
+    this.dialogManager_ = deps.dialogManager();
+
+    const isClosable = (options && options.isClosable) || true;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/contributionsiframe'),
+        feArgs({
+          'productId': deps.pageConfig().getProductId(),
+          'publicationId': deps.pageConfig().getPublicationId(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
+          'isClosable': isClosable,
+        }),
+        /* shouldFadeBody */ true);
+  }
+
+  /**
+   * Starts the contributions flow or alreadyMember flow.
+   * @return {!Promise}
+   */
+  start() {
+    // Start/cancel events.
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+    this.activityIframeView_.onCancel(() => {
+      this.deps_.callbacks().triggerFlowCanceled(
+          SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+    });
+
+    // If result is due to OfferSelection, redirect to payments.
+    this.activityIframeView_.onMessage(result => {
+      if (result['alreadyMember']) {
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!result['linkRequested'],
+        });
+        return;
+      }
+      if (result['sku']) {
+        new PayStartFlow(
+            this.deps_,
+            /** @type {string} */ (result['sku']))
+            .start();
+        return;
+      }
+    });
+
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
  * The flow to initiate deferred account process.
  * See `Subscriptions.completeDeferredAccountCreation` API.
  */
@@ -4855,6 +4961,176 @@ class DeferredAccountFlow {
  */
 
 const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -5342,7 +5618,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(iframeDoc, CSS$1);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -5789,176 +6065,6 @@ class DialogManager {
       // Ignore.
     }
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/** @implements {Doc} */
-class GlobalDoc {
-
-  /**
-   * @param {!Window|!Document} winOrDoc
-   */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
-  }
-
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
-  whenReady() {
-    return whenDocumentReady(this.doc_);
-  }
-}
-
-
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
-  }
-  // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
-  }
-  return /** @type {!Doc} */ (input);
 }
 
 /**
@@ -6569,6 +6675,11 @@ const ExperimentFlags = {
    * for another in the subscribe() API.
    */
   REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   */
+  CONTRIBUTIONS: 'contributions',
 };
 
 /**
@@ -8875,10 +8986,6 @@ function apiV2DoesMerchantSupportSpecifiedCardType(
  * message.
  */
 function validateSecureContext() {
-  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
-    // This is for local development.
-    return null;
-  }
   if (window.isSecureContext === undefined) {
     // Browser not support isSecureContext, figure out a way to validate this
     // for the unsupported browser.
@@ -12164,6 +12271,11 @@ class ConfiguredRuntime {
 
     /** @private @const {*} */
     this.config_ = defaultConfig();
+    if (isEdgeBrowser$1(this.win_)) {
+      // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
+      // or move it to Web Activities.
+      this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
+    }
     if (opt_config) {
       this.configure_(opt_config);
     }
@@ -12217,7 +12329,7 @@ class ConfiguredRuntime {
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
 
-    injectStyleSheet(this.win_.document, CSS);
+    injectStyleSheet(this.doc_, CSS);
 
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {
@@ -12387,6 +12499,17 @@ class ConfiguredRuntime {
   showAbbrvOffer(opt_options) {
     return this.documentParsed_.then(() => {
       const flow = new AbbrvOfferFlow(this, opt_options);
+      return flow.start();
+    });
+  }
+
+  /** @override */
+  showContributionOptions(opt_options) {
+    if (!isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS)) {
+      throw new Error('Not yet launched!');
+    }
+    return this.documentParsed_.then(() => {
+      const flow = new ContributionsFlow(this, opt_options);
       return flow.start();
     });
   }
