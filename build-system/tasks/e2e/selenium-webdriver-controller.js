@@ -346,12 +346,11 @@ class SeleniumWebDriverController {
   /**
    * Evaluate the given function
    * @param {function()} fn
-   * @param {...*} unusedArgs
+   * @param {...*} args
    * @return {!ControllerPromise}
    * @override
    */
-  eval(fn, unusedArgs) {
-    const args = Array.prototype.slice.call(arguments, 1);
+  eval(fn, ...args) {
     return this.driver.executeScript(fn, ...args);
   }
 
