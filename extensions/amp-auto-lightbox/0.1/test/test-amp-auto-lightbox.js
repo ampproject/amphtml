@@ -31,7 +31,7 @@ import {
   meetsSizingCriteria,
   resolveIsEnabledForDoc,
   runCandidates,
-  scanDoc,
+  scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
@@ -604,10 +604,10 @@ describes.realWin(TAG, {
 
   });
 
-  describe('scanDoc', () => {
+  describe('scan', () => {
 
     function waitForAllScannedToBeResolved() {
-      return scanDoc(env.ampdoc).then(scanned => Promise.all(scanned));
+      return scan(env.ampdoc).then(scanned => Promise.all(scanned));
     }
 
     it('does not load extension if no candidates found', function* () {

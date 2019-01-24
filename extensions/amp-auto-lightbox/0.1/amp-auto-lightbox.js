@@ -200,13 +200,13 @@ export class Scanner {
 
   /**
    * Gets all unvisited lightbox candidates.
-   * @param {!Document} doc
+   * @param {!Document|!Element} root
    * @return {!Array<!Element>}
    */
-  static getCandidates(doc) {
+  static getCandidates(root) {
     const selector =
         `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
-    const candidates = toArray(doc.querySelectorAll(selector));
+    const candidates = toArray(root.querySelectorAll(selector));
     candidates.forEach(markAsVisited);
     return candidates;
   }
@@ -409,10 +409,11 @@ export function runCandidates(ampdoc, candidates) {
 /**
  * Scans a document on initialization to lightbox elements that meet criteria.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element=} opt_root
  * @return {!Promise<!Array<!Promise>>}
  */
-export function scanDoc(ampdoc) {
-  const candidates = Scanner.getCandidates(ampdoc.win.document);
+export function scan(ampdoc, opt_root) {
+  const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
 
   return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
     if (!isEnabled) {
@@ -426,12 +427,8 @@ export function scanDoc(ampdoc) {
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
     ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-      // Prevent recursion.
-      if (target.hasAttribute(LIGHTBOXABLE_ATTR)) {
-        return;
-      }
-      scanDoc(ampdoc);
+      scan(ampdoc, target);
     });
-    scanDoc(ampdoc);
+    scan(ampdoc);
   });
 });
