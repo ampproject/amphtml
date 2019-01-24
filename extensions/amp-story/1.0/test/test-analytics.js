@@ -39,7 +39,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   it('should trigger `manualAdvance` on change', () => {
     const trigger = sandbox.stub(analytics, 'triggerEvent_');
 
-    analytics.onAdvacementModeStateChange(AdvancementMode.MANUAL_ADVANCE);
+    analytics.onAdvancementModeStateChange(AdvancementMode.MANUAL_ADVANCE);
 
     expect(trigger).to.have.been.calledWith('manualAdvance');
   });
