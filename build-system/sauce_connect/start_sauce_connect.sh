@@ -19,8 +19,12 @@
 
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+RED() { echo -e "\033[0;31m$1\033[0m"; }
 
 SC_VERSION="sc-4.5.3-linux"
+AUTHENTICATED_STATUS_URL="https://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/info/status"
+STATUS_URL="https://saucelabs.com/rest/v1/info/status"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
 DOWNLOAD_DIR="sauce_connect"
 TAR_FILE="$DOWNLOAD_DIR/$SC_VERSION.tar.gz"
@@ -30,6 +34,24 @@ LOG_FILE="sauce_connect_log"
 READY_FILE="sauce_connect_ready"
 READY_DELAY_SECS=60
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
+
+# Check the status of the Sauce Labs service
+echo "$LOG_PREFIX Fetching current Sauce Labs service status from $(CYAN "$STATUS_URL")..."
+SAUCE_STATUS="$(curl -s "$AUTHENTICATED_STATUS_URL")"
+SERVICE_OPERATIONAL="$(echo "$SAUCE_STATUS" | jq '.service_operational')"
+STATUS_MESSAGE="$(echo "$SAUCE_STATUS" | jq '.status_message')"
+ERROR_MESSAGE="$(echo "$SAUCE_STATUS" | jq '.message')"
+if [[ "$STATUS_MESSAGE" = "null" ]]; then
+  echo "$LOG_PREFIX $(RED "ERROR:") Could not fetch Sauce Labs Service status. Message: $(CYAN "$ERROR_MESSAGE")"
+  echo "$LOG_PREFIX Attempting to connect anyway..."
+else
+  if [[ $SERVICE_OPERATIONAL = "true" ]]; then
+    echo "$LOG_PREFIX $(GREEN "SUCCESS:") Sauce Labs is operational. Status: $(CYAN "$STATUS_MESSAGE")"
+  else
+    echo "$LOG_PREFIX $(RED "ERROR:") Sauce Labs does not appear to be operational. Status: $(CYAN "$STATUS_MESSAGE")"
+    echo "$LOG_PREFIX Attempting to connect anyway..."
+  fi
+fi
 
 # Download the sauce connect proxy binary (if needed) and unpack it.
 if [[ -f $TAR_FILE ]]; then
