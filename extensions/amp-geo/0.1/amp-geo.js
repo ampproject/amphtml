@@ -114,6 +114,11 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     // All geo config within the amp-geo component.
     // The validator only allows one amp-geo per page
