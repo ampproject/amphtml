@@ -24,7 +24,7 @@ Serves ads from [Adyoulike](https://www.adyoulike.com/).
 ```html
 <amp-ad width="300" height="250"
       type="adyoulike"
-      data-placement="d135a2027b1041059f06fbf8cf4ddfef"
+      data-placement="d135a2027b1041059f06fbf8cf4ddfef">
 </amp-ad>
 ```
 
