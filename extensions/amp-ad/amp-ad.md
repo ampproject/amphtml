@@ -339,6 +339,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
+- [TcsEmotion](../../ads/tcsemotion.md)
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
