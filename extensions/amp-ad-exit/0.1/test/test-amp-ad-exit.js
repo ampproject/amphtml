@@ -212,7 +212,7 @@ describes.realWin('amp-ad-exit', {
     const event = makeClickEvent(1001);
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'simple'},
+      args: {target: 'twoSecondDelay'},
       event,
       satisfiesTrust: () => true,
     });
