@@ -100,11 +100,7 @@ The output of "triple-mustache" is sanitized to only allow the following tags: `
 
 ### Sanitization
 
-Mustache output is sanitized for security reasons, which may result in certain elements and attributes being removed.
-
-A console error will be output with details of the sanitized element or attribute. For example:
-
-> [PURIFIER] Removed unsafe attribute: href="javascript:alert"
+Mustache output is sanitized for security reasons and to maintain AMP validity. This may result in certain elements and attributes being silently removed.
 
 ## Pitfalls
 
