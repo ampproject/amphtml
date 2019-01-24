@@ -546,7 +546,8 @@ function wrapMainBinaries() {
   jsFilesToWrap.forEach(x => {
     const path = `${singlePassDest}${x}.js`;
     const bootstrapCode = path === `${singlePassDest}v0.js` ? '' : mainFile;
-    const isAmpAltstring = path === `${singlePassDest}v0.js` ? '' : 'self.IS_AMP_ALT=1;';
+    const isAmpAltstring =
+      path === `${singlePassDest}v0.js` ? '' : 'self.IS_AMP_ALT=1;';
     fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
         `${fs.readFileSync(path).toString()}${suffix}`);
   });
@@ -564,8 +565,10 @@ function postProcessConcat() {
     const isAltMainBundle = altMainBundles.some(x => {
       return x.name === extension.name;
     });
-    // We assume its in v0 unless its an alternative main binary.
-    const srcTargetDir = isAltMainBundle ? singlePassDest : `${singlePassDest}v0/`;
+    // We assume its in v0 unless
+    // its an alternative main binary.
+    const srcTargetDir =
+      isAltMainBundle ? singlePassDest : `${singlePassDest}v0/`;
 
     function createFullPath(version) {
       return `${srcTargetDir}${extension.name}-${version}.js`;
