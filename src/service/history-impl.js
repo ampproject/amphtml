@@ -911,7 +911,9 @@ export class HistoryBindingVirtual_ {
         'fullReplaceHistory')) {
       // Full URL replacement requested, but not supported by the viewer.
       // Don't update, and return the current state.
-      return Promise.resolve({'stackIndex': this.stackIndex_});
+      const curState = /** @type {!HistoryStateDef} */ dict(
+          {'stackIndex': this.stackIndex_});
+      return Promise.resolve(curState);
     }
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
