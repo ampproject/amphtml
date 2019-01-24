@@ -38,7 +38,8 @@ describes.endtoend('AMP carousel max-swipe', {
     controller = env.controller;
     ampDriver = env.ampDriver;
 
-    await controller.navigateTo('http://localhost:8000/');
+    await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-carousel-0-2/max-swipe-one.amp.html');
     await ampDriver.toggleExperiment('layers', true);
     await ampDriver.toggleExperiment('amp-carousel-v2', true);
 

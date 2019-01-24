@@ -40,7 +40,8 @@ describes.endtoend('AMP carousel mixed length slides', {
     controller = env.controller;
     ampDriver = env.ampDriver;
 
-    await controller.navigateTo('http://localhost:8000/');
+    await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-carousel-0-2/mixed-lengths-no-snap.amp.html');
     await ampDriver.toggleExperiment('layers', true);
     await ampDriver.toggleExperiment('amp-carousel-v2', true);
 
