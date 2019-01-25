@@ -553,22 +553,24 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
 });
 
 
-describe('HistoryBindingVirtual', () => {
+describes.sandboxed('HistoryBindingVirtual', {}, env => {
   let sandbox;
 
   let history;
   let viewer;
+  let capabilityStub;
 
   let onStateUpdated;
   let onHistoryPopped;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    sandbox = env.sandbox;
     onStateUpdated = sandbox.spy();
+    capabilityStub = sandbox.stub();
     viewer = {
       onMessage: sandbox.stub().returns(() => {}),
       sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve()),
-      hasCapability: sandbox.stub().returns(false),
+      hasCapability: capabilityStub,
     };
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStateUpdated(onStateUpdated);
@@ -680,7 +682,7 @@ describe('HistoryBindingVirtual', () => {
     });
 
     it('supports full URL replacement', () => {
-      viewer.hasCapability.withArgs('fullReplaceHistory').returns(true);
+      capabilityStub.withArgs('fullReplaceHistory').returns(true);
       viewer.sendMessageAwaitResponse
           .withArgs('replaceHistory',
               {stackIndex: 123, title: 'title', url: '/page'})
@@ -699,7 +701,7 @@ describe('HistoryBindingVirtual', () => {
     });
 
     it('does not support full URL replacement', () => {
-      viewer.hasCapability.withArgs('fullReplaceHistory').returns(false);
+      capabilityStub.withArgs('fullReplaceHistory').returns(false);
 
       return history.replace(
           {stackIndex: 123, title: 'title', url: '/page'}).then(state => {
