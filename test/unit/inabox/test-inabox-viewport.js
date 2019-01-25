@@ -271,7 +271,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   it('should disconnect events if listener setup', () => {
     sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
-    let viewportRect = layoutRectLtwh(0, 0, 100, 100);
+    const viewportRect = layoutRectLtwh(0, 0, 100, 100);
     sandbox.stub(binding, 'getViewportRect_').returns(viewportRect);
     return binding.setUpNativeListener().then(() => {
       expect(topWindowObservable.getHandlerCount()).to.equal(1);
