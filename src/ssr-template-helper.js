@@ -95,6 +95,24 @@ export class SsrTemplateHelper {
   }
 
   /**
+   * @param {!Element} container
+   * @param {!JsonObject} data
+   * @return {!Promise}
+   */
+  renderTemplate(container, data) {
+    let renderTemplatePromise;
+    if (this.isSupported()) {
+      renderTemplatePromise = this.templates_
+          .findAndSetHtmlForTemplate(container, data['html']);
+    } else {
+      renderTemplatePromise =
+          this.templates_.findAndRenderTemplate(container, data);
+    }
+
+    return renderTemplatePromise;
+  }
+
+  /**
    * @param {!FetchRequestDef} request
    * @param {?Element|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates

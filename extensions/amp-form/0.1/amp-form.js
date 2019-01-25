@@ -810,9 +810,9 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!JsonObject|string|undefined} response
+   * @param {!JsonObject} response
    * @param {!FetchRequestDef} request
-   * @return {!Promise}
+   * @return {!Promise<string>}
    * @private visible for testing
    */
   handleSsrTemplateSuccess_(response, request) {
@@ -1032,38 +1032,32 @@ export class AmpForm {
    * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
    * @return {!Promise}
+   * @private
    */
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
-    let renderTemplatePromise;
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        if (this.ssrTemplateHelper_.isSupported()) {
-          renderTemplatePromise = this.templates_
-              .findAndSetHtmlForTemplate(container, data['html']);
-        } else {
-          renderTemplatePromise =
-              this.templates_.findAndRenderTemplate(container, data);
-        }
-        p = renderTemplatePromise.then(rendered => {
-          rendered.id = messageId;
-          rendered.setAttribute('i-amphtml-rendered', '');
-          return this.resources_.mutateElement(devAssert(container),
-              () => {
-                container.appendChild(rendered);
-                const renderedEvent = createCustomEvent(
-                    this.win_,
-                    AmpEvents.DOM_UPDATE,
-                    /* detail */ null,
-                    {bubbles: true});
-                container.dispatchEvent(renderedEvent);
-              });
-        });
+        p = this.ssrTemplateHelper_.renderTemplate(devAssert(container), data)
+            .then(rendered => {
+              rendered.id = messageId;
+              rendered.setAttribute('i-amphtml-rendered', '');
+              return this.resources_.mutateElement(devAssert(container),
+                  () => {
+                    container.appendChild(rendered);
+                    const renderedEvent = createCustomEvent(
+                        this.win_,
+                        AmpEvents.DOM_UPDATE,
+                        /* detail */ null,
+                        {bubbles: true});
+                    container.dispatchEvent(renderedEvent);
+                  });
+            });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
