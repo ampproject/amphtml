@@ -28,30 +28,26 @@ function ciReporter(runner) {
   Base.call(this, runner);
 
   const self = this;
-  const width = (Base.window.width * 0.75) | 0;
-  let n = -1;
-
-  runner.on('start', function() {
-    process.stdout.write('\n');
-  });
+  const width = (Base.window.width) | 0;
+  let n = 0;
 
   runner.on('pass', function() {
     if (++n % width === 0) {
-      process.stdout.write('\n  ');
+      process.stdout.write('\n');
     }
     process.stdout.write(Base.color('green', symbols.success));
   });
 
   runner.on('pending', function() {
     if (++n % width === 0) {
-      process.stdout.write('\n  ');
+      process.stdout.write('\n');
     }
     process.stdout.write(Base.color('bright yellow', symbols.info));
   });
 
   runner.on('fail', function() {
     if (++n % width === 0) {
-      process.stdout.write('\n  ');
+      process.stdout.write('\n');
     }
     process.stdout.write(Base.color('fail', symbols.error));
   });
@@ -62,7 +58,6 @@ function ciReporter(runner) {
 
   function epilogue() {
     const {failures, stats} = self;
-    console.log();
     Base.list(failures);
     process.stdout.write(
         `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
@@ -72,8 +67,6 @@ function ciReporter(runner) {
     } else {
       process.stdout.write(Base.color('fail', `${stats.failures} FAILED \n`));
     }
-
-    console.log();
   }
 }
 
