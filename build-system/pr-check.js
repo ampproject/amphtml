@@ -476,6 +476,9 @@ const command = {
   updatePackages: function() {
     timedExecOrDie('gulp update-packages');
   },
+  runE2ETests: function() {
+    timedExecOrDie('gulp e2e');
+  },
 };
 
 function runAllCommands() {
@@ -501,6 +504,7 @@ function runAllCommands() {
     command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
+    command.runE2ETests();
     command.runBundleSizeCheck(/* action */ 'push');
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
@@ -528,6 +532,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
+  command.runE2ETests();
   command.verifyVisualDiffTests();
 
   // Validator tests.

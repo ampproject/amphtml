@@ -22,7 +22,7 @@ const {SeleniumWebDriverController} = require('./selenium-webdriver-controller')
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TIMEOUT = 20000;
+const TIMEOUT = 2000;
 
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
@@ -65,7 +65,7 @@ function describeEnv(factory) {
       const env = Object.create(null);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(() => {
+      before(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
         fixtures.forEach((fixture, unusedIndex) => {
@@ -81,7 +81,7 @@ function describeEnv(factory) {
         return totalPromise;
       });
 
-      afterEach(function() {
+      after(function() {
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.

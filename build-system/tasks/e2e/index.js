@@ -17,6 +17,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
 const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
@@ -31,8 +32,7 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 let webServerProcess_;
 
 function installPackages_() {
-  execOrDie('npx yarn --cwd build-system/tasks/e2e',
-      {'stdio': 'ignore'});
+  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
 }
 
 function launchWebServer_() {
@@ -66,7 +66,7 @@ async function e2e() {
   // install e2e-specific modules
   installPackages_();
 
-  // set up promise to return
+  // set up promise to return to gulp.task()
   let resolver, rejecter;
   const deferred = new Promise((resolverIn, rejecterIn) => {
     resolver = resolverIn;
@@ -76,14 +76,27 @@ async function e2e() {
   // create mocha instance
   require('@babel/register');
   require('./helper');
-  const mocha = new Mocha();
 
-  // add test files to mocha
-  config.e2eTestPaths.forEach(path => {
-    glob.sync(path).forEach(file => {
+  const mocha = new Mocha({
+    reporter: argv.testnames ? '' : ciReporter,
+  });
+
+  // specify tests to run
+  if (argv.file) {
+    mocha.addFile(argv.file);
+  }
+  else if (argv.path) {
+    glob.sync(argv.path).forEach(file => {
       mocha.addFile(file);
     });
-  });
+  }
+  else {
+    config.e2eTestPaths.forEach(path => {
+      glob.sync(path).forEach(file => {
+        mocha.addFile(file);
+      });
+    });
+  }
 
   // start up web server
   await launchWebServer_();
@@ -106,6 +119,9 @@ async function e2e() {
 
 gulp.task('e2e', 'Runs e2e tests', e2e, {
   options: {
+    'file': '  Runs tests for a specific file (ex: test/e2e/test-github.js)',
+    'path': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
     'quiet': '  Do not log HTTP requests (default: false)',
+    'testnames': '  Lists the name of each test being run',
   },
 });
