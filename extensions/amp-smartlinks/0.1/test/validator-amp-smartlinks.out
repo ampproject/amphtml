@@ -27,7 +27,7 @@
 |  <body>
 |      <amp-smartlinks
 |          layout="nodisplay"
-|          nrtv-account-name="examplepubliser"
+|          nrtv-account-name="examplepublisher"
 |          linkmate="true"
 |          exclusive-links="false"
 |          link-attribute="href"
