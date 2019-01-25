@@ -62,7 +62,10 @@ exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampp
     },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3sClick", "borderProtection"]
+      "filters": ["3sClick", "borderProtection"],
+      "behaviors": {
+        "clickTarget": "_top"
+      }
     },
     "bannetons": {
       "finalUrl": "https://example.com/artisan-baking/bannetons",
@@ -354,6 +357,13 @@ string replacement. *Any* occurrence of the variable in the URL will be
 replaced. For example, if you define a custom variable named "_b" with value
 "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
 {% endcall %}
+
+## Behaviors
+Behaviors specify additional properties of the exit action.
+
+### Click Target
+
+The `clickTarget` behavior specifies where a target's click should try to open.  A click defaults to opening a new tab, if it is possible in the environment.  With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`.  If this is not set to `"_top"`, then it will fall back to opening a new tab.
 
 ## `exit` action
 
