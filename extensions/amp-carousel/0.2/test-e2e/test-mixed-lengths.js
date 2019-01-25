@@ -89,7 +89,7 @@ describes.endtoend('AMP carousel mixed length slides', {
 
     beforeEach(async() => {
       await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-carousel-0-2/mixed-lengths.amp.html');	
+          'http://localhost:8000/test/manual/amp-carousel-0-2/mixed-lengths.amp.html');
     });
 
     it('should have the correct initial slide positions', async() => {
