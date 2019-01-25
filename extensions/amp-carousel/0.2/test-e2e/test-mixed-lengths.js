@@ -47,7 +47,7 @@ describes.endtoend('AMP carousel mixed length slides', {
   });
 
   describe('fail test', () => {
-    it.only('fail test', async() => {
+    it('fail test', async() => {
       await expect(true).to.equal(false);
     });
   });
