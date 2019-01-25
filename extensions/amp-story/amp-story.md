@@ -1142,7 +1142,6 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 - [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
-- [amp4ads](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
 
 ## Validation
 
