@@ -57,6 +57,7 @@ describe.configure().run('amp-recaptcha-input', () => {
   });
 
   it('should respond when ready from bootstrap frame', function() {
+    this.timeout(7000);
     expect(true).to.be.ok;
   });
 

@@ -73,7 +73,7 @@ init();
 
 /**
  * Main function called by the recaptcha bootstrap frame
- * @param {string} recaptchaApiUrl
+ * @param {string} recaptchaApiBaseUrl
  */
 export function initRecaptcha(recaptchaApiBaseUrl) {
 
