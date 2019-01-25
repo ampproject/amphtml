@@ -3,29 +3,29 @@
 ## Overview
 The feature is still in experimental mode. Please opt-in using the `amp-consent-v2` flag. To opt-in, you can either run `AMP.toggleExperiment('amp-consent-v2')` in console, or turn on the experiment from the [experiments managing page](https://cdn.ampproject.org/experiments.html).
 
-If you operate a CMP to help publishers to manage their user consents, you may want to integrate your service in `amp-consent`. This will enable your customers to use your service in AMP HTML pages.
+To enable customers to operate a CMP to manage their user consents in AMPHTML pages, Consent Management Providers should integrate their service in `amp-consent`.
 
 ## Before you begin
 
-To add your consent management service to AMP runtime, it is expected that you do:
-* Set the remote endpoint to handle requests from AMP. This is for the purpose of determining if the user consent will be required.
+To add your consent management service to AMP runtime, it is expected that you:
+* Set the remote endpoint to handle requests from AMP. This determines if user consent is required.
 * Make sure the prompted consent collecting page communicates well with the AMP runtime using the provided APIs.
-* Check in your consent configuration to the AMP code base.
-* Be aware of the restrictions that the AMP runtime applies to ensure a good user experience. These includes
-    * Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`width: 100vw`, `height: 30vh`), and the fullScreen (`width: 100vw`, `height: 100%`) after user interactions.
-    * A placeholder will be displayed before the consent prompt iframe is ready.
-    * Enforce the size of the stored consent information. 188 character length is the current limit. Please file an issue if you find that not sufficient.
-* Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. **Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking>` metaTag, or the `data-block-on-consent` attribute.**
-* Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via provided APIs. It's up to the CMP and service provider vendors to agree on the format of the consent info string.
+* [Add your consent configuration](#adding-your-configuration-to-amp) to the AMP code base.
+* Meet the restrictions that the AMP runtime applies to ensure a good user experience. These includes
+    * Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`width: 100vw`, `height: 30vh`), and the full screen size (`width: 100vw`, `height: 100%`) after user interactions.
+    * A default placeholder will be displayed before the consent prompt iframe is ready.
+    * Enforce the size of the stored consent information. 150 character length is the current limit. Please [file an issue](https://github.com/ampproject/amphtml/issues/new) if you find that not sufficient.
+* Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. **Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking">` metaTag, or the `data-block-on-consent` attribute.**
+* Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via [provided APIs](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration). It's up to the CMP and service provider vendors to agree on the format of the consent info string.
 * Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding support to your CMP service to AMP. A great start point is to follow the `_ping_` CMP service implementation that the AMP team creates for testing purpose.
 
 ## Add remote endpoint support
-A remote endpoint is expected to tell the AMP runtime whether the user consent is required. It can also pass extra information via AMP to 3P vendors. More information on the remote endpoint can be found [here]((https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#checkconsenthref)).
+A remote endpoint is expected to tell the AMP runtime whether the user consent is required. It can also pass extra information via AMP to third party vendors. More information on the remote endpoint can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#checkconsenthref).
 
 ## Prompt UI Iframe
-The AMP runtime will embed the CMP's prompt in an iframe. amp-consent will create the iframe only when it is necessary. A default placeholder will be displayed, and the prompt iframe will remain hidden until it has finished loading.
+The AMP runtime will embed the CMP's prompt in an iframe. `amp-consent` will create the iframe when it is necessary. A default placeholder will be displayed, and the prompt iframe will remain hidden until it has finished loading.
 
-The prompt iframe and the parent AMP page will communicate through postMessages and the iframe name attribute. In the case of using postMessage, messages from nested iframes will be ignored. The lists of support APIs are:
+The prompt iframe and the parent AMP page will communicate through `postMessages` and the iframe `name` attribute. In the case of using postMessage, messages from nested iframes will be ignored. The lists of support APIs are:
 
 #### Requesting UI state change
 Iframes can send a `consent-ui` message to the parent AMP page to request UI state change.
