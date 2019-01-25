@@ -22,7 +22,7 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function kuadio(global, data) {
   validateData(data, ['widgetId'],
-      ['region', 'baseUrl', 'betaMode', 'debugMode', 'fastParse']);
+      ['region', 'baseUrl', 'betaMode', 'debugMode', 'fastParse', 'ref']);
 
   global._pvmax = {
     region: data.region,
@@ -35,7 +35,7 @@ export function kuadio(global, data) {
   const e = global.document.createElement('div');
   e.className = '_pvmax_recommend';
   e.setAttribute('data-widget-id', data.widgetId);
-  e.setAttribute('data-ref', window.context.canonicalUrl);
+  e.setAttribute('data-ref', data.ref || global.context.canonicalUrl);
   global.document.getElementById('c').appendChild(e);
 
   loadScript(global, 'https://api.pvmax.net/v1.0/pvmax.js');
