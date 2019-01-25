@@ -432,6 +432,7 @@ exports.extensionBundles = [
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-digidip', version: '0.1', type: TYPES.MISC},
 ];
 
 exports.aliasBundles = [

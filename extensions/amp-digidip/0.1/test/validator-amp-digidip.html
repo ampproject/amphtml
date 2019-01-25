@@ -1,0 +1,69 @@
+<!--
+  Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-digidip example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-digidip {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-digidip" src="https://cdn.ampproject.org/v0/amp-digidip-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-digidip
+          layout="nodisplay"
+          publisher-id="stylebudget"
+          use-worddip="0"
+          new-tab="1"
+          encoded-xhr-credentials="bW9iaXBhbnRzOm1vYmlwYW50cw=="
+          hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
+          reading-words-exclude="the|you|was|or|it|and|to|of|in|for|on|with|at|by|from|up|about|into|over|after|beneath|under|above|der|die|das|von|zu"
+          element-clickhandler=""
+          element-clickhandler-attribute=""
+          element-ignore-attribute="rel"
+          element-ignore-pattern="pass"
+          element-ignore-consider-parents="0"
+  >
+  </amp-digidip>
+  <div>
+    <p>Example of merchants links shifting</p>
+  </div>
+  <div>
+    <div>
+      <a href="https://www.amazon.de/Paulaner-Wei%C3%9Fbier-Oktoberfestbier-Ma%C3%9Fkrug-vol/dp/B005HIMJ7W/ref=sr_1_fkmr1_1?ie=UTF8&qid=1542186734&sr=8-1-fkmr1&keywords=Paulaner+1+liter+Bierdose">
+        link to amazon
+      </a>
+    </div>
+    <div>
+      <a href="https://www.gearbest.com/pest-control/pp_665269.html?wid=1112942">
+        link to gear best
+      </a>
+    </div>
+    <div id="track">
+      <a href="http://localhost:8000/examples/amp-digidip.amp.html">
+        link to local
+      </a>
+    </div>
+  </div>
+</body>
+</html>
