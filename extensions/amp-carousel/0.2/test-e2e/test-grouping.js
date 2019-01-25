@@ -66,11 +66,11 @@ describes.endtoend('AMP carousel grouping', {
       const slides = await getSlides(controller);
       const btn = await controller.findElement('[on="tap:carousel-1.next()"]');
 
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[2])).to.include({x: 0});
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[4])).to.include({x: 0});
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
@@ -78,11 +78,11 @@ describes.endtoend('AMP carousel grouping', {
       const slides = await getSlides(controller);
       const btn = await controller.findElement('[on="tap:carousel-1.prev()"]');
 
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[4])).to.include({x: 0});
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[2])).to.include({x: 0});
-      controller.click(btn);
+      await controller.click(btn);
       await expect(rect(slides[0])).to.include({x: 0});
     });
   });

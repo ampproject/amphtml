@@ -6,6 +6,7 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
   <style amp-custom>
     amp-carousel img {
@@ -16,8 +17,21 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <amp-state>
+    <script type="application/json">
+      {
+        "visibleCount": "(min-width: 800px) 3, 2"
+      }
+    </script>
+  </amp-state>
+
   <h1>Shows 3 at a time, when width >= 800px, 2 otherwise</h1>
-  <amp-carousel id="carousel-1" width="900" height="200" visible-count="(min-width: 800px) 3, 2" layout="responsive">
+  <amp-carousel
+      id="carousel-1"
+      width="900" height="200"
+      layout="responsive"
+      visible-count="(min-width: 800px) 3, 2"
+      [visible-count]="visibleCount">
     <!-- wrapping divs to workaround https://bugs.webkit.org/show_bug.cgi?id=191816 -->
     <div>
       <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200 layout="responsive"></amp-img>
@@ -41,5 +55,15 @@
       <amp-img src="../../../examples/img/sample.jpg" width=300 height=200 layout="responsive"></amp-img>
     </div>
   </amp-carousel>
+  <button
+      id="responsive-3-2"
+      on="tap:AMP.setState({'visibleCount': '(min-width: 800px) 3, 2'})">
+    visible-count="(min-width: 800px) 3, 2"
+  </button>
+  <button
+      id="responsive-5-4"
+      on="tap:AMP.setState({'visibleCount': '(min-width: 650px) 5, 4'})">
+    visible-count="(min-width: 650px) 5, 4"
+  </button>
 </body>
 </html>
