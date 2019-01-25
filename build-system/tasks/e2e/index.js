@@ -37,8 +37,7 @@ function installPackages_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}\
-      ${argv.quiet ? '--quiet' : ''}`);
+      `gulp serve --host ${HOST} --port ${PORT}`);
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -82,10 +81,7 @@ async function e2e() {
   });
 
   // specify tests to run
-  if (argv.file) {
-    mocha.addFile(argv.file);
-  }
-  else if (argv.path) {
+  if (argv.files) {
     glob.sync(argv.path).forEach(file => {
       mocha.addFile(file);
     });
@@ -121,9 +117,7 @@ async function e2e() {
 
 gulp.task('e2e', 'Runs e2e tests', e2e, {
   options: {
-    'file': '  Runs tests for a specific file (ex: test/e2e/test-github.js)',
-    'path': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
-    'quiet': '  Do not log HTTP requests (default: false)',
+    'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
     'testnames': '  Lists the name of each test being run',
   },
 });

@@ -65,7 +65,7 @@ function describeEnv(factory) {
       const env = Object.create(null);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(() => {
+      before(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
         fixtures.forEach((fixture, unusedIndex) => {
@@ -81,7 +81,7 @@ function describeEnv(factory) {
         return totalPromise;
       });
 
-      afterEach(function() {
+      after(function() {
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.
