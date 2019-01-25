@@ -21,7 +21,7 @@ You can view the translations provided for each language in [this spreadsheet](h
 # Adding new strings (English)
 
 1. Add a new string ID in [`LocalizedStringId`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/localization.js#L32).  Keep the `LocalizedStringId` list in alphabetical order, and make sure your ID's name is clear about what it represents semantically.
-2. Open the [`en.js` file](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/_locales/en.js)
+2. Open the [`en.js` file](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/_locales/en.js).
 3. Add a new object key with the `LocalizedStringId` as the key, and an object containing the string and its description as its value.  For example:
 
 ```javascript
@@ -35,12 +35,12 @@ You can view the translations provided for each language in [this spreadsheet](h
 /* ... */
 ```
 
-4. Send a pull request with your changes
+4. Send a pull request with your changes.
 
 
 # Adding new translations (non-English strings)
 
-1. Find which string(s) are missing by looking at [the string spreadsheet](https://bit.ly/amp-story-strings)
+1. Find which string(s) are missing by looking at [the string spreadsheet](https://bit.ly/amp-story-strings).
 2. Open the `*.js` file from the [`_locales` directory](https://github.com/ampproject/amphtml/tree/master/extensions/amp-story/1.0/_locales) for the language you would like to add a translation for
 3. Add a new object key with the `LocalizedStringId` as the key, and an object containing the string as its value.  For example:
 
@@ -54,6 +54,6 @@ You can view the translations provided for each language in [this spreadsheet](h
 /* ... */
 ```
 
-4. Send a pull request with your changes
+4. Send a pull request with your changes.
 
 NOTE: Keep string IDs in alphabetical order, and do not include the `description` key in your string object for languages other than English.
