@@ -24,13 +24,14 @@ import ampToolboxCacheUrl from
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {getSourceOrigin} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -79,6 +80,9 @@ export class AmpRecaptchaService {
 
     /** @private {number} */
     this.registeredElementCount_ = 0;
+
+    /** @private {?string} */
+    this.recaptchaFrameOrigin_ = null;
 
     /** @private {!Deferred} */
     this.recaptchaApiReady_ = new Deferred();
@@ -153,12 +157,10 @@ export class AmpRecaptchaService {
       });
 
       // Send the message
-      postMessage(
-          dev().assertElement(this.iframe_),
-          'amp-recaptcha-action',
-          message,
-          '*',
-          true);
+      this.postMessageToIframe_(
+          devAssert(this.recaptchaFrameOrigin_),
+          message
+      );
     });
     return executePromise.promise;
   }
@@ -217,6 +219,7 @@ export class AmpRecaptchaService {
     const iframe = this.win_.document.createElement('iframe');
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+      this.recaptchaFrameOrigin_ = getSourceOrigin(recaptchaFrameSrc);
       iframe.src = recaptchaFrameSrc;
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
@@ -292,10 +295,32 @@ export class AmpRecaptchaService {
    * @private
    */
   listenIframe_(evName, cb) {
+
+    const checkOriginWrappedCallback = (data, source, origin) => {
+      if (this.recaptchaFrameOrigin_ === origin) {
+        cb(data, source, origin);
+      }
+    };
+
     return listenFor(
         dev().assertElement(this.iframe_),
         evName,
-        cb,
+        checkOriginWrappedCallback,
+        true);
+  }
+
+  /**
+   * Function to send a message to our iframe
+   * @param {string} origin
+   * @param {!JsonObject} message
+   * @private
+   */
+  postMessageToIframe_(origin, message) {
+    postMessage(
+        dev().assertElement(this.iframe_),
+        'amp-recaptcha-action',
+        message,
+        origin,
         true);
   }
 
