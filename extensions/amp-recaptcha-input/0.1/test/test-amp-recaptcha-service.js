@@ -144,6 +144,30 @@ describes.realWin('amp-recaptcha-service', {
         });
   });
 
+  it('should postmessage to the specified ' +
+    'recaptcha frame origin on execute', () => {
+
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+
+    const postMessageStub = sandbox.stub(
+        recaptchaService,
+        'postMessageToIframe_'
+    );
+
+    return recaptchaService
+        .register(fakeSitekey).then(() => {
+          recaptchaService.execute(0, '');
+
+          recaptchaService.recaptchaApiReady_.resolve();
+          return recaptchaService.recaptchaApiReady_.promise;
+        }).then(() => {
+          expect(postMessageStub).to.be.calledWith(
+              recaptchaService.recaptchaFrameOrigin_
+          );
+        });
+  });
+
+
   it('should reject if there is no iframe on execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     expect(recaptchaService.iframe_).to.not.be.ok;
