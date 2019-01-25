@@ -83,7 +83,7 @@ describes.endtoend('Non-looping AMP carousel', {
     // Note: 513 seems to be the smallest settable width.
     controller.setWindowRect({
       width: 600,
-      height: 1000,
+      height: 500,
     });
 
     const firstSlide = await getSlide(controller, 0);
@@ -98,7 +98,7 @@ describes.endtoend('Non-looping AMP carousel', {
 
     controller.setWindowRect({
       width: 700,
-      height: 1000,
+      height: 500,
     });
 
     // Normally, resizing would cause the position to change. We're testing

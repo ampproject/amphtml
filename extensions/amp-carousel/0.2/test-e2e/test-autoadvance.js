@@ -22,7 +22,7 @@ import {
 describes.endtoend('AMP carousel autoadvance', {
 }, async env => {
   const pageWidth = 600;
-  const pageHeight = 1000;
+  const pageHeight = 500;
   let controller;
 
   function rect(el) {
