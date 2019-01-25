@@ -347,7 +347,7 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 <figure class="centered-fig">
   <span class="special-char">Before:</span>
   <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/lamp-story-desktop-three-panels.gif" /></noscript>
+  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
   </amp-anim>
   <span class="special-char">After:</span>
   <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
