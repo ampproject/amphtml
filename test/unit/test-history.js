@@ -532,22 +532,28 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   it('should update path from URL parameter', () => {
     const path = '/path';
     const query = '?query=1';
+    const prevHref = document.location.href;
     return history.replace({url: path + query}).then(() => {
       expect(document.location.pathname).to.equal(path);
       expect(document.location.search).to.equal(query);
+      return history.replace({url: prevHref});
     });
   });
 
   it('should strip fragment from URL parameter', () => {
+    const prevHref = document.location.href;
     return history.replace({url: '/path?query=1#fragment'}).then(() => {
       expect(document.location.hash).to.equal('');
+      return history.replace({url: prevHref});
     });
   });
 
   it('should append the fragment parameter to the URL parameter', () => {
     const fragment = 'test';
+    const {href, hash} = document.location;
     return history.replace({url: '/path?query=1', fragment}).then(() => {
       expect(document.location.hash).to.equal(`#${fragment}`);
+      return history.replace({url: href, fragment: hash});
     });
   });
 });
