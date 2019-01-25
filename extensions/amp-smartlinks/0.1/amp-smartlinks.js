@@ -15,6 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {getData} from './../../../src/event-helper';
 
 import {ENDPOINTS, SMARTLINKS_REWRITER_ID} from './constants';
 import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
@@ -29,22 +31,22 @@ export class AmpSmartlinks extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!../../../src/service/xhr-impl.Xhr} */
+    /** @private {?../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = null;
 
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = null;
 
-    /** @private {!./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
-    /** @private {!./link-rewriter/link-rewriter.LinkRewriter} */
+    /** @private {?./link-rewriter/link-rewriter.LinkRewriter} */
     this.smartLinkRewriter_ = null;
 
     /** @private {?Object} */
     this.linkmateOptions_ = null;
 
-    /** @private {function({?JsonObject}} */
+    /** @private {?function({JsonObject})} */
     this.fetchLinkmateConfig_ = null;
 
     /** @private {?../../../src/service/viewer-impl.Viewer} */
@@ -90,7 +92,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
       this.linkmate_ = new Linkmate(
           this.ampDoc_,
           this.xhr_,
-          this.linkmateOptions_,
+          this.linkmateOptions_
       );
     });
 
@@ -106,7 +108,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
   /**
    * API call to retrieve the Narrativ config for this extension.
-   * @return {?JsonObject}
+   * @return {?Promise}
    * @private
    */
   getLinkmateOptions_() {
@@ -120,7 +122,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     })
         .then(res => res.json())
         .then(res => {
-          return res.data[0]['amp_config'];
+          return getData(res)[0]['amp_config'];
         });
   }
 
@@ -134,7 +136,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     this.xhr_.fetchJson(ENDPOINTS.PAGE_IMPRESSION_ENDPOINT, {
       method: 'POST',
       ampCors: false,
-      headers: {'Content-Type': 'application/json'},
+      headers: dict({'Content-Type': 'application/json'}),
       body: payload,
     });
   }
@@ -158,11 +160,11 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
   /**
    * Build the payload for our page load event.
-   * @return {!Object}
+   * @return {!JsonObject}
    * @private
    */
   buildPageImpressionPayload_() {
-    return {
+    return /** @type {!JsonObject} */ ({
       'events': [{'is_amp': true}],
       'organization_id': this.linkmateOptions_.publisherID,
       'organization_type': 'publisher',
@@ -172,7 +174,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
         'previous_url': this.referrer_,
         'user_agent': this.ampDoc_.win.navigator.userAgent,
       },
-    };
+    });
   }
 
   /**

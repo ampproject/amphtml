@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
+import {deepEquals} from '../../../src/json';
+import {dict} from '../../../src/utils/object';
+
 import {ENDPOINTS} from './constants';
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
-import {deepEquals} from '../../../src/json';
+import {getData} from '../../../src/event-helper';
 
 
 export class Linkmate {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @param {!../../../src/service/xhr-impl.Xhr} xhr
+   * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {?../../../src/service/xhr-impl.Xhr} xhr
    * @param {?Object} linkmateOptions
    */
   constructor(ampDoc, xhr, linkmateOptions) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = ampDoc;
 
-    /** @private {!../../../src/service/xhr-impl.Xhr} */
+    /** @private {?../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
     /** @private {?boolean} */
     this.requestExclusiveLinks_ = linkmateOptions.exclusiveLinks;
 
-    /** @private {?int} */
+    /** @private {?number} */
     this.publisherID_ = linkmateOptions.publisherID;
 
     /** @private {?string} */
@@ -44,7 +47,7 @@ export class Linkmate {
     /** @private {!Document|!ShadowRoot} */
     this.rootNode_ = this.ampDoc_.getRootNode();
 
-    /** @private {!Array<!HTMLElement>} */
+    /** @private {?Array<!HTMLElement>} */
     this.anchorList_ = null;
 
     /** @private {?Array<JsonObject>}*/
@@ -75,7 +78,7 @@ export class Linkmate {
 
       const asyncMappedLinks = this.postToLinkmate_(anchorList)
           .then(res => {
-            this.linkmateResponse_ = res.data[0]['smart_links'];
+            this.linkmateResponse_ = getData(res)[0]['smart_links'];
             this.anchorList_ = anchorList;
             return this.mapLinks_();
           });
@@ -83,7 +86,7 @@ export class Linkmate {
       return new TwoStepsResponse(syncMappedLinks, asyncMappedLinks);
     } else { // If we didn't need to make an API call return the synchronous response
       this.anchorList_ = anchorList;
-      return new TwoStepsResponse(syncMappedLinks);
+      return new TwoStepsResponse(syncMappedLinks, null);
     }
   }
 
@@ -97,18 +100,18 @@ export class Linkmate {
     const linksPayload = this.buildLinksPayload_(anchorList);
     const editPayload = this.getEditInfo_();
 
-    const payload = {
+    const payload = dict({
       'article': editPayload,
       'links': linksPayload,
-    };
+    });
 
     const fetchUrl = ENDPOINTS.LINKMATE_ENDPOINT.replace(
-        '.pub_id.', this.publisherID_
+        '.pub_id.', this.publisherID_.toString()
     );
     const postOptions = {
       method: 'POST',
       ampCors: false,
-      headers: {'Content-Type': 'application/json'},
+      headers: dict({'Content-Type': 'application/json'}),
       body: payload,
     };
 
@@ -158,21 +161,19 @@ export class Linkmate {
   /**
    * The API response returns unique links. Map those unique links to as many
    * urls in the anchorList as possible. Set the replacement url as a shop-link.
-   * @return {!Array<JsonObject>}
+   * @return {!./link-rewriter/link-rewriter.AnchorReplacementList}
    * @public
    */
   mapLinks_() {
-    const mappedLinks = this.linkmateResponse_.map(smartLink => {
+    return this.linkmateResponse_.map(smartLink => {
       return Array.prototype.slice.call(this.anchorList_)
           .map(anchor => {
             return {
               anchor,
-              replacementUrl: anchor[this.linkAttribute_] === smartLink.url ?
+              replacementUrl: anchor[this.linkAttribute_] === smartLink['url'] ?
                 `https://shop-links.co/${smartLink['auction_id']}/?amp=true` : null,
             };
           });
-    });
-
-    return mappedLinks.flat();
+    })[0];
   }
 }

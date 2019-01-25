@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Get the config values from the tag on the amp page
@@ -34,11 +34,11 @@ export function getConfigOptions(element) {
 /**
  * The slug used to distinguish Narrativ accounts.
  * @param {!Element} element
- * @return {string}
+ * @return {?string}
  */
 function getNrtvAccountName_(element) {
   const nrtvSlug = element.getAttribute('nrtv-account-name');
-  user().assert(nrtvSlug,
+  userAssert(nrtvSlug,
       'amp-smartlinks: nrtv-account-name is a required field');
 
   return nrtvSlug ? nrtvSlug.toLowerCase() : null;
@@ -47,11 +47,11 @@ function getNrtvAccountName_(element) {
 /**
  * Flag to specify if we are to run our Linkmate service.
  * @param {!Element} element
- * @return {?string}
+ * @return {boolean}
  */
 function getLinkmateFlag_(element) {
   const linkmateEnabled = element.getAttribute('linkmate').toLowerCase();
-  user().assert(linkmateEnabled,
+  userAssert(linkmateEnabled,
       'amp-smartlinks: linkmate is a required field');
 
   return linkmateEnabled === 'true';
@@ -60,7 +60,7 @@ function getLinkmateFlag_(element) {
 /**
  * Flag to mark links as exlusive or not.
  * @param {!Element} element
- * @return {?string}
+ * @return {boolean}
  */
 function getExclusiveLinksFlag_(element) {
   const exclusiveLinks = element.getAttribute('exclusive-links').toLowerCase();

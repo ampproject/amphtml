@@ -19,7 +19,7 @@ import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
 
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
@@ -192,7 +192,7 @@ export class LinkRewriter {
         unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-    user().assert(twoStepsResponse instanceof TwoStepsResponse,
+    userAssert(twoStepsResponse instanceof TwoStepsResponse,
         'Invalid response from provided "resolveUnknownLinks" function.' +
         '"resolveUnknownLinks" should return an instance of TwoStepsResponse');
 
