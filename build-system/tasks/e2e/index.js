@@ -111,6 +111,7 @@ async function e2e() {
       return rejecter();
     }
 
+    process.exit();
     return resolver();
   });
 

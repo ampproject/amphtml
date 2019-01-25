@@ -501,10 +501,10 @@ function runAllCommands() {
     command.buildValidator();
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.runE2ETests();
     command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    command.runE2ETests();
     command.runBundleSizeCheck(/* action */ 'push');
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
