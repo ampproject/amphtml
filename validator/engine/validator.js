@@ -583,9 +583,12 @@ class ParsedTagSpec {
     // It's possible to provide multiple specifications for the same attribute
     // name, but for any given tag only one such specification can be active.
     // The precedence is (1), (2), (3), (4)
+    // If tagSpec.explicitAttrsOnly is true then only collect the attributes
+    // from (2) and (3).
 
-    // (1) layout attrs.
-    if (tagSpec.ampLayout !== null && !this.isReferencePoint_) {
+    // (1) layout attrs (except when explicitAttrsOnly is true).
+    if (!tagSpec.explicitAttrsOnly && tagSpec.ampLayout !== null &&
+        !this.isReferencePoint_) {
       this.mergeAttrs(parsedAttrSpecs.ampLayoutAttrs, parsedAttrSpecs);
     }
     // (2) attributes specified within |tagSpec|.
@@ -595,8 +598,9 @@ class ParsedTagSpec {
     for (const id of tagSpec.attrLists) {
       this.mergeAttrs(parsedAttrSpecs.attrLists[id], parsedAttrSpecs);
     }
-    // (4) attributes specified in the global_attr list.
-    if (!this.isReferencePoint_) {
+    // (4) attributes specified in the global_attr list (except when
+    // explicitAttrsOnly is true).
+    if (!tagSpec.explicitAttrsOnly && !this.isReferencePoint_) {
       this.mergeAttrs(parsedAttrSpecs.globalAttrs, parsedAttrSpecs);
     }
     sortAndUniquify(this.mandatoryOneofs_);
@@ -3717,8 +3721,11 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
   // http://w3c.github.io/aria-in-html/
   // However, to avoid parsing differences, we restrict the set of allowed
   // characters in the document.
+  // If explicitAttrsOnly is true then do not allow data- attributes by default.
+  // They must be explicitly added to the tagSpec.
   const dataAttrRe = /^data-[A-Za-z0-9-_:.]*$/;
-  if (attrName.match(dataAttrRe) !== null) {return;}
+  if (!parsedTagSpec.getSpec().explicitAttrsOnly &&
+      (attrName.match(dataAttrRe) !== null)) {return;}
 
   // At this point, it's an error either way, but we try to give a
   // more specific error in the case of Mustache template characters.
@@ -4742,6 +4749,7 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    const transformedValueRe = new RegExp(/^\w+;v=(\d+)$/);
     for (const attr of attrs) {
       // Verify this attribute is a type identifier. Other attributes are
       // validated in validateAttributes.
@@ -4756,8 +4764,23 @@ class ParsedValidatorRules {
           }
           // The type identifier "actions" and "transformed" are not considered
           // mandatory unlike other type identifiers.
-          if (identifier != 'actions' && identifier != 'transformed') {
+          if (identifier !== 'actions' && identifier !== 'transformed') {
             hasMandatoryTypeIdentifier = true;
+          }
+          // The type identifier "transformed" has restrictions on it's value.
+          // It must be \w+;v=\d+ (e.g. google;v=1).
+          if ((identifier === 'transformed') && (attr.value !== '')) {
+            const reResult = transformedValueRe.exec(attr.value);
+            if (reResult !== null) {
+              validationResult.transformerVersion = parseInt(reResult[1], 10);
+            } else {
+              context.addError(
+                  amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                  context.getLineCol(),
+                  /*params=*/[attr.name, 'html', attr.value],
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
+                  validationResult);
+            }
           }
         } else {
           context.addError(

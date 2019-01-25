@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import 'babel-regenerator-runtime';
-import * as describes from '../../testing/e2e/describes-e2e';
-import {expect} from '../../testing/e2e/expect';
-
-const Keys = {
-  ENTER: 'enter',
-};
-
 describes.endtoend('GitHub search results', {
 }, async env => {
   let controller;
@@ -31,11 +23,11 @@ describes.endtoend('GitHub search results', {
     await controller.navigateTo('https://github.com/');
   });
 
-  it('should contain a result for the search term', async() => {
+  it.skip('should contain a result for the search term', async() => {
     const searchButtonHandle =
       await controller.findElement('.header-search-input');
     await controller.type(searchButtonHandle, 'TestCafe');
-    await controller.type(null, Keys.ENTER);
+    await controller.type(null, Key.ENTER);
 
     await expect(controller.getTitle()).to.match(/TestCafe/);
 
@@ -54,7 +46,7 @@ describes.endtoend('GitHub login', {
     await controller.navigateTo('https://github.com/login');
   });
 
-  it('should fail to login with no credentials', async() => {
+  it.skip('should fail to login with no credentials', async() => {
     const loginButton =
       await controller.findElement('.btn.btn-primary.btn-block');
     await controller.click(loginButton);
