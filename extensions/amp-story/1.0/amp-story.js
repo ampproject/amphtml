@@ -308,7 +308,11 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/document-state.DocumentState} */
     this.documentState_ = Services.documentStateFor(this.win);
 
-    /** @private {boolean} */
+    /**
+     * Store the current paused state, to make sure the story does not play on
+     * resume if it was previously paused.
+     * @private {boolean}
+     */
     this.pausedStateToRestore_ = false;
 
     /** @private {?Element} */
@@ -399,8 +403,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    // Store the current paused state, to make sure the story does not play on
-    // resume if it was previously paused.
     this.pausedStateToRestore_ = !!this.storeService_
         .get(StateProperty.PAUSED_STATE);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -1409,14 +1411,31 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    // On mobile, maybe display the landscape overlay warning.
+    // On mobile, maybe display the landscape overlay warning and pause the
+    // story.
     this.vsync_.run({
       measure: state => {
         const {offsetWidth, offsetHeight} = this.element;
         state.isLandscape = offsetWidth > offsetHeight;
       },
       mutate: state => {
-        this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, state.isLandscape);
+        const landscapeState =
+            this.storeService_.get(StateProperty.LANDSCAPE_STATE);
+
+        if (landscapeState === state.isLandscape) {
+          return;
+        }
+
+        if (state.isLandscape) {
+          this.pausedStateToRestore_ =
+              !!this.storeService_.get(StateProperty.PAUSED_STATE);
+          this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+          this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, true);
+        } else {
+          this.storeService_
+              .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
+          this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
+        }
       },
     }, {});
   }
