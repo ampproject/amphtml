@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {handleAutoscroll} from './autoscroll';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
@@ -201,7 +202,6 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }
     }, true);
-
   }
 
   /** @override */
@@ -326,6 +326,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
+    handleAutoscroll(this.element);
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForPreOpening_());
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {

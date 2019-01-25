@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -94,6 +95,8 @@ export class Toolbar {
         `toolbar-target element with an id: ${targetId}`);
       }
     });
+
+    handleAutoscroll(this.toolbarClone_);
   }
 
   /**
