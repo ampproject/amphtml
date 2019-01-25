@@ -682,6 +682,7 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runE2ETests();
       command.runVisualDiffTests();
     } else {
       // Generate a blank Percy build to satisfy the required GitHub check.
