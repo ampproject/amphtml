@@ -249,7 +249,9 @@ export class Schema {
       const schemaTag = schemaTags[i];
       const parsed = tryParseJson(schemaTag./*OK*/innerText);
 
-      if (parsed && parsed['url'] == canonicalUrl) {
+      if (parsed &&
+          (parsed['mainEntityOfPage'] == canonicalUrl ||
+          parsed['url'] == canonicalUrl)) {
         return parsed['@type'];
       }
     }
