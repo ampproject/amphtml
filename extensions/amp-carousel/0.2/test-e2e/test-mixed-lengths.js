@@ -46,7 +46,13 @@ describes.endtoend('AMP carousel mixed length slides', {
     });
   });
 
-  let i = 100;
+  describe('fail test', () => {
+    it.only('fail test', async() => {
+      await expect(true).to.equal(false);
+    });
+  });
+
+  let i = 200;
   while (--i > 0) {
     // Test mixed lengths without snapping. This is start aligned as that seems
     // make the most sense for non-snapping mixed lengths.
