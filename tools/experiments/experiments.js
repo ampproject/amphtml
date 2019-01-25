@@ -413,12 +413,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-date-display',
-    name: 'Enables displaying dates',
-    spec: 'https://github.com/ampproject/amphtml/issues/10837',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
-  },
-  {
     id: 'amp-list-viewport-resize',
     name: 'Enables amp-list to resize on viewport resize',
     spec: 'https://github.com/ampproject/amphtml/issues/19945',
