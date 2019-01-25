@@ -40,25 +40,22 @@ function transform(file, encoding, callback) {
   const changes = [];
 
   traverse(ast, {
-    enter(path) {
+    ThisExpression(path) {
       // Find the closest encosing function that is not an arrow.
       // Arrows inherit their parent's `this` context.
       let parent = path;
       const {node} = path;
-      if (node.type === 'ThisExpression') {
-        while ((parent = parent.getFunctionParent())) {
-          if (parent.isFunction() && !parent.isArrowFunctionExpression()) {
-            return;
-          }
+      while ((parent = parent.getFunctionParent())) {
+        if (parent.isFunction() && !parent.isArrowFunctionExpression()) {
+          return;
         }
-        // collect the changes in an array
-        changes.push({
-          start: node.start,
-          end: node.end,
-          value: 'self',
-        });
-        return;
       }
+      // collect the changes in an array
+      changes.push({
+        start: node.start,
+        end: node.end,
+        value: 'self',
+      });
     },
   });
 
