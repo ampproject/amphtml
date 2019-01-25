@@ -1071,6 +1071,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     if (direction === TapNavigationDirection.NEXT) {
       this.next_();
     } else if (direction === TapNavigationDirection.PREVIOUS) {
@@ -1160,17 +1163,16 @@ export class AmpStory extends AMP.BaseElement {
             this.storeService_.dispatch(
                 Action.SET_ADVANCEMENT_MODE,
                 AdvancementMode.ADVANCE_TO_ADS);
-          } else {
-            const advanceAttr =
-              isExperimentOn(this.win, 'amp-story-branching') ?
-                Attributes.PUBLIC_ADVANCE_TO :
-                Attributes.ADVANCE_TO;
-            if (oldPage.element.hasAttribute(advanceAttr)) {
-              this.storeService_.dispatch(
-                  Action.SET_ADVANCEMENT_MODE,
-                  AdvancementMode.ADVANCE_TO);
-            }
           }
+
+          // TODO(alanorozco): check if autoplay
+          this.navigationState_.updateActivePage(
+              pageIndex,
+              this.getPageCount(),
+              targetPage.element.id,
+              oldPage.element.id,
+              targetPage.getNextPageId() === null /* isFinalPage */
+          );
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
@@ -1194,15 +1196,6 @@ export class AmpStory extends AMP.BaseElement {
                 this.advancement_.getProgress());
           }
         }
-
-        // TODO(alanorozco): check if autoplay
-        this.navigationState_.updateActivePage(
-            pageIndex,
-            this.getPageCount(),
-            targetPage.element.id,
-            oldPage.element.id,
-            targetPage.getNextPageId() === null /* isFinalPage */
-        );
 
         // If first navigation.
         if (!oldPage) {
@@ -1389,6 +1382,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       return;
     }
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 

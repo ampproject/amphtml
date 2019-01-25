@@ -34,7 +34,6 @@ export const AdvancementMode = {
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
   MANUAL_ADVANCE: 'manualAdvance',
-  ADVANCE_TO: 'advanceTo',
   ADVANCE_TO_ADS: 'manualAdvanceFromAd',
 };
 
