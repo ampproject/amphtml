@@ -118,6 +118,18 @@ if (!global.AMP_TESTING) {
   });
 }
 
+/*
+ * Intercept Recaptcha frame for,
+ * integration tests. Using this to mock
+ * out the recaptcha api
+ */
+app.get('/dist.3p/current/recaptcha.max.html', (req, res, next) => {
+  fs.readFileAsync(pc.cwd() + req.path, 'utf8').then(file => {
+    file = file.replace(/initRecaptcha\(.*\)/g, 'initRecaptcha("/recaptcha.mock.js?sitekey=")');
+    res.end(file);
+  });
+});
+
 // Deprecate usage of .min.html/.max.html
 app.get([
   '/examples/*.(min|max).html',
