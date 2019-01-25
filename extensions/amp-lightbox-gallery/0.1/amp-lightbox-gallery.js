@@ -363,13 +363,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   maybeEnableMultipleItemControls_(itemLength) {
     const isDisabled = itemLength <= 1;
     const ghost = 'i-amphtml-ghost';
+    const container = dev().assertElement(this.controlsContainer_);
     [
       '.i-amphtml-lbg-button-next',
       '.i-amphtml-lbg-button-prev',
       '.i-amphtml-lbg-button-gallery',
     ].forEach(selector => {
-      dev().assertElement(
-          scopedQuerySelector(this.controlsContainer_, selector))
+      dev().assertElement(scopedQuerySelector(container, selector))
           .classList.toggle(ghost, isDisabled);
     });
   }
