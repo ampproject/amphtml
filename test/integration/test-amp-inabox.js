@@ -140,14 +140,12 @@ describe('inabox', function() {
 
     it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
-      expect(env.win.top.ampInaboxInitialized).to.be.true;
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
     });
 
     it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
-      expect(env.win.top.ampInaboxInitialized).to.be.true;
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
     });
