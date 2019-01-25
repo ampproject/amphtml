@@ -236,7 +236,7 @@ export class Schema {
    * @return {string|undefined}
    */
   static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getHeadNode().querySelectorAll(
+    const schemaTags = ampdoc.getRootNode().querySelectorAll(
         'script[type="application/ld+json"]');
 
     if (schemaTags.length <= 0) {
@@ -249,7 +249,9 @@ export class Schema {
       const schemaTag = schemaTags[i];
       const parsed = tryParseJson(schemaTag./*OK*/innerText);
 
-      if (parsed && parsed['url'] == canonicalUrl) {
+      if (parsed &&
+          (parsed['mainEntityOfPage'] == canonicalUrl ||
+          parsed['url'] == canonicalUrl)) {
         return parsed['@type'];
       }
     }
