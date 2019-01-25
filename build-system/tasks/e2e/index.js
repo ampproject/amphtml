@@ -60,6 +60,7 @@ function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
     webServerProcess_.kill('SIGINT');
   }
+  process.exit();
 }
 
 async function e2e() {
@@ -111,7 +112,6 @@ async function e2e() {
       return rejecter();
     }
 
-    process.exit();
     return resolver();
   });
 

@@ -93,6 +93,7 @@ describes.endtoend('AMP carousel mixed length slides', {
     });
 
     it('should have the correct initial slide positions', async() => {
+      expect(true).toBe(false);
       const slides = await getSlides(controller);
 
       // First slide has width 75%, and viewport is 600 pixels wide
