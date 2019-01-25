@@ -236,7 +236,7 @@ export class Schema {
    * @return {string|undefined}
    */
   static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getHeadNode().querySelectorAll(
+    const schemaTags = ampdoc.getRootNode().querySelectorAll(
         'script[type="application/ld+json"]');
 
     if (schemaTags.length <= 0) {
