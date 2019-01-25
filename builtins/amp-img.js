@@ -22,7 +22,6 @@ import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
 import {setImportantStyles} from '../src/style';
-import { generate } from 'rxjs';
 
 /**
  * Attributes to propagate to internal image when changed externally.
