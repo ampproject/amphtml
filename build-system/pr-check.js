@@ -682,44 +682,44 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runVisualDiffTests();
       command.runE2ETests();
-      //command.runVisualDiffTests();
     } else {
       // Generate a blank Percy build to satisfy the required GitHub check.
       command.runVisualDiffTests(/* opt_mode */ 'empty');
     }
-    // if (buildTargets.has('RUNTIME')) {
-    //   command.buildRuntimeMinified(/* extensions */ false);
-    //   command.runBundleSizeCheck(/* action */ 'pr');
-    // } else {
-    //   // Skip the bundle-size check to satisfy the required GitHub check.
-    //   command.runBundleSizeCheck(/* action */ 'skipped');
-    // }
-    // command.runPresubmitTests();
-    // if (buildTargets.has('INTEGRATION_TEST') ||
-    //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('BUILD_SYSTEM')) {
-    //   command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    //   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-    // }
-    // if (buildTargets.has('INTEGRATION_TEST') ||
-    //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('VISUAL_DIFF') ||
-    //     buildTargets.has('FLAG_CONFIG') ||
-    //     buildTargets.has('BUILD_SYSTEM')) {
-    //   command.verifyVisualDiffTests();
-    // }
-    // if (buildTargets.has('VALIDATOR_WEBUI')) {
-    //   command.buildValidatorWebUI();
-    // }
-    // if (buildTargets.has('VALIDATOR')) {
-    //   command.buildValidator();
-    // }
-    // if (buildTargets.has('INTEGRATION_TEST') ||
-    //     buildTargets.has('RUNTIME') ||
-    //     buildTargets.has('BUILD_SYSTEM')) {
-    //   command.runSinglePassCompiledIntegrationTests();
-    // }
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck(/* action */ 'pr');
+    } else {
+      // Skip the bundle-size check to satisfy the required GitHub check.
+      command.runBundleSizeCheck(/* action */ 'skipped');
+    }
+    command.runPresubmitTests();
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.verifyVisualDiffTests();
+    }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
+    }
   }
 
   stopTimer('pr-check.js', startTime);

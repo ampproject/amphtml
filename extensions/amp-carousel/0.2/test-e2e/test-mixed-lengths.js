@@ -46,47 +46,38 @@ describes.endtoend('AMP carousel mixed length slides', {
     });
   });
 
-  describe('fail test', () => {
-    it('fail test', async() => {
-      await expect(true).to.equal(false);
+  // Test mixed lengths without snapping. This is start aligned as that seems
+  // make the most sense for non-snapping mixed lengths.
+  describe('no snap', () => {
+    const slideOneWidth = 450;
+    const slideTwoWidth = 300;
+
+    beforeEach(async() => {
+      await controller.navigateTo(
+          'http://localhost:8000/test/manual/amp-carousel-0-2/mixed-lengths-no-snap.amp.html');
+    });
+
+    it('should have the correct initial slide positions', async() => {
+      const slides = await getSlides(controller);
+
+      // First slide has width 75%, and viewport is 600 pixels wide
+      await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
+      await expect(controller.getElementRect(slides[0])).to.include({x: 0});
+      await assertSpacerWidth(0, slideOneWidth);
+      // Second slide has width 50%, and viewport is 400 pixels wide
+      await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
+      await expect(controller.getElementRect(slides[1])).to.include({
+        x: slideOneWidth,
+      });
+      await assertSpacerWidth(1, slideTwoWidth);
+    });
+
+    it('should scroll freely', async() => {
+      const el = await getScrollingElement(controller);
+      const slides = await getSlides(controller);
+
+      await controller.scrollBy(el, {left: 10});
+      await expect(controller.getElementRect(slides[0])).to.include({x: -10});
     });
   });
-
-  let i = 200;
-  while (--i > 0) {
-    // Test mixed lengths without snapping. This is start aligned as that seems
-    // make the most sense for non-snapping mixed lengths.
-    describe('no snap', () => {
-      const slideOneWidth = 450;
-      const slideTwoWidth = 300;
-
-      beforeEach(async() => {
-        await controller.navigateTo(
-            'http://localhost:8000/test/manual/amp-carousel-0-2/mixed-lengths-no-snap.amp.html');
-      });
-
-      it('should have the correct initial slide positions', async() => {
-        const slides = await getSlides(controller);
-
-        // First slide has width 75%, and viewport is 600 pixels wide
-        await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
-        await expect(controller.getElementRect(slides[0])).to.include({x: 0});
-        await assertSpacerWidth(0, slideOneWidth);
-        // Second slide has width 50%, and viewport is 400 pixels wide
-        await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
-        await expect(controller.getElementRect(slides[1])).to.include({
-          x: slideOneWidth,
-        });
-        await assertSpacerWidth(1, slideTwoWidth);
-      });
-
-      it('should scroll freely', async() => {
-        const el = await getScrollingElement(controller);
-        const slides = await getSlides(controller);
-
-        await controller.scrollBy(el, {left: 10});
-        await expect(controller.getElementRect(slides[0])).to.include({x: -10});
-      });
-    });
-  }
 });
