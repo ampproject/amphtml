@@ -674,7 +674,6 @@ function main() {
   }
 
   if (process.env.BUILD_SHARD == 'integration_tests') {
-    command.runE2ETests();
     command.updatePackages();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
@@ -683,6 +682,7 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runE2ETests();
       command.runVisualDiffTests();
     } else {
       // Generate a blank Percy build to satisfy the required GitHub check.
