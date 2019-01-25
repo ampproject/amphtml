@@ -108,7 +108,7 @@ describe('inabox', function() {
       `,
   }, () => {
     // TODO: unskip this test once #14010 is fixed
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+    it('should layout amp-img, amp-pixel, ' +
         'amp-analytics', () => {
       // See amp4test.js for creative content
       return testAmpComponents();
@@ -138,13 +138,13 @@ describe('inabox', function() {
       env.win.document.body.removeChild(iframe);
     });
 
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+    it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
     });
 
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+    it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
@@ -252,15 +252,13 @@ describe('inabox with a complex image ad', function() {
       Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
     });
 
-    it.configure().skipSafari().run(
-        'should properly render ad in a friendly iframe with viewability pings',
+    it('should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().run(
-        'should properly render ad in a safe frame with viewability pings',
+    it('should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
