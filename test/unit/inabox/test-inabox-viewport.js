@@ -76,6 +76,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           topWindowObservable.add(listener);
         }
       },
+      removeEventListener(event, listener) {
+        if (topWindowObservable.getHandlerCount() > 0) {
+          topWindowObservable.remove(listener);
+        }
+      },
     };
     const iframeElement = {
       getBoundingClientRect() {
@@ -96,6 +101,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     sandbox.stub(
         Services.resourcesForDoc(win.document), 'get').returns([element]);
+    sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
+        new Promise(resolve => { resolve(); }));
   });
 
   afterEach(() => {
@@ -179,8 +186,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   it('should work for size, layoutRect and position observed - friendly',
       () => {
         sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
-        sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
-            new Promise(resolve => { resolve(); }));
 
         onScrollCallback = sandbox.spy();
         onResizeCallback = sandbox.spy();
@@ -263,6 +268,17 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
               .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
         });
       });
+
+  it('should disconnect events if listener setup', () => {
+    sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+    let viewportRect = layoutRectLtwh(0, 0, 100, 100);
+    sandbox.stub(binding, 'getViewportRect_').returns(viewportRect);
+    return binding.setUpNativeListener().then(() => {
+      expect(topWindowObservable.getHandlerCount()).to.equal(1);
+      binding.disconnect();
+      expect(topWindowObservable.getHandlerCount()).to.equal(0);
+    });
+  });
 
 
   it('should center content, resize and remeasure on overlay mode', () => {
