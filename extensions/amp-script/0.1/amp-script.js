@@ -62,6 +62,12 @@ export class AmpScript extends AMP.BaseElement {
       },
     });
     // Configure callbacks.
+    callbacks.onCreateWorker = data => {
+      dev().info(TAG, 'Create worker:', data);
+    };
+    callbacks.onHydration = () => {
+      // TODO(choumx): Toggle CSS class.
+    };
     callbacks.onSendMessage = data => {
       dev().info(TAG, 'To worker:', data);
     };
