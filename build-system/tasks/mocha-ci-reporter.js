@@ -26,29 +26,17 @@ const {symbols} = require('./karma.conf').mochaReporter;
  */
 function ciReporter(runner) {
   Base.call(this, runner);
-
   const self = this;
-  const width = (Base.window.width) | 0;
-  let n = 0;
 
   runner.on('pass', function() {
-    if (++n % width === 0) {
-      process.stdout.write('\n');
-    }
     process.stdout.write(Base.color('green', symbols.success));
   });
 
   runner.on('pending', function() {
-    if (++n % width === 0) {
-      process.stdout.write('\n');
-    }
     process.stdout.write(Base.color('bright yellow', symbols.info));
   });
 
   runner.on('fail', function() {
-    if (++n % width === 0) {
-      process.stdout.write('\n');
-    }
     process.stdout.write(Base.color('fail', symbols.error));
   });
 
@@ -70,8 +58,5 @@ function ciReporter(runner) {
   }
 }
 
-
-
 inherits(ciReporter, Base);
-
 module.exports = ciReporter;
