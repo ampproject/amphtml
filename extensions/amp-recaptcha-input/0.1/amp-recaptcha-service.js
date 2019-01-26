@@ -251,17 +251,10 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      let winLocation = this.win_.location;
-      if (this.win_.testLocation) {
-        winLocation = this.win_.testLocation;
-      }
-
-      // TODO: win location href curls domain MAY need to be the same
-      return ampToolboxCacheUrl.createCurlsSubdomain(winLocation.href)
+      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
           .then(curlsSubdomain => {
-            return '//' + curlsSubdomain +
-              '.recaptcha.' + winLocation.host
-              + '/dist.3p/' +
+            return 'http://' + curlsSubdomain +
+          '.recaptcha.localhost:8000/dist.3p/' +
           (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
             : 'current/recaptcha.max') +
           '.html';
