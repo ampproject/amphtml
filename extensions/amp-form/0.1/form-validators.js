@@ -26,6 +26,9 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
+/** @const @private {string} */
+const DEFAULT_PATTERN_ERROR = 'Please match the requested format.';
+
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
@@ -114,13 +117,59 @@ export class FormValidator {
   }
 
   /**
+   * Wraps `checkValidity` on input elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!Element} input
+   */
+  checkInputValidity(input) {
+    if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
+      const pattern = input.getAttribute('pattern');
+      const re = new RegExp(`^${pattern}$`);
+      const valid = re.test(input.value);
+      const error = input.getAttribute('error') || DEFAULT_PATTERN_ERROR;
+      input.setCustomValidity(valid ? '' : error);
+    }
+    input.checkValidity();
+  }
+
+  /**
+   * Wraps `checkValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   */
+  checkFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.checkValidity();
+  }
+
+  /**
+   * Wraps `reportValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   */
+  reportFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.reportValidity();
+  }
+
+  /**
+   * @param {!HTMLFormElement} form
+   * @private
+   */
+  checkTextAreaValidityInForm_(form) {
+    form.querySelectorAll('textarea').forEach(i => this.checkInputValidity(i));
+  }
+
+  /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
    * @visibleForTesting
    */
   fireValidityEventIfNecessary() {
     const previousValidity = this.formValidity_;
-    this.formValidity_ = this.form.checkValidity();
+    this.formValidity_ = this.checkFormValidity(this.form);
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
       const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
@@ -136,7 +185,7 @@ export class DefaultValidator extends FormValidator {
 
   /** @override */
   report() {
-    this.form.reportValidity();
+    this.reportFormValidity(this.form);
     this.fireValidityEventIfNecessary();
   }
 }
@@ -160,7 +209,7 @@ export class PolyfillDefaultValidator extends FormValidator {
   report() {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         inputs[i]./*REVIEW*/focus();
         this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
@@ -188,7 +237,7 @@ export class PolyfillDefaultValidator extends FormValidator {
       return;
     }
 
-    if (input.checkValidity()) {
+    if (this.checkInputValidity(input)) {
       input.removeAttribute('aria-invalid');
       this.validationBubble_.hide();
     } else {
@@ -313,7 +362,7 @@ export class AbstractCustomValidator extends FormValidator {
         !!input.checkValidity && this.shouldValidateOnInteraction(input);
 
     this.hideValidationFor(input);
-    if (shouldValidate && !input.checkValidity()) {
+    if (shouldValidate && !this.checkInputValidity(input)) {
       this.reportInput(input);
     }
   }
@@ -338,7 +387,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
     this.hideAllValidations();
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         this.reportInput(inputs[i]);
         inputs[i]./*REVIEW*/focus();
         break;
@@ -364,7 +413,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     let firstInvalidInput = null;
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         firstInvalidInput = firstInvalidInput || inputs[i];
         this.reportInput(inputs[i]);
       }
