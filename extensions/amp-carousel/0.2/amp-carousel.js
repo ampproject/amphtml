@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
 import {ResponsiveAttributes} from './responsive-attributes';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -120,6 +121,9 @@ class AmpCarousel extends AMP.BaseElement {
     });
 
     this.setupActions_();
+    this.element.addEventListener('indexchange', event => {
+      this.onIndexChanged_(event);
+    });
 
     // Do some manual "slot" distribution
     this.slides_.forEach(slide => {
@@ -151,6 +155,14 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Moves the Carousel to a given index.
+   * @param {number} index
+   */
+  showSlideWhenReady(index) {
+    this.carousel_.goToSlide(index, {smoothScroll: false});
+  }
+
+  /**
    * @private
    */
   renderContainerDom_() {
@@ -169,6 +181,17 @@ class AmpCarousel extends AMP.BaseElement {
     this.registerAction('goToSlide', ({args}) => {
       this.carousel_.goToSlide(args['index'] || -1);
     }, ActionTrust.LOW);
+  }
+
+  /**
+   * @private
+   * @param {!CustomEvent} event
+   */
+  onIndexChanged_(event) {
+    const data = dict({'index': event.detail['index']});
+    const name = 'slideChange';
+    // TODO(sparhami) trigger an action, but not from autoadvance.
+    this.element.dispatchCustomEvent(name, data);
   }
 
   /**
