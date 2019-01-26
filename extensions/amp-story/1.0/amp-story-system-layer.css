@@ -114,14 +114,12 @@
 }
 
 .i-amphtml-story-page-progress-value {
-  /* Do not remove `translateZ(0)` or `will-change` as they prevent an iOS
-   * repaint issue. */
+  /* Do not remove `translateZ(0)` as it prevents an iOS repaint issue. */
   background: rgba(255, 255, 255, 1) !important;
   height: 100% !important;
   width: 100% !important;
   transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
   transform-origin: left !important;
-  will-change: transform, transition !important;
 }
 
 [dir=rtl] .i-amphtml-story-page-progress-value {
@@ -267,6 +265,10 @@
   height: 3px !important;
   width: calc(100vw / 3) !important;
   margin: 0 24px !important;
+}
+
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
+  height: 3px !important;
 }
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {

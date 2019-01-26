@@ -93,15 +93,6 @@ export class ConsentStateManager {
       return;
     }
 
-    if (state == CONSENT_ITEM_STATE.DISMISSED) {
-      if (consentStr) {
-        user().error(TAG,
-            'Consent string value %s will be ignored on user dismiss',
-            consentStr);
-        consentStr = undefined;
-      }
-    }
-
     this.instance_.update(state, consentStr);
 
     if (this.consentChangeHandler_) {
@@ -225,21 +216,25 @@ export class ConsentInstance {
    * @param {string=} consentString
    */
   update(state, consentString) {
-    const localStateValue =
+    const localState =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
     const calculatedState =
-        recalculateConsentStateValue(state, localStateValue);
+        recalculateConsentStateValue(state, localState);
 
-    // TODO(@zhouyx) Make consentString init value to null
-    consentString = consentString || localConsentStr || undefined;
+    if (state === CONSENT_ITEM_STATE.DISMISSED) {
+      // If state is dismissed, use the old consent string.
+      this.localConsentInfo_ =
+          constructConsentInfo(calculatedState, localConsentStr);
+      return;
+    }
+
     const newConsentInfo = constructConsentInfo(calculatedState, consentString);
     const oldConsentInfo = this.localConsentInfo_;
     this.localConsentInfo_ = newConsentInfo;
 
-    if (state === CONSENT_ITEM_STATE.DISMISSED ||
-        isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
+    if (isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
       // Only update/save to localstorage if it's not dismiss
       // And the value is different from what is stored.
       return;
@@ -260,6 +255,22 @@ export class ConsentInstance {
         // If state has changed. do not store outdated value.
         return;
       }
+
+      const consentStr = consentInfo['consentString'];
+      if (consentStr && consentStr.length > 150) {
+        // Verify the length of consentString.
+        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
+        // TODO: Need utf8Encode if necessary.
+        user().error(TAG,
+            'Cannot store consentString which length exceeds 150 ' +
+            'Previous stored consentInfo will be cleared');
+        // If new consentInfo value cannot be stored, need to remove previous
+        // value
+        storage.remove(this.storageKey_);
+        // TODO: Good to have a way to inform CMP service in this case
+        return;
+      }
+
       const value = composeStoreValue(
           consentInfo, this.isAmpConsentV2ExperimentOn_);
       if (value == null) {
@@ -316,6 +327,7 @@ export class ConsentInstance {
     });
     cidPromise.then(userId => {
       const request = /** @type {!JsonObject} */ ({
+        // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
         'ampUserId': userId,
       });

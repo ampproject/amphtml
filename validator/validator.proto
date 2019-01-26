@@ -59,6 +59,7 @@ message UrlSpec {
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
 
+  // Deprecated fields, do not resuse.
   // reserved 4;
 }
 
@@ -394,7 +395,7 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  extensions 5;
+  // reserved 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
@@ -407,6 +408,7 @@ message HtmlFormat {
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
+    ACTIONS = 5;
     EXPERIMENTAL = 4;  // Currently unused
   }
 }
@@ -415,7 +417,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 34
+// NEXT AVAILABLE TAG: 35
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -513,6 +515,12 @@ message TagSpec {
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 18;
 
+  // This TagSpec will only validate against attributes explicitly
+  // listed within the TagSpec (attrs and attr_lists). No attributes
+  // from $GLOBAL_ATTRS and $AMP_LAYOUT_ATTRS are valid unless explicitly
+  // added as an attribute within the TagSpec. The field `amp_layout` is not
+  // allowed to be set when `explicit_attrs_only` is true.
+  optional bool explicit_attrs_only = 34 [default = false];
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
   // Top level attr lists of shared tags, identified by unique key
@@ -549,7 +557,7 @@ message TagSpec {
   optional AmpLayout amp_layout = 11;
 
   // Deprecated fields, do not reuse.
-  extensions 14, 26;
+  // reserved 14, 26;
 }
 
 // Defines how much css is allowed on the document including inline styles.
@@ -602,7 +610,7 @@ message ValidatorRules {
   repeated CssLengthSpec css_length_spec = 18;
 
   // Deprecated fields, do not reuse.
-  extensions 2, 5, 11, 12, 14;
+  // reserved 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -774,7 +782,8 @@ message ValidationError {
     CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
     CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
 
-    // reserved 13
+    // Deprecated fields, do not reuse.
+    // reserved 13;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -793,7 +802,8 @@ message ValidationError {
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
 
-  extensions 4;  // Previously used tag ids.
+  // Deprecated fields, do not reuse.
+  // reserved 4;
 }
 
 // Used in the verbose validator to select between multiple generated error
@@ -821,6 +831,14 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // If the AMP document is a transformed AMP document, then this is the
+  // version of the transformers that were used to transform it. If the document
+  // is not transformed, then the transformer_version's value will be 0.
+  // Note: the AMP Pacakager's transformer library specifies the version as
+  // int64. However, JavaScript does not natively support int64 so int32 is
+  // used instead.
+  // https://github.com/ampproject/amppackager/blob/master/transformer/transformers/context.go
+  optional int32 transformer_version = 6 [default = 0];
   // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
   // type that has yet to be defined. These are declared on the HTML tag and
   // parsed by the Validator Engine.
