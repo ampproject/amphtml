@@ -144,7 +144,6 @@ app.post(
     recaptchaFormSubmitHandler
 );
 
-
 // Deprecate usage of .min.html/.max.html
 app.get([
   '/examples/*.(min|max).html',
