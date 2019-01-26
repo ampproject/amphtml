@@ -19,13 +19,16 @@ const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 
 const recaptchaMock = `
-console.log('yoooooo!');
+window.grecaptcha = {
+  ready: (callback) => callback(),
+  execute: () => Promise.resolve('recaptcha-mock')
+};
 `;
 
 const recaptchaFrameRequestHandler = (req, res, next) => {
-  if(global.AMP_TESTING) {
+  if (global.AMP_TESTING) {
     fs.readFileAsync(pc.cwd() + req.path, 'utf8').then(file => {
-      file = file.replace(/initRecaptcha\(.*\)/g, recaptchaMock);
+      file = file.replace(/initRecaptcha\(.*\)/g, 'initRecaptcha("/recaptcha/mock.js?sitekey=")');
       res.end(file);
     });
   } else {
@@ -33,6 +36,29 @@ const recaptchaFrameRequestHandler = (req, res, next) => {
   }
 };
 
+const recaptchaMockRequestHandler = (req, res) => {
+  res.end(recaptchaMock);
+};
+
+const recaptchaFormSubmitHandler = (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+
+  const responseJson = {
+    message: 'Success!',
+  };
+
+  Object.keys(req.body).forEach(bodyKey => {
+    responseJson[bodyKey] = req.body[bodyKey];
+  });
+
+  res.status(200).json(responseJson);
+};
+
 module.exports = {
-  recaptchaFrameRequestHandler
+  recaptchaFrameRequestHandler,
+  recaptchaMockRequestHandler,
+  recaptchaFormSubmitHandler,
 };

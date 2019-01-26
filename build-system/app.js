@@ -33,9 +33,15 @@ const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
-const {recaptchaFrameRequestHandler} = require('./recaptcha.test.js');
+const {
+  recaptchaFrameRequestHandler,
+  recaptchaMockRequestHandler,
+  recaptchaFormSubmitHandler,
+} = require('./recaptcha.test.js');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
+
+const upload = multer();
 
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test'));
@@ -128,6 +134,16 @@ app.get(
     '/dist.3p/current/recaptcha.max.html',
     recaptchaFrameRequestHandler
 );
+app.get(
+    '/recaptcha/mock.js',
+    recaptchaMockRequestHandler
+);
+app.post(
+    '/recaptcha/submit',
+    upload.array(),
+    recaptchaFormSubmitHandler
+);
+
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -276,8 +292,6 @@ app.use('/form/json/poll1', (req, res) => {
     }));
   });
 });
-
-const upload = multer();
 
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);

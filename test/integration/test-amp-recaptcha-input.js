@@ -14,18 +14,54 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Deferred} from '../../src/utils/promise';
 import {
   createFixtureIframe,
   poll,
 } from '../../testing/iframe';
+import {dict} from '../../src/utils/object';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
 import {toggleExperiment} from '../../src/experiments';
 
 
 function createFixture() {
-  return createFixtureIframe('test/fixtures/amp-recaptcha-input.html', 3000, () => {});
+  return createFixtureIframe(
+      'test/fixtures/amp-recaptcha-input.html',
+      3000,
+      () => {}
+  );
+}
+
+function waitForBootstrapFrameOnLoad(fixture) {
+  let bootstrapFrame = undefined;
+  return poll('create bootstrap frame', () => {
+    return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
+  }, undefined, 5000).then(frame => {
+    bootstrapFrame = frame;
+    const onLoadDeferred = new Deferred();
+    frame.onload = onLoadDeferred.resolve;
+    return onLoadDeferred.promise;
+  }).then(() => {
+    return bootstrapFrame;
+  });
+}
+
+function submitForm(fixture) {
+  return waitForBootstrapFrameOnLoad(fixture).then(() => {
+    const searchInputElement =
+      fixture.doc.querySelector('input[type="search"]');
+    const submitElement =
+      fixture.doc.querySelector('input[type="submit"]');
+
+    searchInputElement.value = 'recaptcha-search';
+    submitElement.click();
+
+    return poll('Polling for hidden input', () => {
+      return fixture.doc.querySelector('input[hidden]');
+    }, undefined, 5000);
+  }).then(() => {
+    return fixture.doc.querySelector('input[hidden]');
+  });
 }
 
 describe.configure().run('amp-recaptcha-input', () => {
@@ -45,22 +81,41 @@ describe.configure().run('amp-recaptcha-input', () => {
       return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
     }, undefined, 5000).then(frame => {
       expect(frame.src.includes('recaptcha')).to.be.true;
-      expect(frame.getAttribute('data-amp-3p-sentinel')).to.be.equal('amp-recaptcha');
-      expect(frame.getAttribute('name')).to.be.equal('{"sitekey":"6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE","sentinel":"amp-recaptcha"}');
+      expect(frame.getAttribute('data-amp-3p-sentinel'))
+          .to.be.equal('amp-recaptcha');
+      expect(frame.getAttribute('name')).to.be.equal(dict({
+        'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
+        'sentinel': 'amp-recaptcha',
+      }));
     });
   });
 
-  it('should load the 3p recaptcha and recaptcha api script', function() {
+  it('should load the 3p recaptcha frame', function() {
     this.timeout(7000);
-
-    expect(true).to.be.ok;
+    return waitForBootstrapFrameOnLoad(fixture).then(frame => {
+      expect(frame).to.be.ok;
+    });
   });
 
-  it('should respond when ready from bootstrap frame', function() {
+  it('should create a hidden input, ' +
+    'with the value resolved from the recaptcha mock, ' +
+    ' on submit', function() {
     this.timeout(7000);
-    expect(true).to.be.ok;
+    return submitForm(fixture).then(hiddenInput => {
+      expect(hiddenInput).to.be.ok;
+      expect(hiddenInput.name).to.be.equal('recaptcha-token');
+      expect(hiddenInput.value).to.be.equal('recaptcha-mock');
+    });
   });
 
+  it('should show submit-success on successful submit', function() {
+    this.timeout(7000);
+    return submitForm(fixture).then(() => {
+      return poll('submit-success', () => {
+        return fixture.doc.querySelector('div[id="submit-success"]');
+      }, undefined, 5000);
+    });
+  });
 });
 
 
