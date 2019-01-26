@@ -1,0 +1,28 @@
+diff --git a/third_party/inputmask/inputmask.date.extensions.js b/third_party/inputmask/inputmask.date.extensions.js
+index 8f6b13f4f..ae850260c 100755
+--- a/third_party/inputmask/inputmask.date.extensions.js
++++ b/third_party/inputmask/inputmask.date.extensions.js
+@@ -6,15 +6,7 @@
+ * Version: 4.0.4
+ */
+ 
+-(function(factory) {
+-    if (typeof define === "function" && define.amd) {
+-        define([ "./inputmask" ], factory);
+-    } else if (typeof exports === "object") {
+-        module.exports = factory(require("./inputmask"));
+-    } else {
+-        factory(window.Inputmask);
+-    }
+-})(function(Inputmask) {
++export function factory(Inputmask) {
+     var $ = Inputmask.dependencyLib;
+     var formatCode = {
+         d: [ "[1-9]|[12][0-9]|3[01]", Date.prototype.setDate, "day", Date.prototype.getDate ],
+@@ -250,4 +242,4 @@
+         }
+     });
+     return Inputmask;
+-});
+\ No newline at end of file
++}

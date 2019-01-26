@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
@@ -21,6 +22,42 @@ import {isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
+
+
+/**
+ * Variants service provides VARIANT variables for the experiment config.
+ */
+export class Variants {
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
+
+    /** @private @const {!Deferred<!Object<string, ?string>>} */
+    this.variantsDeferred_ = new Deferred();
+  }
+
+  /**
+   * @param {!Object<string, ?string>|!Promise<!Object<string, ?string>>} variants
+   * @package
+   * @restricted
+   */
+  init(variants) {
+    this.variantsDeferred_.resolve(variants);
+  }
+
+  /**
+   * Returns a promise for the experiment variants.
+   * @return {!Promise<!Object<string, ?string>>}
+   */
+  getVariants() {
+    return this.variantsDeferred_.promise;
+  }
+}
+
 
 /**
  * Allocates the current page view to an experiment variant based on the given

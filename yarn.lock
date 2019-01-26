@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.1.1.tgz#35641d5032a4df312db8da060c27556e4c93c460"
   integrity sha512-a2AKdZUnBOKWaWqGqFEVtIzIYWi9yvhH25dWHXSH8ZV0026ckV+i09PeTeDI69DoiMbKEQRlyl8a2RVZPepNnA==
 
-"@ampproject/worker-dom@0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.2.tgz#aadfcd86752f48ea3dd54ff539097493facb3ae5"
-  integrity sha512-y3CljfO73pk5CeEGML9OtcLcDJ/4pjnk/H52HbHts7nVczwb9kaeQWxcHDPIZFJzrsNklV7ExLRKOiFoHLXEwA==
+"@ampproject/worker-dom@0.2.8":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.8.tgz#d3cb4b44d385233a50c745a82910e62999d1b6e4"
+  integrity sha512-v8AAq15vu93oJ+/ZB9iIpdq9pXfsjWgaq1ILrte84OAwJO4C2wNuvAMhqUjSW2w8kcFcjd5Tw5kcNO89ZwJH4Q==
   dependencies:
     dompurify "1.0.8"
 
@@ -2969,10 +2969,10 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
-bundlesize@0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/bundlesize/-/bundlesize-0.17.0.tgz#212ae5731ab0554d2acd509d23e1de18640b2008"
-  integrity sha512-w/jYWQupw/eijqx4LV6PPr1z0HmfXT8SMCg9tls1a3xrr6/PtC22MoFrYJ8j/uPLSANRQ+8WiN/gXuhTY6wogQ==
+bundlesize@0.17.1:
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/bundlesize/-/bundlesize-0.17.1.tgz#87018f4aa31e27127481897fc90e30248a4be28b"
+  integrity sha512-p5I5Tpoug9aOVGg4kQETMJ8xquY66mX9XI19kXkkAFnmDhDXwSF+1jq1OjBGz7h27TAulM3k2wLEJPvickTt0A==
   dependencies:
     axios "^0.17.0"
     brotli-size "0.0.1"
