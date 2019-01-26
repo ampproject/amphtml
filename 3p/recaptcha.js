@@ -54,6 +54,9 @@ import {parseJson} from '../src/json';
 /** @const {string} */
 const TAG = 'RECAPTCHA';
 
+/** @const {string} */
+const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
+
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
@@ -73,9 +76,8 @@ init();
 
 /**
  * Main function called by the recaptcha bootstrap frame
- * @param {string} recaptchaApiBaseUrl
  */
-export function initRecaptcha(recaptchaApiBaseUrl) {
+export function initRecaptcha() {
 
   const win = window;
 
@@ -98,7 +100,7 @@ export function initRecaptcha(recaptchaApiBaseUrl) {
       'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   sitekey = dataObject.sitekey;
-  const recaptchaApiUrl = recaptchaApiBaseUrl + sitekey;
+  const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
   loadScript(win, recaptchaApiUrl, function() {
     const {grecaptcha} = win;
