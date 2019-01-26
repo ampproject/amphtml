@@ -114,6 +114,9 @@ export class NextPageService {
 
     /** @private {string} */
     this.origin_ = '';
+
+    /** @private {?../../../src/service/history-impl.History} */
+    this.history_ = null;
   }
 
   /** Returns true if the service has already been initialized. */
@@ -156,12 +159,15 @@ export class NextPageService {
             Services.extensionsFor(win), Services.timerFor(win));
     this.urlService_ = Services.urlForDoc(dev().assertElement(this.element_));
     this.origin_ = this.urlService_.parse(ampDoc.getUrl()).origin;
+    this.history_ = Services.historyForDoc(ampDoc);
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
+    const {canonicalUrl} = Services.documentInfoForDoc(ampDoc);
     const documentRef =
-        createDocumentRef(win.document.location.href, win.document.title);
+        createDocumentRef(win.document.location.href, win.document.title,
+            canonicalUrl);
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -460,7 +466,6 @@ export class NextPageService {
     this.activeDocumentRef_ = documentRef;
     this.setActiveDocumentInHistory_(documentRef);
 
-    // TODO(peterjosling): Send request to viewer with title/URL
     // TODO(emarchiori): Consider updating position fixed elements.
   }
 
@@ -469,13 +474,9 @@ export class NextPageService {
    * @private
    */
   setActiveDocumentInHistory_(documentRef) {
-    if (!this.win_.history || !this.win_.history.replaceState) {
-      return;
-    }
-
-    const {title} = documentRef.amp;
+    const {title, canonicalUrl} = documentRef.amp;
     const {pathname, search} = this.urlService_.parse(documentRef.ampUrl);
-    this.win_.history.replaceState({}, title, pathname + search);
+    this.history_.replace({title, url: pathname + search, canonicalUrl});
   }
 
   /**
@@ -499,10 +500,12 @@ export class NextPageService {
  * Creates a new {@link DocumentRef} for the specified URL.
  * @param {string} ampUrl AMP URL of the document.
  * @param {string=} title Document title, if known before loading.
+ * @param {string=} canonicalUrl Canonical URL of the page, if known before
+ *     loading.
  * @return {!DocumentRef} Ref object initialised with the given URL.
  */
-function createDocumentRef(ampUrl, title) {
-  const amp = (title) ? {title} : null;
+function createDocumentRef(ampUrl, title, canonicalUrl) {
+  const amp = (title || canonicalUrl) ? {title, canonicalUrl} : null;
   return {
     ampUrl,
     amp,
