@@ -54,6 +54,9 @@ import {parseJson} from '../src/json';
 /** @const {string} */
 const TAG = 'RECAPTCHA';
 
+/** @const {string} */
+const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
+
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
@@ -75,7 +78,7 @@ init();
  * Main function called by the recaptcha bootstrap frame
  * @param {string} recaptchaApiBaseUrl
  */
-export function initRecaptcha(recaptchaApiBaseUrl) {
+export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
 
   const win = window;
 
