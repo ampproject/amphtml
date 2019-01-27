@@ -534,6 +534,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'jubna': {},
+
   'kargo': {},
 
   'kiosked': {
@@ -792,7 +794,7 @@ export const adConfig = {
   },
 
   'rbinfox': {
-	    renderStartImplemented: true,
+      renderStartImplemented: true,
   },
 
   'realclick': {
@@ -1099,6 +1101,5 @@ export const adConfig = {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
-  'jubna': {},
 
 };
