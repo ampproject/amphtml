@@ -337,14 +337,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
-      format,
+      'format': format,
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
-      adk,
+      'adk': adk,
       'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
@@ -393,9 +393,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return googleAdUrl(
           this, ADSENSE_BASE_URL, startTime, Object.assign(
               {
-                adsid: identity.token || null,
-                jar: identity.jar || null,
-                pucrd: identity.pucrd || null,
+                'adsid': identity.token || null,
+                'jar': identity.jar || null,
+                'pucrd': identity.pucrd || null,
               },
               parameters), experimentIds);
     });

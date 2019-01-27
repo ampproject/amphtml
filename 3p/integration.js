@@ -159,6 +159,7 @@ import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
+import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
@@ -204,6 +205,7 @@ import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rbinfox} from '../ads/rbinfox';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -226,7 +228,7 @@ import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
-import {jubna} from '../ads/jubna';
+import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
@@ -271,6 +273,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  jubna: true,
   kuadio: true,
   'mantis-recommend': true,
   miximedia: true,
@@ -279,10 +282,10 @@ const AMP_EMBED_ALLOWED = {
   plista: true,
   postquare: true,
   pubexchange: true,
+  rbinfox: true,
   smartclip: true,
   smi2: true,
   taboola: true,
-  jubna: true,
   zen: true,
   zergnet: true,
   runative: true,
@@ -391,6 +394,7 @@ register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
 register('ix', ix);
+register('jubna', jubna);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
@@ -438,6 +442,7 @@ register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rbinfox', rbinfox);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
@@ -461,7 +466,7 @@ register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
-register('jubna', jubna);
+register('tcsemotion', tcsemotion);
 register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
