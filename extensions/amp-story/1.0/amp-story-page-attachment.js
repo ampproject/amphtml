@@ -455,12 +455,24 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Does a browser back to close the attachment, to ensure the history state
-   * we added when opening the attachment is popped.
+   * Ensures the history state we added when opening the attachment is popped,
+   * and closes the attachment either directly, or through the onPop callback.
    * @private
    */
   close_() {
-    this.historyService_.goBack();
+    switch (this.state_) {
+      // If the attachment was open, pop the history entry that was added, which
+      // will close the attachment through the onPop callback.
+      case AttachmentState.OPEN:
+      case AttachmentState.DRAGGING_TO_CLOSE:
+        this.historyService_.goBack();
+        break;
+      // If the attachment was not open, no history entry was added, so we can
+      // close the attachment directly.
+      case AttachmentState.DRAGGING_TO_OPEN:
+        this.closeInternal_();
+        break;
+    }
   }
 
   /**
