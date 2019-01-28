@@ -198,7 +198,7 @@ describes.repeated('', {
         const el = html`<amp-video>
           <div placeholder>
             <amp-img src=foo.png></amp-img>
-            </div>
+          </div>
         </amp-video>`;
 
         expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
