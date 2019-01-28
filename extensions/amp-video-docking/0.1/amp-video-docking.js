@@ -1136,7 +1136,7 @@ export class VideoDocking {
       element.appendChild(placeholderBackground);
 
       // Delay by one frame to account for reparenting.
-      this.ampdoc_.win.requestAnimationFrame(() => {
+      this.raf_(() => {
         video.mutateElement(() => {
           setOpacity(placeholderBackground);
           setTransitionTiming(placeholderBackground);
