@@ -221,7 +221,7 @@ export class LinkShifter {
 
     if (this.digidipOpts_.hostsIgnore.length > 0) {
       const targetTest = new RegExp(
-          '(' + this.digidipOpts_.hostsIgnore.replace(/[\.]/g, '\\$&') + ')$',
+          '(' + this.digidipOpts_.hostsIgnore.replace(/[\.]/g, '\\$&').replace(/'/g, "''") + ')$',
           'i');
       if (targetTest.test(targetHost)) {
         return true;

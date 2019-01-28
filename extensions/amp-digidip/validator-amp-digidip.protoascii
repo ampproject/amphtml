@@ -28,9 +28,26 @@ tags: {  # <amp-digidip>
   html_format: AMP
   tag_name: "AMP-DIGIDIP"
   requires_extension: "amp-digidip"
+  attrs: {
+    name: "publisher-id"
+  }
+  attrs: {
+    name: "hosts-ignore"
+  }
+  attrs: {
+    name: "element-clickhandler-attribute"
+  }
+  attrs: {
+    name: "element-clickhandler"
+  }
+  attrs: {
+    name: "element-ignore-attribute"
+  }
+  attrs: {
+    name: "element-ignore-pattern"
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-digidip"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: NODISPLAY
   }
 }
