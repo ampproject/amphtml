@@ -82,7 +82,7 @@ fi
 
 # Launch proxy and wait for a tunnel to be created.
 echo "$LOG_PREFIX Launching $(CYAN "$BINARY_FILE")"
-"$BINARY_FILE" --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" 1>"$LOG_FILE" 2>&1 &
+"$BINARY_FILE" --doctor --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" 1>"$LOG_FILE" 2>&1 &
 count=0
 while [ $count -lt $READY_DELAY_SECS ]
 do
