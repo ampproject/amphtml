@@ -34,7 +34,7 @@ export const HostServiceError = {
   // The host service is correct for its environment, but not able to function.
   // For example, a SafeFrame host service running inside a SafeFrame
   // implementation that is incomplete or out of date.
-  NOT_SUPPORTED: 2,
+  UNSUPPORTED: 2,
 };
 
 export class HostServices {

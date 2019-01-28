@@ -42,7 +42,7 @@ const FALLBACK_ON = 'fallback-on';
  */
 const FallbackErrorNames = {
   'mismatch': HostServiceError.MISMATCH,
-  'not_supported': HostServiceError.NOT_SUPPORTED
+  'unsupported': HostServiceError.UNSUPPORTED
 }
 
 /**
@@ -139,7 +139,7 @@ export class MraidInitializer {
     const mraid = window['mraid'];
     if (!mraid || !mraid.getState || !mraid.addEventListener
         || !mraid.close || !mraid.open || !mraid.expand) {
-      this.handleError_(HostServiceError.NOT_SUPPORTED);
+      this.handleError_(HostServiceError.UNSUPPORTED);
       return;
     }
     this.mraid_ = mraid;
