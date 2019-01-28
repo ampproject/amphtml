@@ -32,7 +32,7 @@ BINARY_FILE="$SC_VERSION/bin/sc"
 PID_FILE="sauce_connect_pid"
 LOG_FILE="sauce_connect_log"
 READY_FILE="sauce_connect_ready"
-READY_DELAY_SECS=60
+READY_DELAY_SECS=120
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
 
 # Check the status of the Sauce Labs service
