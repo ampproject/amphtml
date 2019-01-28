@@ -28,9 +28,108 @@ tags: {  # <amp-wpm-player>
   html_format: AMP
   tag_name: "AMP-WPM-PLAYER"
   requires_extension: "amp-wpm-player"
+  attrs: {
+    name: "url"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+    mandatory_oneof: "['url', 'clip']"
+  }
+  attrs: {
+    name: "clip"
+    mandatory_oneof: "['url', 'clip']"
+  }
+  attrs: {
+    name: "adv"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
+    name: "screenshot"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "forcerelated"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "hiderelated"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "hideendscreen"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "mediaEmbed"
+  }
+  attrs: {
+    name: "extendedrelated"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "skin"
+  }
+  attrs: {
+    name: "showlogo"
+    value_casei: "true"
+    value_casei: "false"
+  }
+    attrs: {
+    name: "watermark"
+    value_casei: "true"
+    value_casei: "false"
+  }
+  attrs: {
+    name: "qoeEventsConfig"
+  }
+  attrs: {
+    name: "advVastDuration"
+  }
+  attrs: {
+    name: "vastTag"
+  }
+  attrs: {
+    name: "embedTrackings"
+  }
+    attrs: {
+    name: "id"
+  }
+
+
+  attrs: {
+    name: "adv"
+  }
+  attrs: {
+    name: "adv"
+  }
+  attrs: {
+    name: "adv"
+  }
+  attrs: {
+    name: "adv"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-wpm-player"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }

@@ -15,6 +15,26 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-wpm-player layout="responsive" width="150" height="80"></amp-wpm-player>
+  <!-- Valid: clip is is optional when url is used  -->
+  <amp-wpm-player
+    layout="responsive"
+    width="150"
+    height="80"
+    url="https://wp.tv/?mid=2013067">
+  </amp-wpm-player>
+
+  <!-- Valid: url is is optional when clip is used -->
+  <amp-wpm-player
+    layout="responsive"
+    width="150"
+    height="80"
+    clip= "">
+  </amp-wpm-player>
+  <!-- Invalid: url or clip is needed -->
+  <amp-wpm-player
+    layout="responsive"
+    width="150"
+    height="80">
+  </amp-wpm-player>
 </body>
 </html>

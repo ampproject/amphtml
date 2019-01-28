@@ -14,33 +14,36 @@
   <script async custom-element="amp-wpm-player" src="https://cdn.ampproject.org/v0/amp-wpm-player-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-iframe"
-  src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js">
+  </script>
 </head>
 <body>
-  <button on="tap:wpmPlayer.init">init</button>
-  <button on="tap:wpmPlayer.play">play</button>
-  <button on="tap:wpmPlayer.pause">pause</button>
-  <button on="tap:wpmPlayer.mute">mute</button>
-  <button on="tap:wpmPlayer.unmute">unmute</button>
-  <button on="tap:wpmPlayer.showControls">showControls</button>
-  <button on="tap:wpmPlayer.hideControls">hideControls</button>
-  <button on="tap:wpmPlayer.fullscreen">fullscreenEnter</button>
-  <button on="tap:wpmPlayer.asdf">asdf</button>
-
+  Minimal component usage:
+  <br/>
   <amp-wpm-player
-    noloading
     layout="responsive"
     width="1920"
     height="1080"
-    id="wpmPlayer"
     url="https://wp.tv/?mid=2013067"
-    screenshot="https://via.placeholder.com/800x500"
-    autoplay="true"
-    adv="true"
-    extendedrelated="false"
-    forceliteembed="false"
   >
     <div fallback>Cannot play video on this device.</div>
   </amp-wpm-player>
+
+  <br/>
+  Advanced usage with autoplay and custom screenshot and autoplay:
+  <br/>
+  <amp-wpm-player
+    layout="responsive"
+    width="1920"
+    height="1080"
+    url="https://wp.tv/?mid=2013067"
+    screenshot="https://wptv.wpcdn.pl/2964130-01prevb.jpg"
+    autoplay
+  >
+    <div fallback>Cannot play video on this device.</div>
+  </amp-wpm-player>
+
+  <br/>
 </body>
+
 </html>

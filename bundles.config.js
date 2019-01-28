@@ -170,7 +170,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-install-serviceworker', version: '0.1', type: TYPES.MISC},
-  {name: 'amp-wpm-player', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-wpm-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-izlesene', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-jwplayer', version: '0.1', type: TYPES.MEDIA},
   {
