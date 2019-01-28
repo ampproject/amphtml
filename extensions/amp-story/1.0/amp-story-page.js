@@ -82,7 +82,11 @@ const Selectors = {
   ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
       'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
       'amp-story-grid-layer amp-anim',
-  ALL_MEDIA: 'amp-story-page > audio, amp-story-grid-layer audio, ' +
+  // TODO(gmajoulet): Refactor the way these selectors are used. They will be
+  // passed to scopedQuerySelectorAll which expects only one selector and not
+  // multiple separated by commas. `> audio` has to be kept first of the list to
+  // work with this current implementation.
+  ALL_MEDIA: '> audio, amp-story-grid-layer audio, ' +
       'amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
@@ -474,7 +478,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return mediaSet;
     }
 
-    iterateCursor(fie.win.document.querySelectorAll(selector),
+    iterateCursor(scopedQuerySelectorAll(fie.win.document.body, selector),
         el => mediaSet.push(el));
     return mediaSet;
   }

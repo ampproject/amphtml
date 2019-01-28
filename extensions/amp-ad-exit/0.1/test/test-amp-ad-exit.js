@@ -95,6 +95,12 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/simple',
       'filters': ['unclickableFilter'],
     },
+    clickTargetTest: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'behaviors': {
+        'clickTarget': '_top',
+      },
+    },
   },
   filters: {
     'twoSecond': {
@@ -212,7 +218,7 @@ describes.realWin('amp-ad-exit', {
     const event = makeClickEvent(1001);
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'simple'},
+      args: {target: 'twoSecondDelay'},
       event,
       satisfiesTrust: () => true,
     });
@@ -298,6 +304,23 @@ describes.realWin('amp-ad-exit', {
         EXIT_CONFIG.targets.simple.finalUrl, '_blank');
     expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.simple.finalUrl, '_top');
+  });
+
+  it('should attempt same-tab navigation', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
+      return {name: 'fakeWin'};
+    });
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'clickTargetTest'},
+      event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledOnce;
+    expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.clickTargetTest.finalUrl, '_top');
   });
 
   it('should ping tracking URLs with sendBeacon', () => {
