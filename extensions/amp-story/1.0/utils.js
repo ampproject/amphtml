@@ -230,13 +230,14 @@ export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
   PAGE_ID: 'ampStoryPageId',
+  NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
 /**
  * Updates the value for a given state in the window history.
  * @param {!Window} win
  * @param {string} stateName
- * @param {string|boolean|null} value
+ * @param {string|boolean|Array<string>|null} value
  */
 export function setHistoryState(win, stateName, value) {
   const {history} = win;

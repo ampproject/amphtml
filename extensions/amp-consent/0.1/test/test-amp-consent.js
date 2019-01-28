@@ -19,7 +19,7 @@ import {
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-info';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -122,7 +122,7 @@ describes.realWin('amp-consent', {
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(ampConsent.consentId_).to.equal('test');
         expect(ampConsent.consentConfig_).to.deep.equal(dict({
-          'storageKey': 'test',
+          'consentInstanceId': 'test',
           'checkConsentHref': '/override',
           'postPromptUI': 'test',
           'clientConfig': {

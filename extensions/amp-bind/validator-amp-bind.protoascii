@@ -63,9 +63,6 @@ tags: {  # <amp-state>
   requires_extension: "amp-bind"
   attrs: {
     name: "credentials"
-    trigger: {
-      also_requires_attr: "src"
-    }
   }
   attrs: {
     name: "id"
@@ -119,9 +116,6 @@ tags: { # <amp-state>
   requires_extension: "amp-bind"
   attrs: {
     name: "credentials"
-    trigger: {
-      also_requires_attr: "src"
-    }
   }
   attrs: {
     name: "cross-origin"

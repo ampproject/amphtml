@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-unused-vars */
-
 import {
   Alignment,
   Axis,
+  findOverlappingIndex,
   getDimension,
+  getOffsetStart,
+  scrollContainerToElement,
+  setScrollPosition,
+  setTransformTranslateStyle,
   updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
@@ -29,8 +32,15 @@ import {
   wrappingDistance,
 } from './array-util.js';
 import {debounce} from '../../../src/utils/rate-limit';
-import {getStyle, setStyle} from '../../../src/style';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from '../../../src/style';
+import {iterateCursor} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
+import {mod} from '../../../src/utils/math';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -236,9 +246,6 @@ export class Carousel {
     /** @private {number} */
     this.currentIndex_ = 0;
 
-    /** @private {boolean} */
-    this.horizontal_ = true;
-
     /** @private {number} */
     this.initialIndex_ = 0;
 
@@ -299,7 +306,27 @@ export class Carousel {
    * @param {number} delta
    */
   advance(delta) {
-    // TODO(sparhami) implement
+    const {slides_: slides, currentIndex_} = this;
+
+    const newIndex = currentIndex_ + delta;
+    const endIndex = slides.length - 1;
+    const atStart = currentIndex_ == 0;
+    const atEnd = currentIndex_ == endIndex;
+    const passingStart = newIndex < 0;
+    const passingEnd = newIndex > endIndex;
+
+    if (this.loop_) {
+      this.goToSlide(mod(newIndex, endIndex + 1));
+    } else if (delta > 0 && this.inLastWindow_(currentIndex_) &&
+        this.inLastWindow_(newIndex)) {
+      this.goToSlide(0);
+    } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
+      this.goToSlide(endIndex);
+    } else if ((passingStart && !atStart) || (passingEnd && atEnd)) {
+      this.goToSlide(0);
+    } else {
+      this.goToSlide(newIndex);
+    }
   }
 
   /**
@@ -308,7 +335,12 @@ export class Carousel {
    * @param {number} index
    */
   goToSlide(index) {
-    // TODO(sparhami) implement
+    if (index < 0 || index > this.slides_.length - 1) {
+      return;
+    }
+
+    this.updateCurrentIndex_(index);
+    this.scrollCurrentIntoView_();
   }
 
   /**
@@ -457,8 +489,9 @@ export class Carousel {
       this.scrollContainer_.setAttribute('loop', this.loop_);
       this.scrollContainer_.setAttribute('snap', this.snap_);
       // TODO(sparhami) Do not use CSS custom property
-      // this.scrollContainer_.style.setProperty(
-      //     '--visible-count', this.visibleCount_);
+      setImportantStyles(this.scrollContainer_, {
+        '--visible-count': this.visibleCount_,
+      });
 
       if (!this.slides_.length) {
         return;
@@ -481,6 +514,16 @@ export class Carousel {
   updateVisibleCount(visibleCount) {
     this.visibleCount_ = Math.max(1, visibleCount);
     this.updateUi();
+  }
+
+  /**
+   * Updates the current index as well as firing an event.
+   * @param {number} currentIndex The new current index.
+   * @private
+   */
+  updateCurrentIndex_(currentIndex) {
+    this.currentIndex_ = currentIndex;
+    // TODO(sparhami) Fire an event.
   }
 
   /**
@@ -513,6 +556,7 @@ export class Carousel {
     this.updateCurrent_();
     this.debouncedResetScrollReferencePoint_();
   }
+
   /**
    * @param {!Element} el The slide or spacer to move.
    * @param {number} revolutions How many revolutions forwards (or backwards)
@@ -522,16 +566,22 @@ export class Carousel {
    * @private
    */
   setElementTransform_(el, revolutions, revolutionLength) {
-    // TODO(sparhami) implement
+    setTransformTranslateStyle(
+        this.axis_, el, revolutions * revolutionLength);
+    el._revolutions = revolutions;
   }
 
   /**
    * Resets the transforms for all the slides, putting them back in their
    * natural position.
+   * @param {number} totalLength The total length of all the slides.
    * @private
    */
-  resetSlideTransforms_() {
-    // TODO(sparhami) implement
+  resetSlideTransforms_(totalLength) {
+    const revolutions = 0; // Sets the slide back to the initial position.
+    this.slides_.forEach(slide => {
+      this.setElementTransform_(slide, revolutions, totalLength);
+    });
   }
 
   /**
@@ -609,7 +659,31 @@ export class Carousel {
    * @private
    */
   setChildrenSnapAlign_() {
-    // TODO(sparhami) implement
+    const slideCount = this.slides_.length;
+    const startAligned = this.alignment_ == Alignment.START ;
+    const oddVisibleCount = mod(this.visibleCount_, 2) == 1;
+    // For the legacy scroll-snap-coordinate, when center aligning with an odd
+    // count, actually use a start coordinate. Otherwise it will snap to the
+    // center of the slides near the edge of the container. That is
+    //    ______________             _____________
+    // [ | ][   ][   ][ | ]   vs.   [   ][   ][   ]
+    //    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾             ‾‾‾‾‾‾‾‾‾‾‾‾‾
+    const coordinate = startAligned || oddVisibleCount ? '0%' : '50%';
+
+    iterateCursor(this.scrollContainer_.children, (child, index) => {
+      // Note that we are dealing with both spacers, so we need to make sure
+      // we are always dealing with the slideIndex. Since we have the same
+      // number of each type of spacer as we do slides, we can simply do a mod
+      // to do the mapping.
+      const slideIndex = mod(index, slideCount);
+      // If an item is at the start of the group, it gets an aligned.
+      const shouldSnap = mod(slideIndex, this.snapBy_) == 0;
+
+      setStyles(child, {
+        'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
+        'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
+      });
+    });
   }
 
   /**
@@ -637,14 +711,16 @@ export class Carousel {
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
-    [slides_, replacementSpacers_].forEach(elements => {
-      elements.forEach((el, i) => {
-        const distance = loop_ ?
-          wrappingDistance(currentIndex_, i, elements) :
-          Math.abs(currentIndex_ - i);
-        const tooFar = distance > sideSlideCount;
-        el.hidden = tooFar;
-      });
+    slides_.forEach((el, i) => {
+      const distance = loop_ ?
+        wrappingDistance(currentIndex_, i, slides_) :
+        Math.abs(currentIndex_ - i);
+      const tooFar = distance > sideSlideCount;
+      el.hidden = tooFar;
+    });
+
+    replacementSpacers_.forEach(el => {
+      el.hidden = sideSlideCount < (slides_.length - 1);
     });
 
     beforeSpacers_.forEach((el, i) => {
@@ -668,8 +744,37 @@ export class Carousel {
    * @private
    */
   updateCurrent_() {
-    // TODO(sparhami) implement
+    const totalLength = sum(this.getSlideLengths_());
+    const overlappingIndex = findOverlappingIndex(
+        this.axis_, this.alignment_, this.element_, this.slides_,
+        this.currentIndex_);
+
+    // Currently not over a slide (e.g. on top of overscroll area).
+    if (overlappingIndex === undefined) {
+      return;
+    }
+
+    // Pulled out as a separate variable, since Closure gets confused about
+    // whether it can be undefined pas this point when closed over (in
+    // runMutate).
+    const newIndex = overlappingIndex;
+    // Update the current offset on each scroll so that we have it up to date
+    // in case of a resize.
+    const currentElement = this.slides_[newIndex];
+    const dimension = getDimension(this.axis_, currentElement);
+    this.currentElementOffset_ = dimension.start;
+
+    // We did not move at all.
+    if (newIndex == this.currentIndex_) {
+      return;
+    }
+
+    this.runMutate_(() => {
+      this.updateCurrentIndex_(newIndex);
+      this.moveSlides_(totalLength);
+    });
   }
+
 
   /**
    * Resets the frame of reference for scrolling, centering things around the
@@ -695,7 +800,7 @@ export class Carousel {
     this.runMutate_(() => {
       this.restingIndex_ = this.currentIndex_;
 
-      this.resetSlideTransforms_();
+      this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();
       this.moveSlides_(totalLength);
       this.restoreScrollStart_();
@@ -710,7 +815,27 @@ export class Carousel {
    * @private
    */
   restoreScrollStart_() {
-    // TODO(sparhami) implement
+    const {
+      axis_,
+      currentElementOffset_,
+      currentIndex_,
+      scrollContainer_,
+      slides_,
+    } = this;
+    const currentElement = slides_[currentIndex_];
+    const {length, start} = getDimension(axis_, scrollContainer_);
+    const currentElementStart = Math.abs(currentElementOffset_) <= length ?
+      currentElementOffset_ : 0;
+    // Use the offsetStart to figure out the scroll position of the current
+    // element. Note that this only works because the element is not translated
+    // at this point.
+    const offsetStart = getOffsetStart(axis_, currentElement);
+    const pos = offsetStart - currentElementStart + start;
+
+    this.ignoreNextScroll_ = true;
+    runDisablingSmoothScroll(scrollContainer_, () => {
+      setScrollPosition(axis_, scrollContainer_, pos);
+    });
   }
 
   /**
@@ -718,7 +843,44 @@ export class Carousel {
    * @private
    */
   scrollCurrentIntoView_() {
-    // TODO(sparhami) implement
+    scrollContainerToElement(
+        this.slides_[this.currentIndex_],
+        this.scrollContainer_,
+        this.axis_,
+        this.alignment_
+    );
+  }
+
+  /**
+   * Moves slides before or after the current index by setting setting a
+   * translate.
+   * @param {number} totalLength The total length of all the slides.
+   * @param {number} count How many slides to move.
+   * @param {boolean} isAfter Whether the slides should move after or before.
+   * @private
+   */
+  moveSlidesBeforeOrAfter__(totalLength, count, isAfter) {
+    const {currentIndex_, restingIndex_, slides_} = this;
+    const current = slides_[currentIndex_];
+    const currentRevolutions = (current._revolutions || 0);
+    const dir = isAfter ? 1 : -1;
+
+    for (let i = 1; i <= count; i++) {
+      const elIndex = mod(currentIndex_ + (i * dir), slides_.length);
+
+      // We do not want to move the slide that we started at.
+      if (elIndex === restingIndex_ && currentIndex_ !== restingIndex_) {
+        break;
+      }
+
+      const el = slides_[elIndex];
+      // Check if the element is on the wrong side of the current index.
+      const needsMove = elIndex > currentIndex_ !== isAfter;
+      const revolutions = needsMove ? currentRevolutions + dir :
+        currentRevolutions;
+
+      this.setElementTransform_(el, revolutions, totalLength);
+    }
   }
 
   /**
@@ -728,6 +890,36 @@ export class Carousel {
    * @private
    */
   moveSlides_(totalLength) {
-    // TODO(sparhami) implement
+    // TODO(sparhami) We could only the number of slides needed to have enough
+    // buffer between scrolls. One thing we need to look out for is to make
+    // sure the mixed length and visibleCount cases are handled correctly.
+    const count = (this.slides_.length - 1) / 2;
+
+    if (!this.loop_) {
+      return;
+    }
+
+    if (this.slides_.length <= 2) {
+      return;
+    }
+
+    this.moveSlidesBeforeOrAfter__(totalLength, Math.floor(count), false);
+    this.moveSlidesBeforeOrAfter__(totalLength, Math.ceil(count), true);
+  }
+
+  /**
+   * Checks if a given index is in the last window of items. For example, if
+   * showing two slides at a time with the slides [a, b, c, d], both slide
+   * b and c are in the last window.
+   * @param {number} index The index to check.
+   * @return {boolean} True if the slide is in the last window, false
+   *    otherwise.
+   */
+  inLastWindow_(index) {
+    const {alignment_, slides_, visibleCount_} = this;
+    const startAligned = alignment_ == Alignment.START;
+    const lastWindowSize = startAligned ? visibleCount_ : visibleCount_ / 2;
+
+    return index >= slides_.length - lastWindowSize;
   }
 }
