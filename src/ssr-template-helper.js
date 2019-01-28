@@ -95,18 +95,18 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * @param {!Element} container
+   * @param {!Element} element
    * @param {!JsonObject} data
    * @return {!Promise}
    */
-  renderTemplate(container, data) {
+  renderTemplate(element, data) {
     let renderTemplatePromise;
     if (this.isSupported()) {
       renderTemplatePromise = this.templates_
-          .findAndSetHtmlForTemplate(container, data['html']);
+          .findAndSetHtmlForTemplate(element, data['html']);
     } else {
       renderTemplatePromise =
-          this.templates_.findAndRenderTemplate(container, data);
+          this.templates_.findAndRenderTemplate(element, data);
     }
 
     return renderTemplatePromise;

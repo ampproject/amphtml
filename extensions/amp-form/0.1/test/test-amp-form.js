@@ -314,12 +314,9 @@ describes.repeated('', {
           renderedTemplate.innerText = 'much success';
           sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
               .returns(template);
-          sandbox.stub(ampForm.templates_, 'findAndSetHtmlForTemplate')
-              .returns(Promise.resolve({html: renderedTemplate}));
-          sandbox.stub(ampForm.templates_, 'findAndRenderTemplate');
 
           const fetchAndRenderTemplate = sandbox.stub(
-              ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
+              ampForm.ssrTemplateHelper_, 'renderTemplate');
           fetchAndRenderTemplate
               .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
               .onSecondCall().returns(Promise.resolve({html: template}));
@@ -329,10 +326,8 @@ describes.repeated('', {
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(renderTemplate, 2)
               .then(() => {
-                expect(ampForm.templates_.findAndSetHtmlForTemplate)
+                expect(ampForm.ssrTemplateHelper_.renderTemplate)
                     .to.have.been.called;
-                expect(ampForm.templates_.findAndRenderTemplate)
-                    .not.to.have.been.called;
                 return handleSubmitEventPromise;
               });
         });

@@ -812,7 +812,7 @@ export class AmpForm {
    * Transition the form to the submit success state.
    * @param {!JsonObject} response
    * @param {!FetchRequestDef} request
-   * @return {!Promise<string>}
+   * @return {!Promise}
    * @private visible for testing
    */
   handleSsrTemplateSuccess_(response, request) {
