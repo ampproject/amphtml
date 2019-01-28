@@ -1213,25 +1213,38 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
+   * @private
    */
   setPosterImage_(video) {
-    const attr = 'poster';
-
-    const {element} = video;
-
     const placeholderPoster = this.getPlaceholderRefs_()['poster'];
+    const posterSrc = this.getPosterImageSrc_(video.element);
 
-    if (!element.hasAttribute('poster')) {
+    if (!posterSrc) {
       toggle(placeholderPoster, false);
       return;
     }
-
-    const posterSrc = element.getAttribute(attr);
 
     toggle(placeholderPoster, true);
     setStyles(placeholderPoster, {
       'background-image': `url(${posterSrc})`,
     });
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {string|undefined}
+   * @private
+   */
+  getPosterImageSrc_(element) {
+    const poster = 'poster';
+    if (element.hasAttribute(poster)) {
+      return element.getAttribute(poster);
+    }
+    const imgEl = element.querySelector(
+        'amp-img[placeholder],img[placeholder]');
+    if (imgEl) {
+      return imgEl.getAttribute('src');
+    }
   }
 
   /**
