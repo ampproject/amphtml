@@ -51,7 +51,11 @@ export class AmpWpmPlayer extends AMP.BaseElement {
      * @param {*} parseFunction
      */
     const parseAttribute = (name, required, parseFunction) => {
-      const value = this.element_.getAttribute(name);
+      let value = this.element_.getAttribute(name);
+
+      if (value === '') {
+        value = 'true';
+      }
 
       if (value) {
         return parseFunction(value);
@@ -148,37 +152,13 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       embedTrackings: parseAttribute.json('embedTrackings'),
       id: parseAttribute.string('id'),
 
-      autoplay: parseAttribute.boolean(VideoAttributes.AUTOPLAY) || false, // TODO: czy to tutaj wgl ma byc? tutaj raczej nie, ale gdzies tak!
+      autoplay: parseAttribute.boolean(VideoAttributes.AUTOPLAY) || false,
       ampnoaudio: parseAttribute.boolean(VideoAttributes.NO_AUDIO),
       dock: parseAttribute.boolean(VideoAttributes.DOCK),
       rotateToFullscreen: parseAttribute.boolean(
           VideoAttributes.ROTATE_TO_FULLSCREEN,
       ),
     };
-  }
-
-  /**
-   * Method that calls wp video api for the url of the placeholder image
-   * @private
-   * @param {string} videoID
-   *
-   * @return {promise}
-   */
-  getScreenshotUrl_(videoID) {
-    return new Promise(res => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `https://video.wp.pl/api/v1/embed/${videoID}`, true);
-      xhr.send(null);
-      xhr.onreadystatechange = function() {
-        if (this.readyState === 4) {
-          if (xhr.status === 200) {
-            res(JSON.parse(xhr.responseText).clip.screenshot);
-          } else {
-            res('https://via.placeholder.com/800x500'); // TODO: uniwersalny placeholder
-          }
-        }
-      };
-    });
   }
 
   /**
@@ -266,7 +246,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     /** @private {element} */
     this.container_;
 
-    /** @private {url} */
+    /** @private {string} */
     this.placeholderUrl_;
 
     /** @private {element} */
@@ -291,7 +271,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.win.addEventListener('message', e => {
-      if (e.data.startsWith(this.header_)) {
+      if (typeof e.data === 'string' && e.data.startsWith(this.header_)) {
         const message = e.data.replace(this.header_, '');
 
         this.messageListeners_.forEach(listener => {
@@ -303,7 +283,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.attributes_ = this.parseAttributes_();
 
     this.frameId_ = this.attributes_.id || `${Math.random() * 10e17}`;
-    this.frameUrl_ = new URL('https://std.wpcdn.pl/wpjslib/AMP-270-init-iframe/playerComponentFrame.html'); // TODO: zmiana na niebrancha
+    this.frameUrl_ = new URL('https://std.wpcdn.pl/wpjslib/AMP-270-init-iframe/playerComponentFrame.html');
     this.frameUrl_.searchParams.set('frameId', this.frameId_);
     this.frameUrl_.searchParams.set('debug', 'ampPlayerComponent');
 
@@ -325,8 +305,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.element_.appendChild(this.container_);
 
-    this.placeholderUrl_ = this.attributes_.screenshot
-      || this.getScreenshotUrl_(this.videoId_);
+    this.placeholderUrl_ = this.attributes_.screenshot;
   }
 
   /** @override */
@@ -346,11 +325,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
     const image = this.win.document.createElement('amp-img');
     image.setAttribute('layout', 'fill');
-    if (this.placeholderUrl_.then) {
-      this.placeholderUrl_.then(url => {
-        image.setAttribute('src', url);
-      });
-    } else {
+    if (this.placeholderUrl_) {
       image.setAttribute('src', this.placeholderUrl_);
     }
 
@@ -441,11 +416,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', 'true');
-    if (this.placeholderUrl_.then) {
-      this.placeholderUrl_.then(url => {
-        placeholder.setAttribute('src', url);
-      });
-    } else {
+    if (this.placeholderUrl_) {
       placeholder.setAttribute('src', this.placeholderUrl_);
     }
 
