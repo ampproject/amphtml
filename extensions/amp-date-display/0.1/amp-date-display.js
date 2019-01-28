@@ -157,6 +157,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
    * @private
    */
   getEpoch_() {
+    const {Date} = this.win;
     let epoch;
 
     if (this.datetime_.toLowerCase() === 'now') {
