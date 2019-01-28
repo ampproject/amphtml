@@ -163,9 +163,7 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
     'target',
   ],
   'input': [
-    'value',
     'mask-output',
-    'mask',
   ],
   'template': [
     'type',
