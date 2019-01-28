@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
+import {
+  enableExperiments,
+  getScrollingElement,
+  getSlide,
+  waitForCarouselImg,
+} from './helpers';
+
 describes.endtoend('AMP carousel', {
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
-  const slottedClass = 'i-amphtml-carousel-slotted';
-  const scrollerSelector = 'amp-carousel .i-amphtml-carousel-scroll';
+  const pageWidth = 600;
+  const pageHeight = 1200;
 
   let controller;
 
@@ -27,56 +34,43 @@ describes.endtoend('AMP carousel', {
     return controller.getElementProperty(el, name);
   }
 
-  async function waitForImgLoad(el) {
-    await expect(prop(el, 'naturalWidth')).to.be.greaterThan(0);
-  }
-
-  async function waitForCarouselImg(n) {
-    // We cannot use CSS's nth child due to non-slide elements in the scroll
-    // container. We query all the imgs upfront, since they might not have
-    // laid out yet.
-    const el = await controller.findElementXPath(
-        `//amp-carousel//div[contains(@class, "${slottedClass}")][${n + 1}]` +
-        '//img');
-    return await waitForImgLoad(el);
-  }
-
-  async function getSlide(n) {
-    return await controller.findElementXPath(
-        `//amp-carousel//div[contains(@class, "${slottedClass}")][${n + 1}]`);
-  }
-
   beforeEach(async() => {
     controller = env.controller;
 
-    // Enable the amp-carousel-v2 and layers experiments.
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-carousel-0-2/enable-experiment.html');
-    await controller.findElement('.msg-div');
-
+    await enableExperiments(controller);
+    await controller.setWindowRect({
+      width: pageWidth,
+      height: pageHeight,
+    });
     await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-carousel-0-2/basic.amp.html');
   });
 
   it('should render correctly', async() => {
-    await waitForCarouselImg(0);
+    const el = await getScrollingElement(controller);
+
+    // We should have space for SLIDE_COUNT - 1 on either side + 1 for the
+    // current slide.
+    await expect(prop(el, 'scrollWidth'))
+        .to.equal(pageWidth * (2 * (SLIDE_COUNT - 1) + 1));
+    await waitForCarouselImg(controller, 0);
     await controller.takeScreenshot('screenshots/render.png');
   });
 
-  it.skip('should layout the two adjacent slides', async() => {
+  it('should layout the two adjacent slides', async() => {
     // TODO(sparhami) Verify this is on the right of the 0th slide
-    await waitForCarouselImg(1);
+    await waitForCarouselImg(controller, 1);
     // TODO(sparhami) Verify this is on the left of the 0th slide
-    await waitForCarouselImg(SLIDE_COUNT - 1);
+    await waitForCarouselImg(controller, SLIDE_COUNT - 1);
   });
 
-  it.skip('should snap when scrolling', async() => {
-    const el = await controller.findElement(scrollerSelector);
-    const firstSlide = await getSlide(0);
+  it('should snap when scrolling', async() => {
+    const el = await getScrollingElement(controller);
+    const firstSlide = await getSlide(controller, 0);
 
     // Wait for the first two slides's imgs to load.
-    await waitForCarouselImg(0);
-    await waitForCarouselImg(1);
+    await waitForCarouselImg(controller, 0);
+    await waitForCarouselImg(controller, 1);
 
     const slideWidth = await prop(firstSlide, 'offsetWidth');
     const scrollLeft = await prop(el, 'scrollLeft');
@@ -90,13 +84,13 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/snapped.png');
   });
 
-  it.skip('should reset the window after scroll', async() => {
-    const el = await controller.findElement(scrollerSelector);
-    const firstSlide = await getSlide(0);
+  it('should reset the window after scroll', async() => {
+    const el = await getScrollingElement(controller);
+    const firstSlide = await getSlide(controller, 0);
 
     // Wait for the first two slides's imgs to load.
-    await waitForCarouselImg(0);
-    await waitForCarouselImg(1);
+    await waitForCarouselImg(controller, 0);
+    await waitForCarouselImg(controller, 1);
 
     const slideWidth = await prop(firstSlide, 'offsetWidth');
     const scrollWidth = await prop(el, 'scrollWidth');
@@ -121,11 +115,11 @@ describes.endtoend('AMP carousel', {
       height: 1000,
     });
 
-    const firstSlide = await getSlide(0);
+    const firstSlide = await getSlide(controller, 0);
 
     // Wait for the first two slides's imgs to load.
-    await waitForCarouselImg(0);
-    await waitForCarouselImg(1);
+    await waitForCarouselImg(controller, 0);
+    await waitForCarouselImg(controller, 1);
     await expect(controller.getElementRect(firstSlide)).to.include({
       'x': 0,
       'width': 600,
@@ -145,14 +139,14 @@ describes.endtoend('AMP carousel', {
     await controller.takeScreenshot('screenshots/after-resize.png');
   });
 
-  describe.skip('looping', () => {
+  describe('looping', () => {
     it('should show the last slide when looping', async() => {
-      const el = await controller.findElement(scrollerSelector);
-      const lastSlide = await getSlide(SLIDE_COUNT - 1);
+      const el = await getScrollingElement(controller);
+      const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
       // Wait for the first and last slides to load.
-      await waitForCarouselImg(0);
-      await waitForCarouselImg(SLIDE_COUNT - 1);
+      await waitForCarouselImg(controller, 0);
+      await waitForCarouselImg(controller, SLIDE_COUNT - 1);
 
       // Scroll to the previous slide by moving left by the last slide's width.
       const slideWidth = await prop(lastSlide, 'offsetWidth');
@@ -166,12 +160,12 @@ describes.endtoend('AMP carousel', {
     });
 
     it('should show the first slide when looping', async() => {
-      const el = await controller.findElement(scrollerSelector);
-      const lastSlide = await getSlide(SLIDE_COUNT - 1);
+      const el = await getScrollingElement(controller);
+      const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
       // Wait for the first and last slides to load.
-      await waitForCarouselImg(0);
-      await waitForCarouselImg(SLIDE_COUNT - 1);
+      await waitForCarouselImg(controller, 0);
+      await waitForCarouselImg(controller, SLIDE_COUNT - 1);
 
       // Go to the last slide, wait for scrolling to move and window to reset.
       const slideWidth = await prop(lastSlide, 'offsetWidth');
@@ -194,23 +188,26 @@ describes.endtoend('AMP carousel', {
     // Make sure we can move all the way forwards to the last slide and that it
     // is in the right place.
     it('should display slides correctly when moving forwards', async() => {
-      const el = await controller.findElement(scrollerSelector);
-      const lastSlide = await getSlide(SLIDE_COUNT - 1);
+      const el = await getScrollingElement(controller);
+      const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
       // Wait for the first and last slides to load.
-      await waitForCarouselImg(0);
-      await waitForCarouselImg(SLIDE_COUNT - 1);
+      await waitForCarouselImg(controller, 0);
+      await waitForCarouselImg(controller, SLIDE_COUNT - 1);
 
       // Go to the last slide, wait for scrolling to move.
       const slideWidth = await prop(lastSlide, 'offsetWidth');
       const restingScrollLeft = await prop(el, 'scrollLeft');
-      const lastSlideScrollPos = restingScrollLeft +
-          (slideWidth * (SLIDE_COUNT - 1));
-      await controller.scroll(el, {left: lastSlideScrollPos});
+      await controller.scrollBy(el, {
+        left: slideWidth * (SLIDE_COUNT - 1),
+      });
 
       await expect(prop(el, 'scrollLeft')).to.not.equal(restingScrollLeft);
       await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
-      // TODO(sparhami) Make sure the slide is in the right place.
+      await expect(controller.getElementRect(lastSlide)).to.include({
+        x: 0,
+        width: slideWidth,
+      });
       await controller.takeScreenshot(
           'screenshots/loop-move-forwards-to-end.png');
     });
@@ -219,23 +216,26 @@ describes.endtoend('AMP carousel', {
     // Make sure we can move all the way backwards to the second slide and that
     // it is in the right place.
     it('should display slides correctly when moving backwards', async() => {
-      const el = await controller.findElement(scrollerSelector);
-      const secondSlide = await getSlide(1);
+      const el = await getScrollingElement(controller);
+      const secondSlide = await getSlide(controller, 1);
 
       // Wait for the first and second slides to load.
-      await waitForCarouselImg(0);
-      await waitForCarouselImg(1);
+      await waitForCarouselImg(controller, 0);
+      await waitForCarouselImg(controller, 1);
 
       // Go to the last slide, wait for scrolling to move.
       const slideWidth = await prop(secondSlide, 'offsetWidth');
       const restingScrollLeft = await prop(el, 'scrollLeft');
-      const secondSlideScrollPos = restingScrollLeft -
-          (slideWidth * (SLIDE_COUNT - 1));
-      await controller.scroll(el, {left: secondSlideScrollPos});
+      await controller.scrollBy(el, {
+        left: -(slideWidth * (SLIDE_COUNT - 1)),
+      });
 
       await expect(prop(el, 'scrollLeft')).to.not.equal(restingScrollLeft);
       await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
-      // TODO(sparhami) Make sure the slide is in the right place.
+      await expect(controller.getElementRect(secondSlide)).to.include({
+        x: 0,
+        width: slideWidth,
+      });
       await controller.takeScreenshot(
           'screenshots/loop-move-backwards-to-second.png');
     });
