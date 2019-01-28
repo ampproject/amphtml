@@ -1164,15 +1164,6 @@ export class AmpStory extends AMP.BaseElement {
                 Action.SET_ADVANCEMENT_MODE,
                 AdvancementMode.ADVANCE_TO_ADS);
           }
-
-          // TODO(alanorozco): check if autoplay
-          this.navigationState_.updateActivePage(
-              pageIndex,
-              this.getPageCount(),
-              targetPage.element.id,
-              oldPage.element.id,
-              targetPage.getNextPageId() === null /* isFinalPage */
-          );
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
@@ -1196,6 +1187,16 @@ export class AmpStory extends AMP.BaseElement {
                 this.advancement_.getProgress());
           }
         }
+
+        const oldPageId = oldPage ? oldPage.element.id : null;
+        // TODO(alanorozco): check if autoplay
+        this.navigationState_.updateActivePage(
+            pageIndex,
+            this.getPageCount(),
+            targetPage.element.id,
+            oldPageId,
+            targetPage.getNextPageId() === null /* isFinalPage */
+        );
 
         // If first navigation.
         if (!oldPage) {

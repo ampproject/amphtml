@@ -84,7 +84,7 @@ export class NavigationState {
    * @param {number} pageIndex
    * @param {number} totalPages
    * @param {string} pageId
-   * @param {string} previousPageId
+   * @param {string|null} previousPageId
    * @param {boolean} isFinalPage
    * TODO(alanorozco): pass whether change was automatic or on user action.
    */
