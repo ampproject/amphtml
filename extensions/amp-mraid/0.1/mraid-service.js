@@ -42,14 +42,47 @@ export class MraidService {
    * @param {function(!VisibilityDataDef)} callback
    */
   onVisibilityChange(callback) {
-    // TODO: impedance matching.  The format of data MRAID returns doesn't
-    // exactly match the format of data that the callback expects yet.
+    // The MRAID3 specification says:
+    //
+    // * exposedPercentage: percentage of ad that is visible on screen, a
+    //   floating-point number between 0.0 and 100.0, or 0.0 if not visible.
+    //
+    // * visibleRectangle: the visible portion of the ad container, or null if
+    //   not visible. It has the fields {x, y, width, height}, where x and y are
+    //   the position of the upper-left corner of the visible area, relative of
+    //   the upper-left corner of the ad container's current extent, and width
+    //   and height are size of the visible area. If the visible area is
+    //   non-rectangular, then this parameter is the bounding box of the visible
+    //   portion, and the occlusionRectangles parameter describes the
+    //   non-visible areas within the bounding box.
+    //
+    // * occlusionRectangles: an array of rectangles describing the sections of
+    //   the visibleRectangle that are not visible, or null if occlusion
+    //   detection is not used or relevant. Each element of the array is has the
+    //   fields {x, y, width, height}, where x and y are the position of the
+    //   upper-left corner of the occluded area, relative of the upper-left
+    //   corner of the ad container's current extent, and width and height are
+    //   size of the occluded area. The rectangles must not overlap, and they
+    //   must be sorted from largest area to smallest area. In common scenarios,
+    //   the visible area is rectangular, and this parameter is null. If the
+    //   implementation can detect non-rectangular exposures, then this
+    //   parameter will be set.
+    //
+    // AMP doesn't currently understand occlusion rectangles so this parameter
+    // is dropped when calling AMP's callback.
+    //
+    // We're trying to produce a VisibilityDataDef:
+    //  * visibleRatio: an exact match for MRAID's exposedPercentage
+    //  * visibleRect: a LayoutRectDef, which corresponds to a more detailed
+    //    concept than visibleRectangle represents.  visibleRectangle is a
+    //    subset of LayoutRectDef, though, with x/y position and width/height,
+    //    and we can pass it through to the callback directly.
     this.mraid_.addEventListener(
         'exposureChange',
         (exposedPercentage,
-         visibileRectangle,
+         visibleRectangle,
          occlusionRectangles) => {
-           callback({visibleRect: visibileRectangle,
+           callback({visibleRect: visibleRectangle,
                      visibleRatio: exposedPercentage});
          });
   }
