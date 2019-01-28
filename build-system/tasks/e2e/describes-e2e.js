@@ -201,11 +201,8 @@ class AmpPageFixture {
   }
 
   /** @override */
-  teardown(unusedEnv) {
-    try {
-      this.driver_.quit();
-    } catch (ex) { }
-
+  async teardown(unusedEnv) {
+    await this.driver_.quit();
     this.driver_ = null;
   }
 }
