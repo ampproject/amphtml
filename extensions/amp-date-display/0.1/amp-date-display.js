@@ -141,6 +141,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
    * @private
    */
   getDataForTemplate_() {
+    const {Date} = this.win;
+
     const epoch = this.getEpoch_();
     const offset = this.offsetSeconds_ * 1000;
     const date = new Date(epoch + offset);
