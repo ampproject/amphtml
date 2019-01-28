@@ -193,6 +193,17 @@ describes.repeated('', {
         expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
       });
 
+      skipForSlot('uses amp-img in a `placeholder`', () => {
+        const html = htmlFor(env.win.document);
+        const el = html`<amp-video>
+          <div placeholder>
+            <amp-img src=foo.png></amp-img>
+            </div>
+        </amp-video>`;
+
+        expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
       skipForSlot('uses `placeholder` img', () => {
         const html = htmlFor(env.win.document);
         const el = html`<amp-video>

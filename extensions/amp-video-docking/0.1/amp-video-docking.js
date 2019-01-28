@@ -45,6 +45,7 @@ import {
   escapeCssSelectorIdent,
   isRTL,
   removeElement,
+  scopedQuerySelector,
 } from '../../../src/dom';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
@@ -1240,8 +1241,8 @@ export class VideoDocking {
     if (element.hasAttribute(poster)) {
       return element.getAttribute(poster);
     }
-    const imgEl = element.querySelector(
-        'amp-img[placeholder],img[placeholder]');
+    const imgEl = scopedQuerySelector(element,
+        'amp-img[placeholder],img[placeholder],[placeholder] amp-img');
     if (imgEl) {
       return imgEl.getAttribute('src');
     }
