@@ -1141,12 +1141,14 @@ export class VideoDocking {
           setOpacity(placeholderBackground);
           setTransitionTiming(placeholderBackground);
           setTransitionTiming(placeholderIcon);
+          if (hasRelativePlacement) {
+            const y = 0;
+            const scale = 1;
+            setImportantStyles(placeholderIcon, {
+              'transform': transform(placeholderIconX, y, scale),
+            });
+          }
         });
-        if (hasRelativePlacement) {
-          setImportantStyles(placeholderIcon, {
-            'transform': transform(placeholderIconX, /* y */ 0, /* scale */ 1),
-          });
-        }
       });
 
       this.getElementsOnDockArea_(video).forEach(el => {
