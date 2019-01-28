@@ -151,6 +151,33 @@ describe('inabox', function() {
     });
   });
 
+  describes.realWin('AMPHTML ads rendered on non-AMP page ATF within ' +
+      'friendly frame and safe frame - no host', {
+    amp: false,
+  }, env => {
+    let adContent;
+    let iframe;
+    before(() => {
+      // Gets the same ad as the other tests.
+      return fetchAdContent().then(text => { adContent = text; });
+    });
+
+    beforeEach(() => {
+      iframe = document.createElement('iframe');
+      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+    });
+
+    afterEach(() => {
+      env.win.document.body.removeChild(iframe);
+    });
+
+    it('should layout amp-img, amp-pixel, ' +
+        'amp-analytics within friendly frame', () => {
+      writeFriendlyFrame(env.win.document, iframe, adContent);
+      return testAmpComponents();
+    });
+  });
+
   describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
     amp: false,
     body: `
