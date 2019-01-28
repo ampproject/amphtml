@@ -28,6 +28,14 @@ router.post('/rewriter', (req, res) => {
     Object.assign(body, requestsConfig);
   }
 
+  if (body.vars && body.vars.iframeUrl) {
+    Object.assign(body, {
+      transport: {
+        'iframe': body.vars.iframeUrl,
+      },
+    });
+  }
+
   const extraUrlParams = {
     extraUrlParams: {
       testId: 12358,

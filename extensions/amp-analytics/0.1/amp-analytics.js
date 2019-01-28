@@ -265,8 +265,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
+    const rewriterEnabled = !!this.config_['configRewriter'];
     this.transport_.maybeInitIframeTransport(
-        this.getAmpDoc().win, this.element, this.preconnect);
+        this.getAmpDoc().win, this.element, this.preconnect, rewriterEnabled);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.

@@ -349,6 +349,27 @@ describes.realWin('amp-analytics.transport', {
       expect(transport.iframeTransport_).to.be.null;
     });
 
+
+    it('initialize iframe transport when returned from configRewriter',
+        () => {
+          const transport = new Transport(win, {
+            iframe: '//test',
+          });
+
+          const analyticsEl = doc.createElement('amp-analytics');
+          doc.body.appendChild(analyticsEl);
+          const preconnectSpy = sandbox.spy();
+          transport.maybeInitIframeTransport(win, analyticsEl, {
+            preload: preconnectSpy,
+          }, /* rewriterEnabled */ true);
+          expect(transport.iframeTransport_).to.be.ok;
+          expect(preconnectSpy).to.be.called;
+
+          transport.deleteIframeTransport();
+          expect(transport.iframeTransport_).to.be.null;
+        });
+
+
     it('initialize iframe transport when used with inabox', () => {
       win.AMP_MODE = win.AMP_MODE || {};
       win.AMP_MODE.runtime = 'inabox';
