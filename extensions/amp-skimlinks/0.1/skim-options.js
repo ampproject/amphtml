@@ -151,16 +151,17 @@ function getInternalDomains_(docInfo) {
 }
 
 /**
- *
+ * Use CNAME domain defined in "custom-redirect-domain" option if specified
+ * or "https://go.skimresources.com" by default.
  * @param {!Element} element
  * @return {string}
  */
 function getWaypointBaseUrl(element) {
   let customSubDomain = element.getAttribute('custom-redirect-domain');
   if (customSubDomain) {
-    // Remove potential HTTP protocol
+    // Remove potential HTTP protocol.
     customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\//, '');
-    // Remove potential trailing slash
+    // Remove potential trailing slash.
     customSubDomain = endsWith(customSubDomain, '/') ?
       customSubDomain.slice(0, -1) :
       customSubDomain;

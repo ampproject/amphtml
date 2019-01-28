@@ -30,6 +30,9 @@ tags: {  # <amp-skimlinks>
   tag_name: "AMP-SKIMLINKS"
   requires_extension: "amp-skimlinks"
   attrs: {
+    name: "custom-redirect-domain"
+  }
+  attrs: {
     name: "custom-tracking-id"
     value_regex_casei: "^.{0,50}$"
   }
@@ -43,9 +46,6 @@ tags: {  # <amp-skimlinks>
     name: "publisher-code"
     value_regex_casei: "^[0-9]+X[0-9]+$"
     mandatory: true
-  }
-  attrs: {
-    name: "custom-redirect-domain"
   }
   attrs: {
     name: "tracking"
