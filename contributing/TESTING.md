@@ -113,6 +113,9 @@ Command                                                                 | Descri
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
 `gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
+`gulp e2e`                                                              | Runs all end to end tests on the latest Chrome browser.
+`gulp e2e --files=<test-files-path-glob>`                               | Runs end to end tests from the specified files on the latest Chrome browser.
+`gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
 
 ## Manual testing
 
@@ -320,3 +323,14 @@ firebase deploy
 ```
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
+
+## End to End Tests
+
+You can run and create E2E tests locally during development. Currently the tests only run on Chrome, but support for additional browsers is underway. You can view E2E test results in the integration shard of our CI builds.
+
+Run all tests with: 
+```
+gulp e2e
+```
+
+Create your own test by adding it to `test\e2e` or `extensions\**\test-e2e`. For examples, see `test\e2e\test-github.js` and `extensions\amp-carousel\0.2\test-e2e\test-carousel.js`.
