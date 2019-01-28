@@ -40,7 +40,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('./git');
-const {execOrDie, exec, getStderr, getStdout} = require('./exec');
+const {execOrDie, exec, getStderr} = require('./exec');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -323,6 +323,7 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+/*
 function startSauceConnect() {
   process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
@@ -339,6 +340,7 @@ function stopSauceConnect() {
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
   execOrDie(stopScCmd);
 }
+*/
 
 const command = {
   testBuildSystem: function() {
@@ -387,11 +389,11 @@ const command = {
     timedExecOrDie(cmd + ' --headless --coverage');
     // TODO(erwinm): temporary until saucelabs is back up
     //if (process.env.TRAVIS) {
-      //// A subset of unit tests on other browsers via sauce labs
-      //cmd = cmd + ' --saucelabs_lite';
-      //startSauceConnect();
-      //timedExecOrDie(cmd);
-      //stopSauceConnect();
+    //// A subset of unit tests on other browsers via sauce labs
+    //cmd = cmd + ' --saucelabs_lite';
+    //startSauceConnect();
+    //timedExecOrDie(cmd);
+    //stopSauceConnect();
     //}
   },
   runUnitTestsOnLocalChanges: function() {
@@ -417,9 +419,9 @@ const command = {
       }
       // TODO(erwinm): temporary until saucelabs is back up
       //else {
-        //startSauceConnect();
-        //timedExecOrDie(cmd + ' --saucelabs');
-        //stopSauceConnect();
+      //startSauceConnect();
+      //timedExecOrDie(cmd + ' --saucelabs');
+      //stopSauceConnect();
       //}
     } else {
       timedExecOrDie(cmd + ' --headless');
