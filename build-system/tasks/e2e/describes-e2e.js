@@ -99,11 +99,6 @@ function describeEnv(factory) {
         }
       });
 
-      after(function() {
-        clearTimeout(asyncErrorTimerId);
-      });
-
-
       describe(SUB, function() {
         // If there is an async expect error, throw it in the final state.
         asyncErrorTimerId = setTimeout(() => {
@@ -207,7 +202,10 @@ class AmpPageFixture {
 
   /** @override */
   teardown(unusedEnv) {
-    this.driver_.quit();
+    try {
+      this.driver_.quit();
+    } catch (ex) { }
+
     this.driver_ = null;
   }
 }
