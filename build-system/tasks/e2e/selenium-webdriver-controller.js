@@ -350,7 +350,7 @@ class SeleniumWebDriverController {
    * @return {!ControllerPromise}
    * @override
    */
-  eval(fn, ...args) {
+  evaluate(fn, ...args) {
     return this.driver.executeScript(fn, ...args);
   }
 

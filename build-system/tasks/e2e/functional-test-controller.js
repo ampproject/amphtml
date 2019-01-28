@@ -400,7 +400,7 @@ class FunctionalTestController {
    * @return {!Promise}
    * @package
    */
-  async eval(unusedFn, ...unusedArgs) {}
+  async evaluate(unusedFn, ...unusedArgs) {}
 }
 
 
