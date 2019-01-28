@@ -25,6 +25,18 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
+export const HostServiceError = {
+  // The host service doesn't match its environment.  For example, a SafeFrame
+  // host service when run in something that isn't a SafeFrame.  The
+  // implementation should consider falling back to its default implementation
+  // on the regular web.
+  MISMATCH: 1,
+  // The host service is correct for its environment, but not able to function.
+  // For example, a SafeFrame host service running inside a SafeFrame
+  // implementation that is incomplete or out of date.
+  NOT_SUPPORTED: 2,
+};
+
 export class HostServices {
 
   /**

@@ -21,12 +21,12 @@
  * Example:
  * <code>
  * <script async host-api="amp-mraid"
- *  fallback-on="load incomplete"></script>
+ *         fallback-on="mismatch"></script>
  * </code>
  *
  */
 
-import {HostServices} from '../../../src/inabox/host-services';
+import {HostServices, HostServiceError} from '../../../src/inabox/host-services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {MraidService} from './mraid-service';
@@ -35,12 +35,14 @@ const TAG = 'amp-mraid';
 const FALLBACK_ON = 'fallback-on';
 
 /**
- * Error codes that can be macroed into the error ping url.
+ * String representations of the HostServicesErrors that can be used in the
+ * 'fallback-on' attribute.
+ *
  * @const @enum {string}
  */
-const ErrorCodes = {
-  load: 'load',
-  incomplete: 'incomplete',
+const FallbackErrorNames = {
+  'mismatch': HostServiceError.MISMATCH,
+  'not_supported': HostServiceError.NOT_SUPPORTED
 }
 
 /**
@@ -55,7 +57,7 @@ export class MraidInitializer {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Array<string>} */
+    /** @private {!Array<number>} */
     this.fallbackOn_ = [];
 
     /** @private {boolean} */
@@ -64,7 +66,8 @@ export class MraidInitializer {
     /** @private */
     this.mraid_ = null;
 
-    const ampMraidScripts = document.querySelectorAll('script[host-api="amp-mraid"]');
+    const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
+        'script[host-api="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
       dev().error(TAG, 'Multiple amp-mraid scripts.');
       return;
@@ -79,11 +82,16 @@ export class MraidInitializer {
       return;
     }
 
-    this.fallbackOn_ = (element.getAttribute(FALLBACK_ON) || '').split(' ');
-    for (const errorCode of this.fallbackOn_) {
-      if (errorCode && !(errorCode in ErrorCodes)) {
-        dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorCode}"`);
-        return;
+    this.fallbackOn_ = [];
+    const fallbackOnErrorNames =
+          (element.getAttribute(FALLBACK_ON) || '').split(' ');
+    for (const errorName of fallbackOnErrorNames) {
+      if (errorName) {
+        if (!(errorName in FallbackErrorNames)) {
+          dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorName}"`);
+          return;
+        }
+        this.fallbackOn_.push(FallbackErrorNames[errorName])
       }
     }
 
@@ -97,18 +105,18 @@ export class MraidInitializer {
       this.mraidLoadSuccess_()
     });
     mraidJs.addEventListener('error', () => {
-      this.handleError_(ErrorCodes.load);
+      this.handleError_(HostServiceError.MISMATCH);
     });
     const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraidJs);
   }
 
   /**
-   * @param {string} errorCode
+   * @param {number} hostServiceError
    */
-  handleError_(errorCode) {
+  handleError_(hostServiceError) {
     if (!this.registeredWithHostServices_ &&
-        this.fallbackOn_.includes(errorCode)) {
+        this.fallbackOn_.includes(hostServiceError)) {
       this.declineService_();
     }
     // TODO: send error ping
@@ -131,7 +139,7 @@ export class MraidInitializer {
     const mraid = window['mraid'];
     if (!mraid || !mraid.getState || !mraid.addEventListener
         || !mraid.close || !mraid.open || !mraid.expand) {
-      this.handleError_(ErrorCodes.incomplete);
+      this.handleError_(HostServiceError.NOT_SUPPORTED);
       return;
     }
     this.mraid_ = mraid;
