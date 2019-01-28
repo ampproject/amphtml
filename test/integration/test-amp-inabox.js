@@ -280,7 +280,7 @@ describe('inabox with a complex image ad', function() {
       iframe = document.createElement('iframe');
     });
 
-    it.configure().skipSafari().run(
+    it(
         'should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
