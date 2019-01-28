@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/./dist/amp-ad-network-triplelift-impl-0.1.js",
+"lineCount":16,
+"mappings":"A;AAwCO,IAAA,qHAAA,QAAA,CAAA,qBAAA,CAAA;AAAA,SAAA,CAAA,iDAAA,MAAA,CAAA,IAAA,EAAA,SAAA,CAAA,IAAA,IAAA;AAAA,CAAA;AAAyCA,CAAAA,oBAAAC,CAAnCC,kHAAmCD,EAAAA,CAAAA,iDAAAA,CAAAA;AAG9C,kHAAA,UAAA,eAAA,GAAAE,QAAc,EAAG;AACf,SAAOC,CAAAA,2CAAA,CAAAA,IAAA,CAAP;AADe,CAAjB;AAKA,kHAAA,UAAA,yBAAA,GAAAC,QAAsB,EAAG;AACvB,SAAO,CAAC,YAAD,CAAP;AADuB,CAAzB;AAKA,kHAAA,UAAA,WAAA,GAAAC,QAAQ,EAAG;AACT,SAAO,IAAAC,QAAAC,aAAA,CAA0B,KAA1B,CAAAC,QAAA,CA9BkBC,kBA8BlB,EAtBsBC,gCAsBtB,CAAP;AADS,CAAX;AAOqD,MAAA,KAAAC,IACrDC,gBAAA,CAAoB,gCAApB,EACAX,kHADA,CAAA;;",
+"sources":["//private/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/40693c48cb90d369aa1f454d855ef21b/extensions/amp-ad-network-triplelift-impl/0.1/amp-ad-network-triplelift-impl.js"],
+"names":["$jscomp.inherits","AmpA4A","AmpAdNetworkTripleliftImpl","isValidElement","isAmpAdElement","getSigningServiceNames","getAdUrl","element","getAttribute","replace","TRIPLELIFT_BASE_URL_","TRIPLELIFT_BASE_A4A_URL_","AMP","registerElement"]
+}

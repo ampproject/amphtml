@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/./dist/amp-ad-network-gmossp-impl-0.1.js",
+"lineCount":17,
+"mappings":"A;AAyCO,IAAA,yGAAA,QAAA,CAAA,qBAAA,CAAA;AAAA,SAAA,CAAA,iDAAA,MAAA,CAAA,IAAA,EAAA,SAAA,CAAA,IAAA,IAAA;AAAA,CAAA;AAAqCA,CAAAA,oBAAAC,CAA/BC,sGAA+BD,EAAAA,CAAAA,iDAAAA,CAAAA;AAG1C,sGAAA,UAAA,eAAA,GAAAE,QAAc,EAAG;AACf,MAAMC,mBAAM,IAAAC,QAAAC,aAAA,CAA0B,KAA1B,CAANF,IAA0C,EAAhD;AACA,SAAOG,CAAAA,2CAAA,CAAAA,IAAA,CAAP,KC+BYC,CAAAA,iCD9BZ,CAAWJ,gBAAX,EAtBqBK,0BAsBrB,CADA,IC+BYD,CAAAA,iCD7BZ,CAAWJ,gBAAX,EAfyBM,mCAezB,CAFA;AAFe,CAAjB;AAQA,sGAAA,UAAA,yBAAA,GAAAC,QAAsB,EAAG;AACvB,SAAO,CAAC,YAAD,CAAP;AADuB,CAAzB;AAKA,sGAAA,UAAA,WAAA,GAAAC,QAAQ,EAAG;AACT,SAAO,IAAAP,QAAAC,aAAA,CAA0B,KAA1B,CAAAO,QAAA,CAjCcJ,0BAiCd,EAzBkBC,mCAyBlB,CAAP;AADS,CAAX;AAQiD,MAAA,KAAAI,IACjDC,gBAAA,CAAoB,4BAApB,EACAb,sGADA,CAAA;;",
+"sources":["//private/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/40693c48cb90d369aa1f454d855ef21b/extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js","//private/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/40693c48cb90d369aa1f454d855ef21b/src/string.js"],
+"names":["$jscomp.inherits","AmpA4A","AmpAdNetworkGmosspImpl","isValidElement","src","element","getAttribute","isAmpAdElement","startsWith","GMOSSP_BASE_URL_","GMOSSP_BASE_A4A_URL_","getSigningServiceNames","getAdUrl","replace","AMP","registerElement"]
+}

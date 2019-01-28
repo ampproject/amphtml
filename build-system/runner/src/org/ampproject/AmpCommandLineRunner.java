@@ -76,7 +76,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
         assignmentReplacements, prodAssignmentReplacements);
+    AmpPassJSONObjectCastFinder jsonObjectCastFinder = new AmpPassJSONObjectCastFinder(getCompiler());
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
+    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);

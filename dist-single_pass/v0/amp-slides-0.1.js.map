@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/./dist/amp-slides-0.1.js",
+"lineCount":9,
+"mappings":"A;AA0BEA,IAAAA,4DAAAA,QAAWA,CAACC,kDAADD,CAAUA;AACnBA,oDAAAA,GAAAA,MAAAA,IAAAA,YAAAA,KAAAA,CAAAA,IAAAA,EAAMC,kDAAND,CAAAA,IAAAA,IAAAA;ACglBYE,GAAAA,wBD/kBZF,EAAAG,MAAAH,CARQI,YAQRJ,EACAA,iFADAA,CAAAA;AAFmBA,SAAAA,kDAAAA;AAAAA,CAArBA;AAFsBK,CAAAA,oBAAAC,CAAlBC,yDAAkBD,EAAAE,MAAAA,IAAAF,YAAAA,CAAAA;AAWE,MAAA,KAAAE,IACxBC,gBAAA,CAhBUL,YAgBV,EAAyBG,yDAAzB,CAAA;;",
+"sources":["//private/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/40693c48cb90d369aa1f454d855ef21b/extensions/amp-slides/0.1/amp-slides.js","//private/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/40693c48cb90d369aa1f454d855ef21b/src/log.js"],
+"names":["constructor","element","user","error","TAG","$jscomp.inherits","BaseElement","AmpSlides","AMP","registerElement"]
+}
