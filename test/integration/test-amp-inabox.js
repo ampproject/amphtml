@@ -164,7 +164,6 @@ describe('inabox', function() {
 
     beforeEach(() => {
       iframe = document.createElement('iframe');
-      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
     });
 
     afterEach(() => {
