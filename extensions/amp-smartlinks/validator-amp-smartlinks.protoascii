@@ -1,5 +1,5 @@
 #
-# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,21 +30,25 @@ tags: {  # <amp-smartlinks>
   tag_name: "AMP-SMARTLINKS"
   requires_extension: "amp-smartlinks"
   attrs: {
-    name: "nrtv-account-name"
-    mandatory: true
-  }
-  attrs: {
-    name: "linkmate"
-    mandatory: true
-  }
-  attrs: {
     name: "exclusive-links"
+    value: "true"
+    value: "false"
   }
   attrs: {
     name: "link-attribute"
   }
   attrs: {
     name: "link-selector"
+  }
+  attrs: {
+    name: "linkmate"
+    mandatory: true
+    value: "true"
+    value: "false"
+  }
+  attrs: {
+    name: "nrtv-account-name"
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
