@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,9 +27,35 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
+|    <!-- Valid: Activating link shifter -->
 |    <amp-digidip
 |            layout="nodisplay"
 |            publisher-id="stylebudget"
+|            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
+|            element-clickhandler=""
+|            element-clickhandler-attribute=""
+|            element-ignore-attribute="rel"
+|            element-ignore-pattern="pass"
+|    >
+|    </amp-digidip>
+|    <!-- Invalid: missing publisher-id attribute. -->
+|    <amp-digidip
+>>   ^~~~~~~~~
+amp-digidip/0.1/test/validator-amp-digidip.html:41:2 The mandatory attribute 'publisher-id' is missing in tag 'amp-digidip'. (see https://www.ampproject.org/docs/reference/components/amp-digidip) [AMP_TAG_PROBLEM]
+|            layout="nodisplay"
+|            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
+|            element-clickhandler=""
+|            element-clickhandler-attribute=""
+|            element-ignore-attribute="rel"
+|            element-ignore-pattern="pass"
+|    >
+|    </amp-digidip>
+|    <!-- Invalid: wrong publisher-id value. -->
+|    <amp-digidip
+>>   ^~~~~~~~~
+amp-digidip/0.1/test/validator-amp-digidip.html:51:2 The attribute 'publisher-id' in tag 'amp-digidip' is set to the invalid value 'stylebudget!'. (see https://www.ampproject.org/docs/reference/components/amp-digidip) [DISALLOWED_HTML]
+|            layout="nodisplay"
+|            publisher-id="stylebudget!"
 |            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
 |            element-clickhandler=""
 |            element-clickhandler-attribute=""

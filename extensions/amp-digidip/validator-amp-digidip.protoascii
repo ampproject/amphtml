@@ -29,12 +29,6 @@ tags: {  # <amp-digidip>
   tag_name: "AMP-DIGIDIP"
   requires_extension: "amp-digidip"
   attrs: {
-    name: "publisher-id"
-  }
-  attrs: {
-    name: "hosts-ignore"
-  }
-  attrs: {
     name: "element-clickhandler-attribute"
   }
   attrs: {
@@ -45,6 +39,14 @@ tags: {  # <amp-digidip>
   }
   attrs: {
     name: "element-ignore-pattern"
+  }
+  attrs: {
+    name: "hosts-ignore"
+  }
+  attrs: {
+    name: "publisher-id"
+    mandatory: true
+    value_regex_casei: "^[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?$"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
