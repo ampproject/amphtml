@@ -55,7 +55,7 @@ export class ReadDepthTracker {
    * @private
    */
   findTopParagraph_() {
-    Promise.all([].slice.call(this.paragraphs_)
+    return Promise.all([].slice.call(this.paragraphs_)
         .map(p => this.viewport_.getClientRectAsync(p)))
         .then(rects => {
           let lastIdxAboveViewport = null;
