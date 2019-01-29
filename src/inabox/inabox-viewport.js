@@ -117,20 +117,20 @@ export class ViewportBindingInabox {
     this.resizeObservable_ = new Observable();
 
     /** @const {function()} */
-    this.onTopWindowScrollListener_ = () => {
+    this.onTopWindowScrollListener_ = throttle(this.win, () => {
       this.updateLayoutRects_(this.getViewportRect_(),
           layoutRectFromDomRect(
               this.win.frameElement./*OK*/getBoundingClientRect()));
       this.scrollObservable_.fire();
-    };
+    }, MIN_EVENT_INTERVAL);
 
     /** @const {function()} */
-    this.onTopWindowResizeListener_ = () => {
+    this.onTopWindowResizeListener_ = throttle(this.win, () => {
       this.updateLayoutRects_(this.getViewportRect_(),
           layoutRectFromDomRect(
               this.win.frameElement./*OK*/getBoundingClientRect()));
       this.resizeObservable_.fire();
-    };
+    }, MIN_EVENT_INTERVAL);
 
     const boxWidth = win./*OK*/innerWidth;
     const boxHeight = win./*OK*/innerHeight;
