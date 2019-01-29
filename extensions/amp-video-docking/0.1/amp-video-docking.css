@@ -187,7 +187,6 @@
 }
 
 .amp-video-docked-placeholder-background {
-  position: absolute;
   background: rgba(200, 200, 200, 0.5);
   transition-property: opacity;
   overflow: hidden;
@@ -206,41 +205,31 @@
   background: rgba(100, 100, 100, 0.8);
   transition-property: opacity, transform;
   will-change: opacity, transform;
-  /*
-   * Value for margin-top: -(height * visibleContainerMargin)
-   */
-  margin: -88px 0 0 40px;
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
 }
 
 .amp-video-docked-placeholder-icon.amp-rtl {
   mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M-4-4h48v48H-4z'/%3E%3Cpath d='M36 0c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4H12c-2.2 0-4-1.8-4-4V4c0-2.2 1.8-4 4-4h24zM16 11.868l12.618 12.618 2.829-2.828L18.789 9H27V5H12v15h4v-8.132zM4 8H0v28c0 2.2 1.8 4 4 4h28v-4H4V8z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E");
-  /*
-   * Value for margin-left: 100% -(width * visibleContainerMargin)
-   */
-  margin-left: calc(100% - 88px);
+  left: auto;
+  right: 40px;
 }
 
 .amp-video-docked-placeholder-icon.amp-small {
   mask-size: 32px 32px;
   width: 32px;
   height: 32px;
-  /*
-   * Value for margin-top: -(height * visibleContainerMargin)
-   */
-  margin: -52px 0 0 20px;
+  bottom: 20px;
+  left: 20px;
 }
 
 .amp-video-docked-placeholder-icon.amp-rtl.amp-small {
-  /*
-   * Value for margin-left: 100% -(width * visibleContainerMargin)
-   */
-  margin-left: calc(100% - 52px);
+  left: auto;
+  right: 20px;
 }
 
 .amp-video-docked-placeholder-background-poster {
-  width: 100%;
-  height: 100%;
-
   background-size: cover;
   background-repeat: no-repeat;
 
