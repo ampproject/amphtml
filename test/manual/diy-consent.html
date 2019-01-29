@@ -113,11 +113,17 @@ var sentinel = 'amp';
 var ampWindow = parent;
 
 // Write passed in stored state and client config
-var clientInfo = JSON.parse(window.name);
-var cmpId = clientInfo['clientConfig']['CMP_id'];
-var consentStr = clientInfo['consentString'];
-var consentState = clientInfo['consentState'];
-// TODO: convert consentState to readable value
+var clientInfo;
+var cmpId;
+var consentStr;
+var consentState;
+if (window && window.name && typeof window.name !== 'string') {
+  clientInfo = JSON.parse(window.name);
+  cmpId = clientInfo['clientConfig']['CMP_id'];
+  consentStr = clientInfo['consentString'];
+  consentState = clientInfo['consentState'];
+  // TODO: convert consentState to readable value
+}
 
 var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` +
 ` '${consentStr}', consent state is '${consentState}'`;
