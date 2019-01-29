@@ -4482,7 +4482,6 @@ tags: {
     value: ""
   }
   attrs: { name: "pattern" }
-  attrs: { name: "pattern-error" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }

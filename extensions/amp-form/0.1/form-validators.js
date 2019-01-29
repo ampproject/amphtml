@@ -26,9 +26,6 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
-/** @const @private {string} */
-const DEFAULT_PATTERN_ERROR = 'Please match the requested format.';
-
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
@@ -128,8 +125,9 @@ export class FormValidator {
       const pattern = input.getAttribute('pattern');
       const re = new RegExp(`^${pattern}$`, 'm');
       const valid = re.test(input.value);
-      const msg = input.getAttribute('pattern-error') || DEFAULT_PATTERN_ERROR;
-      input.setCustomValidity(valid ? '' : msg);
+      // Note this isn't localized but custom validation is available.
+      const error = 'Please match the requested format.';
+      input.setCustomValidity(valid ? '' : error);
     }
     return input.checkValidity();
   }
