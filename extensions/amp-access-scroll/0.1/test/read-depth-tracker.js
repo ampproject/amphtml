@@ -24,6 +24,7 @@ describes.realWin('ReadDepthTracker', {
   let win;
   let doc;
   let ampdoc;
+  let sandbox;
   let accessSource;
   let readDepthTracker;
 
@@ -31,6 +32,7 @@ describes.realWin('ReadDepthTracker', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
 
     // Undefined initialization params for AccessSource
     let scheduleViewFn, onReauthorizeFn;
@@ -52,7 +54,7 @@ describes.realWin('ReadDepthTracker', {
 
     for (let i = 0; i < 5; i++) {
       const elem = doc.createElement('p');
-      elem.innerText = `Scroll amp test paragraph ${i}`;
+      elem./*OK*/innerText = `Scroll amp test paragraph ${i}`;
       elem.id = `${i}`;
       doc.body.appendChild(elem);
     }
@@ -64,11 +66,11 @@ describes.realWin('ReadDepthTracker', {
     );
 
     // Stub viewport to fake paragraph positions
-    sinon.stub(readDepthTracker.viewport_,'getClientRectAsync')
+    sandbox.stub(readDepthTracker.viewport_,'getClientRectAsync')
         .callsFake(returnRectPosition);
 
     // Stub updateLastRead_ call to check content sent
-    sinon.stub(readDepthTracker, 'updateLastRead_');
+    sandbox.stub(readDepthTracker, 'updateLastRead_');
   });
 
   function returnRectPosition(paragraph) {
