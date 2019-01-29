@@ -1185,7 +1185,6 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   }, (name, {useSlot, topBoundary}) => {
 
     const targetType = useSlot ? 'slot element' : 'corner';
-    const skipForSlot = useSlot ? it.skip : it;
 
     function maybeCreateSlotElementLtwh(left, top, width, height, ratio = 0) {
       if (!useSlot) {
