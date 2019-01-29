@@ -116,18 +116,26 @@ export class ViewportBindingInabox {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
+    /** @const {function(!../layout-rect.LayoutRectDef, !../layout-rect.LayoutRectDef)} */
+    this.updateLayoutRects_ = (viewportRect, targetRect) => {
+      this.viewportRect_ = viewportRect;
+      this.updateBoxRect_(layoutRectFromDomRect(targetRect));
+    };
+
     /** @const {function()} */
-    this.onTopWindowChangeListener_ = () => {
-      const oldViewportRect = this.viewportRect_;
-      this.viewportRect_ = this.getViewportRect_();
-      this.updateBoxRect_(layoutRectFromDomRect(
-          this.win.frameElement./*OK*/getBoundingClientRect()));
-      if (isResized(this.viewportRect_, oldViewportRect)) {
-        this.resizeObservable_.fire();
-      }
-      if (isMoved(this.viewportRect_, oldViewportRect)) {
-        this.scrollObservable_.fire();
-      }
+    this.onTopWindowScrollListener_ = () => {
+      this.updateLayoutRects_(this.getViewportRect_(),
+          layoutRectFromDomRect(
+              this.win.frameElement./*OK*/getBoundingClientRect()));
+      this.scrollObservable_.fire();
+    };
+
+    /** @const {function()} */
+    this.onTopWindowResizeListener_ = () => {
+      this.updateLayoutRects_(this.getViewportRect_(),
+          layoutRectFromDomRect(
+              this.win.frameElement./*OK*/getBoundingClientRect()));
+      this.resizeObservable_.fire();
     };
 
     const boxWidth = win./*OK*/innerWidth;
@@ -188,10 +196,7 @@ export class ViewportBindingInabox {
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data['viewportRect'];
-
-          this.updateBoxRect_(data['targetRect']);
-
+          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
@@ -251,10 +256,19 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
         .then(() => {
           this.win.top.addEventListener(
-              'scroll', this.onTopWindowChangeListener_, true);
+              'scroll', this.onTopWindowScrollListener_, true);
           this.win.top.addEventListener(
-              'resize', this.onTopWindowChangeListener_, true);
-          this.onTopWindowChangeListener_();
+              'resize', this.onTopWindowResizeListener_, true);
+          const oldViewportRect = this.viewportRect_;
+          this.updateLayoutRects_(this.getViewportRect_(),
+              layoutRectFromDomRect(
+                  this.win.frameElement./*OK*/getBoundingClientRect()));
+          if (isResized(this.viewportRect_, oldViewportRect)) {
+            this.resizeObservable_.fire();
+          }
+          if (isMoved(this.viewportRect_, oldViewportRect)) {
+            this.scrollObservable_.fire();
+          }
         });
   }
 
@@ -267,9 +281,9 @@ export class ViewportBindingInabox {
   disconnect() {
     if (this.canInspectTopWindow_()) {
       this.win.top.removeEventListener(
-          'scroll', this.onTopWindowChangeListener_, true);
+          'scroll', this.onTopWindowScrollListener_, true);
       this.win.top.removeEventListener(
-          'resize', this.onTopWindowChangeListener_, true);
+          'resize', this.onTopWindowResizeListener_, true);
     }
   }
 

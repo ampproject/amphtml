@@ -38,7 +38,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let positionCallback;
   let onScrollCallback;
   let onResizeCallback;
-  let topWindowObservable;
+  let topWindowScrollObservable;
+  let topWindowResizeObservable;
   let measureSpy;
 
   function stubIframeClientMakeRequest(
@@ -69,19 +70,30 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.innerWidth = 200;
     win.innerHeight = 150;
-    topWindowObservable = new Observable();
+    topWindowScrollObservable = new Observable();
+    topWindowResizeObservable = new Observable();
     win.top = {
       addEventListener(event, listener) {
-        if (topWindowObservable.getHandlerCount() == 0) {
-          topWindowObservable.add(listener);
+        switch(event) {
+          case 'scroll':
+            topWindowScrollObservable.add(listener);
+            break;
+          case 'resize':
+            topWindowResizeObservable.add(listener);
+            break;
         }
       },
       removeEventListener(event, listener) {
-        if (topWindowObservable.getHandlerCount() > 0) {
-          topWindowObservable.remove(listener);
+        switch(event) {
+          case 'scroll':
+            topWindowScrollObservable.remove(listener);
+            break;
+          case 'resize':
+            topWindowResizeObservable.remove(listener);
+            break;
         }
       },
-    };
+    }
     const iframeElement = {
       getBoundingClientRect() {
         return layoutRectLtwh(10, 20, 100, 100);
@@ -200,9 +212,20 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             setTimeout(() => {
               ({viewportRect, targetRect} = data);
               getViewportRectStub.returns(viewportRect);
-              topWindowObservable.fire();
               resolve();
             }, 100);
+          });
+        };
+
+        const scrollTop = data => {
+          return positionCallback(data).then(() => {
+            topWindowScrollObservable.fire();
+          });
+        };
+
+        const resizeTop = data => {
+          return positionCallback(data).then(() => {
+            topWindowResizeObservable.fire();
           });
         };
 
@@ -226,7 +249,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           sandbox.reset();
         }).then(() => {
         // Scroll, viewport position changed
-          return positionCallback({
+          return scrollTop({
             viewportRect: layoutRectLtwh(0, 10, 100, 100),
             targetRect: layoutRectLtwh(10, 10, 50, 50),
           });
@@ -239,7 +262,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           sandbox.reset();
         }).then(() => {
         // Resize, viewport size changed
-          return positionCallback({
+          return resizeTop({
             viewportRect: layoutRectLtwh(0, 10, 200, 100),
             targetRect: layoutRectLtwh(10, 10, 50, 50),
           });
@@ -249,23 +272,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           expect(measureSpy).to.not.be.called;
           expect(binding.getLayoutRect(element))
               .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-          sandbox.reset();
-          // DOM change, target position changed
-          sandbox.restore();
-          getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
-          sandbox.stub(
-              Services.resourcesForDoc(win.document), 'get').returns([element]);
-        }).then(() => {
-          return positionCallback({
-            viewportRect: layoutRectLtwh(0, 10, 200, 100),
-            targetRect: layoutRectLtwh(20, 10, 50, 50),
-          });
-        }).then(() => {
-          expect(onScrollCallback).to.not.be.called;
-          expect(onResizeCallback).to.not.be.called;
-          expect(measureSpy).to.be.calledOnce;
-          expect(binding.getLayoutRect(element))
-              .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+          // TODO: test for DOM change when the native viewport (and/or the host
+          // observer) can handle it
         });
       });
 
@@ -274,9 +282,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const viewportRect = layoutRectLtwh(0, 0, 100, 100);
     sandbox.stub(binding, 'getViewportRect_').returns(viewportRect);
     return binding.setUpNativeListener().then(() => {
-      expect(topWindowObservable.getHandlerCount()).to.equal(1);
+      expect(topWindowScrollObservable.getHandlerCount()).to.equal(1);
+      expect(topWindowResizeObservable.getHandlerCount()).to.equal(1);
       binding.disconnect();
-      expect(topWindowObservable.getHandlerCount()).to.equal(0);
+      expect(topWindowScrollObservable.getHandlerCount()).to.equal(0);
+      expect(topWindowResizeObservable.getHandlerCount()).to.equal(0);
     });
   });
 
