@@ -49,7 +49,7 @@ amp-carousel {
  * TODO(sparhami) Find a solution for the clipping on all browsers.
  */
 .i-amphtml-carousel-scroll::-webkit-scrollbar {
-  height: 0;
+  display: none;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"] {
@@ -95,6 +95,7 @@ amp-carousel {
   width: calc(100% / var(--visible-count)) !important;
   min-width: auto !important;
   max-width: none !important;
+  height: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-slotted,
@@ -103,6 +104,7 @@ amp-carousel {
   height: calc(100% / var(--visible-count)) !important;
   min-height: auto !important;
   max-height: none !important;
+  width: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
@@ -126,4 +128,11 @@ amp-carousel {
 
 .i-amphtml-carousel-scroll[horizontal="false"] > .i-amphtml-carousel-spacer{
   width: 100%;
+}
+
+.i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
 }

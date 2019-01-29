@@ -20,6 +20,7 @@ import {
 } from '../amp-video-docking';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 
@@ -172,6 +173,61 @@ describes.repeated('', {
     afterEach(() => {
       viewport.width = 0;
       viewport.height = 0;
+    });
+
+    describe('getPosterImageSrc_', () => {
+
+      skipForSlot('uses `poster` attr', () => {
+        const html = htmlFor(env.win.document);
+        const el = html`<amp-video poster=foo.png></amp-video>`;
+
+        expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
+      skipForSlot('uses `placeholder` amp-img', () => {
+        const html = htmlFor(env.win.document);
+        const el = html`<amp-video>
+          <amp-img src=foo.png placeholder></amp-img>
+        </amp-video>`;
+
+        expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
+      skipForSlot('uses amp-img in a `placeholder`', () => {
+        const html = htmlFor(env.win.document);
+        const el = html`<amp-video>
+          <div placeholder>
+            <amp-img src=foo.png></amp-img>
+          </div>
+        </amp-video>`;
+
+        expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
+      skipForSlot('uses `placeholder` img', () => {
+        const html = htmlFor(env.win.document);
+        const el = html`<amp-video>
+          <img src=foo.png placeholder>
+        </amp-video>`;
+
+        expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
+    });
+
+    describe('dockInTransferLayerStep_', () => {
+
+      it('should not overflow', function* () {
+        const video = {};
+        const target = {};
+
+        const dock = sandbox.stub(docking, 'dock_').returns(Promise.resolve());
+
+        yield docking.dockInTransferLayerStep_(video, target);
+
+        expect(dock).to.have.been.called;
+      });
+
     });
 
     it(`should use a ${targetType} as target`, () => {

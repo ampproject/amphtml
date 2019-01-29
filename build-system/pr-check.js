@@ -40,7 +40,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('./git');
-const {execOrDie, exec, getStderr, getStdout} = require('./exec');
+const {execOrDie, exec, getStderr} = require('./exec');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -323,6 +323,7 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+/*
 function startSauceConnect() {
   process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
@@ -339,6 +340,7 @@ function stopSauceConnect() {
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
   execOrDie(stopScCmd);
 }
+*/
 
 const command = {
   testBuildSystem: function() {
@@ -385,13 +387,14 @@ const command = {
     }
     // Unit tests with Travis' default chromium in coverage mode.
     timedExecOrDie(cmd + ' --headless --coverage');
-    if (process.env.TRAVIS) {
-      // A subset of unit tests on other browsers via sauce labs
-      cmd = cmd + ' --saucelabs_lite';
-      startSauceConnect();
-      timedExecOrDie(cmd);
-      stopSauceConnect();
-    }
+    // TODO(erwinm): temporary until saucelabs is back up
+    //if (process.env.TRAVIS) {
+    //// A subset of unit tests on other browsers via sauce labs
+    //cmd = cmd + ' --saucelabs_lite';
+    //startSauceConnect();
+    //timedExecOrDie(cmd);
+    //stopSauceConnect();
+    //}
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
@@ -413,11 +416,13 @@ const command = {
         // TODO(choumx, #19658): --headless disabled for integration tests on
         // Travis until Chrome 72.
         timedExecOrDie(cmd + ' --coverage');
-      } else {
-        startSauceConnect();
-        timedExecOrDie(cmd + ' --saucelabs');
-        stopSauceConnect();
       }
+      // TODO(erwinm): temporary until saucelabs is back up
+      //else {
+      //startSauceConnect();
+      //timedExecOrDie(cmd + ' --saucelabs');
+      //stopSauceConnect();
+      //}
     } else {
       timedExecOrDie(cmd + ' --headless');
     }

@@ -45,12 +45,12 @@ import {
   escapeCssSelectorIdent,
   isRTL,
   removeElement,
+  scopedQuerySelector,
 } from '../../../src/dom';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh, moveLayoutRect} from '../../../src/layout-rect';
 import {mapRange} from '../../../src/utils/math';
@@ -438,9 +438,6 @@ export class VideoDocking {
 
   /** @param {!../../../src/video-interface.VideoOrBaseElementDef} video */
   register(video) {
-    userAssert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
-        '`video-dock` experiment must be on to use `dock`.');
-
     this.install_();
 
     const {element} = video;
@@ -641,7 +638,7 @@ export class VideoDocking {
   updateOnResize_(video) {
     // Update on subsequent animation frame to allow CSS media queries to be
     // applied.
-    this.ampdoc_.win.requestAnimationFrame(() => {
+    this.raf_(() => {
       const target = this.getTargetFor_(video);
       if (target) {
         this.dock_(video, target, /* step */ 1);
@@ -651,6 +648,14 @@ export class VideoDocking {
         this.undock_(video);
       }
     });
+  }
+
+  /**
+   * @param {function()} cb
+   * @private
+   */
+  raf_(cb) {
+    this.ampdoc_.win.requestAnimationFrame(cb);
   }
 
   /**
@@ -878,7 +883,7 @@ export class VideoDocking {
     const isTransferLayerStep = true;
     return this.dock_(video, target, step, isTransferLayerStep).then(() =>
       new Promise(resolve => {
-        this.ampdoc_.win.requestAnimationFrame(() => {
+        this.raf_(() => {
           this.dockInTransferLayerStep_(video, target, step + 0.1)
               .then(resolve);
         });
@@ -1037,7 +1042,7 @@ export class VideoDocking {
 
     this.isTransitioning_ = true;
 
-    const {width, height, x: videoX, y: videoY} = video.getLayoutBox();
+    const {width, height} = video.getLayoutBox();
 
     this.placedAt_ = {x, y, scale};
 
@@ -1065,11 +1070,8 @@ export class VideoDocking {
     // frames.
     const boxNeedsSizing = this.boxNeedsSizing_(width, height);
 
-    /**
-     * @param {!Element} element
-     * @param {boolean=} opt_positioned
-     */
-    const maybeSetSizing = (element, opt_positioned) => {
+    /** @param {!Element} element */
+    const maybeSetSizing = element => {
       if (!boxNeedsSizing) {
         return;
       }
@@ -1079,12 +1081,6 @@ export class VideoDocking {
         'min-width': px(width),
         'min-height': px(height),
       });
-      if (opt_positioned) {
-        setImportantStyles(element, {
-          'left': px(videoX),
-          'top': px(videoY),
-        });
-      }
     };
 
     const setOpacity = element => setImportantStyles(element, {
@@ -1130,19 +1126,27 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
 
-      maybeSetSizing(placeholderBackground, /* positioned */ true);
-      setOpacity(placeholderBackground);
-      setTransitionTiming(placeholderBackground);
-
+      video.applyFillContent(this.getPlaceholderRefs_()['poster']);
+      video.applyFillContent(placeholderBackground);
       this.setPosterImage_(video);
 
-      setTransitionTiming(placeholderIcon);
+      element.appendChild(placeholderBackground);
 
-      if (hasRelativePlacement) {
-        setImportantStyles(placeholderIcon, {
-          'transform': transform(placeholderIconX, /* y */ 0, /* scale */ 1),
+      // Delay by one frame to account for reparenting.
+      this.raf_(() => {
+        video.mutateElement(() => {
+          setOpacity(placeholderBackground);
+          setTransitionTiming(placeholderBackground);
+          setTransitionTiming(placeholderIcon);
+          if (hasRelativePlacement) {
+            const y = 0;
+            const scale = 1;
+            setImportantStyles(placeholderIcon, {
+              'transform': transform(placeholderIconX, y, scale),
+            });
+          }
         });
-      }
+      });
 
       this.getElementsOnDockArea_(video).forEach(el => {
         setImportantStyles(el, {
@@ -1213,25 +1217,38 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
+   * @private
    */
   setPosterImage_(video) {
-    const attr = 'poster';
-
-    const {element} = video;
-
     const placeholderPoster = this.getPlaceholderRefs_()['poster'];
+    const posterSrc = this.getPosterImageSrc_(video.element);
 
-    if (!element.hasAttribute('poster')) {
+    if (!posterSrc) {
       toggle(placeholderPoster, false);
       return;
     }
-
-    const posterSrc = element.getAttribute(attr);
 
     toggle(placeholderPoster, true);
     setStyles(placeholderPoster, {
       'background-image': `url(${posterSrc})`,
     });
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {string|undefined}
+   * @private
+   */
+  getPosterImageSrc_(element) {
+    const poster = 'poster';
+    if (element.hasAttribute(poster)) {
+      return element.getAttribute(poster);
+    }
+    const imgEl = scopedQuerySelector(element,
+        'amp-img[placeholder],img[placeholder],[placeholder] amp-img');
+    if (imgEl) {
+      return imgEl.getAttribute('src');
+    }
   }
 
   /**
