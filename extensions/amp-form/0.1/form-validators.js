@@ -291,6 +291,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!input.id) {
       return null;
     }
+    // <textarea> only supports `pattern` matching. But, it's implemented via
+    // setCustomValidity(), which results in the 'customError' validity state.
+    if (input.tagName === 'TEXTAREA') {
+      dev().assert(invalidType === 'customError');
+      invalidType = 'patternMismatch';
+    }
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
       const selector = `[visible-when-invalid=${invalidType}]`
@@ -519,6 +525,7 @@ export function isCheckValiditySupported(doc) {
 
 /**
  * Returns invalid error type on the input.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
  * @param {!Element} input
  * @return {?string}
  */
