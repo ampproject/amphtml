@@ -141,9 +141,8 @@ export class Transport {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
-   * @param {boolean} rewriterEnabled
    */
-  maybeInitIframeTransport(win, element, opt_preconnect, rewriterEnabled) {
+  maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
@@ -152,14 +151,11 @@ export class Transport {
     }
 
     const type = element.getAttribute('type');
-
-    // In inabox there is no amp-ad element. We also allow use of iframe
-    // trasport if returned from configRewriter endpoint.
-    const ampAdResourceId = this.isInabox_ || rewriterEnabled ? '1'
-      : user().assertString(
-          getAmpAdResourceId(element, getTopWindow(win)),
-          'No friendly amp-ad ancestor element was found ' +
-          'for amp-analytics tag with iframe transport.');
+    // In inabox there is no amp-ad element.
+    const ampAdResourceId = this.isInabox_ ? '1' : user().assertString(
+        getAmpAdResourceId(element, getTopWindow(win)),
+        'No friendly amp-ad ancestor element was found ' +
+        'for amp-analytics tag with iframe transport.');
 
     this.iframeTransport_ = new IframeTransport(
         win, type, this.options_, ampAdResourceId);

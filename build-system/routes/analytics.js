@@ -28,10 +28,12 @@ router.post('/rewriter', (req, res) => {
     Object.assign(body, requestsConfig);
   }
 
-  if (body.vars && body.vars.iframeUrl) {
+  if (body.vars && body.vars.useIframePing) {
     Object.assign(body, {
-      transport: {
-        'iframe': body.vars.iframeUrl,
+      triggers: {
+        view: {
+          'iframePing': true,
+        },
       },
     });
   }
