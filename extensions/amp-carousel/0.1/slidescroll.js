@@ -211,7 +211,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.registerAction('goToSlide', invocation => {
       const {args} = invocation;
       if (args) {
-        this.showSlideWhenReady(args['index']);
+        this.goToSlide(args['index']);
       }
     }, ActionTrust.LOW);
   }
@@ -225,7 +225,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.showSlideWhenReady(slide);
+      this.goToSlide(slide);
     }
   }
 
@@ -553,7 +553,7 @@ export class AmpSlideScroll extends BaseSlides {
    * when element has been laid out.
    * @param {*} value
    */
-  showSlideWhenReady(value) {
+  goToSlide(value) {
     const index = parseInt(value, 10);
 
     if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
