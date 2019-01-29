@@ -34,7 +34,10 @@ describes.endtoend('AMP carousel grouping', {
   beforeEach(async() => {
     controller = env.controller;
 
-    await enableExperiments(controller);
+    await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-carousel-0-2/grouping-move-by-2.amp.html');
+    await ampDriver.toggleExperiment('layers', true);
+    await ampDriver.toggleExperiment('amp-carousel-v2', true);
     await controller.setWindowRect({
       width: pageWidth,
       height: pageHeight,
