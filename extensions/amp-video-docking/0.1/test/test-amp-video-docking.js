@@ -86,6 +86,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
     video.pause = sandbox.spy();
     video.showControls = sandbox.spy();
+    video.hideControls = sandbox.spy();
 
     return video;
   }
@@ -147,6 +148,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       enable: sandbox.spy(),
       disable: sandbox.spy(),
       hide: sandbox.spy(),
+      setVideo: sandbox.spy(),
       overlay: html`<div></div>`,
     };
 
@@ -853,6 +855,135 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       expect(docking.getDims_(video, target, step).relativeX)
           .to.equal(RelativeX.LEFT);
+    });
+
+  });
+
+  describe('dock_', () => {
+
+    let video;
+    let placeAt;
+    let setCurrentlyDocked;
+
+    const target = {};
+    const step = 1;
+    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: RelativeX.RIGHT};
+
+    beforeEach(() => {
+      video = createVideo();
+
+      placeElementLtwh(video, 0, 0, 400, 300, /* ratio */ 1);
+
+      setCurrentlyDocked = sandbox.stub(docking, 'setCurrentlyDocked_');
+      placeAt = sandbox.stub(docking, 'placeAt_').returns(Promise.resolve());
+
+      sandbox.stub(docking, 'getDims_').returns(targetDims);
+    });
+
+    it('sets currently docked', function* () {
+      stubControls();
+
+      yield docking.dock_(video, target, step);
+
+      expect(setCurrentlyDocked.withArgs(video, target, step))
+          .to.have.been.calledOnce;
+    });
+
+    it('places element at the result of getDims_', function* () {
+      stubControls();
+
+      yield docking.dock_(video, target, step);
+
+      const {x, y, scale, relativeX} = targetDims;
+
+      expect(placeAt.withArgs(
+          video, x, y, scale, step, /* durationMs */ sinon.match.any,
+          relativeX))
+          .to.have.been.calledOnce;
+    });
+
+    it('enables controls when not transfer later step', function* () {
+      const {enable} = stubControls();
+
+      yield docking.dock_(video, target, step);
+
+      expect(enable).to.have.been.calledOnce;
+    });
+
+    it('does not enable controls when transfer later step', function* () {
+      const {enable} = stubControls();
+
+      yield docking.dock_(video, target, step, /* isTransferLayerStep */ true);
+
+      expect(enable).to.not.have.been.called;
+    });
+  });
+
+  describe('setCurrentlyDocked_', () => {
+
+    const video = {foo: 'bar'};
+    const target = {tacos: 'sí'};
+
+    const targetArea = layoutRectLtwh(0, 0, 50, 50);
+
+    const step = 1;
+
+    let trigger;
+
+    beforeEach(() => {
+      trigger = sandbox.stub(docking, 'trigger_');
+
+      sandbox.stub(docking, 'getTargetArea_')
+          .withArgs(video, target)
+          .returns(targetArea);
+    });
+
+    it('triggers action', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledOnce;
+    });
+
+    it('does not retrigger action', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledOnce;
+    });
+
+    it('retriggers action when videos change', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_({a: 'b'}, target, step);
+      docking.setCurrentlyDocked_({c: 'd'}, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledThrice;
+    });
+
+    it('retriggers action when targets change', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_(video, {posX: 'a'}, step);
+      docking.setCurrentlyDocked_(video, {nodeType: /* ELEMENT */ 1}, step);
+      docking.setCurrentlyDocked_(video, {posX: 'b'}, step);
+      docking.setCurrentlyDocked_(video, {posX: 'b'}, step);
+
+      expect(trigger.withArgs(Actions.DOCK).callCount).to.equal(4);
+    });
+
+    it('updates controls\' video reference', () => {
+      const {setVideo} = stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(setVideo.withArgs(video, targetArea)).to.have.been.calledOnce;
     });
 
   });

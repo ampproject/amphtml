@@ -1288,19 +1288,13 @@ export class VideoDocking {
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
     this.currentlyDocked_ = {video, target, step};
-    if (!previouslyDocked ||
-        !targetsEqual(target, previouslyDocked.target) ||
-        previouslyDocked.video != video) {
-      const {
-        x,
-        y,
-        width: targetWidth,
-        height: targetHeight,
-      } = this.getTargetArea_(video, target);
-      const targetRect = layoutRectLtwh(x, y, targetWidth, targetHeight);
-      this.getControls_().setVideo(video, targetRect);
-      this.trigger_(Actions.DOCK);
+    if (previouslyDocked &&
+        targetsEqual(target, previouslyDocked.target) &&
+        previouslyDocked.video == video) {
+      return;
     }
+    this.getControls_().setVideo(video, this.getTargetArea_(video, target));
+    this.trigger_(Actions.DOCK);
   }
 
   /**
