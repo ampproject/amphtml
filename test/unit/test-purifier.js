@@ -376,6 +376,11 @@ function runSanitizerTests() {
           .to.equal('<form action-xhr="https://foo.com"></form>');
     });
 
+    it('should allow input::mask-output', () => {
+      expect(purify('<input mask-output="alphanumeric">'))
+          .to.equal('<input mask-output="alphanumeric">');
+    });
+
     // Need to test this since DOMPurify doesn't offer a API for tag-specific
     // attribute whitelists. Instead, we hack around it with custom hooks.
     it('should not allow unsupported attributes after a valid one', () => {

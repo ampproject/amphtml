@@ -12,16 +12,7 @@
     <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-inputmask" src="https://cdn.ampproject.org/v0/amp-inputmask-0.1.js"></script>
-    <style amp-custom>
-    [contenteditable],
-    input[type=tel],
-    input[type=search],
-    input[type=text] {
-      padding: 5px;
-      font-size: 16px;
-      border: 1px solid lightgray;
-    }
-    </style>
+    <style amp-custom></style>
 </head>
 <body>
   <h1>Input Masking</h1>
@@ -32,21 +23,36 @@
       target="_blank"
       id="form-a">
     <p>Credit card (<code>payment-card</code>)</p>
-    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" placeholder="Card number">
+    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" mask-output="alphanumeric" placeholder="Card number">
 
     <p>mm/dd/yyyy (<code>date-mm-dd-yyyy</code>)</p>
-    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
+    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" mask-output="alphanumeric" placeholder="mm/dd/yyyy" type="tel">
 
     <p>dd/mm/yyyy (<code>date-dd-mm-yyyy</code>)</p>
-    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
+    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" mask-output="alphanumeric" placeholder="dd/mm/yyyy" type="tel">
 
     <p>yyyy-mm-dd (<code>date-yyyy-mm-dd</code>)</p>
-    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
+    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" mask-output="alphanumeric" placeholder="yyyy-mm-dd" type="tel">
 
     <p>mm/yy (<code>date-mm-yy</code>)</p>
-    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
+    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" mask-output="alphanumeric" placeholder="MM/YY">
 
     <input type="submit">
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>payment-card</td><td>{{payment-card}}</td><td>{{payment-card-unmasked}}</td></tr>
+            <tr><td>date1</td><td>{{date1}}</td><td>{{date1-unmasked}}</td></tr>
+            <tr><td>date2</td><td>{{date2}}</td><td>{{date2-unmasked}}</td></tr>
+            <tr><td>date3</td><td>{{date3}}</td><td>{{date3-unmasked}}</td></tr>
+            <tr><td>date4</td><td>{{date4}}</td><td>{{date4-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
   <h2>Custom Masks</h2>
@@ -61,23 +67,40 @@
     <input id="b-char" name="char" mask="L" type="text">
 
     <p>Phone 2</p>
-    <input id="b-phone2" name="b-phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" placeholder="+1(555)555-5555">
+    <input id="b-phone2" name="phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" mask-output="alphanumeric" placeholder="+1(555)555-5555">
     <p>Phone (German)</p>
-    <input id="b-phone3" name="b-phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" placeholder="+49(0000)0000-0000">
+    <input id="b-phone3" name="phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" mask-output="alphanumeric" placeholder="+49(0000)0000-0000">
 
     <p>US Postal Code</p>
-    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" placeholder="10024" type="tel">
+    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" mask-output="alphanumeric" placeholder="10024" type="tel">
 
     <p>Canadian Postal Code</p>
-    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" mask-output="alphanumeric" placeholder="A1A 1A1" type="text">
 
     <p>US or Canada postal code</p>
-    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" placeholder="Post Code" type="text">
+    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" mask-output="alphanumeric" placeholder="Post Code" type="text">
 
     <p>Dollars</p>
-    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="text">
+    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" mask-output="alphanumeric" placeholder="$0.00" type="text">
 
     <input type="submit">
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>text</td><td>{{text}}</td><td>{{text-unmasked}}</td></tr>
+            <tr><td>phone2</td><td>{{phone2}}</td><td>{{phone2-unmasked}}</td></tr>
+            <tr><td>phone3</td><td>{{phone3}}</td><td>{{phone3-unmasked}}</td></tr>
+            <tr><td>post-code-us</td><td>{{post-code-us}}</td><td>{{post-code-us-unmasked}}</td></tr>
+            <tr><td>post-code-ca</td><td>{{post-code-ca}}</td><td>{{post-code-ca-unmasked}}</td></tr>
+            <tr><td>post-code-both</td><td>{{post-code-both}}</td><td>{{post-code-both-unmasked}}</td></tr>
+            <tr><td>amount</td><td>{{amount}}</td><td>{{amount-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
 
@@ -111,6 +134,10 @@
     <input id="c-card" name="card" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel">
 
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
   </form>
 
   <h2>Forms with initial values</h2>
@@ -182,6 +209,10 @@
       </tbody>
     </table>
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
   </form>
 
 
@@ -251,6 +282,10 @@
       </tbody>
     </table>
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
   </form>
 
   <h2>Combined Phone Form example (amp-list)</h2>
@@ -659,7 +694,7 @@
       action-xhr="/form/echo-json/post"
       target="_blank"
       id="form-g">
-    <amp-layout [hidden]="bound" layout="fixed-height" height="300">
+    <amp-layout [hidden]="bound" layout="fixed-height" height="60">
       <table>
         <tbody>
           <tr>
@@ -669,6 +704,7 @@
               id="g-phone-nobind"
               name="phone"
               mask="+1(000)000-0000"
+              mask-output="alphanumeric"
               placeholder="+1(000)000-0000"
               [disabled]="bound"
               type="tel">
@@ -678,7 +714,7 @@
       </table>
       <input type="submit">
     </amp-layout>
-    <amp-list hidden [hidden]="!bound" layout="fixed-height" height="300" items="." [src]="phoneCodes.filter(x => x.cc == countryCode)[0]">
+    <amp-list hidden [hidden]="!bound" layout="fixed-height" height="60" items="." [src]="phoneCodes.filter(x => x.cc == countryCode)[0]">
       <template type="amp-mustache">
         <table>
           <tbody>
@@ -689,6 +725,7 @@
                 id="g-phone"
                 name="phone"
                 mask="{{mask}}"
+                mask-output="alphanumeric"
                 placeholder="{{placeholder}}"
                 disabled
                 [disabled]="!bound"
@@ -701,6 +738,17 @@
         <input type="submit">
       </template>
     </amp-list>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>phone</td><td>{{phone}}</td><td>{{phone-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
   <!-- TODO(cvializ) -->
