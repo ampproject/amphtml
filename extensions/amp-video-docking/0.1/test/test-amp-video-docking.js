@@ -892,32 +892,32 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expect(scale, 'scale').to.equal(targetWidth / videoWidth);
     });
 
-    it('returns relativeX=RIGHT when target placed right of component', () => {
-      const videoX = 0;
-      const targetX = 10;
-      const step = 1;
+    [{
+      expectedRelativeX: RelativeX.RIGHT,
+      placementTextual: 'right',
+      videoX: 0,
+      targetX: 10,
+    }, {
+      expectedRelativeX: RelativeX.LEFT,
+      placementTextual: 'left',
+      videoX: 10,
+      targetX: 0,
+    }].forEach(({expectedRelativeX, placementTextual, videoX, targetX}) => {
 
-      placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
+      it(`returns relativeX=${placementTextual.toUpperCase()
+      } when target placed ${placementTextual} of component`, () => {
 
-      targetAreaStub
-          .returns(layoutRectLtwh(targetX, targetY, targetWidth, targetHeight));
+        const step = 1;
 
-      expect(docking.getDims_(video, target, step).relativeX)
-          .to.equal(RelativeX.RIGHT);
-    });
+        placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
 
-    it('returns relativeX=LEFT when target placed left of component', () => {
-      const videoX = 10;
-      const targetX = 0;
-      const step = 1;
+        targetAreaStub
+            .returns(layoutRectLtwh(
+                targetX, targetY, targetWidth, targetHeight));
 
-      placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
-
-      targetAreaStub
-          .returns(layoutRectLtwh(targetX, targetY, targetWidth, targetHeight));
-
-      expect(docking.getDims_(video, target, step).relativeX)
-          .to.equal(RelativeX.LEFT);
+        expect(docking.getDims_(video, target, step).relativeX)
+            .to.equal(expectedRelativeX);
+      });
     });
 
   });
