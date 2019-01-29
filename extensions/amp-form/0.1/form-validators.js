@@ -128,8 +128,8 @@ export class FormValidator {
       const pattern = input.getAttribute('pattern');
       const re = new RegExp(`^${pattern}$`, 'm');
       const valid = re.test(input.value);
-      const error = input.getAttribute('error') || DEFAULT_PATTERN_ERROR;
-      input.setCustomValidity(valid ? '' : error);
+      const msg = input.getAttribute('pattern-error') || DEFAULT_PATTERN_ERROR;
+      input.setCustomValidity(valid ? '' : msg);
     }
     return input.checkValidity();
   }

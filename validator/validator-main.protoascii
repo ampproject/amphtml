@@ -4481,6 +4481,8 @@ tags: {
     name: "no-verify"
     value: ""
   }
+  attrs: { name: "pattern" }
+  attrs: { name: "pattern-error" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
@@ -4497,6 +4499,7 @@ tags: {
   attrs: { name: "[disabled]" }
   attrs: { name: "[maxlength]" }
   attrs: { name: "[minlength]" }
+  attrs: { name: "[pattern]" }
   attrs: { name: "[placeholder]" }
   attrs: { name: "[readonly]" }
   attrs: { name: "[required]" }
