@@ -177,6 +177,7 @@ export const adConfig = {
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
     clientIdScope: 'amp_ecid_adensor',
+    renderStartImplemented: true,
   },
 
   'adsnative': {
