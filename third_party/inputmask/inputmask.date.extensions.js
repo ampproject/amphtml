@@ -78,7 +78,7 @@ export function factory(Inputmask) {
         return opts.tokenizer;
     }
     function isValidDate(dateParts, currentResult) {
-        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || dateParts.rawyear < 1000 || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
+        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || dateParts.year.length < 4 || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
     }
     function isDateInRange(dateParts, opts) {
         var result = true;
