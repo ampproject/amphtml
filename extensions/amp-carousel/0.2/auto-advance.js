@@ -17,7 +17,7 @@
 import {debounce} from '../../../src/utils/rate-limit';
 import {listenOnce} from '../../../src/event-helper';
 
-const MIN_AUTO_ADVANCE_INTERVAL = 2000;
+const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
