@@ -83,6 +83,8 @@ References a layer that contains the docked video controls. Usually, this
 doesn't need to be styled. See `.amp-docked-video-controls-bg` for a background
 layer.
 
+This element also gets the classname `amp-small` applied when rendered in small areas (those under 300 pixels wide), and the classname `amp-large` when not.
+
 #### `.amp-docked-video-controls-bg`
 
 References a layer that draws an overlay background over the video and under
@@ -120,6 +122,20 @@ Represents the `unmute` button.
 #### `.amp-docked-video-fullscreen`
 
 Represents the `fullscreen` button.
+
+#### `.amp-video-docked-placeholder-background`
+
+Represents a container for placeholder elements placed on the empty component area.
+
+#### `.amp-video-docked-placeholder-background-poster`
+
+Represents a layer displaying the `poster` or `placeholder` image of the video on the empty component area. Blurred by default.
+
+#### `.amp-video-docked-placeholder-icon`
+
+Represents an animated icon for a UX affordance displayed on the empty component area.
+
+This element also gets the classname `amp-small` when rendered in small viewports (those under 420 pixels wide). It also gets the classname `amp-rtl` when animating from right to left.
 
 <a id="rotate-to-fullscreen"></a>
 
