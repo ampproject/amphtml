@@ -22,6 +22,10 @@ import {
   MARGIN_MAX,
   MIN_WIDTH,
   PLACEHOLDER_ICON_BREAKPOINTS,
+  PLACEHOLDER_ICON_LARGE_MARGIN,
+  PLACEHOLDER_ICON_LARGE_WIDTH,
+  PLACEHOLDER_ICON_SMALL_MARGIN,
+  PLACEHOLDER_ICON_SMALL_WIDTH,
   REVERT_TO_INLINE_RATIO,
   RelativeX,
   RelativeY,
@@ -30,6 +34,7 @@ import {
 import {Deferred, tryResolve} from '../../../../src/utils/promise';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {calculateLeftJustifiedX, calculateRightJustifiedX} from '../math';
 import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
@@ -158,6 +163,13 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
     return controls;
   }
+
+  // This may output differently depending on browser
+  // TODO(alanorozco): Compare against the output of a statically defined
+  // transform on a dummy element.
+  const transformMatrix = (x, y, scale) => `matrix(${[
+    scale, 0, 0, scale, x, y,
+  ].join(', ')})`;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -292,19 +304,14 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       const shadow = bodyLayerElement('.amp-video-docked-shadow');
 
-      // This may output differently in browsers.
-      // TODO(alanorozco): Compare against the output of a statically defined
-      // transform on a dummy element.
-      const transformMatrix = `matrix(${[
-        scale, 0, 0, scale, x, y,
-      ].join(', ')})`;
+      const expectedTransform = transformMatrix(x, y, scale);
 
       [
         internalElement,
         overlay,
         shadow,
       ].forEach(el => {
-        expect(getComputedStyle(el)['transform']).to.equal(transformMatrix);
+        expect(getComputedStyle(el)['transform']).to.equal(expectedTransform);
         expect(getComputedStyle(el)['width']).to.equal(width + 'px');
         expect(getComputedStyle(el)['min-width']).to.equal(width + 'px');
         expect(getComputedStyle(el)['height']).to.equal(height + 'px');
@@ -425,13 +432,22 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     PLACEHOLDER_ICON_BREAKPOINTS.forEach(({minWidth, className}) => {
       const width = Math.max(200, minWidth);
 
+      const iconMargin = className == 'amp-small' ?
+        PLACEHOLDER_ICON_SMALL_MARGIN :
+        PLACEHOLDER_ICON_LARGE_MARGIN;
+
+      const iconWidth = className == 'amp-small' ?
+        PLACEHOLDER_ICON_SMALL_WIDTH :
+        PLACEHOLDER_ICON_LARGE_WIDTH;
+
+      const step = 1;
+
       it(`sets ${className} on icon @ ${width}px wide`, function* () {
         stubControls();
 
         const x = 30;
         const y = 60;
         const scale = 0.5;
-        const step = 1;
         const transitionDurationMs = 0;
 
         placeElementLtwh(video, 0, 0, width, 200);
@@ -444,6 +460,43 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         expect(videoLayerElement('.amp-video-docked-placeholder-icon'))
             .to.have.class(className);
       });
+
+      [{
+        relativeX: RelativeX.RIGHT,
+        relativeXTextual: 'right',
+        expectedIconX: width - iconWidth - iconMargin * 2,
+      }, {
+        relativeX: RelativeX.LEFT,
+        relativeXTextual: 'left',
+        expectedIconX: -width + iconWidth + iconMargin * 2,
+      }].forEach(({relativeX, relativeXTextual, expectedIconX}) => {
+
+        it(`translates placeholder icon horizontally for posX=${
+          relativeXTextual} in threshold for .${className}`, function* () {
+
+          stubControls();
+          enableComputedStyle(video.element);
+
+          const expectedTransformMatrix = transformMatrix(
+              expectedIconX, /* y */ 0, /* scale */ 1);
+
+          const x = 30;
+          const y = 60;
+          const scale = 0.5;
+          const transitionDurationMs = 0;
+
+          placeElementLtwh(video, 0, 0, width, 200);
+
+          yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs,
+              relativeX);
+
+          const computedStyle = getComputedStyle(
+              videoLayerElement('.amp-video-docked-placeholder-icon'));
+
+          expect(computedStyle['transform']).to.equal(expectedTransformMatrix);
+        });
+      });
+
     });
 
     [{
