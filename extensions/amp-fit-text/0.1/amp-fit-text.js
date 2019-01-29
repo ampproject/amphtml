@@ -97,8 +97,9 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.updateFontSize_();
-    return Promise.resolve();
+    return this.mutateElement(() => {
+      this.updateFontSize_();
+    });
   }
 
   /** @private */
