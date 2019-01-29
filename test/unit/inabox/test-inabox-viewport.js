@@ -74,7 +74,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     topWindowResizeObservable = new Observable();
     win.top = {
       addEventListener(event, listener) {
-        switch(event) {
+        switch (event) {
           case 'scroll':
             topWindowScrollObservable.add(listener);
             break;
@@ -84,7 +84,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         }
       },
       removeEventListener(event, listener) {
-        switch(event) {
+        switch (event) {
           case 'scroll':
             topWindowScrollObservable.remove(listener);
             break;
@@ -93,7 +93,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             break;
         }
       },
-    }
+    };
     const iframeElement = {
       getBoundingClientRect() {
         return layoutRectLtwh(10, 20, 100, 100);
@@ -203,7 +203,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         onResizeCallback = sandbox.spy();
         let viewportRect = layoutRectLtwh(0, 0, 100, 100);
         let targetRect = layoutRectLtwh(10, 20, 50, 50);
-        let getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
+        const getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
         win.frameElement.getBoundingClientRect = () => targetRect;
         getViewportRectStub.returns(viewportRect);
 
