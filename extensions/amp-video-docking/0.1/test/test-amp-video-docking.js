@@ -175,7 +175,7 @@ describes.repeated('', {
       viewport.height = 0;
     });
 
-    describe('#getPosterImageSrc_', () => {
+    describe('getPosterImageSrc_', () => {
 
       skipForSlot('uses `poster` attr', () => {
         const html = htmlFor(env.win.document);
@@ -211,6 +211,21 @@ describes.repeated('', {
         </amp-video>`;
 
         expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      });
+
+    });
+
+    describe('dockInTransferLayerStep_', () => {
+
+      it('should not overflow', function* () {
+        const video = {};
+        const target = {};
+
+        const dock = sandbox.stub(docking, 'dock_').returns(Promise.resolve());
+
+        yield docking.dockInTransferLayerStep_(video, target);
+
+        expect(dock).to.have.been.called;
       });
 
     });
