@@ -15,6 +15,7 @@
  */
 
 import '../amp-date-display';
+import * as lolex from 'lolex';
 import {toggleExperiment} from '../../../../src/experiments';
 
 
@@ -27,15 +28,25 @@ describes.realWin('amp-date-display', {
   let win;
   let element;
   let impl;
+  let clock;
 
   beforeEach(() => {
     win = env.win;
+    clock = lolex.install({
+      target: win,
+      now: new Date('2018-01-01T08:00:00Z'),
+    });
+
     toggleExperiment(win, 'amp-date-display', true);
     element = win.document.createElement('amp-date-display');
     win.document.body.appendChild(element);
     impl = element.implementation_;
     env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
     env.sandbox.stub(impl, 'boundRendered_');
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   // Unfortunately, we cannot test the most interesting case of UTC datetime
@@ -102,10 +113,10 @@ describes.realWin('amp-date-display', {
       element.build();
 
       const {iso} = impl.getDataForTemplate_();
-      const dateFromParsed = new Date(iso);
+      const dateFromParsed = new win.Date(iso);
 
       // Because of the runtime there could be a several ms difference.
-      expect(dateFromParsed.getTime()).to.be.closeTo(Date.now(), 5);
+      expect(dateFromParsed.getTime()).to.equal(win.Date.now());
     });
 
     it('day only ISO 8601 date', () => {
