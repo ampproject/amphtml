@@ -56,19 +56,33 @@ export class AmpActionMacro extends AMP.BaseElement {
    * @private
    */
   initialize_() {
-    const {element} = this;
-    this.addActionMacro_(element);
+    // const {element} = this;
+    // this.addActionMacro_(element);
   }
 
   /**
-   * Parse the action set on the macro and register it with the action service.
-   * This action is then referenced in the caller referencing the action macro.
-   * @param {!Element} element
+   * Executes the action.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @override
    */
-  addActionMacro_(element) {
-    const id = element.getAttribute('id');
-    const action = element.getAttribute('action');
-    this.actions_.addActionMacroDef(id, action);
+  executeAction(invocation, unusedDeferred) {
+    const {element} = this;
+    const args = element.getAttribute('arguments');
+    let {method} = invocation;
+    // If the default action has an alias, the handler will be stored under it.
+    if (method === DEFAULT_ACTION) {
+      method = this.defaultActionAlias_ || method;
+    }
+    this.initActionMap_();
+    const holder = this.actionMap_[method];
+    const {tagName} = this.element;
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
+    const {handler, minTrust} = holder;
+    // Use the arguments provided by the caller and keep any defaults set on the macro.
+    invocation.args = Object.assign(invocation.args, args);
+    if (invocation.satisfiesTrust(minTrust)) {
+      return handler(invocation);
+    }
   }
 
   /** @override */

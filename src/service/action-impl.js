@@ -239,9 +239,6 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    /** @const @private {?Object<string, string>} */
-    this.actionMacros_ = map();
-
     /**
      * Optional whitelist of actions, e.g.:
      *
@@ -279,16 +276,6 @@ export class ActionService {
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
         new ActionService(ampdoc, embedWin.document));
-  }
-
-  /**
-   * @param {string} id
-   * @param {string} action
-   */
-  addActionMacroDef(id, action) {
-    userAssert(this.actionMacros_[id] == null,
-        `Action macro ${id} is already defined`);
-    this.actionMacros_[id] = action;
   }
 
   /**
@@ -664,10 +651,14 @@ export class ActionService {
       const hasAction = node.hasAttribute('on');
       if (hasAction) {
         const action = node.getAttribute('on');
-        const actionMacroDefs = this.getActionMacroDefs_(action);
-        actionMap = parseActionMap(
-            actionMacroDefs ? actionMacroDefs.action : action,
-            node, actionMacroDefs ? actionMacroDefs.args : null);
+        actionMap = parseActionMap(action, node);
+        // parse the actionmap on the action macro if the node references
+        // an action macro.
+        const actionInfo = actionMap[Object.keys(actionMap)[0]][0];
+        if (actionInfo.isActionMacro) {
+          actionMap =
+              this.parseActionMapForMacro_(actionInfo.event, actionInfo.target);
+        }
 
         node[ACTION_MAP_] = actionMap;
       }
@@ -676,52 +667,18 @@ export class ActionService {
   }
 
   /**
-   * Check if an action call references an action macro and if so returns
-   * the details of that action macro.
-   * @param {string} actionCall
+   * @param {string} event
+   * @param {string} macroActionId
    * @private
-   * @return {?ActionMacroDef}
+   * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
-  getActionMacroDefs_(actionCall) {
-    // An action macro has the following formats:
-    //   event:action-macro-id()
-    //   event.action-macro-id
-    //   event.action-macro-id(arg1=1, arg2=2)
-    const actionMacroCall = /^\w+:(\w+[a-zA-Z'-]+)((\(.*\))?)$/;
-    const matchActionResults = actionCall.match(actionMacroCall);
-    const event = actionCall.split(":")[0];
-    if (matchActionResults) {
-      const macroActionId = matchActionResults[1];
-      const actionInfo = this.actionMacros_[macroActionId];
-      const ampActionMacroEl = this.ampdoc.getRootNode().querySelector(
-          `amp-action-macro[id=${escapeCssSelectorIdent(macroActionId)}]`);
-      const actionMap = parseActionMap(`${event}:${actionInfo}`,
-          devAssert(ampActionMacroEl));
-      const callerProvidedArgs = [];
-      // Extract args.
-      const argumnts =
-          matchActionResults[2].substring(1, matchActionResults[2].length - 1).split(':');
-        argumnts.forEach(args => {
-        const callerArgs = []
-        if (args !== '') {
-          args.split(',').forEach(arg => {
-            const keyValue = arg.split('=');
-            const key = keyValue[0];
-            const value = keyValue[1];
-            const obj = map();
-            obj[`${key}`] = value;
-            callerArgs.push(obj);
-          });
-          // devAssert(actionInfoDef, 'macro action reference does not exist');
-          callerProvidedArgs.push(callerArgs);
-        }
-      });
-
-      const action = `${event}:${actionInfo}`;
-      return {action, callerProvidedArgs};
-    }
-
-    return null;
+  parseActionMapForMacro_(event, macroActionId) {
+    const ampActionMacroEl = this.ampdoc.getRootNode().querySelector(
+        `amp-action-macro[id=${escapeCssSelectorIdent(macroActionId)}]`);
+    const actionInfo = ampActionMacroEl.getAttribute('action');
+    const actionMap = parseActionMap(`${event}:${actionInfo}`,
+        devAssert(ampActionMacroEl));
+    return actionMap;
   }
 
   /**
@@ -908,6 +865,7 @@ export function parseActionMap(action, context, opt_defaultArgs) {
   let actionMap = null;
 
   const toks = new ParserTokenizer(action);
+  let isActionMacro = false;
   let tok;
   let peek;
   do {
@@ -937,14 +895,21 @@ export function parseActionMap(action, context, opt_defaultArgs) {
         let args = null;
 
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-          toks.next(); // Skip '.'
-          method = assertToken(
-              toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
+        if (peek.type == TokenType.SEPARATOR && (peek.value == '.' || peek.value == '(')) {
+          if (peek.value == '.') {
+            toks.next(); // Skip '.'
+            method = assertToken(
+                toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
-          // Optionally, there may be arguments: "(key = value, key = value)".
-          peek = toks.peek();
-          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+            // Optionally, there may be arguments: "(key = value, key = value)".
+            peek = toks.peek();
+            if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+              toks.next(); // Skip '('
+              args = tokenizeMethodArguments(toks, assertToken, assertAction);
+            }
+          } else {
+            // This is an action-macro invocation.
+            isActionMacro = true;
             toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
@@ -962,6 +927,7 @@ export function parseActionMap(action, context, opt_defaultArgs) {
           args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
           str: action,
+          isActionMacro,
         });
 
         peek = toks.peek();
