@@ -54,8 +54,8 @@ describes.realWin('form-validators', {amp: true}, env => {
     [name, email, text, submit].forEach(c => form.appendChild(c));
 
     if (isCustomValidations) {
-      const {noName, noEmail, invalidEmail, invalidText} =
-          getCustomValidations(doc);
+      const {noName, noEmail, invalidEmail, invalidText}
+          = getCustomValidations(doc);
       [noName, noEmail, invalidEmail, invalidText]
           .forEach(c => doc.body.appendChild(c));
     }
@@ -79,7 +79,7 @@ describes.realWin('form-validators', {amp: true}, env => {
 
     const text = doc.createElement('textarea');
     text.id = 'text1';
-    text.setAttribute('pattern', '[^\\s]+'); // Must have a non-whitespace char.
+    text.setAttribute('pattern', '.*[^\\s]+.*'); // Must be non-empty.
 
     const submit = doc.createElement('input');
     submit.setAttribute('type', 'submit');
@@ -309,6 +309,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should not report on interaction for non-active inputs', () => {
@@ -317,12 +318,14 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       validator.onInput({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should report on interaction for active inputs', () => {
@@ -332,6 +335,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[0].textContent).to.equal('Name is required');
 
       form.elements[0].value = 'John Miller';
@@ -339,6 +343,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       form.elements[1].validationMessage = 'Email is required';
       validator.report();
@@ -346,6 +351,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[1].textContent).to.equal('Email is required');
 
       form.elements[1].value = 'invalidemail';
@@ -357,6 +363,22 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[2].textContent).to.not.equal(
           'Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
+      expect(validations[3].className).to.not.contain('visible');
+
+      form.elements[1].value = 'valid@email.com';
+      validator.report();
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
+      expect(validations[3].textContent).to.equal(textPatternValidationMsg);
+
+      form.elements[2].value = 'valid, non-empty text';
+      validator.onInput({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should fire events on report()', () => {
@@ -398,6 +420,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
     });
 
     it('should not report on interaction for non-active inputs', () => {
@@ -406,11 +429,14 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
+
       validator.onInput({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should re-validate and report on interaction for active inputs', () => {
@@ -421,20 +447,24 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
       expect(validations[0].textContent).to.equal('Name is required');
       expect(validations[1].textContent).to.equal('Email is required');
+      expect(validations[3].textContent).to.equal(textPatternValidationMsg);
 
       form.elements[0].value = 'John Miller';
       validator.onBlur({target: form.elements[0]});
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
 
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[1]);
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
       expect(validations[1].textContent).to.equal('Email is required');
 
       form.elements[1].value = 'invalidemail';
@@ -443,6 +473,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
+      expect(validations[3].className).to.contain('visible');
       expect(validations[2].textContent).to.not.equal(
           'Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
@@ -452,6 +483,14 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
+
+      form.elements[2].value = 'valid, non-empty text';
+      validator.onInput({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should fire events on report()', () => {
@@ -495,17 +534,20 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       form.elements[0].value = 'John Miller';
       validator.onInput({target: form.elements[0]});
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       validator.onInput({target: form.elements[1]});
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[1].textContent).to.equal('Email is required');
 
       form.elements[1].value = 'invalidemail';
@@ -514,6 +556,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[2].textContent).to.not.equal(
           'Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
@@ -523,6 +566,20 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
+
+      validator.onBlur({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
+
+      form.elements[2].value = 'valid, non-empty text';
+      validator.onInput({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should fire events on onBlur() and onInput()', () => {
@@ -570,17 +627,20 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       form.elements[0].value = 'John Miller';
       validator.onInput({target: form.elements[0]});
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       validator.onInput({target: form.elements[1]});
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[1].textContent).to.equal('Email is required');
 
       form.elements[1].value = 'invalidemail';
@@ -589,6 +649,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
       expect(validations[2].textContent).to.not.equal(
           'Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
@@ -598,6 +659,20 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
+
+      validator.onBlur({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
+
+      form.elements[2].value = 'valid, non-empty text';
+      validator.onInput({target: form.elements[2]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should report on interaction for non-active inputs on submit', () => {
@@ -607,11 +682,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
-
-      expect(doc.activeElement).to.equal(form.elements[0]);
-      expect(validations[0].className).to.contain('visible');
-      expect(validations[1].className).to.contain('visible');
-      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.contain('visible');
     });
 
     it('should work after input and validation elements are replaced', () => {
@@ -622,6 +693,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
 
       // Simulate a dynamic content event e.g. amp-list re-render.
       const {name, email, submit} = getInputs(doc);
@@ -631,8 +703,10 @@ describes.realWin('form-validators', {amp: true}, env => {
       [name, email, submit].forEach(c => form.appendChild(c));
 
       validations.forEach(v => v.parentNode.removeChild(v));
-      const {noName, noEmail, invalidEmail} = getCustomValidations(doc);
-      [noName, noEmail, invalidEmail].forEach(c => doc.body.appendChild(c));
+      const {noName, noEmail, invalidEmail, invalidText}
+          = getCustomValidations(doc);
+      [noName, noEmail, invalidEmail, invalidText]
+          .forEach(c => doc.body.appendChild(c));
       validations = doc.querySelectorAll('[visible-when-invalid]');
 
       // Test that validation still works.
@@ -640,6 +714,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+      expect(validations[3].className).to.not.contain('visible');
     });
 
     it('should fire events on report(), onBlur() and onInput()', () => {

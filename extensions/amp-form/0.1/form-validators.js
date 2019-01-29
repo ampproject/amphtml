@@ -126,7 +126,7 @@ export class FormValidator {
   checkInputValidity(input) {
     if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
       const pattern = input.getAttribute('pattern');
-      const re = new RegExp(`^${pattern}$`);
+      const re = new RegExp(`^${pattern}$`, 'm');
       const valid = re.test(input.value);
       const error = input.getAttribute('error') || DEFAULT_PATTERN_ERROR;
       input.setCustomValidity(valid ? '' : error);
