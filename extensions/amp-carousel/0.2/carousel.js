@@ -338,7 +338,7 @@ export class Carousel {
    * carousel is not moved.
    * @param {number} index
    * @param {{
-   *   smoothScroll: boolean|undefined,
+   *   smoothScroll: (boolean|undefined),
    * }=} options
    */
   goToSlide(index, {smoothScroll = true} = {}) {

@@ -20,6 +20,7 @@ import {Carousel} from './carousel.js';
 import {ResponsiveAttributes} from './responsive-attributes';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getDetail} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -185,10 +186,11 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @private
-   * @param {!CustomEvent} event
+   * @param {!Event} event
    */
   onIndexChanged_(event) {
-    const data = dict({'index': event.detail['index']});
+    const detail = getDetail(event);
+    const data = dict({'index': detail['index']});
     const name = 'slideChange';
     // TODO(sparhami) trigger an action, but not from autoadvance.
     this.element.dispatchCustomEvent(name, data);
