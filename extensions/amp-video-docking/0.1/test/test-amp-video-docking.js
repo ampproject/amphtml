@@ -595,35 +595,52 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expectedXFn: (unusedVw, margin, unusedWidth) => margin,
     }].forEach(({posX, posXTextual, expectedXFn}) => {
 
-      it(`sets relative margin for posX = ${posXTextual}`, () => {
-        const video = createVideo();
+      const videoWidth = 600;
+      const videoHeight = 400;
 
+      const aspectRatio = videoWidth / videoHeight;
+
+      let video;
+
+      beforeEach(() => {
+        video = createVideo();
+        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+      });
+
+      it('sizes the dock area relative to viewport area', () => {
+        const vw = mockAreaWidth(
+            Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO));
+
+        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
+        const expectedHeight = expectedWidth / aspectRatio;
+
+        mockAreaHeight(200);
+
+        const {width, height} =
+            docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
+
+        expect(width, 'width').to.equal(expectedWidth);
+        expect(height, 'height').to.equal(expectedHeight);
+      });
+
+      it(`sets relative margin for posX = ${posXTextual}`, () => {
         const vw = mockAreaWidth(
             Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO));
 
         mockAreaHeight(200);
 
-        const videoWidth = 600;
-        const videoHeight = 400;
-
-        const aspectRatio = videoWidth / videoHeight;
-
         const expectedMargin = MARGIN_AREA_WIDTH_PERC * vw;
         const expectedY = expectedMargin;
         const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
-        const expectedHeight = expectedWidth / aspectRatio;
 
         placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
 
         const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
 
-        const {x, y, width, height} =
-            docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
+        const pos = docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
 
-        expect(x, 'x').to.equal(expectedX);
-        expect(y, 'y').to.equal(expectedY);
-        expect(width, 'width').to.equal(expectedWidth);
-        expect(height, 'height').to.equal(expectedHeight);
+        expect(pos.x, 'x').to.equal(expectedX);
+        expect(pos.y, 'y').to.equal(expectedY);
       });
 
       it(`limits margin for posX = ${posXTextual}`, () => {
@@ -633,27 +650,18 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
         mockAreaHeight(8000);
 
-        const videoWidth = 600;
-        const videoHeight = 400;
-
-        const aspectRatio = videoWidth / videoHeight;
-
         const expectedMargin = MARGIN_MAX;
         const expectedY = expectedMargin;
         const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
-        const expectedHeight = expectedWidth / aspectRatio;
 
         placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
 
         const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
 
-        const {x, y, width, height} =
-            docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
+        const pos = docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
 
-        expect(x, 'x').to.equal(expectedX);
-        expect(y, 'y').to.equal(expectedY);
-        expect(width, 'width').to.equal(expectedWidth);
-        expect(height, 'height').to.equal(expectedHeight);
+        expect(pos.x, 'x').to.equal(expectedX);
+        expect(pos.y, 'y').to.equal(expectedY);
       });
 
     });
