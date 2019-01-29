@@ -318,6 +318,22 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @return {!Promise}
+   * @override
+   */
+  async scrollBy(handle, opt_scrollToOptions) {
+    const webElement = handle.getElement();
+    const scrollBy = (element, opt_scrollToOptions) => {
+      element./*OK*/scrollBy(opt_scrollToOptions);
+    };
+
+    return await this.driver.executeScript(
+        scrollBy, webElement, opt_scrollToOptions);
+  }
+
+  /**
    * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
@@ -325,6 +341,17 @@ class SeleniumWebDriverController {
   async takeScreenshot(path) {
     const imageString = await this.driver.takeScreenshot();
     fs.writeFile(path, imageString, 'base64', function() {});
+  }
+
+  /**
+   * Evaluate the given function
+   * @param {function()} fn
+   * @param {...*} args
+   * @return {!ControllerPromise}
+   * @override
+   */
+  evaluate(fn, ...args) {
+    return this.driver.executeScript(fn, ...args);
   }
 
   /**

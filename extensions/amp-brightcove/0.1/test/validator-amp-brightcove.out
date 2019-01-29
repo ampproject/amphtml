@@ -58,5 +58,15 @@ FAIL
 amp-brightcove/0.1/test/validator-amp-brightcove.html:55:2 The mandatory attribute 'data-account' is missing in tag 'amp-brightcove'. (see https://www.ampproject.org/docs/reference/components/amp-brightcove) [AMP_TAG_PROBLEM]
 |        layout="responsive" width="480" height="270">
 |    </amp-brightcove>
+|    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+|    <amp-brightcove
+>>   ^~~~~~~~~
+amp-brightcove/0.1/test/validator-amp-brightcove.html:59:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|        dock
+|        data-account="1290862519001"
+|        data-video-id="ref:amp-docs-sample"
+|        data-player-id="SyIOV8yWM"
+|        layout="responsive" width="480" height="270">
+|    </amp-brightcove>
 |  </body>
 |  </html>

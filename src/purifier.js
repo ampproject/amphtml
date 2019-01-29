@@ -38,7 +38,7 @@ let DomPurifyDef;
 const DomPurify = purify(self);
 
 /** @private @const {string} */
-const TAG = 'PURIFIER';
+const TAG = 'purifier';
 
 /** @private @const {string} */
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
@@ -161,6 +161,9 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
     'verify-xhr',
     'custom-validation-reporting',
     'target',
+  ],
+  'input': [
+    'mask-output',
   ],
   'template': [
     'type',
@@ -339,7 +342,6 @@ export function addPurifyHooks(purifier, diffing) {
 
   /**
    * @param {!Node} unusedNode
-   * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
   const afterSanitizeElements = function(unusedNode) {
     // DOMPurify doesn't have a attribute-specific tag whitelist API and
@@ -349,16 +351,6 @@ export function addPurifyHooks(purifier, diffing) {
       delete allowedTags[tag];
     });
     allowedTagsChanges.length = 0;
-
-    // Output user errors for each removed element.
-    this.removed.forEach(r => {
-      if (r.element) {
-        const {nodeName} = r.element;
-        if (nodeName !== 'REMOVE') { // <remove> is added by DOMPurify.
-          user().error(TAG, 'Removed unsafe element:', r.element.nodeName);
-        }
-      }
-    });
   };
 
   /**
@@ -413,7 +405,8 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = isBindingAttribute(attrName);
+    const classicBinding = attrName[0] == '['
+        && attrName[attrName.length - 1] == ']';
     const alternativeBinding = startsWith(attrName, BIND_PREFIX);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
@@ -437,6 +430,8 @@ export function addPurifyHooks(purifier, diffing) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
+      user().error(TAG, `Removing "${attrName}" attribute with invalid `
+          + `value in <${tagName} ${attrName}="${attrValue}">.`);
       data.keepAttr = false;
     }
 
@@ -460,21 +455,12 @@ export function addPurifyHooks(purifier, diffing) {
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
     remove(this.removed, r => {
-      // Ignore attributes belonging to other nodes.
-      if (r.from !== node) {
-        return false;
-      }
-      if (!r.attribute) {
-        return false;
-      }
-      const {name, value} = r.attribute;
-      if (name.toLowerCase() === 'on') {
-        node.setAttribute('on', value);
-        return true; // Delete from `removed` array once processed.
-      }
-      // Output user error for sanitized attributes.
-      if (!isBindingAttribute(name)) {
-        user().error(TAG, `Removed unsafe attribute: ${name}="${value}"`);
+      if (r.from === node && r.attribute) {
+        const {name, value} = r.attribute;
+        if (name.toLowerCase() === 'on') {
+          node.setAttribute('on', value);
+          return true; // Delete from `removed` array once processed.
+        }
       }
       return false;
     });
@@ -484,14 +470,6 @@ export function addPurifyHooks(purifier, diffing) {
   purifier.addHook('afterSanitizeElements', afterSanitizeElements);
   purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-}
-
-/**
- * @param {string} attrName
- * @return {boolean}
- */
-export function isBindingAttribute(attrName) {
-  return attrName[0] == '[' && attrName[attrName.length - 1] == ']';
 }
 
 /**
