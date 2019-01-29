@@ -120,6 +120,8 @@ export class FormValidator {
    * Wraps `checkValidity` on input elements to support `pattern` attribute on
    * <textarea> which is not supported in HTML5.
    * @param {!Element} input
+   * @return {boolean}
+   * @protected
    */
   checkInputValidity(input) {
     if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
@@ -129,7 +131,7 @@ export class FormValidator {
       const error = input.getAttribute('error') || DEFAULT_PATTERN_ERROR;
       input.setCustomValidity(valid ? '' : error);
     }
-    input.checkValidity();
+    return input.checkValidity();
   }
 
   /**
@@ -137,6 +139,7 @@ export class FormValidator {
    * <textarea> which is not supported in HTML5.
    * @param {!HTMLFormElement} form
    * @return {boolean}
+   * @protected
    */
   checkFormValidity(form) {
     this.checkTextAreaValidityInForm_(form);
@@ -148,6 +151,7 @@ export class FormValidator {
    * <textarea> which is not supported in HTML5.
    * @param {!HTMLFormElement} form
    * @return {boolean}
+   * @protected
    */
   reportFormValidity(form) {
     this.checkTextAreaValidityInForm_(form);
