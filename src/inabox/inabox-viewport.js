@@ -189,7 +189,7 @@ export class ViewportBindingInabox {
    */
   updateLayoutRects_(viewportRect, targetRect) {
     this.viewportRect_ = viewportRect;
-    this.updateBoxRect_(layoutRectFromDomRect(targetRect));
+    this.updateBoxRect_(targetRect);
   }
 
   /** @private */
