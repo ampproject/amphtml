@@ -311,11 +311,12 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         overlay,
         shadow,
       ].forEach(el => {
-        expect(getComputedStyle(el)['transform']).to.equal(expectedTransform);
-        expect(getComputedStyle(el)['width']).to.equal(width + 'px');
-        expect(getComputedStyle(el)['min-width']).to.equal(width + 'px');
-        expect(getComputedStyle(el)['height']).to.equal(height + 'px');
-        expect(getComputedStyle(el)['min-height']).to.equal(height + 'px');
+        const computedStyle = getComputedStyle(el);
+        expect(computedStyle['transform']).to.equal(expectedTransform);
+        expect(computedStyle['width']).to.equal(width + 'px');
+        expect(computedStyle['min-width']).to.equal(width + 'px');
+        expect(computedStyle['height']).to.equal(height + 'px');
+        expect(computedStyle['min-height']).to.equal(height + 'px');
       });
     });
 
