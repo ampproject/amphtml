@@ -595,7 +595,11 @@ export class VideoDocking {
     }
     const relativeY = this.getSlotRelativeY_();
     const {element} = video;
-    const {top, bottom} = getIntersectionRect(element);
+    const intersectionRect = getIntersectionRect(element);
+    if (!isSizedLayoutRect(intersectionRect)) {
+      return false;
+    }
+    const {top, bottom} = intersectionRect;
     const {top: slotTop, height: slotHeight} = this.getFixedSlotLayoutBox_();
     const slotBottom = this.viewport_.getSize().height - slotHeight - slotTop;
     if (relativeY == RelativeY.TOP) {

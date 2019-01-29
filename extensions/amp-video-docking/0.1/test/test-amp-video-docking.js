@@ -50,6 +50,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
   const viewportSize = {width: 0, height: 0};
 
+  const {any} = sinon.match;
+
   function createAmpElementMock(tag = 'div') {
     const element = env.win.document.createElement(tag);
     const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
@@ -110,7 +112,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   }
 
   function mockAreaWidth(width) {
-    viewport.width = width;
+    viewportSize.width = width;
     sandbox.stub(docking, 'getRightEdge_').returns(width);
     return width;
   }
@@ -120,7 +122,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   }
 
   function mockAreaHeight(height) {
-    viewport.height = height;
+    viewportSize.height = height;
     sandbox.stub(docking, 'getBottomEdge_').returns(height);
     return height;
   }
@@ -133,7 +135,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     docking.scrollDirection_ = direction;
   }
 
-  function stubDock() {
+  function stubDockInTransferLayerStep() {
     return sandbox.stub(docking, 'dockInTransferLayerStep_');
   }
 
@@ -185,8 +187,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   });
 
   afterEach(() => {
-    viewport.width = 0;
-    viewport.height = 0;
+    viewportSize.width = 0;
+    viewportSize.height = 0;
   });
 
   describe('placeAt_', () => {
@@ -897,12 +899,17 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const {x, y, scale, relativeX} = targetDims;
 
       expect(placeAt.withArgs(
-          video, x, y, scale, step, /* durationMs */ sinon.match.any,
-          relativeX))
+          video, x, y, scale, step, /* durationMs */ any, relativeX))
           .to.have.been.calledOnce;
     });
 
-    it('enables controls when not transfer layer step', function* () {
+    it('hides component controls', function* () {
+      yield docking.dock_(video, target, step);
+
+      expect(video.hideControls).to.have.been.calledOnce;
+    });
+
+    it('enables docked controls', function* () {
       const {enable} = stubControls();
 
       yield docking.dock_(video, target, step);
@@ -910,7 +917,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expect(enable).to.have.been.calledOnce;
     });
 
-    it('does not enable controls when transfer layer step', function* () {
+    it('does not enable docked controls if transferring layer', function* () {
       const {enable} = stubControls();
 
       yield docking.dock_(video, target, step, /* isTransferLayerStep */ true);
@@ -1078,9 +1085,90 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const {x, y, scale, relativeX} = targetDims;
 
       expect(placeAt.withArgs(
-          video, x, y, scale, /* step */ 0, /* durationMs */ sinon.match.any,
-          relativeX))
+          video, x, y, scale, /* step */ 0, /* durationMs */ any, relativeX))
           .to.have.been.calledOnce;
+    });
+
+    const inlinePercVis = `${REVERT_TO_INLINE_RATIO * 100}% visible`;
+
+    it(`pauses video when < ${inlinePercVis}`, function* () {
+      placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+      yield docking.undock_(video);
+
+      expect(video.pause).to.have.been.calledOnce;
+    });
+
+    it(`doesn't pause video when >= ${inlinePercVis}`, function* () {
+      placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+
+      yield docking.undock_(video);
+
+      expect(video.pause).to.not.have.been.called;
+    });
+
+    describe('Chrome freeze when out-of-view workaround', () => {
+
+      it(`shows component controls early when < ${inlinePercVis}`, () => {
+        const {promise, resolve} = new Deferred();
+
+        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+        placeAt.returns(promise);
+
+        const done = docking.undock_(video);
+
+        expect(video.showControls).to.have.been.calledOnce;
+
+        resolve();
+
+        return done;
+      });
+
+      it(`shows component controls late when >= ${inlinePercVis}`, () => {
+        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+
+        const {promise, resolve} = new Deferred();
+
+        placeAt.returns(promise);
+
+        const done = docking.undock_(video);
+
+        expect(video.showControls).to.not.have.been.called;
+
+        resolve();
+
+        return done.then(() => {
+          expect(video.showControls).to.have.been.calledOnce;
+        });
+      });
+
+      it(`does not animate transition when < ${inlinePercVis}`, function* () {
+        const expectedTransitionDurationMs = 0;
+
+        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+        yield docking.undock_(video);
+
+        expect(placeAt.withArgs(video, /* x */ any, /* y */ any,
+            /* scale */ any, /* step */ any, expectedTransitionDurationMs))
+            .to.have.been.calledOnce;
+      });
+
+      it(`animates transition when >= ${inlinePercVis}`, function* () {
+        const expectedTransitionDurationMs = 555;
+
+        sandbox.stub(docking, 'calculateTransitionDuration_')
+            .returns(expectedTransitionDurationMs);
+
+        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+
+        yield docking.undock_(video);
+
+        expect(placeAt.withArgs(video, /* x */ any, /* y */ any,
+            /* scale */ any, /* step */ any, expectedTransitionDurationMs))
+            .to.have.been.calledOnce;
+      });
     });
 
   });
@@ -1112,6 +1200,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       querySelectorStub
           .withArgs('#' + slotId)
           .returns(impl.element);
+
+      return impl.element;
     }
 
     beforeEach(() => {
@@ -1120,161 +1210,190 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       }
     });
 
-    it(`should use a ${targetType} as target`, () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+    describe('getTargetFor_', () => {
 
-      const video = createVideo();
+      it(`should use a ${targetType} as target`, () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
-      const videoWidth = 400;
-      const videoHeight = 300;
+        const video = createVideo();
 
-      placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
+        const videoWidth = 400;
+        const videoHeight = 300;
 
-      setScrollDirection(Direction.UP);
+        placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
+        setScrollDirection(Direction.UP);
 
-      const target = docking.getTargetFor_(video);
+        setValidAreaWidth();
+        setValidAreaHeight(videoHeight);
 
-      expect(target).to.not.be.null;
+        const target = docking.getTargetFor_(video);
 
-      if (useSlot) {
-        expect(target.nodeType).to.equal(/* ELEMENT */ 1);
-        expect(target.posX).to.be.undefined;
-        expect(target.posY).to.be.undefined;
-      } else {
-        expect(target.nodeType).to.be.undefined;
-        expect(target.posX).to.not.be.undefined;
-        expect(target.posY).to.not.be.undefined;
-      }
-    });
+        expect(target).to.not.be.null;
 
-    it('should not dock if the viewport is too small', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const video = createVideo();
-      const dock = stubDock();
-
-      const videoWidth = 400;
-      const videoHeight = 300;
-
-      placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
-
-      setScrollDirection(Direction.UP);
-
-      mockInvalidAreaWidth();
-      setValidAreaHeight(videoHeight);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
-    });
-
-    it('should not dock if the video is portrait', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      const videoWidth = 300;
-      const videoHeight = 400;
-
-      setScrollDirection(Direction.UP);
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
-
-      placeElementLtwh(video, 0, -400, videoWidth, videoHeight);
-
-      allowConsoleError(() => {
-        // user().error() expected.
-        docking.updateOnPositionChange_(video);
+        if (useSlot) {
+          expect(target.nodeType).to.equal(/* ELEMENT */ 1);
+          expect(target.posX).to.be.undefined;
+          expect(target.posY).to.be.undefined;
+        } else {
+          expect(target.nodeType).to.be.undefined;
+          expect(target.posX).to.not.be.undefined;
+          expect(target.posY).to.not.be.undefined;
+        }
       });
 
-      expect(dock).to.not.have.been.called;
     });
 
-    // TODO(alanorozco): Unskip for slot
-    skipForSlot('does not dock if the video\'s layout box is not sized', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+    describe('updateOnPositionChange_', () => {
 
-      const video = createVideo();
-      const dock = stubDock();
+      it('should not dock if the viewport is too small', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
-      placeElementLtwh(video, 0, -100, 0, 0);
+        const video = createVideo();
+        const dock = stubDockInTransferLayerStep();
 
-      setScrollDirection(Direction.UP);
+        const videoWidth = 400;
+        const videoHeight = 300;
 
-      setValidAreaWidth();
-      setValidAreaHeight();
+        placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-      docking.updateOnPositionChange_(video);
+        setScrollDirection(Direction.UP);
 
-      expect(dock).to.not.have.been.called;
+        mockInvalidAreaWidth();
+        setValidAreaHeight(videoHeight);
+
+        docking.updateOnPositionChange_(video);
+
+        expect(dock).to.not.have.been.called;
+      });
+
+      it('should not dock if the video is portrait', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+        const dock = stubDockInTransferLayerStep();
+        const video = createVideo();
+
+        const videoWidth = 300;
+        const videoHeight = 400;
+
+        setScrollDirection(Direction.UP);
+
+        setValidAreaWidth();
+        setValidAreaHeight(videoHeight);
+
+        placeElementLtwh(video, 0, -400, videoWidth, videoHeight);
+
+        allowConsoleError(() => {
+          // user().error() expected.
+          docking.updateOnPositionChange_(video);
+        });
+
+        expect(dock).to.not.have.been.called;
+      });
+
+      it('doesn\'t dock when video\'s layout box is not sized', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+        const video = createVideo();
+        const dock = stubDockInTransferLayerStep();
+
+        placeElementLtwh(video, 0, -100, 0, 0);
+
+        setScrollDirection(Direction.UP);
+
+        setValidAreaWidth();
+        setValidAreaHeight();
+
+        docking.updateOnPositionChange_(video);
+
+        expect(dock).to.not.have.been.called;
+      });
+
+      it('should not dock if another video is docked', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+        const dock = stubDockInTransferLayerStep();
+        const video = createVideo();
+
+        setValidAreaWidth();
+
+        placeElementLtwh(video, 0, 0, 0, 0);
+
+        docking.currentlyDocked_ = {video: createVideo()};
+
+        setScrollDirection(Direction.UP);
+
+        docking.updateOnPositionChange_(video);
+
+        expect(dock).to.not.have.been.called;
+      });
+
+      it('should dock if video is over top boundary', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+        const dock = stubDockInTransferLayerStep();
+        const video = createVideo();
+
+        setScrollDirection(Direction.UP);
+
+        const videoWidth = 400;
+        const videoHeight = 300;
+
+        setValidAreaWidth();
+        setValidAreaHeight(videoHeight * 2);
+
+        placeElementLtwh(
+            video, 0, -250, videoWidth, videoHeight, /* ratio */ 1 / 3);
+
+        sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
+
+        docking.updateOnPositionChange_(video);
+
+        expect(dock).to.have.been.calledOnce;
+      });
+
+      it('should not dock if video does not touch boundaries', () => {
+        maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+        const dock = stubDockInTransferLayerStep();
+        const video = createVideo();
+
+        const videoWidth = 400;
+        const videoHeight = 300;
+
+        setValidAreaWidth();
+        setValidAreaHeight(videoHeight);
+        setScrollDirection(Direction.UP);
+        placeElementLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
+
+        docking.updateOnPositionChange_(video);
+
+        expect(dock).to.not.have.been.called;
+      });
+
     });
 
-    it('should not dock if another video is docked', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+    describe('trigger_', () => {
+      const targetElementTextual = useSlot ? 'video' : 'slot';
 
-      const dock = stubDock();
-      const video = createVideo();
+      it(`triggers action from ${targetElementTextual} element`, () => {
+        const actions = {trigger: sandbox.spy()};
+        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
-      setValidAreaWidth();
+        const slot = maybeCreateSlotElementLtwh(0, 0, 0, 0);
+        const video = createVideo();
+        const action = '🌮';
 
-      placeElementLtwh(video, 0, 0, 0, 0);
+        docking.currentlyDocked_ = {video, target: slot || {}};
+        docking.trigger_(action);
 
-      docking.currentlyDocked_ = {video: createVideo()};
-
-      setScrollDirection(Direction.UP);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
-    });
-
-    it('should dock if video is over top boundary', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      setScrollDirection(Direction.UP);
-
-      const videoWidth = 400;
-      const videoHeight = 300;
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight * 2);
-
-      placeElementLtwh(
-          video, 0, -250, videoWidth, videoHeight, /* ratio */ 1 / 3);
-
-      sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.have.been.calledOnce;
-    });
-
-    // TODO(alanorozco): Unskip
-    skipForSlot('should not dock if video does not touch boundaries', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      const videoWidth = 400;
-      const videoHeight = 300;
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
-      setScrollDirection(Direction.UP);
-      placeElementLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
+        expect(actions.trigger.withArgs(
+            slot || video.element,
+            action,
+            /* event */ any,
+            /* trust */ any))
+            .to.have.been.calledOnce;
+      });
     });
   });
 });
