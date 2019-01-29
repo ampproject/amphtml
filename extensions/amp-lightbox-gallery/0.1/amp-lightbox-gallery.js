@@ -824,7 +824,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
     devAssert(this.carousel_).getImpl()
-        .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
+        .then(carousel => carousel.goToSlide(this.currentElemId_));
     this.updateDescriptionBox_();
     return this.enter_();
   }
@@ -1136,7 +1136,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           closestBySelector(target, SLIDE_ITEM_SELECTOR));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       devAssert(parentCarousel).getImpl()
-          .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
+          .then(carousel => carousel.goToSlide(targetSlideIndex));
     }
   }
 
@@ -1390,7 +1390,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       devAssert(this.carousel_).getImpl(),
     ]).then(values => {
       this.currentElemId_ = id;
-      values[1].showSlideWhenReady(this.currentElemId_);
+      values[1].goToSlide(this.currentElemId_);
       this.updateDescriptionBox_();
     });
   }

@@ -158,7 +158,7 @@ class AmpCarousel extends AMP.BaseElement {
    * Moves the Carousel to a given index.
    * @param {number} index
    */
-  showSlideWhenReady(index) {
+  goToSlide(index) {
     this.carousel_.goToSlide(index, {smoothScroll: false});
   }
 
