@@ -36,7 +36,7 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {htmlFor} from '../../../src/static-template';
-import {isArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {
@@ -492,6 +492,11 @@ export class AmpList extends AMP.BaseElement {
       this.toggleLoading(true, /* opt_force */ true);
       this.mutateElement(() => {
         this.toggleFallback_(false);
+        // Clean up bindings in children before removing them from DOM.
+        if (this.bind_) {
+          const removed = toArray(this.container_.children);
+          this.bind_.scanAndApply(/* added */ [], removed);
+        }
         removeChildren(dev().assertElement(this.container_));
       });
     }

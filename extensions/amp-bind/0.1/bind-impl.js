@@ -390,6 +390,7 @@ export class Bind {
       this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
     });
     const added = bindings.length;
+    // Early-out if there are no elements to add -- just clean up `removed`.
     if (added === 0) {
       return cleanup(0);
     }
