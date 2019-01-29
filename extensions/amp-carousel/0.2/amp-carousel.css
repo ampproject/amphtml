@@ -49,7 +49,7 @@ amp-carousel {
  * TODO(sparhami) Find a solution for the clipping on all browsers.
  */
 .i-amphtml-carousel-scroll::-webkit-scrollbar {
-  height: 0;
+  display: none;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"] {

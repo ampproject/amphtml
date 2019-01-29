@@ -23,7 +23,7 @@ import {
 describes.endtoend('AMP carousel mixed length slides', {
 }, async env => {
   const pageWidth = 600;
-  const pageHeight = 500;
+  const pageHeight = 600;
   let controller;
   let ampDriver;
 
