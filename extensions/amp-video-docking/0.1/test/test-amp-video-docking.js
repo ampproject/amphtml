@@ -1392,7 +1392,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
             action,
             /* event */ any,
             /* trust */ any))
-            .to.have.been.calledOnce;
+            .to.have.been.called;
+        expect(actions.trigger).to.have.been.calledOnce;
       });
     });
   });
