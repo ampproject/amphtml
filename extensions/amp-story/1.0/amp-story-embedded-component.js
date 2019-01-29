@@ -207,15 +207,22 @@ export class AmpStoryEmbeddedComponent {
     /**
      * Target producing the tooltip. Used to avoid building the same
      * element twice.
-     * @private {?Element} */
+     * @private {?Element}
+     */
     this.previousTarget_ = null;
+
+    /**
+     * Page containing component.
+     * @private {?Element}
+     */
+    this.componentPage_ = null;
 
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
-          this.onEmbeddedComponentUpdate_(component);
+          this.onComponentStateUpdate_(component);
         });
 
     /** @private {EmbeddedComponentState} */
@@ -223,40 +230,45 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Reacts to embedded component updates.
-   * @param {!InteractiveComponentDef} component
-   * @private
-   */
-  onEmbeddedComponentUpdate_(component) {
-    switch (this.state_) {
-      case EmbeddedComponentState.FOCUSED:
-        component.state === EmbeddedComponentState.EXPANDED ?
-          this.setState_(EmbeddedComponentState.EXPANDED, component) :
-          this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
-        break;
-      case EmbeddedComponentState.HIDDEN:
-        this.setState_(EmbeddedComponentState.FOCUSED, component);
-        break;
-      case EmbeddedComponentState.EXPANDED:
-        component.state === EmbeddedComponentState.HIDDEN ?
-          this.setState_(EmbeddedComponentState.HIDDEN, null /** component */) :
-          this.maybeCloseExpandedView_(component.element);
-        break;
-      default:
-        dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
-        break;
-    }
-  }
-
-  /**
-   * Sets new state for the embedded component.
-   *
+   * Reacts to embedded component state updates.
    * Possible state updates:
    *
    *    HIDDEN ==> FOCUSED ==> EXPANDED
    *      /\ _________|           |
    *      ||______________________|
    *
+   * @param {!InteractiveComponentDef} component
+   * @private
+   */
+  onComponentStateUpdate_(component) {
+    switch (component.state) {
+      case EmbeddedComponentState.HIDDEN:
+        this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
+        break;
+      case EmbeddedComponentState.FOCUSED:
+        if (this.state_ !== EmbeddedComponentState.HIDDEN) {
+          dev().warn(TAG,
+              `Invalid component update. Not possible to go from ${this.state_}
+              to ${component.state}`);
+        }
+        this.setState_(EmbeddedComponentState.FOCUSED, component);
+        break;
+      case EmbeddedComponentState.EXPANDED:
+        if (this.state_ === EmbeddedComponentState.FOCUSED) {
+          this.setState_(EmbeddedComponentState.EXPANDED, component);
+        } else if (this.state_ === EmbeddedComponentState.EXPANDED) {
+          this.maybeCloseExpandedView_(component.element);
+        } else {
+          dev().warn(TAG,
+              `Invalid component update. Not possible to go from ${this.state_}
+               to ${component.state}`);
+        }
+        break;
+    }
+  }
+
+  /**
+   * Sets new state for the embedded component.
    * @param {EmbeddedComponentState} state
    * @param {?InteractiveComponentDef} component
    * @private
@@ -288,13 +300,11 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   toggleExpandedView_(targetToExpand) {
-    const storyPage = devAssert(
-        this.storyEl_.querySelector('amp-story-page[active]'));
-
     if (!targetToExpand) {
       this.expandedViewOverlay_ &&
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
-          storyPage.classList.toggle('i-amphtml-expanded-mode', false);
+          this.componentPage_.classList.toggle(
+              'i-amphtml-expanded-mode', false);
           toggle(devAssert(this.expandedViewOverlay_), false);
           resetStyles(devAssert(this.previousTarget_), ['transform']);
         });
@@ -304,32 +314,33 @@ export class AmpStoryEmbeddedComponent {
     this.animateExpanded_(devAssert(targetToExpand));
 
     if (!this.expandedViewOverlay_) {
-      this.buildAndAppendExpandedViewOverlay_(storyPage);
+      this.buildAndAppendExpandedViewOverlay_();
     }
     this.resources_.mutateElement(devAssert(this.expandedViewOverlay_), () => {
       toggle(devAssert(this.expandedViewOverlay_), true);
-      storyPage.classList.toggle('i-amphtml-expanded-mode', true);
+      this.componentPage_.classList.toggle('i-amphtml-expanded-mode', true);
     });
   }
 
   /**
    * Builds the expanded view overlay element and appends it to the page.
-   * @param {!Element} storyPage
    * @private
    */
-  buildAndAppendExpandedViewOverlay_(storyPage) {
+  buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
-    this.resources_.mutateElement(storyPage, () => storyPage.appendChild(
-        this.expandedViewOverlay_));
+    this.resources_.mutateElement(devAssert(this.componentPage_),
+        () => this.componentPage_.appendChild(this.expandedViewOverlay_));
   }
 
   /**
    * Closes the expanded view overlay.
    * @param {?Element} target
+   * @param {boolean=} forceClose Force closing the expanded view.
    * @private
    */
-  maybeCloseExpandedView_(target) {
-    if (target && matches(target, '.i-amphtml-expanded-view-close-button')) {
+  maybeCloseExpandedView_(target, forceClose = false) {
+    if ((target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
+      forceClose) {
       // Target is expanded and going into hidden mode.
       this.close_();
       this.toggleExpandedView_(null);
@@ -352,8 +363,8 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
-      this.onUIStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
@@ -361,6 +372,13 @@ export class AmpStoryEmbeddedComponent {
       // desktop buttons.
       if (this.state_ === EmbeddedComponentState.FOCUSED) {
         this.close_();
+      }
+
+      // Hide expanded view when page switch is triggered by keyboard or desktop
+      // buttons.
+      if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        this.maybeCloseExpandedView_(null /** target */,
+            true /** forceClose */);
       }
     });
 
@@ -400,6 +418,8 @@ export class AmpStoryEmbeddedComponent {
 
     this.updateTooltipBehavior_(component.element);
     this.updateTooltipEl_(component);
+    this.componentPage_ = devAssert(this.storyEl_.querySelector(
+        'amp-story-page[active]'));
     this.previousTarget_ = component.element;
 
     this.resources_.mutateElement(
@@ -513,9 +533,7 @@ export class AmpStoryEmbeddedComponent {
         /** measure */
         () => {
           const targetRect = target./*OK*/getBoundingClientRect();
-          const storyPage =
-            this.storyEl_.querySelector('amp-story-page[active]');
-          const pageRect = storyPage./*OK*/getBoundingClientRect();
+          const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
           const centeredTop = pageRect.height / 2 - targetRect.height / 2;
           const centeredLeft = pageRect.width / 2 - targetRect.width / 2;
@@ -609,9 +627,7 @@ export class AmpStoryEmbeddedComponent {
     this.resources_.measureMutateElement(this.storyEl_,
         /** measure */
         () => {
-          const storyPage =
-              this.storyEl_.querySelector('amp-story-page[active]');
-          const pageRect = storyPage./*OK*/getBoundingClientRect();
+          const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
           this.horizontalPositioning_(component, pageRect, state);
           this.verticalPositioning_(component, pageRect, state);

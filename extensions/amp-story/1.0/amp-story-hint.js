@@ -184,7 +184,7 @@ export class AmpStoryHint {
 
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {./amp-story-store-service.InteractiveComponentDef} component */ component => {
-          this.onFocusedStateUpdate_(
+          this.hideOnFocusedState_(
               component.state === EmbeddedComponentState.FOCUSED);
         });
 
@@ -314,12 +314,12 @@ export class AmpStoryHint {
   }
 
   /**
-   * Hides navigation if tooltip is open.
-   * @param {boolean} isOpen
+   * Hides navigation hint if tooltip is open.
+   * @param {boolean} isActive
    * @private
    */
-  onFocusedStateUpdate_(isOpen) {
-    if (isOpen) {
+  hideOnFocusedState_(isActive) {
+    if (isActive) {
       this.hideAllNavigationHint();
     }
   }

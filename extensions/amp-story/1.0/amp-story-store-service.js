@@ -245,7 +245,8 @@ const actions = (state, action, data) => {
               data.state === EmbeddedComponentState.EXPANDED ||
               data.state === EmbeddedComponentState.FOCUSED,
             [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-              data.state !== EmbeddedComponentState.EXPANDED,
+              data.state !== EmbeddedComponentState.EXPANDED ||
+              state.uiState === UIType.DESKTOP_PANELS,
             [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
           }));
     // Shows or hides the info dialog.
