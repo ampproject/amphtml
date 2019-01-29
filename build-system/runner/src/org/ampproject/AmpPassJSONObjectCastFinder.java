@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.CompilerPass;
@@ -92,7 +93,7 @@ class AmpPassJSONObjectCastFinder implements NodeTraversal.Callback, CompilerPas
   
   public static void usingPath(String str) throws IOException {       
       Path path = Paths.get("/Users/erwinm/dev/amphtml/build-system/runner/types.txt");
-      Files.write(path, str.getBytes());
+      Files.write(path, str.getBytes(), StandardOpenOption.APPEND);
   }
 
   @Override
