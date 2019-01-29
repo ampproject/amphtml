@@ -50,6 +50,10 @@ tags: {  # <amp-youtube>
     mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   # <amp-bind>
   attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
