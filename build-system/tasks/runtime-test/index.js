@@ -511,7 +511,7 @@ async function runTests() {
         log(green('Running tests locally...'));
       }
     }).on('browsers_ready', function() {
-      console.log('\n');
+      console./*OK*/log('\n');
       log(green('Done. Running tests...'));
     }).on('browser_complete', function(browser) {
       const result = browser.lastResult;
@@ -532,7 +532,7 @@ async function runTests() {
         message += red(result.failed + ' FAILED');
       }
       message += '\n';
-      console./* OK*/log('\n');
+      console./*OK*/log('\n');
       log(message);
     }).start();
     return deferred;
