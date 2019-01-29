@@ -162,6 +162,9 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
     'custom-validation-reporting',
     'target',
   ],
+  'input': [
+    'mask-output',
+  ],
   'template': [
     'type',
   ],
