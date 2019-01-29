@@ -34,7 +34,6 @@ import {
 import {Deferred, tryResolve} from '../../../../src/utils/promise';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
-import {calculateLeftJustifiedX, calculateRightJustifiedX} from '../math';
 import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
