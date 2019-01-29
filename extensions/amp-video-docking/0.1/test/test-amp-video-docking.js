@@ -902,7 +902,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           .to.have.been.calledOnce;
     });
 
-    it('enables controls when not transfer later step', function* () {
+    it('enables controls when not transfer layer step', function* () {
       const {enable} = stubControls();
 
       yield docking.dock_(video, target, step);
@@ -910,7 +910,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expect(enable).to.have.been.calledOnce;
     });
 
-    it('does not enable controls when transfer later step', function* () {
+    it('does not enable controls when transfer layer step', function* () {
       const {enable} = stubControls();
 
       yield docking.dock_(video, target, step, /* isTransferLayerStep */ true);
