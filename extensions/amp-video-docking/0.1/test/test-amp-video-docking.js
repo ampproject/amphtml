@@ -174,6 +174,21 @@ describes.repeated('', {
       viewport.height = 0;
     });
 
+    describe('dockInTransferLayerStep_', () => {
+
+      it('should not overflow', function* () {
+        const video = {};
+        const target = {};
+
+        const dock = sandbox.stub(docking, 'dock_').returns(Promise.resolve());
+
+        yield docking.dockInTransferLayerStep_(video, target);
+
+        expect(dock).to.have.been.called;
+      });
+
+    });
+
     it(`should use a ${targetType} as target`, () => {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
