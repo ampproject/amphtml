@@ -25,8 +25,7 @@ describes.endtoend('AMP carousel', {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
   const pageWidth = 600;
-  const pageHeight = 500;
-
+  const pageHeight = 600;
   let controller;
   let ampDriver;
 
@@ -116,7 +115,7 @@ describes.endtoend('AMP carousel', {
     // Note: 513 seems to be the smallest settable width.
     controller.setWindowRect({
       width: 600,
-      height: 500,
+      height: 600,
     });
 
     const firstSlide = await getSlide(controller, 0);
@@ -131,7 +130,7 @@ describes.endtoend('AMP carousel', {
 
     controller.setWindowRect({
       width: 700,
-      height: 500,
+      height: 600,
     });
 
     // Normally, resizing would cause the position to change. We're testing

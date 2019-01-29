@@ -15,7 +15,6 @@
  */
 
 import {
-  enableExperiments,
   getScrollingElement,
   getSlide,
   waitForCarouselImg,
@@ -27,8 +26,8 @@ describes.endtoend('Vertical AMP carousel', {
   const SLIDE_COUNT = 7;
   const pageWidth = 600;
   const pageHeight = 600;
-
   let controller;
+  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -40,11 +39,12 @@ describes.endtoend('Vertical AMP carousel', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
-  await controller.navigateTo(
-      'http://localhost:8000/test/manual/amp-carousel-0-2/vertical.amp.html');
-  await ampDriver.toggleExperiment('layers', true);
-  await ampDriver.toggleExperiment('amp-carousel-v2', true);
+    await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-carousel-0-2/vertical.amp.html');
+    await ampDriver.toggleExperiment('layers', true);
+    await ampDriver.toggleExperiment('amp-carousel-v2', true);
     await controller.setWindowRect({
       width: pageWidth,
       height: pageHeight,

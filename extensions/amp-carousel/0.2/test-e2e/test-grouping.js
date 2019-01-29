@@ -15,7 +15,6 @@
  */
 
 import {
-  enableExperiments,
   getScrollingElement,
   getSlides,
 } from './helpers';
@@ -23,9 +22,10 @@ import {
 describes.endtoend('AMP carousel grouping', {
 }, async env => {
   const pageWidth = 600;
-  const pageHeight = 1200;
+  const pageHeight = 600;
   const slideWidth = pageWidth / 2;
   let controller;
+  let ampDriver;
 
   function rect(el) {
     return controller.getElementRect(el);
@@ -33,6 +33,7 @@ describes.endtoend('AMP carousel grouping', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
     await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-carousel-0-2/grouping-move-by-2.amp.html');

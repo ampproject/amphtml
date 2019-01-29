@@ -15,15 +15,15 @@
  */
 
 import {
-  enableExperiments,
   getSlides,
 } from './helpers';
 
 describes.endtoend('AMP carousel autoadvance', {
 }, async env => {
   const pageWidth = 600;
-  const pageHeight = 500;
+  const pageHeight = 600;
   let controller;
+  let ampDriver;
 
   function rect(el) {
     return controller.getElementRect(el);
@@ -31,6 +31,7 @@ describes.endtoend('AMP carousel autoadvance', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
     await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-carousel-0-2/autoadvance.amp.html');
