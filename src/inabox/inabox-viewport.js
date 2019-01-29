@@ -116,12 +116,6 @@ export class ViewportBindingInabox {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    /** @const {function(!../layout-rect.LayoutRectDef, !../layout-rect.LayoutRectDef)} */
-    this.updateLayoutRects_ = (viewportRect, targetRect) => {
-      this.viewportRect_ = viewportRect;
-      this.updateBoxRect_(layoutRectFromDomRect(targetRect));
-    };
-
     /** @const {function()} */
     this.onTopWindowScrollListener_ = () => {
       this.updateLayoutRects_(this.getViewportRect_(),
@@ -186,6 +180,16 @@ export class ViewportBindingInabox {
     else {
       this.listenForPosition_();
     }
+  }
+
+  /**
+   * @private
+   * @param {!../layout-rect.LayoutRectDef} viewportRect
+   * @param {!../layout-rect.LayoutRectDef} targetRect
+   */
+  updateLayoutRects_(viewportRect, targetRect) {
+    this.viewportRect_ = viewportRect;
+    this.updateBoxRect_(layoutRectFromDomRect(targetRect));
   }
 
   /** @private */
