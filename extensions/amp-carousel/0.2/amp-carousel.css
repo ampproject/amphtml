@@ -42,6 +42,16 @@ amp-carousel {
   --visible-count: 1;
 }
 
+/**
+ * Make sure the scrollbar does not take up space on desktop, which will cause
+ * the bottom of the slides to be cutoff. Padding + overflow is used to hide
+ * the scrollbars for all browsers.
+ * TODO(sparhami) Find a solution for the clipping on all browsers.
+ */
+.i-amphtml-carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .i-amphtml-carousel-scroll[horizontal="true"] {
   flex-direction: row;
   scroll-snap-type-x: mandatory; /* Firefox, IE */
@@ -85,6 +95,7 @@ amp-carousel {
   width: calc(100% / var(--visible-count)) !important;
   min-width: auto !important;
   max-width: none !important;
+  height: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-slotted,
@@ -93,6 +104,7 @@ amp-carousel {
   height: calc(100% / var(--visible-count)) !important;
   min-height: auto !important;
   max-height: none !important;
+  width: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
@@ -116,4 +128,11 @@ amp-carousel {
 
 .i-amphtml-carousel-scroll[horizontal="false"] > .i-amphtml-carousel-spacer{
   width: 100%;
+}
+
+.i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
 }

@@ -586,6 +586,24 @@ describes.repeated('amp-list', {
         });
       });
 
+      it('should clear old bindings when resetting', () => {
+        element.setAttribute('reset-on-refresh', '');
+        const foo = doc.createElement('div');
+        expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo]);
+
+        return list.layoutCallback().then(() => {
+          expect(list.container_.contains(foo)).to.be.true;
+
+          expectFetchAndRender(DEFAULT_FETCHED_DATA,
+              [foo], {resetOnRefresh: true});
+          element.setAttribute('src', 'https://new.com/list.json');
+          list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+
+          expect(bind.scanAndApply).to.be.calledTwice;
+          expect(bind.scanAndApply).to.be.calledWith([], sinon.match.array);
+        });
+      });
+
       it('should not reset if `reset-on-refresh=""` (new data)', () => {
         element.setAttribute('reset-on-refresh', '');
         const foo = doc.createElement('div');
