@@ -16,6 +16,7 @@
 
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
+import {PositionObserver} from '../../ads/inabox/position-observer';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
@@ -107,30 +108,11 @@ export class ViewportBindingInabox {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.win);
-
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
-
-    /** @const {function()} */
-    this.onTopWindowScrollListener_ = throttle(this.win, () => {
-      this.updateLayoutRects_(this.getViewportRect_(),
-          layoutRectFromDomRect(
-              this.win.frameElement./*OK*/getBoundingClientRect()));
-      this.scrollObservable_.fire();
-    }, MIN_EVENT_INTERVAL);
-
-    /** @const {function()} */
-    this.onTopWindowResizeListener_ = throttle(this.win, () => {
-      this.updateLayoutRects_(this.getViewportRect_(),
-          layoutRectFromDomRect(
-              this.win.frameElement./*OK*/getBoundingClientRect()));
-      this.resizeObservable_.fire();
-    }, MIN_EVENT_INTERVAL);
 
     const boxWidth = win./*OK*/innerWidth;
     const boxHeight = win./*OK*/innerHeight;
@@ -169,6 +151,9 @@ export class ViewportBindingInabox {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private {?../../ads/inabox/position-observer.PositionObserver} */
+    this.topWindowPositionObserver_ = null;
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -188,49 +173,25 @@ export class ViewportBindingInabox {
    * @param {!../layout-rect.LayoutRectDef} targetRect
    */
   updateLayoutRects_(viewportRect, targetRect) {
+    const oldViewportRect = this.viewportRect_;
     this.viewportRect_ = viewportRect;
     this.updateBoxRect_(targetRect);
+    if (isResized(this.viewportRect_, oldViewportRect)) {
+      this.resizeObservable_.fire();
+    }
+    if (isMoved(this.viewportRect_, oldViewportRect)) {
+      this.fireScrollThrottle_();
+    }
   }
 
   /** @private */
   listenForPosition_() {
-
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
-          const oldViewportRect = this.viewportRect_;
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-          if (isResized(this.viewportRect_, oldViewportRect)) {
-            this.resizeObservable_.fire();
-          }
-          if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.fireScrollThrottle_();
-          }
         });
-  }
-
-  /**
-   * Get the viewport rect by polling the top level window directly.
-   * Only used when the inabox iframe is within the same domain (otherwise will
-   * fail due to xdomain restrictions).
-   */
-  getViewportRect_() {
-    const topWin = this.win.top;
-    const topDoc = topWin.document;
-    const scrollingElement =
-        topDoc./*OK*/scrollingElement ||
-        (this.platform_.isWebKit() && topDoc.body) ||
-        topDoc.documentElement;
-    const scrollLeft = scrollingElement./*OK*/scrollLeft ||
-        topWin./*OK*/pageXOffset;
-    const scrollTop = scrollingElement./*OK*/scrollTop ||
-        topWin./*OK*/pageYOffset;
-    return layoutRectLtwh(
-        Math.round(scrollLeft),
-        Math.round(scrollTop),
-        topWin./*OK*/innerWidth,
-        topWin./*OK*/innerHeight);
   }
 
   /**
@@ -254,41 +215,24 @@ export class ViewportBindingInabox {
 
   /** @visibleForTesting */
   setUpNativeListener() {
-    // Set up listener and send the 1st ping immediately but only after the
-    // resources service is properly registered (since it's registered after the
-    // inabox services so it won't be available immediately).
+    // Set up listener but only after the resources service is properly
+    // registered (since it's registered after the inabox services so it won't
+    // be available immediately).
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
         .then(() => {
-          this.win.top.addEventListener(
-              'scroll', this.onTopWindowScrollListener_, true);
-          this.win.top.addEventListener(
-              'resize', this.onTopWindowResizeListener_, true);
-          const oldViewportRect = this.viewportRect_;
-          this.updateLayoutRects_(this.getViewportRect_(),
-              layoutRectFromDomRect(
-                  this.win.frameElement./*OK*/getBoundingClientRect()));
-          if (isResized(this.viewportRect_, oldViewportRect)) {
-            this.resizeObservable_.fire();
-          }
-          if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
-          }
+          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
+          this.topWindowPositionObserver_.observe(
+              this.win.frameElement, data => {
+                this.updateLayoutRects_(
+                    data['viewportRect'],
+                    data['targetRect']);
+              });
         });
   }
 
   /** @private */
   listenForPositionSameDomain_() {
     this.setUpNativeListener();
-  }
-
-  /** @override */
-  disconnect() {
-    if (this.canInspectTopWindow_()) {
-      this.win.top.removeEventListener(
-          'scroll', this.onTopWindowScrollListener_, true);
-      this.win.top.removeEventListener(
-          'resize', this.onTopWindowResizeListener_, true);
-    }
   }
 
   /** @override */
@@ -497,6 +441,7 @@ export class ViewportBindingInabox {
     return dev().assertElement(this.win.document.body);
   }
 
+  /** @override */ disconnect() {/* no-op */}
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}

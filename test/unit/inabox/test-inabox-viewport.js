@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../../src/observable';
+import {PositionObserver} from '../../../ads/inabox/position-observer';
 import {Services} from '../../../src/services';
 import {
   ViewportBindingInabox,
@@ -38,8 +39,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let positionCallback;
   let onScrollCallback;
   let onResizeCallback;
-  let topWindowScrollObservable;
-  let topWindowResizeObservable;
+  let topWindowObservable;
   let measureSpy;
 
   function stubIframeClientMakeRequest(
@@ -70,29 +70,14 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.innerWidth = 200;
     win.innerHeight = 150;
-    topWindowScrollObservable = new Observable();
-    topWindowResizeObservable = new Observable();
+    topWindowObservable = new Observable();
     win.top = {
       addEventListener(event, listener) {
-        switch (event) {
-          case 'scroll':
-            topWindowScrollObservable.add(listener);
-            break;
-          case 'resize':
-            topWindowResizeObservable.add(listener);
-            break;
+        if (topWindowObservable.getHandlerCount() == 0) {
+          topWindowObservable.add(listener);
         }
       },
-      removeEventListener(event, listener) {
-        switch (event) {
-          case 'scroll':
-            topWindowScrollObservable.remove(listener);
-            break;
-          case 'resize':
-            topWindowResizeObservable.remove(listener);
-            break;
-        }
-      },
+      document: {scrollingElement: {}},
     };
     const iframeElement = {
       getBoundingClientRect() {
@@ -121,175 +106,110 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.restore();
   });
 
-  it('should work for size, layoutRect and position observer', () => {
-    sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
-    stubIframeClientMakeRequest(
-        'send-positions',
-        'position',
-        (req, res, cb) => { positionCallback = cb; },
-        /* opt_sync */ true);
+  describe('should work for size, layoutRect and position observer', () => {
 
-    onScrollCallback = sandbox.spy();
-    onResizeCallback = sandbox.spy();
-    binding.connect();
-    binding.onScroll(onScrollCallback);
-    binding.onResize(onResizeCallback);
+    let viewportRect;
+    let targetRect;
 
-    // Initial state
-    expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
-
-    // Initial position received
-    positionCallback({
-      viewportRect: layoutRectLtwh(0, 0, 100, 100),
-      targetRect: layoutRectLtwh(10, 20, 50, 50),
+    beforeEach(() => {
     });
 
-    expect(onScrollCallback).to.not.be.called;
-    expect(onResizeCallback).to.be.calledOnce;
-    expect(measureSpy).to.be.calledOnce;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-    sandbox.reset();
-
-    // Scroll, viewport position changed
-    positionCallback({
-      viewportRect: layoutRectLtwh(0, 10, 100, 100),
-      targetRect: layoutRectLtwh(10, 10, 50, 50),
+    it('cross domain', () => {
+      sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
+      stubIframeClientMakeRequest(
+          'send-positions',
+          'position',
+          (req, res, cb) => { positionCallback = cb; },
+          /* opt_sync */ true);
+      binding.connect();
+      testPositionCallback();
     });
 
-    expect(onScrollCallback).to.be.calledOnce;
-    expect(onResizeCallback).to.not.be.called;
-    expect(measureSpy).to.not.be.called;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-    sandbox.reset();
-
-    // Resize, viewport size changed
-    positionCallback({
-      viewportRect: layoutRectLtwh(0, 10, 200, 100),
-      targetRect: layoutRectLtwh(10, 10, 50, 50),
-    });
-
-    expect(onScrollCallback).to.not.be.called;
-    expect(onResizeCallback).to.be.calledOnce;
-    expect(measureSpy).to.not.be.called;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-    sandbox.reset();
-
-    // DOM change, target position changed
-    sandbox.restore();
-    sandbox.stub(
-        Services.resourcesForDoc(win.document), 'get').returns([element]);
-    positionCallback({
-      viewportRect: layoutRectLtwh(0, 10, 200, 100),
-      targetRect: layoutRectLtwh(20, 10, 50, 50),
-    });
-
-    expect(onScrollCallback).to.not.be.called;
-    expect(onResizeCallback).to.not.be.called;
-    expect(measureSpy).to.be.calledOnce;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
-  });
-
-  it('should work for size, layoutRect and position observed - friendly',
-      () => {
-        sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
-
-        onScrollCallback = sandbox.spy();
-        onResizeCallback = sandbox.spy();
-        let viewportRect = layoutRectLtwh(0, 0, 100, 100);
-        let targetRect = layoutRectLtwh(10, 20, 50, 50);
-        const getViewportRectStub = sandbox.stub(binding, 'getViewportRect_');
-        win.frameElement.getBoundingClientRect = () => targetRect;
-        getViewportRectStub.returns(viewportRect);
-
-        positionCallback = data => {
-          return new Promise(resolve => {
-            setTimeout(() => {
-              ({viewportRect, targetRect} = data);
-              getViewportRectStub.returns(viewportRect);
-              resolve();
-            }, 100);
+    it('same domain', () => {
+      sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+      sandbox.stub(PositionObserver.prototype, 'observe')
+          .callsFake((e, callback) => {
+            topWindowObservable.add(() => callback({viewportRect, targetRect}));
           });
-        };
 
-        const scrollTop = data => {
-          return positionCallback(data).then(() => {
-            topWindowScrollObservable.fire();
-          });
-        };
+      positionCallback = data => {
+        viewportRect = data.viewportRect;
+        targetRect = data.targetRect;
+        topWindowObservable.fire();
+      };
 
-        const resizeTop = data => {
-          return positionCallback(data).then(() => {
-            topWindowResizeObservable.fire();
-          });
-        };
-
-        binding.onScroll(onScrollCallback);
-        binding.onResize(onResizeCallback);
-
-        // Initial state
-        expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
-        expect(binding.getLayoutRect(element))
-            .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
-
-        // We connect later because the friendly frame case will immediately
-        // fire without waiting for scroll event (or a postMessage like above)
-        return binding.setUpNativeListener().then(() => {
-        // Initial position received from above
-          expect(onScrollCallback).to.not.be.called;
-          expect(onResizeCallback).to.be.calledOnce;
-          expect(measureSpy).to.be.calledOnce;
-          expect(binding.getLayoutRect(element))
-              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-          sandbox.reset();
-        }).then(() => {
-        // Scroll, viewport position changed
-          return scrollTop({
-            viewportRect: layoutRectLtwh(0, 10, 100, 100),
-            targetRect: layoutRectLtwh(10, 10, 50, 50),
-          });
-        }).then(() => {
-          expect(onScrollCallback).to.be.calledOnce;
-          expect(onResizeCallback).to.not.be.called;
-          expect(measureSpy).to.not.be.called;
-          expect(binding.getLayoutRect(element))
-              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-          sandbox.reset();
-        }).then(() => {
-        // Resize, viewport size changed
-          return resizeTop({
-            viewportRect: layoutRectLtwh(0, 10, 200, 100),
-            targetRect: layoutRectLtwh(10, 10, 50, 50),
-          });
-        }).then(() => {
-          expect(onScrollCallback).to.not.be.called;
-          expect(onResizeCallback).to.be.calledOnce;
-          expect(measureSpy).to.not.be.called;
-          expect(binding.getLayoutRect(element))
-              .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
-          // TODO: test for DOM change when the native viewport (and/or the host
-          // observer) can handle it
-        });
+      return binding.setUpNativeListener().then(() => {
+        testPositionCallback();
       });
 
-  it('should disconnect events if listener setup', () => {
-    sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
-    const viewportRect = layoutRectLtwh(0, 0, 100, 100);
-    sandbox.stub(binding, 'getViewportRect_').returns(viewportRect);
-    return binding.setUpNativeListener().then(() => {
-      expect(topWindowScrollObservable.getHandlerCount()).to.equal(1);
-      expect(topWindowResizeObservable.getHandlerCount()).to.equal(1);
-      binding.disconnect();
-      expect(topWindowScrollObservable.getHandlerCount()).to.equal(0);
-      expect(topWindowResizeObservable.getHandlerCount()).to.equal(0);
     });
-  });
 
+    function testPositionCallback() {
+      onScrollCallback = sandbox.spy();
+      onResizeCallback = sandbox.spy();
+      binding.onScroll(onScrollCallback);
+      binding.onResize(onResizeCallback);
+
+      // Initial state
+      expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
+      expect(binding.getLayoutRect(element))
+          .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
+
+      // Initial position received
+      positionCallback({
+        viewportRect: layoutRectLtwh(0, 0, 100, 100),
+        targetRect: layoutRectLtwh(10, 20, 50, 50),
+      });
+
+      expect(onScrollCallback).to.not.be.called;
+      expect(onResizeCallback).to.be.calledOnce;
+      expect(measureSpy).to.be.calledOnce;
+      expect(binding.getLayoutRect(element))
+          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      sandbox.reset();
+
+      // Scroll, viewport position changed
+      positionCallback({
+        viewportRect: layoutRectLtwh(0, 10, 100, 100),
+        targetRect: layoutRectLtwh(10, 10, 50, 50),
+      });
+
+      expect(onScrollCallback).to.be.calledOnce;
+      expect(onResizeCallback).to.not.be.called;
+      expect(measureSpy).to.not.be.called;
+      expect(binding.getLayoutRect(element))
+          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      sandbox.reset();
+
+      // Resize, viewport size changed
+      positionCallback({
+        viewportRect: layoutRectLtwh(0, 10, 200, 100),
+        targetRect: layoutRectLtwh(10, 10, 50, 50),
+      });
+
+      expect(onScrollCallback).to.not.be.called;
+      expect(onResizeCallback).to.be.calledOnce;
+      expect(measureSpy).to.not.be.called;
+      expect(binding.getLayoutRect(element))
+          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      sandbox.reset();
+
+      // DOM change, target position changed
+      sandbox.restore();
+      sandbox.stub(
+          Services.resourcesForDoc(win.document), 'get').returns([element]);
+      positionCallback({
+        viewportRect: layoutRectLtwh(0, 10, 200, 100),
+        targetRect: layoutRectLtwh(20, 10, 50, 50),
+      });
+
+      expect(onScrollCallback).to.not.be.called;
+      expect(onResizeCallback).to.not.be.called;
+      expect(measureSpy).to.be.calledOnce;
+      expect(binding.getLayoutRect(element))
+          .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+    }
+  });
 
   it('should center content, resize and remeasure on overlay mode', () => {
     const allResourcesMock = Array(5).fill(undefined).map(() => ({
