@@ -16,7 +16,7 @@
 
 import {
   PositionObserver,
-  getTargetRect
+  getTargetRect,
 } from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
@@ -88,7 +88,6 @@ describes.realWin('inabox-host:position-observer', {}, env => {
   });
 
   it('getTargetRect should work within nested iframes', () => {
-    window.top.console.log('omega');
     const iframe1 = win.document.createElement('iframe');
     const iframe2 = win.document.createElement('iframe');
     const iframe3 = win.document.createElement('iframe');
