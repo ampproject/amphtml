@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.42 */
+/** Version: 0.1.22.43 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -437,7 +437,7 @@ function isNodeConnected(node) {
   }
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
-  return root && root.contains(node) || false;
+  return (root && root.contains(node)) || false;
 }
 
 
@@ -1524,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.20';
+    this.version = '1.21';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -4335,7 +4335,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.42',
+    '_client': 'SwG 0.1.22.43',
   });
 }
 
@@ -7455,11 +7455,8 @@ class LinkSaveFlow {
     /** @private {?Promise<*>} */
     this.requestPromise_ = null;
 
-    /** @private {?Promise<!Object>} */
-    this.linkedPromise_ = null;
-
-    /** @private {?Promise<boolean>} */
-    this.confirmPromise_ = null;
+    /** @private {?Promise} */
+    this.openPromise_ = null;
 
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
@@ -7474,26 +7471,41 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise}
-   * @package Visible for testing.
-   */
-  whenLinked() {
-    return this.linkedPromise_;
-  }
-
-  /**
-   * @return {?Promise<boolean>}
-   * @package Visible for testing.
-   */
-  whenConfirmed() {
-    return this.confirmPromise_;
-  }
-
-  /**
    * @private
    */
   complete_() {
     this.dialogManager_.completeView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {!Object} result
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  handleLinkSaveResponse_(result) {
+    // This flow is complete
+    this.complete_();
+    let startPromise;
+    let linkConfirm = null;
+    if (result['linked']) {
+      // When linking succeeds, start link confirmation flow
+      this.dialogManager_.popupClosed();
+      this.deps_.callbacks().triggerFlowStarted(
+          SubscriptionFlows.LINK_ACCOUNT);
+      linkConfirm = new LinkCompleteFlow(this.deps_, result);
+      startPromise = linkConfirm.start();
+    } else {
+      startPromise = Promise.reject(
+          createCancelError(this.win_, 'not linked'));
+    }
+    const completePromise = startPromise.then(() => {
+      this.deps_.callbacks().triggerLinkProgress();
+      return linkConfirm.whenComplete();
+    });
+
+    return completePromise.then(() => {
+      return true;
+    });
   }
 
   /**
@@ -7508,7 +7520,6 @@ class LinkSaveFlow {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'isClosable': true,
     };
-
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
@@ -7543,45 +7554,28 @@ class LinkSaveFlow {
       }
     });
 
-    this.linkedPromise_ = this.activityIframeView_.port().then(port => {
+    this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_,
+        /* hidden */ true);
+    /** {!Promise<boolean>} */
+    return this.activityIframeView_.port().then(port => {
       return acceptPortResultData(
           port,
           feOrigin(),
           /* requireOriginVerified */ true,
           /* requireSecureChannel */ true);
-    });
-
-    let linkConfirm = null;
-    this.confirmPromise_ = this.linkedPromise_.then(result => {
-      // This flow is complete
-      this.complete_();
-      if (result['linked']) {
-        this.dialogManager_.popupClosed();
-        this.deps_.callbacks().triggerFlowStarted(
-            SubscriptionFlows.LINK_ACCOUNT);
-        linkConfirm = new LinkCompleteFlow(this.deps_, result);
-        return linkConfirm.start();
-      }
-      return Promise.reject(createCancelError(this.win_, 'not linked'));
-    }).then(() => {
-      this.deps_.callbacks().triggerLinkProgress();
-      return linkConfirm.whenComplete();
-    }).then(() => {
-      return true;
+    }).then(result => {
+      return this.handleLinkSaveResponse_(result);
     }).catch(reason => {
+      // In case this flow wasn't complete, complete it here
+      this.complete_();
+      // Handle cancellation from user, link confirm start or completion here
       if (isCancelError(reason)) {
         this.deps_.callbacks().triggerFlowCanceled(
             SubscriptionFlows.LINK_ACCOUNT);
         return false;
       }
-      // In case this flow wasn't complete, complete it here
-      this.complete_();
       throw reason;
     });
-
-    /** {!Promise<boolean>} */
-    return this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true);
   }
 }
 
