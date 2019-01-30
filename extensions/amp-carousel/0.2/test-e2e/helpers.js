@@ -19,13 +19,6 @@ const SLOTTED_CLASS = 'i-amphtml-carousel-slotted';
 const SPACER_CLASS = 'i-amphtml-carousel-spacer';
 const SCROLLER_SELECTOR = `${TAG_NAME} .i-amphtml-carousel-scroll`;
 
-// TODO(sparhami) Remove once part of the test framework.
-export async function enableExperiments(controller) {
-  await controller.navigateTo(
-      'http://localhost:8000/test/manual/amp-carousel-0-2/enable-experiment.html');
-  await controller.findElement('.msg-div');
-}
-
 async function waitForImgLoad(controller, el) {
   await expect(controller.getElementProperty(el, 'naturalWidth'))
       .to.be.greaterThan(0);
