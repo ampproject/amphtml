@@ -18,8 +18,9 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 
-import {ENDPOINTS, SMARTLINKS_REWRITER_ID} from './constants';
-import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
+import {ENDPOINTS, EVENTS} from './constants';
+import {LinkRewriterManager} from
+  '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
@@ -37,20 +38,20 @@ export class AmpSmartlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = null;
 
-    /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    /** @private {?../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
-    /** @private {?./link-rewriter/link-rewriter.LinkRewriter} */
+    /** @private {?../../amp-skimlinks/0.1/link-rewriter/link-rewriter.LinkRewriter} */
     this.smartLinkRewriter_ = null;
 
-    /** @private {?Object} */
+    /**
+     * This will store config attributes from the extension options and an API
+     * request. The attributes from options are:
+     *  exclusiveLinks, linkAttribute, linkSelector, linkmateEnabled, nrtvSlug
+     * The attributes from the API are:
+     *  linkmateExpected, publisherID
+     * @private {?Object} */
     this.linkmateOptions_ = null;
-
-    /** @private {?function({JsonObject})} */
-    this.fetchLinkmateConfig_ = null;
-
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
 
     /** @private {?./linkmate.Linkmate} */
     this.linkmate_ = null;
@@ -61,21 +62,20 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
-
-    this.viewer_ = Services.viewerForDoc(this.ampDoc_);
+    this.xhr_ = Services.xhrFor(this.ampDoc_.win);
+    const viewer = Services.viewerForDoc(this.ampDoc_);
 
     this.linkmateOptions_ = getConfigOptions(this.element);
-    this.fetchLinkmateConfig_ = this.getLinkmateOptions_;
-
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
 
     return this.ampDoc_.whenBodyAvailable()
-        .then(() => this.viewer_.getReferrerUrl())
+        .then(() => viewer.getReferrerUrl())
         .then(referrer => {
           this.referrer_ = referrer;
-          this.runSmartlinks_();
+          viewer.whenFirstVisible().then(() => {
+            this.runSmartlinks_();
+          });
         });
   }
 
@@ -84,7 +84,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   runSmartlinks_() {
-    this.fetchLinkmateConfig_().then(config => {
+    this.getLinkmateOptions_().then(config => {
       this.linkmateOptions_.linkmateExpected = config['linkmate_enabled'];
       this.linkmateOptions_.publisherID = config['publisher_id'];
 
@@ -94,21 +94,23 @@ export class AmpSmartlinks extends AMP.BaseElement {
           this.xhr_,
           this.linkmateOptions_
       );
+      this.smartLinkRewriter_ = this.initLinkRewriter_();
+
+      // If the config specified linkmate to run and our API is expecting
+      // linkmate to run
+      if (this.linkmateOptions_.linkmateEnabled &&
+          this.linkmateOptions_.linkmateExpected) {
+        this.smartLinkRewriter_.getAnchorReplacementList();
+      }
     });
-
-    this.smartLinkRewriter_ = this.initLinkRewriter_();
-
-    // We have a valid linkmate class, the config specified linkmate to run
-    // and our API is expecting linkmate to run
-    if (this.linkmate_ && this.linkmateOptions_.linkmateEnabled &&
-      this.linkmateOptions_.linkmateExpected) {
-      this.smartLinkRewriter_.getAnchorReplacementList();
-    }
   }
 
   /**
    * API call to retrieve the Narrativ config for this extension.
-   * @return {?Promise}
+   * API response will be a list containing nested json values. For the purpose
+   * of this extension there will only ever be one value in the list:
+   *  {amp_config: {linkmate_enabled: <!boolean>, publisher_id: <!number>}}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   getLinkmateOptions_() {
@@ -143,14 +145,14 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
   /**
    * Initialize and register a Narrativ LinkRewriter instance
-   * @return {!./link-rewriter/link-rewriter.LinkRewriter}
+   * @return {!../../amp-skimlinks/0.1/link-rewriter/link-rewriter.LinkRewriter}
    * @private
    */
   initLinkRewriter_() {
     const options = {linkSelector: this.linkmateOptions_.linkSelector};
 
     return this.linkRewriterService_.registerLinkRewriter(
-        SMARTLINKS_REWRITER_ID,
+        EVENTS.SMARTLINKS_REWRITER_ID,
         anchorList => {
           return this.linkmate_.runLinkmate(anchorList);
         },
@@ -164,7 +166,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ ({
+    return /** @type {!JsonObject} */ dict({
       'events': [{'is_amp': true}],
       'organization_id': this.linkmateOptions_.publisherID,
       'organization_type': 'publisher',

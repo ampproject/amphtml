@@ -18,7 +18,8 @@ import {deepEquals} from '../../../src/json';
 import {dict} from '../../../src/utils/object';
 
 import {ENDPOINTS} from './constants';
-import {TwoStepsResponse} from './link-rewriter/two-steps-response';
+import {TwoStepsResponse} from
+  '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 import {getData} from '../../../src/event-helper';
 
 
@@ -58,7 +59,7 @@ export class Linkmate {
    * Callback used by LinkRewriter. Whenever there is a change in the anchors
    * on the page we want make a new API call.
    * @param {!Array<!HTMLElement>} anchorList
-   * @return {!./link-rewriter/two-steps-response.TwoStepsResponse}
+   * @return {!../../amp-skimlinks/0.1/link-rewriter/two-steps-response.TwoStepsResponse}
    * @public
    */
   runLinkmate(anchorList) {
@@ -148,20 +149,20 @@ export class Linkmate {
 
   /**
    * This is just article information used in the edit part of Linkmate payload.
-   * @return {!Object}
+   * @return {!JsonObject}
    * @private
    */
   getEditInfo_() {
-    return {
+    return dict({
       'name': this.rootNode_.title || null,
       'url': this.ampDoc_.getUrl(),
-    };
+    });
   }
 
   /**
    * The API response returns unique links. Map those unique links to as many
    * urls in the anchorList as possible. Set the replacement url as a shop-link.
-   * @return {!./link-rewriter/link-rewriter.AnchorReplacementList}
+   * @return {!../../amp-skimlinks/0.1/link-rewriter/link-rewriter.AnchorReplacementList}
    * @public
    */
   mapLinks_() {

@@ -41,7 +41,7 @@ function getNrtvAccountName_(element) {
   userAssert(nrtvSlug,
       'amp-smartlinks: nrtv-account-name is a required field');
 
-  return nrtvSlug ? nrtvSlug.toLowerCase() : null;
+  return nrtvSlug.toLowerCase();
 }
 
 /**

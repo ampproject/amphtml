@@ -17,8 +17,9 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
-import {SMARTLINKS_REWRITER_ID} from '../constants';
+import {EVENTS} from '../constants';
+import {LinkRewriterManager} from
+  '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Services} from '../../../../src/services';
 
 const helpersFactory = env => {
@@ -123,6 +124,8 @@ describes.fakeWin('amp-smartlinks',
       });
 
       describe('runSmartlinks_', () => {
+        let fakeViewer;
+
         beforeEach(() => {
           const options = {
             'nrtv-account-name': 'thisisnotapublisher',
@@ -131,18 +134,21 @@ describes.fakeWin('amp-smartlinks',
           };
 
           ampSmartlinks = helpers.createAmpSmartlinks(options);
-        });
+          fakeViewer = Services.viewerForDoc(env.ampdoc);
 
-        it('Should call postPageImpression_', () => {
           env.sandbox
               .stub(ampSmartlinks, 'getLinkmateOptions_')
               .returns(Promise.resolve({'publisher_id': 999}));
-
-          env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
           env.sandbox.stub(xhr, 'fetchJson');
+        });
+
+        it('Should call postPageImpression_', () => {
+          env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
 
           return ampSmartlinks.buildCallback().then(() => {
-            expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.true;
+            fakeViewer.whenFirstVisible().then(() => {
+              expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.true;
+            });
           });
         });
 
@@ -150,7 +156,9 @@ describes.fakeWin('amp-smartlinks',
           env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
           return ampSmartlinks.buildCallback().then(() => {
-            expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.true;
+            fakeViewer.whenFirstVisible().then(() => {
+              expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.true;
+            });
           });
         });
       });
@@ -230,7 +238,7 @@ describes.fakeWin('amp-smartlinks',
 
           expect(ampSmartlinks.linkRewriterService_.registerLinkRewriter
               .calledOnce).to.be.true;
-          expect(args[0]).to.equal(SMARTLINKS_REWRITER_ID);
+          expect(args[0]).to.equal(EVENTS.SMARTLINKS_REWRITER_ID);
           expect(args[1]).to.be.a('function');
           expect(args[2].linkSelector).to.equal('a');
         });
