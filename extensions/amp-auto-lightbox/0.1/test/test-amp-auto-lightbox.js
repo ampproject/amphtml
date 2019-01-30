@@ -75,10 +75,10 @@ describes.realWin(TAG, {
   const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
 
-  const product = (a, b, callback) => a.forEach(itemA =>
+  const iterProduct = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
 
-  const squaredCompare = (set, callback) => product(set, set, (a, b) => {
+  const squaredCompare = (set, callback) => iterProduct(set, set, (a, b) => {
     if (a != b) {
       callback(a, b);
     }
@@ -260,7 +260,7 @@ describes.realWin(TAG, {
       const minDim = Math.sqrt(minArea);
 
       const axisRange = [minDim + 1, minDim + 10, minDim + 100];
-      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
         expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -279,7 +279,7 @@ describes.realWin(TAG, {
       const minDim = Math.sqrt(minArea);
 
       const axisRange = [minDim, minDim - 10, minDim - 100];
-      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
         expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -298,7 +298,7 @@ describes.realWin(TAG, {
       const naturalHeight = 100;
 
       const axisRange = [minDim, minDim + 10, minDim + 100];
-      product(axisRange, axisRange, (renderWidth, renderHeight) => {
+      iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
         expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -313,7 +313,7 @@ describes.realWin(TAG, {
       const minDim = Math.sqrt(minArea);
 
       const axisRange = [minDim - 1, minDim - 10, minDim - 100];
-      product(axisRange, axisRange, (renderWidth, renderHeight) => {
+      iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
         expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -361,7 +361,7 @@ describes.realWin(TAG, {
       const renderHeight = 100;
 
       const axisRange = [renderWidth, renderWidth - 10, renderWidth - 100];
-      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
         expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
