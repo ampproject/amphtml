@@ -101,7 +101,7 @@ function getConfig() {
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
-        'SL_Edge_17',
+        //'SL_Edge_17',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
