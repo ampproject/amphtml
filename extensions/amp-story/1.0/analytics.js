@@ -28,6 +28,14 @@ const Events = {
   STORY_UNMUTED: 'story-audio-unmuted',
 };
 
+/** @enum {string} */
+export const AdvancementMode = {
+  GO_TO_PAGE: 'goToPageAction',
+  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
+  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
+  MANUAL_ADVANCE: 'manualAdvance',
+  ADVANCE_TO_ADS: 'manualAdvanceFromAd',
+};
 
 /**
  * Intermediate handler for amp-story specific analytics.
@@ -79,8 +87,7 @@ export class AmpStoryAnalytics {
     variablesPromise.then(
         variables => {
           triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!JsonObject} */ (variables));
-        },
+              /** @type {!JsonObject} */ (variables)); },
         reason => {
           dev().error('AMP-STORY', 'Could not get analytics variables', reason);
         });

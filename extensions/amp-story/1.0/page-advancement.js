@@ -18,6 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
+import {AdvancementMode} from './analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -181,7 +182,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
     const supportedAdvancementModes = [
       ManualAdvancement.fromElement(win, rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
+      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
 
@@ -495,6 +496,9 @@ class ManualAdvancement extends AdvancementConfig {
 
     event.stopPropagation();
 
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     const pageRect = this.element_./*OK*/getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
@@ -552,8 +556,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
+   * @param {!Element} element
    */
-  constructor(win, delayMs) {
+  constructor(win, delayMs, element) {
     super();
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
@@ -570,6 +575,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     /** @private {number|string|null} */
     this.timeoutId_ = null;
+
+    if (element.ownerDocument.defaultView) {
+      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+      this.storeService_ =
+        getStoreService(element.ownerDocument.defaultView);
+    }
   }
 
   /**
@@ -583,6 +594,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_TIME);
 
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
@@ -636,11 +650,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
+   * @param {!Element} rootEl
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     if (!autoAdvanceStr) {
       return null;
     }
@@ -650,7 +665,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, Number(delayMs));
+    return new TimeBasedAdvancement(win, Number(delayMs), rootEl);
   }
 }
 
@@ -691,6 +706,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
+
+    if (element.ownerDocument.defaultView) {
+      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+      this.storeService_ =
+        getStoreService(element.ownerDocument.defaultView);
+    }
   }
 
   /**
@@ -731,6 +752,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
         .then(() => this.startWhenBuilt_());
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_MEDIA);
   }
 
   /** @private */
