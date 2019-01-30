@@ -24,7 +24,8 @@ export function factory(Inputmask) {
   // https://baymard.com/checkout-usability/credit-card-patterns
   Inputmask.extendAliases({
     'payment-card': {
-      mask: function(opts) {
+      'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
+      'mask': function(opts) {
         opts.definitions = {
           'x': {
             'validator': function(chrs, buffer) {
@@ -45,7 +46,12 @@ export function factory(Inputmask) {
             'cardinality': 2,
           },
         };
-        return ['x99 9999 9999 9999', 'y99 999999 99999'];
+        return [
+          'y99 999999 99999',
+          'x99 9999 9999 9999',
+          '9999 999999 99999',
+          '9999 9999 9999 9999',
+        ];
       },
     },
   });
