@@ -78,12 +78,11 @@ describes.realWin(TAG, {
   const product = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
 
-  const squaredCompare = (set, callback, key = item => item) =>
-    product(set, set, (a, b) => {
-      if (key(a) != key(b)) {
-        callback(a, b);
-      }
-    });
+  const squaredCompare = (set, callback) => product(set, set, (a, b) => {
+    if (a != b) {
+      callback(a, b);
+    }
+  });
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
@@ -455,7 +454,7 @@ describes.realWin(TAG, {
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
             .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
-      }, ({element}) => element);
+      });
     });
 
   });
@@ -562,9 +561,8 @@ describes.realWin(TAG, {
 
     it('sets unique group for each element', function* () {
       const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
-      const applyPromises = candidates.map(c => apply(env.ampdoc, c));
 
-      yield Promise.all(applyPromises);
+      yield Promise.all(candidates.map(c => apply(env.ampdoc, c)));
 
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
