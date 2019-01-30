@@ -20,7 +20,6 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
-import {installVariableService} from '../variables';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
@@ -748,10 +747,10 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         macros);
 
     sandbox.stub(Services, 'urlReplacementsForDoc')
-      .returns({
-        'expandUrlAsync': url => Promise.resolve(url),
-        'expandStringAsync': expandStringStub,
-      });
+        .returns({
+          'expandUrlAsync': url => Promise.resolve(url),
+          'expandStringAsync': expandStringStub,
+        });
 
     return stubService(sandbox, win, 'xhr', 'fetchJson');
   }
