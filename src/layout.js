@@ -460,7 +460,8 @@ export function applyStaticLayout(element) {
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer">
-        <img class="i-amphtml-intrinsic-sizer" />
+        <img alt="" role="presentation" aria-hidden="true" 
+             class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute('src',
