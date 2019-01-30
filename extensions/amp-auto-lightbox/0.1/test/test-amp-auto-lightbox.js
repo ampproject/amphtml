@@ -158,11 +158,14 @@ describes.realWin(TAG, {
             html`<div><div><amp-img src="carnitas.png"></amp-img></div></div>`,
           ].forEach(unwrapped => {
             const scenario = maybeWrap(maybeMutate(unwrapped));
+            const candidate = ampImgFromTree(scenario);
+
             env.win.document.body.appendChild(scenario);
-            expect(
-                Criteria.meetsTreeShapeCriteria(ampImgFromTree(scenario)),
-                scenario.outerHTML)
-                .to.equal(shouldAccept);
+
+            expect(candidate, 'scenario candidate').to.be.ok;
+
+            expect(Criteria.meetsTreeShapeCriteria(candidate),
+                scenario.outerHTML).to.equal(shouldAccept);
           });
         });
       });
