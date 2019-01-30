@@ -56,23 +56,17 @@ describes.realWin(TAG, {
 
   const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
 
-  const ampImgFromTree = el =>
-    el.tagName == 'AMP-IMG' ? el : el.querySelector('amp-img');
+  const firstElementLeaf = el =>
+    el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
 
-  const stubAllCriteriaMet = () =>
-    env.sandbox.stub(Criteria, 'meetsAll');
+  const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
+  const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
-  function mockAllCriteriaMet(isMet) {
-    stubAllCriteriaMet().returns(isMet);
-  }
-
-  function mockCandidates(candidates) {
+  const mockCandidates = candidates =>
     env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
-  }
 
-  function mockSchemaType(type) {
+  const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
-  }
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
@@ -161,11 +155,12 @@ describes.realWin(TAG, {
             html`<div><div><amp-img src="carnitas.png"></amp-img></div></div>`,
           ].forEach(unwrapped => {
             const scenario = maybeWrap(maybeMutate(unwrapped));
-            const candidate = ampImgFromTree(scenario);
+            const candidate = firstElementLeaf(scenario);
 
             env.win.document.body.appendChild(scenario);
 
-            expect(candidate, 'scenario candidate').to.be.ok;
+            expect(candidate).to.be.ok;
+            expect(candidate.tagName).to.equal('AMP-IMG');
 
             expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
