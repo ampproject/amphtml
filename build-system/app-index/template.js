@@ -35,7 +35,7 @@ const examplesLinkRegex = /^\/examples\//;
 
 const fileListEndpoint = query =>
   fileListEndpointPrefix + '?' +
-  Object.keys(query).map(k => `${k}=${query[k]}`);
+  Object.keys(query).map(k => `${k}=${query[k]}`).join('&');
 
 
 const headerLinks = [
