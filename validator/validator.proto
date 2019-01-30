@@ -230,10 +230,15 @@ message CssSpec {
   repeated string declaration = 7;
 }
 
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
+  // If false, bytes inside URLs are not included in the byte calculation for
+  // max_bytes. This is used for handling signed exchange transformations which
+  // can potentially take the number of bytes over the 50,000 byte limit due
+  // to rewriting URLs to point at an AMP Cache.
+  optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string max_bytes_spec_url = 2;
@@ -255,6 +260,9 @@ message CdataSpec {
 
   // If any of these regexes match, then this cdata spec does not validate.
   repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Specifies which AMP Layouts are supported by a given element.
