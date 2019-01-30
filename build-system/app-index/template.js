@@ -23,6 +23,7 @@ const boilerPlate = require('./boilerplate');
 const documentModes = require('./document-modes');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
+const {AmpState, addRequiredExtensionsToHead} = require('./amphtml-helpers');
 const {KeyValueOptions} = require('./form');
 const {many} = require('./html-helpers');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
@@ -80,25 +81,6 @@ const headerLinks = [
     'href': 'https://percy.io/ampproject/amphtml/',
   },
 ];
-
-
-const requiredExtensions = [
-  // Keep alphabetically sorted.
-  {name: 'amp-bind'},
-  {name: 'amp-form'},
-  {name: 'amp-lightbox'},
-  {name: 'amp-list'},
-  {name: 'amp-mustache', version: '0.2', isTemplate: true},
-  {name: 'amp-selector'},
-];
-
-
-const ExtensionScript = ({name, version, isTemplate}) =>
-  html`<script
-    async
-    ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
-    src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
-  </script>`;
 
 
 const HeaderLink = ({name, href, divider}) => html`
@@ -193,15 +175,6 @@ const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
     basepath) +
   name;
 
-
-const AmpState = (id, state) => html`
-  <amp-state id="${id}">
-    <script type="application/json">
-      ${JSON.stringify(state)}
-    </script>
-  </amp-state>`;
-
-
 const FileList = ({basepath, fileSet, selectModePrefix}) => many([
   AmpState(fileListEndpointStateId, {
     [fileListEndpointStateKey]: fileListEndpoint({path: basepath}),
@@ -249,7 +222,7 @@ const renderTemplate = ({
   css,
   isMainPage,
   fileSet,
-  serveMode}) => html`
+  serveMode}) => addRequiredExtensionsToHead(html`
 
   <!doctype html>
   <html ⚡>
@@ -264,7 +237,6 @@ const renderTemplate = ({
       content="width=device-width,minimum-scale=1,initial-scale=1">
     ${boilerPlate}
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    ${many(requiredExtensions, ExtensionScript)}
   </head>
   <body>
     <div class="wrap">
@@ -302,7 +274,7 @@ const renderTemplate = ({
     </div>
     ${SettingsModal({serveMode})}
   </body>
-  </html>`;
+  </html>`);
 
 
 module.exports = {renderTemplate};
