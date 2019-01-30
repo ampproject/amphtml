@@ -174,7 +174,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       iframe1.getBoundingClientRect =
           () => {return layoutRectLtwh(5, 5, 20, 20);};
       // pretend that iframe1 is the direct child of the top level window
-      iframe1.contentWindow.parent = iframe1.contentWindow.parent.top;
+      iframe1.contentWindow.parent = iframe1.contentWindow.top;
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',

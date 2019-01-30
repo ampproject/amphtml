@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {PositionObserver} from '../../../ads/inabox/position-observer';
+import {
+  PositionObserver,
+  getTargetRect
+} from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
@@ -82,5 +85,24 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       expect(callbackSpy12).to.be.calledWith(position1);
       expect(callbackSpy21).to.be.calledWith(position2);
     });
+  });
+
+  it('getTargetRect should work within nested iframes', () => {
+    window.top.console.log('omega');
+    const iframe1 = win.document.createElement('iframe');
+    const iframe2 = win.document.createElement('iframe');
+    const iframe3 = win.document.createElement('iframe');
+    win.document.body.appendChild(iframe1);
+    iframe1.contentDocument.body.appendChild(iframe2);
+    iframe2.contentDocument.body.appendChild(iframe3);
+    iframe1.name = '1';
+    iframe2.name = '2';
+    iframe3.name = '3';
+    iframe1.getBoundingClientRect = () => layoutRectLtwh(1, 2, 70, 80);
+    iframe2.getBoundingClientRect = () => layoutRectLtwh(5, 6, 30, 40);
+    iframe3.getBoundingClientRect = () => layoutRectLtwh(7, 8, 10, 20);
+    iframe1.contentWindow.parent = iframe1.contentWindow.top;
+    expect(getTargetRect(target1, iframe3.contentWindow))
+        .to.deep.equal(layoutRectLtwh(14, 18, 30, 40));
   });
 });

@@ -161,7 +161,7 @@ export function getTargetRect(element, parentWin) {
     for (let j = 0, tempWin = parentWin;
       j < 10 && tempWin != tempWin.top; j++, tempWin = tempWin.parent) {
       const parentFrameRect = layoutRectFromDomRect(
-          parentWin.frameElement./*OK*/getBoundingClientRect());
+          tempWin.frameElement./*OK*/getBoundingClientRect());
       targetRect = moveLayoutRect(targetRect,
           parentFrameRect.left, parentFrameRect.top);
     }
