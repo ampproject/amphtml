@@ -1892,6 +1892,11 @@ class CdataMatcher {
       }
     }
 
+    // Record <style amp-custom> byte size
+    if (context.getTagStack().isStyleAmpCustomChild()) {
+      context.addStyleAmpCustomByteSize(byteLength(cdata));
+    }
+
     // The mandatory_cdata, cdata_regex, and css_spec fields are treated
     // like a oneof, but we're not using oneof because it's a feature
     // that was added after protobuf 2.5.0 (which our open-source
@@ -5425,10 +5430,6 @@ amp.validator.ValidationHandler =
    * @override
    */
       cdata(text) {
-        // Record <style amp-custom> byte size
-        if (this.context_.getTagStack().isStyleAmpCustomChild()) {
-          this.context_.addStyleAmpCustomByteSize(byteLength(text));
-        }
         // Validate that JSON can be parsed.
         if (this.context_.getTagStack().isScriptTypeJsonChild()) {
           try {
