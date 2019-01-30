@@ -251,6 +251,12 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
+
+      /**
+       * Get our window location.
+       * In localDev mode, this will be this.win_.location
+       * In test mode, this will be this.win_.testLocation
+       */
       let winLocation = this.win_.location;
       if (this.win_.testLocation) {
         winLocation = this.win_.testLocation;

@@ -131,7 +131,7 @@ if (!global.AMP_TESTING) {
  * out the recaptcha api.
  */
 app.get(
-    '/dist.3p/current/recaptcha.*html',
+    '/dist.3p/current*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
 app.get(
