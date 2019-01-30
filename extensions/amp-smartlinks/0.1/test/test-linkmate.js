@@ -18,7 +18,8 @@ import * as DocumentReady from '../../../../src/document-ready';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';
-import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
+import {TwoStepsResponse} from
+  '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
 const helpersFactory = env => {
   const {win} = env;
