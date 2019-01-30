@@ -117,12 +117,16 @@ var clientInfo;
 var cmpId;
 var consentStr;
 var consentState;
-if (window && window.name && typeof window.name !== 'string') {
-  clientInfo = JSON.parse(window.name);
-  cmpId = clientInfo['clientConfig']['CMP_id'];
-  consentStr = clientInfo['consentString'];
-  consentState = clientInfo['consentState'];
-  // TODO: convert consentState to readable value
+if (window && window.name) {
+  try {
+    clientInfo = JSON.parse(window.name);
+    cmpId = clientInfo['clientConfig']['CMP_id'];
+    consentStr = clientInfo['consentString'];
+    consentState = clientInfo['consentState'];
+    // TODO: convert consentState to readable value
+  } catch(e) {
+    console.log('Caught error when parsing window.name,', e)
+  }
 }
 
 var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` +
