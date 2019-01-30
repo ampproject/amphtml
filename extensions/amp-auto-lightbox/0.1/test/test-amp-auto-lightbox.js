@@ -134,10 +134,10 @@ describes.realWin(TAG, {
   describe('meetsTreeShapeCriteria', () => {
 
     function runScenarios(verb, scenarios, expectation) {
-      scenarios.forEach(({kind, mutate, createWrapper}) => {
+      scenarios.forEach(({kind, mutate, wrapWith}) => {
         function maybeWrap(root) {
-          if (createWrapper) {
-            const wrapper = createWrapper();
+          if (wrapWith) {
+            const wrapper = wrapWith();
             wrapper.appendChild(root);
             return wrapper;
           }
@@ -192,23 +192,23 @@ describes.realWin(TAG, {
       {
         kind: 'items inside an amp-selector',
         mutate: el => el.setAttribute('option', ''),
-        createWrapper: () => html`<amp-selector></amp-selector>`,
+        wrapWith: () => html`<amp-selector></amp-selector>`,
       },
       {
         kind: 'items inside a button',
-        createWrapper: () => html`<button></button>`,
+        wrapWith: () => html`<button></button>`,
       },
       {
         kind: 'items inside amp-script',
-        createWrapper: () => html`<amp-script></amp-script>`,
+        wrapWith: () => html`<amp-script></amp-script>`,
       },
       {
         kind: 'items inside amp-story',
-        createWrapper: () => html`<amp-story></amp-story>`,
+        wrapWith: () => html`<amp-story></amp-story>`,
       },
       {
         kind: 'items inside a clickable link',
-        createWrapper: () => html`<a href="http://hamberders.com"></a>`,
+        wrapWith: () => html`<a href="http://hamberders.com"></a>`,
       },
     ], (scenario, isAccepted) => {
       expect(isAccepted, scenario.outerHTML).to.be.false;
@@ -224,7 +224,7 @@ describes.realWin(TAG, {
       },
       {
         kind: 'elements inside non-clickable anchor',
-        createWrapper: () => html`<a id=my-anchor></a>`,
+        wrapWith: () => html`<a id=my-anchor></a>`,
       },
     ], (scenario, isAccepted) => {
       expect(isAccepted, scenario.outerHTML).to.be.true;
