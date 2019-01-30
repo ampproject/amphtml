@@ -8965,6 +8965,11 @@ karma-ie-launcher@1.0.0:
   dependencies:
     lodash "^4.6.1"
 
+karma-json-reporter@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/karma-json-reporter/-/karma-json-reporter-1.2.1.tgz#7b4d6102d1ccaf573061ca76f11e9586948ecce3"
+  integrity sha512-ASmvranNhUN0ctSuAZKeWISW9Nf4AteMcVy8rJVjS7Qk+qWgssag/nw+yivHWKDROztVFn7TdamHOETMPCkvgA==
+
 karma-mocha-reporter@2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/karma-mocha-reporter/-/karma-mocha-reporter-2.2.5.tgz#15120095e8ed819186e47a0b012f3cd741895560"

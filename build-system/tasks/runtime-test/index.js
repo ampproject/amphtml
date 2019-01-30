@@ -351,6 +351,14 @@ async function runTests() {
     };
   }
 
+  if (process.env.TRAVIS && process.env.TRAVIS_EVENT_TYPE === 'push') {
+    c.reporters = c.reporters.concat(['json']);
+    c.jsonReporter = {
+      stdout: false,
+      outputFile: argv.unit ? 'results_unit.json' : 'results_integration.json',
+    };
+  }
+
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 8081,
     host: 'localhost',
@@ -510,7 +518,7 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
-    }).on('browsers_ready', function() {
+    }).once('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
     }).on('browser_complete', function(browser) {
