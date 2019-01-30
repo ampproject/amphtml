@@ -1799,11 +1799,28 @@ export class AmpStory extends AMP.BaseElement {
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
     Object.keys(distanceMap).forEach(pageId => {
+
       const distance = distanceMap[pageId];
       if (!pagesByDistance[distance]) {
         pagesByDistance[distance] = [];
       }
-      pagesByDistance[distance].push(pageId);
+      // There may be other 1 skip away pages due to branching.
+      if (isExperimentOn(this.win, 'amp-story-branching')) {
+        const indexInStack =
+          this.storyNavigationPath_.indexOf(this.activePage_.element.id);
+        const maybePrev = this.storyNavigationPath_[indexInStack - 1];
+        if (indexInStack > 0 && pageId === this.activePage_.element.id) {
+          if (!pagesByDistance[1]) {
+            pagesByDistance[1] = [];
+          }
+          pagesByDistance[1].push(maybePrev);
+        }
+        if (pageId !== maybePrev) {
+          pagesByDistance[distance].push(pageId);
+        }
+      } else {
+        pagesByDistance[distance].push(pageId);
+      }
     });
 
     return pagesByDistance;
@@ -1856,6 +1873,8 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       pagesByDistance.forEach((pageIds, distance) => {
+        console.log(distance);
+        console.log(pageIds);
         pageIds.forEach(pageId => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
