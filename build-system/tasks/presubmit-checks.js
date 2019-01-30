@@ -148,6 +148,7 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
+      'build-system/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
     ],
