@@ -123,7 +123,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with blue text on white background"
           layout="fixed"
-          width="107" height="112" 
+          width="107" height="112"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
         <noscript>
           <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
@@ -134,7 +134,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with white text on blue background"
           layout="fixed"
-          width="107" height="101" 
+          width="107" height="101"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
         <noscript>
           <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
@@ -145,7 +145,7 @@ The following guidelines apply to the image for the publisher logo:
     <td>
       <amp-img alt="Logo with blue text on blue background"
           layout="fixed"
-          width="103" height="102" 
+          width="103" height="102"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
         <noscript>
           <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
@@ -311,6 +311,10 @@ A URL to the story publisher's logo in square format (1x1 aspect ratio). For exa
 
 A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
 
+##### supports-landscape [optional]
+
+Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.
+
 ##### background-audio [optional]
 
 A URL to an audio file that plays throughout the story.
@@ -330,6 +334,26 @@ A "poster" is an image that displays in the UI until your story is loaded. The p
 ### Children (of amp-story)
 
 The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
+
+### Landscape orientation and full bleed desktop experience opt in
+
+If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
+
+  * Allow the story to be seen when a mobile device is held in a landscape orientation.
+  * Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
+
+Usage: `<amp-story ... supports-landscape>...</amp-story>`
+
+<figure class="centered-fig">
+  <span class="special-char">Before:</span>
+  <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
+  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
+  </amp-anim>
+  <span class="special-char">After:</span>
+  <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
+  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
+  </amp-anim>
+</figure>
 
 ## Pages: `amp-story-page`
 
@@ -1139,9 +1163,46 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 
 ```
 
+## Other components usable in AMP stories
+The following are other components usable in AMP stories that require some story-specific caveats.
+
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
+- [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
+
+For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
+
 ## Validation
 
 See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
+
+## Localization
+
+To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html lang="en">` for English.  The supported language codes are:
+
+* ar (Arabic)
+* de (German)
+* en-GB (English, UK)
+* en (English, US)
+* es-419 (Spanish, Central/Latin America)
+* es (Spanish, Spain)
+* fr-CA (French, Canada)
+* fr (French, France)
+* hi (Hindi)
+* id (Indonesian)
+* it (Italian)
+* ja (Japanese)
+* ko (Korean)
+* nl (Dutch)
+* no (Norwegian)
+* pt-BR (Portuguese, Brazil)
+* pt (Portuguese, Portugal)
+* ru (Russian)
+* tr (Turkish)
+* vi (Vietnamese)
+* zh-TW (Traditional Chinese)
+* zh (Simplified Chinese)
+
+Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html lang="ar" dir="rtl">`.
 
 ## Related resources
 

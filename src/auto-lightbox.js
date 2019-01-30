@@ -19,6 +19,14 @@ import {Services} from './services';
 import {isExperimentOn} from './experiments';
 
 
+/** @const @enum {string} */
+export const AutoLightboxEvents = {
+  // Triggered when the lightbox attribute is newly set on an item in order to
+  // process by the renderer extension (e.g. amp-lightbox-gallery).
+  NEWLY_SET: 'amp-auto-lightbox:newly-set',
+};
+
+
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */

@@ -174,6 +174,12 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'adsensor': {
+    prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
+    clientIdScope: 'amp_ecid_adensor',
+    renderStartImplemented: true,
+  },
+
   'adsnative': {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',
@@ -791,6 +797,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rbinfox': {
+	    renderStartImplemented: true,
+  },
+
   'realclick': {
     renderStartImplemented: true,
   },
@@ -913,6 +923,11 @@ export const adConfig = {
   },
 
   'taboola': {},
+
+  'tcsemotion': {
+    prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',
+    renderStartImplemented: true,
+  },
 
   'teads': {
     prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
