@@ -149,7 +149,7 @@ export class AmpList extends AMP.BaseElement {
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, viewer, this.templates_);
 
-    const originTrialPromise = originExperimentsForDoc(this.element)
+    const originTrialPromise = originExperimentsForDoc(this.getAmpDoc())
         .getExperiments()
         .then(trials => {
           return trials && trials.includes('amp-list-load-more');
