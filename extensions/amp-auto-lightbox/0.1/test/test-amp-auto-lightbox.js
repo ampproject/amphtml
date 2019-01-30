@@ -168,13 +168,12 @@ describes.realWin(TAG, {
       });
     }
 
-    describe('meta', () => {
-      [true, false].forEach(shouldAccept => {
-        it(`passes criteria result through (${shouldAccept})`, () => {
-          sandbox.stub(Criteria, 'meetsTreeShapeCriteria')
-              .returns(shouldAccept);
-          itAccepts(shouldAccept, [{kind: 'any'}]);
+    [true, false].forEach(accepts => {
+      describe('self-test', () => {
+        beforeEach(() => {
+          sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(accepts);
         });
+        itAccepts(accepts, [{kind: 'any'}]);
       });
     });
 
