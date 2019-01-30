@@ -24,19 +24,33 @@ const documentModes = require('./document-modes');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
 const {KeyValueOptions} = require('./form');
+const {many} = require('./html-helpers');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
-
-const fileListEndpointStateKey = 'fileListEndpoint';
 const fileListEndpointPrefix = '/dashboard/api/listing';
 
-const documentLinkRegex = /\.html$/;
-const examplesLinkRegex = /^\/examples\//;
+const examplesPathRegex = /^\/examples\//;
+const htmlDocRegex = /\.html$/;
+
+const leadingSlashRegex = /^\//;
+
+const replaceLeadingSlash = (subject, replacement) =>
+  subject.replace(leadingSlashRegex, replacement);
 
 const fileListEndpoint = query =>
   fileListEndpointPrefix + '?' +
   Object.keys(query).map(k => `${k}=${query[k]}`).join('&');
 
+const ampStateKey = (...keys) => keys.join('.');
+
+const selectModeStateId = 'documentMode';
+const selectModeStateKey = 'selectModePrefix';
+const selectModeKey = ampStateKey(selectModeStateId, selectModeStateKey);
+
+const fileListEndpointStateId = 'fileListEndpoint';
+const fileListEndpointStateKey = 'src';
+const fileListEndpointKey = ampStateKey(
+    fileListEndpointStateId, fileListEndpointStateKey);
 
 const headerLinks = [
   {
@@ -102,24 +116,24 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${links.map(({name, href, divider}, i) =>
+      ${many(links, ({name, href, divider}, i) =>
           HeaderLink({
             divider: divider || i == links.length - 1,
             name,
             href,
-          })).join('')}
+          }))}
       <li>${SettingsOpenButton()}</li>
     </ul>
   </header>`;
 
-const FileListSearch = ({basepath}) =>
-  html`<input type="text"
+const FileListSearchInput = ({basepath}) => html`
+  <input type="text"
     class="file-list-search"
     placeholder="Fuzzy Search"
     pattern="[a-zA-Z0-9-]+"
     on="input-debounced: AMP.setState({
-      ${fileListEndpointStateKey}: {
-        src: '${fileListEndpoint({
+      ${fileListEndpointStateId}: {
+        ${fileListEndpointStateKey}: '${fileListEndpoint({
           path: basepath,
           search: '',
         })}' + event.value
@@ -133,8 +147,8 @@ const ExamplesDocumentModeSelect = () => html`
     Document mode:
     <select id="examples-mode-select"
         on="change:AMP.setState({
-          documentMode: {
-            selectModePrefix: event.value
+          ${selectModeStateId}: {
+            ${selectModeStateKey}: event.value
           }
         })">
       ${KeyValueOptions(documentModes)}
@@ -142,8 +156,13 @@ const ExamplesDocumentModeSelect = () => html`
   </label>`;
 
 
+const linksToExample = (shouldContainBasepath, opt_name) =>
+  examplesPathRegex.test(shouldContainBasepath) &&
+    htmlDocRegex.test(opt_name || shouldContainBasepath);
+
+
 const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
-  !/^\/examples/.test(basepath) ? '' : ExamplesDocumentModeSelect({
+  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect({
     selectModePrefix,
   });
 
@@ -158,51 +177,37 @@ const FileListItem = ({name, href, boundHref}) =>
   </div>`;
 
 
-const PlaceholderFileListItem = ({name, href, selectModePrefix}) => {
-  if (!/^\/examples/.test(href) || !/\.html$/.test(href)) {
-    return FileListItem({href, name});
-  }
-
-  const hrefSufix = href.replace(/^\//, '');
-
-  return FileListItem({
-    name,
-    href: selectModePrefix + hrefSufix,
-    boundHref: `documentMode.selectModePrefix + '${hrefSufix}'`,
-  });
-};
+const PlaceholderFileListItem = ({name, href, selectModePrefix}) =>
+  linksToExample(href) ?
+    FileListItem({
+      name,
+      href: selectModePrefix + replaceLeadingSlash(href, ''),
+      boundHref: `${selectModeKey} + '${replaceLeadingSlash(href, '')}'`,
+    }) :
+    FileListItem({href, name});
 
 
-const TemplatedFileListItem = ({basepath}) => FileListItem({
-  boundHref: `(documentMode.selectModePrefix || '') +
-    '${basepath.substring(1)}{{.}}'`,
-  name: '{{.}}',
-});
+const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
+  (linksToExample(basepath, name) ?
+    replaceLeadingSlash(basepath, selectModePrefix) :
+    basepath) +
+  name;
 
 
-const getFileSet = ({basepath, fileSet, selectModePrefix}) =>
-  fileSet.map(name => {
-    const isExamplesDocument = examplesLinkRegex.test(basepath) &&
-      documentLinkRegex.test(name);
-
-    const prefix = isExamplesDocument ?
-      basepath.replace(/^\//, selectModePrefix) :
-      basepath;
-
-    return {name, href: prefix + name};
-  });
-
-const FileListEndpointState = ({basepath}) =>
-  html`<amp-state id="${fileListEndpointStateKey}">
+const AmpState = (id, state) => html`
+  <amp-state id="${id}">
     <script type="application/json">
-      {"src": "${fileListEndpoint({path: basepath})}"}
+      ${JSON.stringify(state)}
     </script>
   </amp-state>`;
 
 
-const FileList = ({basepath, fileSet, selectModePrefix}) =>
-  FileListEndpointState({basepath}) +
-  html`<amp-list [src]="${fileListEndpointStateKey}.src"
+const FileList = ({basepath, fileSet, selectModePrefix}) => many([
+  AmpState(fileListEndpointStateId, {
+    [fileListEndpointStateKey]: fileListEndpoint({path: basepath}),
+  }),
+
+  html`<amp-list [src]="${fileListEndpointKey}"
     src="${fileListEndpoint({path: basepath})}"
     items="."
     layout="fixed-height"
@@ -214,13 +219,16 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
 
     <div placeholder>
       <div role=list>
-        ${fileSet.map(({name, href}) =>
-          PlaceholderFileListItem({name, href, selectModePrefix})).join('')}
+        ${many(fileSet, ({name, href}) =>
+          PlaceholderFileListItem({name, href, selectModePrefix}))}
       </div>
     </div>
 
     <template type="amp-mustache">
-      ${TemplatedFileListItem({basepath})}
+      ${FileListItem({
+        boundHref: `(${selectModeKey} || '') + '${basepath.substring(1)}{{.}}'`,
+        name: '{{.}}',
+      })}
     </template>
 
     <div overflow
@@ -229,11 +237,10 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
       class="list-overflow">
       Show more
     </div>
-  </amp-list>`;
+  </amp-list>`,
+]);
 
-const ProxyFormOptional = ({isMainPage}) => {
-  return isMainPage ? ProxyForm() : '';
-};
+const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
 const selectModePrefix = '/';
 
@@ -257,7 +264,7 @@ const renderTemplate = ({
       content="width=device-width,minimum-scale=1,initial-scale=1">
     ${boilerPlate}
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    ${requiredExtensions.map(config => ExtensionScript(config)).join('')}
+    ${many(requiredExtensions, ExtensionScript)}
   </head>
   <body>
     <div class="wrap">
@@ -270,26 +277,23 @@ const renderTemplate = ({
           <h3 class="code" id="basepath">
             ${basepath}
           </h3>
-          ${FileListSearch({basepath})}
+          ${FileListSearchInput({basepath})}
           <div class="file-list-right-section">
-            <amp-state id="documentMode">
-              <script type="application/json">
-              ${JSON.stringify({selectModePrefix})}
-              </script>
-            </amp-state>
+            ${AmpState(selectModeStateId, {
+              [selectModeStateKey]: selectModePrefix,
+            })}
             ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
             <a href="/~" class="underlined">List root directory</a>
           </div>
         </div>
-          ${FileList({
-            basepath,
-            selectModePrefix,
-            fileSet: getFileSet({
-              basepath,
-              selectModePrefix,
-              fileSet,
-            }),
-          })}
+        ${FileList({
+          basepath,
+          selectModePrefix,
+          fileSet: fileSet.map(name => ({
+            name,
+            href: maybePrefixExampleDocHref(basepath, name, selectModePrefix),
+          })),
+        })}
       </div>
     </div>
     <div class="center">
