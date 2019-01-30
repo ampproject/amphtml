@@ -26,6 +26,13 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
+/**
+ * Validation user message for non-standard pattern mismatch errors.
+ * Note this isn't localized but custom validation can be used instead.
+ * @const @private {string}
+ */
+const CUSTOM_PATTERN_ERROR = 'Please match the requested format.';
+
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
@@ -122,12 +129,15 @@ export class FormValidator {
    */
   checkInputValidity(input) {
     if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
-      const pattern = input.getAttribute('pattern');
-      const re = new RegExp(`^${pattern}$`, 'm');
-      const valid = re.test(input.value);
-      // Note this isn't localized but custom validation is available.
-      const error = 'Please match the requested format.';
-      input.setCustomValidity(valid ? '' : error);
+      // FormVerifier also uses setCustomValidity() to signal verification
+      // errors. Make sure we only override pattern errors here.
+      if (input.checkValidity()
+          || input.validationMessage === CUSTOM_PATTERN_ERROR) {
+        const pattern = input.getAttribute('pattern');
+        const re = new RegExp(`^${pattern}$`, 'm');
+        const valid = re.test(input.value);
+        input.setCustomValidity(valid ? '' : CUSTOM_PATTERN_ERROR);
+      }
     }
     return input.checkValidity();
   }
