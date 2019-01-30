@@ -133,7 +133,7 @@ describes.realWin(TAG, {
 
   describe('meetsTreeShapeCriteria', () => {
 
-    function shouldAccept(shouldAccept, scenarios) {
+    function itAccepts(shouldAccept, scenarios) {
       scenarios.forEach(({kind, mutate, wrapWith}) => {
         function maybeWrap(root) {
           if (wrapWith) {
@@ -168,7 +168,7 @@ describes.realWin(TAG, {
       });
     }
 
-    shouldAccept(true, [
+    itAccepts(true, [
       {
         kind: 'elements by default',
       },
@@ -182,7 +182,7 @@ describes.realWin(TAG, {
       },
     ]);
 
-    shouldAccept(false, [
+    itAccepts(false, [
       {
         kind: 'explicitly opted-out subnodes',
         mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
