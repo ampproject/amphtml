@@ -4212,7 +4212,7 @@ class TagSpecDispatch {
   constructor() {
     /**
      * TagSpec ids for a specific attribute dispatch key.
-     * @type {Object<string, number>}
+     * @type {?Object<string, !Array<number>>}
      * @private
      */
     this.tagSpecsByDispatch_ = null;
@@ -4233,8 +4233,14 @@ class TagSpecDispatch {
     if (this.tagSpecsByDispatch_ === null) {
       this.tagSpecsByDispatch_ = Object.create(null);
     }
-    goog.asserts.assert(!(dispatchKey in this.tagSpecsByDispatch_));
-    this.tagSpecsByDispatch_[dispatchKey] = tagSpecId;
+    // Multiple TagSpecs may have the same dispatch key. These are added in the
+    // order in which they are found and only the first TagSpec is used below
+    // in matchingDispatchKey.
+    if (!(dispatchKey in this.tagSpecsByDispatch_)) {
+      this.tagSpecsByDispatch_[dispatchKey] = [tagSpecId];
+    } else {
+      this.tagSpecsByDispatch_[dispatchKey].push(tagSpecId);
+    }
   }
 
   /**
@@ -4277,7 +4283,7 @@ class TagSpecDispatch {
         attrName, attrValue, mandatoryParent);
     const match = this.tagSpecsByDispatch_[dispatchKey];
     if (match !== undefined) {
-      return match;
+      return match[0];
     }
 
     // Try next to find a key that allows any parent.
@@ -4286,7 +4292,7 @@ class TagSpecDispatch {
         attrValue, '');
     const noParentMatch = this.tagSpecsByDispatch_[noParentKey];
     if (noParentMatch !== undefined) {
-      return noParentMatch;
+      return noParentMatch[0];
     }
 
     // Try last to find a key that matches just this attribute name.
@@ -4294,7 +4300,7 @@ class TagSpecDispatch {
         amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, '', '');
     const noValueMatch = this.tagSpecsByDispatch_[noValueKey];
     if (noValueMatch !== undefined) {
-      return noValueMatch;
+      return noValueMatch[0];
     }
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
