@@ -27,7 +27,7 @@ const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 
-const fileListEndpointStateKey = 'file-list-endpoint';
+const fileListEndpointStateKey = 'fileListEndpoint';
 const fileListEndpointPrefix = '/dashboard/api/listing';
 
 const documentLinkRegex = /\.html$/;
@@ -118,10 +118,12 @@ const FileListSearch = ({basepath}) =>
     placeholder="Fuzzy Search"
     pattern="[a-zA-Z0-9-]+"
     on="input-debounced: AMP.setState({
-      ${fileListEndpointStateKey}: '${fileListEndpoint({
-        path: basepath,
-        search: '',
-      })}' + event.value
+      ${fileListEndpointStateKey}: {
+        src: '${fileListEndpoint({
+          path: basepath,
+          search: '',
+        })}' + event.value
+      }
     })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
@@ -193,14 +195,14 @@ const getFileSet = ({basepath, fileSet, selectModePrefix}) =>
 const FileListEndpointState = ({basepath}) =>
   html`<amp-state id="${fileListEndpointStateKey}">
     <script type="application/json">
-      "${fileListEndpoint({path: basepath})}"
+      {"src": "${fileListEndpoint({path: basepath})}"}
     </script>
   </amp-state>`;
 
 
 const FileList = ({basepath, fileSet, selectModePrefix}) =>
   FileListEndpointState({basepath}) +
-  html`<amp-list [src]="${fileListEndpointStateKey}"
+  html`<amp-list [src]="${fileListEndpointStateKey}.src"
     src="${fileListEndpoint({path: basepath})}"
     items="."
     layout="fixed-height"
