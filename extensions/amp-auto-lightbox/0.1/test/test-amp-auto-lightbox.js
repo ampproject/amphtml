@@ -48,7 +48,7 @@ describes.realWin(TAG, {
     amp: true,
     ampdoc: 'single',
   },
-}, ({sandbox, win, ampdoc}) => {
+}, env => {
 
   let html;
 
@@ -64,16 +64,16 @@ describes.realWin(TAG, {
     return wrapper;
   }
 
-  const stubAllCriteriaMet = () => sandbox.stub(Criteria, 'meetsAll');
+  const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
   const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
   function mockCandidates(candidates) {
-    sandbox.stub(Scanner, 'getCandidates').returns(candidates);
+    env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
     return candidates;
   }
 
   const mockSchemaType = type =>
-    sandbox.stub(Schema, 'getDocumentType').returns(type);
+    env.sandbox.stub(Schema, 'getDocumentType').returns(type);
 
   const iterProduct = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
@@ -88,7 +88,7 @@ describes.realWin(TAG, {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
     const viewerHostname = isTrusted ? 'google.com' : 'tacos.al.pastor';
 
-    sandbox.stub(Services, 'viewerForDoc').returns({
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded() {
         return isEmbedded;
       },
@@ -99,9 +99,9 @@ describes.realWin(TAG, {
   }
 
   function spyInstallExtensionsForDoc() {
-    const installExtensionForDoc = sandbox.spy();
+    const installExtensionForDoc = env.sandbox.spy();
 
-    sandbox.stub(Services, 'extensionsFor').returns({
+    env.sandbox.stub(Services, 'extensionsFor').returns({
       installExtensionForDoc,
     });
 
@@ -124,12 +124,12 @@ describes.realWin(TAG, {
   }
 
   beforeEach(() => {
-    html = htmlFor(win.document);
+    html = htmlFor(env.win.document);
 
-    sandbox.stub(Mutation, 'mutate').callsFake((_, mutator) =>
+    env.sandbox.stub(Mutation, 'mutate').callsFake((_, mutator) =>
       tryResolve(mutator));
 
-    sandbox.stub(Services, 'urlForDoc').returns({
+    env.sandbox.stub(Services, 'urlForDoc').returns({
       parse(url) {
         return parseUrlDeprecated(url);
       },
@@ -157,7 +157,7 @@ describes.realWin(TAG, {
             const scenario = maybeWrap(unwrapped);
             const candidate = firstElementLeaf(scenario);
 
-            win.document.body.appendChild(scenario);
+            env.win.document.body.appendChild(scenario);
 
             expect(candidate).to.be.ok;
             expect(candidate.tagName).to.equal('AMP-IMG');
@@ -174,7 +174,7 @@ describes.realWin(TAG, {
     [true, false].forEach(accepts => {
       describe('self-test', () => {
         beforeEach(() => {
-          sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(accepts);
+          env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(accepts);
         });
         itAccepts(accepts, [{kind: 'any'}]);
       });
@@ -375,7 +375,7 @@ describes.realWin(TAG, {
   describe('scan', () => {
 
     const waitForAllScannedToBeResolved = () =>
-      scan(ampdoc).then(scanned => scanned && Promise.all(scanned));
+      scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
 
     beforeEach(() => {
       mockSchemaType(schemaTypes[0]);
@@ -474,7 +474,7 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      return Promise.all(runCandidates(ampdoc, candidates))
+      return Promise.all(runCandidates(env.ampdoc, candidates))
           .then(candidates => {
             expect(candidates.length).to.equal(2);
             expect(candidates[0]).to.not.be.ok;
@@ -487,7 +487,7 @@ describes.realWin(TAG, {
   describe('resolveIsEnabledForDoc', () => {
 
     const expectIsEnabled = shouldBeEnabled =>
-      resolveIsEnabledForDoc(ampdoc, ['foo']).then(actuallyEnabled => {
+      resolveIsEnabledForDoc(env.ampdoc, ['foo']).then(actuallyEnabled => {
         expect(actuallyEnabled).to.equal(shouldBeEnabled);
       });
 
@@ -511,7 +511,7 @@ describes.realWin(TAG, {
       });
 
       it(`rejects schema with @type=${type} but lightbox explicit`, () => {
-        const doc = win.document;
+        const doc = env.win.document;
 
         const extensionScript = createElementWithAttributes(doc, 'script', {
           'custom-element': REQUIRED_EXTENSION,
@@ -554,7 +554,7 @@ describes.realWin(TAG, {
     it('sets attribute', function* () {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
 
-      yield apply(ampdoc, element);
+      yield apply(env.ampdoc, element);
 
       expect(element.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
     });
@@ -562,7 +562,7 @@ describes.realWin(TAG, {
     it('sets unique group for each element', function* () {
       const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
 
-      yield Promise.all(candidates.map(c => apply(ampdoc, c)));
+      yield Promise.all(candidates.map(c => apply(env.ampdoc, c)));
 
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
@@ -573,9 +573,9 @@ describes.realWin(TAG, {
     it('dispatches event', function* () {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
 
-      element.dispatchCustomEvent = sandbox.spy();
+      element.dispatchCustomEvent = env.sandbox.spy();
 
-      yield apply(ampdoc, element);
+      yield apply(env.ampdoc, element);
 
       expect(element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET))
           .to.have.been.calledOnce;
