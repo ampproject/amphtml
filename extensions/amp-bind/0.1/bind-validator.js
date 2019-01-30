@@ -427,6 +427,7 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
+      'pattern': null,
       'placeholder': null,
       'readonly': null,
       'required': null,
