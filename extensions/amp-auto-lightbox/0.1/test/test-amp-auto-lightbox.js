@@ -160,6 +160,7 @@ describes.realWin(TAG, {
             const scenario = maybeWrap(maybeMutate(unwrapped));
             env.win.document.body.appendChild(scenario);
             expectation(
+                scenario,
                 Criteria.meetsTreeShapeCriteria(ampImgFromTree(scenario)));
           });
         });
@@ -209,8 +210,8 @@ describes.realWin(TAG, {
         kind: 'items inside a clickable link',
         createWrapper: () => html`<a href="http://hamberders.com"></a>`,
       },
-    ], isAccepted => {
-      expect(isAccepted).to.be.false;
+    ], (scenario, isAccepted) => {
+      expect(isAccepted, scenario.outerHTML).to.be.false;
     });
 
     runScenarios('accepts', [
@@ -221,8 +222,8 @@ describes.realWin(TAG, {
         kind: 'elements with a non-tap action',
         mutate: el => el.setAttribute('on', 'nottap:doSomething'),
       },
-    ], isAccepted => {
-      expect(isAccepted).to.be.true;
+    ], (scenario, isAccepted) => {
+      expect(isAccepted, scenario.outerHTML).to.be.true;
     });
 
   });
