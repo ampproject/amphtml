@@ -17,6 +17,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
 const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
@@ -31,14 +32,16 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 let webServerProcess_;
 
 function installPackages_() {
-  execOrDie('npx yarn --cwd build-system/tasks/e2e',
-      {'stdio': 'ignore'});
+  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
+}
+
+function buildRuntime_() {
+  execOrDie('gulp build');
 }
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}\
-      ${argv.quiet ? '--quiet' : ''}`);
+      `gulp serve --host ${HOST} --port ${PORT}`);
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -66,7 +69,7 @@ async function e2e() {
   // install e2e-specific modules
   installPackages_();
 
-  // set up promise to return
+  // set up promise to return to gulp.task()
   let resolver, rejecter;
   const deferred = new Promise((resolverIn, rejecterIn) => {
     resolver = resolverIn;
@@ -76,14 +79,29 @@ async function e2e() {
   // create mocha instance
   require('@babel/register');
   require('./helper');
-  const mocha = new Mocha();
 
-  // add test files to mocha
-  config.e2eTestPaths.forEach(path => {
-    glob.sync(path).forEach(file => {
+  const mocha = new Mocha({
+    reporter: argv.testnames ? '' : ciReporter,
+  });
+
+  // specify tests to run
+  if (argv.files) {
+    glob.sync(argv.path).forEach(file => {
       mocha.addFile(file);
     });
-  });
+  }
+  else {
+    config.e2eTestPaths.forEach(path => {
+      glob.sync(path).forEach(file => {
+        mocha.addFile(file);
+      });
+    });
+  }
+
+  // build runtime
+  if (!argv.nobuild) {
+    buildRuntime_();
+  }
 
   // start up web server
   await launchWebServer_();
@@ -95,9 +113,11 @@ async function e2e() {
 
     // end task
     if (failures) {
+      process.exit(1);
       return rejecter();
     }
 
+    process.exit();
     return resolver();
   });
 
@@ -106,6 +126,8 @@ async function e2e() {
 
 gulp.task('e2e', 'Runs e2e tests', e2e, {
   options: {
-    'quiet': '  Do not log HTTP requests (default: false)',
+    'nobuild': '  Skips building the runtime via `gulp build`',
+    'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
+    'testnames': '  Lists the name of each test being run',
   },
 });
