@@ -168,6 +168,16 @@ describes.realWin(TAG, {
       });
     }
 
+    describe('meta', () => {
+      [true, false].forEach(shouldAccept => {
+        it(`passes criteria result through (${shouldAccept})`, () => {
+          sandbox.stub(Criteria, 'meetsTreeShapeCriteria')
+              .returns(shouldAccept);
+          itAccepts(shouldAccept, [{kind: 'any'}]);
+        });
+      });
+    });
+
     itAccepts(true, [
       {
         kind: 'elements by default',
