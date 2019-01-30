@@ -27,7 +27,6 @@ import {
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
-import {layoutRectFromDomRect} from '../../src/layout-rect';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
