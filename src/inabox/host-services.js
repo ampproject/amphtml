@@ -41,16 +41,16 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Visibility>}
+   * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Visibility>} */ (
+    return /** @type {!Promise<!VisibilityInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Visibility} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installVisibilityServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -59,16 +59,16 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Visibility>}
+   * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Fullscreen>} */ (
+    return /** @type {!Promise<!FullscreenInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Fullscreen} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installFullscreenServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -77,16 +77,16 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Exit>}
+   * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Fullscreen>} */ (
+    return /** @type {!Promise<!ExitInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Exit} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -95,11 +95,12 @@ export class HostServices {
 }
 
 /**
- * Visibility defines interface provided by host for visibility detection.
+ * VisibilityInterface defines interface provided by host for visibility
+ * detection.
  *
  * @interface
  */
-export class Visibility {
+export class VisibilityInterface {
 
   /**
    * Register a callback for visibility change events.
@@ -107,7 +108,6 @@ export class Visibility {
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
   onVisibilityChange(unusedCallback) {
-    throwUnsupportedError();
   }
 }
 
@@ -124,12 +124,12 @@ export let VisibilityDataDef;
 
 
 /**
- * Fullscreen defines interface provided by host to enable/disable
+ * FullscreenInterface defines interface provided by host to enable/disable
  * fullscreen mode.
  *
  * @interface
  */
-export class Fullscreen {
+export class FullscreenInterface {
 
   /**
    * Request to expand the given element to fullscreen overlay.
@@ -139,7 +139,6 @@ export class Fullscreen {
    *     indicating if the request was fulfilled
    */
   enterFullscreenOverlay(unusedTargetElement) {
-    throwUnsupportedError();
   }
 
   /**
@@ -150,16 +149,15 @@ export class Fullscreen {
    *     indicating if the request was fulfilled
    */
   exitFullscreenOverlay(unusedTargetElement) {
-    throwUnsupportedError();
   }
 }
 
 /**
- * Exit defines interface provided by host for navigating out.
+ * ExitInterface defines interface provided by host for navigating out.
  *
  * @interface
  */
-export class Exit {
+export class ExitInterface {
 
   /**
    * Request to navigate to URL.
@@ -169,13 +167,5 @@ export class Exit {
    *     indicating if the request was fulfilled
    */
   openUrl(unusedUrl) {
-    throwUnsupportedError();
   }
-}
-
-/**
- * Throw unsupported error.
- */
-function throwUnsupportedError() {
-  throw new Error('Unsupported operation');
 }

@@ -26,10 +26,13 @@
  *
  */
 
-import {HostServices, HostServiceError} from '../../../src/inabox/host-services';
+import {
+  HostServiceError,
+  HostServices,
+} from '../../../src/inabox/host-services';
+import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {MraidService} from './mraid-service';
 
 const TAG = 'amp-mraid';
 const FALLBACK_ON = 'fallback-on';
@@ -38,12 +41,12 @@ const FALLBACK_ON = 'fallback-on';
  * String representations of the HostServicesErrors that can be used in the
  * 'fallback-on' attribute.
  *
- * @const @enum {string}
+ * @const @enum {number}
  */
 const FallbackErrorNames = {
   'mismatch': HostServiceError.MISMATCH,
-  'unsupported': HostServiceError.UNSUPPORTED
-}
+  'unsupported': HostServiceError.UNSUPPORTED,
+};
 
 /**
  * Loads mraid.js if available, and once it's loaded looks good, configures an
@@ -77,7 +80,7 @@ export class MraidInitializer {
     }
     const element = ampMraidScripts[0];
 
-    if (getMode().runtime !== 'inabox' && false /* TODO */) {
+    if (getMode().runtime !== 'inabox') {
       dev().error(TAG, 'Only supported with Inabox');
       return;
     }
@@ -85,13 +88,14 @@ export class MraidInitializer {
     this.fallbackOn_ = [];
     const fallbackOnErrorNames =
           (element.getAttribute(FALLBACK_ON) || '').split(' ');
-    for (const errorName of fallbackOnErrorNames) {
+    for (let i = 0; i < fallbackOnErrorNames.length; i++) {
+      const errorName = fallbackOnErrorNames[i];
       if (errorName) {
         if (!(errorName in FallbackErrorNames)) {
           dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorName}"`);
           return;
         }
-        this.fallbackOn_.push(FallbackErrorNames[errorName])
+        this.fallbackOn_.push(FallbackErrorNames[errorName]);
       }
     }
 
@@ -102,7 +106,7 @@ export class MraidInitializer {
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');
     mraidJs.addEventListener('load', () => {
-      this.mraidLoadSuccess_()
+      this.mraidLoadSuccess_();
     });
     mraidJs.addEventListener('error', () => {
       this.handleError_(HostServiceError.MISMATCH);
@@ -122,6 +126,9 @@ export class MraidInitializer {
     // TODO: send error ping
   }
 
+  /**
+   * Runs when MRAID reports that it is ready.
+   */
   mraidReady_() {
     const mraidService = new MraidService(this.mraid_);
 
@@ -135,6 +142,9 @@ export class MraidInitializer {
     this.registeredWithHostServices_ = true;
   }
 
+  /**
+   * Runs if mraid.js was loaded successfully.
+   */
   mraidLoadSuccess_() {
     const mraid = window['mraid'];
     if (!mraid || !mraid.getState || !mraid.addEventListener
@@ -145,13 +155,17 @@ export class MraidInitializer {
     this.mraid_ = mraid;
     if (mraid.getState() === 'loading') {
       mraid.addEventListener('ready', () => {
-        this.mraidReady_()
+        this.mraidReady_();
       });
     } else {
       this.mraidReady_();
     }
   }
 
+  /**
+   * Stub for handling the case when we want to allow fallback to the standard
+   * web way of doing things.
+   */
   declineService_() {
     // Needs API change
   }

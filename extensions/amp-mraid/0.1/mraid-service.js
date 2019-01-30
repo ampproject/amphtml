@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {Exit, Fullscreen, Visible, VisibilityDataDef} from '../../../src/inabox/host-services';
-
+import {
+  ExitInterface,
+  FullscreenInterface,
+  VisibilityDataDef,
+  VisibilityInterface,
+} from '../../../src/inabox/host-services';
 
 /**
  * Translates between the AMP HostServices APIs and MRAID.
  *
- * @implements {Visibility}
- * @implements {Fullscreen}
- * @implements {Exit}
+ * @implements {VisibilityInterface}
+ * @implements {FullscreenInterface}
+ * @implements {ExitInterface}
  */
 export class MraidService {
   /**
@@ -80,24 +84,24 @@ export class MraidService {
     this.mraid_.addEventListener(
         'exposureChange',
         (exposedPercentage,
-         visibleRectangle,
-         occlusionRectangles) => {
-           callback({visibleRect: visibleRectangle,
-                     visibleRatio: exposedPercentage});
-         });
+          visibleRectangle,
+          unusedOcclusionRectangles) => {
+          callback({visibleRect: visibleRectangle,
+            visibleRatio: exposedPercentage});
+        });
   }
 
   /**
    * Request to expand the given element to fullscreen overlay.
    *
-   * @param {!Element} targetElement
+   * @param {!Element} unusedTargetElement not supported by MRAID
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  enterFullscreenOverlay(targetElement) {
-    if (this.expanded_) return Promise.resolve(false);
+  enterFullscreenOverlay(unusedTargetElement) {
+    if (this.expanded_) {return Promise.resolve(false);}
 
-    this.mraid_.expand();
+    this.mraid_./*OK*/expand();
     this.expanded_ = true;
     return Promise.resolve(true);
   }
@@ -105,12 +109,12 @@ export class MraidService {
   /**
    * Request to exit from fullscreen overlay.
    *
-   * @param {!Element} targetElement
+   * @param {!Element} unusedTargetElement not supported by MRAID
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  exitFullscreenOverlay(targetElement) {
-    if (!this.expanded_) return Promise.resolve(false);
+  exitFullscreenOverlay(unusedTargetElement) {
+    if (!this.expanded_) {return Promise.resolve(false);}
 
     this.mraid_.close();
     this.expanded_ = false;
