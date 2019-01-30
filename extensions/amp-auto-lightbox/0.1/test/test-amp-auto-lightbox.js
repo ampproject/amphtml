@@ -59,6 +59,11 @@ describes.realWin(TAG, {
   const firstElementLeaf = el =>
     el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
 
+  function wrap(el, wrapper) {
+    firstElementLeaf(wrapper).appendChild(el);
+    return wrapper;
+  }
+
   const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
   const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
@@ -68,10 +73,14 @@ describes.realWin(TAG, {
   const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
 
-  function wrap(el, wrapper) {
-    firstElementLeaf(wrapper).appendChild(el);
-    return wrapper;
-  }
+  const product = (a, b, callback) => a.forEach(itemA =>
+    b.forEach(itemB => callback(itemA, itemB)));
+
+  const squaredCompare = (set, callback) => product(set, set, (a, b) => {
+    if (a != b) {
+      callback(a, b);
+    }
+  });
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
@@ -515,33 +524,21 @@ describes.realWin(TAG, {
     });
 
     it('sets unique group for candidates that meet criteria', function* () {
-      const a = mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true);
-      const b = mockLoadedSignal(html`<amp-img src="b.png"></amp-img>`, true);
-      const c = mockLoadedSignal(html`<amp-img src="c.png"></amp-img>`, true);
+      const candidates = [1, 2, 3].map(() =>
+        mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true));
 
       mockAllCriteriaMet(true);
 
       mockSchemaType(schemaTypes[0]);
-      mockCandidates([a, b, c]);
+      mockCandidates(candidates);
       mockIsEmbeddedAndTrustedViewer(true);
 
       yield waitForAllScannedToBeResolved();
 
-      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
-      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
-      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
-
-      expect(aAttr).to.be.ok;
-      expect(aAttr).to.not.equal(bAttr);
-      expect(aAttr).to.not.equal(cAttr);
-
-      expect(bAttr).to.be.ok;
-      expect(bAttr).to.not.equal(aAttr);
-      expect(bAttr).to.not.equal(cAttr);
-
-      expect(cAttr).to.be.ok;
-      expect(cAttr).to.not.equal(aAttr);
-      expect(cAttr).to.not.equal(bAttr);
+      squaredCompare(candidates, (a, b) => {
+        expect(a.getAttribute(LIGHTBOXABLE_ATTR))
+            .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
+      });
     });
 
   });
@@ -675,21 +672,10 @@ describes.realWin(TAG, {
       yield apply(env.ampdoc, b);
       yield apply(env.ampdoc, c);
 
-      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
-      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
-      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
-
-      expect(aAttr).to.be.ok;
-      expect(aAttr).to.not.equal(bAttr);
-      expect(aAttr).to.not.equal(cAttr);
-
-      expect(bAttr).to.be.ok;
-      expect(bAttr).to.not.equal(aAttr);
-      expect(bAttr).to.not.equal(cAttr);
-
-      expect(cAttr).to.be.ok;
-      expect(cAttr).to.not.equal(aAttr);
-      expect(cAttr).to.not.equal(bAttr);
+      squaredCompare([a, b, c], (x, y) => {
+        expect(x.getAttribute(LIGHTBOXABLE_ATTR))
+            .not.to.equal(y.getAttribute(LIGHTBOXABLE_ATTR));
+      });
     });
 
     it('dispatches event', function* () {
