@@ -27,6 +27,17 @@ const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 
+const fileListEndpointStateKey = 'file-list-endpoint';
+const fileListEndpointPrefix = '/dashboard/api/listing';
+
+const documentLinkRegex = /\.html$/;
+const examplesLinkRegex = /^\/examples\//;
+
+const fileListEndpoint = query =>
+  fileListEndpointPrefix + '?' +
+  Object.keys(query).map(k => `${k}=${query[k]}`);
+
+
 const headerLinks = [
   {
     'name': 'Developing',
@@ -62,15 +73,15 @@ const requiredExtensions = [
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
-  {name: 'amp-mustache', version: '0.2'},
+  {name: 'amp-mustache', version: '0.2', template: true},
   {name: 'amp-list'},
 ];
 
 
-const ExtensionScript = ({name, version}) =>
+const ExtensionScript = ({name, version, template}) =>
   html`<script
     async
-    custom-element="${name}"
+    ${template ? 'custom-template' : 'custom-element'}="${name}"
     src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
   </script>`;
 
@@ -106,9 +117,10 @@ const FileListSearch = ({basepath}) =>
     placeholder="Fuzzy Search"
     pattern="[a-zA-Z0-9-]+"
     on="input-debounced: AMP.setState({
-      fileListState: {
-        src: '/dashboard/api/listing?path=${basepath}&search=' + event.value
-      }
+      ${fileListEndpointStateKey}: '${fileListEndpoint({
+        path: basepath,
+        search: ' + event.value',
+      })}'
     })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
@@ -132,14 +144,63 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
     selectModePrefix,
   });
 
-const FileList = ({basepath}) =>
-  html`<amp-state id="fileListState">
+
+const FileListItem = ({name, href, boundHref}) =>
+  html`<div class="file-link-container" role=listitem>
+    <a class="file-link"
+      ${boundHref ? `[href]="${boundHref}" ` : ''}
+      ${href ? `href="${href}" ` : ''}>
+      ${name}
+    </a>
+  </div>`;
+
+
+const PlaceholderFileListItem = ({name, href, selectModePrefix}) => {
+  if (!/^\/examples/.test(href) || !/\.html$/.test(href)) {
+    return FileListItem({href, name});
+  }
+
+  const hrefSufix = href.replace(/^\//, '');
+
+  return FileListItem({
+    name,
+    href: selectModePrefix + hrefSufix,
+    boundHref: `documentMode.selectModePrefix + '${hrefSufix}'`,
+  });
+};
+
+
+const TemplatedFileListItem = ({basepath}) => FileListItem({
+  boundHref: `(documentMode.selectModePrefix || '') +
+    '${basepath.substring(1)}{{.}}'`,
+  name: '{{.}}',
+});
+
+
+const getFileSet = ({basepath, fileSet, selectModePrefix}) =>
+  fileSet.map(name => {
+    const isExamplesDocument = examplesLinkRegex.test(basepath) &&
+      documentLinkRegex.test(name);
+
+    const prefix = isExamplesDocument ?
+      basepath.replace(/^\//, selectModePrefix) :
+      basepath;
+
+    return {name, href: prefix + name};
+  });
+
+const FileListEndpointState = ({basepath}) =>
+  html`<amp-state id="${fileListEndpointStateKey}">
     <script type="application/json">
-      {"src": "/dashboard/api/listing?path=${basepath}"}
+      "${fileListEndpoint({path: basepath})}"
     </script>
-  </amp-state>
-  <amp-list [src]="fileListState.src"
-    src="/dashboard/api/listing?path=${basepath}"
+  </amp-state>`;
+
+
+const FileList = ({basepath, fileSet, selectModePrefix}) =>
+  FileListEndpointState({basepath}) +
+  html`<amp-list [src]="${fileListEndpointStateKey}"
+    src="${fileListEndpoint({path: basepath})}"
     items="."
     layout="fixed-height"
     width="auto"
@@ -148,14 +209,13 @@ const FileList = ({basepath}) =>
 
     <div fallback>Failed to load data.</div>
 
+    <div placeholder role=list>
+      ${fileSet.map(({name, href}) =>
+        PlaceholderFileListItem({name, href, selectModePrefix})).join('')}
+    </div>
+
     <template type="amp-mustache">
-      <div class="file-link-container">
-        <a class="file-link"
-          [href]="(documentMode.selectModePrefix || '') +
-          '${basepath.substring(1)}{{.}}'">
-          {{.}}
-        </a>
-      </div>
+      ${TemplatedFileListItem({basepath})}
     </template>
 
     <div overflow
@@ -164,8 +224,6 @@ const FileList = ({basepath}) =>
       class="list-overflow">
       Show more
     </div>
-
-    <div placeholder>Loading...</div>
   </amp-list>`;
 
 const ProxyFormOptional = ({isMainPage}) => {
@@ -178,6 +236,7 @@ const renderTemplate = ({
   basepath,
   css,
   isMainPage,
+  fileSet,
   serveMode}) => html`
 
   <!doctype html>
@@ -218,7 +277,15 @@ const renderTemplate = ({
             <a href="/~" class="underlined">List root directory</a>
           </div>
         </div>
-        ${FileList({basepath})}
+          ${FileList({
+            basepath,
+            selectModePrefix,
+            fileSet: getFileSet({
+              basepath,
+              selectModePrefix,
+              fileSet,
+            }),
+          })}
       </div>
     </div>
     <div class="center">
