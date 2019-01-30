@@ -252,7 +252,8 @@ export class AnalyticsConfig {
     mergeObjects(expandConfigRequest(defaultConfig), config);
     mergeObjects(expandConfigRequest(this.getTypeConfig_()), config,
         /* predefined */ true);
-    mergeObjects(expandConfigRequest(rewrittenConfig), config);
+    mergeObjects(expandConfigRequest(rewrittenConfig), config,
+        /* predefined */ true);
     return config;
   }
 
