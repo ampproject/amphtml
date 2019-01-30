@@ -93,11 +93,6 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
-      'extensions/amp-inputmask/**->third_party/inputmask/inputmask.js',
-      'extensions/amp-inputmask/**->' +
-          'third_party/inputmask/inputmask.date.extensions.js',
-      'extensions/amp-inputmask/**->' +
-          'third_party/inputmask/inputmask.dependencyLib.js',
       'extensions/amp-subscriptions/**/*.js->' +
           'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +

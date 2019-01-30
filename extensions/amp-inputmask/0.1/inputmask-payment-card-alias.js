@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
+
 /**
  * Installs an alias used to mask credit cards and enable digit chunking.
  * https://github.com/RobinHerbots/Inputmask/issues/525
@@ -22,10 +24,11 @@
 export function factory(Inputmask) {
   // TODO(cvializ): Improve card chunking support
   // https://baymard.com/checkout-usability/credit-card-patterns
-  Inputmask.extendAliases({
+  Inputmask.extendAliases(dict({
     'payment-card': {
-      mask: function(opts) {
-        opts.definitions = {
+      /** @param {!JsonObject} opts */
+      'mask': function(opts) {
+        opts['definitions'] = dict({
           'x': {
             'validator': function(chrs, buffer) {
               const val = buffer.buffer.join('') + chrs;
@@ -44,9 +47,9 @@ export function factory(Inputmask) {
             },
             'cardinality': 2,
           },
-        };
+        });
         return ['x99 9999 9999 9999', 'y99 999999 99999'];
       },
     },
-  });
+  }));
 }
