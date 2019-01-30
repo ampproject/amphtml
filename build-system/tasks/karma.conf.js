@@ -137,10 +137,10 @@ module.exports = {
       base: 'Chrome',
       flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
-    //Chrome_no_extensions: {
-      //base: 'Chrome',
-      //flags: COMMON_CHROME_FLAGS,
-    //},
+    Chrome_no_extensions: {
+      base: 'Chrome',
+      flags: COMMON_CHROME_FLAGS,
+    },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
       // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
