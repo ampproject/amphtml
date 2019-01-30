@@ -120,8 +120,8 @@ const FileListSearch = ({basepath}) =>
     on="input-debounced: AMP.setState({
       ${fileListEndpointStateKey}: '${fileListEndpoint({
         path: basepath,
-        search: ' + event.value',
-      })}'
+        search: '',
+      })}' + event.value
     })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
