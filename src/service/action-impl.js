@@ -24,7 +24,6 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {escapeCssSelectorIdent, isEnabled, iterateCursor} from '../dom';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
@@ -33,6 +32,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
 /** @const {string} */
@@ -239,9 +239,6 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    /** @const @private {?Object<string, string>} */
-    this.actionMacros_ = map();
-
     /**
      * Optional whitelist of actions, e.g.:
      *
@@ -279,16 +276,6 @@ export class ActionService {
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
         new ActionService(ampdoc, embedWin.document));
-  }
-
-  /**
-   * @param {string} id
-   * @param {string} action
-   */
-  addActionMacroDef(id, action) {
-    userAssert(this.actionMacros_[id] == null,
-        `Action macro ${id} is already defined`);
-    this.actionMacros_[id] = action;
   }
 
   /**
@@ -390,10 +377,11 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {!ActionTrust} trust
+   * @param {?JsonObject=} opt_args
    */
-  trigger(target, eventType, event, trust) {
-    this.action_(target, eventType, event, trust);
+  trigger(target, eventType, event, trust, opt_args) {
+    this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
@@ -491,11 +479,13 @@ export class ActionService {
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {!ActionTrust} trust
+   * @param {?JsonObject=} opt_args
    * @private
    */
-  action_(source, actionEventType, event, trust) {
-    const action = this.findAction_(source, actionEventType);
+  action_(source, actionEventType, event, trust, opt_args) {
+    const action =
+        this.findAction_(source, actionEventType, undefined, opt_args);
     if (!action) {
       return;
     }
@@ -622,16 +612,17 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
+   * @param {?JsonObject=} opt_args
    * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
-  findAction_(target, actionEventType, opt_stopAt) {
+  findAction_(target, actionEventType, opt_stopAt, opt_args) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
     while (n) {
       if (opt_stopAt && n == opt_stopAt) {
         return null;
       }
-      const actionInfos = this.matchActionInfos_(n, actionEventType);
+      const actionInfos = this.matchActionInfos_(n, actionEventType, opt_args);
       if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: devAssert(actionInfos)};
       }
@@ -643,10 +634,11 @@ export class ActionService {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
+   * @param {?JsonObject=} opt_args
    * @return {?Array<!ActionInfoDef>}
    */
-  matchActionInfos_(node, actionEventType) {
-    const actionMap = this.getActionMap_(node);
+  matchActionInfos_(node, actionEventType, opt_args) {
+    const actionMap = this.getActionMap_(node, actionEventType, opt_args);
     if (!actionMap) {
       return null;
     }
@@ -655,20 +647,24 @@ export class ActionService {
 
   /**
    * @param {!Element} node
+   * @param {string} actionEventType
+   * @param {?JsonObject=} opt_args
    * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
-  getActionMap_(node) {
+  getActionMap_(node, actionEventType, opt_args) {
     let actionMap = node[ACTION_MAP_];
     if (actionMap === undefined) {
       actionMap = null;
       const hasAction = node.hasAttribute('on');
+      const isActionMacro = node.tagName === 'AMP-ACTION-MACRO';
       if (hasAction) {
         const action = node.getAttribute('on');
-        const actionMacroDefs = this.getActionMacroDefs_(action);
-        actionMap = parseActionMap(
-            actionMacroDefs ? actionMacroDefs.action : action,
-            node, actionMacroDefs ? actionMacroDefs.args : null);
-
+        actionMap = parseActionMap(action, node);
+        node[ACTION_MAP_] = actionMap;
+      } else if (isActionMacro) {
+        const action = node.getAttribute('action');
+        actionMap = this.parseActionMapForMacro_(
+            `${actionEventType}`, `${action}`, node, opt_args);
         node[ACTION_MAP_] = actionMap;
       }
     }
@@ -676,52 +672,65 @@ export class ActionService {
   }
 
   /**
-   * Check if an action call references an action macro and if so returns
-   * the details of that action macro.
-   * @param {string} actionCall
+   * Parse the action map for the action macro.
+   * @param {string} event
+   * @param {string} action
+   * @param {!Element} node
+   * @param {?JsonObject=} opt_args
    * @private
-   * @return {?ActionMacroDef}
+   * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
-  getActionMacroDefs_(actionCall) {
-    // An action macro has the following formats:
-    //   event:action-macro-id()
-    //   event.action-macro-id
-    //   event.action-macro-id(arg1=1, arg2=2)
-    const actionMacroCall = /^\w+:(\w+[a-zA-Z'-]+)((\(.*\))?)$/;
-    const matchActionResults = actionCall.match(actionMacroCall);
-    const event = actionCall.split(":")[0];
-    if (matchActionResults) {
-      const macroActionId = matchActionResults[1];
-      const actionInfo = this.actionMacros_[macroActionId];
-      const ampActionMacroEl = this.ampdoc.getRootNode().querySelector(
-          `amp-action-macro[id=${escapeCssSelectorIdent(macroActionId)}]`);
-      const actionMap = parseActionMap(`${event}:${actionInfo}`,
-          devAssert(ampActionMacroEl));
-      const callerProvidedArgs = [];
-      // Extract args.
-      const argumnts =
-          matchActionResults[2].substring(1, matchActionResults[2].length - 1).split(':');
-        argumnts.forEach(args => {
-        const callerArgs = []
-        if (args !== '') {
-          args.split(',').forEach(arg => {
-            const keyValue = arg.split('=');
-            const key = keyValue[0];
-            const value = keyValue[1];
-            const obj = map();
-            obj[`${key}`] = value;
-            callerArgs.push(obj);
-          });
-          // devAssert(actionInfoDef, 'macro action reference does not exist');
-          callerProvidedArgs.push(callerArgs);
+  parseActionMapForMacro_(event, action, node, opt_args) {
+    const actionMap = parseActionMap(`${event}:${action}`, node);
+    this.setActionMacroArgs_(actionMap[`${event}`],
+        node.hasAttribute('arguments')
+          ? node.getAttribute('arguments').split(',') : [], opt_args);
+
+    return actionMap;
+  }
+
+  /**
+   * Sets the arguments on the action macro actions, taking the arguments
+   * passed by the caller and for the omitted arguments, defaulting to the ones
+   * provided in the macro.
+   * @param {!Array<!Object>} actions
+   * @param {!Array<string>} macroArgs The arguments provided by macro.
+   * @param {JsonObject=} opt_args The arguments provided by the caller.
+   * @private
+   */
+  setActionMacroArgs_(actions, macroArgs, opt_args) {
+    const aliasToArgNameMapping = map();
+    macroArgs.forEach(argVar => {
+      const keyValue = argVar.split('=');
+      const alias = keyValue[0];
+      const argName = keyValue[1];
+      aliasToArgNameMapping[`${alias}`] = argName;
+    });
+    // Iterate over the actions and construct the arguments.
+    actions.forEach(action => {
+      const actionArgs = action.args;
+      for (const arg in actionArgs) {
+        // If the caller has provided the arguments.
+        if (opt_args) {
+          // Then get the actual argument name for the alias used and use this
+          // argument when invoking the action.
+          if (arg in opt_args) {
+            const callerArg = opt_args[`${arg}`];
+            const argName = aliasToArgNameMapping[`${arg}`];
+            actionArgs[`${argName}`] = callerArg;
+            delete actionArgs[`${arg}`];
+          }
+        } else {
+          // Otherwise default to the arguments defined in the macro.
+          const defaultArg = actionArgs[`${arg}`];
+          const argName = aliasToArgNameMapping[`${arg}`];
+          if (argName) {
+            actionArgs[`${argName}`] = defaultArg;
+            delete actionArgs[`${arg}`];
+          }
         }
-      });
-
-      const action = `${event}:${actionInfo}`;
-      return {action, callerProvidedArgs};
-    }
-
-    return null;
+      }
+    });
   }
 
   /**
@@ -917,7 +926,7 @@ export function parseActionMap(action, context, opt_defaultArgs) {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
-      // Format: event:target.method
+      // Format: event:target.method or event:action-macro-target
 
       // Event: "event:"
       const event = tok.value;
@@ -937,14 +946,21 @@ export function parseActionMap(action, context, opt_defaultArgs) {
         let args = null;
 
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-          toks.next(); // Skip '.'
-          method = assertToken(
-              toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
+        if (peek.type == TokenType.SEPARATOR
+            && (peek.value == '.' || peek.value == '(')) {
+          if (peek.value == '.') {
+            toks.next(); // Skip '.'
+            method = assertToken(
+                toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
-          // Optionally, there may be arguments: "(key = value, key = value)".
-          peek = toks.peek();
-          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+            // Optionally, there may be arguments: "(key = value, key = value)".
+            peek = toks.peek();
+            if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+              toks.next(); // Skip '('
+              args = tokenizeMethodArguments(toks, assertToken, assertAction);
+            }
+          } else {
+            // This is an action-macro invocation.
             toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }

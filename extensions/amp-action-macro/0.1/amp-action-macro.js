@@ -40,7 +40,7 @@ export class AmpActionMacro extends AMP.BaseElement {
         'Experiment is off');
     this.actions_ = Services.actionServiceForDoc(this.element);
 
-    this.initialize_();
+    this.registerDefaultAction(this.execute_.bind(this));
   }
 
   /** @override */
@@ -50,25 +50,13 @@ export class AmpActionMacro extends AMP.BaseElement {
   }
 
   /**
-   * Initializes the amp-action-macro. An action invocation is constructed
-   * here to be merged and used when the action macro is invoked on the
-   * element that is referencing it.
-   * @private
+   * Invoke the action defined on the macro.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
-  initialize_() {
-    const {element} = this;
-    this.addActionMacro_(element);
-  }
-
-  /**
-   * Parse the action set on the macro and register it with the action service.
-   * This action is then referenced in the caller referencing the action macro.
-   * @param {!Element} element
-   */
-  addActionMacro_(element) {
-    const id = element.getAttribute('id');
-    const action = element.getAttribute('action');
-    this.actions_.addActionMacroDef(id, action);
+  execute_(invocation) {
+    const {actionEventType, args, event, trust} = invocation;
+    this.actions_.trigger(
+        this.element, `${actionEventType}`, event, trust, args);
   }
 
   /** @override */
