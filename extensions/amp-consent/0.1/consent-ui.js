@@ -185,6 +185,8 @@ export class ConsentUI {
           return;
         }
 
+        toggle(this.ui_, true);
+
         if (!this.isPostPrompt_) {
 
           this.maybeShowOverlay_();
@@ -194,8 +196,6 @@ export class ConsentUI {
           // for example <amp-iframe>
           this.baseInstance_.scheduleLayout(this.ui_);
         }
-
-        toggle(this.ui_, true);
       };
 
       // If the UI is an AMP Element, wait until it's built before showing it,

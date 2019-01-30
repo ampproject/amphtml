@@ -26,6 +26,7 @@ export function factory(Inputmask) {
   // https://baymard.com/checkout-usability/credit-card-patterns
   Inputmask.extendAliases(dict({
     'payment-card': {
+      'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
       /** @param {!JsonObject} opts */
       'mask': function(opts) {
         opts['definitions'] = dict({
@@ -48,7 +49,12 @@ export function factory(Inputmask) {
             'cardinality': 2,
           },
         });
-        return ['x99 9999 9999 9999', 'y99 999999 99999'];
+        return [
+          'y99 999999 99999',
+          'x99 9999 9999 9999',
+          '9999 999999 99999',
+          '9999 9999 9999 9999',
+        ];
       },
     },
   }));
