@@ -202,6 +202,10 @@ describes.realWin(TAG, {
         createWrapper: () => html`<amp-script></amp-script>`,
       },
       {
+        kind: 'items inside amp-story',
+        createWrapper: () => html`<amp-story></amp-story>`,
+      },
+      {
         kind: 'items inside a clickable link',
         createWrapper: () => html`<a href="http://hamberders.com"></a>`,
       },
