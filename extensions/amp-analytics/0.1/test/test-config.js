@@ -20,6 +20,7 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
+import {installVariableService} from '../variables';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
@@ -31,6 +32,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     win = env.win;
     doc = win.document;
     sandbox = env.sandbox;
+    installVariableService(env.win);
   });
 
   afterEach(() => {
@@ -737,6 +739,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
     const expandStringStub = sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
+    expandStringStub.withArgs('$NOT(foo)', {}).resolves('false');
     expandStringStub.resolvesArg(0);
 
     const macros = {
@@ -747,10 +750,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         macros);
 
     sandbox.stub(Services, 'urlReplacementsForDoc')
-        .returns({
-          'expandUrlAsync': url => Promise.resolve(url),
-          'expandStringAsync': expandStringStub,
-        });
+      .returns({
+        'expandUrlAsync': url => Promise.resolve(url),
+        'expandStringAsync': expandStringStub,
+      });
+
+    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
+      {});
 
     return stubService(sandbox, win, 'xhr', 'fetchJson');
   }

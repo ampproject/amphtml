@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {variableServiceFor} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
