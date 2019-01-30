@@ -298,9 +298,17 @@
 
         // Interprets the parameters after the '#' in the URL.
         var params = getLocationHashParams();
+        // Extracts the code to be validated if sent as a query param.
+        const incomingDocStr = getIncomingDoc(params);
+        if (incomingDocStr) {
+          editor.setEditorValue(incomingDocStr);
+          const format = params['htmlFormat'] || 'AMP';
+          urlForm.setHtmlFormat(format)
+        }
+
         // If #url=<url> was provided, load it, otherwise, start with the
         // minimum valid AMP document.
-        if (params.hasOwnProperty('url') && params['url']) {
+        else if (params.hasOwnProperty('url') && params['url']) {
           this.$.urlForm.setURLAndValidate(params['url']);
           // If filter=<error_category> was provided, filter error-list.
           if (params.hasOwnProperty('filter') && params['filter']) {
