@@ -52,6 +52,14 @@ const AmpState = (id, state) => html`
   </amp-state>`;
 
 
+const ternaryExpr = (condition, onTrue, onFalse) =>
+  `${condition} ? ${onTrue} : ${onFalse}`;
+
+
+const containsExpr = (haystack, needle, onTrue, onFalse) =>
+  ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
+
+
 const addRequiredExtensionsToHead = (docStr, extensionConf = {
   'amp-mustache': {version: '0.2'},
 }) => {
@@ -90,4 +98,9 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
 };
 
 
-module.exports = {AmpState, addRequiredExtensionsToHead};
+module.exports = {
+  AmpState,
+  addRequiredExtensionsToHead,
+  containsExpr,
+  ternaryExpr,
+};

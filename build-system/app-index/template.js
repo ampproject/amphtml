@@ -23,7 +23,11 @@ const boilerPlate = require('./boilerplate');
 const documentModes = require('./document-modes');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
-const {AmpState, addRequiredExtensionsToHead} = require('./amphtml-helpers');
+const {
+  AmpState,
+  addRequiredExtensionsToHead,
+  containsExpr,
+} = require('./amphtml-helpers');
 const {KeyValueOptions} = require('./form');
 const {many} = require('./html-helpers');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
@@ -164,7 +168,8 @@ const PlaceholderFileListItem = ({name, href, selectModePrefix}) =>
     FileListItem({
       name,
       href: selectModePrefix + replaceLeadingSlash(href, ''),
-      boundHref: `${selectModeKey} + '${replaceLeadingSlash(href, '')}'`,
+      boundHref: `(${selectModeKey} || '${selectModePrefix}') + '${
+        replaceLeadingSlash(href, '')}'`,
     }) :
     FileListItem({href, name});
 
@@ -199,7 +204,13 @@ const FileList = ({basepath, fileSet, selectModePrefix}) => many([
 
     <template type="amp-mustache">
       ${FileListItem({
-        boundHref: `(${selectModeKey} || '') + '${basepath.substring(1)}{{.}}'`,
+        href: `${basepath}{{.}}`,
+        boundHref: containsExpr(
+            '\'{{.}}\'',
+            '\'.html\'',
+            `(${selectModeKey} || '${selectModePrefix}') +` +
+                `'${replaceLeadingSlash(basepath, '')}{{.}}'`,
+            `'${basepath}{{.}}'`),
         name: '{{.}}',
       })}
     </template>
