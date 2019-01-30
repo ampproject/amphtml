@@ -1922,7 +1922,9 @@ class CdataMatcher {
 
     /** @type {number} */
     let adjustedCdataLength = byteLength(cdata);
-    if (!cdataSpec.urlBytesIncluded) adjustedCdataLength -= urlBytes;
+    if (!cdataSpec.urlBytesIncluded) {
+      adjustedCdataLength -= urlBytes;
+    }
 
     // Max CDATA Byte Length
     if (cdataSpec.maxBytes !== -1 && adjustedCdataLength > cdataSpec.maxBytes) {
@@ -2091,7 +2093,9 @@ class CdataMatcher {
       // Some CSS specs can choose to not count URLs against the byte limit,
       // but data URLs are always counted (or in other words, they aren't
       // considered URLs).
-      if (!isDataUrl(url.utf8Url)) urlBytes += byteLength(url.utf8Url);
+      if (!isDataUrl(url.utf8Url)) {
+        urlBytes += byteLength(url.utf8Url);
+      }
       const adapter = new UrlErrorInStylesheetAdapter(url.line, url.col);
       validateUrlAndProtocol(
           ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
