@@ -46,7 +46,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		//
 		// Handle '/'.
 		//
-		if r.RequestURI == "/" {
+		if r.URL.Path == "/" {
 			bytes, err := ioutil.ReadFile("index.html")
 			if err != nil {
 				http.Error(w, "File not found.", http.StatusNotFound)

@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 360
+min_validator_revision_required: 364
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 805
+spec_file_revision: 807
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -50,11 +50,32 @@ css_length_spec: {
 
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype"
+  mandatory_parent: "$ROOT"
+  mandatory: true
+  unique: true
+  explicit_attrs_only: true
+  attrs: {
+    name: "html"
+    mandatory: true
+    value: ""
+  }
+  # `lang` is not supported per spec but is allowed because it has been observed
+  # on existing AMP documents.
+  attrs: {
+    name: "lang"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
+}
+# AMP4ADS may need time to transition <!doctype> to using explicit attrs only.
+# Tracking in b/123227526 to merge into tagspec with spec name "html doctype".
+tags: {
+  html_format: AMP4ADS
+  tag_name: "!DOCTYPE"
+  spec_name: "html doctype (AMP4ADS)"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -596,6 +617,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name= and content="

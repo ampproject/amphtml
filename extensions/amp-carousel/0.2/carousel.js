@@ -31,7 +31,9 @@ import {
   forwardWrappingDistance,
   wrappingDistance,
 } from './array-util.js';
+import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
+import {dict} from '../../../src/utils/object';
 import {
   getStyle,
   setImportantStyles,
@@ -39,7 +41,6 @@ import {
   setStyles,
 } from '../../../src/style';
 import {iterateCursor} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
 import {mod} from '../../../src/utils/math';
 
 /**
@@ -159,6 +160,9 @@ export class Carousel {
     scrollContainer,
     runMutate,
   }) {
+    /** @private @const */
+    this.win_ = win;
+
     /** @private @const */
     this.runMutate_ = runMutate;
 
@@ -333,14 +337,22 @@ export class Carousel {
    * Moves the carousel to a given index. If the index is out of range, the
    * carousel is not moved.
    * @param {number} index
+   * @param {{
+   *   smoothScroll: (boolean|undefined),
+   * }=} options
    */
-  goToSlide(index) {
+  goToSlide(index, {smoothScroll = true} = {}) {
     if (index < 0 || index > this.slides_.length - 1) {
       return;
     }
 
+    if (index == this.currentIndex_) {
+      return;
+    }
+
+    // TODO(sparhami) This does not work with side-slide-count
     this.updateCurrentIndex_(index);
-    this.scrollCurrentIntoView_();
+    this.scrollCurrentIntoView_({smoothScroll});
   }
 
   /**
@@ -501,9 +513,7 @@ export class Carousel {
       this.hideSpacersAndSlides_();
       this.resetScrollReferencePoint_(/* force */true);
       this.ignoreNextScroll_ = true;
-      runDisablingSmoothScroll(this.scrollContainer_, () => {
-        this.scrollCurrentIntoView_();
-      });
+      this.scrollCurrentIntoView_({smoothScroll: false});
     });
   }
 
@@ -523,7 +533,10 @@ export class Carousel {
    */
   updateCurrentIndex_(currentIndex) {
     this.currentIndex_ = currentIndex;
-    // TODO(sparhami) Fire an event.
+    this.element_.dispatchEvent(
+        createCustomEvent(this.win_, 'indexchange', dict({
+          'index': currentIndex,
+        })));
   }
 
   /**
@@ -711,14 +724,16 @@ export class Carousel {
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
-    [slides_, replacementSpacers_].forEach(elements => {
-      elements.forEach((el, i) => {
-        const distance = loop_ ?
-          wrappingDistance(currentIndex_, i, elements) :
-          Math.abs(currentIndex_ - i);
-        const tooFar = distance > sideSlideCount;
-        el.hidden = tooFar;
-      });
+    slides_.forEach((el, i) => {
+      const distance = loop_ ?
+        wrappingDistance(currentIndex_, i, slides_) :
+        Math.abs(currentIndex_ - i);
+      const tooFar = distance > sideSlideCount;
+      el.hidden = tooFar;
+    });
+
+    replacementSpacers_.forEach(el => {
+      el.hidden = sideSlideCount < (slides_.length - 1);
     });
 
     beforeSpacers_.forEach((el, i) => {
@@ -837,16 +852,22 @@ export class Carousel {
   }
 
   /**
-   * Scrolls the current element into view based on its alignment,
+   * Scrolls the current element into view based on its alignment.
+   * @param {{
+   *   smoothScroll: boolean,
+   * }} options
    * @private
    */
-  scrollCurrentIntoView_() {
-    scrollContainerToElement(
-        this.slides_[this.currentIndex_],
-        this.scrollContainer_,
-        this.axis_,
-        this.alignment_
-    );
+  scrollCurrentIntoView_({smoothScroll}) {
+    const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
+    runner(this.scrollContainer_, () => {
+      scrollContainerToElement(
+          this.slides_[this.currentIndex_],
+          this.scrollContainer_,
+          this.axis_,
+          this.alignment_
+      );
+    });
   }
 
   /**

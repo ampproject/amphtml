@@ -15,12 +15,14 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
+import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
@@ -49,7 +51,7 @@ export const VIDEO_TAGS = {
 const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAG = 'AMP-CAROUSEL';
 const FIGURE_TAG = 'FIGURE';
-const SLIDE_SELECTOR = '.amp-carousel-slide';
+const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
@@ -98,6 +100,8 @@ export class LightboxManager {
      */
     this.counter_ = 0;
 
+    // TODO(alanorozco): Improve performance of visited lookup by setting
+    // mapped unique ids.
     /**
      * List of lightbox elements that have already been scanned.
      * @private {!Array<!Element>}
@@ -114,11 +118,21 @@ export class LightboxManager {
     if (this.scanPromise_) {
       return this.scanPromise_;
     }
+
     this.scanPromise_ = this.scanLightboxables_();
+
+    const root = this.ampdoc_.getRootNode();
+
     // Rescan whenever DOM changes happen.
-    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
+
+    // Process elements where the `lightbox` attr is dynamically set.
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
+      this.processLightboxElement_(dev().assertElement(target));
+    });
+
     return this.scanPromise_;
   }
 
@@ -251,10 +265,12 @@ export class LightboxManager {
     }
 
     this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
-    if (this.meetsHeuristicsForTap_(element)) {
-      const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
-      element.setAttribute('on', `tap:${gallery.id}.activate`);
+    if (!this.meetsHeuristicsForTap_(element)) {
+      return;
     }
+    const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
+    const actions = Services.actionServiceForDoc(element);
+    actions.setActions(element, `tap:${gallery.id}.activate`);
   }
 
   /**
@@ -343,6 +359,8 @@ export class LightboxManager {
     switch (type) {
       case 'AMP-AD':
         return LIGHTBOX_THUMBNAIL_AD;
+      // TODO(alanorozco): This can be replaced by a check of video service
+      // registration signal, were this list to grow larger.
       case 'AMP-VIDEO':
       case 'AMP-YOUTUBE':
         return LIGHTBOX_THUMBNAIL_VIDEO;
