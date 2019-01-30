@@ -20,6 +20,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AdvancementMode} from './analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
@@ -767,6 +768,8 @@ export class AmpStoryEmbeddedComponent {
    */
   onNavigationalClick_(event, direction) {
     event.preventDefault();
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
     dispatch(
         this.win_,
         devAssert(this.shadowRoot_),

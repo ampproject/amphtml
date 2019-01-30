@@ -35,8 +35,8 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+import {AdvancementMode, AmpStoryAnalytics} from './analytics';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -395,6 +395,8 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
+          this.storeService_.dispatch(
+              Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
           this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
@@ -539,6 +541,11 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
           this.onSupportedBrowserStateUpdate_(isBrowserSupported);
+        });
+
+    this.storeService_.subscribe(
+        StateProperty.ADVANCEMENT_MODE, mode => {
+          this.variableService_.onAdvancementModeStateChange(mode);
         });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -1066,6 +1073,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     if (direction === TapNavigationDirection.NEXT) {
       this.next_();
     } else if (direction === TapNavigationDirection.PREVIOUS) {
@@ -1150,6 +1160,12 @@ export class AmpStory extends AMP.BaseElement {
           this.getPageIndex(oldPage) < pageIndex ?
             setAttributeInMutate(oldPage, Attributes.VISITED) :
             removeAttributeInMutate(oldPage, Attributes.VISITED);
+
+          if (oldPage.isAd()) {
+            this.storeService_.dispatch(
+                Action.SET_ADVANCEMENT_MODE,
+                AdvancementMode.ADVANCE_TO_ADS);
+          }
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
@@ -1174,11 +1190,13 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
+        const oldPageId = oldPage ? oldPage.element.id : null;
         // TODO(alanorozco): check if autoplay
         this.navigationState_.updateActivePage(
             pageIndex,
             this.getPageCount(),
             targetPage.element.id,
+            oldPageId,
             targetPage.getNextPageId() === null /* isFinalPage */
         );
 
@@ -1367,6 +1385,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       return;
     }
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 

@@ -84,14 +84,17 @@ export class NavigationState {
    * @param {number} pageIndex
    * @param {number} totalPages
    * @param {string} pageId
+   * @param {?string} previousPageId
    * @param {boolean} isFinalPage
    * TODO(alanorozco): pass whether change was automatic or on user action.
    */
-  updateActivePage(pageIndex, totalPages, pageId, isFinalPage) {
+  updateActivePage(
+    pageIndex, totalPages, pageId, previousPageId, isFinalPage) {
     const changeValue = {
       pageIndex,
       pageId,
       totalPages,
+      previousPageId,
       storyProgress: pageIndex / totalPages,
     };
 
