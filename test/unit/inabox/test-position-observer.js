@@ -95,9 +95,6 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     win.document.body.appendChild(iframe1);
     iframe1.contentDocument.body.appendChild(iframe2);
     iframe2.contentDocument.body.appendChild(iframe3);
-    iframe1.name = '1';
-    iframe2.name = '2';
-    iframe3.name = '3';
     iframe1.getBoundingClientRect = () => layoutRectLtwh(1, 2, 70, 80);
     iframe2.getBoundingClientRect = () => layoutRectLtwh(5, 6, 30, 40);
     iframe3.getBoundingClientRect = () => layoutRectLtwh(7, 8, 10, 20);
