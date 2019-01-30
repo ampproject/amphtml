@@ -20,10 +20,7 @@ import {
   deserializeMessage,
   serializeMessage,
 } from '../../src/3p-frame-messaging';
-import {
-  PositionObserver,
-  getTargetRect,
-} from './position-observer';
+import {PositionObserver} from './position-observer';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
@@ -157,7 +154,8 @@ export class InaboxMessagingHost {
    */
   handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
-    const targetRect = getTargetRect(iframe, iframe.contentWindow.parent);
+    const targetRect = this.positionObserver_
+        .getTargetRect(iframe, iframe.contentWindow.parent);
     this.sendPosition_(request, source, origin, dict({
       'viewportRect': viewportRect,
       'targetRect': targetRect,

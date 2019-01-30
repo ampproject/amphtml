@@ -93,7 +93,7 @@ export class PositionObserver {
     return {
       viewportRect: /** @type {!LayoutRectDef} */(this.viewportRect_),
       // relative position to viewport
-      targetRect: getTargetRect(element, parentWin),
+      targetRect: this.getTargetRect(element, parentWin),
     };
   }
 
@@ -112,6 +112,32 @@ export class PositionObserver {
         Math.round(scrollTop),
         win./*OK*/innerWidth,
         win./*OK*/innerHeight);
+  }
+
+  /**
+   * Get the element's layout rect relative to the viewport.
+   * If parentWin is provided, then attempt to walk up the DOM and add the
+   * offset of all nested parent iframes. Assumes that all parent frames are
+   * friendly and can be inspected (because the element itself can be inspected
+   * as well).
+   * @param {!Element} element
+   * @param {?Window} parentWin The window that contains the element
+   * @return {!LayoutRectDef}
+   */
+  getTargetRect(element, parentWin) {
+    let targetRect =
+        layoutRectFromDomRect(element./*OK*/getBoundingClientRect());
+    if (parentWin) {
+      for (let j = 0, tempWin = parentWin;
+        j < 10 && tempWin != this.win_ && tempWin != this.win_.top;
+        j++, tempWin = tempWin.parent) {
+        const parentFrameRect = layoutRectFromDomRect(
+            tempWin.frameElement./*OK*/getBoundingClientRect());
+        targetRect = moveLayoutRect(targetRect,
+            parentFrameRect.left, parentFrameRect.top);
+      }
+    }
+    return targetRect;
   }
 }
 
@@ -143,28 +169,4 @@ function getScrollingElement(win) {
  */
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
-}
-
-/**
- * Get the element's layout rect relative to the viewport.
- * If parentWin is provided, then attempt to walk up the DOM and add the
- * offset of all nested parent iframes. Assumes that all parent frames are
- * friendly and can be inspected (because the element itself can be inspected
- * as well).
- * @param {!Element} element
- * @param {?Window} parentWin The window that contains the element
- * @return {!LayoutRectDef}
- */
-export function getTargetRect(element, parentWin) {
-  let targetRect = layoutRectFromDomRect(element./*OK*/getBoundingClientRect());
-  if (parentWin) {
-    for (let j = 0, tempWin = parentWin;
-      j < 10 && tempWin != tempWin.top; j++, tempWin = tempWin.parent) {
-      const parentFrameRect = layoutRectFromDomRect(
-          tempWin.frameElement./*OK*/getBoundingClientRect());
-      targetRect = moveLayoutRect(targetRect,
-          parentFrameRect.left, parentFrameRect.top);
-    }
-  }
-  return targetRect;
 }
