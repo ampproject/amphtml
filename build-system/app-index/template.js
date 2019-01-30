@@ -73,15 +73,15 @@ const requiredExtensions = [
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
-  {name: 'amp-mustache', version: '0.2', template: true},
+  {name: 'amp-mustache', version: '0.2', isTemplate: true},
   {name: 'amp-list'},
 ];
 
 
-const ExtensionScript = ({name, version, template}) =>
+const ExtensionScript = ({name, version, isTemplate}) =>
   html`<script
     async
-    ${template ? 'custom-template' : 'custom-element'}="${name}"
+    ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
     src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
   </script>`;
 
