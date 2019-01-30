@@ -217,6 +217,18 @@ describes.realWin('form-validators', {amp: true}, env => {
       validator.report();
       expect(textarea.checkValidity()).to.be.false;
     });
+
+    it('should not override other custom errors on <textarea>', () => {
+      const textarea = form.querySelector('textarea');
+      expect(textarea.checkValidity()).to.be.true;
+
+      textarea.value = 'valid, non-empty text';
+      textarea.setCustomValidity('other classes can use this API too');
+
+      // Invalid (despite pattern match success) due to existing custom error.
+      validator.report();
+      expect(textarea.checkValidity()).to.be.false;
+    });
   });
 
   describe('PolyfillDefaultValidator', () => {
@@ -599,7 +611,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       const textarea = form.querySelector('textarea');
       expect(textarea.checkValidity()).to.be.true;
 
-      textarea.value = 'abc'; // Valid because it's not all whitespace.
+      textarea.value = 'valid, non-empty text';
       validator.onBlur({target: textarea});
       expect(textarea.checkValidity()).to.be.true;
 
@@ -738,7 +750,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       validator.report();
       expect(textarea.checkValidity()).to.be.false;
 
-      textarea.value = 'abc'; // Valid because it's not all whitespace.
+      textarea.value = 'valid, non-empty text';
       validator.onBlur({target: textarea});
       expect(textarea.checkValidity()).to.be.true;
 
