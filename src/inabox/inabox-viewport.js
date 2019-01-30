@@ -222,7 +222,8 @@ export class ViewportBindingInabox {
         .then(() => {
           this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
           this.topWindowPositionObserver_.observe(
-              this.win.frameElement, data => {
+              /** @type {!HTMLIFrameElement} */(this.win.frameElement),
+              data => {
                 this.updateLayoutRects_(
                     data['viewportRect'],
                     data['targetRect']);
