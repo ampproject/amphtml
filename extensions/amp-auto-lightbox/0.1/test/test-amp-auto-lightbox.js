@@ -27,7 +27,6 @@ import {
   Schema,
   VIEWPORT_AREA_RATIO,
   apply,
-  meetsCriteria,
   meetsSizingCriteria,
   resolveIsEnabledForDoc,
   runCandidates,
@@ -55,18 +54,10 @@ describes.realWin(TAG, {
 
   const {any} = sinon.match;
 
-  const capitalize = str => str.replace(/^([a-z])/, (_, m) => m.toUpperCase());
-
   const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
 
   const ampImgFromTree = el =>
     el.tagName == 'AMP-IMG' ? el : el.querySelector('amp-img');
-
-  const criteriaMethod = c => 'meets' + capitalize(c) + 'Criteria';
-
-  function mockCriteriaMet(criteria, isMet) {
-    env.sandbox.stub(Criteria, criteriaMethod(criteria)).returns(isMet);
-  }
 
   const stubAllCriteriaMet = () =>
     env.sandbox.stub(Criteria, 'meetsAll');
@@ -140,261 +131,94 @@ describes.realWin(TAG, {
     });
   });
 
-  describe('meetsCriteria', () => {
+  describe('meetsTreeShapeCriteria', () => {
 
-    it('rejects placeholder elements', () => {
-      mockCriteriaMet('actionable', true);
-      mockCriteriaMet('sizing', true);
+    function runScenarios(verb, scenarios, expectation) {
+      scenarios.forEach(({kind, mutate, createWrapper}) => {
+        function maybeWrap(root) {
+          if (createWrapper) {
+            const wrapper = createWrapper();
+            wrapper.appendChild(root);
+            return wrapper;
+          }
+          return root;
+        }
 
-      const renderScenarios = [
-        // image is placeholder
-        html`<amp-img src="bla.png" placeholder></amp-img>`,
+        function maybeMutate(root) {
+          if (mutate) {
+            mutate(root);
+          }
+          return root;
+        }
 
-        // immediate ancestor is placeholder
-        html`<div placeholder>
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is placeholder
-        html`<div placeholder>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
+        it(`${verb} ${kind}`, () => {
+          [
+            html`<amp-img src="asada.png"></amp-img>`,
+            html`<div><amp-img src="adobada.png"></amp-img></div>`,
+            html`<div><div><amp-img src="carnitas.png"></amp-img></div></div>`,
+          ].forEach(unwrapped => {
+            const scenario = maybeWrap(maybeMutate(unwrapped));
+            env.win.document.body.appendChild(scenario);
+            expectation(
+                Criteria.meetsTreeShapeCriteria(ampImgFromTree(scenario)));
+          });
+        });
       });
+    }
+
+    runScenarios('rejects', [
+      {
+        kind: 'explicitly opted-out subnodes',
+        mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
+      },
+      {
+        kind: 'presentation subnodes',
+        mutate: el => el.setAttribute('role', 'presentation'),
+      },
+      {
+        kind: 'placeholder subnodes',
+        mutate: el => el.setAttribute('placeholder', ''),
+      },
+      {
+        kind: 'items actionable by tap with a single action',
+        mutate: el => el.setAttribute('on', 'tap:doSomething'),
+      },
+      {
+        kind: 'items actionable by tap with multiple actions',
+        mutate: el =>
+          el.setAttribute('on', 'whatever:doSomething;tap:doSomethingElse'),
+      },
+      {
+        kind: 'items inside an amp-selector',
+        mutate: el => el.setAttribute('option', ''),
+        createWrapper: () => html`<amp-selector></amp-selector>`,
+      },
+      {
+        kind: 'items inside a button',
+        createWrapper: () => html`<button></button>`,
+      },
+      {
+        kind: 'items inside amp-script',
+        createWrapper: () => html`<amp-script></amp-script>`,
+      },
+      {
+        kind: 'items inside a clickable link',
+        createWrapper: () => html`<a href="http://hamberders.com"></a>`,
+      },
+    ], isAccepted => {
+      expect(isAccepted).to.be.false;
     });
 
-    it('rejects elements actionable by tap', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is tappable
-        html`<div on="tap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable
-        html`<div on="tap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable
-        html`<amp-img src="bla.png" on="tap:doSomething">`,
-
-        // immediate container is tappable with prefix actions
-        html`<div on="whatever:doSomething;tap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with prefix actions
-        html`<div on="whatever:doSomething;tap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with prefix actions
-        html`<amp-img src="bla.png" on="whatever:doSomething;tap:doSomething">`,
-
-        // immediate container is tappable with sufix actions
-        html`<div on="tap:doSomething;whatever:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with sufix actions
-        html`<div on="tap:doSomething;whatever:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with sufix actions
-        html`<amp-img src="bla.png" on="tap:doSomething;whatever:doSomething">`,
-
-        // immediate container is tappable with whitespace
-        html`<div on=" tap:doSomething;  ">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with whitespace
-        html`<div on=" tap:doSomething;  ">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with whitespace
-        html`<amp-img src="bla.png" on=" tap:doSomething; ">`,
-      ];
-
-      renderScenarios.forEach(root => {
-        env.win.document.body.appendChild(root);
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('accepts elements with a non-tap action', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container has non-tap actions
-        html`<div on="nottap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor has non-tap actions
-        html`<div on="nottap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image has non-tap actions
-        html`<amp-img src="bla.png" on="nottap:doSomething">`,
-      ];
-
-      renderScenarios.forEach(root => {
-        env.win.document.body.appendChild(root);
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.true;
-      });
-    });
-
-    it('rejects elements inside an <amp-selector>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-selector > [option]
-        html`<amp-selector>
-          <div option>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-selector>`,
-
-        // non-immediate ancestor is amp-selector > [option]
-        html`<amp-selector>
-          <div option>
-            <div>
-              <amp-img src="bla.png"></amp-img>
-            </div>
-          </div>
-        </amp-selector>`,
-
-        // non-immediate ancestor is amp-selector [option]
-        html`<amp-selector>
-          <div>
-            <div option>
-              <div>
-                <amp-img src="bla.png"></amp-img>
-              </div>
-            </div>
-          </div>
-        </amp-selector>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside a <button>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is button
-        html`<button>
-          <amp-img src="bla.png"></amp-img>
-        </button>`,
-
-        // non-immediate ancestor is button
-        html`<button>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </button>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside an <amp-script>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-script
-        html`<amp-script>
-          <amp-img src="bla.png"></amp-img>
-        </amp-script>`,
-
-        // non-immediate ancestor is amp-script
-        html`<amp-script>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-script>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside an <amp-story>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-story
-        html`<amp-story>
-          <amp-img src="bla.png"></amp-img>
-        </amp-story>`,
-
-        // non-immediate ancestor is amp-story
-        html`<amp-story>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-story>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside a clickable link', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is clickable link
-        html`<a href="http://hamberders.com">
-          <amp-img src="bla.png"></amp-img>
-        </a>`,
-
-        // non-immediate ancestor is clickable link
-        html`<a href="http://hamberders.com">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </a>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
+    runScenarios('accepts', [
+      {
+        kind: 'elements by default',
+      },
+      {
+        kind: 'elements with a non-tap action',
+        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
+      },
+    ], isAccepted => {
+      expect(isAccepted).to.be.true;
     });
 
   });
