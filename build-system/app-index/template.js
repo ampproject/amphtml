@@ -210,9 +210,11 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
 
     <div fallback>Failed to load data.</div>
 
-    <div placeholder role=list>
-      ${fileSet.map(({name, href}) =>
-        PlaceholderFileListItem({name, href, selectModePrefix})).join('')}
+    <div placeholder>
+      <div role=list>
+        ${fileSet.map(({name, href}) =>
+          PlaceholderFileListItem({name, href, selectModePrefix})).join('')}
+      </div>
     </div>
 
     <template type="amp-mustache">
