@@ -67,14 +67,14 @@ import {
 const TAG = 'amp-video-docking';
 
 
-/** @private @const {number} */
-const MARGIN_MAX = 30;
+/** @visibleForTesting @const {number} */
+export const MARGIN_MAX = 30;
 
-/** @private {number} */
-const MARGIN_AREA_WIDTH_PERC = 0.04;
+/** @visibleForTesting @const {number} */
+export const MARGIN_AREA_WIDTH_PERC = 0.04;
 
-/** @private @const {number} */
-const MIN_WIDTH = 180;
+/** @visibleForTesting @const {number} */
+export const MIN_WIDTH = 180;
 
 /** @private @const {number} */
 const MIN_VIEWPORT_WIDTH = 320;
@@ -82,8 +82,8 @@ const MIN_VIEWPORT_WIDTH = 320;
 /** @private @const {number} */
 const FLOAT_TOLERANCE = 0.02;
 
-/** @private @const {string} */
-const BASE_CLASS_NAME = 'i-amphtml-video-docked';
+/** @visibleForTesting @const {string} */
+export const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 
 /** @visibleForTesting @const {number} */
 export const REVERT_TO_INLINE_RATIO = 0.7;
@@ -100,6 +100,8 @@ export const Direction = {UP: 1, DOWN: -1};
 /** @enum {string} */
 export const Actions = {DOCK: 'dock', UNDOCK: 'undock'};
 
+/** @visibleForTesting */
+export const DOCKED_TO_CORNER_SIZING_RATIO = 0.3;
 
 /**
  * @struct @typedef {{
@@ -205,10 +207,8 @@ const PlaceholderBackground = html =>
   </div>`;
 
 
-/**
- * @private @const {!Array<!./breakpoints.SyntheticBreakpointDef>}
- */
-const PLACEHOLDER_ICON_BREAKPOINTS = [
+/** @visibleForTesting @const {!Array<!./breakpoints.SyntheticBreakpointDef>} */
+export const PLACEHOLDER_ICON_BREAKPOINTS = [
   {
     className: 'amp-small',
     minWidth: 0,
@@ -220,11 +220,15 @@ const PLACEHOLDER_ICON_BREAKPOINTS = [
 ];
 
 
-const PLACEHOLDER_ICON_LARGE_WIDTH = 48;
-const PLACEHOLDER_ICON_LARGE_MARGIN = 40;
+/** @visibleForTesting */
+export const PLACEHOLDER_ICON_LARGE_WIDTH = 48;
+/** @visibleForTesting */
+export const PLACEHOLDER_ICON_LARGE_MARGIN = 40;
 
-const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
-const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
+/** @visibleForTesting */
+export const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
+/** @visibleForTesting */
+export const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
 
 
 /**
@@ -591,7 +595,11 @@ export class VideoDocking {
     }
     const relativeY = this.getSlotRelativeY_();
     const {element} = video;
-    const {top, bottom} = getIntersectionRect(element);
+    const intersectionRect = getIntersectionRect(element);
+    if (!isSizedLayoutRect(intersectionRect)) {
+      return false;
+    }
+    const {top, bottom} = intersectionRect;
     const {top: slotTop, height: slotHeight} = this.getFixedSlotLayoutBox_();
     const slotBottom = this.viewport_.getSize().height - slotHeight - slotTop;
     if (relativeY == RelativeY.TOP) {
@@ -1284,19 +1292,13 @@ export class VideoDocking {
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
     this.currentlyDocked_ = {video, target, step};
-    if (!previouslyDocked ||
-        !targetsEqual(target, previouslyDocked.target) ||
-        previouslyDocked.video != video) {
-      const {
-        x,
-        y,
-        width: targetWidth,
-        height: targetHeight,
-      } = this.getTargetArea_(video, target);
-      const targetRect = layoutRectLtwh(x, y, targetWidth, targetHeight);
-      this.getControls_().setVideo(video, targetRect);
-      this.trigger_(Actions.DOCK);
+    if (previouslyDocked &&
+        targetsEqual(target, previouslyDocked.target) &&
+        previouslyDocked.video == video) {
+      return;
     }
+    this.getControls_().setVideo(video, this.getTargetArea_(video, target));
+    this.trigger_(Actions.DOCK);
   }
 
   /**
@@ -1550,7 +1552,8 @@ export class VideoDocking {
     const {width, height} = video.getLayoutBox();
     const margin = this.getMargin_();
     const aspectRatio = width / height;
-    const targetWidth = Math.max(MIN_WIDTH, this.getAreaWidth_() * 0.3);
+    const targetWidth = Math.max(MIN_WIDTH,
+        this.getAreaWidth_() * DOCKED_TO_CORNER_SIZING_RATIO);
     const targetHeight = targetWidth / aspectRatio;
 
     const x =
@@ -1570,11 +1573,11 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
-   * @param {!AmpElement} unusedSlot
+   * @param {!AmpElement} slot
    * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
-  getTargetAreaFromSlot_(video, unusedSlot) {
+  getTargetAreaFromSlot_(video, slot) {
     const {
       width: naturalWidth,
       height: naturalHeight,
@@ -1585,7 +1588,7 @@ export class VideoDocking {
       height: slotHeight,
       top,
       left,
-    } = this.getFixedSlotLayoutBox_();
+    } = this.getFixedLayoutBox_(slot);
 
     const slotAspect = slotWidth / slotHeight;
     const naturalAspect = naturalWidth / naturalHeight;
@@ -1631,12 +1634,10 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
-   * @param {number=} unusedDismissDirX
-   * @param {number=} unusedDismissDirY
    * @return {!Promise}
    * @private
    */
-  undock_(video, unusedDismissDirX, unusedDismissDirY) {
+  undock_(video) {
     dev().info(TAG, 'undock', {video});
 
     this.getControls_().disable();
@@ -1662,6 +1663,7 @@ export class VideoDocking {
     const step = 0;
 
     const {target} = devAssert(this.currentlyDocked_);
+
     const {x, y, scale, relativeX} = this.getDims_(video, target, step);
 
     // Do not animate transition if video is out-of-view. Chrome glitches
