@@ -133,7 +133,7 @@ describes.realWin(TAG, {
 
   describe('meetsTreeShapeCriteria', () => {
 
-    function runScenarios(verb, scenarios, expectation) {
+    function shouldAccept(shouldAccept, scenarios) {
       scenarios.forEach(({kind, mutate, wrapWith}) => {
         function maybeWrap(root) {
           if (wrapWith) {
@@ -151,7 +151,7 @@ describes.realWin(TAG, {
           return root;
         }
 
-        it(`${verb} ${kind}`, () => {
+        it(`${shouldAccept ? 'accepts' : 'rejects'} ${kind}`, () => {
           [
             html`<amp-img src="asada.png"></amp-img>`,
             html`<div><amp-img src="adobada.png"></amp-img></div>`,
@@ -159,15 +159,30 @@ describes.realWin(TAG, {
           ].forEach(unwrapped => {
             const scenario = maybeWrap(maybeMutate(unwrapped));
             env.win.document.body.appendChild(scenario);
-            expectation(
-                scenario,
-                Criteria.meetsTreeShapeCriteria(ampImgFromTree(scenario)));
+            expect(
+                Criteria.meetsTreeShapeCriteria(ampImgFromTree(scenario)),
+                scenario.outerHTML)
+                .to.equal(shouldAccept);
           });
         });
       });
     }
 
-    runScenarios('rejects', [
+    shouldAccept(true, [
+      {
+        kind: 'elements by default',
+      },
+      {
+        kind: 'elements with a non-tap action',
+        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
+      },
+      {
+        kind: 'elements inside non-clickable anchor',
+        wrapWith: () => html`<a id=my-anchor></a>`,
+      },
+    ]);
+
+    shouldAccept(false, [
       {
         kind: 'explicitly opted-out subnodes',
         mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
@@ -210,25 +225,7 @@ describes.realWin(TAG, {
         kind: 'items inside a clickable link',
         wrapWith: () => html`<a href="http://hamberders.com"></a>`,
       },
-    ], (scenario, isAccepted) => {
-      expect(isAccepted, scenario.outerHTML).to.be.false;
-    });
-
-    runScenarios('accepts', [
-      {
-        kind: 'elements by default',
-      },
-      {
-        kind: 'elements with a non-tap action',
-        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
-      },
-      {
-        kind: 'elements inside non-clickable anchor',
-        wrapWith: () => html`<a id=my-anchor></a>`,
-      },
-    ], (scenario, isAccepted) => {
-      expect(isAccepted, scenario.outerHTML).to.be.true;
-    });
+    ]);
 
   });
 
