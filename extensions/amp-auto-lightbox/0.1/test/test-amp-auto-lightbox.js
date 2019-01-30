@@ -67,8 +67,10 @@ describes.realWin(TAG, {
   const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
   const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
-  const mockCandidates = candidates =>
+  function mockCandidates(candidates) {
     env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
+    return candidates;
+  }
 
   const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
@@ -76,11 +78,12 @@ describes.realWin(TAG, {
   const product = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
 
-  const squaredCompare = (set, callback) => product(set, set, (a, b) => {
-    if (a != b) {
-      callback(a, b);
-    }
-  });
+  const squaredCompare = (set, callback, key = item => item) =>
+    product(set, set, (a, b) => {
+      if (key(a) != key(b)) {
+        callback(a, b);
+      }
+    });
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
@@ -107,13 +110,8 @@ describes.realWin(TAG, {
   }
 
   // necessary since element matching `withArgs` deep equals and overflows
-  function matchEquals(comparison) {
-    return sinon.match(subject => subject == comparison);
-  }
-
-  function mockCandidatesForLengthCheck() {
-    return ['foo'];
-  }
+  const matchEquals = comparison =>
+    sinon.match(subject => subject == comparison);
 
   function mockLoadedSignal(element, isLoadedSuccessfully) {
     const signals = new Signals();
@@ -246,11 +244,14 @@ describes.realWin(TAG, {
 
   describe('meetsSizingCriteria', () => {
     const areaDeltaPerc = RENDER_AREA_RATIO * 100;
+    const {vw, vh} = {vw: 1000, vh: 600};
+
+    const expectMeetsSizingCriteria = (
+      renderWidth, renderHeight, naturalWidth, naturalHeight) =>
+      expect(meetsSizingCriteria(
+          renderWidth, renderHeight, naturalWidth, naturalHeight, vw, vh));
 
     it(`accepts elements ${areaDeltaPerc}%+ of size than render area`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 1000;
       const renderHeight = 200;
 
@@ -259,31 +260,17 @@ describes.realWin(TAG, {
       const minArea = (renderArea) * RENDER_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim + 1,
-        minDim + 10,
-        minDim + 100,
-      ].forEach(naturalWidth => {
-        [
-          minDim + 1,
-          minDim + 10,
-          minDim + 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.true;
-        });
+      const axisRange = [minDim + 1, minDim + 10, minDim + 100];
+      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.true;
       });
     });
 
     it(`rejects elements < ${areaDeltaPerc}%+ of size of render area`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 100;
       const renderHeight = 100;
 
@@ -292,93 +279,51 @@ describes.realWin(TAG, {
       const minArea = (renderArea) * (RENDER_AREA_RATIO - 0.1);
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim,
-        minDim - 10,
-        minDim - 100,
-      ].forEach(naturalWidth => {
-        [
-          minDim,
-          minDim - 10,
-          minDim - 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [minDim, minDim - 10, minDim - 100];
+      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.false;
       });
     });
 
     const minAreaPerc = VIEWPORT_AREA_RATIO * 100;
 
     it(`accepts elements that cover ${minAreaPerc}%+ of the viewport`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
       const naturalWidth = 100;
       const naturalHeight = 100;
 
-      [
-        minDim,
-        minDim + 10,
-        minDim + 100,
-      ].forEach(renderWidth => {
-        [
-          minDim,
-          minDim + 10,
-          minDim + 100,
-        ].forEach(renderHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.true;
-        });
+      const axisRange = [minDim, minDim + 10, minDim + 100];
+      product(axisRange, axisRange, (renderWidth, renderHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.true;
       });
 
     });
 
     it(`rejects elements that cover < ${minAreaPerc}% of the viewport`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim - 1,
-        minDim - 10,
-        minDim - 100,
-      ].forEach(renderWidth => {
-        [
-          minDim - 1,
-          minDim - 10,
-          minDim - 100,
-        ].forEach(renderHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              /* naturalWidth */ renderWidth,
-              /* naturalHeight */ renderHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [minDim - 1, minDim - 10, minDim - 100];
+      product(axisRange, axisRange, (renderWidth, renderHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            /* naturalWidth */ renderWidth,
+            /* naturalHeight */ renderHeight).to.be.false;
       });
     });
 
     it('accepts elements with height > than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = vw;
       const renderHeight = vh;
 
@@ -387,20 +332,15 @@ describes.realWin(TAG, {
         vh + 10,
         vh + 100,
       ].forEach(naturalHeight => {
-        expect(meetsSizingCriteria(
+        expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
             /* naturalWidth */ renderWidth,
-            naturalHeight,
-            vw,
-            vh)).to.be.true;
+            naturalHeight).to.be.true;
       });
     });
 
     it('accepts elements with width > than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = vw;
       const renderHeight = vh;
 
@@ -409,41 +349,25 @@ describes.realWin(TAG, {
         vw + 10,
         vw + 100,
       ].forEach(naturalWidth => {
-        expect(meetsSizingCriteria(
+        expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
             naturalWidth,
-            /* naturalHeight */ renderHeight,
-            vw,
-            vh)).to.be.true;
+            /* naturalHeight */ renderHeight).to.be.true;
       });
     });
 
     it('rejects elements with dimensions <= than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 100;
       const renderHeight = 100;
 
-      [
-        renderWidth,
-        renderWidth - 10,
-        renderWidth - 100,
-      ].forEach(naturalWidth => {
-        [
-          renderHeight,
-          renderHeight - 10,
-          renderHeight - 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [renderWidth, renderWidth - 10, renderWidth - 100];
+      product(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.false;
       });
     });
 
@@ -451,14 +375,16 @@ describes.realWin(TAG, {
 
   describe('scan', () => {
 
-    function waitForAllScannedToBeResolved() {
-      return scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
-    }
+    const waitForAllScannedToBeResolved = () =>
+      scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
+
+    beforeEach(() => {
+      mockSchemaType(schemaTypes[0]);
+    });
 
     it('does not load extension if no candidates found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([]);
 
@@ -471,11 +397,8 @@ describes.realWin(TAG, {
     it('loads extension if >= 1 candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
-      mockCandidates([
-        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
-      ]);
+      mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(true);
 
@@ -488,9 +411,7 @@ describes.realWin(TAG, {
     it('does not load extension if no candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockCandidates([
-        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
-      ]);
+      mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(false);
       mockIsEmbeddedAndTrustedViewer(true);
@@ -512,7 +433,6 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
-      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -524,13 +444,10 @@ describes.realWin(TAG, {
     });
 
     it('sets unique group for candidates that meet criteria', function* () {
-      const candidates = [1, 2, 3].map(() =>
-        mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true));
+      const candidates = mockCandidates([1, 2, 3].map(() =>
+        mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true)));
 
       mockAllCriteriaMet(true);
-
-      mockSchemaType(schemaTypes[0]);
-      mockCandidates(candidates);
       mockIsEmbeddedAndTrustedViewer(true);
 
       yield waitForAllScannedToBeResolved();
@@ -538,7 +455,7 @@ describes.realWin(TAG, {
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
             .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
-      });
+      }, ({element}) => element);
     });
 
   });
@@ -570,23 +487,20 @@ describes.realWin(TAG, {
 
   describe('resolveIsEnabledForDoc', () => {
 
+    const expectIsEnabled = shouldBeEnabled =>
+      resolveIsEnabledForDoc(env.ampdoc, ['foo']).then(actuallyEnabled => {
+        expect(actuallyEnabled).to.equal(shouldBeEnabled);
+      });
+
     it('rejects documents without schema', () => {
       mockIsEmbeddedAndTrustedViewer(true);
-
-      return resolveIsEnabledForDoc(env.ampdoc,
-          mockCandidatesForLengthCheck()).then(isEnabled => {
-        expect(isEnabled).to.be.false;
-      });
+      return expectIsEnabled(false);
     });
 
     it('rejects schema with invalid @type', () => {
       mockIsEmbeddedAndTrustedViewer(true);
       mockSchemaType('hamberder');
-
-      return resolveIsEnabledForDoc(env.ampdoc,
-          mockCandidatesForLengthCheck()).then(isEnabled => {
-        expect(isEnabled).to.be.false;
-      });
+      return expectIsEnabled(false);
     });
 
     schemaTypes.forEach(type => {
@@ -594,11 +508,7 @@ describes.realWin(TAG, {
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
-
-        return resolveIsEnabledForDoc(env.ampdoc,
-            mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.true;
-        });
+        return expectIsEnabled(true);
       });
 
       it(`rejects schema with @type=${type} but lightbox explicit`, () => {
@@ -617,12 +527,7 @@ describes.realWin(TAG, {
 
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
-
-        return resolveIsEnabledForDoc(env.ampdoc,
-            mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
-
+        return expectIsEnabled(false);
       });
 
       it(`rejects schema with @type=${type} for non-embedded docs`, () => {
@@ -630,11 +535,7 @@ describes.realWin(TAG, {
         mockIsEmbeddedAndTrustedViewer(
             /* isEmbedded */ false,
             /* isTrusted */ true);
-
-        return resolveIsEnabledForDoc(
-            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
+        return expectIsEnabled(false);
       });
 
       it(`rejects schema with @type=${type} for untrusted viewer`, () => {
@@ -642,11 +543,7 @@ describes.realWin(TAG, {
         mockIsEmbeddedAndTrustedViewer(
             /* isEmbedded */ true,
             /* isTrusted */ false);
-
-        return resolveIsEnabledForDoc(
-            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
+        return expectIsEnabled(false);
       });
 
     });
@@ -664,17 +561,14 @@ describes.realWin(TAG, {
     });
 
     it('sets unique group for each element', function* () {
-      const a = html`<amp-img src="a.png"></amp-img>`;
-      const b = html`<amp-img src="b.png"></amp-img>`;
-      const c = html`<amp-img src="c.png"></amp-img>`;
+      const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
+      const applyPromises = candidates.map(c => apply(env.ampdoc, c));
 
-      yield apply(env.ampdoc, a);
-      yield apply(env.ampdoc, b);
-      yield apply(env.ampdoc, c);
+      yield Promise.all(applyPromises);
 
-      squaredCompare([a, b, c], (x, y) => {
-        expect(x.getAttribute(LIGHTBOXABLE_ATTR))
-            .not.to.equal(y.getAttribute(LIGHTBOXABLE_ATTR));
+      squaredCompare(candidates, (a, b) => {
+        expect(a.getAttribute(LIGHTBOXABLE_ATTR))
+            .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
       });
     });
 
