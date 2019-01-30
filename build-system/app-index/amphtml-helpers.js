@@ -61,9 +61,6 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
     extensions[name] = {name, ...defaultConf, ...(extensionConf[name] || {})};
 
   forEachMatch(componentTagNameRegex, docStr, ([unusedFullMatch, tagName]) => {
-    if (tagName == 'amp-template') {
-      return;
-    }
     if (tagName == 'amp-state') {
       addExtension('amp-bind');
       return;
