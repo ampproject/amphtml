@@ -32,7 +32,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     win = env.win;
     doc = win.document;
     sandbox = env.sandbox;
-    installVariableService(env.win);
   });
 
   afterEach(() => {
@@ -739,17 +738,20 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
     const expandStringStub = sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
-    expandStringStub.withArgs('$NOT(foo)', {}).resolves('false');
     expandStringStub.resolvesArg(0);
+
+    const macros = {
+      a: 'b',
+    };
+    expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
+    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
+      macros);
 
     sandbox.stub(Services, 'urlReplacementsForDoc')
       .returns({
         'expandUrlAsync': url => Promise.resolve(url),
         'expandStringAsync': expandStringStub,
       });
-
-    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
-      {});
 
     return stubService(sandbox, win, 'xhr', 'fetchJson');
   }
