@@ -133,6 +133,9 @@ describes.realWin(TAG, {
 
   describe('meetsTreeShapeCriteria', () => {
 
+    const meetsTreeShapeCriteriaMsg = outerHtml =>
+      `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
+
     function itAccepts(shouldAccept, scenarios) {
       scenarios.forEach(({kind, mutate, wrapWith}) => {
         function maybeWrap(root) {
@@ -164,8 +167,10 @@ describes.realWin(TAG, {
 
             expect(candidate, 'scenario candidate').to.be.ok;
 
-            expect(Criteria.meetsTreeShapeCriteria(candidate),
-                scenario.outerHTML).to.equal(shouldAccept);
+            expect(
+                Criteria.meetsTreeShapeCriteria(candidate),
+                meetsTreeShapeCriteriaMsg(scenario.outerHTML))
+                .to.equal(shouldAccept);
           });
         });
       });
