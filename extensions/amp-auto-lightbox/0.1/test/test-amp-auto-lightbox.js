@@ -68,6 +68,11 @@ describes.realWin(TAG, {
   const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
 
+  function wrap(el, wrapper) {
+    firstElementLeaf(wrapper).appendChild(el);
+    return wrapper;
+  }
+
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
     const viewerHostname = isTrusted ? 'google.com' : 'tacos.al.pastor';
@@ -132,21 +137,8 @@ describes.realWin(TAG, {
 
     function itAccepts(shouldAccept, scenarios) {
       scenarios.forEach(({kind, mutate, wrapWith}) => {
-        function maybeWrap(root) {
-          if (wrapWith) {
-            const wrapper = wrapWith();
-            wrapper.appendChild(root);
-            return wrapper;
-          }
-          return root;
-        }
-
-        function maybeMutate(root) {
-          if (mutate) {
-            mutate(root);
-          }
-          return root;
-        }
+        const maybeWrap = root => wrapWith ? wrap(root, wrapWith()) : root;
+        const maybeMutate = root => mutate && mutate(root);
 
         it(`${shouldAccept ? 'accepts' : 'rejects'} ${kind}`, () => {
           [
@@ -154,7 +146,9 @@ describes.realWin(TAG, {
             html`<div><amp-img src="adobada.png"></amp-img></div>`,
             html`<div><div><amp-img src="carnitas.png"></amp-img></div></div>`,
           ].forEach(unwrapped => {
-            const scenario = maybeWrap(maybeMutate(unwrapped));
+            maybeMutate(unwrapped);
+
+            const scenario = maybeWrap(unwrapped);
             const candidate = firstElementLeaf(scenario);
 
             env.win.document.body.appendChild(scenario);
