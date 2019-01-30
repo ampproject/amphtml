@@ -17,7 +17,7 @@ import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {toWin} from '../../../src/types';
 
 /** @const @private {string} */
@@ -296,7 +296,7 @@ export class AbstractCustomValidator extends FormValidator {
     // <textarea> only supports `pattern` matching. But, it's implemented via
     // setCustomValidity(), which results in the 'customError' validity state.
     if (input.tagName === 'TEXTAREA') {
-      dev().assert(invalidType === 'customError');
+      devAssert(invalidType === 'customError');
       invalidType = 'patternMismatch';
     }
     const property = VALIDATION_CACHE_PREFIX + invalidType;
