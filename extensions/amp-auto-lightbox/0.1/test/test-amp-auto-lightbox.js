@@ -222,6 +222,10 @@ describes.realWin(TAG, {
         kind: 'elements with a non-tap action',
         mutate: el => el.setAttribute('on', 'nottap:doSomething'),
       },
+      {
+        kind: 'elements inside non-clickable anchor',
+        createWrapper: () => html`<a id=my-anchor></a>`,
+      },
     ], (scenario, isAccepted) => {
       expect(isAccepted, scenario.outerHTML).to.be.true;
     });
