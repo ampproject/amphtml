@@ -60,7 +60,6 @@
     "babel-plugin-istanbul": "5.1.0",
     "babel-plugin-transform-commonjs-es2015-modules": "4.0.1",
     "babel-plugin-transform-react-jsx": "6.24.1",
-    "babel-regenerator-runtime": "6.5.0",
     "babelify": "10.0.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.5.2",
