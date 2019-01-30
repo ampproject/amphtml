@@ -69,12 +69,13 @@ const headerLinks = [
 
 
 const requiredExtensions = [
+  // Keep alphabetically sorted.
   {name: 'amp-bind'},
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
-  {name: 'amp-selector'},
-  {name: 'amp-mustache', version: '0.2', isTemplate: true},
   {name: 'amp-list'},
+  {name: 'amp-mustache', version: '0.2', isTemplate: true},
+  {name: 'amp-selector'},
 ];
 
 
@@ -252,8 +253,7 @@ const renderTemplate = ({
       content="width=device-width,minimum-scale=1,initial-scale=1">
     ${boilerPlate}
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    ${requiredExtensions.map(({name, version}) =>
-        ExtensionScript({name, version})).join('')}
+    ${requiredExtensions.map(config => ExtensionScript(config)).join('')}
   </head>
   <body>
     <div class="wrap">
