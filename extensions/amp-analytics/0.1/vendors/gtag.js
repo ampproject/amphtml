@@ -22,6 +22,10 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
         'dr': 'DOCUMENT_REFERRER',
         'dl': 'SOURCE_URL',
       },
+      'conversion': {
+        'gclsrc': 'QUERY_PARAM(gclsrc)',
+        'enabled': true,
+      },
     },
   },
   'vars': {
