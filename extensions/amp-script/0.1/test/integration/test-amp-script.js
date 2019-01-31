@@ -15,15 +15,23 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {poll} from '../../../../../testing/iframe';
+import {poll as classicPoll} from '../../../../../testing/iframe';
+
+const TIMEOUT = 10000;
+
+function poll(description, condition, opt_onError) {
+  return classicPoll(description, condition, opt_onError, TIMEOUT);
+}
 
 describe('amp-script', function() {
-  let browser;
+  this.timeout(TIMEOUT);
+
+  let browser, doc, element;
 
   describes.integration('basic', {
     /* eslint-disable max-len */
     body: `
-      <amp-script layout=container src="/examples/amp-script/hello-world.js"><div class="root"><button id="hello">Insert Hello World!</button></div></amp-script>
+      <amp-script layout=container src="/examples/amp-script/hello-world.js"><button id="hello">Insert Hello World!</button></amp-script>
     `,
     /* eslint-enable max-len */
     extensions: ['amp-script'],
@@ -31,17 +39,18 @@ describe('amp-script', function() {
   }, env => {
     beforeEach(() => {
       browser = new BrowserController(env.win);
-
-      env.win['__AMP__EXPERIMENT_TOGGLES']['amp-script'] = true;
+      doc = env.win.document;
+      element = doc.querySelector('amp-script');
     });
 
     it('should say "hello world"', function*() {
-      // TODO: Wait for hydration/interactive.
-      yield browser.wait(1000);
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
 
       browser.click('button#hello');
-
-      const doc = env.win.document;
       yield poll('Hello World!', () => {
         const h1 = doc.querySelector('h1');
         return h1 && h1.textContent == 'Hello World!';
