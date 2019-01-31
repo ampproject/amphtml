@@ -154,8 +154,7 @@ export class InaboxMessagingHost {
    */
   handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
-    const targetRect = this.positionObserver_
-        .getTargetRect(iframe, iframe.contentWindow.parent);
+    const targetRect = this.positionObserver_.getTargetRect(iframe);
     this.sendPosition_(request, source, origin, dict({
       'viewportRect': viewportRect,
       'targetRect': targetRect,
@@ -165,8 +164,7 @@ export class InaboxMessagingHost {
     this.iframeMap_[request.sentinel].observeUnregisterFn =
         this.iframeMap_[request.sentinel].observeUnregisterFn ||
         this.positionObserver_.observe(iframe, data =>
-          this.sendPosition_(request, source, origin, /** @type ?JsonObject */(data)),
-        iframe.contentWindow.parent);
+          this.sendPosition_(request, source, origin, /** @type ?JsonObject */(data)));
     return true;
   }
 

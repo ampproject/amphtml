@@ -39,10 +39,16 @@ describes.realWin('inabox-host:position-observer', {}, env => {
 
     target1 = {
       getBoundingClientRect: () => layoutRectLtwh(1, 2, 30, 40),
+      ownerDocument: {
+        defaultView: win,
+      },
     };
 
     target2 = {
       getBoundingClientRect: () => layoutRectLtwh(3, 4, 30, 40),
+      ownerDocument: {
+        defaultView: win,
+      },
     };
   });
 
@@ -88,13 +94,16 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     const iframe1 = win.document.createElement('iframe');
     const iframe2 = win.document.createElement('iframe');
     const iframe3 = win.document.createElement('iframe');
+    const element = win.document.createElement('div');
+    element.getBoundingClientRect = () => layoutRectLtwh(1, 2, 30, 40);
     win.document.body.appendChild(iframe1);
     iframe1.contentDocument.body.appendChild(iframe2);
     iframe2.contentDocument.body.appendChild(iframe3);
+    iframe3.contentDocument.body.appendChild(element);
     iframe1.getBoundingClientRect = () => layoutRectLtwh(1, 2, 70, 80);
     iframe2.getBoundingClientRect = () => layoutRectLtwh(5, 6, 30, 40);
     iframe3.getBoundingClientRect = () => layoutRectLtwh(7, 8, 10, 20);
-    expect(observer.getTargetRect(target1, iframe3.contentWindow))
+    expect(observer.getTargetRect(element))
         .to.deep.equal(layoutRectLtwh(14, 18, 30, 40));
   });
 });
