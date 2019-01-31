@@ -23,9 +23,39 @@ const boilerPlate = require('./boilerplate');
 const documentModes = require('./document-modes');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
+const {
+  AmpState,
+  addRequiredExtensionsToHead,
+  containsExpr,
+} = require('./amphtml-helpers');
+const {joinFragments} = require('./html-helpers');
 const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
+const fileListEndpointPrefix = '/dashboard/api/listing';
+
+const examplesPathRegex = /^\/examples\//;
+const htmlDocRegex = /\.html$/;
+
+const leadingSlashRegex = /^\//;
+
+const replaceLeadingSlash = (subject, replacement) =>
+  subject.replace(leadingSlashRegex, replacement);
+
+const fileListEndpoint = query =>
+  fileListEndpointPrefix + '?' +
+  Object.keys(query).map(k => `${k}=${query[k]}`).join('&');
+
+const ampStateKey = (...keys) => keys.join('.');
+
+const selectModeStateId = 'documentMode';
+const selectModeStateKey = 'selectModePrefix';
+const selectModeKey = ampStateKey(selectModeStateId, selectModeStateKey);
+
+const fileListEndpointStateId = 'fileListEndpoint';
+const fileListEndpointStateKey = 'src';
+const fileListEndpointKey = ampStateKey(
+    fileListEndpointStateId, fileListEndpointStateKey);
 
 const headerLinks = [
   {
@@ -57,24 +87,6 @@ const headerLinks = [
 ];
 
 
-const requiredExtensions = [
-  {name: 'amp-bind'},
-  {name: 'amp-form'},
-  {name: 'amp-lightbox'},
-  {name: 'amp-selector'},
-  {name: 'amp-mustache', version: '0.2'},
-  {name: 'amp-list'},
-];
-
-
-const ExtensionScript = ({name, version}) =>
-  html`<script
-    async
-    custom-element="${name}"
-    src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
-  </script>`;
-
-
 const HeaderLink = ({name, href, divider}) => html`
   <li class="${divider ? 'divider' : ''}">
     <a target="_blank" rel="noopener noreferrer" href="${href}">
@@ -90,24 +102,27 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${links.map(({name, href, divider}, i) =>
+      ${joinFragments(links, ({name, href, divider}, i) =>
           HeaderLink({
             divider: divider || i == links.length - 1,
             name,
             href,
-          })).join('')}
+          }))}
       <li>${SettingsOpenButton()}</li>
     </ul>
   </header>`;
 
-const FileListSearch = ({basepath}) =>
-  html`<input type="text"
+const FileListSearchInput = ({basepath}) => html`
+  <input type="text"
     class="file-list-search"
     placeholder="Fuzzy Search"
     pattern="[a-zA-Z0-9-]+"
     on="input-debounced: AMP.setState({
-      fileListState: {
-        src: '/dashboard/api/listing?path=${basepath}&search=' + event.value
+      ${fileListEndpointStateId}: {
+        ${fileListEndpointStateKey}: '${fileListEndpoint({
+          path: basepath,
+          search: '',
+        })}' + event.value
       }
     })">`;
 
@@ -118,8 +133,8 @@ const ExamplesDocumentModeSelect = () => html`
     Document mode:
     <select id="examples-mode-select"
         on="change:AMP.setState({
-          documentMode: {
-            selectModePrefix: event.value
+          ${selectModeStateId}: {
+            ${selectModeStateKey}: event.value
           }
         })">
       ${KeyValueOptions(documentModes)}
@@ -127,19 +142,51 @@ const ExamplesDocumentModeSelect = () => html`
   </label>`;
 
 
+const linksToExample = (shouldContainBasepath, opt_name) =>
+  examplesPathRegex.test(shouldContainBasepath) &&
+    htmlDocRegex.test(opt_name || shouldContainBasepath);
+
+
 const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
-  !/^\/examples/.test(basepath) ? '' : ExamplesDocumentModeSelect({
+  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect({
     selectModePrefix,
   });
 
-const FileList = ({basepath}) =>
-  html`<amp-state id="fileListState">
-    <script type="application/json">
-      {"src": "/dashboard/api/listing?path=${basepath}"}
-    </script>
-  </amp-state>
-  <amp-list [src]="fileListState.src"
-    src="/dashboard/api/listing?path=${basepath}"
+
+const FileListItem = ({name, href, boundHref}) =>
+  html`<div class="file-link-container" role=listitem>
+    <a class="file-link"
+      ${boundHref ? `[href]="${boundHref}" ` : ''}
+      ${href ? `href="${href}" ` : ''}>
+      ${name}
+    </a>
+  </div>`;
+
+
+const PlaceholderFileListItem = ({name, href, selectModePrefix}) =>
+  linksToExample(href) ?
+    FileListItem({
+      name,
+      href: selectModePrefix + replaceLeadingSlash(href, ''),
+      boundHref: `(${selectModeKey} || '${selectModePrefix}') + '${
+        replaceLeadingSlash(href, '')}'`,
+    }) :
+    FileListItem({href, name});
+
+
+const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
+  (linksToExample(basepath, name) ?
+    replaceLeadingSlash(basepath, selectModePrefix) :
+    basepath) +
+  name;
+
+const FileList = ({basepath, fileSet, selectModePrefix}) => joinFragments([
+  AmpState(fileListEndpointStateId, {
+    [fileListEndpointStateKey]: fileListEndpoint({path: basepath}),
+  }),
+
+  html`<amp-list [src]="${fileListEndpointKey}"
+    src="${fileListEndpoint({path: basepath})}"
     items="."
     layout="fixed-height"
     width="auto"
@@ -148,14 +195,24 @@ const FileList = ({basepath}) =>
 
     <div fallback>Failed to load data.</div>
 
-    <template type="amp-mustache">
-      <div class="file-link-container">
-        <a class="file-link"
-          [href]="(documentMode.selectModePrefix || '') +
-          '${basepath.substring(1)}{{.}}'">
-          {{.}}
-        </a>
+    <div placeholder>
+      <div role=list>
+        ${joinFragments(fileSet, ({name, href}) =>
+          PlaceholderFileListItem({name, href, selectModePrefix}))}
       </div>
+    </div>
+
+    <template type="amp-mustache">
+      ${FileListItem({
+        href: `${basepath}{{.}}`,
+        boundHref: containsExpr(
+            '\'{{.}}\'',
+            '\'.html\'',
+            `(${selectModeKey} || '${selectModePrefix}') +` +
+                `'${replaceLeadingSlash(basepath, '')}{{.}}'`,
+            `'${basepath}{{.}}'`),
+        name: '{{.}}',
+      })}
     </template>
 
     <div overflow
@@ -164,13 +221,10 @@ const FileList = ({basepath}) =>
       class="list-overflow">
       Show more
     </div>
+  </amp-list>`,
+]);
 
-    <div placeholder>Loading...</div>
-  </amp-list>`;
-
-const ProxyFormOptional = ({isMainPage}) => {
-  return isMainPage ? ProxyForm() : '';
-};
+const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
 const selectModePrefix = '/';
 
@@ -178,7 +232,8 @@ const renderTemplate = ({
   basepath,
   css,
   isMainPage,
-  serveMode}) => html`
+  fileSet,
+  serveMode}) => addRequiredExtensionsToHead(html`
 
   <!doctype html>
   <html ⚡>
@@ -193,8 +248,6 @@ const renderTemplate = ({
       content="width=device-width,minimum-scale=1,initial-scale=1">
     ${boilerPlate}
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    ${requiredExtensions.map(({name, version}) =>
-        ExtensionScript({name, version})).join('')}
   </head>
   <body>
     <div class="wrap">
@@ -207,18 +260,23 @@ const renderTemplate = ({
           <h3 class="code" id="basepath">
             ${basepath}
           </h3>
-          ${FileListSearch({basepath})}
+          ${FileListSearchInput({basepath})}
           <div class="file-list-right-section">
-            <amp-state id="documentMode">
-              <script type="application/json">
-              ${JSON.stringify({selectModePrefix})}
-              </script>
-            </amp-state>
+            ${AmpState(selectModeStateId, {
+              [selectModeStateKey]: selectModePrefix,
+            })}
             ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
             <a href="/~" class="underlined">List root directory</a>
           </div>
         </div>
-        ${FileList({basepath})}
+        ${FileList({
+          basepath,
+          selectModePrefix,
+          fileSet: fileSet.map(name => ({
+            name,
+            href: maybePrefixExampleDocHref(basepath, name, selectModePrefix),
+          })),
+        })}
       </div>
     </div>
     <div class="center">
@@ -227,7 +285,7 @@ const renderTemplate = ({
     </div>
     ${SettingsModal({serveMode})}
   </body>
-  </html>`;
+  </html>`);
 
 
 module.exports = {renderTemplate};
