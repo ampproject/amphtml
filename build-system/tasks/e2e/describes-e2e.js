@@ -196,8 +196,8 @@ class AmpPageFixture {
 
     // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
-    // const chromeOptions = {'args': ['--headless']};
-    // capabilities.set('chromeOptions', chromeOptions);
+    const chromeOptions = {'args': ['--headless']};
+    capabilities.set('chromeOptions', chromeOptions);
 
     const builder = new Builder().withCapabilities(capabilities);
     return builder.build().then(driver => {
@@ -209,8 +209,10 @@ class AmpPageFixture {
   }
 
   /** @override */
-  teardown(unusedEnv) {
-    this.driver_.quit();
+  async teardown(unusedEnv) {
+    if (this.driver_) {
+      await this.driver_.quit();
+    }
     this.driver_ = null;
   }
 }
