@@ -90,6 +90,7 @@ function serveIndex({root, mapBasepath}) {
         isMainPage,
         serveMode,
         css,
+        selectModePrefix: '/',
       });
 
       res.end(renderedHtml);

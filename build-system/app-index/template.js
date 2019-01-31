@@ -21,29 +21,23 @@
 
 const boilerPlate = require('./boilerplate');
 const documentModes = require('./document-modes');
+const headerLinks = require('./header-links');
 const ProxyForm = require('./proxy-form');
 const {
   AmpState,
   addRequiredExtensionsToHead,
   containsExpr,
 } = require('./amphtml-helpers');
+const {appendQueryParamsToUrl, replaceLeadingSlash} = require('./url');
 const {html, joinFragments} = require('./html');
 const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
-const fileListEndpointPrefix = '/dashboard/api/listing';
-
 const examplesPathRegex = /^\/examples\//;
 const htmlDocRegex = /\.html$/;
 
-const leadingSlashRegex = /^\//;
-
-const replaceLeadingSlash = (subject, replacement) =>
-  subject.replace(leadingSlashRegex, replacement);
-
 const fileListEndpoint = query =>
-  fileListEndpointPrefix + '?' +
-  Object.keys(query).map(k => `${k}=${query[k]}`).join('&');
+  appendQueryParamsToUrl('/dashboard/api/listing', query);
 
 const ampStateKey = (...keys) => keys.join('.');
 
@@ -55,35 +49,6 @@ const fileListEndpointStateId = 'fileListEndpoint';
 const fileListEndpointStateKey = 'src';
 const fileListEndpointKey = ampStateKey(
     fileListEndpointStateId, fileListEndpointStateKey);
-
-const headerLinks = [
-  {
-    'name': 'Developing',
-    'href': 'https://' +
-      'github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md',
-  },
-  {
-    'divider': true,
-    'name': 'Contributing',
-    'href': 'https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md',
-  },
-  {
-    'name': 'Github',
-    'href': 'https://github.com/ampproject/amphtml/',
-  },
-  {
-    'name': 'Find File',
-    'href': 'https://github.com/ampproject/amphtml/find/master',
-  },
-  {
-    'name': 'Travis',
-    'href': 'https://travis-ci.org/ampproject/amphtml',
-  },
-  {
-    'name': 'Percy',
-    'href': 'https://percy.io/ampproject/amphtml/',
-  },
-];
 
 
 const HeaderLink = ({name, href, divider}) => html`
@@ -225,14 +190,13 @@ const FileList = ({basepath, fileSet, selectModePrefix}) => joinFragments([
 
 const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
-const selectModePrefix = '/';
-
 const renderTemplate = ({
   basepath,
   css,
   isMainPage,
   fileSet,
-  serveMode}) => addRequiredExtensionsToHead(html`
+  serveMode,
+  selectModePrefix}) => addRequiredExtensionsToHead(html`
 
   <!doctype html>
   <html ⚡>
