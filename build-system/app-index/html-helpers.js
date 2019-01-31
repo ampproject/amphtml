@@ -24,8 +24,8 @@ const thru = a => a;
  * @return {string}
  * @template T
  */
-const many = (fragments, opt_renderer) =>
+const joinFragments = (fragments, opt_renderer) =>
   fragments.map(opt_renderer || thru).join('');
 
 
-module.exports = {many};
+module.exports = {joinFragments};

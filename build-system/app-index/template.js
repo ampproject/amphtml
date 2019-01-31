@@ -28,8 +28,8 @@ const {
   addRequiredExtensionsToHead,
   containsExpr,
 } = require('./amphtml-helpers');
+const {joinFragments} = require('./html-helpers');
 const {KeyValueOptions} = require('./form');
-const {many} = require('./html-helpers');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 const fileListEndpointPrefix = '/dashboard/api/listing';
@@ -102,7 +102,7 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${many(links, ({name, href, divider}, i) =>
+      ${joinFragments(links, ({name, href, divider}, i) =>
           HeaderLink({
             divider: divider || i == links.length - 1,
             name,
@@ -180,7 +180,7 @@ const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
     basepath) +
   name;
 
-const FileList = ({basepath, fileSet, selectModePrefix}) => many([
+const FileList = ({basepath, fileSet, selectModePrefix}) => joinFragments([
   AmpState(fileListEndpointStateId, {
     [fileListEndpointStateKey]: fileListEndpoint({path: basepath}),
   }),
@@ -197,7 +197,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) => many([
 
     <div placeholder>
       <div role=list>
-        ${many(fileSet, ({name, href}) =>
+        ${joinFragments(fileSet, ({name, href}) =>
           PlaceholderFileListItem({name, href, selectModePrefix}))}
       </div>
     </div>

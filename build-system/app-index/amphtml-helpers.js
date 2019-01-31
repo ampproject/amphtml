@@ -17,7 +17,7 @@
 /* eslint-disable amphtml-internal/html-template */
 
 const html = require('./html');
-const {many} = require('./html-helpers');
+const {joinFragments} = require('./html-helpers');
 
 
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
@@ -94,7 +94,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
   }
 
   return docStr.replace(/(\<\/head\>)/i, (_, headClosingTag) =>
-    many(Object.values(extensions), ExtensionScript) + headClosingTag);
+    joinFragments(Object.values(extensions), ExtensionScript) + headClosingTag);
 };
 
 
