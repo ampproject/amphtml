@@ -1388,8 +1388,9 @@ describes.realWin('amp-story', {
                 expect(story.activePage_.element.id).to.equal('cover');
               });
         });
+
     it('should correctly mark goToPage pages are distance 1', () => {
-      const pages = createPages(
+      createPages(
           story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
       story.buildCallback();
 
@@ -1402,40 +1403,32 @@ describes.realWin('amp-story', {
                 'button',
                 {'id': 'actionButton',
                   'on': 'tap:story.goToPage(id=page-2)'});
-            story.element.querySelector('#cover').appendChild(actionButton);
-            expect(pages[0].getAttribute('distance')).to.equal('1');
-          });
 
+            story.element.querySelector('#cover').appendChild(actionButton);
+
+            const distanceGraph = story.getPagesByDistance_();
+            expect(distanceGraph[1].includes('page-2')).to.be.true;
+          });
     });
 
     it('should correctly mark previous pages in the stack as distance 1',
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
 
           return story.layoutCallback()
               .then(() => {
-                story.element.setAttribute('id', 'story');
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
 
-                const actionButton = createElementWithAttributes(
-                    win.document,
-                    'button',
-                    {'id': 'actionButton',
-                      'on': 'tap:story.goToPage(id=page-2)'});
-                story.element.querySelector('#cover').appendChild(actionButton);
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
 
-                // Click on the actionButton to trigger the goToPage action.
-                actionButton.click().then(() => {
+                const distanceGraph = story.getPagesByDistance_();
+                expect(distanceGraph[1].includes('cover')).to.be.true;
 
-                  expect(story.element.querySelector('#cover')
-                      .getAttribute('distance')).to.equal('1');
-                });
               });
-
-
         });
-
   });
 });
 
