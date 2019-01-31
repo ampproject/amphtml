@@ -1815,6 +1815,7 @@ export class AmpStory extends AMP.BaseElement {
           }
           pagesByDistance[1].push(maybePrev);
         }
+        // Do not overwrite, branching distance always takes precedence.
         if (pageId !== maybePrev) {
           pagesByDistance[distance].push(pageId);
         }
