@@ -40,7 +40,7 @@ import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
-import {buildUrl} from '../url-builder';
+import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
