@@ -31,8 +31,7 @@ tags: {  # <amp-smartlinks>
   requires_extension: "amp-smartlinks"
   attrs: {
     name: "exclusive-links"
-    value: "true"
-    value: "false"
+    value: ""
   }
   attrs: {
     name: "link-attribute"
@@ -43,8 +42,7 @@ tags: {  # <amp-smartlinks>
   attrs: {
     name: "linkmate"
     mandatory: true
-    value: "true"
-    value: "false"
+    value: ""
   }
   attrs: {
     name: "nrtv-account-name"
