@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
@@ -66,7 +67,8 @@ export class AmpScript extends AMP.BaseElement {
       dev().info(TAG, 'Create worker:', data);
     };
     callbacks.onHydration = () => {
-      // TODO(choumx): Toggle CSS class.
+      dev().info(TAG, 'Hydrated!');
+      this.element.classList.add('i-amphtml-hydrated');
     };
     callbacks.onSendMessage = data => {
       dev().info(TAG, 'To worker:', data);
@@ -113,5 +115,5 @@ export class AmpScript extends AMP.BaseElement {
 }
 
 AMP.extension('amp-script', '0.1', function(AMP) {
-  AMP.registerElement('amp-script', AmpScript);
+  AMP.registerElement('amp-script', AmpScript, CSS);
 });
