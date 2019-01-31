@@ -1,0 +1,118 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-cld-img example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body {
+    -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    animation: -amp-start 8s steps(1, end) 0s 1 normal both
+  }
+
+  @-webkit-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-moz-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-ms-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-o-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }</style>
+  <noscript>
+    <style amp-boilerplate>body {
+      -webkit-animation: none;
+      -moz-animation: none;
+      -ms-animation: none;
+      animation: none
+    }</style>
+  </noscript>
+
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-cld-img" src="https://cdn.ampproject.org/v0/amp-cld-img-0.1.js"></script>
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script id="amp-cld-config" type="application/json">
+    {
+      "cloudName": "demo",
+      "stepSize": 200,
+      "maxSize": 1500,
+      "fetchFormat": "auto",
+      "quality": "auto",
+      "dpr": "auto"
+    }
+  </script>
+
+  <style amp-custom>
+
+    .contain img {
+      object-fit: contain;
+      background: #0dd3ff;
+    }
+
+    .cover img {
+      object-fit: cover;
+      background: #0dd3ff;
+    }
+
+  </style>
+</head>
+<body>
+<amp-carousel
+    height="400"
+  layout="fixed-height"
+  type="carousel">
+  <amp-cld-img data-public-id="sample" effect="sepia" width="201" height="399"
+               transformation-width="250"
+               crop="fill" gravity="auto"></amp-cld-img>
+  <amp-cld-img src="https://res.cloudinary.com/demo/image/upload/sample" width="201" height="399" class="amp-object-fit-cover"></amp-cld-img>
+  <amp-cld-img src="https://res.cloudinary.com/demo/image/upload/w_auto,h_auto/sample" width="201" height="399"class="amp-object-fit-contain"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" effect="sepia" width="300" height="400" class="contain"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" effect="blur:1500" width="300" height="400" class="contain"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" background="red" crop="pad" width="300" height="400" class="contain"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" raw-transformation="e_grayscale" width="300" height="400" class="contain"></amp-cld-img>
+
+  <amp-cld-img data-public-id="sample" effect="sepia" width="300" height="400" class="cover"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" effect="blur:1500" width="300" height="400" class="cover"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" background="red" crop="pad" width="300" height="400" class="cover"></amp-cld-img>
+  <amp-cld-img data-public-id="sample" raw-transformation="e_grayscale" width="300" height="400" class="cover"></amp-cld-img>
+</amp-carousel>
+</body>
+</html>

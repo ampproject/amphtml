@@ -275,6 +275,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-cld-img',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-consent',
     version: '0.1',
     latestVersion: '0.1',

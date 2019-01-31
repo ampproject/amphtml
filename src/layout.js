@@ -99,6 +99,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-CLD-IMG': true,
   'AMP-DAILYMOTION': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
