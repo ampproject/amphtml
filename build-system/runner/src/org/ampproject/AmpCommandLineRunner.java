@@ -45,6 +45,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean is_production_env = true;
 
   private boolean single_file_compilation = false;
+  
+  private boolean scan_json_casts = false;
 
   /**
    * List of string suffixes to eliminate from the AST.
@@ -78,7 +80,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         assignmentReplacements, prodAssignmentReplacements);
     AmpPassJSONObjectCastFinder jsonObjectCastFinder = new AmpPassJSONObjectCastFinder(getCompiler());
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
+    if (scan_json_casts) {
+      options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
+    }
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
@@ -133,6 +137,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
         runner.single_file_compilation = true;
+      } else if (arg.contains("SCAN_JSON_CASTS=true")) {
+        runner.scan_json_casts = true;
       }
     }
 

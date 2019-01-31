@@ -59,17 +59,6 @@ import {stubElementsForDoc} from './service/custom-element-registry';
  */
 const shouldMainBootstrapRun = !self.IS_AMP_ALT;
 
-/** @typedef {{b: string}} */
-let abc;
-
-/** @typedef {{a: string}} */
-let xyz;
-
-/** @type {!abc} */
-let aaa = {};
-
-/** @type {!xyz} */ (aaa);
-
 if (shouldMainBootstrapRun) {
   // Store the originalHash as early as possible. Trying to debug:
   // https://github.com/ampproject/amphtml/issues/6070
