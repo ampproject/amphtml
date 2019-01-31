@@ -25,6 +25,7 @@ import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {
   factory as inputmaskPaymentCardAliasFactory,
 } from './inputmask-payment-card-alias';
+import {requireExternal} from '../../../src/module';
 
 const NamedMasksToInputmask = dict({
   [NamedMasks.PAYMENT_CARD]: 'payment-card',
@@ -58,7 +59,35 @@ const MaskCharsToInputmask = dict({
   [MaskChars.ESCAPE]: '\\',
 });
 
-let Inputmask;
+let Inputmask_;
+/**
+ * Require and configure the Inputmask dependency.
+ * @param {!Element} element
+ * @return {function(!Object):!Inputmask}
+ */
+function getInputmask(element) {
+  if (Inputmask_) {
+    return Inputmask_;
+  }
+
+  const inputmaskFactory = requireExternal('inputmaskFactory');
+  Inputmask_ = inputmaskFactory(element);
+  inputmaskCustomAliasFactory(Inputmask_);
+  inputmaskPaymentCardAliasFactory(Inputmask_);
+
+  Inputmask_.extendDefaults(dict({
+    // A list of supported input type attribute values
+    'supportsInputType': [
+      'text',
+      'tel',
+      'search',
+      // 'password', // use-case?
+      // 'email', // doesn't support setSelectionRange. workaround?
+    ],
+  }));
+
+  return Inputmask_;
+}
 
 /**
  * TODO(cvializ): allow masks to be passed as data
@@ -71,21 +100,7 @@ export class Mask {
    * @param {string} mask
    */
   constructor(element, mask) {
-    const win = element.ownerDocument.defaultView;
-    Inputmask = Inputmask || win.inputmaskFactory(element);
-    inputmaskCustomAliasFactory(Inputmask);
-    inputmaskPaymentCardAliasFactory(Inputmask);
-
-    Inputmask.extendDefaults(dict({
-      // A list of supported input type attribute values
-      'supportsInputType': [
-        'text',
-        'tel',
-        'search',
-        // 'password', // use-case?
-        // 'email', // doesn't support setSelectionRange. workaround?
-      ],
-    }));
+    const Inputmask = getInputmask(element);
 
     this.element_ = element;
 

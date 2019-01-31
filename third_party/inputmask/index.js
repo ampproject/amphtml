@@ -1,21 +1,19 @@
 
 import {factory as inputmaskDependencyFactory} from './inputmask.dependencyLib';
-import {factory as inputmaskFactory} from './inputmask';
+import {factory as inputmaskCoreFactory} from './inputmask';
 import {factory as inputmaskDateExtensionsFactory} from './inputmask.date.extensions';
 
-let Inputmask;
+(window.AMP = window.AMP || []).push(function (AMP) {
+  (AMP.dependencies = AMP.dependencies || {})['inputmaskFactory'] = factory;
+});
 
-window.inputmaskFactory = function(element) {
+function factory(element) {
   const doc = element.ownerDocument;
-  const win = element.ownerDocument.defaultView;
-
-  if (Inputmask) {
-    return Inputmask;
-  }
+  const win = doc.defaultView;
 
   const InputmaskDependencyLib = inputmaskDependencyFactory(win, doc);
-  Inputmask = inputmaskFactory(InputmaskDependencyLib, win, doc, undefined);
+  const Inputmask = inputmaskCoreFactory(InputmaskDependencyLib, win, doc, undefined);
   inputmaskDateExtensionsFactory(Inputmask);
 
   return Inputmask;
-};
+}

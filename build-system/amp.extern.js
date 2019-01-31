@@ -342,7 +342,7 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
 // amp-inputmask externs
 /**
- * @constructor @dict
+ * @constructor
  */
 var Inputmask = class {};
 
@@ -352,11 +352,19 @@ Inputmask.extendAliases = function (unusedOpts) {};
 /** @param {!Object} unusedOpts */
 Inputmask.extendDefaults = function (unusedOpts) {};
 
+/** @param {!Element} unusedElement */
+Inputmask.prototype.mask = function (unusedElement) {};
+
+Inputmask.prototype.remove = function () {};
+
+/** @dict */
+window.AMP.dependencies = {};
+
 /**
  * @param {!Element} unusedElement
  * @return {!Inputmask}
  */
-window.inputmaskFactory = function(unusedElement) {};
+window.AMP.dependencies.inputmaskFactory = function(unusedElement) {};
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
