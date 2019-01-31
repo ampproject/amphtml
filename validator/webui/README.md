@@ -45,7 +45,12 @@ function utoa(str) {
 }
 ```
 
-By default this tool will assume you want to validate an `AMPHTML` document. If you would like to validate another format you can add `#htmlFormat={'AMP4ADS', 'AMP4EMAIL', 'ACTIONS'}`.
+By default this tool will assume you want to validate an `AMPHTML` document. If you would like to validate another format you can chose one of the following:
+```
+#htmlFormat=AMP4ADS
+#htmlFormat=AMP4EMAIL
+#htmlFormat=ACTIONS
+```
 
 If you wish to use both the `doc=` and `htmlFormat=` together make sure to include an `&` between the key-value pairs.
 
