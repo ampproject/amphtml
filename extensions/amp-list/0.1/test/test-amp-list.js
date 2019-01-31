@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
@@ -52,6 +53,7 @@ describes.repeated('amp-list', {
         findAndRenderTemplateArray: sandbox.stub(),
       };
       sandbox.stub(Services, 'templatesFor').returns(templates);
+      sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
       resource = {
         resetPendingChangeSize: sandbox.stub(),

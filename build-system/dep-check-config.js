@@ -371,6 +371,8 @@ exports.rules = [
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
     ],
   },
   {
