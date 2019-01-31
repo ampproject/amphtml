@@ -1154,6 +1154,9 @@ const EXTENSION_BUNDLE_MAP = {
     'third_party/d3-geo-projection/d3-geo-projection.js',
     'third_party/vega/vega.js',
   ],
+  'amp-inputmask.js': [
+    'third_party/inputmask/bundle.js',
+  ],
 };
 
 /**
