@@ -1873,8 +1873,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       pagesByDistance.forEach((pageIds, distance) => {
-        console.log(distance);
-        console.log(pageIds);
         pageIds.forEach(pageId => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
