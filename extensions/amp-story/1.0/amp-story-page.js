@@ -119,10 +119,13 @@ const buildPlayMessageElement = element =>
 const buildOpenAttachmentElement = element =>
   htmlFor(element)`
       <div class="
-          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-open-attachment-icon"></span>
-        <span class="i-amphtml-story-page-open-attachment-text"
-            role="button"></span>
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+          role="button">
+        <span class="i-amphtml-story-page-open-attachment-icon">
+          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
+          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+        </span>
+        <span class="i-amphtml-story-page-open-attachment-text"></span>
       </div>`;
 
 /**
@@ -967,11 +970,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      this.openAttachmentEl_
+          .addEventListener('click', () => this.openAttachment());
 
       const textEl = this.openAttachmentEl_
           .querySelector('.i-amphtml-story-page-open-attachment-text');
-
-      textEl.addEventListener('click', () => this.openAttachment());
 
       const openAttachmentLabel = Services.localizationService(this.win)
           .getLocalizedString(
