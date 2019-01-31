@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-const TAG = 'AMP.require';
+import {listenOncePromise} from '../../../../../src/event-helper';
 
-/**
- * Allows `require`ing modules exported by non-AMP build code.
- * @param {string} module
- * @return {?}
- */
-export function requireExternal(module) {
-  const required = (AMP.dependencies && AMP.dependencies[module]) ||
-      (AMP.require && AMP.require(module));
-  if (required) {
-    return required;
-  } else {
-    dev().error(TAG, 'Could not require external module %s.' +
-        ' Did you import the bundle in the extension?', module);
-  }
+export function simulateKeyboardInteraction(win, input, key) {
+  const promise = listenOncePromise(input, 'keypress');
+  const keyCode = key.charCodeAt(0);
+  const keydown = new win.KeyboardEvent('keydown', {key, keyCode});
+  const keypress = new win.KeyboardEvent('keypress', {key, keyCode});
+  input.dispatchEvent(keydown);
+  input.dispatchEvent(keypress);
+  return promise;
 }

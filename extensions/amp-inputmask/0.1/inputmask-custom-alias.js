@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
+
 /**
  * Installs an alias used by amp-inputmask that fixes a problem where
  * the user copy-pastes a value into a field with an inputmask that has a
@@ -22,27 +24,32 @@
  * @param {!Object} Inputmask
  */
 export function factory(Inputmask) {
-  Inputmask.extendAliases({
+  Inputmask.extendAliases(dict({
     'custom': {
-      prefixes: [],
-      mask(opts) {
-        const {customMask} = opts;
-        opts.prefixes = getPrefixSubsets(customMask);
+      'prefixes': [],
+      /**
+       * @param {!JsonObject} opts
+       * @return {!Object}
+       */
+      'mask': function(opts) {
+        const customMask = opts['customMask'];
+        opts['prefixes'] = getPrefixSubsets(customMask);
 
         return customMask;
       },
       /**
        * @param {string} value
-       * @param {!Object} opts
+       * @param {!JsonObject} opts
+       * @return {string}
        */
-      onBeforeMask(value, opts) {
+      'onBeforeMask': function(value, opts) {
         const processedValue = value.replace(/^0{1,2}/, '').replace(/[\s]/g, '');
-        const {prefixes} = opts;
+        const prefixes = opts['prefixes'];
 
         return removePrefix(processedValue, prefixes);
       },
     },
-  });
+  }));
 
   /**
    * A prefix is defined as non-mask characters at the beginning of a mask
@@ -100,6 +107,7 @@ export function factory(Inputmask) {
    * Remove a mask prefix from the input value
    * @param {string} value
    * @param {!Array<string>} prefixes
+   * @return {string}
    */
   function removePrefix(value, prefixes) {
     const longestPrefix = prefixes
