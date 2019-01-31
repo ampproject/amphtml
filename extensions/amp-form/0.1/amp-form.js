@@ -527,7 +527,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(/*shouldSubmitFormElement*/false);
+        this.handleNonXhrGet_(event);
         return Promise.resolve();
       }
 
@@ -548,7 +548,7 @@ export class AmpForm {
         presubmitPromises,
         SUBMIT_TIMEOUT
     ).then(
-        () => this.handlePresubmitSuccess_(trust),
+        () => this.handlePresubmitSuccess_(trust, event),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
@@ -566,15 +566,16 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
+   * @param {?Event} event
    * @return {!Promise}
    */
-  handlePresubmitSuccess_(trust) {
+  handlePresubmitSuccess_(trust, event) {
     if (this.xhrAction_) {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
+      this.handleNonXhrGet_(event);
     }
 
     return Promise.resolve();
@@ -888,14 +889,12 @@ export class AmpForm {
 
   /**
    * Triggers Submit Analytics,
-   * and Form Element submit if passed by param.
-   * shouldSubmitFormElement should ONLY be true
-   * If the submit event.preventDefault was called
-   * @param {boolean} shouldSubmitFormElement
+   * and Form Element submit if not triggered by an event
+   * @param {?Event} event
    */
-  handleNonXhrGet_(shouldSubmitFormElement) {
+  handleNonXhrGet_(event) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    if (shouldSubmitFormElement) {
+    if (!event) {
       this.form_.submit();
     }
     this.setState_(FormState.INITIAL);

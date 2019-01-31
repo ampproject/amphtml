@@ -29,14 +29,16 @@ import './amp-story-grid-layer';
 import './amp-story-page';
 import {
   Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+import {AdvancementMode, AmpStoryAnalytics} from './analytics';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -395,6 +397,8 @@ export class AmpStory extends AMP.BaseElement {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
         if (args) {
+          this.storeService_.dispatch(
+              Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
           this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
@@ -541,6 +545,11 @@ export class AmpStory extends AMP.BaseElement {
           this.onSupportedBrowserStateUpdate_(isBrowserSupported);
         });
 
+    this.storeService_.subscribe(
+        StateProperty.ADVANCEMENT_MODE, mode => {
+          this.variableService_.onAdvancementModeStateChange(mode);
+        });
+
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
@@ -651,9 +660,11 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
+      const embedComponent = /** @type {InteractiveComponentDef} */
+        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.EMBEDDED_COMPONENT) ||
+          embedComponent.state !== EmbeddedComponentState.HIDDEN ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
@@ -1066,6 +1077,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     if (direction === TapNavigationDirection.NEXT) {
       this.next_();
     } else if (direction === TapNavigationDirection.PREVIOUS) {
@@ -1150,6 +1164,12 @@ export class AmpStory extends AMP.BaseElement {
           this.getPageIndex(oldPage) < pageIndex ?
             setAttributeInMutate(oldPage, Attributes.VISITED) :
             removeAttributeInMutate(oldPage, Attributes.VISITED);
+
+          if (oldPage.isAd()) {
+            this.storeService_.dispatch(
+                Action.SET_ADVANCEMENT_MODE,
+                AdvancementMode.ADVANCE_TO_ADS);
+          }
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
@@ -1174,11 +1194,13 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
+        const oldPageId = oldPage ? oldPage.element.id : null;
         // TODO(alanorozco): check if autoplay
         this.navigationState_.updateActivePage(
             pageIndex,
             this.getPageCount(),
             targetPage.element.id,
+            oldPageId,
             targetPage.getNextPageId() === null /* isFinalPage */
         );
 
@@ -1367,6 +1389,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       return;
     }
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
