@@ -17,7 +17,7 @@
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
-import {buildUrl} from './url-builder';
+import {buildUrl} from './shared/url-builder';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -92,7 +92,7 @@ export let AmpAnalyticsConfigDef;
 export let NameframeExperimentConfig;
 
 /**
- * @const {!./url-builder.QueryParameterDef}
+ * @const {!./shared/url-builder.QueryParameterDef}
  * @visibleForTesting
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
