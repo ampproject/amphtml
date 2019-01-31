@@ -16,8 +16,7 @@
 
 /* eslint-disable amphtml-internal/html-template */
 
-const html = require('./html');
-const {joinFragments} = require('./html-helpers');
+const {html, joinFragments} = require('./html');
 
 
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;

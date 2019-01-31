@@ -15,7 +15,7 @@
  */
 /* eslint-disable indent */
 /* eslint-disable amphtml-internal/html-template */
-const html = require('./html');
+const {html} = require('./html');
 
 const serveModes = [
   {

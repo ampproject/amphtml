@@ -21,14 +21,13 @@
 
 const boilerPlate = require('./boilerplate');
 const documentModes = require('./document-modes');
-const html = require('./html');
 const ProxyForm = require('./proxy-form');
 const {
   AmpState,
   addRequiredExtensionsToHead,
   containsExpr,
 } = require('./amphtml-helpers');
-const {joinFragments} = require('./html-helpers');
+const {html, joinFragments} = require('./html');
 const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
