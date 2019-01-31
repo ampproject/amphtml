@@ -600,5 +600,10 @@
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
+    {
+      "url": "examples/visual-tests/amp-selector.amp.html",
+      "name": "amp-selector",
+      "interactive_tests": "examples/visual-tests/amp-selector.js",
+    }
   ]
 }
