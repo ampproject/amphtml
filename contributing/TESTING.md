@@ -113,9 +113,9 @@ Command                                                                 | Descri
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
 `gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
-`gulp e2e`                                                              | Runs all end to end tests on Chrome.
-`gulp e2e --files=<test-files-path-glob>`                               | Runs end to end tests from the specified files on the latest Chrome browser.
-`gulp e2e --nobuild`                                                    | Runs all end to end tests without building the runtime.
+`gulp e2e`                                                              | Runs all end-to-end tests on Chrome.
+`gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
+`gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
 `gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
 
 ## Manual testing
@@ -325,7 +325,7 @@ firebase deploy
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
 
-## End to End Tests
+## End-to-End Tests
 
 You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon. 
 
