@@ -16,6 +16,7 @@
 
 /* eslint-disable amphtml-internal/html-template */
 
+const {forEachMatch} = require('./regex');
 const {html, joinFragments} = require('./html');
 
 
@@ -24,15 +25,6 @@ const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
 
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
-
-
-const forEachMatch = (regex, subject, callback) => {
-  let match = regex.exec(subject);
-  while (match != null) {
-    callback(match);
-    match = regex.exec(subject);
-  }
-};
 
 
 const ExtensionScript = ({name, version, isTemplate}) =>
