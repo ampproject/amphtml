@@ -73,6 +73,7 @@ const CTA_TYPES = {
   EXPLORE: 'Explore Now',
   GET_NOW: 'Get Now',
   INSTALL: 'Install Now',
+  LEARN_MORE: 'Learn More',
   LISTEN: 'Listen Now',
   MORE: 'More',
   OPEN_APP: 'Open App',
