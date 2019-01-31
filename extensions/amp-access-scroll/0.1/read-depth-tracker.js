@@ -45,9 +45,13 @@ export class ReadDepthTracker {
     );
 
     this.viewport_ = Services.viewportForDoc(ampdoc);
-    this.viewport_.onChanged(debouncedFindTopParagraph_);
 
-    this.paragraphs_ = ampdoc.getBody().getElementsByTagName('p');
+    this.paragraphs_ = [];
+
+    ampdoc.whenReady().then(() => {
+      this.viewport_.onChanged(debouncedFindTopParagraph_);
+      this.paragraphs_ = ampdoc.getBody().getElementsByTagName('p');
+    });
   }
 
   /**
