@@ -744,7 +744,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     };
     expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
     stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
-      macros);
+        macros);
 
     sandbox.stub(Services, 'urlReplacementsForDoc')
         .returns({

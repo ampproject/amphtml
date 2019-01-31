@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {variableServiceFor} from './variables';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -23,6 +22,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {variableServiceFor} from './variables';
 
 const TAG = 'amp-analytics/config';
 
@@ -358,7 +358,9 @@ export class AnalyticsConfig {
     Object.keys(obj).forEach(key => {
       keys.push(key);
       const expanded = Services.urlReplacementsForDoc(element)
-        .expandStringAsync(obj[key], variableServiceFor(this.win_).getMacros());
+          .expandStringAsync(obj[key],
+              variableServiceFor(/** @type {!Window} */
+                  (this.win_)).getMacros());
       expansionPromises.push(expanded);
     });
 
