@@ -15,6 +15,8 @@
  */
 import {
   Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
@@ -24,7 +26,9 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {embeddedComponentSelectors} from './amp-story-embedded-component';
+import {
+  embeddedComponentSelectors,
+} from './amp-story-embedded-component';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 
@@ -377,7 +381,9 @@ class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-        !this.storeService_.get(StateProperty.EXPANDED_COMPONENT)) {
+    /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+        StateProperty.INTERACTIVE_COMPONENT_STATE)).state !==
+        EmbeddedComponentState.EXPANDED) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -481,7 +487,14 @@ class ManualAdvancement extends AdvancementConfig {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
-      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, target);
+      const embedComponent = /** @type {InteractiveComponentDef} */
+        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
+      this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+        element: target,
+        state: embedComponent.state || EmbeddedComponentState.FOCUSED,
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
       return;
     }
 
