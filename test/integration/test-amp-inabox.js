@@ -151,32 +151,6 @@ describe('inabox', function() {
     });
   });
 
-  describes.realWin('AMPHTML ads rendered on non-AMP page ATF within ' +
-      'friendly frame and safe frame - no host', {
-    amp: false,
-  }, env => {
-    let adContent;
-    let iframe;
-    before(() => {
-      // Gets the same ad as the other tests.
-      return fetchAdContent().then(text => { adContent = text; });
-    });
-
-    beforeEach(() => {
-      iframe = document.createElement('iframe');
-    });
-
-    afterEach(() => {
-      env.win.document.body.removeChild(iframe);
-    });
-
-    it('should layout amp-img, amp-pixel, ' +
-        'amp-analytics within friendly frame', () => {
-      writeFriendlyFrame(env.win.document, iframe, adContent);
-      return testAmpComponents();
-    });
-  });
-
   describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
     amp: false,
     body: `
@@ -306,7 +280,8 @@ describe('inabox with a complex image ad', function() {
       iframe = document.createElement('iframe');
     });
 
-    it('should properly render ad in a friendly iframe with viewability pings',
+    it.configure().skipSafari().run(
+        'should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
