@@ -118,8 +118,6 @@ export class AmpList extends AMP.BaseElement {
     /**@private {boolean} */
     this.resizeFailed_ = false;
 
-    installOriginExperimentsForDoc(this.getAmpDoc());
-
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
@@ -149,16 +147,7 @@ export class AmpList extends AMP.BaseElement {
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, viewer, this.templates_);
 
-    const originTrialPromise = originExperimentsForDoc(this.element)
-        .getExperiments()
-        .then(trials => {
-          return trials && trials.includes('amp-list-load-more');
-        });
-
-    this.loadMoreEnabledPromise_ = originTrialPromise.then(enabled => {
-      return (enabled || isExperimentOn(this.win, 'amp-list-load-more')) &&
-        this.element.hasAttribute('load-more');
-    });
+    this.loadMoreEnabledPromise_ = this.getLoadMoreEnabledPromise_();
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -184,6 +173,26 @@ export class AmpList extends AMP.BaseElement {
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
     });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  getLoadMoreEnabledPromise_() {
+    if (!this.element.hasAttribute('load-more')) {
+      return Promise.resolve(false);
+    }
+    if (isExperimentOn(this.win, 'amp-list-load-more')) {
+      return Promise.resolve(true);
+    }
+    installOriginExperimentsForDoc(this.getAmpDoc());
+
+    return originExperimentsForDoc(this.element)
+        .getExperiments()
+        .then(trials => {
+          return trials && trials.includes('amp-list-load-more');
+        });
   }
 
 
