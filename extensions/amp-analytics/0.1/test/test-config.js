@@ -572,6 +572,46 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       });
     });
 
+
+    it('should support amp-analytics-variables macros in varGroups', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'hasValue': '$NOT(foo)',
+              'enabled': true,
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}],
+            configRewriter: {
+              vars: {
+                hasValue: 'false',
+              },
+            },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+
     it('should merge rewritten configuration and use vendor', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
@@ -698,6 +738,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     const expandStringStub = sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
     expandStringStub.resolvesArg(0);
+
+    const macros = {
+      a: 'b',
+    };
+    expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
+    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
+        macros);
 
     sandbox.stub(Services, 'urlReplacementsForDoc')
         .returns({
