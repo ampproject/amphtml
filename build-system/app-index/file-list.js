@@ -18,7 +18,7 @@
 /* eslint-disable indent */
 
 const documentModes = require('./document-modes');
-const {AmpState, containsExpr} = require('./amphtml-helpers');
+const {AmpState, ampStateKey, containsExpr} = require('./amphtml-helpers');
 const {appendQueryParamsToUrl, replaceLeadingSlash} = require('./url');
 const {html, joinFragments} = require('./html');
 const {KeyValueOptions} = require('./form');
@@ -29,14 +29,13 @@ const htmlDocRegex = /\.html$/;
 
 const endpoint = q => appendQueryParamsToUrl('/dashboard/api/listing', q);
 
-const ampStateKey = (...keys) => keys.join('.');
-
 const selectModeStateId = 'documentMode';
 const selectModeStateKey = 'selectModePrefix';
 const selectModeKey = ampStateKey(selectModeStateId, selectModeStateKey);
 
 const endpointStateId = 'listingEndpoint';
 const endpointStateKey = 'src';
+const endpointKey = ampStateKey(endpointStateId, endpointStateKey);
 
 
 const FileListSearchInput = ({basepath}) => html`
@@ -139,7 +138,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
 
     FileListHeading({basepath, selectModePrefix}),
 
-    html`<amp-list [src]="${ampStateKey(endpointStateId, endpointStateKey)}"
+    html`<amp-list [src]="${endpointKey}"
       src="${endpoint({path: basepath})}"
       items="."
       layout="fixed-height"

@@ -59,6 +59,9 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
   ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
 
 
+const ampStateKey = (...keys) => keys.join('.');
+
+
 const addRequiredExtensionsToHead = (docStr, extensionConf = {
   'amp-mustache': {version: '0.2'},
 }) => {
@@ -99,6 +102,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
 
 module.exports = {
   AmpState,
+  ampStateKey,
   addRequiredExtensionsToHead,
   containsExpr,
   ternaryExpr,
