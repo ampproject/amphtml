@@ -844,7 +844,15 @@ amp-story .amp-video-eq,
   }
 }
 
+/**
+ * Hiding the element and only showing it on the active page so the animation
+ * triggers every time the page becomes active.
+ */
 amp-story-page .i-amphtml-story-page-open-attachment {
+  display: none !important;
+}
+
+amp-story-page[active] .i-amphtml-story-page-open-attachment {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -879,7 +887,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  background: #FFF;
+  background: #FFF !important;
   border-radius: 100% !important;
   z-index: -1 !important;
   animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
