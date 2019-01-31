@@ -35,9 +35,8 @@ const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
-  recaptchaMockRequestHandler,
-  recaptchaFormSubmitHandler,
-} = require('./recaptcha.test.js');
+  recaptchaRouter,
+} = require('./recaptcha-router.js');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
@@ -134,14 +133,9 @@ app.get(
     '/dist.3p/current*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
-app.get(
-    '/recaptcha/mock.js',
-    recaptchaMockRequestHandler
-);
-app.post(
-    '/recaptcha/submit',
-    upload.array(),
-    recaptchaFormSubmitHandler
+app.use(
+    '/recaptcha',
+    recaptchaRouter
 );
 
 // Deprecate usage of .min.html/.max.html

@@ -17,6 +17,10 @@
 const pc = process;
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
+const multer = require('multer');
+const recaptchaRouter = require('express').Router();
+
+const upload = multer();
 
 const recaptchaMock = `
 window.grecaptcha = {
@@ -36,29 +40,32 @@ const recaptchaFrameRequestHandler = (req, res, next) => {
   }
 };
 
-const recaptchaMockRequestHandler = (req, res) => {
+recaptchaRouter.get('/mock.js', (req, res) => {
   res.end(recaptchaMock);
-};
+});
 
-const recaptchaFormSubmitHandler = (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+recaptchaRouter.post(
+  '/submit',
+  upload.array(),
+  (req, res) => {
+    const sourceOrigin = req.query['__amp_source_origin'];
+    if (sourceOrigin) {
+      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+    }
+
+    const responseJson = {
+      message: 'Success!',
+    };
+
+    Object.keys(req.body).forEach(bodyKey => {
+      responseJson[bodyKey] = req.body[bodyKey];
+    });
+
+    res.status(200).json(responseJson);
   }
-
-  const responseJson = {
-    message: 'Success!',
-  };
-
-  Object.keys(req.body).forEach(bodyKey => {
-    responseJson[bodyKey] = req.body[bodyKey];
-  });
-
-  res.status(200).json(responseJson);
-};
+);
 
 module.exports = {
   recaptchaFrameRequestHandler,
-  recaptchaMockRequestHandler,
-  recaptchaFormSubmitHandler,
+  recaptchaRouter
 };
