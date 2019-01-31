@@ -126,8 +126,8 @@ export class PositionObserver {
         layoutRectFromDomRect(element./*OK*/getBoundingClientRect());
     const parentWin = element.ownerDocument.defaultView;
     for (let j = 0, tempWin = parentWin;
-        j < 10 && tempWin != this.win_ && tempWin != this.win_.top;
-        j++, tempWin = tempWin.parent) {
+      j < 10 && tempWin != this.win_ && tempWin != this.win_.top;
+      j++, tempWin = tempWin.parent) {
       const parentFrameRect = layoutRectFromDomRect(
           tempWin.frameElement./*OK*/getBoundingClientRect());
       targetRect = moveLayoutRect(targetRect,
