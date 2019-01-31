@@ -108,7 +108,7 @@ function getConfig() {
         //'SL_iOS_11',
         //'SL_iOS_12',
         //'SL_IE_11',
-        'SL_Chrome_Beta',
+        //'SL_Chrome_Beta',
         'SL_Firefox_Beta',
       ] : [
       // With --saucelabs_lite, a subset of the unit tests are run.
