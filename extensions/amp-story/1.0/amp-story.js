@@ -29,6 +29,8 @@ import './amp-story-grid-layer';
 import './amp-story-page';
 import {
   Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
   StateProperty,
   UIType,
   getStoreService,
@@ -658,9 +660,11 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
+      const embedComponent = /** @type {InteractiveComponentDef} */
+        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.EMBEDDED_COMPONENT) ||
+          embedComponent.state !== EmbeddedComponentState.HIDDEN ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
