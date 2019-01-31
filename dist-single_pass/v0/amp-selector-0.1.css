@@ -1,2 +1,0 @@
-amp-selector [option]{cursor:pointer}amp-selector [option][selected]{cursor:auto;outline:1px solid rgba(0,0,0,0.7)}amp-selector [disabled][option],amp-selector[disabled] [option],amp-selector[disabled] [selected],amp-selector [selected][disabled]{cursor:auto;outline:none}
-/*# sourceURL=/extensions/amp-selector/0.1/amp-selector.css*/

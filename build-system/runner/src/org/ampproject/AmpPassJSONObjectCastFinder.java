@@ -23,7 +23,9 @@ import java.nio.file.StandardOpenOption;
 
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.CompilerPass;
+import com.google.javascript.jscomp.DiagnosticType;
 import com.google.javascript.jscomp.Es6SyntacticScopeCreator;
+import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.NodeTraversal;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.jstype.JSType;
@@ -65,24 +67,16 @@ class AmpPassJSONObjectCastFinder implements NodeTraversal.Callback, CompilerPas
   }
 
   public void visit(NodeTraversal t, Node n, Node parent) {
-	System.out.println(n.getToken());
     if (isCast(n)) {
     	Node castNode = n;
     	Node exprNode = castNode.getFirstChild();
     	
     	JSType castType = castNode.getJSType();
     	JSType exprType = exprNode.getJSType();
-    	String errorPoint = "castNode type: " + castType + ", " + this.typeRegistry.getReadableTypeName(castNode);
-    	System.out.println(errorPoint);
-    	//System.out.println("exprNode type: " + exprType + ", " + this.typeRegistry.getReadableTypeName(exprNode));
-
-    
-    	try {
-			usingPath(errorPoint);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	String error = "cast from type: " + exprType + " " + this.typeRegistry.getReadableTypeName(exprNode) +
+    			" to " + castType + " " +  this.typeRegistry.getReadableTypeName(exprNode) + ". " + castNode.getSourceFileName() + ":" + castNode.getLineno() + "\n";
+    	JSError err = JSError.make(DiagnosticType.warning("JSERROR", "{0}"), error);
+    	this.compiler.report(err);
 
     }
   }
@@ -91,7 +85,7 @@ class AmpPassJSONObjectCastFinder implements NodeTraversal.Callback, CompilerPas
 	  return n != null && n.isCast();
   }
   
-  public static void usingPath(String str) throws IOException {       
+  public static void writeCastWarnings(String str) throws IOException {       
       Path path = Paths.get("/Users/erwinm/dev/amphtml/build-system/runner/types.txt");
       Files.write(path, str.getBytes(), StandardOpenOption.APPEND);
   }

@@ -80,9 +80,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         assignmentReplacements, prodAssignmentReplacements);
     AmpPassJSONObjectCastFinder jsonObjectCastFinder = new AmpPassJSONObjectCastFinder(getCompiler());
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    if (scan_json_casts) {
-      options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
-    }
+    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
+    options.setPreserveTypeAnnotations(true);
+    
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);

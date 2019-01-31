@@ -1,1 +1,1 @@
-castNode type: null, ?
+castNode type: Element, Element
