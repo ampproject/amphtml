@@ -139,7 +139,7 @@ export class Messaging {
      * document would be "null", which defeats the purpose of an origin check.
      * An attacker could simply create a sandboxed, malicious iframe (therefore
      * having null origin), walk on the DOM frame tree to find a reference to
-     * the viewer iframe (this is not constrained bu the same origin policy),
+     * the viewer iframe (this is not constrained by the same origin policy),
      * and then send postMessage() calls to the viewer frame and pass the
      * viewer's origin checks, if any.
      *
