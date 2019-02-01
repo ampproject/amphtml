@@ -209,6 +209,7 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {name: 'amp-movingplay', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mustache', version: ['0.1', '0.2'], type: TYPES.MISC},
   {
     name: 'amp-next-page',
