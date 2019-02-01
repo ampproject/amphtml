@@ -287,13 +287,14 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
+    const /** Object<string, *> */ finalMessage = Object.assign(message, {});
     if (this.token_) {
-      message['messagingToken'] = this.token_;
+      finalMessage['messagingToken'] = this.token_;
     }
     this.port_./*OK*/postMessage(
         this.isWebview_
-          ? JSON.stringify(message)
-          : message);
+          ? JSON.stringify(/** @type {!JsonObject} */ (finalMessage))
+          : finalMessage);
   }
 
   /**
