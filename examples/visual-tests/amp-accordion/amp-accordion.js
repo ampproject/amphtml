@@ -19,7 +19,6 @@ const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/hel
 
 module.exports = {
   'click section one': async (page, name) => {
-    // await page.waitFor(1600);
     await page.tap('amp-accordion section:first-child');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
