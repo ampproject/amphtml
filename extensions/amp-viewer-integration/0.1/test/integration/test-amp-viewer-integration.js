@@ -185,6 +185,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
   describe.configure().ifChrome().run('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
+    const messagingToken = '32q4pAwei09W845V3j24o8OJIO3fE9l3q49p';
     const requestProcessor = function() {
       return Promise.resolve({});
     };
@@ -207,7 +208,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         postMessageResolve();
       });
 
-      messaging = new Messaging(window, port);
+      messaging = new Messaging(
+          window, port, /* opt_isWebview= */ false, messagingToken);
       messaging.setDefaultHandler(requestProcessor);
     });
 
@@ -231,6 +233,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: 'message',
           requestid: 1,
           type: 's',
@@ -352,6 +355,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: message,
           requestid: 1,
           rsvp: awaitResponse,
@@ -371,6 +375,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: mName,
           requestid: 1,
           type: 's',
@@ -392,6 +397,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           app: '__AMPHTML__',
           data: null,
           error: errString,
+          messagingToken,
           name: mName,
           requestid: 1,
           type: 's',
