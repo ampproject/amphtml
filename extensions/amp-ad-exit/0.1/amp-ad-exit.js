@@ -95,18 +95,21 @@ export class AmpAdExit extends AMP.BaseElement {
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
 
+    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
-    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
+    const clickTarget = (target.behaviors && target.behaviors.clickTarget
+      && target.behaviors.clickTarget == '_top') ? '_top' : '_blank';
+    openWindowDialog(this.win, substituteVariables(target.finalUrl),
+        clickTarget);
   }
 
 
@@ -280,6 +283,7 @@ export class AmpAdExit extends AMP.BaseElement {
           filters:
               (target['filters'] || []).map(
                   f => this.userFilters_[f]).filter(f => f),
+          behaviors: target['behaviors'] || {},
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {

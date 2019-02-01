@@ -82,6 +82,26 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
   </script>
 </head>
 ```
+## Entitlements pingback
+As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the  `pingbackUrl` via a POST request.
+
+If `subscribe.google.com` is the "winning" service, the request to the `pingbackUrl` will be of the following format:
+```
+{
+  "raw":"...",
+  "source":"google",
+  "service":"subscribe.google.com",
+  "granted":true,
+  "grantReason":"SUBSCRIBER",
+  "data":{
+    "source":"google",
+    "products":[ ... ],
+    "subscriptionToken":"..."
+  }
+}
+```
+Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+
 ## Example with markup
 ```
 <head>

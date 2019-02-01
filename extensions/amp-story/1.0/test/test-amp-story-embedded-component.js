@@ -22,7 +22,7 @@ import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-embedded-component', {amp: true}, env => {
-  let tooltip;
+  let component;
   let win;
   let parentEl;
   let storeService;
@@ -35,6 +35,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
     clickableEl = win.document.createElement('a');
+    addAttributesToElement(clickableEl, {'href': 'https://google.com'});
 
     // Making sure resource tasks run synchronously.
     sandbox.stub(Services, 'resourcesForDoc').returns({
@@ -57,12 +58,12 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     parentEl.appendChild(fakeCover);
     parentEl.appendChild(fakePage);
 
-    tooltip = new AmpStoryEmbeddedComponent(win, parentEl);
+    component = new AmpStoryEmbeddedComponent(win, parentEl);
   });
 
   it('should build the tooltip', () => {
-    tooltip.buildFocusedState_();
-    expect(tooltip.focusedStateOverlay_).to.exist;
+    component.buildFocusedState_();
+    expect(component.focusedStateOverlay_).to.exist;
   });
 
   it('should append the tooltip to the parentEl when clicking a clickable ' +
@@ -80,7 +81,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    expect(tooltip.focusedStateOverlay_).to.not.have.class('i-amphtml-hidden');
+    expect(component.focusedStateOverlay_).to.not.have
+        .class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip on store property update', () => {
@@ -89,7 +91,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
 
-    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
+    expect(component.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip when switching page', () => {
@@ -98,16 +100,16 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     storeService.dispatch(Action.CHANGE_PAGE, {id: 'newPageId'});
 
-    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
+    expect(component.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should hide the tooltip when clicking outside of it', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    tooltip.focusedStateOverlay_.dispatchEvent(new Event('click'));
+    component.focusedStateOverlay_.dispatchEvent(new Event('click'));
 
-    expect(tooltip.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
+    expect(component.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
 
   it('should navigate when tooltip is open and user clicks on arrow', () => {
@@ -117,7 +119,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const nextPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
-    const rightButton = tooltip.focusedStateOverlay_
+    const rightButton = component.focusedStateOverlay_
         .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
           '.i-amphtml-story-tooltip-nav-button-right');
 
@@ -135,7 +137,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const previousPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
 
-    const rightButton = tooltip.focusedStateOverlay_
+    const rightButton = component.focusedStateOverlay_
         .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
           '.i-amphtml-story-tooltip-nav-button-right');
 
@@ -149,7 +151,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipIconEl = tooltip.focusedStateOverlay_
+    const tooltipIconEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
 
     expect(tooltipIconEl).to.have.attribute('src');
@@ -166,7 +168,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         '[amp-story-embedded-component] The tooltip icon url is invalid');
 
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
-    const tooltipIconEl = tooltip.focusedStateOverlay_
+    const tooltipIconEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
     expect(tooltipIconEl).to.not.have.attribute('src');
   });
@@ -176,19 +178,19 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipTextEl = tooltip.focusedStateOverlay_
+    const tooltipTextEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
     expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
-  it('should append local url when text attribute is not present', () => {
+  it('should append href url when text attribute is not present', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, clickableEl);
 
-    const tooltipTextEl = tooltip.focusedStateOverlay_
+    const tooltipTextEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
-    expect(tooltipTextEl.textContent).to.equal('localhost');
+    expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 });

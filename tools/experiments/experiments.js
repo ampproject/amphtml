@@ -49,6 +49,14 @@ let ExperimentDef;
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 const RC_EXPERIMENT_ID = 'rc-channel';
 
+/**
+ * The different states of the AMP_CANARY cookie.
+ */
+const AMP_CANARY_COOKIE = {
+  DISABLED: '0',
+  CANARY: '1',
+  RC: '2',
+};
 
 /** @const {!Array<!ExperimentDef>} */
 const EXPERIMENTS = [
@@ -405,16 +413,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-date-display',
-    name: 'Enables displaying dates',
-    spec: 'https://github.com/ampproject/amphtml/issues/10837',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
-  },
-  {
     id: 'amp-list-viewport-resize',
     name: 'Enables amp-list to resize on viewport resize',
     spec: 'https://github.com/ampproject/amphtml/issues/19945',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
+  },
+  {
+    id: 'amp-auto-lightbox',
+    name: 'Automatically detects images to place in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
 ];
 
@@ -537,9 +545,9 @@ function updateExperimentRow(experiment) {
  */
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '1';
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
   } else if (id == RC_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '2';
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
   }
   return isExperimentOn(window, /*OK*/id);
 }
@@ -547,11 +555,11 @@ function isExperimentOn_(id) {
 /**
  * Opts in to / out of the "canary" or "rc" runtime types by setting the
  * AMP_CANARY cookie.
- * @param {string} cookieState '0' for disabled, '1' for canary, '2' for rc
+ * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC}
  */
 function setAmpCanaryCookie_(cookieState) {
-  const validUntil =
-      (cookieState != '0') ? (Date.now() + COOKIE_MAX_AGE_MS) : 0;
+  const validUntil = (cookieState != AMP_CANARY_COOKIE.DISABLED) ?
+    (Date.now() + COOKIE_MAX_AGE_MS) : 0;
   const cookieOptions = {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
@@ -578,9 +586,11 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      setAmpCanaryCookie_(on ? '1' : '0');
+      setAmpCanaryCookie_(
+          on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED);
     } else if (id == RC_EXPERIMENT_ID) {
-      setAmpCanaryCookie_(on ? '2' : '0');
+      setAmpCanaryCookie_(
+          on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED);
     } else {
       toggleExperiment(window, id, on);
     }
