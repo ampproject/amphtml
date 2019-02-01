@@ -210,11 +210,9 @@ export class AmpList extends AMP.BaseElement {
       this.attemptToFit_(placeholder);
     }
 
-    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
-      this.viewport_.onResize(() => {
-        this.attemptToFit_(dev().assertElement(this.container_));
-      });
-    }
+    this.viewport_.onResize(() => {
+      this.attemptToFit_(dev().assertElement(this.container_));
+    });
 
     this.loadMoreEnabledPromise_.then(enabled => {
       if (enabled) {
@@ -500,7 +498,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array|?JsonObject|string|undefined} data
+   * @param {!Array|string|undefined} data
    * @param {boolean} append
    * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
@@ -552,17 +550,15 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
+    const renderTemplate = this.ssrTemplateHelper_.renderTemplateArray(
+        this.element, current.data);
     if (this.ssrTemplateHelper_.isSupported()) {
-      const html = /** @type {string} */ (current.data);
-      this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(result => this.updateBindings_([result]))
+      renderTemplate.then(result => this.updateBindings_([result]))
           .then(element => this.render_(element, current.append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
-      const array = /** @type {!Array} */ (current.data);
       const payload = /** @type {!JsonObject} */ (current.payload);
-      this.templates_.findAndRenderTemplateArray(this.element, array)
-          .then(results => this.updateBindings_(results))
+      renderTemplate.then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements, current.append))
           .then(() => this.maybeRenderLoadMoreTemplates_(payload))
           .then(() => this.maybeSetLoadMore_())

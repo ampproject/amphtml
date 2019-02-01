@@ -96,6 +96,24 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!Element} element
+   * @param {!Array|string} data
+   * @return {!Promise}
+   */
+  renderTemplateArray(element, data) {
+    let renderTemplatePromise;
+    if (this.isSupported() && typeof data === 'string') {
+      renderTemplatePromise = this.templates_
+          .findAndSetHtmlForTemplate(element, /** @type {string} */ (data));
+    } else {
+      renderTemplatePromise = this.templates_
+          .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
+    }
+
+    return renderTemplatePromise;
+  }
+
+  /**
+   * @param {!Element} element
    * @param {!JsonObject} data
    * @return {!Promise}
    */
