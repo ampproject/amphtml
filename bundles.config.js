@@ -163,7 +163,14 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
-  {name: 'amp-inputmask', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-inputmask',
+    version: '0.1',
+    type: TYPES.MISC,
+    postPrepend: [
+      'third_party/inputmask/bundle.js',
+    ],
+  },
   {
     name: 'amp-instagram',
     version: '0.1',

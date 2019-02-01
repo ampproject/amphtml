@@ -32,15 +32,25 @@ export class AmpActionMacro extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.actions_ = null;
+
+    /** @private {!Array<string>} */
+    this.arguments_ = [];
   }
 
   /** @override */
   buildCallback() {
     userAssert(isExperimentOn(this.win, 'amp-action-macro'),
         'Experiment is off');
-    this.actions_ = Services.actionServiceForDoc(this.element);
+    const {element} = this;
 
-    this.registerDefaultAction(this.execute_.bind(this));
+    this.actions_ = Services.actionServiceForDoc(element);
+
+    const argVarNames = element.getAttribute('arguments');
+    if (argVarNames) {
+      this.arguments_ = argVarNames.split(',');
+    }
+
+    this.registerAction('execute', this.execute_.bind(this));
   }
 
   /** @override */
@@ -55,6 +65,12 @@ export class AmpActionMacro extends AMP.BaseElement {
    */
   execute_(invocation) {
     const {actionEventType, args, event, trust} = invocation;
+    // Save a reference to the argument variable names used in the action macro
+    // in the args passed to the service. These values are evaluated and
+    // replaced with the actual caller args when the action is triggered.
+    if (args && this.arguments_) {
+      args['args'] = this.arguments_;
+    }
     this.actions_.trigger(
         this.element, `${actionEventType}`, event, trust, args);
   }
