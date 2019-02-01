@@ -298,7 +298,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         'button',
         {'id': 'actionButton',
           'on':
-                    'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux'});
+            'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux'});
     element.appendChild(multipleEventsButton);
     page.buildCallback();
 
