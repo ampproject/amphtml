@@ -15,11 +15,35 @@
  */
 'use strict';
 
-const {verifyCssElements} = require('../../build-system/tasks/visual-diff/helpers');
+const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
+
+const log = (string) => {
+  process.stdout.write(' \n\n');
+  process.stdout.write(string);
+  process.stdout.write(' \n\n');
+};
+
+const goToUniqueLocalHostSubDomain = async (page) => {
+  const url = page.url();
+  const randomString = Math.random().toString(36).substring(2, 9);
+  const randomOriginUrl = url.replace('localhost', `${randomString}.localhost`);
+  await page.goto(randomOriginUrl, {waitUntil: 'load'});
+  await page.evaluate(() => {
+    localStorage.clear();
+  });
+  await page.reload({waitUntil: 'networkidle0'});
+
+
+  log(page.url());
+}
 
 module.exports = {
   'accept consent': async (page, name) => {
+
+    await goToUniqueLocalHostSubDomain(page);
+
     await page.tap('#consent-ui #accept');
+
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
@@ -30,4 +54,79 @@ module.exports = {
         '#not-specified img'
       ]);
   },
+  'reject consent': async (page, name) => {
+
+    let pageHtml = await page.content();
+    log(pageHtml);
+
+    await goToUniqueLocalHostSubDomain(page);
+
+    pageHtml = await page.content();
+    log(pageHtml);
+
+    await page.tap('#consent-ui #reject');
+
+    await page.evaluate(() => {
+      document.querySelector('#consent-ui #reject').click();
+    });
+
+
+    log('no more error!');
+
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ [
+        'amp-img[data-block-on-consent="_till_responded"] img'
+    ]);
+  },
+  'should preserve accepted state': async (page, name) => {
+
+    await goToUniqueLocalHostSubDomain(page);
+
+    // Accept the consent
+    await page.tap('#consent-ui #accept');
+
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ [
+        'amp-img[data-block-on-consent="_till_responded"] img',
+        'amp-img[data-block-on-consent="_till_accepted"] img',
+        'amp-img[data-block-on-consent="default"] img',
+        '#not-specified img'
+      ]);
+
+    // save the accepted local storage value
+    const localStorageJson = await page.evaluate(() => {
+      const json = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        json[key] = localStorage.getItem(key);
+      }
+      return json;
+    });
+
+    // Refresh the page
+    await page.reload();
+
+    // Set the local storage back to the accepted value
+    await page.evaluate(json => {
+      localStorage.clear();
+
+      Object.keys(json).forEach(key => {
+        localStorage.setItem(key, json[key]);
+      });
+    }, localStorageJson);
+
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ null,
+      /* loadingCompleteCss */ [
+        'amp-img[data-block-on-consent="_till_responded"] img',
+        'amp-img[data-block-on-consent="_till_accepted"] img',
+        'amp-img[data-block-on-consent="default"] img',
+        '#not-specified img'
+    ]);
+  }
  };
