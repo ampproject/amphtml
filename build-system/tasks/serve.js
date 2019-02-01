@@ -49,6 +49,7 @@ function serve() {
     script: require.resolve('../server.js'),
     watch: [
       require.resolve('../app.js'),
+      require.resolve('../routes/analytics.js'),
       require.resolve('../server.js'),
     ],
     env: {

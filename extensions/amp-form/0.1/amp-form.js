@@ -527,7 +527,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(/*shouldSubmitFormElement*/false);
+        this.handleNonXhrGet_(event);
         return Promise.resolve();
       }
 
@@ -548,7 +548,7 @@ export class AmpForm {
         presubmitPromises,
         SUBMIT_TIMEOUT
     ).then(
-        () => this.handlePresubmitSuccess_(trust),
+        () => this.handlePresubmitSuccess_(trust, event),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
@@ -566,15 +566,16 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
+   * @param {?Event} event
    * @return {!Promise}
    */
-  handlePresubmitSuccess_(trust) {
+  handlePresubmitSuccess_(trust, event) {
     if (this.xhrAction_) {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
+      this.handleNonXhrGet_(event);
     }
 
     return Promise.resolve();
@@ -810,7 +811,7 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!JsonObject|string|undefined} response
+   * @param {!JsonObject} response
    * @param {!FetchRequestDef} request
    * @return {!Promise}
    * @private visible for testing
@@ -819,7 +820,7 @@ export class AmpForm {
     // Construct the fetch response to reuse the methods in-place for
     // amp CORs validation.
     this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
-    return this.handleSubmitSuccess_(tryResolve(() => response['html']));
+    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -888,14 +889,12 @@ export class AmpForm {
 
   /**
    * Triggers Submit Analytics,
-   * and Form Element submit if passed by param.
-   * shouldSubmitFormElement should ONLY be true
-   * If the submit event.preventDefault was called
-   * @param {boolean} shouldSubmitFormElement
+   * and Form Element submit if not triggered by an event
+   * @param {?Event} event
    */
-  handleNonXhrGet_(shouldSubmitFormElement) {
+  handleNonXhrGet_(event) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    if (shouldSubmitFormElement) {
+    if (!event) {
       this.form_.submit();
     }
     this.setState_(FormState.INITIAL);
@@ -1032,6 +1031,7 @@ export class AmpForm {
    * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
    * @return {!Promise}
+   * @private
    */
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
@@ -1042,7 +1042,7 @@ export class AmpForm {
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        p = this.templates_.findAndRenderTemplate(container, data)
+        p = this.ssrTemplateHelper_.renderTemplate(devAssert(container), data)
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');

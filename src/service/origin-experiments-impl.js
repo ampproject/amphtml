@@ -286,9 +286,9 @@ export function installOriginExperimentsForDoc(ampdoc) {
  * Doesn't live in services.js to avoid bundling into v0.js.
  * Be sure to call installOriginExperimentsForDoc() before using.
  * @param {!Element|!ShadowRoot} element
- * @return {!./service/origin-experiments-impl.OriginExperiments}
+ * @return {!OriginExperiments}
  */
 export function originExperimentsForDoc(element) {
-  return /** @type {!./service/origin-experiments-impl.OriginExperiments} */ (
+  return /** @type {!OriginExperiments} */ (
     getServiceForDoc(element, 'origin-experiments'));
 }

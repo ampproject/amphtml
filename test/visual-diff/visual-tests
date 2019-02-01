@@ -204,6 +204,12 @@
       "loading_complete_css": ["video.i-amphtml-replaced-content"]
     },
     {
+      "url": "examples/visual-tests/amp-sidebar/amp-sidebar.amp.html",
+      "name": "amp-sidebar",
+      "viewport": {"width": 400, "height": 800},
+      "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
+    },
+    {
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
       "viewport": {
@@ -599,6 +605,25 @@
         ".i-amphtml-story-loaded",
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-date-picker/amp-date-picker.amp.html",
+      "name": "amp-date-picker",
+      "loading_complete_css": [
+        ".i-amphtml-date-picker-container",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-date-picker/amp-date-picker.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-selector.amp.html",
+      "name": "amp-selector",
+      "interactive_tests": "examples/visual-tests/amp-selector.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
+      "name": "amp-accordion: page loads",
+      "loading_complete_delay_ms": 1000,
+      "interactive_tests": "examples/visual-tests/amp-accordion/amp-accordion.js"
     },
   ]
 }
