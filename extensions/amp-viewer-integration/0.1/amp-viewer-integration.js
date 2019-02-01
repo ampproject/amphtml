@@ -93,6 +93,7 @@ export class AmpViewerIntegration {
     const viewer = Services.viewerForDoc(ampdoc);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
+    const messagingToken = viewer.getParam('messagingToken');
     const origin = viewer.getParam('origin') || '';
 
     if (!this.isWebView_ && !origin) {
@@ -104,7 +105,8 @@ export class AmpViewerIntegration {
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
             return this.openChannelAndStart_(viewer, ampdoc, origin,
-                new Messaging(this.win, receivedPort, this.isWebView_));
+                new Messaging(
+                    this.win, receivedPort, this.isWebView_, messagingToken));
           });
     }
     /** @type {?HighlightInfoDef} */
@@ -116,7 +118,8 @@ export class AmpViewerIntegration {
     const port = new WindowPortEmulator(
         this.win, origin, this.win.parent/* target */);
     return this.openChannelAndStart_(
-        viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
+        viewer, ampdoc, origin,
+        new Messaging(this.win, port, this.isWebView_, messagingToken));
   }
 
   /**
