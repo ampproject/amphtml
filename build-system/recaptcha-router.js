@@ -45,27 +45,27 @@ recaptchaRouter.get('/mock.js', (req, res) => {
 });
 
 recaptchaRouter.post(
-  '/submit',
-  upload.array(),
-  (req, res) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+    '/submit',
+    upload.array(),
+    (req, res) => {
+      const sourceOrigin = req.query['__amp_source_origin'];
+      if (sourceOrigin) {
+        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+      }
+
+      const responseJson = {
+        message: 'Success!',
+      };
+
+      Object.keys(req.body).forEach(bodyKey => {
+        responseJson[bodyKey] = req.body[bodyKey];
+      });
+
+      res.status(200).json(responseJson);
     }
-
-    const responseJson = {
-      message: 'Success!',
-    };
-
-    Object.keys(req.body).forEach(bodyKey => {
-      responseJson[bodyKey] = req.body[bodyKey];
-    });
-
-    res.status(200).json(responseJson);
-  }
 );
 
 module.exports = {
   recaptchaFrameRequestHandler,
-  recaptchaRouter
+  recaptchaRouter,
 };

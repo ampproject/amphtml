@@ -256,6 +256,10 @@ export class AmpRecaptchaService {
        * Get our window location.
        * In localDev mode, this will be this.win_.location
        * In test mode, this will be this.win_.testLocation
+       *
+       * tesLocation is needed because test fixtures are
+       * loaded in friendly iframes, thus win.location
+       * would give about:blank.
        */
       let winLocation = this.win_.location;
       if (this.win_.testLocation) {
