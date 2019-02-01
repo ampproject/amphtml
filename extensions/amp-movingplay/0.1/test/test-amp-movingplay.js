@@ -43,17 +43,17 @@ describes.realWin('amp-movingplay', {
 
   it('the player should be renders', () => {
     return getPlayer({
-      'data-player-id':'3e1eee5a68d65bf24db48d994ab6a7a7',
+      'data-player-id': '3e1eee5a68d65bf24db48d994ab6a7a7',
       'data-media-id': '5678WxYz',
       'data-vp-id': '0',
-      'data-o-id':"",
-      'layout':"responsive"
+      'data-o-id': '',
+      'layout': 'responsive',
     }).then(mov => {
       const iframe = mov.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cdn.movingplay.it/amp/movplay.html?idp=3e1eee5a68d65bf24db48d994ab6a7a7&idv=0&oid=' 
+          'https://cdn.movingplay.it/amp/movplay.html?idp=3e1eee5a68d65bf24db48d994ab6a7a7&idv=0&oid='
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
@@ -63,8 +63,8 @@ describes.realWin('amp-movingplay', {
     return allowConsoleError(() => { return getPlayer({
       'data-media-id': '5678WxYz',
       'data-vp-id': '0',
-      'data-o-id':"",
-      'layout':"responsive"
+      'data-o-id': '',
+      'layout': 'responsive',
     }).should.eventually.be.rejectedWith(
         /The data-player-id attribute is required for/);
     });
@@ -72,10 +72,10 @@ describes.realWin('amp-movingplay', {
 
   it('fails if no data-media is specified', () => {
     return allowConsoleError(() => { return getPlayer({
-      'data-player-id':'3e1eee5a68d65bf24db48d994ab6a7a7',
+      'data-player-id': '3e1eee5a68d65bf24db48d994ab6a7a7',
       'data-vp-id': '0',
-      'data-o-id':"",
-      'layout':"responsive"
+      'data-o-id': '',
+      'layout': 'responsive',
     }).should.eventually.be.rejectedWith(
         /The data-media-id attribute is required for/);
     });

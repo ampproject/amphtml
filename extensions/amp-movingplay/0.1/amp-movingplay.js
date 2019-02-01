@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 class AmpMovingplay extends AMP.BaseElement {
@@ -60,18 +60,18 @@ class AmpMovingplay extends AMP.BaseElement {
         this.element);
 
     this.dataVpId_ = userAssert(
-          this.element.getAttribute('data-vp-id'),
-          'The data-vp-id attribute is required for <amp-movingplay> %s',
-          this.element);
-          
+        this.element.getAttribute('data-vp-id'),
+        'The data-vp-id attribute is required for <amp-movingplay> %s',
+        this.element);
+
     this.oId_ = this.element.getAttribute('data-o-id');
-    
+
   }
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = 'https://cdn.movingplay.it/amp/movplay.html?idp=' + encodeURIComponent(this.playerid_) +"&idv="+encodeURIComponent(this.dataVpId_)+"&oid="+encodeURIComponent(this.oId_);
+    const src = 'https://cdn.movingplay.it/amp/movplay.html?idp=' + encodeURIComponent(this.playerid_) + '&idv=' + encodeURIComponent(this.dataVpId_) + '&oid=' + encodeURIComponent(this.oId_);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
@@ -87,7 +87,7 @@ class AmpMovingplay extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    return true; // Call layoutCallback again.
+    return true;
   }
 }
 
