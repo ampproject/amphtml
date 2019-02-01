@@ -200,10 +200,6 @@ describes.realWin(TAG, {
         mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
       },
       {
-        kind: 'presentation subnodes',
-        mutate: el => el.setAttribute('role', 'presentation'),
-      },
-      {
         kind: 'placeholder subnodes',
         mutate: el => el.setAttribute('placeholder', ''),
       },

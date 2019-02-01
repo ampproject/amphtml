@@ -70,9 +70,6 @@ const DISABLED_ANCESTORS =
     // Explicitly opted out.
     '[data-amp-auto-lightbox-disable],' +
 
-    // Semantically annotated.
-    '[role=presentation],' +
-
     // Ancestors considered "actionable", i.e. that are bound to a default
     // onclick action(e.g. `button`) or where it cannot be determined whether
     // they're actionable or not (e.g. `amp-script`).
