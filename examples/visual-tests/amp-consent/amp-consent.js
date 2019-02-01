@@ -17,12 +17,6 @@
 
 const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
 
-const log = (string) => {
-  process.stdout.write(' \n\n');
-  process.stdout.write(string);
-  process.stdout.write(' \n\n');
-};
-
 const goToUniqueLocalHostSubDomain = async (page) => {
   const url = page.url();
   const randomString = Math.random().toString(36).substring(2, 9);
@@ -32,9 +26,6 @@ const goToUniqueLocalHostSubDomain = async (page) => {
     localStorage.clear();
   });
   await page.reload({waitUntil: 'networkidle0'});
-
-
-  log(page.url());
 }
 
 module.exports = {
@@ -56,22 +47,13 @@ module.exports = {
   },
   'reject consent': async (page, name) => {
 
-    let pageHtml = await page.content();
-    log(pageHtml);
-
     await goToUniqueLocalHostSubDomain(page);
-
-    pageHtml = await page.content();
-    log(pageHtml);
 
     await page.tap('#consent-ui #reject');
 
     await page.evaluate(() => {
       document.querySelector('#consent-ui #reject').click();
     });
-
-
-    log('no more error!');
 
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
