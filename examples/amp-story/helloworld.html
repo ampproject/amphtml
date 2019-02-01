@@ -27,20 +27,16 @@
   </head>
 
   <body>
-    <amp-story standalone id="story">
+    <amp-story standalone>
 
-      <amp-story-page id="cover" >
+      <amp-story-page id="cover" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">
           <h1>Hello World</h1>
-          <button on="tap:story.goToPage(id=page-2)"> click me </button>
-          <button on="tap:story.goToPage(id=page-2), foo.badAction(act=BAD)"> click me </button>
-          <button on="tap:foo.badAction(act=BAD)"> click me </button>
-          <button on="tap:story.goToPage(id=page-2)"> click me </button>
           <p>This is the cover page of this story.</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-1" >
+      <amp-story-page id="page-1" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">
           <h1>First Page</h1>
           <p>This is the first page of this story.</p>
@@ -51,18 +47,6 @@
         <amp-story-grid-layer template="vertical">
           <h1>Second Page</h1>
           <p>This is the second page of this story.</p>
-        </amp-story-grid-layer>
-      </amp-story-page>
-      <amp-story-page id="page-3">
-        <amp-story-grid-layer template="vertical">
-          <h1>Third Page</h1>
-          <p>This is the third page of this story.</p>
-        </amp-story-grid-layer>
-      </amp-story-page>
-      <amp-story-page id="page-4">
-        <amp-story-grid-layer template="vertical">
-          <h1>Fourth Page</h1>
-          <p>This is the fourth page of this story.</p>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
