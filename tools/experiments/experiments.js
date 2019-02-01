@@ -413,12 +413,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-list-viewport-resize',
-    name: 'Enables amp-list to resize on viewport resize',
-    spec: 'https://github.com/ampproject/amphtml/issues/19945',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
-  },
-  {
     id: 'amp-auto-lightbox',
     name: 'Automatically detects images to place in a lightbox.',
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
