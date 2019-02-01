@@ -781,7 +781,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     const actionAttrs = actionElements.map(action => action.getAttribute('on'));
 
     return actionAttrs.reduce((res, actions) => {
-      console.log(typeof (actions));
       // Handling for multiple actions on one event or multiple events.
       const actionList = actions.split(/[;,]+/);
       actionList.forEach(action => {
