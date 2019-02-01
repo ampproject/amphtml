@@ -532,7 +532,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-weight: 400 !important;
   font-size: 12px !important;
   max-width: 640px !important;
-  z-index: 100002 !important; /** Bookend + 1 */
+  z-index: 100004 !important; /** share menu + 1 */
 }
 
 @media (min-width: 640px) {
@@ -799,14 +799,14 @@ amp-story .amp-video-eq,
 
 @keyframes open-attachment-icon {
   0% {
-    transform: translateY(5px);
+    transform: translateY(14px);
   }
   to {
-    transform: translateY(-2px);
+    transform: translateY(0);
   }
 }
 
-@keyframes open-attachment-button-explode {
+@keyframes open-attachment-icon-explode {
   0% {
     transform: scale(0);
   }
@@ -816,64 +816,113 @@ amp-story .amp-video-eq,
   }
 }
 
-@keyframes open-attachment-text-color {
+@keyframes open-attachment-icon-color {
   0% {
-    color: #fff;
-    text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36);
+    background: #fff;
   }
   to {
-    color: rgba(0, 0, 0, 0.87);
+    background: rgba(0, 0, 0, 0.87);
     text-shadow: none;
   }
 }
 
+@keyframes open-attachment-bar-left {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes open-attachment-bar-right {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(30deg);
+  }
+}
+
+/**
+ * Hiding the element and only showing it on the active page so the animation
+ * triggers every time the page becomes active.
+ */
 amp-story-page .i-amphtml-story-page-open-attachment {
+  display: none !important;
+}
+
+amp-story-page[active] .i-amphtml-story-page-open-attachment {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-direction: column !important;
   position: absolute !important;
-  bottom: 12px !important;
+  bottom: 0 !important;
   left: 0 !important;
   width: 100% !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
   pointer-events: none !important;
   z-index: 3 !important;
   animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
+amp-story-page .i-amphtml-story-page-open-attachment > * {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
 amp-story-page .i-amphtml-story-page-open-attachment-icon {
   display: block !important;
-  height: 20px !important;
-  width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
-  background-repeat: no-repeat !important;
-  background-position: center center !important;
-  cursor: pointer !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
-  animation: open-attachment-icon 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-text {
-  position: relative !important;
-  padding: 0 24px !important;
   height: 32px !important;
+  width: 32px !important;
   cursor: pointer !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 15px !important;
-  line-height: 32px !important;
-  pointer-events: auto !important;
-  animation: open-attachment-text-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-text::after {
-  content: "";
+amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
+  content: "" !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  background: #fff !important;
-  border-radius: 32px !important;
+  background: #FFF !important;
+  border-radius: 100% !important;
   z-index: -1 !important;
-  animation: open-attachment-button-explode 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-story-page-open-attachment-bar-right {
+  position: absolute !important;
+  display: block !important;
+  height: 3px !important;
+  width: 12px !important;
+  border-radius: 3px !important;
+  top: 14px !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-left {
+  left: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-right {
+  right: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text {
+  position: relative !important;
+  padding: 0 24px !important;
+  color: #FFF !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 40px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }

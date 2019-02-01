@@ -4,7 +4,6 @@
     "amp-next-page",
     "ampdoc-shell",
     "disable-amp-story-desktop",
-    "inabox-rov",
     "linker-meta-opt-in"
   ],
   "allow-url-opt-in": [
@@ -46,8 +45,7 @@
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "inabox-rov": 1,
-  "layers": 0,
+  "layers": 1,
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,

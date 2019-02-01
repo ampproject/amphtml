@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-list"></a> `<amp-list>`
+# <a name="amp-list"></a> `amp-list`
 
 [TOC]
 
@@ -48,8 +48,8 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 You can specify a template in one of two ways:
 
-- a `template` attribute that references an ID of an existing `template` element.
-- a `template` element nested directly inside the `<amp-list>` element.
+- a `template` attribute that references an ID of an existing `template` or `script` element.
+- a `template` or `script` element nested directly inside the `amp-list` element.
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
@@ -350,24 +350,7 @@ This element is a loader that will be displayed if the user reaches the end of t
 #### load-more-failed
 A `<amp-list-load-more>` element containing the `load-more-failed` attribute that contains a button with the `load-more-clickable` attribute that will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-failed`. Example below:
 ```
-<<<<<<< HEAD
-<amp-list load-more src="https://www.load.more/" ...>
-  <amp-list-load-more load-more-failed>
-    Something went wrong, click here to try again /* Custom load-failed element */
-  </amp-list-load-more>
-</amp-list>
-```
 
-#### load-more-end
-This element is not provided by default, but if a `<amp-list-load-more>` element containing the `load-more-end` attribute is attached to `<amp-list>` as a child element, this element will be displayed at the bottom of the `<amp-list>` if there are no more items.  This element can be templated via `amp-mustache`. Example below:
-```
-<amp-list load-more src="https://www.load.more/" ...>
-  <amp-list-load-more> load-more-end>
-    Congratulations! You've reached the end. /* Custom load-end element */
-  </amp-list-load-more>>
-</amp-list>
-```
-=======
 <amp-list-load-more load-more-failed class="i-amphtml-default-ui">
   <div class="i-amphtml-list-load-more-message">
     Unable to Load More
@@ -383,9 +366,15 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 </amp-list-load-more>
 ```
 
-#### load-more-end (optional)
-A `<amp-list-load-more>` element containing the `load-more-end` attribute. This element will be displayed at the bottom of the `<amp-list>` if there are no more items. This element is optional. This element can be templated via `amp-mustache`.
->>>>>>> Define additional tag for simpler validation
+#### load-more-end
+This element is not provided by default, but if a `<amp-list-load-more>` element containing the `load-more-end` attribute is attached to `<amp-list>` as a child element, this element will be displayed at the bottom of the `<amp-list>` if there are no more items.  This element can be templated via `amp-mustache`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <amp-list-load-more> load-more-end>
+    Congratulations! You've reached the end. /* Custom load-end element */
+  </amp-list-load-more>>
+</amp-list>
+```
 
 ##### common attributes
 

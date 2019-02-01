@@ -82,7 +82,11 @@ const Selectors = {
   ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
       'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
       'amp-story-grid-layer amp-anim',
-  ALL_MEDIA: 'amp-story-page > audio, amp-story-grid-layer audio, ' +
+  // TODO(gmajoulet): Refactor the way these selectors are used. They will be
+  // passed to scopedQuerySelectorAll which expects only one selector and not
+  // multiple separated by commas. `> audio` has to be kept first of the list to
+  // work with this current implementation.
+  ALL_MEDIA: '> audio, amp-story-grid-layer audio, ' +
       'amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
@@ -115,10 +119,13 @@ const buildPlayMessageElement = element =>
 const buildOpenAttachmentElement = element =>
   htmlFor(element)`
       <div class="
-          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-open-attachment-icon"></span>
-        <span class="i-amphtml-story-page-open-attachment-text"
-            role="button"></span>
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+          role="button">
+        <span class="i-amphtml-story-page-open-attachment-icon">
+          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
+          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+        </span>
+        <span class="i-amphtml-story-page-open-attachment-text"></span>
       </div>`;
 
 /**
@@ -474,7 +481,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return mediaSet;
     }
 
-    iterateCursor(fie.win.document.querySelectorAll(selector),
+    iterateCursor(scopedQuerySelectorAll(fie.win.document.body, selector),
         el => mediaSet.push(el));
     return mediaSet;
   }
@@ -963,11 +970,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      this.openAttachmentEl_
+          .addEventListener('click', () => this.openAttachment());
 
       const textEl = this.openAttachmentEl_
           .querySelector('.i-amphtml-story-page-open-attachment-text');
-
-      textEl.addEventListener('click', () => this.openAttachment());
 
       const openAttachmentLabel = Services.localizationService(this.win)
           .getLocalizedString(

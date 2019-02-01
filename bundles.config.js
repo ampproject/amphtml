@@ -75,12 +75,12 @@ exports.extensionBundles = [
   },
   {name: 'amp-audio', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-auto-ads', version: '0.1', type: TYPES.AD},
+  {name: 'amp-auto-lightbox', version: '0.1', type: TYPES.MISC},
   {name: 'amp-beopinion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-bind', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-bodymovin-animation',
     version: '0.1',
-    options: {hasCss: false},
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
@@ -162,7 +162,14 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
-  {name: 'amp-inputmask', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-inputmask',
+    version: '0.1',
+    type: TYPES.MISC,
+    postPrepend: [
+      'third_party/inputmask/bundle.js',
+    ],
+  },
   {
     name: 'amp-instagram',
     version: '0.1',
@@ -230,6 +237,7 @@ exports.extensionBundles = [
   {
     name: 'amp-script',
     version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-share-tracking', version: '0.1', type: TYPES.MISC},
@@ -432,6 +440,7 @@ exports.extensionBundles = [
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-mraid', version: '0.1', type: TYPES.AD},
 ];
 
 exports.aliasBundles = [

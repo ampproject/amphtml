@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {dict} from '../../../src/utils/object';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
@@ -96,8 +95,8 @@ export class AffiliateLinkResolver {
       'page': '',
       'domains': domains,
     });
-
-    const beaconUrl = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(data)}`;
+    let {beaconUrl} = this.skimOptions_.config;
+    beaconUrl = `${beaconUrl}?data=${JSON.stringify(data)}`;
     const fetchOptions = {
       method: 'GET',
       // Disabling AMP CORS since API does not support it.

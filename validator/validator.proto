@@ -230,10 +230,15 @@ message CssSpec {
   repeated string declaration = 7;
 }
 
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
+  // If false, bytes inside URLs are not included in the byte calculation for
+  // max_bytes. This is used for handling signed exchange transformations which
+  // can potentially take the number of bytes over the 50,000 byte limit due
+  // to rewriting URLs to point at an AMP Cache.
+  optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string max_bytes_spec_url = 2;
@@ -255,6 +260,9 @@ message CdataSpec {
 
   // If any of these regexes match, then this cdata spec does not validate.
   repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Specifies which AMP Layouts are supported by a given element.
@@ -417,7 +425,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 34
+// NEXT AVAILABLE TAG: 35
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -515,6 +523,12 @@ message TagSpec {
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 18;
 
+  // This TagSpec will only validate against attributes explicitly
+  // listed within the TagSpec (attrs and attr_lists). No attributes
+  // from $GLOBAL_ATTRS and $AMP_LAYOUT_ATTRS are valid unless explicitly
+  // added as an attribute within the TagSpec. The field `amp_layout` is not
+  // allowed to be set when `explicit_attrs_only` is true.
+  optional bool explicit_attrs_only = 34 [default = false];
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
   // Top level attr lists of shared tags, identified by unique key
@@ -825,6 +839,14 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // If the AMP document is a transformed AMP document, then this is the
+  // version of the transformers that were used to transform it. If the document
+  // is not transformed, then the transformer_version's value will be 0.
+  // Note: the AMP Pacakager's transformer library specifies the version as
+  // int64. However, JavaScript does not natively support int64 so int32 is
+  // used instead.
+  // https://github.com/ampproject/amppackager/blob/master/transformer/transformers/context.go
+  optional int32 transformer_version = 6 [default = 0];
   // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
   // type that has yet to be defined. These are declared on the HTML tag and
   // parsed by the Validator Engine.

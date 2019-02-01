@@ -91,8 +91,10 @@ import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
+import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
+import {adsensor} from '../ads/adsensor';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -203,6 +205,7 @@ import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rbinfox} from '../ads/rbinfox';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -225,6 +228,7 @@ import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
+import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
@@ -277,6 +281,7 @@ const AMP_EMBED_ALLOWED = {
   plista: true,
   postquare: true,
   pubexchange: true,
+  rbinfox: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -314,8 +319,10 @@ register('admixer', admixer);
 register('adocean', adocean);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
+register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
+register('adsensor', adsensor);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
@@ -434,6 +441,7 @@ register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rbinfox', rbinfox);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
@@ -457,6 +465,7 @@ register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
+register('tcsemotion', tcsemotion);
 register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);

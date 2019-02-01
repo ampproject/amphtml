@@ -19,10 +19,6 @@ import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {
-
-  LINKS_IMPRESSIONS_TRACKING_URL,
-  NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from './constants';
@@ -162,7 +158,8 @@ export class Tracking {
     });
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in NA_CLICK_TRACKING_URL.
+    // placeholder variables defined in NA_CLICK_TRACKING_URL
+    // (See constants.js).
     this.analytics_.trigger(NON_AFFILIATE_CLICK, dict({
       'data': JSON.stringify(data),
       'rnd': 'RANDOM',
@@ -191,7 +188,8 @@ export class Tracking {
     ));
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
+    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
+    // (See constants.js).
     this.analytics_.trigger(PAGE_IMPRESSIONS, dict({
       'data': JSON.stringify(data),
     }));
@@ -222,6 +220,7 @@ export class Tracking {
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
+    // (See constants.js).
     this.analytics_.trigger(LINK_IMPRESSIONS, dict({
       'data': JSON.stringify(data),
     }));
@@ -238,14 +237,20 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
+    const {
+      pageTrackingUrl,
+      linksTrackingUrl,
+      nonAffiliateTrackingUrl,
+    } = this.skimOptions_.config;
+
     // Configure analytics to send POST request when receiving
     // 'page-impressions' event.
     analyticsBuilder.track(PAGE_IMPRESSIONS,
-        PAGE_IMPRESSION_TRACKING_URL);
+        pageTrackingUrl);
     analyticsBuilder.track(LINK_IMPRESSIONS,
-        LINKS_IMPRESSIONS_TRACKING_URL);
+        linksTrackingUrl);
     analyticsBuilder.track(NON_AFFILIATE_CLICK,
-        NA_CLICK_TRACKING_URL);
+        nonAffiliateTrackingUrl);
 
     analyticsBuilder.setTransportConfig(dict({
       'beacon': true,

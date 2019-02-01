@@ -38,7 +38,7 @@ let DomPurifyDef;
 const DomPurify = purify(self);
 
 /** @private @const {string} */
-const TAG = 'PURIFIER';
+const TAG = 'purifier';
 
 /** @private @const {string} */
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
@@ -161,6 +161,9 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
     'verify-xhr',
     'custom-validation-reporting',
     'target',
+  ],
+  'input': [
+    'mask-output',
   ],
   'template': [
     'type',
@@ -339,7 +342,6 @@ export function addPurifyHooks(purifier, diffing) {
 
   /**
    * @param {!Node} unusedNode
-   * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
   const afterSanitizeElements = function(unusedNode) {
     // DOMPurify doesn't have a attribute-specific tag whitelist API and
@@ -349,19 +351,6 @@ export function addPurifyHooks(purifier, diffing) {
       delete allowedTags[tag];
     });
     allowedTagsChanges.length = 0;
-
-    // Output user errors for each removed attribute or element.
-    this.removed.forEach(r => {
-      if (r.attribute) {
-        const {name, value} = r.attribute;
-        user().error(TAG, `Removed unsafe attribute: ${name}="${value}"`);
-      } else if (r.element) {
-        const {nodeName} = r.element;
-        if (nodeName !== 'REMOVE') { // <remove> is added by DOMPurify.
-          user().error(TAG, 'Removed unsafe element:', r.element.nodeName);
-        }
-      }
-    });
   };
 
   /**
@@ -441,6 +430,8 @@ export function addPurifyHooks(purifier, diffing) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
+      user().error(TAG, `Removing "${attrName}" attribute with invalid `
+          + `value in <${tagName} ${attrName}="${attrValue}">.`);
       data.keepAttr = false;
     }
 

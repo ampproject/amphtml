@@ -231,6 +231,20 @@ function createElementRules_() {
     },
     'AMP-CAROUSEL': {
       'slide': null,
+      // For carousel v2
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
     },
     'AMP-DATE-PICKER': {
       'max': null,
@@ -413,6 +427,7 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
+      'pattern': null,
       'placeholder': null,
       'readonly': null,
       'required': null,

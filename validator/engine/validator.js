@@ -583,9 +583,12 @@ class ParsedTagSpec {
     // It's possible to provide multiple specifications for the same attribute
     // name, but for any given tag only one such specification can be active.
     // The precedence is (1), (2), (3), (4)
+    // If tagSpec.explicitAttrsOnly is true then only collect the attributes
+    // from (2) and (3).
 
-    // (1) layout attrs.
-    if (tagSpec.ampLayout !== null && !this.isReferencePoint_) {
+    // (1) layout attrs (except when explicitAttrsOnly is true).
+    if (!tagSpec.explicitAttrsOnly && tagSpec.ampLayout !== null &&
+        !this.isReferencePoint_) {
       this.mergeAttrs(parsedAttrSpecs.ampLayoutAttrs, parsedAttrSpecs);
     }
     // (2) attributes specified within |tagSpec|.
@@ -595,8 +598,9 @@ class ParsedTagSpec {
     for (const id of tagSpec.attrLists) {
       this.mergeAttrs(parsedAttrSpecs.attrLists[id], parsedAttrSpecs);
     }
-    // (4) attributes specified in the global_attr list.
-    if (!this.isReferencePoint_) {
+    // (4) attributes specified in the global_attr list (except when
+    // explicitAttrsOnly is true).
+    if (!tagSpec.explicitAttrsOnly && !this.isReferencePoint_) {
       this.mergeAttrs(parsedAttrSpecs.globalAttrs, parsedAttrSpecs);
     }
     sortAndUniquify(this.mandatoryOneofs_);
@@ -1868,26 +1872,7 @@ class CdataMatcher {
     if (cdataSpec === null) {
       return;
     }
-    // Max CDATA Byte Length
-    if (cdataSpec.maxBytes !== -1) {
-      const bytes = byteLength(cdata);
-      if (bytes > cdataSpec.maxBytes) {
-        context.addError(
-            amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
-            context.getLineCol(),
-            /* params */
-            [
-              getTagSpecName(this.tagSpec_),
-              bytes.toString(),
-              cdataSpec.maxBytes.toString(),
-            ],
-            cdataSpec.maxBytesSpecUrl, validationResult);
-        // We return early if the byte length is violated as parsing
-        // really long stylesheets is slow and not worth our time.
-        return;
-      }
-    }
-
+    let urlBytes = 0;
     // The mandatory_cdata, cdata_regex, and css_spec fields are treated
     // like a oneof, but we're not using oneof because it's a feature
     // that was added after protobuf 2.5.0 (which our open-source
@@ -1921,7 +1906,8 @@ class CdataMatcher {
       }
     } else if (cdataSpec.cssSpec !== null) {
       if (amp.validator.VALIDATE_CSS) {
-        this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
+        urlBytes =
+            this.matchCss_(cdata, cdataSpec.cssSpec, context, validationResult);
       }
     } else if (cdataSpec.whitespaceOnly === true) {
       if (!(/^\s*$/.test(cdata))) {
@@ -1933,6 +1919,32 @@ class CdataMatcher {
       }
     }
     // } end oneof
+
+    /** @type {number} */
+    let adjustedCdataLength = byteLength(cdata);
+    if (!cdataSpec.urlBytesIncluded) {
+      adjustedCdataLength -= urlBytes;
+    }
+
+    // Max CDATA Byte Length
+    if (cdataSpec.maxBytes !== -1 && adjustedCdataLength > cdataSpec.maxBytes) {
+      context.addError(
+          amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
+          context.getLineCol(),
+          /* params */
+          [
+            getTagSpecName(this.tagSpec_),
+            adjustedCdataLength.toString(),
+            cdataSpec.maxBytes.toString(),
+          ],
+          cdataSpec.maxBytesSpecUrl, validationResult);
+      return;
+    }
+
+    // Record <style amp-custom> byte size
+    if (context.getTagStack().isStyleAmpCustomChild()) {
+      context.addStyleAmpCustomByteSize(adjustedCdataLength);
+    }
 
     // Blacklisted CDATA Regular Expressions
     // We use a combined regex as a fast test. If it matches, we re-match
@@ -2001,11 +2013,14 @@ class CdataMatcher {
 
   /**
    * Matches the provided cdata against a CSS specification. Helper
-   * routine for match (see above).
+   * routine for match (see above). The return value is the number of
+   * bytes in the CSS string which were measured as URLs. In some
+   * validation types, these bytes are not counted against byte limits.
    * @param {string} cdata
    * @param {!amp.validator.CssSpec} cssSpec
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
+   * @returns {number}
    * @private
    */
   matchCss_(cdata, cssSpec, context, validationResult) {
@@ -2023,6 +2038,8 @@ class CdataMatcher {
     const stylesheet = parse_css.parseAStylesheet(
         tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
         cssErrors);
+    /** @type {number} */
+    let urlBytes = 0;
 
     // We extract the urls from the stylesheet. As a side-effect, this can
     // generate errors for url(…) functions with invalid parameters.
@@ -2073,6 +2090,12 @@ class CdataMatcher {
     const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
     const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
     for (const url of parsedUrls) {
+      // Some CSS specs can choose to not count URLs against the byte limit,
+      // but data URLs are always counted (or in other words, they aren't
+      // considered URLs).
+      if (!isDataUrl(url.utf8Url)) {
+        urlBytes += byteLength(url.utf8Url);
+      }
       const adapter = new UrlErrorInStylesheetAdapter(url.line, url.col);
       validateUrlAndProtocol(
           ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
@@ -2082,6 +2105,7 @@ class CdataMatcher {
     const visitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
     stylesheet.accept(visitor);
+    return urlBytes;
   }
 
   /** @return {!LineCol} */
@@ -2854,6 +2878,34 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
 }
 
 /**
+ * Returns the protocol of the input URL. Assumes https if relative. Accepts
+ * both the original URL string and a parsed URL produced from it, to avoid
+ * reparsing.
+ * @param {string} urlStr original URL string
+ * @param {!parse_url.URL} url parsed URL.
+ * @return {string}
+ */
+function urlProtocol(urlStr, url) {
+  // Technically, an URL such as "script :alert('foo')" is considered a relative
+  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
+  // character in a URL protocol. This is what parse_url.URL will determine.
+  // However, some very old browsers will ignore whitespace in URL protocols and
+  // will treat this as javascript execution. We must be safe regardless of the
+  // client. This RE is much more aggressive at extracting a protcol than
+  // parse_url.URL for this reason.
+  const re = /^([^:\/?#.]+):.*$/;
+  const match = re.exec(urlStr);
+  let protocol = '';
+  if (match !== null) {
+    protocol = match[1];
+    protocol = protocol.toLowerCase().trimLeft();
+  } else {
+    protocol = url.protocol;
+  }
+  return protocol;
+}
+
+/**
  * @param {!ParsedUrlSpec} parsedUrlSpec
  * @param {UrlErrorInAttrAdapter|UrlErrorInStylesheetAdapter} adapter
  * @param {!Context} context
@@ -2875,22 +2927,7 @@ function validateUrlAndProtocol(
     adapter.invalidUrl(context, urlStr, tagSpec, result);
     return;
   }
-  // Technically, an URL such as "script :alert('foo')" is considered a relative
-  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
-  // character in a URL protocol. This is what parse_url.URL will determine.
-  // However, some very old browsers will ignore whitespace in URL protocols and
-  // will treat this as javascript execution. We must be safe regardless of the
-  // client. This RE is much more aggressive at extracting a protcol than
-  // parse_url.URL for this reason.
-  const re = /^([^:\/?#.]+):.*$/;
-  const match = re.exec(urlStr);
-  let protocol = '';
-  if (match !== null) {
-    protocol = match[1];
-    protocol = protocol.toLowerCase().trimLeft();
-  } else {
-    protocol = url.protocol;
-  }
+  let protocol = urlProtocol(urlStr, url);
   if (protocol.length > 0 && !parsedUrlSpec.isAllowedProtocol(protocol)) {
     adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
     return;
@@ -2899,6 +2936,16 @@ function validateUrlAndProtocol(
     adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
     return;
   }
+}
+
+/**
+ * Returns true iff the passed in URL is a data: protocol URL.
+ * @param {string} urlStr
+ * @return {boolean}
+ */
+function isDataUrl(urlStr) {
+  const url = new parse_url.URL(urlStr);
+  return urlProtocol(urlStr, url) == 'data';
 }
 
 /**
@@ -3717,8 +3764,11 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
   // http://w3c.github.io/aria-in-html/
   // However, to avoid parsing differences, we restrict the set of allowed
   // characters in the document.
+  // If explicitAttrsOnly is true then do not allow data- attributes by default.
+  // They must be explicitly added to the tagSpec.
   const dataAttrRe = /^data-[A-Za-z0-9-_:.]*$/;
-  if (attrName.match(dataAttrRe) !== null) {return;}
+  if (!parsedTagSpec.getSpec().explicitAttrsOnly &&
+      (attrName.match(dataAttrRe) !== null)) {return;}
 
   // At this point, it's an error either way, but we try to give a
   // more specific error in the case of Mustache template characters.
@@ -4166,7 +4216,7 @@ class TagSpecDispatch {
   constructor() {
     /**
      * TagSpec ids for a specific attribute dispatch key.
-     * @type {Object<string, number>}
+     * @type {?Object<string, !Array<number>>}
      * @private
      */
     this.tagSpecsByDispatch_ = null;
@@ -4187,8 +4237,14 @@ class TagSpecDispatch {
     if (this.tagSpecsByDispatch_ === null) {
       this.tagSpecsByDispatch_ = Object.create(null);
     }
-    goog.asserts.assert(!(dispatchKey in this.tagSpecsByDispatch_));
-    this.tagSpecsByDispatch_[dispatchKey] = tagSpecId;
+    // Multiple TagSpecs may have the same dispatch key. These are added in the
+    // order in which they are found and only the first TagSpec is used below
+    // in matchingDispatchKey.
+    if (!(dispatchKey in this.tagSpecsByDispatch_)) {
+      this.tagSpecsByDispatch_[dispatchKey] = [tagSpecId];
+    } else {
+      this.tagSpecsByDispatch_[dispatchKey].push(tagSpecId);
+    }
   }
 
   /**
@@ -4231,7 +4287,7 @@ class TagSpecDispatch {
         attrName, attrValue, mandatoryParent);
     const match = this.tagSpecsByDispatch_[dispatchKey];
     if (match !== undefined) {
-      return match;
+      return match[0];
     }
 
     // Try next to find a key that allows any parent.
@@ -4240,7 +4296,7 @@ class TagSpecDispatch {
         attrValue, '');
     const noParentMatch = this.tagSpecsByDispatch_[noParentKey];
     if (noParentMatch !== undefined) {
-      return noParentMatch;
+      return noParentMatch[0];
     }
 
     // Try last to find a key that matches just this attribute name.
@@ -4248,7 +4304,7 @@ class TagSpecDispatch {
         amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, '', '');
     const noValueMatch = this.tagSpecsByDispatch_[noValueKey];
     if (noValueMatch !== undefined) {
-      return noValueMatch;
+      return noValueMatch[0];
     }
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
@@ -4742,6 +4798,7 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    const transformedValueRe = new RegExp(/^\w+;v=(\d+)$/);
     for (const attr of attrs) {
       // Verify this attribute is a type identifier. Other attributes are
       // validated in validateAttributes.
@@ -4756,8 +4813,23 @@ class ParsedValidatorRules {
           }
           // The type identifier "actions" and "transformed" are not considered
           // mandatory unlike other type identifiers.
-          if (identifier != 'actions' && identifier != 'transformed') {
+          if (identifier !== 'actions' && identifier !== 'transformed') {
             hasMandatoryTypeIdentifier = true;
+          }
+          // The type identifier "transformed" has restrictions on it's value.
+          // It must be \w+;v=\d+ (e.g. google;v=1).
+          if ((identifier === 'transformed') && (attr.value !== '')) {
+            const reResult = transformedValueRe.exec(attr.value);
+            if (reResult !== null) {
+              validationResult.transformerVersion = parseInt(reResult[1], 10);
+            } else {
+              context.addError(
+                  amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                  context.getLineCol(),
+                  /*params=*/[attr.name, 'html', attr.value],
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
+                  validationResult);
+            }
           }
         } else {
           context.addError(
@@ -5402,10 +5474,6 @@ amp.validator.ValidationHandler =
    * @override
    */
       cdata(text) {
-        // Record <style amp-custom> byte size
-        if (this.context_.getTagStack().isStyleAmpCustomChild()) {
-          this.context_.addStyleAmpCustomByteSize(byteLength(text));
-        }
         // Validate that JSON can be parsed.
         if (this.context_.getTagStack().isScriptTypeJsonChild()) {
           try {

@@ -347,6 +347,21 @@ describe('ValidatorOutput', () => {
   });
 });
 
+describe('ValidationResultTransformerVersion', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Confirm that the transformer version in attribute "transformed" is
+  // set to ValidationResult.transformer_version.
+  it('produces expected output with hash in the URL', () => {
+    const test = new ValidatorTestCase(
+        'transformed_feature_tests/minimum_valid_amp.html');
+    const result =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    assertStrictEqual(1, result.transformerVersion);
+  });
+});
+
 describe('ValidatorCssLengthValidation', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
   // Rather than encoding some really long author stylesheets in
@@ -392,6 +407,84 @@ describe('ValidatorCssLengthValidation', () => {
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
        '(see https://www.ampproject.org/docs/reference/spec' +
        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
+
+  it('will accept 50010 bytes in author stylesheet that includes an URL',
+      () => {
+        const url = 'http://example.com/';
+        assertStrictEqual(19, url.length);
+        const cssWithUrl = 'a{b:url(\'' + url + '\')';
+        assertStrictEqual(30, cssWithUrl.length);
+        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+        // 10 bytes over limit, 19 of which are the URL.
+        assertStrictEqual(50010, stylesheet.length);
+        const test = new ValidatorTestCase('feature_tests/css_length.html');
+        test.inlineOutput = false;
+        test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+        test.expectedOutputFile = null;
+        // TODO(gregable): Modify this test to pass for transformed AMP.
+        // test.expectedOutput = 'PASS';
+        test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
+        test.run();
+      });
+
+  it('will accept 50010 bytes in stylesheet that includes a relative URL',
+      () => {
+        const url = 'a-relative-url.html';
+        assertStrictEqual(19, url.length);
+        const cssWithUrl = 'a{b:url(\'' + url + '\')';
+        assertStrictEqual(30, cssWithUrl.length);
+        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+        // 10 bytes over limit, 19 of which are the URL.
+        assertStrictEqual(50010, stylesheet.length);
+        const test = new ValidatorTestCase('feature_tests/css_length.html');
+        test.inlineOutput = false;
+        test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+        test.expectedOutputFile = null;
+        test.expectedOutput = 'PASS';
+        // TODO(gregable): Modify this test to pass for transformed AMP.
+        // test.expectedOutput = 'PASS';
+        test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
+        test.run();
+      });
+
+  it('will accept 50010 bytes in stylesheet that includes a data URL', () => {
+    const url = 'data:nineteen-bytes';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -971,6 +1064,14 @@ describe('ValidatorRulesMakeSense', () => {
     it('unique and unique_warning can not be defined at the same time', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
+
+    // When explicit_attrs_only is true, then amp_layout must not be set.
+    if (tagSpec.explicitAttrsOnly) {
+      it('\'' + tagSpecName + '\' has explicit_attrs_only set to true ' +
+          'and must not have any amp_layouts', () => {
+        expect(tagSpec.ampLayout === null).toBe(true);
+      });
+    }
 
     // attr_specs within tag.
     let seenDispatchKey = false;
