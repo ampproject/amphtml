@@ -25,20 +25,32 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
+export const HostServiceError = {
+  // The host service doesn't match its environment.  For example, a SafeFrame
+  // host service when run in something that isn't a SafeFrame.  The
+  // implementation should consider falling back to its default implementation
+  // on the regular web.
+  MISMATCH: 1,
+  // The host service is correct for its environment, but not able to function.
+  // For example, a SafeFrame host service running inside a SafeFrame
+  // implementation that is incomplete or out of date.
+  UNSUPPORTED: 2,
+};
+
 export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Visibility>}
+   * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Visibility>} */ (
+    return /** @type {!Promise<!VisibilityInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Visibility} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installVisibilityServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -47,16 +59,16 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Visibility>}
+   * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Fullscreen>} */ (
+    return /** @type {!Promise<!FullscreenInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Fullscreen} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installFullscreenServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -65,16 +77,16 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Exit>}
+   * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Fullscreen>} */ (
+    return /** @type {!Promise<!ExitInterface>} */ (
       getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT));
   }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {!Exit} impl
+   * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
@@ -83,11 +95,12 @@ export class HostServices {
 }
 
 /**
- * Visibility defines interface provided by host for visibility detection.
+ * VisibilityInterface defines interface provided by host for visibility
+ * detection.
  *
  * @interface
  */
-export class Visibility {
+export class VisibilityInterface {
 
   /**
    * Register a callback for visibility change events.
@@ -95,7 +108,6 @@ export class Visibility {
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
   onVisibilityChange(unusedCallback) {
-    throwUnsupportedError();
   }
 }
 
@@ -112,22 +124,21 @@ export let VisibilityDataDef;
 
 
 /**
- * Fullscreen defines interface provided by host to enable/disable
+ * FullscreenInterface defines interface provided by host to enable/disable
  * fullscreen mode.
  *
  * @interface
  */
-export class Fullscreen {
+export class FullscreenInterface {
 
   /**
    * Request to expand the given element to fullscreen overlay.
    *
    * @param {!Element} unusedTargetElement
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   enterFullscreenOverlay(unusedTargetElement) {
-    throwUnsupportedError();
   }
 
   /**
@@ -135,35 +146,26 @@ export class Fullscreen {
    *
    * @param {!Element} unusedTargetElement
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   exitFullscreenOverlay(unusedTargetElement) {
-    throwUnsupportedError();
   }
 }
 
 /**
- * Exit defines interface provided by host for navigating out.
+ * ExitInterface defines interface provided by host for navigating out.
  *
  * @interface
  */
-export class Exit {
+export class ExitInterface {
 
   /**
    * Request to navigate to URL.
    *
    * @param {string} unusedUrl
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   openUrl(unusedUrl) {
-    throwUnsupportedError();
   }
-}
-
-/**
- * Throw unsupported error.
- */
-function throwUnsupportedError() {
-  throw new Error('Unsupported operation');
 }
