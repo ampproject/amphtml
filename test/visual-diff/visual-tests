@@ -600,5 +600,13 @@
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
+    {
+      "url": "examples/visual-tests/amp-date-picker/amp-date-picker.amp.html",
+      "name": "amp-date-picker",
+      "loading_complete_css": [
+        ".i-amphtml-date-picker-container",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-date-picker/amp-date-picker.js"
+    },
   ]
 }
