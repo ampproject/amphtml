@@ -237,6 +237,7 @@ exports.extensionBundles = [
   {
     name: 'amp-script',
     version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-share-tracking', version: '0.1', type: TYPES.MISC},
