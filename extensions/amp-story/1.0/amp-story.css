@@ -179,7 +179,7 @@ amp-story-page[active] {
 }
 
 amp-story amp-sidebar[side][open] {
-  background-color: #ffffff !important;
+  background-color: #ffffff;
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }

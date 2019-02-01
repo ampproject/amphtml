@@ -772,25 +772,25 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Finds any elements in the page that has a goToPage action.
-   * @return {!Array<string>|null} The IDs of the potential next pages in the story
+   * @return {!Array<string>} The IDs of the potential next pages in the story
    * or null if there aren't any.
    */
   actions() {
     const actionElements =
-      Array.from(
-          this.element.querySelectorAll('[on]'),
-          action => action.getAttribute('on'));
+      Array.prototype.slice.call(this.element.querySelectorAll('[on]'));
+    const actionAttrs = actionElements.map(action => action.getAttribute('on'));
 
-    return actionElements.reduce((res, actions) => {
-        // Handling for multiple actions on one event or multiple events.
-        const actionList = actions.split(/[;,]+/);
-        actionList.forEach(action => {
-          if(action.includes('goToPage')){
-            // The pageId is in between the equals sign & closing parenthesis.
-            res.push(action.slice(action.search('\=(.*)') + 1,-1));
-          }
-        });
-         return res;
+    return actionAttrs.reduce((res, actions) => {
+      console.log(typeof (actions));
+      // Handling for multiple actions on one event or multiple events.
+      const actionList = actions.split(/[;,]+/);
+      actionList.forEach(action => {
+        if (action.indexOf('goToPage') >= 0) {
+          // The pageId is in between the equals sign & closing parenthesis.
+          res.push(action.slice(action.search('\=(.*)') + 1,-1));
+        }
+      });
+      return res;
     }, []);
   }
 
