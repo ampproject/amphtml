@@ -63,9 +63,9 @@ function getLinkmateFlag_(element) {
  * @return {boolean}
  */
 function getExclusiveLinksFlag_(element) {
-  const exclusiveLinks = element.getAttribute('exclusive-links').toLowerCase();
+  const exclusiveLinks = element.getAttribute('exclusive-links');
 
-  return exclusiveLinks === 'true';
+  return exclusiveLinks ? exclusiveLinks.toLowerCase() === 'true' : false;
 }
 
 /**
