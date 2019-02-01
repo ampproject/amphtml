@@ -254,10 +254,27 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
+
+      /**
+       * Get our window location.
+       * In localDev mode, this will be this.win_.location
+       * In test mode, this will be this.win_.testLocation
+       *
+       * tesLocation is needed because test fixtures are
+       * loaded in friendly iframes, thus win.location
+       * would give about:blank.
+       */
+      let winLocation = this.win_.location;
+      if (this.win_.testLocation) {
+        winLocation = this.win_.testLocation;
+      }
+
+      // TODO: win location href curls domain MAY need to be the same
+      return ampToolboxCacheUrl.createCurlsSubdomain(winLocation.href)
           .then(curlsSubdomain => {
-            return 'http://' + curlsSubdomain +
-          '.recaptcha.localhost:8000/dist.3p/' +
+            return '//' + curlsSubdomain +
+              '.recaptcha.' + winLocation.host
+              + '/dist.3p/' +
           (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
             : 'current/recaptcha.max') +
           '.html';
