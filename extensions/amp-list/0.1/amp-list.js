@@ -855,13 +855,16 @@ export class AmpList extends AMP.BaseElement {
    * Called when 3 viewports above bottom of automatic load-more list, or
    * manually on clicking the load-more-button element. Sets the amp-list
    * src to the bookmarked src and fetches data from it.
+   * @param {boolean=} opt_reload
    * @return {!Promise}
    * @private
    */
-  loadMoreCallback_() {
-    if (this.loadMoreSrc_) {
+  loadMoreCallback_(opt_reload = false) {
+    if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
-      this.loadMoreSrc_ = null;
+    } else if (!opt_reload) {
+      // Nothing more to load
+      return Promise.resolve();
     }
     this.mutateElement(() => {
       this.loadMoreService_.toggleLoadMoreLoading(true);
@@ -869,7 +872,8 @@ export class AmpList extends AMP.BaseElement {
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
           if (this.loadMoreSrc_) {
-            this.loadMoreService_.toggleLoadMoreLoading(false);
+            this.mutateElement(() =>
+              this.loadMoreService_.toggleLoadMoreLoading(false));
           } else {
             this.mutateElement(() =>
               this.loadMoreService_.setLoadMoreEnded());
@@ -886,7 +890,7 @@ export class AmpList extends AMP.BaseElement {
               .getLoadMoreFailedClickable();
           this.unlistenLoadMore_ = listen(
               loadMoreFailedClickable,
-              'click', () => this.loadMoreCallback_());
+              'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
         });
   }
 
