@@ -527,6 +527,15 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
+        // TODO: torch2424. I think ali express case breaks
+        // for button on:tap
+          /*
+          e.g: on="tap: AMP.setState(
+          {cartParam: {shopcartId: '20158463321,106205922219,',countryCode: 'US'}}
+          ), form-submit-create-order.submit"
+          */
+        // https://m.aliexpress.com/shopcart/list.html
+
         this.handleNonXhrGet_(/*shouldSubmitFormElement*/false);
         return Promise.resolve();
       }
