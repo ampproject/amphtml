@@ -23,6 +23,7 @@ const recaptchaRouter = require('express').Router();
 const upload = multer();
 
 const recaptchaMock = `
+console.error('I was loaded in travis!');
 window.grecaptcha = {
   ready: (callback) => callback(),
   execute: () => Promise.resolve('recaptcha-mock')
@@ -41,6 +42,7 @@ const recaptchaFrameRequestHandler = (req, res, next) => {
 };
 
 recaptchaRouter.get('/mock.js', (req, res) => {
+  console.error('Serving recaptcha mock');
   res.end(recaptchaMock);
 });
 
