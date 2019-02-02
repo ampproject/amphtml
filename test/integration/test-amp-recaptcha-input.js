@@ -19,7 +19,6 @@ import {
   createFixtureIframe,
   poll,
 } from '../../testing/iframe';
-import {dict} from '../../src/utils/object';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -83,7 +82,7 @@ describe.configure().run('amp-recaptcha-input', () => {
       expect(frame.src.includes('recaptcha')).to.be.true;
       expect(frame.getAttribute('data-amp-3p-sentinel'))
           .to.be.equal('amp-recaptcha');
-      expect(frame.getAttribute('name')).to.be.equal(dict({
+      expect(frame.getAttribute('name')).to.be.equal(JSON.stringify({
         'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
         'sentinel': 'amp-recaptcha',
       }));
