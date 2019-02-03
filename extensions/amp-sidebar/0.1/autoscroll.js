@@ -47,7 +47,7 @@ export function handleAutoscroll(viewport, container) {
     return;
   }
 
-  viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'bottom');
+  viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
 }
 
 
