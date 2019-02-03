@@ -16,6 +16,8 @@
 
 import {
   Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
   StateProperty,
   UIType,
   getStoreService,
@@ -23,6 +25,7 @@ import {
 import {AdvancementMode} from './analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
@@ -63,8 +66,7 @@ const EXPANDABLE_COMPONENTS = {
     '2 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 ' +
     '0 78.62 23"/></g></svg>',
     actionIcon: ActionIcon.EXPAND,
-    // TODO(enriqe): change for i18n label.
-    defaultText: 'View on Twitter',
+    localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
 };
@@ -168,16 +170,6 @@ let tooltipElementsDef;
 const TAG = 'amp-story-embedded-component';
 
 /**
- * States in which an embedded component could be found in.
- * @enum {number}
- */
-const ComponentState = {
-  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
-  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
-  EXPANDED: 2, // Component is in expanded mode.
-};
-
-/**
  * Embedded components found in amp-story.
  */
 export class AmpStoryEmbeddedComponent {
@@ -216,60 +208,89 @@ export class AmpStoryEmbeddedComponent {
     /**
      * Target producing the tooltip. Used to avoid building the same
      * element twice.
-     * @private {?Element} */
+     * @private {?Element}
+     */
     this.previousTarget_ = null;
+
+    /**
+     * Page containing component.
+     * @private {?Element}
+     */
+    this.componentPage_ = null;
 
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
-    this.storeService_.subscribe(StateProperty.EMBEDDED_COMPONENT, target => {
-      this.onEmbeddedComponentUpdate_(target);
-    });
+    this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
+        /** @param {!InteractiveComponentDef} component */ component => {
+          this.onComponentStateUpdate_(component);
+        });
 
-    this.state_ = ComponentState.HIDDEN;
+    /** @private {EmbeddedComponentState} */
+    this.state_ = EmbeddedComponentState.HIDDEN;
   }
 
   /**
-   * Reacts to embedded component updates.
-   * @param {?Element} target
+   * Reacts to embedded component state updates.
+   * Possible state updates:
+   *
+   *    HIDDEN ==> FOCUSED ==> EXPANDED
+   *      /\ _________|           |
+   *      ||______________________|
+   *
+   * @param {!InteractiveComponentDef} component
    * @private
    */
-  onEmbeddedComponentUpdate_(target) {
-    switch (this.state_) {
-      case ComponentState.FOCUSED:
-      case ComponentState.HIDDEN:
-        target ? this.setState_(ComponentState.FOCUSED, target) :
-          this.setState_(ComponentState.HIDDEN, null /** target */);
+  onComponentStateUpdate_(component) {
+    switch (component.state) {
+      case EmbeddedComponentState.HIDDEN:
+        this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
         break;
-      case ComponentState.EXPANDED:
-        this.maybeCloseExpandedView_(target);
+      case EmbeddedComponentState.FOCUSED:
+        if (this.state_ !== EmbeddedComponentState.HIDDEN) {
+          dev().warn(TAG,
+              `Invalid component update. Not possible to go from ${this.state_}
+              to ${component.state}`);
+        }
+        this.setState_(EmbeddedComponentState.FOCUSED, component);
         break;
-      default:
-        dev().warn(TAG, `ComponentState ${this.state_} does not exist`);
+      case EmbeddedComponentState.EXPANDED:
+        if (this.state_ === EmbeddedComponentState.FOCUSED) {
+          this.setState_(EmbeddedComponentState.EXPANDED, component);
+        } else if (this.state_ === EmbeddedComponentState.EXPANDED) {
+          this.maybeCloseExpandedView_(component.element);
+        } else {
+          dev().warn(TAG,
+              `Invalid component update. Not possible to go from ${this.state_}
+               to ${component.state}`);
+        }
         break;
     }
   }
 
   /**
    * Sets new state for the embedded component.
-   * @param {ComponentState} state
-   * @param {?Element} target
+   * @param {EmbeddedComponentState} state
+   * @param {?InteractiveComponentDef} component
    * @private
    */
-  setState_(state, target) {
+  setState_(state, component) {
     switch (state) {
-      case ComponentState.FOCUSED:
-      case ComponentState.HIDDEN:
+      case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
-        this.onFocusedStateUpdate_(target);
+        this.onFocusedStateUpdate_(component);
         break;
-      case ComponentState.EXPANDED:
+      case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
-        this.toggleExpandedView_(target);
+        break;
+      case EmbeddedComponentState.EXPANDED:
+        this.state_ = state;
+        this.onFocusedStateUpdate_(null);
+        this.toggleExpandedView_(component.element);
         break;
       default:
-        dev().warn(TAG, `ComponentState ${this.state_} does not exist`);
+        dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
     }
   }
@@ -280,13 +301,11 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   toggleExpandedView_(targetToExpand) {
-    const storyPage = devAssert(
-        this.storyEl_.querySelector('amp-story-page[active]'));
-
     if (!targetToExpand) {
       this.expandedViewOverlay_ &&
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
-          storyPage.classList.toggle('i-amphtml-expanded-mode', false);
+          this.componentPage_.classList.toggle(
+              'i-amphtml-expanded-mode', false);
           toggle(devAssert(this.expandedViewOverlay_), false);
           resetStyles(devAssert(this.previousTarget_), ['transform']);
         });
@@ -296,38 +315,38 @@ export class AmpStoryEmbeddedComponent {
     this.animateExpanded_(devAssert(targetToExpand));
 
     if (!this.expandedViewOverlay_) {
-      this.buildAndAppendExpandedViewOverlay_(storyPage);
+      this.buildAndAppendExpandedViewOverlay_();
     }
     this.resources_.mutateElement(devAssert(this.expandedViewOverlay_), () => {
       toggle(devAssert(this.expandedViewOverlay_), true);
-      storyPage.classList.toggle('i-amphtml-expanded-mode', true);
+      this.componentPage_.classList.toggle('i-amphtml-expanded-mode', true);
     });
   }
 
   /**
    * Builds the expanded view overlay element and appends it to the page.
-   * @param {!Element} storyPage
    * @private
    */
-  buildAndAppendExpandedViewOverlay_(storyPage) {
+  buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
-    this.resources_.mutateElement(storyPage, () => storyPage.appendChild(
-        this.expandedViewOverlay_));
+    this.resources_.mutateElement(devAssert(this.componentPage_),
+        () => this.componentPage_.appendChild(this.expandedViewOverlay_));
   }
 
   /**
    * Closes the expanded view overlay.
    * @param {?Element} target
+   * @param {boolean=} forceClose Force closing the expanded view.
    * @private
    */
-  maybeCloseExpandedView_(target) {
-    if (target && matches(target, '.i-amphtml-expanded-view-close-button')) {
+  maybeCloseExpandedView_(target, forceClose = false) {
+    if ((target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
+      forceClose) {
       // Target is expanded and going into hidden mode.
-      this.closeFocusedState_();
+      this.close_();
       this.toggleExpandedView_(null);
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
           true /** capture */);
-      this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
     }
   }
 
@@ -345,15 +364,22 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
-      this.onUIStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
-      if (this.storeService_.get(StateProperty.EMBEDDED_COMPONENT)) {
-        this.closeFocusedState_();
+      if (this.state_ === EmbeddedComponentState.FOCUSED) {
+        this.close_();
+      }
+
+      // Hide expanded view when page switch is triggered by keyboard or desktop
+      // buttons.
+      if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        this.maybeCloseExpandedView_(null /** target */,
+            true /** forceClose */);
       }
     });
 
@@ -361,23 +387,23 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Hides the tooltip layer.
+   * Clears tooltip UI and updates store state to hidden.
    * @private
    */
-  closeFocusedState_() {
+  close_() {
     this.clearTooltip_();
-    this.setState_(ComponentState.HIDDEN, null /** target */);
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
+        {state: EmbeddedComponentState.HIDDEN});
   }
 
   /**
    * Reacts to store updates related to the focused state, when a tooltip is
    * active.
-   * @param {?Element} target
+   * @param {?InteractiveComponentDef} component
    * @private
    */
-  onFocusedStateUpdate_(target) {
-    if (!target) {
-      this.storeService_.dispatch(Action.TOGGLE_EMBEDDED_COMPONENT, null);
+  onFocusedStateUpdate_(component) {
+    if (!component) {
       this.resources_.mutateElement(
           devAssert(this.focusedStateOverlay_),
           () => {
@@ -391,9 +417,11 @@ export class AmpStoryEmbeddedComponent {
       this.storyEl_.appendChild(this.buildFocusedState_());
     }
 
-    this.updateTooltipBehavior_(target);
-    this.updateTooltipEl_(target);
-    this.previousTarget_ = target;
+    this.updateTooltipBehavior_(component.element);
+    this.updateTooltipEl_(component);
+    this.componentPage_ = devAssert(this.storyEl_.querySelector(
+        'amp-story-page[active]'));
+    this.previousTarget_ = component.element;
 
     this.resources_.mutateElement(
         devAssert(this.focusedStateOverlay_),
@@ -420,19 +448,18 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Builds tooltip and attaches it depending on the target's content and
-   * position.
-   * @param {!Element} target
+   * Builds and attaches the tooltip.
+   * @param {!InteractiveComponentDef} component
    * @private
    */
-  updateTooltipEl_(target) {
-    const embedConfig = userAssert(this.getEmbedConfigFor_(target), 'Invalid ' +
-      'embed config for target', target);
+  updateTooltipEl_(component) {
+    const embedConfig = userAssert(this.getEmbedConfigFor_(component.element),
+        'Invalid embed config for target', component.element);
 
-    this.updateTooltipText_(target, embedConfig);
-    this.updateTooltipComponentIcon_(target, embedConfig);
+    this.updateTooltipText_(component.element, embedConfig);
+    this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
-    this.positionTooltip_(target);
+    this.positionTooltip_(component);
   }
 
   /**
@@ -462,10 +489,8 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
-    this.setState_(ComponentState.EXPANDED, this.previousTarget_);
-
-    this.storeService_.dispatch(
-        Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState.EXPANDED, element: this.previousTarget_});
   }
 
   /**
@@ -509,9 +534,7 @@ export class AmpStoryEmbeddedComponent {
         /** measure */
         () => {
           const targetRect = target./*OK*/getBoundingClientRect();
-          const storyPage =
-            this.storyEl_.querySelector('amp-story-page[active]');
-          const pageRect = storyPage./*OK*/getBoundingClientRect();
+          const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
           const centeredTop = pageRect.height / 2 - targetRect.height / 2;
           const centeredLeft = pageRect.width / 2 - targetRect.width / 2;
@@ -543,7 +566,8 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipText_(target, embedConfig) {
     const tooltipText = target.getAttribute('data-tooltip-text') ||
-      embedConfig.defaultText ||
+      Services.localizationService(this.win_).getLocalizedString(
+          embedConfig.localizedStringId) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
@@ -596,22 +620,19 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Positions tooltip and its pointing arrow according to the position of the
    * target.
-   * @param {!Element} target
+   * @param {!InteractiveComponentDef} component
    * @private
    */
-  positionTooltip_(target) {
+  positionTooltip_(component) {
     const state = {arrowOnTop: false};
 
     this.resources_.measureMutateElement(this.storyEl_,
         /** measure */
         () => {
-          const storyPage =
-              this.storyEl_.querySelector('amp-story-page[active]');
-          const targetRect = target./*OK*/getBoundingClientRect();
-          const pageRect = storyPage./*OK*/getBoundingClientRect();
+          const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
-          this.verticalPositioning_(targetRect, pageRect, state);
-          this.horizontalPositioning_(targetRect, pageRect, state);
+          this.horizontalPositioning_(component, pageRect, state);
+          this.verticalPositioning_(component, pageRect, state);
         },
         /** mutate */
         () => {
@@ -627,54 +648,51 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * In charge of deciding where to position the tooltip depending on the
-   * target's position and size, and available space in the page. Also
-   * places the tooltip's arrow on top when the tooltip is below an element.
-   * @param {!ClientRect} targetRect
+   * Positions tooltip and its arrow vertically.
+   * @param {!InteractiveComponentDef} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private
    */
-  verticalPositioning_(targetRect, pageRect, state) {
-    const targetTopOffset = targetRect.top - pageRect.top;
-    const targetBottomOffset = targetRect.bottom - pageRect.top;
+  verticalPositioning_(component, pageRect, state) {
+    const tooltipHeight = this.tooltip_./*OK*/offsetHeight;
+    const verticalOffset = EDGE_PADDING * 3;
 
-    if (targetTopOffset > MIN_VERTICAL_SPACE) { // Tooltip fits above target.
-      state.tooltipTop = targetRect.top - MIN_VERTICAL_SPACE;
-    } else if (pageRect.height - targetBottomOffset >
-        MIN_VERTICAL_SPACE) { // Tooltip fits below target. Place arrow on top of the tooltip.
-      state.tooltipTop = targetRect.bottom + EDGE_PADDING;
+    state.tooltipTop = component.clientY - tooltipHeight - verticalOffset;
+    if (state.tooltipTop < pageRect.top + MIN_VERTICAL_SPACE) {
+      // Target is too high up screen, place tooltip facing down with
+      // arrow on top.
       state.arrowOnTop = true;
-    } else { // Element takes whole vertical space. Place tooltip on the middle.
-      state.tooltipTop = pageRect.height / 2;
+      state.tooltipTop = component.clientY + verticalOffset;
     }
   }
 
   /**
-   * In charge of positioning the tooltip and the tooltip's arrow horizontally.
-   * @param {!ClientRect} targetRect
+   * Positions tooltip and its arrow horizontally.
+   * @param {!InteractiveComponentDef} component
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    * @private
    */
-  horizontalPositioning_(targetRect, pageRect, state) {
-    const targetLeftOffset = targetRect.left - pageRect.left;
-    const elCenterLeft = targetRect.width / 2 + targetLeftOffset;
+  horizontalPositioning_(component, pageRect, state) {
     const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
-    state.tooltipLeft = elCenterLeft - (tooltipWidth / 2);
-    const maxHorizontalLeft = pageRect.width - tooltipWidth - EDGE_PADDING;
+    state.tooltipLeft = component.clientX - (tooltipWidth / 2);
+    const maxHorizontalLeft = pageRect.left + pageRect.width -
+      tooltipWidth - EDGE_PADDING;
 
-    // Make sure tooltip is not out of the page.
+    // Make sure tooltip is inside bounds of the page.
     state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
-    state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
+    state.tooltipLeft = Math.max(state.tooltipLeft,
+        pageRect.left + EDGE_PADDING);
 
-    state.arrowLeftOffset = Math.abs(elCenterLeft - state.tooltipLeft -
+    state.arrowLeftOffset = Math.abs(component.clientX - state.tooltipLeft -
         this.tooltipArrow_./*OK*/offsetWidth / 2);
-    // Make sure tooltip arrow is not out of the tooltip.
+
+    // Make sure tooltip arrow is inside bounds of the tooltip.
     state.arrowLeftOffset =
       Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
-
-    state.tooltipLeft += pageRect.left;
+    state.arrowLeftOffset =
+      Math.max(state.arrowLeftOffset, 0);
   }
 
   /**
@@ -686,7 +704,7 @@ export class AmpStoryEmbeddedComponent {
     if (!closest(dev().assertElement(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
-      this.closeFocusedState_();
+      this.close_();
     }
   }
 

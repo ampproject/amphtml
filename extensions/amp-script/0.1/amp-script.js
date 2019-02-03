@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
@@ -31,6 +33,8 @@ import {isExperimentOn} from '../../../src/experiments';
 /** @const {string} */
 const TAG = 'amp-script';
 
+/** @const {number} */
+const MAX_SCRIPT_SIZE = 150000;
 
 export class AmpScript extends AMP.BaseElement {
   /** @override */
@@ -59,6 +63,13 @@ export class AmpScript extends AMP.BaseElement {
       },
     });
     // Configure callbacks.
+    callbacks.onCreateWorker = data => {
+      dev().info(TAG, 'Create worker:', data);
+    };
+    callbacks.onHydration = () => {
+      dev().info(TAG, 'Hydrated!');
+      this.element.classList.add('i-amphtml-hydrated');
+    };
     callbacks.onSendMessage = data => {
       dev().info(TAG, 'To worker:', data);
     };
@@ -69,7 +80,23 @@ export class AmpScript extends AMP.BaseElement {
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
     dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
-    upgrade(this.element, authorUrl, workerUrl);
+
+    const xhr = Services.xhrFor(this.win);
+    const fetches = Promise.all([
+      // `workerUrl` is from CDN, so no need for `ampCors`.
+      xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
+      xhr.fetchText(authorUrl).then(r => r.text()),
+    ]);
+    upgrade(this.element, fetches.then(results => {
+      const workerScript = results[0];
+      const authorScript = results[1];
+      if (authorScript.length > MAX_SCRIPT_SIZE) {
+        user().error(TAG, `Max script size exceeded: ${authorScript.length} > `
+            + MAX_SCRIPT_SIZE);
+        return [];
+      }
+      return [workerScript, authorScript, authorUrl];
+    }));
     return Promise.resolve();
   }
 
@@ -88,5 +115,5 @@ export class AmpScript extends AMP.BaseElement {
 }
 
 AMP.extension('amp-script', '0.1', function(AMP) {
-  AMP.registerElement('amp-script', AmpScript);
+  AMP.registerElement('amp-script', AmpScript, CSS);
 });

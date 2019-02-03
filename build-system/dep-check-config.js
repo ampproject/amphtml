@@ -69,6 +69,7 @@ exports.rules = [
     mustNotDependOn: 'src/module.js',
     whitelist: [
       'extensions/amp-date-picker/0.1/**->src/module.js',
+      'extensions/amp-inputmask/0.1/**->src/module.js',
     ],
   },
   {
@@ -93,11 +94,6 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
-      'extensions/amp-inputmask/**->third_party/inputmask/inputmask.js',
-      'extensions/amp-inputmask/**->' +
-          'third_party/inputmask/inputmask.date.extensions.js',
-      'extensions/amp-inputmask/**->' +
-          'third_party/inputmask/inputmask.dependencyLib.js',
       'extensions/amp-subscriptions/**/*.js->' +
           'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
@@ -371,6 +367,8 @@ exports.rules = [
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
     ],
   },
   {
