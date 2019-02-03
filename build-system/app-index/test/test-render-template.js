@@ -23,13 +23,29 @@ describe('template', () => {
 
   describe('renderTemplate', () => {
 
-    it('validates', async() => {
+    it('validates rendered', async() => {
       const validator = await amphtmlValidator.getInstance();
       const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
         isMainPage: true,
         fileSet: ['tacos.al.pastor'],
+        serveMode: 'default',
+        selectModePrefix: '/',
+      }));
+
+      // Assert errors before so they're output.
+      assert.deepStrictEqual(errors, []);
+      assert.strictEqual(status, 'PASS');
+    });
+
+    it('validates empty', async() => {
+      const validator = await amphtmlValidator.getInstance();
+      const {errors, status} = validator.validateString(renderTemplate({
+        basepath: '/',
+        css: '',
+        isMainPage: true,
+        fileSet: [],
         serveMode: 'default',
         selectModePrefix: '/',
       }));
