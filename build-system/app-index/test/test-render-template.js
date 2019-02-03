@@ -29,7 +29,7 @@ describe('template', () => {
       validator = await amphtmlValidator.getInstance();
     });
 
-    it('validates rendered', () => {
+    it('validates rendered with dummy data', () => {
       const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
@@ -44,11 +44,11 @@ describe('template', () => {
       assert.strictEqual(status, 'PASS');
     });
 
-    it('validates empty', () => {
+    it('validates rendered with empty/default data', () => {
       const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/',
         css: '',
-        isMainPage: true,
+        isMainPage: false,
         fileSet: [],
         serveMode: 'default',
         selectModePrefix: '/',
