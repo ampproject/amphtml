@@ -25,7 +25,7 @@ describe('template', () => {
 
     it('validates', async() => {
       const validator = await amphtmlValidator.getInstance();
-      const {status} = validator.validateString(renderTemplate({
+      const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
         isMainPage: true,
@@ -33,6 +33,9 @@ describe('template', () => {
         serveMode: 'default',
         selectModePrefix: '/',
       }));
+
+      // Assert errors before so they're output.
+      assert.deepStrictEqual(errors, []);
       assert.strictEqual(status, 'PASS');
     });
 
