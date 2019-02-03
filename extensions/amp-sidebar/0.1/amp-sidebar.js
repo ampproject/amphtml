@@ -65,8 +65,8 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @protected {?../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport = null;
+    /** @private @protected {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -119,7 +119,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.side_ = element.getAttribute('side');
 
-    this.viewport = this.getViewport();
+    this.viewport_ = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(element);
 
@@ -268,7 +268,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForPreOpening_() {
     toggle(this.element, /* display */true);
-    this.viewport.addToFixedLayer(this.element, /* forceTransfer */ true);
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.isIos_ && this.isSafari_) {
       this.compensateIosBottombar_();
@@ -285,7 +285,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
-    handleAutoscroll(this.viewport, this.element);
+    handleAutoscroll(this.getAmpDoc(), this.element);
   }
 
   /**
@@ -328,14 +328,14 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    this.viewport.enterOverlayMode();
+    this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForPreOpening_());
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.caller;
-      this.initialScrollTop_ = this.viewport.getScrollTop();
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }
 
@@ -349,9 +349,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return false;
     }
-    this.viewport.leaveOverlayMode();
+    this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
-      (this.initialScrollTop_ == this.viewport.getScrollTop());
+      (this.initialScrollTop_ == this.viewport_.getScrollTop());
     const sidebarIsActive =
         this.element.contains(this.document_.activeElement);
     this.setUpdateFn_(() => this.updateForClosing_());

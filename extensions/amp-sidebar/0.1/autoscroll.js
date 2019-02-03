@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {scopedQuerySelector} from '../../../src/dom';
+
 /**
  * Given a container, find the first descendant element with the `autoscroll`
  * attribute and scrolls the first scroller ancestor of that element which is
@@ -24,10 +26,10 @@ import {scopedQuerySelector} from '../../../src/dom';
  *
  * Note that we never scroll the main scroller. `autoscroll` is only
  * meant to work for sub scrolling areas.
- * @param {!../../../src/service/viewport/viewport-impl.Viewport} viewport
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} container
  */
-export function handleAutoscroll(viewport, container) {
+export function handleAutoscroll(ampdoc, container) {
   dev().assertElement(container);
   // Container could be sidebar or a clone of toolbar,
   // in the sidebar case, we need to exclude toolbar since original toolbar
@@ -38,15 +40,14 @@ export function handleAutoscroll(viewport, container) {
   }
 
   // verify parent is overflow auto or scroll
-  const win = container.ownerDocument.defaultView;
-  const overflow = computedStyle(win, container)['overflow-y'];
+  const overflow = computedStyle(ampdoc.win, container)['overflow-y'];
   if (overflow != 'scroll' && overflow != 'auto') {
     user().error('amp-sidebar [autoscroll]',
         `'nav [toolbar]' element must be set to overflow 'scroll'
         or 'auto' for 'autoscroll' to work.`);
     return;
   }
-
+  const viewport = Services.viewportForDoc(ampdoc);
   viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
 }
 
