@@ -102,7 +102,7 @@ tags: {  # amp-sidebar > nav
 # require that all tags match the rule.
 # Our approach here is two define two reference points. One is a child which
 # has no additional requirements, so it always can match. The other is a child
-# which has the amp-selector option attributes. The first of these can
+# which has the amp-sidebar autoscroll attributes. The first of these can
 # recursively contain either reference point beneath it.
 # One small drawback here is that order matters. The list of reference points
 # must first match against 'autoscroll' before 'child'. Since 'child' will

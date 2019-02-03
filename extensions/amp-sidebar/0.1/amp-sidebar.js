@@ -65,7 +65,7 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @protected {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -203,6 +203,7 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }
     }, true);
+
   }
 
   /** @override */

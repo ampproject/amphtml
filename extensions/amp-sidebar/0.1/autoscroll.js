@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ import {scopedQuerySelector} from '../../../src/dom';
  * not the root scroller enough so that the element becomes visible.
  *
  * Note that we never scroll the main scroller. `autoscroll` is only
- * meant to work for sub scrolling areas.
+ * meant to work for sub scrolling areas of sidebar, including navbar.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} container
  */
 export function handleAutoscroll(ampdoc, container) {
   dev().assertElement(container);
+
   // Container could be sidebar or a clone of toolbar,
   // in the sidebar case, we need to exclude toolbar since original toolbar
   // nodes are also inside a sidebar.
@@ -39,7 +40,7 @@ export function handleAutoscroll(ampdoc, container) {
     return;
   }
 
-  // verify parent is overflow auto or scroll
+  // Verify parent is overflow auto or scroll.
   const overflow = computedStyle(ampdoc.win, container)['overflow-y'];
   if (overflow != 'scroll' && overflow != 'auto') {
     user().error('amp-sidebar [autoscroll]',
@@ -47,6 +48,7 @@ export function handleAutoscroll(ampdoc, container) {
         or 'auto' for 'autoscroll' to work.`);
     return;
   }
+
   const viewport = Services.viewportForDoc(ampdoc);
   viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {dev, userAssert} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
-import {userAssert, dev} from '../../../src/log';
 
 /**
  * Class representing toolbar behavior in sidebar
