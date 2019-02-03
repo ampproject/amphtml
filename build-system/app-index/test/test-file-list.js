@@ -17,22 +17,7 @@
 const assert = require('assert');
 
 const {FileList} = require('../file-list');
-const {JSDOM} = require('jsdom');
-
-
-// JSDom doesn't parse attributes whose names don't follow the spec, so
-// our only way to test [attr] values is via regex.
-const getBoundAttr = (el, attr) => {
-  const match = el.outerHTML.match(
-      new RegExp(`\\[${attr}\\]="?([^\\s"\\>]+)`), 'g');
-  if (match) {
-    return match[1];
-  }
-}
-
-
-const parseHtmlChunk = htmlStr =>
-  (new JSDOM(htmlStr)).window.document.body.firstElementChild;
+const {getBoundAttr, parseHtmlChunk} = require('./helpers');
 
 
 describe('devdash', () => {

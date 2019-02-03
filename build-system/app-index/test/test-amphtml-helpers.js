@@ -25,10 +25,7 @@ const {
 } = require('../amphtml-helpers');
 const {html} = require('../html');
 const {JSDOM} = require('jsdom');
-
-
-const parseHtmlChunk = htmlStr =>
-  (new JSDOM(htmlStr)).window.document.body.firstElementChild;
+const {parseHtmlChunk} = require('./helpers');
 
 
 describe('devdash', () => {
