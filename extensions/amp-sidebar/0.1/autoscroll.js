@@ -43,9 +43,9 @@ export function handleAutoscroll(ampdoc, container) {
   // Verify parent is overflow auto or scroll.
   const overflow = computedStyle(ampdoc.win, container)['overflow-y'];
   if (overflow != 'scroll' && overflow != 'auto') {
-    user().error('amp-sidebar [autoscroll]',
-        `'nav [toolbar]' element must be set to overflow 'scroll'
-        or 'auto' for 'autoscroll' to work.`);
+    user().error('AMP-SIDEBAR',
+        `for 'autoscroll', 'nav [toolbar]' element must be set to overflow
+        'scroll' or 'auto' for 'autoscroll' to work.`);
     return;
   }
 
