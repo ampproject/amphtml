@@ -9,48 +9,136 @@
   <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+    }
+
     .hamburger{
-      width: 30px;
-      height: 15px;
+      font-size: 2em;
       display:block;
       cursor: pointer;
-      border: 5px solid #000;
-      border-width: 5px 0;
       position: fixed;
       top: 0;
       right: 0;
+      width: 40px;
+      height: 40px;
+      background: #03A9F4;
       z-index: 1;
     }
-    .hamburger:before {
+
+    h1, h2, h3, h4 {
+      margin: 0px;
+      padding: 5px;
       display: block;
-      content: '';
-      border-top: 5px solid #000;
-      margin-top: 5px;
-      height: 5px;
-      width: 30px;
-      cursor: pointer;
     }
 
-    .desktop-sidebar {
+    header {
+      background: #9C27B0;
+      height: 100px;
+    }
+
+    article {
+      background: #FFD54F
+    }
+
+    nav {
+      margin: 0px;
+    }
+
+    aside {
       display: none;
     }
 
+    ul.nav-container {
+      display: block;
+      padding: 0;
+      background: #4CAF50;
+      margin: 0px;
+      width: 300px;
+    }
+
+    ul.nav-container > * {
+      height: 100px;
+      display: block;
+      border-bottom: 1px solid #EEE;
+      padding: 2px;
+    }
+
+    .selected {
+      background: #FF9800;
+    }
+
+    /*  desktop */
     @media (min-width: 767px) {
+
+      /* overflow: scroll MUST BE on the `toolbar` */
+      nav[toolbar] {
+        max-height: calc(100vh - 100px);
+        overflow: auto;
+      }
+
       .hamburger {
         display: none;
       }
 
-      .desktop-sidebar {
-        display: visible;
+      main {
+        display: flex;
+        flex-direction: row;
+      }
+
+      aside {
+        display: flex;
+        flex-direction: column;
+
+      }
+
+      article {
+        flex: 1
       }
     }
   </style>
 </head>
 <body>
 
-  <amp-sidebar id="sidebar" layout="nodisplay" side="right">
+  <amp-sidebar id="sidebar" layout="nodisplay">
     <nav toolbar="(min-width: 767px)" toolbar-target="desktop-sidebar">
-      <ul>
+      <ul class="nav-container">
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
+        <li autoscroll class=selected>Selected Nav Item</li>
+        <li>Nav item</li>
+        <li>Nav item</li>
         <li>Nav item</li>
         <li>Nav item</li>
         <li>Nav item</li>
@@ -60,22 +148,28 @@
     </nav>
   </amp-sidebar>
 
- <main>
+
    <header>
+      <h2>Header</h2>
       <button
         class="hamburger"
         on='tap:sidebar.toggle'
         aria-label="Click to open sidebar"
         >
-      <div class="hamburger"></div>
+      =
     </button>
    </header>
-  <aside id="desktop-sidebar">
-  </aside>
-  <article>
 
-  </article>
- </main>
+   <main>
+      <aside id="desktop-sidebar">
+          <h2>Sidebar Content</h2>
+      </aside>
+
+      <article>
+        <h1>Main Content</h1>
+      </article>
+
+    </main>
 
 
 

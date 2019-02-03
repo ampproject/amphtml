@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {handleAutoscroll} from './autoscroll';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
@@ -25,6 +24,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {handleAutoscroll} from './autoscroll';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -65,8 +65,8 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = null;
+    /** @protected {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -119,7 +119,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.side_ = element.getAttribute('side');
 
-    this.viewport_ = this.getViewport();
+    this.viewport = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(element);
 
@@ -268,7 +268,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForPreOpening_() {
     toggle(this.element, /* display */true);
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+    this.viewport.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.isIos_ && this.isSafari_) {
       this.compensateIosBottombar_();
@@ -285,6 +285,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
+    handleAutoscroll(this.viewport, this.element);
   }
 
   /**
@@ -327,15 +328,14 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    handleAutoscroll(this.element);
-    this.viewport_.enterOverlayMode();
+    this.viewport.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForPreOpening_());
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.caller;
-      this.initialScrollTop_ = this.viewport_.getScrollTop();
+      this.initialScrollTop_ = this.viewport.getScrollTop();
     }
   }
 
@@ -349,9 +349,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return false;
     }
-    this.viewport_.leaveOverlayMode();
+    this.viewport.leaveOverlayMode();
     const scrollDidNotChange =
-      (this.initialScrollTop_ == this.viewport_.getScrollTop());
+      (this.initialScrollTop_ == this.viewport.getScrollTop());
     const sidebarIsActive =
         this.element.contains(this.document_.activeElement);
     this.setUpdateFn_(() => this.updateForClosing_());

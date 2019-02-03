@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {computedStyle} from '../../../src/style';
+import {dev, user} from '../../../src/log';
 import {scopedQuerySelector} from '../../../src/dom';
 /**
  * Given a container, find the first descendant element with the `autoscroll`
@@ -27,13 +28,26 @@ import {scopedQuerySelector} from '../../../src/dom';
  * @param {!Element} container
  */
 export function handleAutoscroll(viewport, container) {
-  return;
   dev().assertElement(container);
+  // Container could be sidebar or a clone of toolbar,
+  // in the sidebar case, we need to exclude toolbar since original toolbar
+  // nodes are also inside a sidebar.
   const elem = scopedQuerySelector(container, ':not([toolbar]) [autoscroll]');
   if (!elem) {
     return;
   }
-  viewport.animateScrollWithinParent(elem, container);
+
+  // verify parent is overflow auto or scroll
+  const win = container.ownerDocument.defaultView;
+  const overflow = computedStyle(win, container)['overflow-y'];
+  if (overflow != 'scroll' && overflow != 'auto') {
+    user().error('amp-sidebar [autoscroll]',
+        `'nav [toolbar]' element must be set to overflow 'scroll'
+        or 'auto' for 'autoscroll' to work.`);
+    return;
+  }
+
+  viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
 }
 
 

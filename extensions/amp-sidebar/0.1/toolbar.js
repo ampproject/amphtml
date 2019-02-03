@@ -95,8 +95,6 @@ export class Toolbar {
         `toolbar-target element with an id: ${targetId}`);
       }
     });
-
-    handleAutoscroll(this.toolbarClone_);
   }
 
   /**
@@ -131,6 +129,7 @@ export class Toolbar {
         this.toolbarDomElement_.classList
             .remove('amp-sidebar-toolbar-target-hidden');
         this.toolbarShown_ = true;
+        handleAutoscroll(this.context_.viewport, this.toolbarClone_);
       }
     });
   }
