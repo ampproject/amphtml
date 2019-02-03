@@ -20,6 +20,17 @@ const {FileList} = require('../file-list');
 const {JSDOM} = require('jsdom');
 
 
+// JSDom doesn't parse attributes whose names don't follow the spec, so
+// our only way to test [attr] values is via regex.
+const getBoundAttr = (el, attr) => {
+  const match = el.outerHTML.match(
+      new RegExp(`\\[${attr}\\]="?([^\\s"\\>]+)`), 'g');
+  if (match) {
+    return match[1];
+  }
+}
+
+
 const parseHtmlChunk = htmlStr =>
   (new JSDOM(htmlStr)).window.document.body.firstElementChild;
 
@@ -75,6 +86,74 @@ describe('devdash', () => {
       const items = firstElementChild.querySelectorAll('.file-link-container');
 
       assert.strictEqual(items.length, fileSet.length);
+    });
+
+    it('binds /examples hrefs', () => {
+      const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
+      const basepath = '/examples/';
+
+      const root = parseHtmlChunk(FileList({
+        fileSet,
+        basepath,
+        selectModePrefix: '/',
+      }));
+
+      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
+
+      assert.strictEqual(els.length, fileSet.length);
+
+      Array.from(els).forEach((el, i) => {
+        assert(getBoundAttr(el, 'href'));
+        assert.strictEqual(el.getAttribute('href'), basepath + fileSet[i]);
+      });
+    });
+
+    it('does not bind non-/examples hrefs', () => {
+      const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
+      const basepath = '/potato/';
+
+      const root = parseHtmlChunk(FileList({
+        fileSet,
+        basepath,
+        selectModePrefix: '/',
+      }));
+
+      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
+
+      assert.strictEqual(els.length, fileSet.length);
+
+      Array.from(els).forEach((el, i) => {
+        assert(!getBoundAttr(el, 'href'));
+        assert.strictEqual(el.getAttribute('href'), basepath + fileSet[i]);
+      });
+    });
+
+    it('binds/does not bind mixed', () => {
+      const bound = ['asada.html', 'adobada.html', 'pastor.html'];
+      const notBound = ['chabbuddy.g', 'dj.beats', 'mc.grindah'];
+      const basepath = '/examples/';
+
+      const root = parseHtmlChunk(FileList({
+        fileSet: [...bound, ...notBound],
+        basepath,
+        selectModePrefix: '/',
+      }));
+
+      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
+
+      assert.strictEqual(els.length, bound.length + notBound.length);
+
+      bound.forEach((expectedHref, i) => {
+        const el = els[i];
+        assert(getBoundAttr(el, 'href'));
+        assert.strictEqual(el.getAttribute('href'), basepath + expectedHref);
+      });
+
+      notBound.forEach((expectedHref, i) => {
+        const el = els[bound.length + i];
+        assert(!getBoundAttr(el, 'href'));
+        assert.strictEqual(el.getAttribute('href'), basepath + expectedHref);
+      });
     });
 
   });
