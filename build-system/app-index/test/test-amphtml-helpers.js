@@ -277,9 +277,7 @@ describe('devdash', () => {
           <html>
             <head></head>
             <body>
-              <form></form>
-              <form></form>
-              <form></form>
+              <form action=whatever.com></form>
             </body>
           </html>`;
 
