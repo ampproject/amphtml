@@ -159,8 +159,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
-        event.preventDefault();
-        this.close_();
+        if (this.close_()) {
+          event.preventDefault();
+        }
       }
     });
 
@@ -340,11 +341,13 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
+   * @return {boolean} Whether the sidebar actually transitioned from "visible"
+   *     to "hidden".
    * @private
    */
   close_() {
     if (!this.isOpen_()) {
-      return;
+      return false;
     }
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
@@ -359,6 +362,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       tryFocus(this.openerElement_);
     }
+    return true;
   }
   /**
    * Sidebars within <amp-story> should be 'flipped'.

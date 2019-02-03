@@ -61,16 +61,25 @@ export const RENDER_AREA_RATIO = 1.2;
 export const VIEWPORT_AREA_RATIO = 0.25;
 
 /**
- * Ancestors considered "actionable", i.e. that are bound to a default onclick
- * action (e.g. `button`) or where it cannot be determined whether they're
- * actionable or not (e.g. `amp-script`).
+ * Selector for subnodes for which the auto-lightbox treatment does not apply.
  */
-const ACTIONABLE_ANCESTORS =
+const DISABLED_ANCESTORS =
+    // Runtime-specific.
+    '[placeholder],' +
+
+    // Explicitly opted out.
+    '[data-amp-auto-lightbox-disable],' +
+
+    // Ancestors considered "actionable", i.e. that are bound to a default
+    // onclick action(e.g. `button`) or where it cannot be determined whether
+    // they're actionable or not (e.g. `amp-script`).
     'a[href],' +
     'amp-selector [option],' +
     'amp-script,' +
     'amp-story,' +
     'button,' +
+
+    // Special treatment.
     // TODO(alanorozco): Allow and possibly group carousels where images are the
     // only content.
     'amp-carousel';
@@ -89,9 +98,8 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsAll(element) {
-    return Criteria.meetsPlaceholderCriteria(element) &&
-      Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsActionableCriteria(element);
+    return Criteria.meetsSizingCriteria(element) &&
+      Criteria.meetsTreeShapeCriteria(element);
   }
 
   /**
@@ -120,16 +128,8 @@ export class Criteria {
    * @param {!Element} element
    * @return {boolean}
    */
-  static meetsPlaceholderCriteria(element) {
-    return !closestBySelector(element, '[placeholder]');
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static meetsActionableCriteria(element) {
-    if (closestBySelector(element, ACTIONABLE_ANCESTORS)) {
+  static meetsTreeShapeCriteria(element) {
+    if (closestBySelector(element, DISABLED_ANCESTORS)) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
@@ -214,16 +214,6 @@ export class Scanner {
 
 
 /**
- * @param {!Element} element
- * @return {boolean}
- * @visibleForTesting
- */
-export function meetsCriteria(element) {
-  return Criteria.meetsAll(element);
-}
-
-
-/**
  * Parses document schema defined as ld+json.
  * @visibleForTesting
  */
@@ -236,7 +226,7 @@ export class Schema {
    * @return {string|undefined}
    */
   static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getHeadNode().querySelectorAll(
+    const schemaTags = ampdoc.getRootNode().querySelectorAll(
         'script[type="application/ld+json"]');
 
     if (schemaTags.length <= 0) {
@@ -249,7 +239,9 @@ export class Schema {
       const schemaTag = schemaTags[i];
       const parsed = tryParseJson(schemaTag./*OK*/innerText);
 
-      if (parsed && parsed['url'] == canonicalUrl) {
+      if (parsed &&
+          (parsed['mainEntityOfPage'] == canonicalUrl ||
+          parsed['url'] == canonicalUrl)) {
         return parsed['@type'];
       }
     }
@@ -392,7 +384,7 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
-      if (!meetsCriteria(candidate)) {
+      if (!Criteria.meetsAll(candidate)) {
         dev().info(TAG, 'discarded', candidate);
         return;
       }

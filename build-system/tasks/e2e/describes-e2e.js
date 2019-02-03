@@ -16,6 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
+const {AmpDriver} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
@@ -195,19 +196,23 @@ class AmpPageFixture {
 
     // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
-    // const chromeOptions = {'args': ['--headless']};
-    // capabilities.set('chromeOptions', chromeOptions);
+    const chromeOptions = {'args': ['--headless']};
+    capabilities.set('chromeOptions', chromeOptions);
 
     const builder = new Builder().withCapabilities(capabilities);
     return builder.build().then(driver => {
-      env.controller = new SeleniumWebDriverController(driver);
+      const controller = new SeleniumWebDriverController(driver);
+      env.controller = controller;
+      env.ampDriver = new AmpDriver(controller);
       this.driver_ = driver;
     });
   }
 
   /** @override */
-  teardown(unusedEnv) {
-    this.driver_.quit();
+  async teardown(unusedEnv) {
+    if (this.driver_) {
+      await this.driver_.quit();
+    }
     this.driver_ = null;
   }
 }

@@ -26,7 +26,7 @@ min_validator_revision_required: 364
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 807
+spec_file_revision: 811
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4481,6 +4481,7 @@ tags: {
     name: "no-verify"
     value: ""
   }
+  attrs: { name: "pattern" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
@@ -4497,6 +4498,7 @@ tags: {
   attrs: { name: "[disabled]" }
   attrs: { name: "[maxlength]" }
   attrs: { name: "[minlength]" }
+  attrs: { name: "[pattern]" }
   attrs: { name: "[placeholder]" }
   attrs: { name: "[readonly]" }
   attrs: { name: "[required]" }
