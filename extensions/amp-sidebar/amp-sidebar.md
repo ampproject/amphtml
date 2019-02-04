@@ -289,7 +289,7 @@ Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pr
 
 ## Auto scrolling within overflowing areas
 
-`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` an attribute in both sidebar and toolbar cases.
+`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` as an attribute in both sidebar and toolbar cases.
 
 This feature is useful when dealing with long navigation list and wanting the sidebar to scroll to the current navigation items when page loads.
 

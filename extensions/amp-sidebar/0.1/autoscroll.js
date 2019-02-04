@@ -16,8 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {computedStyle} from '../../../src/style';
-import {dev, user} from '../../../src/log';
 import {scopedQuerySelector} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 /**
  * Given a container, find the first descendant element with the `autoscroll`
@@ -30,7 +30,6 @@ import {scopedQuerySelector} from '../../../src/dom';
  * @param {!Element} container
  */
 export function handleAutoscroll(ampdoc, container) {
-  dev().assertElement(container);
 
   // Container could be sidebar or a clone of toolbar,
   // in the sidebar case, we need to exclude toolbar since original toolbar
