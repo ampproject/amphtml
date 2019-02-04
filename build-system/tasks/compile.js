@@ -242,7 +242,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
-      'src/!(inabox)*/**/*.js',
+      'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',
