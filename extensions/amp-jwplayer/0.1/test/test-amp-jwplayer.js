@@ -42,7 +42,7 @@ describes.realWin('amp-jwplayer', {
         .withArgs('meta[property="og:title"]')
         .returns(
             html`<meta property="og:title" content="title_tag" />`
-      );
+        );
     doc.body.appendChild(jw);
     return jw.build().then(() => { jw.layoutCallback(); return jw; });
   }
@@ -160,7 +160,7 @@ describes.realWin('amp-jwplayer', {
     });
   });
 
-  
+
 
   describe('createPlaceholderCallback', () => {
     it('should create a placeholder image', () => {
