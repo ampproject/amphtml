@@ -327,6 +327,11 @@ export const adConfig = {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
 
+  'caaja': {
+    renderStartImplemented: true,
+    prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
+  },
+
   'caajainfeed': {
     prefetch: [
       'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
