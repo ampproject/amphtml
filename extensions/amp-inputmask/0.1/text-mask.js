@@ -17,18 +17,29 @@
 import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
 import {Services} from '../../../src/services';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor, removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
+const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';
 
 export class TextMask {
   /**
    * Detect if an element has input mask behavior attached.
    * @param {!Element} element
+   * @return {boolean}
    */
   static isMasked(element) {
-    return element[ELEMENT_MASK_PROPERTY];
+    return Boolean(element[ELEMENT_MASK_PROPERTY]);
+  }
+
+  /**
+   * Detect if an element is a hidden element paired with a masked input.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static isMaskOutputElement(element) {
+    return Boolean(element[ELEMENT_MASK_OUTPUT_PROPERTY]);
   }
 
   /**
@@ -56,7 +67,12 @@ export class TextMask {
     this.controller_.mask();
 
     Services.formSubmitPromiseForDoc(element).then(formSubmitService => {
-      formSubmitService.beforeSubmit(e => this.handleBeforeSubmit_(e.form));
+      formSubmitService.beforeSubmit(e => {
+        if (e.form != this.element_.form) {
+          return;
+        }
+        this.handleBeforeSubmit_(e.form);
+      });
     });
 
     element[ELEMENT_MASK_PROPERTY] = true;
@@ -76,10 +92,21 @@ export class TextMask {
       return;
     }
 
+    const {disabled} = this.element_;
+    if (disabled) {
+      if (this.hiddenInput_) {
+        removeElement(this.hiddenInput_);
+      }
+      return;
+    }
+
     if (!this.hiddenInput_) {
       const hiddenName = `${name}-unmasked`;
       iterateCursor(this.element_.form.elements, element => {
         const {name} = element;
+        if (name == hiddenName && TextMask.isMaskOutputElement(element)) {
+          return;
+        }
         userAssert(name != hiddenName,
             'Illegal input name, %s found: %s', name, element);
       });
@@ -87,6 +114,7 @@ export class TextMask {
       const hidden = this.document_.createElement('input');
       hidden.type = 'hidden';
       hidden.name = hiddenName;
+      hidden[ELEMENT_MASK_OUTPUT_PROPERTY] = true;
       form.appendChild(hidden);
 
       this.hiddenInput_ = hidden;
@@ -101,6 +129,9 @@ export class TextMask {
    */
   dispose() {
     delete this.element_[ELEMENT_MASK_PROPERTY];
+    if (this.hiddenInput_) {
+      removeElement(this.hiddenInput_);
+    }
     this.controller_.dispose();
   }
 }
