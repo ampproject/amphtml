@@ -253,6 +253,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           })).to.deep.equal(size);
           expect(impl.fluidImpressionUrl_).to.not.be.ok;
         });
+
     it('should consume pageview state tokens when header is present',
         () => {
           const removePageviewStateTokenSpy =
@@ -275,6 +276,24 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(removePageviewStateTokenSpy).to.be.calledOnce;
           expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
               .calledOnce;
+        });
+    it('should remove pageview state tokens if none is provided',
+        () => {
+          const removePageviewStateTokenSpy =
+              sandbox.spy(impl, 'removePageviewStateToken');
+          const setPageviewStateTokenSpy =
+              sandbox.spy(impl, 'setPageviewStateToken');
+          expect(impl.extractSize({
+            get(name) {
+                return undefined;
+              }
+            },
+            has(name) {
+              return !!this.get(name);
+            },
+          })).to.deep.equal(size);
+          expect(removePageviewStateTokenSpy).to.be.calledOnce;
+          expect(setPageviewStateTokenSpy.not.to.be.called;
         });
 
     it('should consume sandbox header', () => {

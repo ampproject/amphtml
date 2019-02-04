@@ -757,6 +757,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+
+    // Clear any existing pageview state token for this slot. If the response
+    // included a new token, save it to the module-level object.
+    this.removePageviewStateToken();
+    if (responseHeaders.get('amp-ff-pageview-tokens')) {
+      this.setPageviewStateToken(
+          dev.assertString(responseHeaders.get('amp-ff-pageview-tokens')));
+    }
+
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -770,14 +779,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // fluid, wait until after resize happens.
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    }
-
-    // If the response included a pageview state token, check for an existing
-    // token and remove it. Then save the new one to the module level object.
-    if (responseHeaders.get('amp-ff-pageview-tokens')) {
-      this.removePageviewStateToken();
-      this.setPageviewStateToken(
-          dev().assertString(responseHeaders.get('amp-ff-pageview-tokens')));
     }
 
     return size;
