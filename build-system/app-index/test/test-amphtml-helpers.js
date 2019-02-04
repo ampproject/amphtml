@@ -52,7 +52,7 @@ describe('devdash', () => {
       it('creates valid doc with set values', () => {
         assertValidAmphtml(validator, AmpDoc({
           canonical: '/',
-          css: 'body{}',
+          css: 'body { font-family:sans-serif; } ',
           head: html`
             <script type="application/ld+json">
               {
