@@ -20,6 +20,7 @@ import {PositionObserver} from '../../ads/inabox/position-observer';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
@@ -159,10 +160,10 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
-    if (this.canInspectTopWindow_()) {
+    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+        canInspectWindow(this.win.top)) {
       this.listenForPositionSameDomain_();
-    }
-    else {
+    } else {
       this.listenForPosition_();
     }
   }
@@ -192,25 +193,6 @@ export class ViewportBindingInabox {
           dev().fine(TAG, 'Position changed: ', data);
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
         });
-  }
-
-  /**
-   * Returns true if top win's properties can be accessed and win is defined.
-   * This functioned is used to determine if the host window is cross-domained
-   * from the perspective of the current window.
-   * @return {boolean}
-   * @private
-   */
-  canInspectTopWindow_() {
-    // TODO: This should be changed in the future.
-    // See https://github.com/google/closure-compiler/issues/3156
-    try {
-      // win['test'] could be truthy but not true the compiler shouldn't be able
-      // to optimize this check away.
-      return !!this.win.top.location.href && (this.win.top['test'] || true);
-    } catch (unusedErr) { // eslint-disable-line no-unused-vars
-      return false;
-    }
   }
 
   /** @visibleForTesting */
@@ -341,7 +323,8 @@ export class ViewportBindingInabox {
 
   /** @override */
   getRootClientRectAsync() {
-    if (this.canInspectTopWindow_()) {
+    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+        canInspectWindow(this.win.top)) {
       return new Promise(resolve => {
         resolve(layoutRectFromDomRect(
             this.win.frameElement./*OK*/getBoundingClientRect()));

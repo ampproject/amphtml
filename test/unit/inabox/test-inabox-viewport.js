@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as iframeHelper from '../../../src/iframe-helper';
 import {Observable} from '../../../src/observable';
 import {PositionObserver} from '../../../ads/inabox/position-observer';
 import {Services} from '../../../src/services';
@@ -27,6 +28,7 @@ import {
 } from '../../../src/inabox/inabox-iframe-messaging-client';
 import {installPlatformService} from '../../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {toggleExperiment} from '../../../src/experiments';
 
 
 const NOOP = () => {};
@@ -115,7 +117,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
 
     it('cross domain', () => {
-      sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
+      sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(false);
       stubIframeClientMakeRequest(
           'send-positions',
           'position',
@@ -126,7 +128,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
 
     it('same domain', () => {
-      sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+      sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
+      toggleExperiment(win, 'inabox-viewport-friendly', true);
       sandbox.stub(PositionObserver.prototype, 'observe')
           .callsFake((e, callback) => {
             topWindowObservable.add(() => callback({viewportRect, targetRect}));
@@ -354,7 +357,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position async from host', () => {
-    sandbox.stub(binding, 'canInspectTopWindow_').returns(false);
+    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(false);
     const requestSpy = stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -370,7 +373,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   it('should request the position directly from host if friendly', () => {
     // this is implicit but we make it explicit anyway for clarity
-    sandbox.stub(binding, 'canInspectTopWindow_').returns(true);
+    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
+    toggleExperiment(win, 'inabox-viewport-friendly', true);
     const iframeElement = {
       getBoundingClientRect() {
         return layoutRectLtwh(10, 20, 100, 100);
