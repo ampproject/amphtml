@@ -24,7 +24,6 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {escapeCssSelectorIdent, isEnabled} from '../dom';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
@@ -33,6 +32,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
 /** @const {string} */
@@ -103,12 +103,18 @@ let ActionInfoArgValueDef;
 let ActionInfoArgsDef;
 
 /**
+ * Metadata used to define the behavior of an action.
+ *   - args Defines the arguments to use in the action.
+ *   - action_cache Defines the node that triggered the action.
+ *   - arg_alias Defines the arg name aliases used in args and that
+ *     needs to be evaluated against args.
  * @typedef {{
- *   action: string,
- *   callerProvidedArgs: !Array<!Array<!Object>>,
+ *   args: !JsonObject,
+ *   argAliases: !JsonObject,
+ *   nodeActionCache: !Element,
  * }}
- */
-let ActionMacroDef;
+ **/
+export let ActionInfoMetadata;
 
 /**
  * @typedef {{
@@ -378,10 +384,10 @@ export class ActionService {
    * @param {string} eventType
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
-   * @param {?JsonObject=} opt_args
+   * @param {?ActionInfoMetadata=} opt_metadata
    */
-  trigger(target, eventType, event, trust, opt_args) {
-    this.action_(target, eventType, event, trust, opt_args);
+  trigger(target, eventType, event, trust, opt_metadata) {
+    this.action_(target, eventType, event, trust, opt_metadata);
   }
 
   /**
@@ -480,10 +486,10 @@ export class ActionService {
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
-   * @param {?JsonObject=} opt_args
+   * @param {?ActionInfoMetadata=} opt_metadata
    * @private
    */
-  action_(source, actionEventType, event, trust, opt_args) {
+  action_(source, actionEventType, event, trust, opt_metadata) {
     const action =
         this.findAction_(source, actionEventType);
     if (!action) {
@@ -495,18 +501,11 @@ export class ActionService {
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    // Element that triggered the action. e.g. button.
-    const triggerNode = event.target;
-    // If the source of the action is a macro, then the action map
-    // needs to be on the node that triggered this macro.
-    if (source.tagName === 'AMP-ACTION-MACRO') {
-      const actionMap = dict({});
-      actionMap[`${actionEventType}`] = action.actionInfos;
-      triggerNode[ACTION_MAP_] = actionMap;
-    }
+    this.setNodeActionReference_(
+        actionEventType, action.actionInfos, event, opt_metadata);
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
-      const args = this.initializeArgs_(actionInfo, event, opt_args);
+      const args = this.initializeArgs_(actionInfo, event, opt_metadata);
       // Replace the unevaluated args with the initialized args.
       actionInfo.args = args;
       const invokeAction = () => {
@@ -533,30 +532,58 @@ export class ActionService {
   }
 
   /**
+   * Overrides the node actionMap key reference based on the data provided in
+   * the metadata.
+   * @param {string} actionEventType
+   * @param {!Array<!ActionInfoDef>} actionInfos
+   * @param {?ActionEventDef} event
+   * @param {?ActionInfoMetadata=} opt_metadata
+   */
+  setNodeActionReference_(actionEventType, actionInfos, event, opt_metadata) {
+    if (!opt_metadata) {
+      return;
+    }
+    // Element that triggered the action. e.g. button.
+    const triggerNode = event.target;
+    // If the action is to override an existing action cached on a node
+    // then set it on the triggerNode and delete it on the previously set node.
+    const nodeActionCache = opt_metadata && opt_metadata['nodeActionCache'];
+    if (nodeActionCache) {
+      const actionMap = dict({});
+      const actionMapKey = nodeActionCache['action-map'];
+      actionMap[`${actionEventType}`] = actionInfos;
+      triggerNode[`${actionMapKey}`] = actionMap;
+      delete nodeActionCache[`${actionMapKey}`];
+      delete nodeActionCache['action-map'];
+    }
+  }
+
+  /**
    * Initialize the action's arguments.
    * @param {!ActionInfoDef} actionInfo
    * @param {?ActionEventDef} event
-   * @param {?JsonObject=} opt_args Used primarily for action macros.
-   *   If provided, the arguments defined on the macro will be evaluated
-   *   and merged with the values passed by the caller.
+   * @param {?ActionInfoMetadata=} opt_metadata
    * @return {?JsonObject}
    */
-  initializeArgs_(actionInfo, event, opt_args) {
-    if (opt_args) {
+  initializeArgs_(actionInfo, event, opt_metadata) {
+    let overriddenArgs;
+    // Use arguments provided by the metadata if provided.
+    if (opt_metadata) {
       for (const arg in actionInfo.args) {
         const variableArgName = actionInfo.args[`${arg}`];
-        // If the variable arg name used in a call is a listed argument.
-        if (opt_args['args'] && /** @type {!Array} */ (opt_args['args'])
-            .includes(variableArgName)) {
+        const argsAliases = /** @type {!Array} */ (opt_metadata['argsAliases']);
+        // If the arg name used in a call is a listed argument alias/expression.
+        if (argsAliases && argsAliases.includes(variableArgName)) {
           // Then it is an expression to be evaluated against the data provided
           // in opt_args.
           actionInfo.args[`${arg}`] = {expression: `event.${variableArgName}`};
         }
       }
+      overriddenArgs = opt_metadata['args'];
     }
 
     return dereferenceExprsInArgs(
-        actionInfo.args, opt_args ? opt_args
+        actionInfo.args, overriddenArgs ? overriddenArgs
           : getDetail(/** @type {!Event} */ (event)), 'event');
   }
 
@@ -690,39 +717,22 @@ export class ActionService {
     let actionMap = node[ACTION_MAP_];
     if (actionMap === undefined) {
       actionMap = null;
-      const hasAction = node.hasAttribute('on');
-      const isActionMacro = node.tagName === 'AMP-ACTION-MACRO';
-      if (hasAction) {
+      const hasActionEvent = node.hasAttribute('on');
+      const hasAction = node.hasAttribute('action');
+      if (hasActionEvent) {
         const action = node.getAttribute('on');
         actionMap = parseActionMap(action, node);
-        this.cacheActionMap_(node, actionEventType, actionMap);
-      } else if (isActionMacro) {
+        node[ACTION_MAP_] = actionMap;
+        // We need to save a reference to the dynamic attribute value used
+        // to reference the action map as it needs to be referenced if
+        // action metadata is defined to override it.
+        node['action-map'] = ACTION_MAP_;
+      } else if (hasAction) {
         const action = node.getAttribute('action');
         actionMap = parseActionMap(`${actionEventType}:${action}`, node);
       }
     }
     return actionMap;
-  }
-
-  /**
-   * Caches the action on the node that triggered it.
-   * @param {!Element} node
-   * @param {string} actionEventType
-   * @param {?Object<string, !Array<!ActionInfoDef>>} actionMap
-   * @private
-   */
-  cacheActionMap_(node, actionEventType, actionMap) {
-    // Check if the action target is an action macro. If so, do not assign the
-    // action to the node, as we want to reference the actual actionMap
-    // generated when the action macro is triggered via the component. The
-    // action macro is cached in the action-impl.action_
-    const {target} = actionMap[`${actionEventType}`][0];
-    const queryActionTarget = `amp-action-macro[id='${target}']`;
-    const actionTarget = this.ampdoc.getRootNode().querySelector(
-        escapeCssSelectorIdent(`${queryActionTarget}`));
-    if (actionTarget && actionTarget.tagName !== 'AMP-ACTION-MACRO') {
-      node[ACTION_MAP_] = actionMap;
-    }
   }
 
   /**

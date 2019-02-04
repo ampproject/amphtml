@@ -65,14 +65,21 @@ export class AmpActionMacro extends AMP.BaseElement {
    */
   execute_(invocation) {
     const {actionEventType, args, event, trust} = invocation;
-    // Save a reference to the argument variable names used in the action macro
-    // in the args passed to the service. These values are evaluated and
-    // replaced with the actual caller args when the action is triggered.
+    let actionMetadata;
+    // Define the action metadata used to dictate how the action service
+    // should handle this action.
     if (args && this.arguments_) {
-      args['args'] = this.arguments_;
+      actionMetadata =
+        /** @type !../../../src/service/action-impl.ActionInfoMetadata */
+        ({
+          args,
+          argsAliases: this.arguments_,
+          nodeActionCache: event.target,
+        });
     }
+    // Trigger the macro's action.
     this.actions_.trigger(
-        this.element, `${actionEventType}`, event, trust, args);
+        this.element, `${actionEventType}`, event, trust, actionMetadata);
   }
 
   /** @override */
