@@ -39,4 +39,24 @@ module.exports = {
         '#single_selector span[option="3"][selected]',
       ]);
   },
+
+  'try to select disabled options': async page => {
+    await page.tap('#multi_selector span[option="2"]');
+    await page.tap('#disabled_selector span[option="2"]');
+    await page.tap('#disabled_selector span[option="3"]');
+    await page.waitFor(100);
+  },
+
+  'change mutli select': async (page, name) => {
+    await page.tap('#multi_selector span[option="1"]');
+    await page.tap('#multi_selector span[option="4"]');
+    await verifyCssElements(page, name,
+      /* forbiddenCss */ null,
+      /* loadingIncompleteCss */ [
+        '#multi_selector span[option="1"][selected]',
+      ],
+      /* loadingCompleteCss */ [
+        '#multi_selector span[option="4"][selected]',
+      ]);
+  },
  };
