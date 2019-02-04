@@ -153,7 +153,7 @@ describes.fakeWin('ssr-template-helper', {
 
       it('should set template array ', () => {
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-        ssrTemplateHelper.renderTemplateArray(
+        ssrTemplateHelper.renderTemplate(
             {}, [{data: '<div>some template</div>'}]);
         expect(findAndRenderTemplateArray)
             .to.have.been.calledWith({}, [{data: '<div>some template</div>'}]);
