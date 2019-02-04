@@ -24,7 +24,7 @@ const parseHtmlChunk = htmlStr =>
 // JSDom doesn't parse attributes whose names don't follow the spec, so
 // our only way to test [attr] values is via regex.
 const getBoundAttr = (el, attr) => {
-  const match = el.outerHTML.match(
+  const match = el./*OK*/outerHTML.match(
     new RegExp(`\\[${attr}\\]="?([^\\s"\\>]+)`), 'g');
   if (match) {
     return match[1];
