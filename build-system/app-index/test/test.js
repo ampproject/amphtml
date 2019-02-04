@@ -15,33 +15,33 @@
  */
 
 const assert = require('assert');
-const {join} = require('path');
-
-const bundler = require('../bundler');
-const devDashboard = require('../index');
 const pc = process;
 
-const expressReqMock = {
-  path: '/',
-  url: '/'
-}
+const {bundleComponent} = require('../bundler');
+const {join} = require('path');
+const {serveIndexForTesting} = require('../index');
 
-const expressResMock = {
-  end: () => {},
-};
+const NOOP = () => {};
 
-describe('Tests for the dev dashboard', () => {
+describe('devdash', () => {
 
-  it('should bundle', async() => {
-    const bundle = await bundler.bundleComponent(
-        join(__dirname, '../components/main.js'));
-    assert.ok(bundle);
+  describe('bundling', () => {
+
+    // Bundling unused at the moment, so no use to test.
+    it.skip('bundles', async() => {
+      const mainComponentPath = '../components/main.js';
+      const bundle = await bundleComponent(join(__dirname, mainComponentPath));
+      assert.ok(bundle);
+    });
+
   });
 
-  it('should be able to return HTML', async() => {
-    const renderedHtml = await devDashboard.serveIndex({
-      root: __dirname,
+  describe('express middleware', () => {
+
+    it('renders HTML', async() => {
+      const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
+      assert.ok(renderedHtml);
     });
-    assert.ok(renderedHtml);
+
   });
 });
