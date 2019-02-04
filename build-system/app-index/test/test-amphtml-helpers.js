@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+const amphtmlValidator = require('amphtml-validator');
 const assert = require('assert');
 
 const {
   addRequiredExtensionsToHead,
+  AmpDoc,
   AmpState,
   ampStateKey,
   containsExpr,
@@ -31,6 +33,69 @@ const {parseHtmlChunk} = require('./helpers');
 describe('devdash', () => {
 
   describe('AMPHTML helpers', () => {
+
+    describe('AmpDoc', () => {
+
+      let validator;
+
+      beforeEach(async() => {
+        validator = await amphtmlValidator.getInstance();
+      });
+
+      it('creates valid doc with min required values', () => {
+        const {errors, status} = validator.validateString(AmpDoc({
+          canonical: '/',
+        }));
+
+        // Assert errors before so they're output.
+        assert.deepStrictEqual(errors, []);
+        assert.strictEqual(status, 'PASS');
+      })
+
+      it('creates valid doc with set values', () => {
+        const {errors, status} = validator.validateString(AmpDoc({
+          canonical: '/',
+          css: 'body{}',
+          head: html`
+            <script type="application/ld+json">
+              {
+                "@context": "http://schema.org",
+                "@type": "NewsArticle",
+                "mainEntityOfPage": "http://tacos.al.pastor/",
+                "headline": "Lorem Ipsum",
+                "datePublished": "1907-05-05T12:02:41Z",
+                "dateModified": "1907-05-05T12:02:41Z",
+                "description": "What is love?",
+                "author": {
+                  "@type": "Baby",
+                  "name": "Don't hurt me"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "No more",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "http://perritos.haciendo.cosas/1.png",
+                    "width": 600,
+                    "height": 60
+                  }
+                },
+                "image": {
+                  "@type": "ImageObject",
+                  "url": "http://perritos.haciendo.cosas/2.png",
+                  "height": 2000,
+                  "width": 800
+                }
+              }
+            </script>`,
+          body: html`<div>Hola</div>`,
+        }));
+
+        // Assert errors before so they're output.
+        assert.deepStrictEqual(errors, []);
+        assert.strictEqual(status, 'PASS');
+      })
+    });
 
     describe('ampStateKey', () => {
       it('concats arguments', () => {

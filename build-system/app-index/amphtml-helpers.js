@@ -16,6 +16,9 @@
 
 /* eslint-disable amphtml-internal/html-template */
 
+const assert = require('assert');
+const boilerPlate = require('./boilerplate');
+
 const {forEachMatch} = require('./regex');
 const {html, joinFragments} = require('./html');
 
@@ -52,6 +55,29 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
 
 
 const ampStateKey = (...keys) => keys.join('.');
+
+
+const AmpDoc = ({body, css, head, canonical}) => {
+  assert(canonical);
+  return html`
+    <!doctype html>
+    <html ⚡>
+    <head>
+      <title>AMP Dev Server</title>
+      <meta charset="utf-8">
+      <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+      ${css ? html`<style amp-custom>${css}</style>` : ''}
+      ${canonical ? html`<link rel="canonical" href="${canonical}">` : ''}
+      ${boilerPlate}
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      ${head || ''}
+    </head>
+    <body>
+      ${body}
+    </body>
+    </html>`;
+};
 
 
 const addRequiredExtensionsToHead = (docStr, extensionConf = {
@@ -93,9 +119,10 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
 
 
 module.exports = {
+  AmpDoc,
   AmpState,
-  ampStateKey,
   addRequiredExtensionsToHead,
+  ampStateKey,
   containsExpr,
   ternaryExpr,
 };

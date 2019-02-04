@@ -19,10 +19,9 @@
 
 'use strict';
 
-const boilerPlate = require('./boilerplate');
 const headerLinks = require('./header-links');
 const ProxyForm = require('./proxy-form');
-const {addRequiredExtensionsToHead} = require('./amphtml-helpers');
+const {AmpDoc, addRequiredExtensionsToHead} = require('./amphtml-helpers');
 const {FileList} = require('./file-list');
 const {html, joinFragments} = require('./html');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
@@ -66,35 +65,26 @@ const renderTemplate = ({
   isMainPage,
   fileSet,
   serveMode,
-  selectModePrefix}) => addRequiredExtensionsToHead(html`
+  selectModePrefix}) =>
+  addRequiredExtensionsToHead(AmpDoc({
+    canonical: basepath,
+    css,
+    body: joinFragments([
+      html`<div class="wrap">
+        ${Header({isMainPage, links: headerLinks})}
+        ${ProxyFormOptional({isMainPage})}
+      </div>`,
 
-  <!doctype html>
-  <html ⚡>
-  <head>
-    <title>AMP Dev Server</title>
-    <meta charset="utf-8">
-    <style amp-custom>
-    ${css}
-    </style>
-    <link rel="canonical" href="${basepath}">
-    <meta name="viewport"
-      content="width=device-width,minimum-scale=1,initial-scale=1">
-    ${boilerPlate}
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-  </head>
-  <body>
-    <div class="wrap">
-      ${Header({isMainPage, links: headerLinks})}
-      ${ProxyFormOptional({isMainPage})}
-    </div>
-    ${FileList({basepath, selectModePrefix, fileSet})}
-    <div class="center">
-      Built with 💙  by
-      <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
-    </div>
-    ${SettingsModal({serveMode})}
-  </body>
-  </html>`);
+      FileList({basepath, selectModePrefix, fileSet}),
+
+      html`<div class="center">
+        Built with 💙  by
+        <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+      </div>`,
+
+      SettingsModal({serveMode}),
+    ]),
+  }));
 
 
 module.exports = {renderTemplate};

@@ -23,8 +23,13 @@ describe('template', () => {
 
   describe('renderTemplate', () => {
 
-    it('validates rendered', async() => {
-      const validator = await amphtmlValidator.getInstance();
+    let validator;
+
+    beforeEach(async() => {
+      validator = await amphtmlValidator.getInstance();
+    });
+
+    it('renders valid doc', () => {
       const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
@@ -39,8 +44,7 @@ describe('template', () => {
       assert.strictEqual(status, 'PASS');
     });
 
-    it('validates empty', async() => {
-      const validator = await amphtmlValidator.getInstance();
+    it('renders valid doc with empty/default values', () => {
       const {errors, status} = validator.validateString(renderTemplate({
         basepath: '/',
         css: '',
