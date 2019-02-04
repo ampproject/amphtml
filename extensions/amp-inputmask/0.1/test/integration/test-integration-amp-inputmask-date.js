@@ -25,7 +25,6 @@ config.run('amp-inputmask', () => {
     </form>
   `,
     extensions: ['amp-form', 'amp-inputmask'],
-    experiments: ['amp-inputmask'],
   }, env => {
     let win, doc;
 
