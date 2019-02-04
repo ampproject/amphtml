@@ -915,6 +915,13 @@ export class HistoryBindingVirtual_ {
           {'stackIndex': this.stackIndex_}));
       return Promise.resolve(curState);
     }
+
+    if (opt_stateUpdate && opt_stateUpdate.url) {
+      // replace fragment, only explicit fragment param will be sent
+      const url = (opt_stateUpdate.url || '').replace(/#.*/, '');
+      opt_stateUpdate.url = url;
+    }
+
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
     );
