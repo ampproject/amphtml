@@ -1699,6 +1699,8 @@ export function factory($, window, document, undefined) {
         var EventHandlers = {
             keydownEvent: function(e) {
                 var input = this, $input = $(input), k = e.keyCode, pos = caret(input);
+                const originalPos = {begin: input.selectionStart, end: input.selectionEnd};
+                const initial = input.value;
                 if (k === Inputmask.keyCode.BACKSPACE || k === Inputmask.keyCode.DELETE || iphone && k === Inputmask.keyCode.BACKSPACE_SAFARI || (e.ctrlKey || e.metaKey) && k === Inputmask.keyCode.X && !isInputEventSupported("cut")) {
                     e.preventDefault();
 
@@ -1745,7 +1747,7 @@ export function factory($, window, document, undefined) {
                         caret(input, pos.begin, pos.end);
                     }
                 }
-                opts.onKeyDown.call(this, e, getBuffer(), caret(input).begin, opts);
+                opts.onKeyDown.call(this, e, getBuffer(), caret(input).begin, opts, initial, originalPos);
                 ignorable = $.inArray(k, opts.ignorables) !== -1;
             },
             keypressEvent: function(e, checkval, writeOut, strict, ndx) {
