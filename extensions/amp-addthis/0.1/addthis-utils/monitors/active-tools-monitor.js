@@ -26,8 +26,6 @@ export class ActiveToolsMonitor {
   }
 
   /**
-   *
-   *
    * @param {*} widget
    * @return {void}
    */
@@ -44,8 +42,6 @@ export class ActiveToolsMonitor {
   }
 
   /**
-   *
-   *
    * @param {*} productCode
    * @return {void}
    */
@@ -62,8 +58,6 @@ export class ActiveToolsMonitor {
   }
 
   /**
-   *
-   *
    * @return {!Array}
    */
   getActivePcos() {
