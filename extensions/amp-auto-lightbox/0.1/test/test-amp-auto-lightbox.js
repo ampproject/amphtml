@@ -18,7 +18,8 @@ import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
-  ENABLED_SCHEMA_TYPES,
+  ENABLED_LD_JSON_TYPES,
+  ENABLED_OG_TYPES,
   LIGHTBOXABLE_ATTR,
   Mutation,
   RENDER_AREA_RATIO,
@@ -36,6 +37,7 @@ import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
+import {isArray} from '../../../../src/types';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
 
@@ -54,7 +56,8 @@ describes.realWin(TAG, {
 
   const {any} = sinon.match;
 
-  const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
+  const ldJsonSchemaTypes = Object.keys(ENABLED_LD_JSON_TYPES);
+  const ogTypes = Object.keys(ENABLED_OG_TYPES);
 
   const firstElementLeaf = el =>
     el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
@@ -72,8 +75,12 @@ describes.realWin(TAG, {
     return candidates;
   }
 
-  const mockSchemaType = type =>
-    env.sandbox.stub(Schema, 'getDocumentType').returns(type);
+  const mockLdJsonSchemaTypes = type =>
+    env.sandbox.stub(Schema, 'getAllLdJsonTypes')
+        .returns(isArray(type) ? type : [type]);
+
+  const mockOgType = type =>
+    env.sandbox.stub(Schema, 'getOgType').returns(type);
 
   const iterProduct = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
@@ -374,7 +381,8 @@ describes.realWin(TAG, {
       scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
 
     beforeEach(() => {
-      mockSchemaType(schemaTypes[0]);
+      // mock valid type
+      mockLdJsonSchemaTypes(ldJsonSchemaTypes[0]);
     });
 
     it('does not load extension if no candidates found', function* () {
@@ -487,61 +495,191 @@ describes.realWin(TAG, {
         expect(actuallyEnabled).to.equal(shouldBeEnabled);
       });
 
-    it('rejects documents without schema', () => {
+    it('rejects documents without any type annotation', () => {
       mockIsEmbeddedAndTrustedViewer(true);
       return expectIsEnabled(false);
     });
 
-    it('rejects schema with invalid @type', () => {
-      mockIsEmbeddedAndTrustedViewer(true);
-      mockSchemaType('hamberder');
-      return expectIsEnabled(false);
-    });
+    describe('DOM selection', () => {
 
-    schemaTypes.forEach(type => {
+      const mockRootNodeContent = els => {
+        const fakeRoot = html`<div></div>`;
+        els.forEach(el => {
+          fakeRoot.appendChild(el);
+        });
+        env.sandbox.stub(env.ampdoc, 'getRootNode').returns(fakeRoot);
+      };
 
-      it(`accepts schema with @type=${type}`, () => {
-        mockSchemaType(type);
-        mockIsEmbeddedAndTrustedViewer(true);
-        return expectIsEnabled(true);
-      });
+      describe('getOgType', () => {
 
-      it(`rejects schema with @type=${type} but lightbox explicit`, () => {
-        const doc = env.win.document;
-
-        const extensionScript = createElementWithAttributes(doc, 'script', {
-          'custom-element': REQUIRED_EXTENSION,
+        it('returns empty', () => {
+          expect(Schema.getOgType(env.ampdoc)).to.be.undefined;
         });
 
-        const lightboxable = createElementWithAttributes(doc, 'amp-img', {
-          [LIGHTBOXABLE_ATTR]: '',
+        it('returns tag', () => {
+          mockRootNodeContent([
+            // Expected:
+            html`<meta property="og:type" content="foo">`,
+
+            // Filler:
+            html`<meta property="og:something" content="bar">`,
+            html`<meta property="vims and emacs are both awful" content="baz">`,
+            html`<meta name="description" content="My Website">`,
+          ]);
+
+          expect(Schema.getOgType(env.ampdoc)).to.equal('foo');
         });
 
-        doc.head.appendChild(extensionScript);
-        doc.body.appendChild(lightboxable);
-
-        mockSchemaType(type);
-        mockIsEmbeddedAndTrustedViewer(true);
-        return expectIsEnabled(false);
       });
 
-      it(`rejects schema with @type=${type} for non-embedded docs`, () => {
-        mockSchemaType(type);
-        mockIsEmbeddedAndTrustedViewer(
-            /* isEmbedded */ false,
-            /* isTrusted */ true);
-        return expectIsEnabled(false);
-      });
+      describe('getAllLdJsonTypes', () => {
 
-      it(`rejects schema with @type=${type} for untrusted viewer`, () => {
-        mockSchemaType(type);
-        mockIsEmbeddedAndTrustedViewer(
-            /* isEmbedded */ true,
-            /* isTrusted */ false);
-        return expectIsEnabled(false);
+        const createLdJsonTag = content => {
+          const tag = html`<script type="application/ld+json"></script>`;
+          tag.textContent = JSON.stringify(content);
+          return tag;
+        };
+
+        it('returns empty', () => {
+          expect(Schema.getAllLdJsonTypes(env.ampdoc).length).to.equal(0);
+        });
+
+        it('returns all found @types', () => {
+          const expectedA = 'foo';
+          const expectedB = 'bar';
+          const expectedC = 'baz';
+
+          mockRootNodeContent([
+            createLdJsonTag({'@type': expectedA}),
+            createLdJsonTag({'tacos': 'sí por favor'}),
+            createLdJsonTag({'@type': expectedB}),
+            createLdJsonTag({'@type': expectedC}),
+            createLdJsonTag(''),
+          ]);
+
+          expect(Schema.getAllLdJsonTypes(env.ampdoc)).to.deep.equal([
+            expectedA,
+            expectedB,
+            expectedC,
+          ]);
+        });
+
       });
 
     });
+
+    describe('by LD+JSON @type', () => {
+
+      it('rejects doc with invalid LD+JSON @type', () => {
+        mockIsEmbeddedAndTrustedViewer(true);
+        mockLdJsonSchemaTypes('hamberder');
+        return expectIsEnabled(false);
+      });
+
+      ldJsonSchemaTypes.forEach(type => {
+
+        it(`accepts schema with @type=${type}`, () => {
+          mockLdJsonSchemaTypes(type);
+          mockIsEmbeddedAndTrustedViewer(true);
+          return expectIsEnabled(true);
+        });
+
+        it(`rejects schema with @type=${type} but lightbox explicit`, () => {
+          const doc = env.win.document;
+
+          const extensionScript = createElementWithAttributes(doc, 'script', {
+            'custom-element': REQUIRED_EXTENSION,
+          });
+
+          const lightboxable = createElementWithAttributes(doc, 'amp-img', {
+            [LIGHTBOXABLE_ATTR]: '',
+          });
+
+          doc.head.appendChild(extensionScript);
+          doc.body.appendChild(lightboxable);
+
+          mockLdJsonSchemaTypes(type);
+          mockIsEmbeddedAndTrustedViewer(true);
+          return expectIsEnabled(false);
+        });
+
+        it(`rejects schema with @type=${type} for non-embedded docs`, () => {
+          mockLdJsonSchemaTypes(type);
+          mockIsEmbeddedAndTrustedViewer(
+              /* isEmbedded */ false,
+              /* isTrusted */ true);
+          return expectIsEnabled(false);
+        });
+
+        it(`rejects schema with @type=${type} for untrusted viewer`, () => {
+          mockLdJsonSchemaTypes(type);
+          mockIsEmbeddedAndTrustedViewer(
+              /* isEmbedded */ true,
+              /* isTrusted */ false);
+          return expectIsEnabled(false);
+        });
+
+      });
+    });
+
+    describe('by og:type', () => {
+
+      it('rejects doc with invalid <meta property="og:type">', () => {
+        mockIsEmbeddedAndTrustedViewer(true);
+        mockOgType('cinnamonroll');
+        return expectIsEnabled(false);
+      });
+
+      ogTypes.forEach(type => {
+
+        const ogTypeMeta = type =>
+          `<meta property="og:type" content="${type}">`;
+
+        it(`accepts docs with ${ogTypeMeta(type)}`, () => {
+          mockOgType(type);
+          mockIsEmbeddedAndTrustedViewer(true);
+          return expectIsEnabled(true);
+        });
+
+        it(`rejects docs with ${ogTypeMeta(type)}, lightbox explicit`, () => {
+          const doc = env.win.document;
+
+          const extensionScript = createElementWithAttributes(doc, 'script', {
+            'custom-element': REQUIRED_EXTENSION,
+          });
+
+          const lightboxable = createElementWithAttributes(doc, 'amp-img', {
+            [LIGHTBOXABLE_ATTR]: '',
+          });
+
+          doc.head.appendChild(extensionScript);
+          doc.body.appendChild(lightboxable);
+
+          mockOgType(type);
+          mockIsEmbeddedAndTrustedViewer(true);
+          return expectIsEnabled(false);
+        });
+
+        it(`rejects non-embedded docs with ${ogTypeMeta(type)}`, () => {
+          mockOgType(type);
+          mockIsEmbeddedAndTrustedViewer(
+              /* isEmbedded */ false,
+              /* isTrusted */ true);
+          return expectIsEnabled(false);
+        });
+
+        it(`rejects docs with ${ogTypeMeta(type)} for untrusted viewer`, () => {
+          mockOgType(type);
+          mockIsEmbeddedAndTrustedViewer(
+              /* isEmbedded */ true,
+              /* isTrusted */ false);
+          return expectIsEnabled(false);
+        });
+
+      });
+    });
+
+
 
   });
 

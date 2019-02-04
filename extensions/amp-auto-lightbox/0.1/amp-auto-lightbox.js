@@ -43,15 +43,24 @@ export const LIGHTBOXABLE_ATTR = 'lightbox';
 export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
 /**
- * Types of document by schema where auto-lightbox is enabled.
+ * Types of document by LD+JSON schema `@type` field where auto-lightbox should
+ * be enabled.
  * @private @const {!Object<string, boolean>}
  */
-export const ENABLED_SCHEMA_TYPES = {
+export const ENABLED_LD_JSON_TYPES = {
   'Article': true,
   'NewsArticle': true,
   'BlogPosting': true,
   'LiveBlogPosting': true,
   'DiscussionForumPosting': true,
+};
+
+/**
+ * Types of document by Open Graph `<meta property="og:type">`
+ * @private @const {!Object<string, boolean>}
+ */
+export const ENABLED_OG_TYPES = {
+  'article': true,
 };
 
 /** Factor of naturalArea vs renderArea to lightbox. */
@@ -87,7 +96,17 @@ const DISABLED_ANCESTORS =
 
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
+const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
+const META_OG_TYPE = 'meta[property="og:type"]';
+
 const NOOP = () => {};
+
+/**
+ * For better minification.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Document|!ShadowRoot}
+ */
+const getRootNode = ampdoc => ampdoc.getRootNode();
 
 
 /** @visibleForTesting */
@@ -220,31 +239,46 @@ export class Scanner {
 export class Schema {
 
   /**
-   * Gets document type (field `@type`) where schema is defined for the
-   * canonical URL.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {string|undefined}
    */
-  static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getRootNode().querySelectorAll(
-        'script[type="application/ld+json"]');
-
-    if (schemaTags.length <= 0) {
-      return;
+  static getOgType(ampdoc) {
+    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    if (tag) {
+      return tag.getAttribute('content');
     }
+  }
 
-    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+  /**
+   * Determines wheter the document type as defined by Open Graph meta tag
+   * e.g. `<meta property="og:type">` is in a given set.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string, boolean>} types
+   * @return {boolean}
+   */
+  static isOgTypeInSet(ampdoc, types) {
+    return types[Schema.getOgType(ampdoc)];
+  }
 
-    for (let i = 0; i < schemaTags.length; i++) {
-      const schemaTag = schemaTags[i];
-      const parsed = tryParseJson(schemaTag./*OK*/innerText);
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Array<string>}
+   */
+  static getAllLdJsonTypes(ampdoc) {
+    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+        .map(({textContent}) => ((tryParseJson(textContent) || {})['@type']))
+        .filter(typeOrUndefined => typeOrUndefined);
+  }
 
-      if (parsed &&
-          (parsed['mainEntityOfPage'] == canonicalUrl ||
-          parsed['url'] == canonicalUrl)) {
-        return parsed['@type'];
-      }
-    }
+  /**
+   * Determines wheter one of the document types (field `@type`) defined in
+   * LD+JSON schema is in a given set.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string, boolean>} types
+   * @return {boolean}
+   */
+  static isLdJsonTypeInSet(ampdoc, types) {
+    return Schema.getAllLdJsonTypes(ampdoc).some(type => types[type]);
   }
 }
 
@@ -280,11 +314,10 @@ function usesLightboxExplicitly(ampdoc) {
   const lightboxedElementsSelector =
       `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const querySelector = selector =>
-    ampdoc.getRootNode().querySelector(selector);
+  const exists = selector => !!getRootNode(ampdoc).querySelector(selector);
 
-  return !!querySelector(requiredExtensionSelector) &&
-    !!querySelector(lightboxedElementsSelector);
+  return exists(requiredExtensionSelector) &&
+      exists(lightboxedElementsSelector);
 }
 
 
@@ -334,8 +367,8 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  const docType = Schema.getDocumentType(ampdoc);
-  if (!docType || !ENABLED_SCHEMA_TYPES[docType]) {
+  if (!Schema.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
+      !Schema.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
@@ -415,7 +448,7 @@ export function scan(ampdoc, opt_root) {
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
       scan(ampdoc, target);
     });
     scan(ampdoc);
