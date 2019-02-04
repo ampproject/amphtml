@@ -37,7 +37,7 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, AmpStoryAnalytics} from './analytics';
+import {AdvancementMode} from './story-analytics';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -226,7 +226,7 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
 
-    /** @private {!AmpStoryAnalytics} */
+    /** @private {!./story-analytics.AmpStoryAnalytics} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */

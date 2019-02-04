@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStoryAnalytics} from '../analytics';
+import {AmpStoryAnalytics} from '../story-analytics';
 import {StateChangeType} from '../navigation-state';
 
 
