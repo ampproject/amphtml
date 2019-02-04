@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {endsWith} from '../../../src/string';
 import {getChildJsonConfig} from '../../../src/json';
 import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
@@ -159,12 +158,8 @@ function getInternalDomains_(docInfo) {
 function getWaypointBaseUrl(element) {
   let customSubDomain = element.getAttribute('custom-redirect-domain');
   if (customSubDomain) {
-    // Remove potential HTTP protocol.
-    customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\//, '');
-    // Remove potential trailing slash.
-    customSubDomain = endsWith(customSubDomain, '/') ?
-      customSubDomain.slice(0, -1) :
-      customSubDomain;
+    // Remove potential HTTP protocol and potential trailing slash.
+    customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\/|\/$/g, '');
 
     // Use http since publisher CNAME to go.redirectingat.com does not support
     // https.
