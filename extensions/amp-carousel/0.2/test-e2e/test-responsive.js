@@ -15,7 +15,6 @@
  */
 
 import {
-  enableExperiments,
   getScrollingElement,
   getSlide,
   waitForCarouselImg,
@@ -24,6 +23,7 @@ import {
 describes.endtoend('AMP Carousel responsive attributes', {
 }, async env => {
   let controller;
+  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -31,8 +31,13 @@ describes.endtoend('AMP Carousel responsive attributes', {
 
   beforeEach(async() => {
     controller = env.controller;
+    ampDriver = env.ampDriver;
 
-    await enableExperiments(controller);
+    await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-carousel-0-2/responsive.amp.html');
+    await ampDriver.toggleExperiment('layers', true);
+    await ampDriver.toggleExperiment('amp-carousel-v2', true);
+
     await controller.setWindowRect({
       width: 1000,
       height: 600,
@@ -45,9 +50,11 @@ describes.endtoend('AMP Carousel responsive attributes', {
     const firstSlide = await getSlide(controller, 0);
 
     await waitForCarouselImg(controller, 0);
-    // 3 slides width width 1000 = 333 width per slide
-    await expect(prop(firstSlide, 'offsetWidth')).to.equal(333);
-    await expect(controller.getElementRect(firstSlide)).to.include({x: 0});
+    // 3 slides width width 1000 = 333 width per slide.
+    await expect(controller.getElementRect(firstSlide)).to.include({
+      width: 333,
+      x: 0,
+    });
   });
 
   it('should layout correctly after resize', async() => {
@@ -58,16 +65,17 @@ describes.endtoend('AMP Carousel responsive attributes', {
       width: 600,
       height: 600,
     });
-    // 2 slides width width 600 = 300 width per slide
-    await expect(prop(firstSlide, 'offsetWidth')).to.equal(300);
-    await expect(controller.getElementRect(firstSlide)).to.include({x: 0});
+    // 2 slides width width 600 = 300 width per slide.
+    await expect(controller.getElementRect(firstSlide)).to.include({
+      width: 300,
+      x: 0,
+    });
   });
 
   it('should retain position when changing the visible count', async() => {
     const el = await getScrollingElement(controller);
     const secondSlide = await getSlide(controller, 1);
 
-    await waitForCarouselImg(controller, 0);
     await controller.scroll(el, {left: 333});
     await expect(prop(el, 'scrollLeft')).to.equal(333);
     await controller.setWindowRect({
@@ -76,5 +84,33 @@ describes.endtoend('AMP Carousel responsive attributes', {
     });
 
     await expect(controller.getElementRect(secondSlide)).to.include({x: 0});
+  });
+
+  it('should respond to attribute changes', async() => {
+    const firstSlide = await getSlide(controller, 0);
+
+    // 3 slides width width 1000 = 333 width per slide.
+    await expect(controller.getElementRect(firstSlide)).to.include({
+      width: 333,
+      x: 0,
+    });
+    // Switch over to `visible-count="(min-width: 650px) 5, 4".
+    const btn = await controller.findElement('#responsive-5-4');
+    await controller.click(btn);
+    // 5 slides width width 1000 = 200 width per slide
+    await expect(controller.getElementRect(firstSlide)).to.include({
+      width: 200,
+      x: 0,
+    });
+    // Now make sure new media query is active.
+    await controller.setWindowRect({
+      width: 600,
+      height: 600,
+    });
+    // 4 slides width width 600 = 150 width per slide.
+    await expect(controller.getElementRect(firstSlide)).to.include({
+      width: 150,
+      x: 0,
+    });
   });
 });

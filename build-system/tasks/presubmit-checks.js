@@ -148,6 +148,7 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
+      'build-system/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
     ],
@@ -871,6 +872,7 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/app.js',
       'build-system/app-index/template.js',
+      'build-system/app-index/amphtml-helpers.js',
       'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',

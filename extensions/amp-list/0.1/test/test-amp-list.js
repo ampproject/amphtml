@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
@@ -52,6 +53,7 @@ describes.repeated('amp-list', {
         findAndRenderTemplateArray: sandbox.stub(),
       };
       sandbox.stub(Services, 'templatesFor').returns(templates);
+      sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
       resource = {
         resetPendingChangeSize: sandbox.stub(),
@@ -583,6 +585,24 @@ describes.repeated('amp-list', {
               [foo], {resetOnRefresh: true});
           element.setAttribute('src', 'https://new.com/list.json');
           list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+        });
+      });
+
+      it('should clear old bindings when resetting', () => {
+        element.setAttribute('reset-on-refresh', '');
+        const foo = doc.createElement('div');
+        expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo]);
+
+        return list.layoutCallback().then(() => {
+          expect(list.container_.contains(foo)).to.be.true;
+
+          expectFetchAndRender(DEFAULT_FETCHED_DATA,
+              [foo], {resetOnRefresh: true});
+          element.setAttribute('src', 'https://new.com/list.json');
+          list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+
+          expect(bind.scanAndApply).to.be.calledTwice;
+          expect(bind.scanAndApply).to.be.calledWith([], sinon.match.array);
         });
       });
 

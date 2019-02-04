@@ -78,7 +78,7 @@ export function factory(Inputmask) {
         return opts.tokenizer;
     }
     function isValidDate(dateParts, currentResult) {
-        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
+        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || dateParts.year.length < 4 || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
     }
     function isDateInRange(dateParts, opts) {
         var result = true;
@@ -251,6 +251,24 @@ export function factory(Inputmask) {
                     }
                     input.inputmask._valueSet(date);
                     $(input).trigger("setvalue");
+                }
+
+                // If the user presses backspace in the middle of the input
+                // value, stop masking until the field is cleared.
+                if (e.keyCode === Inputmask.keyCode.BACKSPACE) {
+                    const length = input.value.length;
+                    const cursorIsInMiddle = input.selectionStart != length &&
+                        input.selectionEnd != length;
+                    if (length > 0 && cursorIsInMiddle) {
+                        const cachedController = input.inputmask;
+                        input.inputmask.remove();
+                        input.addEventListener('input', function onclear() {
+                            if (input.value.length == 0) {
+                                input.removeEventListener('input', onclear);
+                                cachedController.mask(input);
+                            }
+                        });
+                    }
                 }
             },
             onUnMask: function(maskedValue, unmaskedValue, opts) {

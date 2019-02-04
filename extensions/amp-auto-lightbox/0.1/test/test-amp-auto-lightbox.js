@@ -27,7 +27,6 @@ import {
   Schema,
   VIEWPORT_AREA_RATIO,
   apply,
-  meetsCriteria,
   meetsSizingCriteria,
   resolveIsEnabledForDoc,
   runCandidates,
@@ -41,7 +40,7 @@ import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
 
 
-const TAG = 'amp-lightbox-gallery-detection';
+const TAG = 'amp-auto-lightbox';
 
 
 describes.realWin(TAG, {
@@ -55,33 +54,35 @@ describes.realWin(TAG, {
 
   const {any} = sinon.match;
 
-  const capitalize = str => str.replace(/^([a-z])/, (_, m) => m.toUpperCase());
-
   const schemaTypes = Object.keys(ENABLED_SCHEMA_TYPES);
 
-  const ampImgFromTree = el =>
-    el.tagName == 'AMP-IMG' ? el : el.querySelector('amp-img');
+  const firstElementLeaf = el =>
+    el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
 
-  const criteriaMethod = c => 'meets' + capitalize(c) + 'Criteria';
-
-  function mockCriteriaMet(criteria, isMet) {
-    env.sandbox.stub(Criteria, criteriaMethod(criteria)).returns(isMet);
+  function wrap(el, wrapper) {
+    firstElementLeaf(wrapper).appendChild(el);
+    return wrapper;
   }
 
-  const stubAllCriteriaMet = () =>
-    env.sandbox.stub(Criteria, 'meetsAll');
-
-  function mockAllCriteriaMet(isMet) {
-    stubAllCriteriaMet().returns(isMet);
-  }
+  const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
+  const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
   function mockCandidates(candidates) {
     env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
+    return candidates;
   }
 
-  function mockSchemaType(type) {
+  const mockSchemaType = type =>
     env.sandbox.stub(Schema, 'getDocumentType').returns(type);
-  }
+
+  const iterProduct = (a, b, callback) => a.forEach(itemA =>
+    b.forEach(itemB => callback(itemA, itemB)));
+
+  const squaredCompare = (set, callback) => iterProduct(set, set, (a, b) => {
+    if (a != b) {
+      callback(a, b);
+    }
+  });
 
   function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
     const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
@@ -108,13 +109,8 @@ describes.realWin(TAG, {
   }
 
   // necessary since element matching `withArgs` deep equals and overflows
-  function matchEquals(comparison) {
-    return sinon.match(subject => subject == comparison);
-  }
-
-  function mockCandidatesForLengthCheck() {
-    return ['foo'];
-  }
+  const matchEquals = comparison =>
+    sinon.match(subject => subject == comparison);
 
   function mockLoadedSignal(element, isLoadedSuccessfully) {
     const signals = new Signals();
@@ -140,272 +136,117 @@ describes.realWin(TAG, {
     });
   });
 
-  describe('meetsCriteria', () => {
+  describe('meetsTreeShapeCriteria', () => {
 
-    it('rejects placeholder elements', () => {
-      mockCriteriaMet('actionable', true);
-      mockCriteriaMet('sizing', true);
+    const meetsTreeShapeCriteriaMsg = outerHtml =>
+      `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
-      const renderScenarios = [
-        // image is placeholder
-        html`<amp-img src="bla.png" placeholder></amp-img>`,
+    function itAccepts(shouldAccept, scenarios) {
+      scenarios.forEach(({kind, mutate, wrapWith}) => {
+        const maybeWrap = root => wrapWith ? wrap(root, wrapWith()) : root;
+        const maybeMutate = root => mutate && mutate(root);
 
-        // immediate ancestor is placeholder
-        html`<div placeholder>
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
+        it(`${shouldAccept ? 'accepts' : 'rejects'} ${kind}`, () => {
+          [
+            html`<amp-img src="asada.png"></amp-img>`,
+            html`<div><amp-img src="adobada.png"></amp-img></div>`,
+            html`<div><div><amp-img src="carnitas.png"></amp-img></div></div>`,
+          ].forEach(unwrapped => {
+            maybeMutate(unwrapped);
 
-        // non-immediate ancestor is placeholder
-        html`<div placeholder>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-      ];
+            const scenario = maybeWrap(unwrapped);
+            const candidate = firstElementLeaf(scenario);
 
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
+            env.win.document.body.appendChild(scenario);
+
+            expect(candidate).to.be.ok;
+            expect(candidate.tagName).to.equal('AMP-IMG');
+
+            expect(
+                Criteria.meetsTreeShapeCriteria(candidate),
+                meetsTreeShapeCriteriaMsg(scenario.outerHTML))
+                .to.equal(shouldAccept);
+          });
+        });
+      });
+    }
+
+    [true, false].forEach(accepts => {
+      describe('self-test', () => {
+        beforeEach(() => {
+          env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(accepts);
+        });
+        itAccepts(accepts, [{kind: 'any'}]);
       });
     });
 
-    it('rejects elements actionable by tap', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
+    itAccepts(true, [
+      {
+        kind: 'elements by default',
+      },
+      {
+        kind: 'elements with a non-tap action',
+        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
+      },
+      {
+        kind: 'elements inside non-clickable anchor',
+        wrapWith: () => html`<a id=my-anchor></a>`,
+      },
+    ]);
 
-      const renderScenarios = [
-        // immediate container is tappable
-        html`<div on="tap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable
-        html`<div on="tap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable
-        html`<amp-img src="bla.png" on="tap:doSomething">`,
-
-        // immediate container is tappable with prefix actions
-        html`<div on="whatever:doSomething;tap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with prefix actions
-        html`<div on="whatever:doSomething;tap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with prefix actions
-        html`<amp-img src="bla.png" on="whatever:doSomething;tap:doSomething">`,
-
-        // immediate container is tappable with sufix actions
-        html`<div on="tap:doSomething;whatever:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with sufix actions
-        html`<div on="tap:doSomething;whatever:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with sufix actions
-        html`<amp-img src="bla.png" on="tap:doSomething;whatever:doSomething">`,
-
-        // immediate container is tappable with whitespace
-        html`<div on=" tap:doSomething;  ">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor is tappable with whitespace
-        html`<div on=" tap:doSomething;  ">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image is tappable with whitespace
-        html`<amp-img src="bla.png" on=" tap:doSomething; ">`,
-      ];
-
-      renderScenarios.forEach(root => {
-        env.win.document.body.appendChild(root);
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('accepts elements with a non-tap action', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container has non-tap actions
-        html`<div on="nottap:doSomething">
-          <amp-img src="bla.png"></amp-img>
-        </div>`,
-
-        // non-immediate ancestor has non-tap actions
-        html`<div on="nottap:doSomething">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </div>`,
-
-        // image has non-tap actions
-        html`<amp-img src="bla.png" on="nottap:doSomething">`,
-      ];
-
-      renderScenarios.forEach(root => {
-        env.win.document.body.appendChild(root);
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.true;
-      });
-    });
-
-    it('rejects elements inside an <amp-selector>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-selector > [option]
-        html`<amp-selector>
-          <div option>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-selector>`,
-
-        // non-immediate ancestor is amp-selector > [option]
-        html`<amp-selector>
-          <div option>
-            <div>
-              <amp-img src="bla.png"></amp-img>
-            </div>
-          </div>
-        </amp-selector>`,
-
-        // non-immediate ancestor is amp-selector [option]
-        html`<amp-selector>
-          <div>
-            <div option>
-              <div>
-                <amp-img src="bla.png"></amp-img>
-              </div>
-            </div>
-          </div>
-        </amp-selector>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside a <button>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is button
-        html`<button>
-          <amp-img src="bla.png"></amp-img>
-        </button>`,
-
-        // non-immediate ancestor is button
-        html`<button>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </button>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside an <amp-script>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-script
-        html`<amp-script>
-          <amp-img src="bla.png"></amp-img>
-        </amp-script>`,
-
-        // non-immediate ancestor is amp-script
-        html`<amp-script>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-script>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside an <amp-story>', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is amp-story
-        html`<amp-story>
-          <amp-img src="bla.png"></amp-img>
-        </amp-story>`,
-
-        // non-immediate ancestor is amp-story
-        html`<amp-story>
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </amp-story>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
-
-    it('rejects elements inside a clickable link', () => {
-      mockCriteriaMet('placeholder', true);
-      mockCriteriaMet('sizing', true);
-
-      const renderScenarios = [
-        // immediate container is clickable link
-        html`<a href="http://hamberders.com">
-          <amp-img src="bla.png"></amp-img>
-        </a>`,
-
-        // non-immediate ancestor is clickable link
-        html`<a href="http://hamberders.com">
-          <div>
-            <amp-img src="bla.png"></amp-img>
-          </div>
-        </a>`,
-      ];
-
-      renderScenarios.forEach(root => {
-        expect(meetsCriteria(ampImgFromTree(root))).to.be.false;
-      });
-    });
+    itAccepts(false, [
+      {
+        kind: 'explicitly opted-out subnodes',
+        mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
+      },
+      {
+        kind: 'placeholder subnodes',
+        mutate: el => el.setAttribute('placeholder', ''),
+      },
+      {
+        kind: 'items actionable by tap with a single action',
+        mutate: el => el.setAttribute('on', 'tap:doSomething'),
+      },
+      {
+        kind: 'items actionable by tap with multiple actions',
+        mutate: el =>
+          el.setAttribute('on', 'whatever:doSomething;tap:doSomethingElse'),
+      },
+      {
+        kind: 'items inside an amp-selector',
+        mutate: el => el.setAttribute('option', ''),
+        wrapWith: () => html`<amp-selector></amp-selector>`,
+      },
+      {
+        kind: 'items inside a button',
+        wrapWith: () => html`<button></button>`,
+      },
+      {
+        kind: 'items inside amp-script',
+        wrapWith: () => html`<amp-script></amp-script>`,
+      },
+      {
+        kind: 'items inside amp-story',
+        wrapWith: () => html`<amp-story></amp-story>`,
+      },
+      {
+        kind: 'items inside a clickable link',
+        wrapWith: () => html`<a href="http://hamberders.com"></a>`,
+      },
+    ]);
 
   });
 
   describe('meetsSizingCriteria', () => {
     const areaDeltaPerc = RENDER_AREA_RATIO * 100;
+    const {vw, vh} = {vw: 1000, vh: 600};
+
+    const expectMeetsSizingCriteria = (
+      renderWidth, renderHeight, naturalWidth, naturalHeight) =>
+      expect(meetsSizingCriteria(
+          renderWidth, renderHeight, naturalWidth, naturalHeight, vw, vh));
 
     it(`accepts elements ${areaDeltaPerc}%+ of size than render area`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 1000;
       const renderHeight = 200;
 
@@ -414,31 +255,17 @@ describes.realWin(TAG, {
       const minArea = (renderArea) * RENDER_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim + 1,
-        minDim + 10,
-        minDim + 100,
-      ].forEach(naturalWidth => {
-        [
-          minDim + 1,
-          minDim + 10,
-          minDim + 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.true;
-        });
+      const axisRange = [minDim + 1, minDim + 10, minDim + 100];
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.true;
       });
     });
 
     it(`rejects elements < ${areaDeltaPerc}%+ of size of render area`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 100;
       const renderHeight = 100;
 
@@ -447,93 +274,51 @@ describes.realWin(TAG, {
       const minArea = (renderArea) * (RENDER_AREA_RATIO - 0.1);
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim,
-        minDim - 10,
-        minDim - 100,
-      ].forEach(naturalWidth => {
-        [
-          minDim,
-          minDim - 10,
-          minDim - 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [minDim, minDim - 10, minDim - 100];
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.false;
       });
     });
 
     const minAreaPerc = VIEWPORT_AREA_RATIO * 100;
 
     it(`accepts elements that cover ${minAreaPerc}%+ of the viewport`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
       const naturalWidth = 100;
       const naturalHeight = 100;
 
-      [
-        minDim,
-        minDim + 10,
-        minDim + 100,
-      ].forEach(renderWidth => {
-        [
-          minDim,
-          minDim + 10,
-          minDim + 100,
-        ].forEach(renderHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.true;
-        });
+      const axisRange = [minDim, minDim + 10, minDim + 100];
+      iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.true;
       });
 
     });
 
     it(`rejects elements that cover < ${minAreaPerc}% of the viewport`, () => {
-      const vw = 1000;
-      const vh = 600;
-
       const minArea = (vw * vh) * VIEWPORT_AREA_RATIO;
       const minDim = Math.sqrt(minArea);
 
-      [
-        minDim - 1,
-        minDim - 10,
-        minDim - 100,
-      ].forEach(renderWidth => {
-        [
-          minDim - 1,
-          minDim - 10,
-          minDim - 100,
-        ].forEach(renderHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              /* naturalWidth */ renderWidth,
-              /* naturalHeight */ renderHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [minDim - 1, minDim - 10, minDim - 100];
+      iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            /* naturalWidth */ renderWidth,
+            /* naturalHeight */ renderHeight).to.be.false;
       });
     });
 
     it('accepts elements with height > than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = vw;
       const renderHeight = vh;
 
@@ -542,20 +327,15 @@ describes.realWin(TAG, {
         vh + 10,
         vh + 100,
       ].forEach(naturalHeight => {
-        expect(meetsSizingCriteria(
+        expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
             /* naturalWidth */ renderWidth,
-            naturalHeight,
-            vw,
-            vh)).to.be.true;
+            naturalHeight).to.be.true;
       });
     });
 
     it('accepts elements with width > than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = vw;
       const renderHeight = vh;
 
@@ -564,41 +344,25 @@ describes.realWin(TAG, {
         vw + 10,
         vw + 100,
       ].forEach(naturalWidth => {
-        expect(meetsSizingCriteria(
+        expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
             naturalWidth,
-            /* naturalHeight */ renderHeight,
-            vw,
-            vh)).to.be.true;
+            /* naturalHeight */ renderHeight).to.be.true;
       });
     });
 
     it('rejects elements with dimensions <= than viewport\'s', () => {
-      const vw = 1000;
-      const vh = 600;
-
       const renderWidth = 100;
       const renderHeight = 100;
 
-      [
-        renderWidth,
-        renderWidth - 10,
-        renderWidth - 100,
-      ].forEach(naturalWidth => {
-        [
-          renderHeight,
-          renderHeight - 10,
-          renderHeight - 100,
-        ].forEach(naturalHeight => {
-          expect(meetsSizingCriteria(
-              renderWidth,
-              renderHeight,
-              naturalWidth,
-              naturalHeight,
-              vw,
-              vh)).to.be.false;
-        });
+      const axisRange = [renderWidth, renderWidth - 10, renderWidth - 100];
+      iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
+        expectMeetsSizingCriteria(
+            renderWidth,
+            renderHeight,
+            naturalWidth,
+            naturalHeight).to.be.false;
       });
     });
 
@@ -606,14 +370,16 @@ describes.realWin(TAG, {
 
   describe('scan', () => {
 
-    function waitForAllScannedToBeResolved() {
-      return scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
-    }
+    const waitForAllScannedToBeResolved = () =>
+      scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
+
+    beforeEach(() => {
+      mockSchemaType(schemaTypes[0]);
+    });
 
     it('does not load extension if no candidates found', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
       mockCandidates([]);
 
@@ -626,11 +392,8 @@ describes.realWin(TAG, {
     it('loads extension if >= 1 candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockSchemaType(schemaTypes[0]);
       mockIsEmbeddedAndTrustedViewer(true);
-      mockCandidates([
-        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
-      ]);
+      mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(true);
 
@@ -643,9 +406,7 @@ describes.realWin(TAG, {
     it('does not load extension if no candidates meet criteria', function* () {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockCandidates([
-        mockLoadedSignal(html`<amp-img src="bla.png"></amp-img>`, true),
-      ]);
+      mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(false);
       mockIsEmbeddedAndTrustedViewer(true);
@@ -667,7 +428,6 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(b)).returns(false);
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
-      mockSchemaType(schemaTypes[0]);
       mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
@@ -679,33 +439,18 @@ describes.realWin(TAG, {
     });
 
     it('sets unique group for candidates that meet criteria', function* () {
-      const a = mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true);
-      const b = mockLoadedSignal(html`<amp-img src="b.png"></amp-img>`, true);
-      const c = mockLoadedSignal(html`<amp-img src="c.png"></amp-img>`, true);
+      const candidates = mockCandidates([1, 2, 3].map(() =>
+        mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true)));
 
       mockAllCriteriaMet(true);
-
-      mockSchemaType(schemaTypes[0]);
-      mockCandidates([a, b, c]);
       mockIsEmbeddedAndTrustedViewer(true);
 
       yield waitForAllScannedToBeResolved();
 
-      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
-      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
-      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
-
-      expect(aAttr).to.be.ok;
-      expect(aAttr).to.not.equal(bAttr);
-      expect(aAttr).to.not.equal(cAttr);
-
-      expect(bAttr).to.be.ok;
-      expect(bAttr).to.not.equal(aAttr);
-      expect(bAttr).to.not.equal(cAttr);
-
-      expect(cAttr).to.be.ok;
-      expect(cAttr).to.not.equal(aAttr);
-      expect(cAttr).to.not.equal(bAttr);
+      squaredCompare(candidates, (a, b) => {
+        expect(a.getAttribute(LIGHTBOXABLE_ATTR))
+            .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
+      });
     });
 
   });
@@ -737,23 +482,20 @@ describes.realWin(TAG, {
 
   describe('resolveIsEnabledForDoc', () => {
 
+    const expectIsEnabled = shouldBeEnabled =>
+      resolveIsEnabledForDoc(env.ampdoc, ['foo']).then(actuallyEnabled => {
+        expect(actuallyEnabled).to.equal(shouldBeEnabled);
+      });
+
     it('rejects documents without schema', () => {
       mockIsEmbeddedAndTrustedViewer(true);
-
-      return resolveIsEnabledForDoc(env.ampdoc,
-          mockCandidatesForLengthCheck()).then(isEnabled => {
-        expect(isEnabled).to.be.false;
-      });
+      return expectIsEnabled(false);
     });
 
     it('rejects schema with invalid @type', () => {
       mockIsEmbeddedAndTrustedViewer(true);
       mockSchemaType('hamberder');
-
-      return resolveIsEnabledForDoc(env.ampdoc,
-          mockCandidatesForLengthCheck()).then(isEnabled => {
-        expect(isEnabled).to.be.false;
-      });
+      return expectIsEnabled(false);
     });
 
     schemaTypes.forEach(type => {
@@ -761,11 +503,7 @@ describes.realWin(TAG, {
       it(`accepts schema with @type=${type}`, () => {
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
-
-        return resolveIsEnabledForDoc(env.ampdoc,
-            mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.true;
-        });
+        return expectIsEnabled(true);
       });
 
       it(`rejects schema with @type=${type} but lightbox explicit`, () => {
@@ -784,12 +522,7 @@ describes.realWin(TAG, {
 
         mockSchemaType(type);
         mockIsEmbeddedAndTrustedViewer(true);
-
-        return resolveIsEnabledForDoc(env.ampdoc,
-            mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
-
+        return expectIsEnabled(false);
       });
 
       it(`rejects schema with @type=${type} for non-embedded docs`, () => {
@@ -797,11 +530,7 @@ describes.realWin(TAG, {
         mockIsEmbeddedAndTrustedViewer(
             /* isEmbedded */ false,
             /* isTrusted */ true);
-
-        return resolveIsEnabledForDoc(
-            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
+        return expectIsEnabled(false);
       });
 
       it(`rejects schema with @type=${type} for untrusted viewer`, () => {
@@ -809,11 +538,7 @@ describes.realWin(TAG, {
         mockIsEmbeddedAndTrustedViewer(
             /* isEmbedded */ true,
             /* isTrusted */ false);
-
-        return resolveIsEnabledForDoc(
-            env.ampdoc, mockCandidatesForLengthCheck()).then(isEnabled => {
-          expect(isEnabled).to.be.false;
-        });
+        return expectIsEnabled(false);
       });
 
     });
@@ -831,29 +556,14 @@ describes.realWin(TAG, {
     });
 
     it('sets unique group for each element', function* () {
-      const a = html`<amp-img src="a.png"></amp-img>`;
-      const b = html`<amp-img src="b.png"></amp-img>`;
-      const c = html`<amp-img src="c.png"></amp-img>`;
+      const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
 
-      yield apply(env.ampdoc, a);
-      yield apply(env.ampdoc, b);
-      yield apply(env.ampdoc, c);
+      yield Promise.all(candidates.map(c => apply(env.ampdoc, c)));
 
-      const aAttr = a.getAttribute(LIGHTBOXABLE_ATTR);
-      const bAttr = b.getAttribute(LIGHTBOXABLE_ATTR);
-      const cAttr = c.getAttribute(LIGHTBOXABLE_ATTR);
-
-      expect(aAttr).to.be.ok;
-      expect(aAttr).to.not.equal(bAttr);
-      expect(aAttr).to.not.equal(cAttr);
-
-      expect(bAttr).to.be.ok;
-      expect(bAttr).to.not.equal(aAttr);
-      expect(bAttr).to.not.equal(cAttr);
-
-      expect(cAttr).to.be.ok;
-      expect(cAttr).to.not.equal(aAttr);
-      expect(cAttr).to.not.equal(bAttr);
+      squaredCompare(candidates, (a, b) => {
+        expect(a.getAttribute(LIGHTBOXABLE_ATTR))
+            .not.to.equal(b.getAttribute(LIGHTBOXABLE_ATTR));
+      });
     });
 
     it('dispatches event', function* () {
