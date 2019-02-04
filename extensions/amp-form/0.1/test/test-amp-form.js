@@ -2068,7 +2068,7 @@ describes.repeated('', {
           const submitActionPromise =
             ampForm.handleSubmitAction_(/* invocation */ {});
 
-          expect(form.submit).to.have.not.been.called;
+          expect(form.submit).to.have.been.called;
 
           return submitActionPromise;
         });
@@ -2170,7 +2170,7 @@ describes.repeated('', {
           'formFields[name]': 'John Miller',
           'formFields[email]': 'j@hnmiller.com',
         };
-        expect(form.submit).to.have.not.been.called;
+        expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit',
             expectedFormData
@@ -2327,7 +2327,7 @@ describes.repeated('', {
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
 
-        expect(form.submit).to.not.have.been.called;
+        expect(form.submit).to.have.been.called;
         expect(clientIdField.value).to.equal('');
         expect(canonicalUrlField.value).to.equal(
             'https%3A%2F%2Fexample.com%2Famps.html');
