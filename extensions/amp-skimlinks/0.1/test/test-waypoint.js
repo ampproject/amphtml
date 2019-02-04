@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import {Waypoint} from '../waypoint';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
-import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
 describes.fakeWin(
@@ -60,12 +60,9 @@ describes.fakeWin(
           canonicalUrl: 'canonical_url',
         });
         env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns('-120');
-        const skimOptions = {
-          config: {waypointUrl: 'https://go.skimresources.com/'},
-        };
         waypoint = new Waypoint(
             env.ampdoc,
-            skimOptions,
+            DEFAULT_SKIM_OPTIONS,
             trackingService,
             'referrer_url'
         );

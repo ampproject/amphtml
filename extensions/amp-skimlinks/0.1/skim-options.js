@@ -22,6 +22,7 @@ import {
   DEFAULT_CONFIG,
   GLOBAL_DOMAIN_BLACKLIST,
   OPTIONS_ERRORS,
+  WAYPOINT_BASE_URL,
 } from './constants';
 
 /**
@@ -46,6 +47,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
     linkSelector: getLinkSelector_(element),
+    waypointBaseUrl: getWaypointBaseUrl(element),
     config: getConfig_(element),
   };
 }
@@ -148,6 +150,26 @@ function getInternalDomains_(docInfo) {
 }
 
 /**
+ * Use CNAME domain defined in "custom-redirect-domain" option if specified
+ * or "https://go.skimresources.com" by default.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getWaypointBaseUrl(element) {
+  let customSubDomain = element.getAttribute('custom-redirect-domain');
+  if (customSubDomain) {
+    // Remove potential HTTP protocol and potential trailing slash.
+    customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\/|\/$/g, '');
+
+    // Use http since publisher CNAME to go.redirectingat.com does not support
+    // https.
+    return `http://${customSubDomain}`;
+  }
+
+  return WAYPOINT_BASE_URL;
+}
+
+/**
  * @param {!Element} element
  * @return {!Object}
  */
@@ -166,8 +188,6 @@ function getConfig_(element) {
         DEFAULT_CONFIG.linksTrackingUrl,
       nonAffiliateTrackingUrl: customConfigJson['nonAffiliateTrackingUrl'] ||
         DEFAULT_CONFIG.nonAffiliateTrackingUrl,
-      waypointUrl: customConfigJson['waypointUrl'] ||
-        DEFAULT_CONFIG.waypointUrl,
       beaconUrl: customConfigJson['beaconUrl'] ||
         DEFAULT_CONFIG.beaconUrl,
     };
