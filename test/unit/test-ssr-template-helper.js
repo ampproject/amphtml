@@ -150,14 +150,6 @@ describes.fakeWin('ssr-template-helper', {
         expect(findAndRenderTemplate)
             .to.have.been.calledWith({}, {data: '<div>some template</div>'});
       });
-    });
-
-    describe('renderTemplateArray', () => {
-      it('should set html template ', () => {
-        ssrTemplateHelper.renderTemplateArray({}, '<div>some template</div>');
-        expect(findAndSetHtmlForTemplate)
-            .to.have.been.calledWith({}, '<div>some template</div>');
-      });
 
       it('should set template array ', () => {
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);

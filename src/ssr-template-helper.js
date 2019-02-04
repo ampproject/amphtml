@@ -20,6 +20,7 @@ import {
   toStructuredCloneable,
   verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
+import {isArray} from './types';
 
 /**
  * @typedef {{
@@ -96,35 +97,21 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!Element} element
-   * @param {!Array|string} data
-   * @return {!Promise}
-   */
-  renderTemplateArray(element, data) {
-    let renderTemplatePromise;
-    if (this.isSupported() && typeof data === 'string') {
-      renderTemplatePromise = this.templates_
-          .findAndSetHtmlForTemplate(element, /** @type {string} */ (data));
-    } else {
-      renderTemplatePromise = this.templates_
-          .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
-    }
-
-    return renderTemplatePromise;
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {!JsonObject} data
+   * @param {!Array|!JsonObject|string} data
    * @return {!Promise}
    */
   renderTemplate(element, data) {
     let renderTemplatePromise;
-    if (this.isSupported()) {
+    if (this.isSupported()
+        && data['html'] && typeof data['html'] === 'string') {
       renderTemplatePromise = this.templates_
-          .findAndSetHtmlForTemplate(element, data['html']);
+          .findAndSetHtmlForTemplate(element, /** @type {string} */ (data['html']));
+    } else if (isArray(data)) {
+      renderTemplatePromise = this.templates_
+          .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
     } else {
       renderTemplatePromise =
-          this.templates_.findAndRenderTemplate(element, data);
+          this.templates_.findAndRenderTemplate(element, /** @type {!JsonObject} */ (data));
     }
 
     return renderTemplatePromise;

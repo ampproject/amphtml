@@ -89,7 +89,7 @@ describes.repeated('amp-list', {
       ssrTemplateHelper = {
         isSupported: () => false,
         fetchAndRenderTemplate: () => Promise.resolve(),
-        renderTemplateArray: sandbox.stub(),
+        renderTemplate: sandbox.stub(),
         verifySsrResponse: () => Promise.resolve(),
       };
 
@@ -147,7 +147,7 @@ describes.repeated('amp-list', {
       } else if (opts.maxItems > 0) {
         itemsToRender = fetched[opts.expr].slice(0, opts.maxItems);
       }
-      ssrTemplateHelper.renderTemplateArray
+      ssrTemplateHelper.renderTemplate
           .withArgs(element, itemsToRender)
           .returns(Promise.resolve(rendered));
 
@@ -407,7 +407,7 @@ describes.repeated('amp-list', {
 
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
-          ssrTemplateHelper.renderTemplateArray
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -426,7 +426,7 @@ describes.repeated('amp-list', {
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
           newItemElement.setAttribute('i-amphtml-key', '2');
-          ssrTemplateHelper.renderTemplateArray
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -471,7 +471,7 @@ describes.repeated('amp-list', {
           expectRender();
 
           const rendered = doc.createElement('p');
-          ssrTemplateHelper.renderTemplateArray
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, '<p>foo</p>')
               .returns(Promise.resolve(rendered));
 
@@ -514,7 +514,7 @@ describes.repeated('amp-list', {
         it('should hide fallback element on fetch success', () => {
           // Stub fetch and render to succeed.
           listMock.expects('fetch_').returns(Promise.resolve([])).once();
-          templates.findAndRenderTemplateArray.returns(Promise.resolve([]));
+          templates.findAndRenderTemplate.returns(Promise.resolve([]));
           // Act as if a fallback is already displayed.
           sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
 

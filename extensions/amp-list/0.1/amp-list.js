@@ -492,7 +492,7 @@ export class AmpList extends AMP.BaseElement {
     }).then(response => {
       request.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
-      return response['html'];
+      return response;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
     }).then(html => this.scheduleRender_(html, /*append*/ false));
@@ -552,7 +552,7 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    const renderTemplate = this.ssrTemplateHelper_.renderTemplateArray(
+    const renderTemplate = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data);
     if (this.ssrTemplateHelper_.isSupported()) {
       renderTemplate.then(result => this.updateBindings_([result]))
