@@ -178,8 +178,8 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-story amp-sidebar[side][open] {
-  background-color: #ffffff !important;
+amp-sidebar[side][open] {
+  background-color: #ffffff;
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
@@ -188,7 +188,7 @@ amp-story amp-sidebar[side][open] {
   max-width: 320px !important;
 }
 
-amp-story amp-sidebar[side] {
+amp-sidebar[side]{
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
