@@ -68,7 +68,7 @@ const AmpDoc = ({body, css, head, canonical}) => {
       <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
       ${css ? html`<style amp-custom>${css}</style>` : ''}
-      ${canonical ? html`<link rel="canonical" href="${canonical}">` : ''}
+      <link rel="canonical" href="${canonical}">
       ${boilerPlate}
       <script async src="https://cdn.ampproject.org/v0.js"></script>
       ${head || ''}
