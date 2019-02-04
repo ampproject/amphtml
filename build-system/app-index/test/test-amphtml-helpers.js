@@ -37,20 +37,26 @@ describe('devdash', () => {
 
     describe('AmpDoc', () => {
 
-      let validator;
-
-      beforeEach(async() => {
-        validator = await amphtmlValidator.getInstance();
+      it('fails without args', () => {
+        assert.throws(() => {
+          AmpDoc();
+        });
       });
 
-      it('creates valid doc with min required values', () => {
-        assertValidAmphtml(validator, AmpDoc({
+      it('fails without min required fields', () => {
+        assert.throws(() => {
+          AmpDoc({});
+        });
+      });
+
+      it('creates valid doc with min required fields', async() => {
+        assertValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
         }));
       })
 
-      it('creates valid doc with set values', () => {
-        assertValidAmphtml(validator, AmpDoc({
+      it('creates valid doc with set fields', async() => {
+        assertValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
           css: 'body { font-family:sans-serif; } ',
           head: html`

@@ -25,14 +25,8 @@ describe('template', () => {
 
   describe('renderTemplate', () => {
 
-    let validator;
-
-    beforeEach(async() => {
-      validator = await amphtmlValidator.getInstance();
-    });
-
-    it('renders valid doc', () => {
-      assertValidAmphtml(validator, renderTemplate({
+    it('renders valid doc', async() => {
+      assertValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
         isMainPage: true,
@@ -42,8 +36,8 @@ describe('template', () => {
       }));
     });
 
-    it('renders valid doc with empty/default values', () => {
-      assertValidAmphtml(validator, renderTemplate({
+    it('renders valid doc with empty/default values', async() => {
+      assertValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
         basepath: '/',
         css: '',
         isMainPage: true,
