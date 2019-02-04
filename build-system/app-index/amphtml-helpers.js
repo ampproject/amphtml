@@ -107,7 +107,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
 
   for (let i = 0; i < formTypes.length; i++) {
     const tagName = formTypes[i];
-    if (docStr.search(new RegExp(`\\<${tagName}(\\s|\\>)`, 'g')) > -1) {
+    if (docStr.search(new RegExp(`\\<${tagName}(\\s|\\>)`)) > -1) {
       addExtension('amp-form');
       break;
     }
