@@ -94,7 +94,7 @@ Enables the Player to grab the OG title (or HTML title if there is no OG title) 
 
 ##### data-content-recency
 
-Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). In the format, `xD`, where x is a numerical value.
+Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). In the format, `xD`, where x is a numerical value (i.e. '9D').
 
 
 ##### data-content-backfill
