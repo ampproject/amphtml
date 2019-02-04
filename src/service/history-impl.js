@@ -918,7 +918,7 @@ export class HistoryBindingVirtual_ {
 
     if (opt_stateUpdate && opt_stateUpdate.url) {
       // replace fragment, only explicit fragment param will be sent
-      const url = (opt_stateUpdate.url || '').replace(/#.*/, '');
+      const url = opt_stateUpdate.url.replace(/#.*/, '');
       opt_stateUpdate.url = url;
     }
 
