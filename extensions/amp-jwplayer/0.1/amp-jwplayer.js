@@ -165,7 +165,7 @@ class AmpJWPlayer extends AMP.BaseElement {
       const ogTitle = ogTitleElement ?
         ogTitleElement.getAttribute('content') : null;
       const title = (context.querySelector('title') || {}).textContent;
-      return encodeURIComponent(ogTitle || title || '');
+      return ogTitle || title || '';
     }
     return this.contentSearch_ ;
   }

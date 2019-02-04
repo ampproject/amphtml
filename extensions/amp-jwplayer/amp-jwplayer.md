@@ -67,45 +67,39 @@ Example:
 ## Attributes
 
 ##### data-player-id
-Type: String
 
 JW Platform player id. This is an 8-digit alphanumeric sequence that can be found in the [Players](https://dashboard.jwplayer.com/#/players) section in your JW Player Dashboard. (**Required**)
 
 
 ##### data-media-id
-Type: String
 
 The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the [Content](https://dashboard.jwplayer.com/#/content) section in your JW Player Dashboard. (**Required if `data-playlist-id` is not defined.**)
 
 
 ##### data-playlist-id
-Type: String
 
 The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes 
 precedence.  (**Required if `data-media-id` is not defined.**)
 
 
 ##### data-content-search
-Type: String
+
 Denotes the type of the playlist. This is a search playlist that takes in a keyword or phrase as the search query and generates a playlist based on that search query. If contextual article matching is desired, use the value `_CONTEXTUAL_` (data-content-contextual must also be true).
 
 
 ##### data-content-contextual
-Type: Boolean
 
-Enables the Player to grab the OG title (or HTML title if there is no OG title) of a given webpage and use that as the search query (required to do Contextual Article Matching).
+Enables the Player to grab the OG title (or HTML title if there is no OG title) of a given webpage and use that as the search query (required to do Contextual Article Matching). (**'true' or 'false'**)
 
 
 ##### data-content-recency
-Type: String
 
-Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). In the format, `xD`, where x is a numerical value,
+Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). In the format, `xD`, where x is a numerical value.
 
 
 ##### data-content-backfill
-Type: Boolean
 
-Ensures that there is always a search result. If there are no search results for the given query, this parameter ensures that a list of trending videos are served.
+Ensures that there is always a search result. If there are no search results for the given query, this parameter ensures that a list of trending videos are served. (**'true' or 'false'**)
 
 
 ##### common attributes
