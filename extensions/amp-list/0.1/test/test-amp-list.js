@@ -89,6 +89,7 @@ describes.repeated('amp-list', {
       ssrTemplateHelper = {
         isSupported: () => false,
         fetchAndRenderTemplate: () => Promise.resolve(),
+        renderTemplateArray: sandbox.stub(),
         verifySsrResponse: () => Promise.resolve(),
       };
 
@@ -146,7 +147,7 @@ describes.repeated('amp-list', {
       } else if (opts.maxItems > 0) {
         itemsToRender = fetched[opts.expr].slice(0, opts.maxItems);
       }
-      templates.findAndRenderTemplateArray
+      ssrTemplateHelper.renderTemplateArray
           .withArgs(element, itemsToRender)
           .returns(Promise.resolve(rendered));
 
@@ -406,7 +407,7 @@ describes.repeated('amp-list', {
 
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
-          templates.findAndRenderTemplateArray
+          ssrTemplateHelper.renderTemplateArray
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -425,7 +426,7 @@ describes.repeated('amp-list', {
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
           newItemElement.setAttribute('i-amphtml-key', '2');
-          templates.findAndRenderTemplateArray
+          ssrTemplateHelper.renderTemplateArray
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -470,7 +471,7 @@ describes.repeated('amp-list', {
           expectRender();
 
           const rendered = doc.createElement('p');
-          templates.findAndSetHtmlForTemplate
+          ssrTemplateHelper.renderTemplateArray
               .withArgs(element, '<p>foo</p>')
               .returns(Promise.resolve(rendered));
 
