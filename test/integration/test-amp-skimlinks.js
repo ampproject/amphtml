@@ -27,7 +27,7 @@ const linksTrackingUrl = RequestBank.getUrl('linksTrackingUrl') +
   '/link?data=${data}';
 const nonAffiliateTrackingUrl = RequestBank.getUrl('nonAffiliateTrackingUrl') +
   '?call=track&data=${data}';
-const waypointUrl = `${RequestBank.getUrl('waypointUrl')}`;
+const waypointUrl = `${RequestBank.getUrl('waypointUrl')}/`;
 
 // Simulated click event created by browser.click() does not trigger
 // the browser navigation when dispatched on a link.
@@ -49,13 +49,13 @@ describe('amp-skimlinks', function() {
         layout="nodisplay"
         publisher-code="123X123"
         tracking="true"
+        custom-redirect-domain="${waypointUrl}"
     >
       <script type="application/json">
         {
             "pageTrackingUrl": "${pageTrackingUrl}",
             "linksTrackingUrl": "${linksTrackingUrl}",
-            "nonAffiliateTrackingUrl": "${nonAffiliateTrackingUrl}",
-            "waypointUrl": "${waypointUrl}"
+            "nonAffiliateTrackingUrl": "${nonAffiliateTrackingUrl}"
         }
       </script>
     </amp-skimlinks>

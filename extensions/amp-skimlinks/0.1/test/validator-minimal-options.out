@@ -1,6 +1,6 @@
 PASS
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
@@ -13,7 +13,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Valid amp-skimlinks tag
+|    Valid amp-skimlinks tag with minimal options
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -29,10 +29,6 @@ PASS
 |      <amp-skimlinks
 |          layout="nodisplay"
 |          publisher-code="123X123"
-|          excluded-domains="samsung.com  asos.com"
-|          link-selector="article:not(.no-skimlinks) a"
-|          custom-tracking-id="phones"
-|          custom-redirect-domain="go.publisher.com"
 |      ></amp-skimlinks>
 |  </body>
 |  </html>
