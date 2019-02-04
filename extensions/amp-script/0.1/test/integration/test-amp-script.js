@@ -23,7 +23,7 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe('amp-script', function() {
+describe.configure().skipSinglePass().run('amp-script', function() {
   this.timeout(TIMEOUT);
 
   let browser, doc, element;
