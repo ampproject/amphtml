@@ -527,20 +527,22 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        // TODO: torch2424. I think ali express case breaks
-        // for button on:tap
-          /*
-          e.g: on="tap: AMP.setState(
-          {cartParam: {shopcartId: '20158463321,106205922219,',countryCode: 'US'}}
-          ), form-submit-create-order.submit"
-          */
-        // https://m.aliexpress.com/shopcart/list.html
+        /**
+         * If the submit was called with an event, then we shouldn't
+         * manually submit the form
+         */
+        let shouldSubmitFormElement = true;
+        if (event) {
+          shouldSubmitFormElement = false;
+        }
 
-        this.handleNonXhrGet_(/*shouldSubmitFormElement*/false);
+        this.handleNonXhrGet_(shouldSubmitFormElement);
         return Promise.resolve();
       }
 
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+      }
     }
 
     // Set ourselves to the SUBMITTING State
