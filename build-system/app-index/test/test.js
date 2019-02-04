@@ -19,6 +19,7 @@ const {join} = require('path');
 
 const bundler = require('../bundler');
 const devDashboard = require('../index');
+const pc = process;
 
 const expressReqMock = {
   path: '/',
@@ -31,18 +32,16 @@ const expressResMock = {
 
 describe('Tests for the dev dashboard', () => {
 
-  it('should bundle', () => {
-    return bundler.bundleComponent(join(__dirname, '../components/main.js'))
-        .then(bundle => {
-          assert.ok(bundle);
-        });
+  it('should bundle', async() => {
+    const bundle = await bundler.bundleComponent(
+        join(__dirname, '../components/main.js'));
+    assert.ok(bundle);
   });
 
-  it('should be able to return HTML', () => {
-    return devDashboard.serveIndex({
+  it('should be able to return HTML', async() => {
+    const renderedHtml = await devDashboard.serveIndex({
       root: __dirname,
-    })(expressReqMock, expressResMock).then(renderedHtml => {
-      assert.ok(renderedHtml);
     });
+    assert.ok(renderedHtml);
   });
 });
