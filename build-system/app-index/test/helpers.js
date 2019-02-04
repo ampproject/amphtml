@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const assert = require('assert');
 const {JSDOM} = require('jsdom');
 
 
@@ -32,4 +33,12 @@ const getBoundAttr = (el, attr) => {
 }
 
 
-module.exports = {parseHtmlChunk, getBoundAttr};
+const assertValidAmphtml = (validator, string) => {
+  const {errors, status} = validator.validateString(string);
+  // Assert errors before so they're output.
+  assert.deepStrictEqual(errors, []);
+  assert.strictEqual(status, 'PASS');
+};
+
+
+module.exports = {assertValidAmphtml, parseHtmlChunk, getBoundAttr};

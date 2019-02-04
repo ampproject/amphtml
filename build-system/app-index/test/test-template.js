@@ -17,6 +17,8 @@
 const amphtmlValidator = require('amphtml-validator');
 const assert = require('assert');
 
+const {assertValidAmphtml} = require('./helpers');
+
 const {renderTemplate} = require('../template');
 
 describe('template', () => {
@@ -30,7 +32,7 @@ describe('template', () => {
     });
 
     it('renders valid doc', () => {
-      const {errors, status} = validator.validateString(renderTemplate({
+      assertValidAmphtml(validator, renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
         isMainPage: true,
@@ -38,14 +40,10 @@ describe('template', () => {
         serveMode: 'default',
         selectModePrefix: '/',
       }));
-
-      // Assert errors before so they're output.
-      assert.deepStrictEqual(errors, []);
-      assert.strictEqual(status, 'PASS');
     });
 
     it('renders valid doc with empty/default values', () => {
-      const {errors, status} = validator.validateString(renderTemplate({
+      assertValidAmphtml(validator, renderTemplate({
         basepath: '/',
         css: '',
         isMainPage: true,
@@ -53,10 +51,6 @@ describe('template', () => {
         serveMode: 'default',
         selectModePrefix: '/',
       }));
-
-      // Assert errors before so they're output.
-      assert.deepStrictEqual(errors, []);
-      assert.strictEqual(status, 'PASS');
     });
 
   });

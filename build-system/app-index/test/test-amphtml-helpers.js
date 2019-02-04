@@ -17,6 +17,10 @@
 const amphtmlValidator = require('amphtml-validator');
 const assert = require('assert');
 
+const {assertValidAmphtml, parseHtmlChunk} = require('./helpers');
+const {html} = require('../html');
+const {JSDOM} = require('jsdom');
+
 const {
   addRequiredExtensionsToHead,
   AmpDoc,
@@ -25,9 +29,6 @@ const {
   containsExpr,
   ternaryExpr,
 } = require('../amphtml-helpers');
-const {html} = require('../html');
-const {JSDOM} = require('jsdom');
-const {parseHtmlChunk} = require('./helpers');
 
 
 describe('devdash', () => {
@@ -43,17 +44,13 @@ describe('devdash', () => {
       });
 
       it('creates valid doc with min required values', () => {
-        const {errors, status} = validator.validateString(AmpDoc({
+        assertValidAmphtml(validator, AmpDoc({
           canonical: '/',
         }));
-
-        // Assert errors before so they're output.
-        assert.deepStrictEqual(errors, []);
-        assert.strictEqual(status, 'PASS');
       })
 
       it('creates valid doc with set values', () => {
-        const {errors, status} = validator.validateString(AmpDoc({
+        assertValidAmphtml(validator, AmpDoc({
           canonical: '/',
           css: 'body{}',
           head: html`
@@ -90,10 +87,6 @@ describe('devdash', () => {
             </script>`,
           body: html`<div>Hola</div>`,
         }));
-
-        // Assert errors before so they're output.
-        assert.deepStrictEqual(errors, []);
-        assert.strictEqual(status, 'PASS');
       })
     });
 
