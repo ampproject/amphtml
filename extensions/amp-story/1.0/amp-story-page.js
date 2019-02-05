@@ -31,6 +31,10 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {
+  AmpStoryEmbeddedComponent,
+  EXPANDABLE_COMPONENTS,
+} from './amp-story-embedded-component';
+import {
   AnimationManager,
   hasAnimations,
 } from './animation';
@@ -89,6 +93,8 @@ const Selectors = {
       'amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
+
+const EMBEDDED_COMPONENTS_SELECTORS = Object.keys(EXPANDABLE_COMPONENTS);
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -351,6 +357,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
+      this.findAndPrepareEmbeddedComponents();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
       this.preloadAllMedia_()
@@ -416,6 +423,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
 
     return Promise.all(mediaPromises);
+  }
+
+  /**
+   * Finds embedded compoennts in page and prepares them for their expanded view
+   * animation.
+   */
+  findAndPrepareEmbeddedComponents() {
+    EMBEDDED_COMPONENTS_SELECTORS.forEach(selector => {
+      scopedQuerySelectorAll(this.element, selector).forEach(el => {
+        AmpStoryEmbeddedComponent.prepareForAnimation(this.element, el);
+      });
+    });
   }
 
   /** @return {!Promise} */

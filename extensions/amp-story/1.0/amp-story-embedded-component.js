@@ -32,9 +32,14 @@ import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
+import {
+  getStyle,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+} from '../../../src/style';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /**
  * Action icons to be placed in tooltip.
@@ -51,7 +56,7 @@ const ActionIcon = {
  * @const {!Object}
  * @private
  */
-const EXPANDABLE_COMPONENTS = {
+export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
     componentIcon: 'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.' +
     'w3.org/2000/svg" width="400" height="400"><g fill="none" fill-rule="eve' +
@@ -217,6 +222,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private {?Element} */
     this.expandedViewOverlay_ = null;
 
+    /** @private {?number} */
+    this.scaleFactor_ = null;
+
     /**
      * Target producing the tooltip. Used to avoid building the same
      * element twice.
@@ -320,6 +328,9 @@ export class AmpStoryEmbeddedComponent {
               'i-amphtml-expanded-mode', false);
           toggle(devAssert(this.expandedViewOverlay_), false);
           resetStyles(devAssert(this.previousTarget_), ['transform']);
+          setImportantStyles(devAssert(this.previousTarget_), {
+            transform: `scale(${this.scaleFactor_})`,
+          });
         });
       return;
     }
@@ -548,26 +559,55 @@ export class AmpStoryEmbeddedComponent {
           const targetRect = target./*OK*/getBoundingClientRect();
           const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
-          const centeredTop = pageRect.height / 2 - targetRect.height / 2;
-          const centeredLeft = pageRect.width / 2 - targetRect.width / 2;
+          this.scaleFactor_ =
+            parseFloat(getStyle(target,'transform').split('scale(')[1]);
+          const realWidth = targetRect.width / this.scaleFactor_;
+          const leftOffset = (realWidth - targetRect.width) / 2;
+          state.translateX = (targetRect.left - leftOffset - pageRect.left);
 
-          // Only account for offset from target to page borders. Since in
-          // desktop mode page is not at the borders of viewport.
-          const leftOffset = targetRect.left - pageRect.left;
-          const topOffset = targetRect.top - pageRect.top;
+          const realHeight = targetRect.height / this.scaleFactor_;
+          const topOffset = (realHeight - targetRect.height) / 2;
+          const verticalOffset = targetRect.top - topOffset - pageRect.top;
+          const centeredTop = pageRect.height / 2 - realHeight / 2;
 
-          state.translateY = centeredTop - topOffset;
-          state.translateX = leftOffset - centeredLeft;
+          state.translateY = centeredTop - verticalOffset;
         },
         /** mutate */
         () => {
           target.classList.add('i-amphtml-animate-expand-in');
           setImportantStyles(dev().assertElement(target),
               {
-                transform: `translate3d(${state.translateX}px,
-                    ${state.translateY}px, 0)`,
+                transform: `translate3d(${-state.translateX}px,
+                  ${state.translateY}px, 0) scale(1)`,
               });
         });
+  }
+
+  /**
+   * Prepares expandable component for its expanded animation.
+   * It resizes it to its full-screen size, and scales it down to match size set
+   * by publisher, adding negative margins so that content around stays put.
+   * @param {!Element} page
+   * @param {!Element} element
+   */
+  static prepareForAnimation(page, element) {
+    element.whenBuilt().then(() => {
+      const pageRect = page./*OK*/getBoundingClientRect();
+      const elRect = element./*OK*/getBoundingClientRect();
+
+      const scaleFactor = elRect.width / pageRect.width;
+      const scaledHeight = elRect.height / elRect.width * pageRect.width;
+
+      const verticalMargin = (-1 * ((scaledHeight - elRect.height) / 2));
+      const horizontalMargin = (-1 * ((pageRect.width - elRect.width) / 2));
+
+      setImportantStyles(devAssert(element), {
+        width: `${pageRect.width}px`,
+        height: `${scaledHeight}px`,
+        transform: `scale(${scaleFactor})`,
+        margin: `${verticalMargin}px ${horizontalMargin}px`,
+      });
+    });
   }
 
   /**
