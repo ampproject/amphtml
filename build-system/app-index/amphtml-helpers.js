@@ -118,7 +118,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
     addExtension('amp-form');
   }
 
-  return docStr.replace(/(\<\/head\>)/i, (_, headClosingTag) =>
+  return docStr.replace(/\<\/head\>/i, headClosingTag =>
     joinFragments(Object.values(extensions), ExtensionScript) + headClosingTag);
 };
 
