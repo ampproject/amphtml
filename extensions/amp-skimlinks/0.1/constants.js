@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const AMP_SKIMLINKS_VERSION = '1.0.2';
+export const AMP_SKIMLINKS_VERSION = '1.0.3';
 export const XCUST_ATTRIBUTE_NAME = 'data-skimlinks-custom-tracking-id';
-export const AFFILIATION_API = 'https://go.skimresources.com';
+export const WAYPOINT_BASE_URL = 'https://go.skimresources.com';
 export const PLATFORM_NAME = 'amp@' + AMP_SKIMLINKS_VERSION;
 export const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
 
@@ -33,7 +33,6 @@ export const DEFAULT_CONFIG = {
   pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
   linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
   nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
-  waypointUrl: AFFILIATION_API,
   beaconUrl: DOMAIN_RESOLVER_API_URL,
 };
 
