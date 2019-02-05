@@ -457,20 +457,23 @@ describes.repeated('amp-list', {
 
           listMock.expects('toggleLoading').withExactArgs(false).once();
 
-          return expect(list.layoutCallback()).to.eventually.be.rejected;
+          return expect(list.layoutCallback()).to.eventually.be
+              .rejectedWith(/Server side response must be defined/);
         });
 
         it('should delegate template rendering to viewer', function*() {
+          const rendered = doc.createElement('p');
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
               .returns(Promise.resolve({html: '<p>foo</p>'}));
-          sandbox.spy(list, 'updateBindings_');
-
+          ssrTemplateHelper.renderTemplate
+              .returns(Promise.resolve('<p>foo</p>'));
+          sandbox.stub(list, 'updateBindings_')
+              .returns(Promise.resolve([rendered]));
 
           // Expects mutate/measure and hiding of loading/placeholder
           // indicators.
           expectRender();
 
-          const rendered = doc.createElement('p');
           ssrTemplateHelper.renderTemplate
               .withArgs(element, '<p>foo</p>')
               .returns(Promise.resolve(rendered));

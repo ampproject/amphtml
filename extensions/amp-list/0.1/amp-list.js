@@ -490,17 +490,19 @@ export class AmpList extends AMP.BaseElement {
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, request, /* opt_templates */ null, attributes);
     }).then(response => {
+      userAssert(response && response['html'] !== 'undefined',
+          'Server side response must be defined');
       request.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
       return response;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(html => this.scheduleRender_(html, /*append*/ false));
+    }).then(data => this.scheduleRender_(data, /*append*/ false));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array|string|undefined} data
+   * @param {!Array|!JsonObject|string|undefined} data
    * @param {boolean} append
    * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
