@@ -56,7 +56,8 @@ export const ENABLED_LD_JSON_TYPES = {
 };
 
 /**
- * Types of document by Open Graph `<meta property="og:type">`
+ * Types of document by Open Graph `<meta property="og:type">` where
+ * auto-lightbox should be enabled.
  * @private @const {!Object<string, boolean>}
  */
 export const ENABLED_OG_TYPES = {
