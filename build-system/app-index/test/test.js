@@ -14,35 +14,32 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
+const {bundleComponent} = require('../bundler');
+const {expect} = require('chai');
 const {join} = require('path');
+const {serveIndexForTesting} = require('../index');
 
-const bundler = require('../bundler');
-const devDashboard = require('../index');
+const NOOP = () => {};
 
-const expressReqMock = {
-  path: '/',
-  url: '/'
-}
+describe('devdash', () => {
 
-const expressResMock = {
-  end: () => {},
-};
+  describe('bundling', () => {
 
-describe('Tests for the dev dashboard', () => {
+    // Bundling unused at the moment, so no use to test.
+    it.skip('bundles', async() => {
+      const mainComponentPath = '../components/main.js';
+      const bundle = await bundleComponent(join(__dirname, mainComponentPath));
+      expect(bundle).to.be.ok;
+    });
 
-  it('should bundle', () => {
-    return bundler.bundleComponent(join(__dirname, '../components/main.js'))
-        .then(bundle => {
-          assert.ok(bundle);
-        });
   });
 
-  it('should be able to return HTML', () => {
-    return devDashboard.serveIndex({
-      root: __dirname,
-    })(expressReqMock, expressResMock).then(renderedHtml => {
-      assert.ok(renderedHtml);
+  describe('express middleware', () => {
+
+    it('renders HTML', async() => {
+      const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
+      expect(renderedHtml).to.be.ok;
     });
+
   });
 });
