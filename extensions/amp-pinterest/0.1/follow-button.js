@@ -62,7 +62,7 @@ export class FollowButton {
    */
   renderTemplate() {
     const followButton = Util.make(this.element.ownerDocument, {'a': {
-      class: 'i-amphtml-pinterest-follow-button',
+      class: '-amp-pinterest-follow-button',
       href: this.href,
       textContent: this.label,
     }});
