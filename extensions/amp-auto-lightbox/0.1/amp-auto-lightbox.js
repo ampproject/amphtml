@@ -45,7 +45,7 @@ export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 /**
  * Types of document by LD+JSON schema `@type` field where auto-lightbox should
  * be enabled.
- * @private @const {!Object<string, boolean>}
+ * @private @const {!Object<string|undefined, boolean>}
  */
 export const ENABLED_LD_JSON_TYPES = {
   'Article': true,
@@ -58,7 +58,7 @@ export const ENABLED_LD_JSON_TYPES = {
 /**
  * Types of document by Open Graph `<meta property="og:type">` where
  * auto-lightbox should be enabled.
- * @private @const {!Object<string, boolean>}
+ * @private @const {!Object<string|undefined, boolean>}
  */
 export const ENABLED_OG_TYPES = {
   'article': true,
@@ -255,7 +255,7 @@ export class DocMetaAnnotations {
    * Determines wheter the document type as defined by Open Graph meta tag
    * e.g. `<meta property="og:type">` is in a given set.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string, boolean>} types
+   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
   static isOgTypeInSet(ampdoc, types) {
@@ -276,7 +276,7 @@ export class DocMetaAnnotations {
    * Determines wheter one of the document types (field `@type`) defined in
    * LD+JSON schema is in a given set.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string, boolean>} types
+   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
   static isLdJsonTypeInSet(ampdoc, types) {
@@ -452,7 +452,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
     getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-      scan(ampdoc, target);
+      scan(ampdoc, dev().assertElement(target));
     });
     scan(ampdoc);
   });
