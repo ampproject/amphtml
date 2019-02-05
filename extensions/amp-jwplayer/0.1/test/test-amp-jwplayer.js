@@ -170,7 +170,7 @@ describes.realWin('amp-jwplayer', {
       expect(img.getAttribute('alt')).to.equal('Loading video');
     });
     it('should propagate aria-label to placeholder', async() => {
-      const jw = getjwplayer({
+      const jw = await getjwplayer({
         'data-media-id': 'Wferorsv',
         'data-player-id': 'sDZEo0ea',
         'aria-label': 'interesting video',
