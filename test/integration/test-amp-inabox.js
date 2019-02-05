@@ -96,7 +96,9 @@ describe('inabox', function() {
     return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
   }
 
-  describe.skip('AMPHTML ads', () => {
+  const describeWebkit = describe.configure().skipFirefox();
+
+  describeWebkit.run('AMPHTML ads', () => {
     describes.integration('rendered on non-AMP page ATF', {
       amp: false,
       body: `
