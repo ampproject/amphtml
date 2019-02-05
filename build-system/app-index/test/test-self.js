@@ -94,6 +94,16 @@ describe('devdash', () => {
         expect(getBoundAttr(fakeEl, 'foo')).to.equal(valueWithWhitespace);
       });
 
+      it('returns value with double quote', () => {
+        const fakeEl = {outerHTML: '<div [foo]=\'ab"cd ef\'></div>'};
+        expect(getBoundAttr(fakeEl, 'foo')).to.equal('ab"cd ef');
+      });
+
+      it('returns value with single quote', () => {
+        const fakeEl = {outerHTML: '<div [foo]="ab\'cd ef"></div>'};
+        expect(getBoundAttr(fakeEl, 'foo')).to.equal('ab\'cd ef');
+      });
+
     });
 
     describe('expectValidAmphtml', () => {

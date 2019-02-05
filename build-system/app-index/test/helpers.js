@@ -26,7 +26,7 @@ const parseHtmlChunk = htmlStr => {
 
 
 const boundAttrRe = attr =>
-  new RegExp(`\\[${attr}\\]=("[^"]+"|'[^']'+|[^\\s\\>]+)`);
+  new RegExp(`\\[${attr}\\]=(("[^"]+")|('[^']+')|([^\\s\\>]+))`);
 
 
 // JSDom doesn't parse attributes whose names don't follow the spec, so
