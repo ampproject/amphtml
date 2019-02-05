@@ -89,7 +89,7 @@ describe('devdash', () => {
             </script>`,
           body: html`<div>Hola</div>`,
         }));
-      })
+      });
     });
 
     describe('ampStateKey', () => {

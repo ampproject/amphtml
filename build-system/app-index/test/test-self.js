@@ -37,6 +37,18 @@ describe('devdash', () => {
         expect(tagName).to.equal(tagName);
       });
 
+      it('fails with multiple children', () => {
+        expect(() => parseHtmlChunk('<a></a><a></a>')).to.throw;
+      });
+
+      it('fails with text node as content', () => {
+        expect(() => parseHtmlChunk('text content')).to.throw;
+      });
+
+      it('fails on empty string', () => {
+        expect(() => parseHtmlChunk('')).to.throw;
+      });
+
     });
 
     describe('getBoundAttr', () => {
