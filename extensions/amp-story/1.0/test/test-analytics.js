@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStoryAnalytics} from '../analytics';
 import {StateChangeType} from '../navigation-state';
+import {getAnalyticsService} from '../story-analytics';
 
 
 describes.fakeWin('amp-story analytics', {}, env => {
@@ -23,7 +23,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
   beforeEach(() => {
     rootEl = env.win.document.createElement('div');
-    analytics = new AmpStoryAnalytics(rootEl);
+    analytics = getAnalyticsService(env.win, rootEl);
   });
 
   it('should trigger `story-page-visible` on change', () => {

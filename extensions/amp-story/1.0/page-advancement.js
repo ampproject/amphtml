@@ -20,7 +20,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './analytics';
+import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
