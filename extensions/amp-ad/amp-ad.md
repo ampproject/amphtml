@@ -313,6 +313,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [Pressboard](../../ads/pressboard.md)
+- [PromoteIQ](../../ads/promoteiq.md)
 - [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
