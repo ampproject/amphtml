@@ -127,6 +127,16 @@ describe('devdash', () => {
         }).to.throw;
       });
 
+      it('ignores errors with severity ≠ ERROR', () => {
+        const mockValidator = {
+          validateString: () => ({
+            status: 'PASS',
+            errors: [{severity: 'FOO'}],
+          }),
+        };
+        expectValidAmphtml(mockValidator, 'any string');
+      });
+
     });
 
   });
