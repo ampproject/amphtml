@@ -682,8 +682,6 @@ describes.realWin(TAG, {
       });
     });
 
-
-
   });
 
   describe('apply', () => {
