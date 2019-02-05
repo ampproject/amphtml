@@ -16,6 +16,7 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -159,6 +160,13 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               new ScrollElement(this.ampdoc).handleScrollUser(
                   this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
+              if (response.features && response.features.readDepth) {
+                new ReadDepthTracker(
+                    this.ampdoc,
+                    this.accessSource_,
+                    connectHostname(config)
+                );
+              }
             }
           } else {
             if (
