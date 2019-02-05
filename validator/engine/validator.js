@@ -1134,7 +1134,7 @@ class ReferencePointMatcher {
           /** @type {number} */ (p.tagSpecName));
       // Skip TagSpecs that aren't used for these type identifiers.
       if (!parsedTagSpec.isUsedForTypeIdentifiers(
-              context.getTypeIdentifiers())) {
+          context.getTypeIdentifiers())) {
         continue;
       }
       const resultForAttempt = validateTagAgainstSpec(
@@ -2985,7 +2985,7 @@ function validateUrlAndProtocol(
     adapter.invalidUrl(context, urlStr, tagSpec, result);
     return;
   }
-  let protocol = urlProtocol(urlStr, url);
+  const protocol = urlProtocol(urlStr, url);
   if (protocol.length > 0 && !parsedUrlSpec.isAllowedProtocol(protocol)) {
     adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
     return;
@@ -4238,7 +4238,7 @@ function validateAttributes(
       }
     }
   }
-  let missingAttrs = [];
+  const missingAttrs = [];
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       missingAttrs.push(
@@ -4337,7 +4337,7 @@ class TagSpecDispatch {
    * @return {!Array<number>}
    */
   matchingDispatchKey(attrName, attrValue, mandatoryParent) {
-    let tagSpecIds = [];
+    const tagSpecIds = [];
     if (!this.hasDispatchKeys()) {
       return tagSpecIds;
     }
@@ -4511,7 +4511,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
         // Skip TagSpecs that aren't used for these type identifiers.
         if (!parsedTagSpec.isUsedForTypeIdentifiers(
-                context.getTypeIdentifiers())) {
+            context.getTypeIdentifiers())) {
           continue;
         }
         bestMatchTagSpec = parsedTagSpec;
@@ -5063,7 +5063,7 @@ class ParsedValidatorRules {
       const parsedTagSpec = this.getByTagSpecId(tagSpecId);
       // Skip TagSpecs that aren't used for these type identifiers.
       if (!parsedTagSpec.isUsedForTypeIdentifiers(
-              context.getTypeIdentifiers())) {
+          context.getTypeIdentifiers())) {
         continue;
       }
       if (!context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
@@ -5093,7 +5093,7 @@ class ParsedValidatorRules {
       const parsedTagSpec = this.getByTagSpecId(tagSpecId);
       // Skip TagSpecs that aren't used for these type identifiers.
       if (!parsedTagSpec.isUsedForTypeIdentifiers(
-              context.getTypeIdentifiers())) {
+          context.getTypeIdentifiers())) {
         continue;
       }
       for (const condition of parsedTagSpec.requires()) {
