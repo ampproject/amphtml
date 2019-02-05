@@ -22,7 +22,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './analytics';
+import {AdvancementMode} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from './localization';

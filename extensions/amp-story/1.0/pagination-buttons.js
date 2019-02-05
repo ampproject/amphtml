@@ -18,7 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './analytics';
+import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';

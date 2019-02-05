@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AdvancementMode} from '../analytics';
+import {AdvancementMode} from '../story-analytics';
 import {AmpStoryVariableService} from '../variable-service';
 import {StateChangeType} from '../navigation-state';
 
