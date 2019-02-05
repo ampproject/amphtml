@@ -441,8 +441,20 @@ export class ScrollableShareWidget extends ShareWidget {
     this.root.classList.add(SCROLLABLE_CLASSNAME);
 
     Services.viewportForDoc(ampdoc).onResize(
-        // we don't require a lot of smoothness here, so we throttle
         throttle(this.win, () => this.applyButtonPadding_(), 100));
+
+    this.vsync_.measure(() => {
+      // If the element is actually scrollable, don't propagate the touch events
+      // so it is not interpreted as a swipe to the next story.
+      if (this.root./*OK*/offsetWidth < this.root./*OK*/scrollWidth) {
+        this.root.addEventListener(
+            'touchstart', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchmove', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchend', event => event.stopPropagation(), {capture: true});
+      }
+    });
 
     return this.root;
   }

@@ -72,7 +72,10 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {
+  SwipeXYRecognizer,
+  SwipeYRecognizer,
+} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
@@ -657,8 +660,16 @@ export class AmpStory extends AMP.BaseElement {
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
 
+    // If the story is within a viewer that enabled the swipe capability, this
+    // disables the navigation education overlay on the X axis to enable the
+    // swipe to the next story feature.
+    const viewerService = Services.viewerForDoc(this.element);
+    const swipeRecognizer =
+        (viewerService && viewerService.hasCapability('swipe')) ?
+          SwipeYRecognizer : SwipeXYRecognizer;
+
     // Shows "tap to navigate" hint when swiping.
-    gestures.onGesture(SwipeXYRecognizer, gesture => {
+    gestures.onGesture(swipeRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       const embedComponent = /** @type {InteractiveComponentDef} */
         (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
@@ -672,11 +683,13 @@ export class AmpStory extends AMP.BaseElement {
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
         // Cancels the event for this gesture entirely, ensuring the hint won't
         // show even if the user keeps swiping without releasing the touch.
-        gesture.event && gesture.event.preventDefault();
+        if (gesture.event && gesture.event.cancelable !== false) {
+          gesture.event.preventDefault();
+        }
         return;
       }
-      if (gesture.event.defaultPrevented ||
-          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
+      if (gesture.event && (gesture.event.defaultPrevented ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY))) {
         return;
       }
 
