@@ -35,14 +35,8 @@ describe('template', () => {
     });
 
     it('renders valid doc with empty/default values', async() => {
-      expectValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
-        basepath: '/',
-        css: '',
-        isMainPage: true,
-        fileSet: [],
-        serveMode: 'default',
-        selectModePrefix: '/',
-      }));
+      expectValidAmphtml(await amphtmlValidator.getInstance(),
+          renderTemplate());
     });
 
   });

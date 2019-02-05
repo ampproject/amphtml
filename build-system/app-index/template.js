@@ -59,8 +59,22 @@ const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
 
-function renderTemplate({
-  basepath, css, isMainPage, fileSet, serveMode, selectModePrefix}) {
+function renderTemplate(opt_params) {
+  const {
+    basepath,
+    css,
+    isMainPage,
+    fileSet,
+    serveMode,
+    selectModePrefix,
+  } = {
+    basepath: '/',
+    isMainPage: false,
+    fileSet: [],
+    serveMode: 'default',
+    selectModePrefix: '/',
+    ...(opt_params || {}),
+  };
 
   const body = joinFragments([
     html`<div class="wrap">
