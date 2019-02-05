@@ -17,8 +17,12 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
-import {StandardActions} from '../../src/service/standard-actions-impl';
+import {
+  StandardActions,
+  getAutofocusElementForShowAction,
+} from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {htmlFor} from '../../src/static-template';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
 import {setParentWindow} from '../../src/service';
@@ -48,46 +52,61 @@ describes.sandboxed('StandardActions', {}, () => {
         (unusedElement, mutator) => mutator());
   }
 
+  function expectElementMutatedAsync(element) {
+    expect(mutateElementStub.withArgs(element, sinon.match.any))
+        .to.be.calledOnce;
+  }
+
   function expectElementToHaveBeenHidden(element) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expectElementMutatedAsync(element);
     expect(element).to.have.attribute('hidden');
   }
 
-  function expectElementToHaveBeenShown(element) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+  function expectElementToHaveBeenShown(element, sync = false) {
+    if (sync) {
+      expect(mutateElementStub).to.not.have.been.called;
+    } else {
+      expectElementMutatedAsync(element);
+    }
     expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
 
   function expectElementToHaveClass(element, className) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expectElementMutatedAsync(element);
     expect(element.classList.contains(className)).to.true;
   }
 
   function expectElementToDropClass(element, className) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expectElementMutatedAsync(element);
     expect(element.classList.contains(className)).to.false;
   }
 
   function expectAmpElementToHaveBeenHidden(element) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expectElementMutatedAsync(element);
     expect(element.collapse).to.be.calledOnce;
   }
 
-  function expectAmpElementToHaveBeenShown(element) {
-    expect(mutateElementStub).to.be.calledOnce;
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+  function expectAmpElementToHaveBeenShown(element, sync = false) {
+    if (!sync) {
+      expectElementMutatedAsync(element);
+    } else {
+      expect(mutateElementStub).to.not.have.been.called;
+    }
     expect(element.expand).to.be.calledOnce;
   }
 
   function expectAmpElementToHaveBeenScrolledIntoView(element) {
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args[0]).to.equal(element);
+  }
+
+  function trustedInvocation(obj) {
+    return Object.assign({satisfiesTrust: () => true}, obj);
+  }
+
+  function stubIsSafari() {
+    sandbox.stub(Services, 'platformFor').returns({isSafari: () => true});
   }
 
   beforeEach(() => {
@@ -100,17 +119,45 @@ describes.sandboxed('StandardActions', {}, () => {
 
   });
 
+  describe('getAutofocusElementForShowAction', () => {
+
+    let html;
+    beforeEach(() => {
+      html = htmlFor(document);
+    });
+
+    it('returns outer element when [autofocus]', () => {
+      const el = html`<input autofocus>`;
+      expect(getAutofocusElementForShowAction(el)).to.equal(el);
+    });
+
+    it('returns inner [autofocus] element', () => {
+      const inner = html`<input autofocus>`;
+      const outer = html`<div><div></div></div>`;
+
+      outer.firstElementChild.appendChild(inner);
+
+      expect(getAutofocusElementForShowAction(outer)).to.equal(inner);
+    });
+
+    it('returns null', () => {
+      const el = html`<div><div><input></div></div>`;
+      expect(getAutofocusElementForShowAction(el)).to.be.null;
+    });
+
+  });
+
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleHide(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleHide(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -120,7 +167,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (toggle)', () => {
       const element = createElement();
       toggle(element, false);
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -128,7 +175,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -136,7 +183,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement (toggle)', () => {
       const element = createAmpElement();
       toggle(element, false);
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
@@ -144,9 +191,121 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement (hidden attribute)', () => {
       const element = createAmpElement();
       element.setAttribute('hidden', '');
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
+    });
+
+    describe('Safari force sync', () => {
+
+      let html;
+      beforeEach(() => {
+        html = htmlFor(document);
+        stubIsSafari();
+      });
+
+      it('executes asynchronously when not autofocus (wrapped)', () => {
+        const node = html`<div><div><input></div></div>`;
+        standardActions.handleShow(trustedInvocation({node}));
+        expectElementToHaveBeenShown(node, /* sync */ false);
+      });
+
+      it('executes asynchronously when autofocus (direct)', () => {
+        const node = html`<input>`;
+        standardActions.handleShow(trustedInvocation({node}));
+        expectElementToHaveBeenShown(node, /* sync */ false);
+      });
+
+      it('executes synchronously when autofocus (wrapped)', () => {
+        const node = html`<div><div><input autofocus></div></div>`;
+        standardActions.handleShow(trustedInvocation({node}));
+        expectElementToHaveBeenShown(node, /* sync */ true);
+      });
+
+      it('executes synchronously when autofocus (direct)', () => {
+        const node = html`<input autofocus>`;
+        standardActions.handleShow(trustedInvocation({node}));
+        expectElementToHaveBeenShown(node, /* sync */ true);
+      });
+
+    });
+
+    describe('autofocus', () => {
+
+      let html;
+      beforeEach(() => {
+        html = htmlFor(document);
+        stubIsSafari();
+      });
+
+      describe('Safari force sync', () => {
+
+        it('focuses [autofocus] element synchronously (direct)', () => {
+          const node = html`<input autofocus>`;
+          node.focus = sandbox.spy();
+
+          standardActions.handleShow(trustedInvocation({node}));
+
+          expect(mutateElementStub).to.not.have.been.called;
+          expect(node.focus).to.have.been.calledOnce;
+        });
+
+        it('focuses [autofocus] element synchronously (wrapped)', () => {
+          const wrapper = html`<div><div></div></div>`;
+          const node = html`<input autofocus>`;
+          node.focus = sandbox.spy();
+
+          wrapper.firstElementChild.appendChild(node);
+          standardActions.handleShow(trustedInvocation({node: wrapper}));
+
+          expect(mutateElementStub).to.not.have.been.called;
+          expect(node.focus).to.have.been.calledOnce;
+        });
+
+        it('does not focus element', () => {
+          const node = html`<input>`;
+          node.focus = sandbox.spy();
+
+          standardActions.handleShow(trustedInvocation({node}));
+
+          expect(mutateElementStub).to.not.have.been.called;
+          expect(node.focus).to.not.have.been.called;
+        });
+
+      });
+
+      it('focuses [autofocus] element asynchronously (direct)', () => {
+        const node = html`<input autofocus>`;
+        node.focus = sandbox.spy();
+
+        standardActions.handleShow(trustedInvocation({node}));
+
+        expectElementMutatedAsync(node);
+        expect(node.focus).to.have.been.calledOnce;
+      });
+
+      it('focuses [autofocus] element asynchronously (wrapped)', () => {
+        const wrapper = html`<div><div></div></div>`;
+        const node = html`<input autofocus>`;
+        node.focus = sandbox.spy();
+
+        wrapper.firstElementChild.appendChild(node);
+        standardActions.handleShow(trustedInvocation({node: wrapper}));
+
+        expectElementMutatedAsync(wrapper);
+        expect(node.focus).to.have.been.calledOnce;
+      });
+
+      it('does not focus element', () => {
+        const node = html`<input>`;
+        node.focus = sandbox.spy();
+
+        standardActions.handleShow(trustedInvocation({node}));
+
+        expectElementMutatedAsync(node);
+        expect(node.focus).to.not.have.been.called;
+      });
+
     });
 
   });
@@ -155,7 +314,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (toggle)', () => {
       const element = createElement();
       toggle(element, false);
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
@@ -163,14 +322,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenHidden(element);
     });
@@ -178,7 +337,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show AmpElement when hidden (toggle)', () => {
       const element = createAmpElement();
       toggle(element, false);
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
@@ -186,14 +345,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show AmpElement when hidden (hidden attribute)', () => {
       const element = createAmpElement();
       element.setAttribute('hidden', '');
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
@@ -285,14 +444,14 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       standardActions.handleScrollTo(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
@@ -301,7 +460,7 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"focus" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
@@ -309,7 +468,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
+      const invocation = trustedInvocation({node: element});
       const focusStub = sandbox.stub(element, 'focus');
       standardActions.handleFocus(invocation);
       expect(focusStub).to.be.calledOnce;
