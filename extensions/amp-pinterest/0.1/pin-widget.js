@@ -129,7 +129,7 @@ export class PinWidget {
 
     // repin button
     const repin = Util.make(this.element.ownerDocument, {'span': {
-      'className': 'amp-pinterest-rect amp-pinterest-en-red' +
+      'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
         ' -amp-pinterest-embed-pin-repin',
       'data-pin-log': 'embed_pin_repin',
       'data-pin-pop': '1',
@@ -160,7 +160,7 @@ export class PinWidget {
           ' -amp-pinterest-embed-pin-attribution',
       }});
       attribution.appendChild(Util.make(this.element.ownerDocument, {'img': {
-        'className': 'i-amphtml-pinterest-embed-pin-text-icon-attrib',
+        'className': '-amp-pinterest-embed-pin-text-icon-attrib',
         'src': pin['attribution']['provider_icon_url'],
       }}));
       attribution.appendChild(Util.make(this.element.ownerDocument, {'span': {
@@ -181,7 +181,7 @@ export class PinWidget {
       }});
       if (pin['repin_count']) {
         const repinCount = Util.make(this.element.ownerDocument, {'span': {
-          'className': 'i-amphtml-pinterest-embed-pin-stats-repins',
+          'className': '-amp-pinterest-embed-pin-stats-repins',
           'textContent': String(pin['repin_count']),
         }});
         stats.appendChild(repinCount);
