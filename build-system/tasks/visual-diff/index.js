@@ -408,6 +408,11 @@ async function snapshotWebpages(percy, browser, webpages) {
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
+      // Chrome supports redirecting <anything>.localhost to localhost, while
+      // respecting domain name boundaries. This allows each test to be
+      // sandboxed from other tests, with respect to things like cookies and
+      // localStorage. Since Puppeteer only ever executes on Chrome, this is
+      // fine.
       const fullUrl = `http://${testNumber++}.${HOST}:${PORT}/${webpage.url}`;
       while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
         await sleep(WAIT_FOR_TABS_MS);
