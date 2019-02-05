@@ -362,12 +362,14 @@ describe('ValidationResultTransformerVersion', () => {
   });
 });
 
-describe('ValidatorCssLengthValidation', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
+describe('ValidatorCssLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
   // testcase is valid, we modify a valid testcase
-  // (features/css_length.html) designed for this purpose in code.
+  // (feature_tests/css_length.html) designed for this purpose in code.
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
@@ -407,84 +409,6 @@ describe('ValidatorCssLengthValidation', () => {
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
        '(see https://www.ampproject.org/docs/reference/spec' +
        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
-    test.run();
-  });
-
-  it('will accept 50010 bytes in author stylesheet that includes an URL',
-      () => {
-        const url = 'http://example.com/';
-        assertStrictEqual(19, url.length);
-        const cssWithUrl = 'a{b:url(\'' + url + '\')';
-        assertStrictEqual(30, cssWithUrl.length);
-        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-        // 10 bytes over limit, 19 of which are the URL.
-        assertStrictEqual(50010, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-        test.ampHtmlFileContents
-            .replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        // TODO(gregable): Modify this test to pass for transformed AMP.
-        // test.expectedOutput = 'PASS';
-        test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
-
-  it('will accept 50010 bytes in stylesheet that includes a relative URL',
-      () => {
-        const url = 'a-relative-url.html';
-        assertStrictEqual(19, url.length);
-        const cssWithUrl = 'a{b:url(\'' + url + '\')';
-        assertStrictEqual(30, cssWithUrl.length);
-        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-        // 10 bytes over limit, 19 of which are the URL.
-        assertStrictEqual(50010, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-        test.ampHtmlFileContents
-            .replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        test.expectedOutput = 'PASS';
-        // TODO(gregable): Modify this test to pass for transformed AMP.
-        // test.expectedOutput = 'PASS';
-        test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
-
-  it('will accept 50010 bytes in stylesheet that includes a data URL', () => {
-    const url = 'data:nineteen-bytes';
-    assertStrictEqual(19, url.length);
-    const cssWithUrl = 'a{b:url(\'' + url + '\')';
-    assertStrictEqual(30, cssWithUrl.length);
-    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-    // 10 bytes over limit, 19 of which are the URL.
-    assertStrictEqual(50010, stylesheet.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.inlineOutput = false;
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -563,6 +487,187 @@ describe('ValidatorCssLengthValidation', () => {
        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
+});
+
+describe('ValidatorCssLengthWithUrls', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Rather than encoding some really long author stylesheets in
+  // testcases, which would be difficult to read/verify that the
+  // testcase is valid, we modify a valid testcase
+  // (feature_tests/css_length.html) designed for this purpose in code.
+
+  // We use a blob of length 10 (both bytes and chars) to make it easy to
+  // construct stylesheets of any length that we want.
+  const validStyleBlob = 'h1 {a: b}\n';
+  assertStrictEqual(10, validStyleBlob.length);
+
+  it('will accept 50010 bytes in author stylesheet that includes an URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'http://example.com/';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' is too long - document ' +
+           'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+           'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('will accept 50010 bytes in stylesheet that includes a relative URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'a-relative-url.html';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' is too long - document ' +
+           'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+           'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+
+  it('will accept 50010 bytes in stylesheet that includes a data URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'data:nineteen-bytes';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:28:2 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' is too long - document ' +
+           'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+           'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
+});
+
+describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Rather than encoding some really long author stylesheets in
+  // testcases, which would be difficult to read/verify that the
+  // testcase is valid, we modify a valid testcase
+  // (transformed_feature_tests/css_length.html) designed for this
+  // purpose in code.
+
+  // We use a blob of length 10 (both bytes and chars) to make it easy to
+  // construct stylesheets of any length that we want.
+  const validStyleBlob = 'h1 {a: b}\n';
+  assertStrictEqual(10, validStyleBlob.length);
+
+  it('will accept 50010 bytes in author stylesheet that includes an URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'http://example.com/';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test =
+           new ValidatorTestCase('transformed_feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'PASS';
+       test.run();
+     });
+
+  it('will accept 50010 bytes in stylesheet that includes a relative URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'a-relative-url.html';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test =
+           new ValidatorTestCase('transformed_feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'PASS';
+       test.run();
+     });
+
+  it('will accept 50010 bytes in stylesheet that includes a data URL ' +
+         'of 19 bytes',
+     () => {
+       const url = 'data:nineteen-bytes';
+       assertStrictEqual(19, url.length);
+       const cssWithUrl = 'a{b:url(\'' + url + '\')';
+       assertStrictEqual(30, cssWithUrl.length);
+       const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+       // 10 bytes over limit, 19 of which are the URL.
+       assertStrictEqual(50010, stylesheet.length);
+       const test =
+           new ValidatorTestCase('transformed_feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('.replace_amp_custom {}', stylesheet)
+               .replace('replace_inline_style', '');
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'transformed_feature_tests/css_length.html:29:2 The author ' +
+           'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
+           'is too long - document contains 50010 bytes whereas the limit ' +
+           'is 50000 bytes. (see ' +
+           'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
 });
 
 describe('CssLength', () => {

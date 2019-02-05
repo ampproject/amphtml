@@ -26,7 +26,7 @@ min_validator_revision_required: 370
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 815
+spec_file_revision: 816
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -937,6 +937,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  disabled_by: "transformed"
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
@@ -957,6 +958,92 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   cdata: {
     max_bytes: 50000
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
+        allow_empty: true
+      }
+      font_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "!important"
+      error_message: "CSS !important"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
+}
+# For transformed AMP non-data URLs are not counted against the total byte
+# limit for <style amp-custom>. This is done by setting url_bytes_included
+# to false for CdataSpec below.
+tags: {  # Special custom 'author' spreadsheet for transformed AMP
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (transformed)"
+  enabled_by: "transformed"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: 50000
+    url_bytes_included: false
     max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#maximum-size"
     css_spec: {
       at_rule_spec: {
