@@ -554,17 +554,16 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
+    const isSSR = this.ssrTemplateHelper_.isSupported();
     const renderTemplate = this.ssrTemplateHelper_.renderTemplate(
-        this.element, current.data);
-    if (this.ssrTemplateHelper_.isSupported()) {
-      renderTemplate.then(result => this.updateBindings_([result]))
-          .then(element => this.render_(element, current.append))
-          .then(onFulfilledCallback, onRejectedCallback);
+        this.element, current.data)
+        .then(result => this.updateBindings_(isSSR ? [result] : result))
+        .then(element => this.render_(element, current.append));
+    if (isSSR) {
+      renderTemplate.then(onFulfilledCallback, onRejectedCallback);
     } else {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      renderTemplate.then(results => this.updateBindings_(results))
-          .then(elements => this.render_(elements, current.append))
-          .then(() => this.maybeRenderLoadMoreTemplates_(payload))
+      renderTemplate.then(() => this.maybeRenderLoadMoreTemplates_(payload))
           .then(() => this.maybeSetLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
