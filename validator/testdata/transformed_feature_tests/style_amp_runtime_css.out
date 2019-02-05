@@ -16,8 +16,11 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    This is the minimum valid tranformed AMP document; it includes all of the
-|    required fields from the spec, but nothing else.
+|    Test for amp runtime css transformer:
+|    - <style amp-runtime i-amphtml-version=#>CSS{}</style> where:
+|     - # is 15 digits
+|     - CSS{} is parsable CSS
+|
 |  -->
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1">
