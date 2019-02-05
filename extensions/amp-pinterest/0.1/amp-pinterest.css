@@ -16,14 +16,14 @@
 
 /* round buttons */
 
-.-amp-pinterest-round {
+.i-amphtml-pinterest-round {
   height: 16px;
   width: 16px;
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_round_red_16_2.png);
   background-size: 16px 16px;
 }
 
-.-amp-pinterest-round-tall {
+.i-amphtml-pinterest-round-tall {
   height: 32px;
   width: 32px;
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_round_red_32_2.png);
@@ -34,101 +34,101 @@
 
 /* default to 20x40 */
 
-.-amp-pinterest-rect {
+.i-amphtml-pinterest-rect {
   height: 20px;
   width: 40px;
   background: url() 0 -20px no-repeat;
   background-size: 40px 60px;
 }
 
-.-amp-pinterest-rect:hover{
+.i-amphtml-pinterest-rect:hover{
   background-position: 0 0;
 }
 
-.-amp-pinterest-rect:active{
+.i-amphtml-pinterest-rect:active{
   background-position: 0 -40px;
 }
 
 /* small background images */
 
-.-amp-pinterest-en-gray {
+.i-amphtml-pinterest-en-gray {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_20_2.png);
 }
 
-.-amp-pinterest-en-red {
+.i-amphtml-pinterest-en-red {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_20_2.png);
 }
 
-.-amp-pinterest-en-white {
+.i-amphtml-pinterest-en-white {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_20_2.png);
 }
 
-.-amp-pinterest-ja-gray {
+.i-amphtml-pinterest-ja-gray {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_20_2.png);
 }
 
-.-amp-pinterest-ja-red {
+.i-amphtml-pinterest-ja-red {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_20_2.png);
 }
 
-.-amp-pinterest-ja-white {
+.i-amphtml-pinterest-ja-white {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_20_2.png);
 }
 
 /* large buttons */
 
-.-amp-pinterest-rect-tall {
+.i-amphtml-pinterest-rect-tall {
   height: 28px;
   width: 56px;
   background: url() 0 -28px no-repeat;
   background-size: 56px 84px;
 }
 
-.-amp-pinterest-rect-tall:hover{
+.i-amphtml-pinterest-rect-tall:hover{
   background-position: 0 0;
 }
 
-.-amp-pinterest-rect-tall:active{
+.i-amphtml-pinterest-rect-tall:active{
   background-position: 0 -56px;
 }
 
 /* large background images */
 
-.-amp-pinterest-en-gray-tall {
+.i-amphtml-pinterest-en-gray-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png);
 }
 
-.-amp-pinterest-en-red-tall {
+.i-amphtml-pinterest-en-red-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_28_2.png);
 }
 
-.-amp-pinterest-en-white-tall {
+.i-amphtml-pinterest-en-white-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_28_2.png);
 }
 
-.-amp-pinterest-ja-gray-tall {
+.i-amphtml-pinterest-ja-gray-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_28_2.png);
 }
 
-.-amp-pinterest-ja-red-tall {
+.i-amphtml-pinterest-ja-red-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_28_2.png);
 }
 
-.-amp-pinterest-ja-white-tall {
+.i-amphtml-pinterest-ja-white-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_28_2.png);
 }
 
 /* count bubble above */
 
-.-amp-pinterest-count-pad-above {
+.i-amphtml-pinterest-count-pad-above {
   margin-top: 30px;
 }
 
-.-amp-pinterest-count-pad-above-tall {
+.i-amphtml-pinterest-count-pad-above-tall {
   margin-top: 38px;
 }
 
-.-amp-pinterest-bubble-above {
+.i-amphtml-pinterest-bubble-above {
   position: absolute;
   left: 0;
   text-align: center;
@@ -143,7 +143,7 @@
   line-height: 24px;
 }
 
-.-amp-pinterest-bubble-above-tall {
+.i-amphtml-pinterest-bubble-above-tall {
   position: absolute;
   left: 0;
   text-align: center;
@@ -160,15 +160,15 @@
 
 /* count bubble beside */
 
-.-amp-pinterest-count-pad-beside {
+.i-amphtml-pinterest-count-pad-beside {
   width: 86px;
 }
 
-.-amp-pinterest-count-pad-beside-tall {
+.i-amphtml-pinterest-count-pad-beside-tall {
   width: 120px;
 }
 
-.-amp-pinterest-bubble-beside {
+.i-amphtml-pinterest-bubble-beside {
   position: absolute;
   top: 0;
   right: 0;
@@ -184,7 +184,7 @@
   line-height: 20px;
 }
 
-.-amp-pinterest-bubble-beside-tall {
+.i-amphtml-pinterest-bubble-beside-tall {
   position: absolute;
   top: 0;
   right: 0;
@@ -200,7 +200,7 @@
   line-height: 28px;
 }
 
-.-amp-pinterest-follow-button {
+.i-amphtml-pinterest-follow-button {
     background: transparent url(https://s-passets.pinimg.com/images/pidgets/bfs2.png) 0 0 no-repeat;
     background-size: 200px 60px;
     border-right: 1px solid #D0D0D0;
@@ -215,12 +215,12 @@
     text-indent: 20px;
 }
 
-.-amp-pinterest-follow-button:hover {
+.i-amphtml-pinterest-follow-button:hover {
     background-position: 0 -20px;
     border-right-color: #919191;
 }
 
-.-amp-pinterest-follow-button i {
+.i-amphtml-pinterest-follow-button i {
     background-image: url(https://s-passets.pinimg.com/images/pidgets/log2.png);
     background-size: 14px 14px;
     height: 14px;
@@ -232,26 +232,26 @@
 
 /* using this button as a repin button on a widget */
 
-.-amp-pinterest-embed-pin,
-.-amp-pinterest-embed-pin-medium {
+.i-amphtml-pinterest-embed-pin,
+.i-amphtml-pinterest-embed-pin-medium {
   box-sizing: border-box;
   padding: 5px;
   width: 237px;
 }
 
-.-amp-pinterest-embed-pin-medium {
+.i-amphtml-pinterest-embed-pin-medium {
   width: 345px;
 }
 
-.-amp-pinterest-embed-pin-responsive {
+.i-amphtml-pinterest-embed-pin-responsive {
   width: 100%;
 }
 
-.-amp-pinterest-embed-pin-responsive .-amp-pinterest-embed-pin-image {
+.i-amphtml-pinterest-embed-pin-responsive .i-amphtml-pinterest-embed-pin-image {
   max-width: 100%;
 }
 
-.-amp-pinterest-embed-pin-inner {
+.i-amphtml-pinterest-embed-pin-inner {
   display: block;
   position: relative;
   -webkit-font-smoothing: antialiased;
@@ -262,7 +262,7 @@
   width: 100%;
 }
 
-.-amp-pinterest-embed-pin-text {
+.i-amphtml-pinterest-embed-pin-text {
   color: #a8a8a8;
   white-space: normal;
   font-family: "Helvetica Neue", arial, sans-serif;
@@ -271,39 +271,39 @@
   font-weight: bold;
 }
 
-.-amp-pinterest-embed-pin-image {
+.i-amphtml-pinterest-embed-pin-image {
   border-radius: 3px 3px 0 0;
 }
 
-.-amp-pinterest-embed-pin-text-block {
+.i-amphtml-pinterest-embed-pin-text-block {
   display: block;
   line-height: 30px;
   padding: 0 12px;
 }
 
-.-amp-pinterest-embed-pin-text-icon-attrib {
+.i-amphtml-pinterest-embed-pin-text-icon-attrib {
   height: 16px;
   width: 16px;
   vertical-align: middle;
 }
 
-.-amp-pinterest-embed-pin-stats {
+.i-amphtml-pinterest-embed-pin-stats {
   height: 16px;
   line-height: 16px;
   padding: 8px 12px;
 }
 
-.-amp-pinterest-embed-pin-stats-likes {
+.i-amphtml-pinterest-embed-pin-stats-likes {
   padding-left: 14px;
   background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAAAAAClR+AmAAAAUElEQVR4AT2HMQpFIQwEc/+zbXhFLBW8QUihIAT2E8Q/xe6M0Jv2zK7NKUcBzAlAjzjqtdZl4c8S2nOjMPS6BoWMr/wLVnAbYJs3mGMkXzx+OeRqUf5HHRoAAAAASUVORK5CYII=) 0 2px no-repeat;
 }
 
-.-amp-pinterest-embed-pin-stats-repins {
+.i-amphtml-pinterest-embed-pin-stats-repins {
   padding: 0 10px 0 18px;
   background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAALCAAAAABq7uO+AAAASklEQVQI10WNMQrAMBRCvf/Z3pQcImPplsIPdqhNXOSJqLxVtnWQsuUO9IM3cHlV8dSSDZQHAOPH2YA2FU+qtH7MRhaVh/xt/PQCEW6N4EV+CPEAAAAASUVORK5CYII=) 0 0 no-repeat;
 }
 
-.-amp-pinterest-embed-pin-description {
+.i-amphtml-pinterest-embed-pin-description {
   color: #363636;
   font-weight: normal;
   font-size: 14px;
@@ -313,12 +313,12 @@
 
 /* pinner block */
 
-.-amp-pinterest-embed-pin-pinner {
+.i-amphtml-pinterest-embed-pin-pinner {
   padding: 12px;
   border-top: 1px solid rgba(0, 0, 0, .09);
 }
 
-.-amp-pinterest-embed-pin-pinner-avatar {
+.i-amphtml-pinterest-embed-pin-pinner-avatar {
   border-radius: 15px;
   border: none;
   height: 30px;
@@ -328,19 +328,19 @@
   float: left;
 }
 
-.-amp-pinterest-embed-pin-pinner-name,
-.-amp-pinterest-embed-pin-board-name {
+.i-amphtml-pinterest-embed-pin-pinner-name,
+.i-amphtml-pinterest-embed-pin-board-name {
   display: block;
   height: 15px;
   line-height: 15px;
 }
 
-.-amp-pinterest-embed-pin-pinner-name {
+.i-amphtml-pinterest-embed-pin-pinner-name {
   color: #777;
 }
 
 /* repin button */
-.-amp-pinterest-embed-pin-repin {
+.i-amphtml-pinterest-embed-pin-repin {
   position: absolute;
   top: 12px;
   left: 12px;

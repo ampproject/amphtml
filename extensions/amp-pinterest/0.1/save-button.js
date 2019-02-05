@@ -114,7 +114,7 @@ export class SaveButton {
   renderCount(count, heightClass) {
     Util.log('&type=pidget&button_count=1');
     return Util.make(this.element.ownerDocument, {'span': {
-      class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
+      class: `i-amphtml-pinterest-bubble-${this.count}${heightClass}`,
       textContent: this.formatPinCount(count),
     }});
   }
@@ -133,15 +133,15 @@ export class SaveButton {
     };
 
     const clazz = [
-      `-amp-pinterest${CLASS.shape}${CLASS.height}`,
+      `i-amphtml-pinterest${CLASS.shape}${CLASS.height}`,
       'i-amphtml-fill-content',
     ];
 
     let countBubble = null;
     if (!this.round) {
-      clazz.push(`-amp-pinterest${CLASS.lang}-${CLASS.color}${CLASS.height}`);
+      clazz.push(`i-amphtml-pinterest${CLASS.lang}-${CLASS.color}${CLASS.height}`);
       if (count) {
-        clazz.push(`-amp-pinterest-count-pad-${this.count}${CLASS.height}`);
+        clazz.push(`i-amphtml-pinterest-count-pad-${this.count}${CLASS.height}`);
         countBubble = this.renderCount(count['count'], CLASS.height);
       }
     }
