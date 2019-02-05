@@ -215,12 +215,12 @@ describe('devdash', () => {
               <div>
                 <amp-bar></amp-bar>
                 <div>
-                  <amp-foo-bar-baz many=1 attributes=2>
+                  <amp-foo-bar-baz many="1" attributes="2">
                     Text content
                   </amp-foo-bar-baz>
                 </div>
                 <input>
-                <amp-state id=myState></amp-state>
+                <amp-state id="myState"></amp-state>
                 <template type="amp-mustache"></template>
               </div>
             </body>
@@ -301,9 +301,9 @@ describe('devdash', () => {
             <head></head>
             <body>
               <div>
-                <template type=amp-mustache></template>
-                <template type=amp-mustache></template>
-                <template type=amp-mustache></template>
+                <template type="amp-mustache"></template>
+                <template type="amp-mustache"></template>
+                <template type="amp-mustache"></template>
                 </div>
               </div>
             </body>
@@ -332,7 +332,7 @@ describe('devdash', () => {
           <html>
             <head></head>
             <body>
-              <form action=whatever.com></form>
+              <form action="whatever.com"></form>
             </body>
           </html>`;
 

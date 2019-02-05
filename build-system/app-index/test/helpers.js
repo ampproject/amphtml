@@ -33,19 +33,23 @@ const boundAttrRe = attr =>
 // our only way to test [attr] values is via regex.
 const getBoundAttr = (el, attr) => {
   const match = el./*OK*/outerHTML.match(boundAttrRe(attr));
-  if (match) {
-    const [_, valuePart] = match;
-    if (valuePart.charAt(0) == '"' ||
-        valuePart.charAt(0) == '\'') {
-      return valuePart.substring(1, valuePart.length - 1);
-    }
-    return valuePart;
+  if (!match) {
+    return;
   }
+  const [_, valuePart] = match;
+  if (valuePart.charAt(0) == '"' ||
+      valuePart.charAt(0) == '\'') {
+    return valuePart.substring(1, valuePart.length - 1);
+  }
+  return valuePart;
 }
 
 
 const expectValidAmphtml = (validator, string) => {
   const {errors, status} = validator.validateString(string);
+
+  // Compare with empty array instring instead of checking `to.be.empty` so
+  // validation errors are output as AssertionErrors.
   expect(errors).to.deep.equal([]);
   expect(status).to.equal('PASS');
 };

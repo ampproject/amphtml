@@ -59,7 +59,7 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list > [placeholder]');
 
-      expect(els.length).to.equal(1);
+      expect(els).to.have.length(1);
 
       const [placeholder] = els;
       const {firstElementChild} = placeholder;
@@ -68,7 +68,7 @@ describe('devdash', () => {
 
       const items = firstElementChild.querySelectorAll('.file-link-container');
 
-      expect(items.length).to.equal(fileSet.length);
+      expect(items).to.have.length(fileSet.length);
     });
 
     it('binds /examples hrefs', () => {
@@ -83,7 +83,7 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      expect(els.length).to.equal(fileSet.length);
+      expect(els).to.have.length(fileSet.length);
 
       Array.from(els).forEach((el, i) => {
         expect(getBoundAttr(el, 'href')).to.be.ok;
@@ -103,7 +103,7 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      expect(els.length).to.equal(fileSet.length);
+      expect(els).to.have.length(fileSet.length);
 
       Array.from(els).forEach((el, i) => {
         expect(getBoundAttr(el, 'href')).to.be.undefined;
@@ -124,7 +124,7 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      expect(els.length).to.equal(bound.length + notBound.length);
+      expect(els).to.have.length(bound.length + notBound.length);
 
       bound.forEach((expectedHref, i) => {
         const el = els[i];
