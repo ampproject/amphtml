@@ -79,7 +79,7 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
 
 
 const FileListItem = ({name, href, boundHref}) =>
-  html`<div class="file-link-container" role=listitem>
+  html`<div class="file-link-container" role="listitem">
     <a class="file-link"
       ${boundHref ? `[href]="${boundHref}" ` : ''}
       ${href ? `href="${href}" ` : ''}>
@@ -149,7 +149,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
       <div fallback>Failed to load data.</div>
 
       <div placeholder>
-        <div role=list>
+        <div role="list">
           ${joinFragments(fileSet, name =>
             PlaceholderFileListItem({
               name,

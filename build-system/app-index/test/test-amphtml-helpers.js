@@ -128,7 +128,7 @@ describe('devdash', () => {
         expect(root.tagName).to.equal('AMP-STATE');
         expect(root.getAttribute('id')).to.equal(id);
 
-        expect(root.children.length).to.equal(1);
+        expect(root.children).to.have.length(1);
 
         const {firstElementChild} = root;
         expect(firstElementChild.tagName).to.equal('SCRIPT');
@@ -169,12 +169,24 @@ describe('devdash', () => {
 
     describe('addRequiredExtensionsToHead', () => {
 
+      function containsExtension(scripts, expectedExtension) {
+        return scripts.some(s =>
+          s.getAttribute('custom-element') == expectedExtension &&
+          s.getAttribute('custom-template') == null);
+      }
+
+      function containsTemplate(scripts, expectedTemplate) {
+        return scripts.some(s =>
+          s.getAttribute('custom-template') == expectedTemplate &&
+          s.getAttribute('custom-extension') == null);
+      }
+
       it('renders ok', () => {
         const rawStr = html`
           <html>
             <head></head>
             <body>
-              <amp-foo foo=bar></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
             </body>
           </html>`;
 
@@ -197,9 +209,9 @@ describe('devdash', () => {
           <html>
             <head></head>
             <body>
-              <amp-foo foo=bar></amp-foo>
-              <amp-foo foo=bar></amp-foo>
-              <amp-foo foo=bar></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
               <div>
                 <amp-bar></amp-bar>
                 <div>
@@ -220,8 +232,8 @@ describe('devdash', () => {
         const scripts =
             Array.from(document.head.getElementsByTagName('script'));
 
-        expect(scripts.length)
-            .to.equal(expectedExtensions.length + expectedTemplates.length);
+        expect(scripts).to.have.length(
+            expectedExtensions.length + expectedTemplates.length);
 
         scripts.forEach(script => {
           expect(script.getAttribute('src')).to.be.ok;
@@ -229,23 +241,13 @@ describe('devdash', () => {
         });
 
         expectedExtensions.forEach(expectedScript => {
-          expect(scripts.some(s => {
-            if (s.getAttribute('custom-element') == expectedScript) {
-              expect(s.getAttribute('custom-template')).to.be.null;
-              return true;
-            }
-            return false;
-          })).to.be.true;
+          expect(scripts).to.satisfy(scripts =>
+            containsExtension(scripts, expectedScript))
         });
 
         expectedTemplates.forEach(expectedScript => {
-          expect(scripts.some(s => {
-            if (s.getAttribute('custom-template') == expectedScript) {
-              expect(s.getAttribute('custom-extension')).to.be.null;
-              return true;
-            }
-            return false;
-          })).to.be.true;
+          expect(scripts).to.satisfy(scripts =>
+            containsTemplate(scripts, expectedScript))
         });
       });
 
@@ -257,9 +259,9 @@ describe('devdash', () => {
           <html>
             <head></head>
             <body>
-              <amp-foo foo=bar></amp-foo>
-              <amp-foo foo=bar></amp-foo>
-              <amp-foo foo=bar></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
+              <amp-foo foo="bar"></amp-foo>
               <div>
                 <amp-bar></amp-bar>
                 <div>
@@ -277,7 +279,7 @@ describe('devdash', () => {
         const scripts =
             Array.from(document.head.getElementsByTagName('script'));
 
-        expect(scripts.length).to.equal(expected.length);
+        expect(scripts).to.have.length(expected.length);
 
         scripts.forEach(script => {
           expect(script.getAttribute('src')).to.be.ok
@@ -286,8 +288,8 @@ describe('devdash', () => {
         });
 
         expected.forEach(expectedScript => {
-          expect(scripts.some(s =>
-            s.getAttribute('custom-element') == expectedScript)).to.be.true;
+          expect(scripts).to.satisfy(scripts =>
+            containsExtension(scripts, expectedScript));
         });
       });
 
@@ -312,7 +314,7 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        expect(scripts.length).to.equal(1);
+        expect(scripts).to.have.length(1);
 
         const [script] = scripts;
 
@@ -339,7 +341,7 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        expect(scripts.length).to.equal(1);
+        expect(scripts).to.have.length(1);
 
         const [script] = scripts;
 
@@ -368,7 +370,7 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        expect(scripts.length).to.equal(1);
+        expect(scripts).to.have.length(1);
 
         const [script] = scripts;
 
@@ -395,7 +397,7 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        expect(scripts.length).to.equal(1);
+        expect(scripts).to.have.length(1);
 
         const [script] = scripts;
 

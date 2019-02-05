@@ -41,31 +41,24 @@ describe('devdash', () => {
 
     describe('getBoundAttr', () => {
 
-      it('returns bound attr when found', () => {
-        [
-          {
-            outerHTML: '<div myHref=a [myHref]=a></div>',
-            attr: 'myHref',
-            expected: 'a',
-          },
-          {
-            outerHTML: '<div foo=a [foo]="blah"></div>',
-            attr: 'foo',
-            expected: 'blah',
-          },
-          {
-            outerHTML: '<div [myHref]="b"></div>',
-            attr: 'myHref',
-            expected: 'b',
-          },
-          {
-            outerHTML: '<div [foo]="baz"></div>',
-            attr: 'foo',
-            expected: 'baz',
-          },
-        ].forEach(({outerHTML, attr, expected}) => {
-          expect(getBoundAttr({outerHTML}, attr)).to.equal(expected);
-        });
+      it('returns bound attr set without quotes with unbound attr', () => {
+        const fakeEl = {outerHTML: '<div myHref=a [myHref]=a></div>'};
+        expect(getBoundAttr(fakeEl, 'myHref')).to.equal('a');
+      });
+
+      it('returns bound attr set with quotes with unbound attr', () => {
+        const fakeEl = {outerHTML: '<div foo=a [foo]="blah"></div>'};
+        expect(getBoundAttr(fakeEl, 'foo')).to.equal('blah');
+      });
+
+      it('returns bound attr set with quotes', () => {
+        const fakeEl = {outerHTML: '<div [myHref]="b"></div>'};
+        expect(getBoundAttr(fakeEl, 'myHref')).to.equal('b');
+      });
+
+      it('returns bound attr set without quotes', () => {
+        const fakeEl = {outerHTML: '<div [foo]=baz></div>'};
+        expect(getBoundAttr(fakeEl, 'foo')).to.equal('baz');
       });
 
       it('returns undefined when not found', () => {
