@@ -225,7 +225,7 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
 
-    /** @private {!./story-analytics.AmpStoryAnalytics} */
+    /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */
