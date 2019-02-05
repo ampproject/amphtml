@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
@@ -16,13 +16,11 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    This is the minimum valid tranformed AMP document; it includes all of the
-|    required fields from the spec, but nothing else.
+|    Test for server side rendering transformer:
+|     - boilerplate is not required.
 |  -->
 |  <!doctype html>
-|  <html ⚡ transformed="google;v=1..3">
->> ^~~~~~~~~
-transformed_feature_tests/transformed_attribute_value_malformed.html:22:0 The attribute 'transformed' in tag 'html' is set to the invalid value 'google;v=1..3'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+|  <html ⚡ transformed>
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
@@ -31,6 +29,5 @@ transformed_feature_tests/transformed_attribute_value_malformed.html:22:0 The at
 |    <link rel="canonical" href="./regular-html-version.html">
 |  </head>
 |  <body>
-|    Hello, world.
 |  </body>
 |  </html>
