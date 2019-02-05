@@ -261,7 +261,7 @@ amp-story-page[distance="2"] {
   background-color: #000 !important;
   visibility: visible;
   z-index: 100003 !important;
-  transition: visibility 0.3s, opacity 0.3s  cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-opacity-mask[hidden] {
