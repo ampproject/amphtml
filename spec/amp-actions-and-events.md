@@ -313,15 +313,15 @@ event.response</pre></td>
   <tr>
     <td><code>show</code></td>
     <td>Shows the target element. If the element is annotated with
-    the [`autofocus` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus),
-    or any of its descendants is, the `autofocus` element gains focus.</td>
+    the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> attribute</a>,
+    or any of its descendants is, the <code>autofocus</code> element gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleVisibility</code></td>
     <td>Toggles the visibility of the target element. If the element is
     displayed and annotated with
-    the [`autofocus` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus),
-    or any of its descendants is, the `autofocus` element gains focus.</td>
+    the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> attribute</a>,
+    or any of its descendants is, the <code>autofocus</code> element gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
