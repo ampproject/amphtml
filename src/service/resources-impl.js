@@ -1044,6 +1044,8 @@ export class Resources {
   dirtyElement(element) {
     if (this.useLayers_) {
       this.layers_.dirty(element);
+      // Remeasures can result in a modified the document height.
+      this.maybeChangeHeight_ = true;
     } else {
       const isAmpElement = element.classList.contains('i-amphtml-element');
       if (isAmpElement) {
