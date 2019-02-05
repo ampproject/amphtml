@@ -28,7 +28,7 @@ const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
 
 const containsTagRegex = tagName => new RegExp(`\\<${tagName}[\\s\\>]`);
 
-const containsRegex = (str, re) => str.search(re) > -1;
+const containsByRegex = (str, re) => str.search(re) > -1;
 
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
@@ -116,7 +116,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
     addExtension('amp-bind');
   }
 
-  if (formTypes.some(t => containsRegex(docStr, containsTagRegex(t)))) {
+  if (formTypes.some(t => containsByRegex(docStr, containsTagRegex(t)))) {
     addExtension('amp-form');
   }
 
