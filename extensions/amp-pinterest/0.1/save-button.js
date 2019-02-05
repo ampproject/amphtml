@@ -134,7 +134,7 @@ export class SaveButton {
 
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
-      '-amp-fill-content',
+      'i-amphtml-fill-content',
     ];
 
     let countBubble = null;
