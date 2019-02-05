@@ -150,6 +150,13 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 const MIN_VERTICAL_SPACE = 48;
 
 /**
+ * Buffer that prevents expanded component from covering close button in
+ * expanded view.
+ * @const {number}
+ */
+const VERTICAL_BUFFER = 100;
+
+/**
  * Padding between tooltip and vertical edges of screen.
  * @const {number}
  */
@@ -326,6 +333,8 @@ export class AmpStoryEmbeddedComponent {
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           this.componentPage_.classList.toggle(
               'i-amphtml-expanded-mode', false);
+          this.previousTarget_.classList.toggle('i-amphtml-expanded-component',
+              false);
           toggle(devAssert(this.expandedViewOverlay_), false);
           resetStyles(devAssert(this.previousTarget_), ['transform']);
           setImportantStyles(devAssert(this.previousTarget_), {
@@ -563,21 +572,23 @@ export class AmpStoryEmbeddedComponent {
             parseFloat(getStyle(target,'transform').split('scale(')[1]);
           const realWidth = targetRect.width / this.scaleFactor_;
           const leftOffset = (realWidth - targetRect.width) / 2;
-          state.translateX = (targetRect.left - leftOffset - pageRect.left);
+          const horizontalOffset = targetRect.left - leftOffset - pageRect.left;
+          const centeredLeft = pageRect.width / 2 - realWidth / 2;
+          state.translateX = centeredLeft - horizontalOffset;
 
           const realHeight = targetRect.height / this.scaleFactor_;
           const topOffset = (realHeight - targetRect.height) / 2;
           const verticalOffset = targetRect.top - topOffset - pageRect.top;
           const centeredTop = pageRect.height / 2 - realHeight / 2;
-
           state.translateY = centeredTop - verticalOffset;
         },
         /** mutate */
         () => {
           target.classList.add('i-amphtml-animate-expand-in');
+          target.classList.toggle('i-amphtml-expanded-component', true);
           setImportantStyles(dev().assertElement(target),
               {
-                transform: `translate3d(${-state.translateX}px,
+                transform: `translate3d(${state.translateX}px,
                   ${state.translateY}px, 0) scale(1)`,
               });
         });
@@ -592,18 +603,27 @@ export class AmpStoryEmbeddedComponent {
    */
   static prepareForAnimation(page, element) {
     element.whenBuilt().then(() => {
+      element.classList.add('i-amphtml-embedded-component');
       const pageRect = page./*OK*/getBoundingClientRect();
       const elRect = element./*OK*/getBoundingClientRect();
 
-      const scaleFactor = elRect.width / pageRect.width;
-      const scaledHeight = elRect.height / elRect.width * pageRect.width;
+      let scaleFactor, newHeight, newWidth;
+      if (elRect.width >= elRect.height) {
+        newWidth = pageRect.width;
+        scaleFactor = elRect.width / newWidth;
+        newHeight = elRect.height / elRect.width * newWidth;
+      } else {
+        newHeight = pageRect.height - VERTICAL_BUFFER;
+        scaleFactor = elRect.height / newHeight;
+        newWidth = elRect.width / elRect.height * newHeight;
+      }
 
-      const verticalMargin = (-1 * ((scaledHeight - elRect.height) / 2));
-      const horizontalMargin = (-1 * ((pageRect.width - elRect.width) / 2));
+      const verticalMargin = (-1 * ((newHeight - elRect.height) / 2));
+      const horizontalMargin = (-1 * ((newWidth - elRect.width) / 2));
 
       setImportantStyles(devAssert(element), {
-        width: `${pageRect.width}px`,
-        height: `${scaledHeight}px`,
+        width: `${newWidth}px`,
+        height: `${newHeight}px`,
         transform: `scale(${scaleFactor})`,
         margin: `${verticalMargin}px ${horizontalMargin}px`,
       });

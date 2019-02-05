@@ -332,7 +332,7 @@ amp-story-grid-layer a * {
 }
 
 /** Apply click shield on embedded components on initial load. */
-amp-story-grid-layer amp-twitter::after {
+amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -341,7 +341,7 @@ amp-story-grid-layer amp-twitter::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter::after {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
   height: 0px !important;
   width: 0px !important;
 }
@@ -352,7 +352,7 @@ amp-story-grid-layer amp-twitter::after {
   z-index: auto !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
   z-index: 1 !important;
 }
 

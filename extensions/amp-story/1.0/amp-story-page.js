@@ -426,7 +426,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Finds embedded compoennts in page and prepares them for their expanded view
+   * Finds embedded components in page and prepares them for their expanded view
    * animation.
    */
   findAndPrepareEmbeddedComponents() {
