@@ -178,16 +178,16 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-sidebar[side][open] {
+.i-amphtml-story-sidebar[open] {
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-sidebar[side][open] {
+[desktop] .i-amphtml-story-sidebar[open] {
   max-width: 320px !important;
 }
 
-amp-sidebar[side] {
+.i-amphtml-story-sidebar {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;

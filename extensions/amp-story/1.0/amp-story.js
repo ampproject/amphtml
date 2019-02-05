@@ -181,6 +181,12 @@ const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
  */
 const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
 
+/**
+ * CSS class for sidebars in stories.
+ * @const {string}
+ */
+const SIDEBAR_CLASS_NAME = 'i-amphtml-story-sidebar';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -2179,6 +2185,11 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.sidebar_) {
       return;
     }
+
+    this.mutateElement(() => {
+      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
+    });
+
     this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
