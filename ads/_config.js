@@ -763,7 +763,7 @@ export const adConfig = {
   },
 
   'promoteiq': {},
-  
+
   'pubexchange': {},
 
   'pubguru': {
