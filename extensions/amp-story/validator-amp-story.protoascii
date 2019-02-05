@@ -646,6 +646,9 @@ tags: {  # <amp-story-page-attachment>
   }
 }
 descendant_tag_list {
+  # Whitelisting as many components as possible, unless they could result in a
+  # bad UX (ie: modal in a modal with amp-lightbox), or potential security
+  # issues (ie: amp-form).
   name: "amp-story-page-attachment-allowed-descendants"
   tag: "A"
   tag: "ABBR"
@@ -756,7 +759,6 @@ descendant_tag_list {
   tag: "MAIN"
   tag: "MARK"
   tag: "NAV"
-  tag: "NOSCRIPT"
   tag: "OL"
   tag: "P"
   tag: "PRE"

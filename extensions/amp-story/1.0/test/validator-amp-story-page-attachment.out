@@ -46,7 +46,8 @@ PASS
 |            <amp-img
 |                src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
 |                placeholder
-|                layout="fill" />
+|                layout="fill">
+|            </amp-img>
 |          </amp-youtube>
 |        </amp-story-page-attachment>
 |      </amp-story-page>

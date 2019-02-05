@@ -61,7 +61,8 @@ amp-story/1.0/test/validator-amp-story-page-attachment-error.html:45:8 The tag '
 |            <amp-img
 |                src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
 |                placeholder
-|                layout="fill" />
+|                layout="fill">
+|            </amp-img>
 |          </amp-youtube>
 |        </amp-story-page-attachment>
 |
