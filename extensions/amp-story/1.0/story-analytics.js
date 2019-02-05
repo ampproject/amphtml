@@ -60,7 +60,7 @@ export const getAnalyticsService = (win, el) => {
 /**
  * Intermediate handler for amp-story specific analytics.
  */
-class StoryAnalyticsService {
+export class StoryAnalyticsService {
   /**
    * @param {!Window} win
    * @param {!Element} element
