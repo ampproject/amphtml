@@ -26,7 +26,7 @@ const POP = 'status=no,resizable=yes,scrollbars=yes,' +
   'menubar=no,width=900,height=500,left=0,top=0';
 
 /**
- * Pinterest Pinit Button
+ * Pinterest Save Button
  * @attr data-url: the source url for the Pin
  * @attr data-media: the url of the Pin image/media
  * @attr data-description: the description of the Pin
@@ -38,16 +38,16 @@ const POP = 'status=no,resizable=yes,scrollbars=yes,' +
  * @attr data-round: should the button be round (true if set)
  * @attr data-tall:  should the button be tall  (true if set)
  */
-export class PinItButton {
+export class SaveButton {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
     userAssert(rootElement.getAttribute('data-url'),
-        'The data-url attribute is required for Pin It buttons');
+        'The data-url attribute is required for Save buttons');
     userAssert(rootElement.getAttribute('data-media'),
-        'The data-media attribute is required for Pin It buttons');
+        'The data-media attribute is required for Save buttons');
     userAssert(rootElement.getAttribute('data-description'),
-        'The data-description attribute is required for Pin It buttons');
+        'The data-description attribute is required for Save buttons');
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.color = rootElement.getAttribute('data-color');
@@ -70,8 +70,8 @@ export class PinItButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, dev().assertString(this.href), '_pinit', POP);
-    Util.log('&type=button_pinit');
+    openWindowDialog(window, dev().assertString(this.href), '_save', POP);
+    Util.log('&type=button_save');
   }
 
   /**
@@ -146,16 +146,16 @@ export class PinItButton {
       }
     }
 
-    const pinitButton = Util.make(this.element.ownerDocument, {'a': {
+    const saveButton = Util.make(this.element.ownerDocument, {'a': {
       class: clazz.join(' '),
       href: this.href,
     }});
 
     if (countBubble) {
-      pinitButton.appendChild(countBubble);
+      saveButton.appendChild(countBubble);
     }
-    pinitButton.onclick = this.handleClick.bind(this);
-    return pinitButton;
+    saveButton.onclick = this.handleClick.bind(this);
+    return saveButton;
   }
 
   /**
