@@ -845,6 +845,57 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   }
 }
 
+/**
+ * Helper for typeIdentifiersShouldMakeSense.
+ * @param {!Object<string, number>} typeIdentifiers
+ * @param {!Array<string>} tagSpecTypeIdentifiers
+ * @param {string} fieldName
+ * @param {string} tagSpecName
+ */
+function typeIdentifiersAreValidAndUnique(
+    typeIdentifiers, tagSpecTypeIdentifiers, fieldName, tagSpecName) {
+  const encounteredTypeIdentifiers = {};
+  for (const typeIdentifier of tagSpecTypeIdentifiers) {
+    it('TagSpec \'' + tagSpecName + '\' has ' + fieldName +
+           ' set to an invalid type identifier: \'' + typeIdentifier + '\'',
+       () => {
+         expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
+       });
+    it('TagSpec \'' + tagSpecName + '\' has duplicate ' + fieldName + ': \'' +
+           typeIdentifier + '\'.',
+       () => {
+         expect(encounteredTypeIdentifiers.hasOwnProperty(typeIdentifier))
+             .toBe(false);
+         encounteredTypeIdentifiers[typeIdentifier] = 0;
+       });
+  }
+}
+
+/**
+ * Helper for ValidatorRulesMakeSense.
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {string} tagSpecName
+ */
+function typeIdentifiersShouldMakeSense(tagSpec, tagSpecName) {
+  const typeIdentifiers =
+      {'amp': 0, 'amp4ads': 0, 'amp4email': 0, 'actions': 0, 'transformed': 0};
+  // both enabled_by and disabled_by must not be set on the same TagSpec.
+  it('TagSpec \'' + tagSpecName + '\' has both enabled_by and disabled_by' +
+         ' set and it must be one or the other, not both.',
+     () => {
+       expect((tagSpec.enabledBy.length > 0) && (tagSpec.disabledBy.length > 0))
+           .toBe(false);
+     });
+  // enabled_by must be a valid type identifier and each type identifier
+  // listed at most once.
+  typeIdentifiersAreValidAndUnique(
+      typeIdentifiers, tagSpec.enabledBy, 'enabled_by', tagSpecName);
+  // disabled_by must be a valid type identifier and each type identifier
+  // listed at most once.
+  typeIdentifiersAreValidAndUnique(
+      typeIdentifiers, tagSpec.disabledBy, 'disabled_by', tagSpecName);
+}
+
 // Test which verifies some constraints on the rules file which the validator
 // depends on, but which proto parser isn't robust enough to verify.
 describe('ValidatorRulesMakeSense', () => {
@@ -970,6 +1021,7 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
+    typeIdentifiersShouldMakeSense(tagSpec, tagSpecName);
     it('unique named_id if present', () => {
       if (tagSpec.namedId !== null &&
           tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {

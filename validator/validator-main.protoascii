@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 364
+min_validator_revision_required: 370
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 813
+spec_file_revision: 814
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1177,7 +1177,30 @@ tags: {
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
+  disabled_by: "transformed"
   mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate] (transformed)"
+  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1242,7 +1265,29 @@ tags: {
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
+  disabled_by: "transformed"
   mandatory: true
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  cdata {
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate] (transformed)"
+  enabled_by: "transformed"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1302,6 +1347,27 @@ tags: {
       declaration: "visibility"
     }
   }
+}
+tags: {
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style[amp-runtime] (transformed)"
+  enabled_by: "transformed"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-runtime"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-version"
+    mandatory: true
+    value_regex: "^\\d{15}|latest$"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
 }
 
 # 4.3 Sections
@@ -4737,7 +4803,18 @@ tags: {
   html_format: ACTIONS
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
+  disabled_by: "transformed"
   mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "NOSCRIPT"
+  spec_name: "noscript enclosure for boilerplate (transformed)"
+  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"

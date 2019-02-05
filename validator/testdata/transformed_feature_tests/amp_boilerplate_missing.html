@@ -15,19 +15,19 @@
 -->
 <!--
   Test Description:
-  This is the minimum valid tranformed AMP document; it includes all of the
-  required fields from the spec, but nothing else.
+  Test for server side rendering transformer:
+   - boilerplate is not required.
 -->
 <!doctype html>
-<html ⚡ transformed="google;v=1..3">
+<html ⚡ transformed>
 <head>
   <meta charset="utf-8">
-  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+   <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
   <link rel="canonical" href="./regular-html-version.html">
+  <link crossorigin href=https://fonts.gstatic.com/ rel="dns-prefetch preconnect">
   <meta name="viewport" content="width=device-width">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  Hello, world.
 </body>
 </html>
