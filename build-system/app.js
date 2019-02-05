@@ -82,48 +82,49 @@ if (!global.AMP_TESTING) {
     devDashboard.setCacheStatus(false);
   }
 
-  app.get(['/', '/*'], devDashboard.serveIndex({
-    // Sitting on build-system/, so we go back one dir for the repo root.
-    root: path.join(__dirname, '../'),
-    mapBasepath(url) {
-      // Serve /examples/ on main page.
-      if (url == '/') {
-        return '/examples';
-      }
-      // Serve root on /~ as a fallback.
-      if (url == '/~') {
-        return '/';
-      }
-      // Serve basepath from URL otherwise.
-      return url;
-    },
-  }));
-
-  app.get('/serve_mode.json', (req, res) => {
-    res.json({serveMode: pc.env.SERVE_MODE || 'default'});
-  });
-
-  app.get('/serve_mode_change', (req, res) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    const {mode} = req.query;
-    if (isValidServeMode(mode)) {
-      setServeMode(mode);
-      res.json({ok: true});
-      return;
-    }
-    res.status(400).json({ok: false});
-  });
-
-  app.get('/proxy', (req, res) => {
-    const {mode, url} = req.query;
-    const prefix = (mode || '').replace(/\/$/, '');
-    const sufix = url.replace(/^http(s?):\/\//i, '');
-    res.redirect(`${prefix}/proxy/s/${sufix}`);
-  });
+  devDashboard.installExpressMiddleware(app);
 }
+
+
+// Changes the current serve mode via query param
+// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// (See ./app-index/settings.js)
+app.get('/serve_mode_change', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  const {mode} = req.query;
+  if (isValidServeMode(mode)) {
+    setServeMode(mode);
+    res.json({ok: true});
+    return;
+  }
+  res.status(400).json({ok: false});
+});
+
+
+// Redirects to a proxied document with optional mode through query params.
+//
+// Mode can be one of:
+//   - '/', empty string, or unset for an unwrapped doc
+//   - 'a4a' for an AMP4ADS wrapper
+//   - 'a4a-3p' for a 3P AMP4ADS wrapper
+//   - 'inabox' for an AMP inabox wrapper
+//   - 'shadow' for a shadow-wrapped document
+//
+// Examples:
+//   - /proxy/?url=hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=hello.com?mode=shadow 👉 /shadow/proxy/s/hello.com
+//
+// This passthrough is useful to generate the URL from <form> values,
+// (See ./app-index/proxy-fom.js)
+app.get('/proxy', (req, res) => {
+  const {mode, url} = req.query;
+  const prefix = (mode || '').replace(/\/$/, '');
+  const sufix = url.replace(/^http(s?):\/\//i, '');
+  res.redirect(`${prefix}/proxy/s/${sufix}`);
+});
 
 /*
  * Intercept Recaptcha frame for,

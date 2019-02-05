@@ -16,7 +16,7 @@
 /* eslint-disable amphtml-internal/html-template */
 
 const documentModes = require('./document-modes');
-const html = require('./html');
+const {html} = require('./html');
 const {KeyValueOptions} = require('./form');
 
 

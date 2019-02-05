@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// pass-through for syntax highlighting
-module.exports = (strings, ...values) =>
-  strings.map((string, i) => string + (values[i] || '')).join('');
+
+const identity = a => a;
+
+
+/**
+ * Takes a set of HTML fragments and concatenates them.
+ * @param {!Array<T>} fragments
+ * @param {function(T):string} renderer
+ * @return {string}
+ * @template T
+ */
+const joinFragments = (fragments, renderer = identity) =>
+  fragments.map(renderer).join('');
+
+
+/**
+ * pass-through for syntax highlighting
+ * @param {!Array<string>} strings
+ * @param {...*} values
+ * @return {string}
+ */
+const html = (strings, ...values) =>
+  joinFragments(strings, (string, i) => string + (values[i] || ''));
+
+
+module.exports = {html, joinFragments};

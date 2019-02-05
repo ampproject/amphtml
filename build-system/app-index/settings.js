@@ -15,7 +15,7 @@
  */
 /* eslint-disable indent */
 /* eslint-disable amphtml-internal/html-template */
-const html = require('./html');
+const {html, joinFragments} = require('./html');
 
 const serveModes = [
   {
@@ -36,13 +36,13 @@ const serveModes = [
 ];
 
 
-const SelectorBlock = ({id, value, selected, children}) => html`<div
-    class="selector-block"
-    ${selected ? ' selected' : ''}
-    id="${id}"
-    option="${value}">
+const SelectorBlock = ({id, value, selected, children}) => html`
+  <div class="selector-block"
+      ${selected ? ' selected' : ''}
+      id="${id}"
+      option="${value}">
     <div class="check-icon icon"></div>
-      ${children}
+    ${children}
   </div>`;
 
 
@@ -56,16 +56,14 @@ const ServeModeSelector = ({serveMode}) => html`
       layout="container"
       on="select:serve-mode-form.submit"
       name="mode">
-      ${serveModes.map(({value, description}) => {
-        const id = `serve_mode_${value}`;
-        return SelectorBlock({
-          id,
+      ${joinFragments(serveModes, ({value, description}) =>
+        SelectorBlock({
+          id: `serve_mode_${value}`,
           value,
           selected: serveMode == value,
           children: html`<strong>${value}</strong>
             <p>${description}</p>`,
-        });
-      }).join('')}
+        }))}
     </amp-selector>
   </form>`;
 

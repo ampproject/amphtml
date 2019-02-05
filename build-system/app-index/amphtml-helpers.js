@@ -16,24 +16,22 @@
 
 /* eslint-disable amphtml-internal/html-template */
 
-const html = require('./html');
-const {joinFragments} = require('./html-helpers');
+const assert = require('assert');
+const boilerPlate = require('./boilerplate');
+
+const {html, joinFragments} = require('./html');
+const {matchIterator} = require('./regex');
 
 
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
 const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
 
+const containsTagRegex = tagName => new RegExp(`\\<${tagName}[\\s\\>]`);
+
+const containsByRegex = (str, re) => str.search(re) > -1;
+
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
-
-
-const forEachMatch = (regex, subject, callback) => {
-  let match = regex.exec(subject);
-  while (match != null) {
-    callback(match);
-    match = regex.exec(subject);
-  }
-};
 
 
 const ExtensionScript = ({name, version, isTemplate}) =>
@@ -60,6 +58,40 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
   ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
 
 
+const ampStateKey = (...keys) => keys.join('.');
+
+
+const AmpDoc = ({body, css, head, canonical}) => {
+  assert(canonical);
+  return html`
+    <!doctype html>
+    <html ⚡>
+    <head>
+      <title>AMP Dev Server</title>
+      <meta charset="utf-8">
+      <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+      ${css ? html`<style amp-custom>${css}</style>` : ''}
+      <link rel="canonical" href="${canonical}">
+      ${boilerPlate}
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      ${head || ''}
+    </head>
+    <body>
+      ${body}
+    </body>
+    </html>`;
+};
+
+
+const componentExtensionNameMapping = {
+  'amp-state': 'amp-bind',
+};
+
+const componentExtensionName = tagName =>
+  componentExtensionNameMapping[tagName] || tagName;
+
+
 const addRequiredExtensionsToHead = (docStr, extensionConf = {
   'amp-mustache': {version: '0.2'},
 }) => {
@@ -68,39 +100,36 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
   const addExtension = (name, defaultConf = {}) =>
     extensions[name] = {name, ...defaultConf, ...(extensionConf[name] || {})};
 
-  forEachMatch(componentTagNameRegex, docStr, ([unusedFullMatch, tagName]) => {
-    if (tagName == 'amp-state') {
-      addExtension('amp-bind');
-      return;
-    }
-    addExtension(tagName);
-  });
+  const addTemplate = (name, defaultConf = {}) =>
+    addExtension(name, {isTemplate: true, ...defaultConf});
 
-  forEachMatch(templateTagTypeRegex, docStr, ([unusedFullMatch, type]) => {
-    addExtension(type, {isTemplate: true});
-  });
+  Array.from(matchIterator(componentTagNameRegex, docStr))
+      .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+      .forEach(addExtension);
+
+  Array.from(matchIterator(templateTagTypeRegex, docStr))
+      .map(([unusedFullMatch, type]) => type)
+      .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.
   if (docStr.indexOf('AMP.setState') >= 0) {
     addExtension('amp-bind');
   }
 
-  for (let i = 0; i < formTypes.length; i++) {
-    const tagName = formTypes[i];
-    if (docStr.search(new RegExp(`\<${tagName}(\s|\>)`))) {
-      addExtension('amp-form');
-      break;
-    }
+  if (formTypes.some(t => containsByRegex(docStr, containsTagRegex(t)))) {
+    addExtension('amp-form');
   }
 
-  return docStr.replace(/(\<\/head\>)/i, (_, headClosingTag) =>
+  return docStr.replace(/\<\/head\>/i, headClosingTag =>
     joinFragments(Object.values(extensions), ExtensionScript) + headClosingTag);
 };
 
 
 module.exports = {
+  AmpDoc,
   AmpState,
   addRequiredExtensionsToHead,
+  ampStateKey,
   containsExpr,
   ternaryExpr,
 };

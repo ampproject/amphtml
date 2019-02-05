@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-const thru = a => a;
+
+const appendQueryParamsToUrl = (url, params) =>
+  url + '?' + Object.keys(params).map(k =>
+    `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join('&');
 
 
-/**
- * Takes a set of HTML fragments and concatenates them.
- * @param {!Array<T>} fragments
- * @param {function(T):string=} opt_renderer
- * @return {string}
- * @template T
- */
-const joinFragments = (fragments, opt_renderer) =>
-  fragments.map(opt_renderer || thru).join('');
+const leadingSlashRegex = /^\//;
+const replaceLeadingSlash = (subject, replacement) =>
+  subject.replace(leadingSlashRegex, replacement);
 
 
-module.exports = {joinFragments};
+module.exports = {
+  appendQueryParamsToUrl,
+  replaceLeadingSlash,
+};
