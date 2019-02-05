@@ -25,13 +25,14 @@ const parseHtmlChunk = htmlStr => {
 };
 
 
-const boundAttrRe = attr => `\\[${attr}\\]=("[^"]+"|'[^']'+|[^\\s\\>]+)`;
+const boundAttrRe = attr =>
+  new RegExp(`\\[${attr}\\]=("[^"]+"|'[^']'+|[^\\s\\>]+)`);
 
 
 // JSDom doesn't parse attributes whose names don't follow the spec, so
 // our only way to test [attr] values is via regex.
 const getBoundAttr = (el, attr) => {
-  const match = el./*OK*/outerHTML.match(new RegExp(boundAttrRe(attr), 'g'));
+  const match = el./*OK*/outerHTML.match(boundAttrRe(attr));
   if (match) {
     const [_, valuePart] = match;
     if (valuePart.charAt(0) == '"' ||
