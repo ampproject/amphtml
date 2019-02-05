@@ -126,7 +126,7 @@ export class SaveButton {
    */
   renderTemplate(count) {
     const CLASS = {
-      shape: this.round ? '-round' : '-rect',
+      shape: this.round ? '-round' : '',
       height: this.tall ? '-tall' : '',
       lang: this.lang === 'ja' ? '-ja' : '-en',
       color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
@@ -135,6 +135,7 @@ export class SaveButton {
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
       'i-amphtml-fill-content',
+      '-amp-pinterest-save-button',
     ];
 
     let countBubble = null;
@@ -149,6 +150,7 @@ export class SaveButton {
     const saveButton = Util.make(this.element.ownerDocument, {'a': {
       class: clazz.join(' '),
       href: this.href,
+      textContent: "Save",
     }});
 
     if (countBubble) {
