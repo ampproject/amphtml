@@ -18,6 +18,7 @@ import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   Criteria,
+  DocMetaAnnotations,
   ENABLED_LD_JSON_TYPES,
   ENABLED_OG_TYPES,
   LIGHTBOXABLE_ATTR,
@@ -25,7 +26,6 @@ import {
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
-  Schema,
   VIEWPORT_AREA_RATIO,
   apply,
   meetsSizingCriteria,
@@ -76,11 +76,11 @@ describes.realWin(TAG, {
   }
 
   const mockLdJsonSchemaTypes = type =>
-    env.sandbox.stub(Schema, 'getAllLdJsonTypes')
+    env.sandbox.stub(DocMetaAnnotations, 'getAllLdJsonTypes')
         .returns(isArray(type) ? type : [type]);
 
   const mockOgType = type =>
-    env.sandbox.stub(Schema, 'getOgType').returns(type);
+    env.sandbox.stub(DocMetaAnnotations, 'getOgType').returns(type);
 
   const iterProduct = (a, b, callback) => a.forEach(itemA =>
     b.forEach(itemB => callback(itemA, itemB)));
@@ -513,7 +513,7 @@ describes.realWin(TAG, {
       describe('getOgType', () => {
 
         it('returns empty', () => {
-          expect(Schema.getOgType(env.ampdoc)).to.be.undefined;
+          expect(DocMetaAnnotations.getOgType(env.ampdoc)).to.be.undefined;
         });
 
         it('returns tag', () => {
@@ -527,7 +527,7 @@ describes.realWin(TAG, {
             html`<meta name="description" content="My Website">`,
           ]);
 
-          expect(Schema.getOgType(env.ampdoc)).to.equal('foo');
+          expect(DocMetaAnnotations.getOgType(env.ampdoc)).to.equal('foo');
         });
 
       });
@@ -541,7 +541,8 @@ describes.realWin(TAG, {
         };
 
         it('returns empty', () => {
-          expect(Schema.getAllLdJsonTypes(env.ampdoc).length).to.equal(0);
+          expect(DocMetaAnnotations.getAllLdJsonTypes(env.ampdoc).length)
+              .to.equal(0);
         });
 
         it('returns all found @types', () => {
@@ -550,6 +551,7 @@ describes.realWin(TAG, {
           const expectedC = 'baz';
 
           mockRootNodeContent([
+            html`<script></script>`,
             createLdJsonTag({'@type': expectedA}),
             createLdJsonTag({'tacos': 'sí por favor'}),
             createLdJsonTag({'@type': expectedB}),
@@ -557,11 +559,12 @@ describes.realWin(TAG, {
             createLdJsonTag(''),
           ]);
 
-          expect(Schema.getAllLdJsonTypes(env.ampdoc)).to.deep.equal([
-            expectedA,
-            expectedB,
-            expectedC,
-          ]);
+          expect(DocMetaAnnotations.getAllLdJsonTypes(env.ampdoc))
+              .to.deep.equal([
+                expectedA,
+                expectedB,
+                expectedC,
+              ]);
         });
 
       });

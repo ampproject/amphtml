@@ -234,10 +234,11 @@ export class Scanner {
 
 
 /**
- * Parses document schema defined as ld+json.
+ * Parses document metadata annotations as defined by either LD+JSON schema or
+ * Open Graph <meta> tags.
  * @visibleForTesting
  */
-export class Schema {
+export class DocMetaAnnotations {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -258,7 +259,7 @@ export class Schema {
    * @return {boolean}
    */
   static isOgTypeInSet(ampdoc, types) {
-    return types[Schema.getOgType(ampdoc)];
+    return types[DocMetaAnnotations.getOgType(ampdoc)];
   }
 
   /**
@@ -279,7 +280,8 @@ export class Schema {
    * @return {boolean}
    */
   static isLdJsonTypeInSet(ampdoc, types) {
-    return Schema.getAllLdJsonTypes(ampdoc).some(type => types[type]);
+    return DocMetaAnnotations.getAllLdJsonTypes(ampdoc)
+        .some(type => types[type]);
   }
 }
 
@@ -368,8 +370,8 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  if (!Schema.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
-      !Schema.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
+  if (!DocMetaAnnotations.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
+      !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
