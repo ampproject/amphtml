@@ -55,6 +55,7 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
+import {installAmpFormTextarea} from './amp-form-textarea';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -207,6 +208,8 @@ export class AmpForm {
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
     this.installInputMasking_();
+    installAmpFormTextarea(this.form_);
+
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
