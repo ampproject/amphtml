@@ -4238,8 +4238,7 @@ class TagSpecDispatch {
       this.tagSpecsByDispatch_ = Object.create(null);
     }
     // Multiple TagSpecs may have the same dispatch key. These are added in the
-    // order in which they are found and only the first TagSpec is used below
-    // in matchingDispatchKey.
+    // order in which they are found.
     if (!(dispatchKey in this.tagSpecsByDispatch_)) {
       this.tagSpecsByDispatch_[dispatchKey] = [tagSpecId];
     } else {
@@ -4272,14 +4271,18 @@ class TagSpecDispatch {
 
   /**
    * Looks up a dispatch key as previously registered, returning the
-   * corresponding tagSpecId or -1 if none.
+   * corresponding tagSpecIds which are ordered by their specificity of match
+   * (e.g. Name/Value/Parent, then Name/Value, and then Name).
    * @param {string} attrName
    * @param {string} attrValue
    * @param {string} mandatoryParent
-   * @return {number}
+   * @return {!Array<number>}
    */
   matchingDispatchKey(attrName, attrValue, mandatoryParent) {
-    if (!this.hasDispatchKeys()) {return -1;}
+    let tagSpecIds = [];
+    if (!this.hasDispatchKeys()) {
+      return tagSpecIds;
+    }
 
     // Try first to find a key with the given parent.
     const dispatchKey = makeDispatchKey(
@@ -4287,7 +4290,7 @@ class TagSpecDispatch {
         attrName, attrValue, mandatoryParent);
     const match = this.tagSpecsByDispatch_[dispatchKey];
     if (match !== undefined) {
-      return match[0];
+      tagSpecIds.push.apply(tagSpecIds, match);
     }
 
     // Try next to find a key that allows any parent.
@@ -4296,7 +4299,7 @@ class TagSpecDispatch {
         attrValue, '');
     const noParentMatch = this.tagSpecsByDispatch_[noParentKey];
     if (noParentMatch !== undefined) {
-      return noParentMatch[0];
+      tagSpecIds.push.apply(tagSpecIds, noParentMatch);
     }
 
     // Try last to find a key that matches just this attribute name.
@@ -4304,15 +4307,17 @@ class TagSpecDispatch {
         amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, '', '');
     const noValueMatch = this.tagSpecsByDispatch_[noValueKey];
     if (noValueMatch !== undefined) {
-      return noValueMatch[0];
+      tagSpecIds.push.apply(tagSpecIds, noValueMatch);
     }
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
     // foo="" or just <tag foo>.
-    if (attrName === attrValue)
-    {return this.matchingDispatchKey(attrName, '', mandatoryParent);}
+    if (attrName === attrValue) {
+      tagSpecIds.push.apply(
+          tagSpecIds, this.matchingDispatchKey(attrName, '', mandatoryParent));
+    }
 
-    return -1;
+    return tagSpecIds;
   }
 
   /**
@@ -4438,14 +4443,15 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (const attr of encounteredTag.attrs()) {
-      const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
+      const maybeTagSpecIds = tagSpecDispatch.matchingDispatchKey(
           attr.name,
           // Attribute values are case-sensitive by default, but we
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           attr.value.toLowerCase(), context.getTagStack().parentTagName());
-      if (maybeTagSpecId !== -1) {
-        bestMatchTagSpec = context.getRules().getByTagSpecId(maybeTagSpecId);
+      if (maybeTagSpecIds.length > 0) {
+        bestMatchTagSpec =
+            context.getRules().getByTagSpecId(maybeTagSpecIds[0]);
         return {
           bestMatchTagSpec,
           validationResult: validateTagAgainstSpec(
