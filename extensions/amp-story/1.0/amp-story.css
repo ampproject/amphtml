@@ -183,7 +183,7 @@ amp-sidebar[side][open] {
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-sidebar[side][open]{
+[desktop] amp-sidebar[side][open] {
   max-width: 320px !important;
 }
 
