@@ -214,7 +214,6 @@ requirement: {
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
-  whitelist: 'ads/sas.js'
   whitelist: 'ads/zen.js'
   whitelist: 'src/json.js' # Where jsonParse itself is implemented.
 }

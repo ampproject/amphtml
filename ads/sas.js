@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import {validateData, writeScript} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 /**
  * @param {!Window} global
@@ -44,10 +45,12 @@ export function sas(global, data) {
   }
 
   if (typeof data.tags !== 'undefined') {
-    const tags = JSON.parse(data.tags);
+    const tags = parseJson(data.tags);
     for (const tag in tags) {
       url += '/' + tag + '=' + encodeURIComponent(tags[tag]);
     }
   }
-  writeScript(global, url);
+  writeScript(global, url, () => {
+    global.context.renderStart();
+  });
 }
