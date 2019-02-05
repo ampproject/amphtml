@@ -140,10 +140,10 @@ export class SaveButton {
     let countBubble = null;
     if (!this.round) {
       clazz.push(
-        `i-amphtml-pinterest${CLASS.lang}-${CLASS.color}${CLASS.height}`);
+          `i-amphtml-pinterest${CLASS.lang}-${CLASS.color}${CLASS.height}`);
       if (count) {
         clazz.push(
-          `i-amphtml-pinterest-count-pad-${this.count}${CLASS.height}`);
+            `i-amphtml-pinterest-count-pad-${this.count}${CLASS.height}`);
         countBubble = this.renderCount(count['count'], CLASS.height);
       }
     }
