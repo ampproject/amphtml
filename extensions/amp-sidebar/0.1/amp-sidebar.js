@@ -24,7 +24,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {handleAutoscroll} from './autoscroll';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -286,7 +285,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
-    handleAutoscroll(this.getAmpDoc(), this.element);
   }
 
   /**

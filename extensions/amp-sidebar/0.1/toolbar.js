@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, userAssert} from '../../../src/log';
-import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
 /**
  * Class representing toolbar behavior in sidebar
@@ -129,9 +128,6 @@ export class Toolbar {
         this.toolbarDomElement_.classList
             .remove('amp-sidebar-toolbar-target-hidden');
         this.toolbarShown_ = true;
-
-        handleAutoscroll(this.ampdoc_,
-            dev().assertElement(this.toolbarClone_));
       }
     });
   }

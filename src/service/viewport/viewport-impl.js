@@ -529,7 +529,7 @@ export class Viewport {
     pos = 'top') {
 
     return this.getScrollingContainerFor_(element).then(parent =>
-      this.animateScrollWithinParent(
+      this.animateScrollIntoViewInternal_(
           element,
           parent,
           dev().assertNumber(duration),
@@ -544,8 +544,9 @@ export class Viewport {
    * @param {string} curve
    * @param {string} pos (takes one of 'top', 'bottom', 'center')
    * @return {!Promise}
+   * @private
    */
-  animateScrollWithinParent(element, parent, duration, curve, pos) {
+  animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
 
     const {height: parentHeight} = this.isScrollingElement_(parent) ?
