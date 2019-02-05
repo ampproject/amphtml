@@ -15,19 +15,22 @@
 -->
 <!--
   Test Description:
-  This is the minimum valid tranformed AMP document; it includes all of the
-  required fields from the spec, but nothing else.
+  This testcase isn't run verbatim. The template string below is replaced by
+  the test harnesses with various lengths of valid CSS stylesheets. We use
+  this test to verify the max_byte_length rules for CSS author stylesheets.
 -->
 <!doctype html>
-<html ⚡ transformed="google;v=1..3">
+<html ⚡ transformed="google;v=1">
 <head>
   <meta charset="utf-8">
   <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
-  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>.replace_amp_custom {}</style>
   <link rel="canonical" href="./regular-html-version.html">
 </head>
 <body>
   Hello, world.
+  <div style="replace_inline_style"></div>
 </body>
 </html>
