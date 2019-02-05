@@ -762,6 +762,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'promoteiq': {},
+  
   'pubexchange': {},
 
   'pubguru': {
