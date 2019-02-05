@@ -2327,7 +2327,7 @@ describes.repeated('', {
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
 
-        expect(form.submit).to.have.been.called;
+        expect(form.submit).to.have.been.calledOnce;
         expect(clientIdField.value).to.equal('');
         expect(canonicalUrlField.value).to.equal(
             'https%3A%2F%2Fexample.com%2Famps.html');
@@ -2369,7 +2369,7 @@ describes.repeated('', {
 
           return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
             expect(getValueStub).to.be.called;
-            expect(formElementSubmitSpy).to.be.called;
+            expect(formElementSubmitSpy).to.be.calledOnce;
           });
         });
       });

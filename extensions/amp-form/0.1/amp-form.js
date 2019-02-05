@@ -531,10 +531,7 @@ export class AmpForm {
          * If the submit was called with an event, then we shouldn't
          * manually submit the form
          */
-        let shouldSubmitFormElement = true;
-        if (event) {
-          shouldSubmitFormElement = false;
-        }
+        let shouldSubmitFormElement = Boolean(!event);
 
         this.handleNonXhrGet_(shouldSubmitFormElement);
         return Promise.resolve();
