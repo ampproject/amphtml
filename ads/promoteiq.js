@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  dev,
-} from '../src/log';
-import {
-  loadScript,
-  validateData,
-} from '../3p/3p';
+import { dev } from '../src/log';
+import { loadScript, validateData } from '../3p/3p';
 
 const TAG = 'PROMOTEIQ';
 const mandatoryDataFields = ['src', 'params', 'sfcallback'];
@@ -34,9 +29,9 @@ export function promoteiq(global, data) {
   const sfInputs = JSON.parse(data.params);
 
   loadScript(global, data.src, () => {
-    if (!!TagDeliveryContent) {
+    if (!!global.TagDeliveryContent) {
       const sfCallback = new Function('return ' + data.sfcallback);
-      TagDeliveryContent.request(sfInputs, sfCallback);
+      global.TagDeliveryContent.request(sfInputs, sfCallback);
     } else {
       dev().error(TAG, 'TagDeliveryContent object not loaded on page');
     }
