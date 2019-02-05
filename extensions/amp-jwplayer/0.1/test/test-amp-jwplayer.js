@@ -47,88 +47,82 @@ describes.realWin('amp-jwplayer', {
     return jw.build().then(() => { jw.layoutCallback(); return jw; });
   }
 
-  it('renders', () => {
-    return getjwplayer({
+  it('renders', async() => {
+    const jw = await getjwplayer({
       'data-media-id': 'Wferorsv',
       'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
   });
 
-  it('renders with a playlist', () => {
-    return getjwplayer({
+  it('renders with a playlist', async() => {
+    const jw = await getjwplayer({
       'data-playlist-id': '482jsTAr',
       'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html');
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html');
   });
-  it('renders with a playlist and parses contextual parameter', () => {
-    return getjwplayer({
+  it('renders with a playlist and parses contextual parameter', async() => {
+    const jw = await getjwplayer({
       'data-playlist-id': '482jsTAr',
       'data-player-id': 'sDZEo0ea',
       'data-content-search': '__CONTEXTUAL__',
       'data-content-contextual': true,
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag&contextual=true');
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag&contextual=true');
   });
-  it('renders with a playlist and all parameters', () => {
-    return getjwplayer({
+  it('renders with a playlist and all parameters', async() => {
+    const jw = await getjwplayer({
       'data-playlist-id': '482jsTAr',
       'data-player-id': 'sDZEo0ea',
       'data-content-search': 'dog',
       'data-content-contextual': true,
       'data-content-recency': '9D',
       'data-content-backfill': true,
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&contextual=true&recency=9D&backfill=true');
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&contextual=true&recency=9D&backfill=true');
   });
-  it('renders with a playlist and contextual, backfill parameters', () => {
-    return getjwplayer({
+  it('renders with a playlist and contextual, backfill parameters', async() => {
+    const jw = await getjwplayer({
       'data-playlist-id': '482jsTAr',
       'data-player-id': 'sDZEo0ea',
       'data-content-contextual': true,
       'data-content-backfill': true,
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true&backfill=true');
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true&backfill=true');
   });
-  it('renders with a playlist and contextual parameter', () => {
-    return getjwplayer({
+  it('renders with a playlist and contextual parameter', async() => {
+    const jw = await getjwplayer({
       'data-playlist-id': '482jsTAr',
       'data-player-id': 'sDZEo0ea',
       'data-content-contextual': true,
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true');
     });
+    const iframe = jw.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true');
   });
 
   it('fails if no media is specified', () => {
@@ -160,45 +154,40 @@ describes.realWin('amp-jwplayer', {
     });
   });
 
-
-
   describe('createPlaceholderCallback', () => {
-    it('should create a placeholder image', () => {
-      return getjwplayer({
+    it('should create a placeholder image', async() => {
+      const jw = await getjwplayer({
         'data-media-id': 'Wferorsv',
         'data-player-id': 'sDZEo0ea',
-      }).then(jwp => {
-        const img = jwp.querySelector('amp-img');
-        expect(img).to.not.be.null;
-        expect(img.getAttribute('src')).to.equal(
-            'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
-        expect(img.getAttribute('layout')).to.equal('fill');
-        expect(img.hasAttribute('placeholder')).to.be.true;
-        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
-        expect(img.getAttribute('alt')).to.equal('Loading video');
       });
+      const img = jw.querySelector('amp-img');
+      expect(img).to.not.be.null;
+      expect(img.getAttribute('src')).to.equal(
+          'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
+      expect(img.getAttribute('layout')).to.equal('fill');
+      expect(img.hasAttribute('placeholder')).to.be.true;
+      expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(img.getAttribute('alt')).to.equal('Loading video');
     });
-    it('should propagate aria-label to placeholder', () => {
-      return getjwplayer({
+    it('should propagate aria-label to placeholder', async() => {
+      const jw = getjwplayer({
         'data-media-id': 'Wferorsv',
         'data-player-id': 'sDZEo0ea',
         'aria-label': 'interesting video',
-      }).then(jwp => {
-        const img = jwp.querySelector('amp-img');
-        expect(img).to.not.be.null;
-        expect(img.getAttribute('aria-label')).to.equal('interesting video');
-        expect(img.getAttribute('alt'))
-            .to.equal('Loading video - interesting video');
       });
+      const img = jw.querySelector('amp-img');
+      expect(img).to.not.be.null;
+      expect(img.getAttribute('aria-label')).to.equal('interesting video');
+      expect(img.getAttribute('alt'))
+          .to.equal('Loading video - interesting video');
     });
-    it('should not create a placeholder for playlists', () => {
-      return getjwplayer({
+    it('should not create a placeholder for playlists', async() => {
+      const jw = await getjwplayer({
         'data-playlist-id': 'Wferorsv',
         'data-player-id': 'sDZEo0ea',
-      }).then(jwp => {
-        const img = jwp.querySelector('amp-img');
-        expect(img).to.be.null;
       });
+      const img = jw.querySelector('amp-img');
+      expect(img).to.be.null;
     });
   });
 });

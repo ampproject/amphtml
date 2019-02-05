@@ -64,6 +64,22 @@ Example:
 </amp-jwplayer>
 ```
 
+Contextual Article Matching
+
+Example:
+
+```html
+  <amp-jwplayer
+      data-player-id="BjcwyK37"
+      data-media-id="BZ6tc0gy"
+      data-content-search="__CONTEXTUAL__"
+      data-content-contextual=true
+      data-content-recency="9D"
+      data-content-backfill=true
+      layout="responsive" width="160" height="90">
+  </amp-jwplayer>
+```
+
 ## Attributes
 
 ##### data-player-id
@@ -84,7 +100,7 @@ precedence.  (**Required if `data-media-id` is not defined.**)
 
 ##### data-content-search
 
-Denotes the type of the playlist. This is a search playlist that takes in a keyword or phrase as the search query and generates a playlist based on that search query. If contextual article matching is desired, use the value `_CONTEXTUAL_` (data-content-contextual must also be true).
+Denotes the type of the playlist. This is a search playlist that takes in a keyword or phrase as the search query and generates a playlist based on that search query. If contextual article matching is desired, use the value `__CONTEXTUAL__` (data-content-contextual must also be 'true').
 
 
 ##### data-content-contextual
@@ -94,7 +110,7 @@ Enables the Player to grab the OG title (or HTML title if there is no OG title) 
 
 ##### data-content-recency
 
-Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). In the format, `xD`, where x is a numerical value (i.e. '9D').
+Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). Specified in the format `xD`, where x is a numerical value (i.e. '9D').
 
 
 ##### data-content-backfill
