@@ -31,8 +31,8 @@ const boundAttrRe = attr =>
 
 // JSDom doesn't parse attributes whose names don't follow the spec, so
 // our only way to test [attr] values is via regex.
-const getBoundAttr = (el, attr) => {
-  const match = el./*OK*/outerHTML.match(boundAttrRe(attr));
+const getBoundAttr = ({outerHTML}, attr) => {
+  const match = outerHTML.match(boundAttrRe(attr));
   if (!match) {
     return;
   }
