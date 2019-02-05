@@ -21,7 +21,7 @@ const path = require('path');
 const {expect} = require('chai');
 
 const {
-  assertValidAmphtml,
+  expectValidAmphtml,
   getBoundAttr,
   parseHtmlChunk,
 } = require('./helpers');
@@ -73,7 +73,7 @@ describe('devdash', () => {
 
     });
 
-    describe('assertValidAmphtml', () => {
+    describe('expectValidAmphtml', () => {
 
       it('passes with minimum valid doc', async() => {
         const validDocPath = path.join(__dirname,
@@ -81,7 +81,7 @@ describe('devdash', () => {
 
         const validDoc = (await fs.readFileAsync(validDocPath)).toString();
 
-        assertValidAmphtml(await amphtmlValidator.getInstance(), validDoc);
+        expectValidAmphtml(await amphtmlValidator.getInstance(), validDoc);
       });
 
       it('fails with invalid doc', async() => {
@@ -90,7 +90,7 @@ describe('devdash', () => {
         const validator = await amphtmlValidator.getInstance();
 
         expect(() => {
-          assertValidAmphtml(validator, invalidDoc);
+          expectValidAmphtml(validator, invalidDoc);
         }).to.throw;
       });
 

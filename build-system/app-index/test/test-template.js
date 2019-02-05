@@ -16,7 +16,7 @@
 
 const amphtmlValidator = require('amphtml-validator');
 
-const {assertValidAmphtml} = require('./helpers');
+const {expectValidAmphtml} = require('./helpers');
 const {renderTemplate} = require('../template');
 
 describe('template', () => {
@@ -24,7 +24,7 @@ describe('template', () => {
   describe('renderTemplate', () => {
 
     it('renders valid doc', async() => {
-      assertValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
+      expectValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
         basepath: '/examples/',
         css: 'body{}',
         isMainPage: true,
@@ -35,7 +35,7 @@ describe('template', () => {
     });
 
     it('renders valid doc with empty/default values', async() => {
-      assertValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
+      expectValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
         basepath: '/',
         css: '',
         isMainPage: true,

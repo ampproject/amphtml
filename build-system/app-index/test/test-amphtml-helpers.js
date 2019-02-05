@@ -16,8 +16,8 @@
 
 const amphtmlValidator = require('amphtml-validator');
 
-const {assertValidAmphtml, parseHtmlChunk} = require('./helpers');
 const {expect} = require('chai');
+const {expectValidAmphtml, parseHtmlChunk} = require('./helpers');
 const {html} = require('../html');
 const {JSDOM} = require('jsdom');
 
@@ -46,13 +46,13 @@ describe('devdash', () => {
       });
 
       it('creates valid doc with min required fields', async() => {
-        assertValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
+        expectValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
         }));
       })
 
       it('creates valid doc with set fields', async() => {
-        assertValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
+        expectValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
           css: 'body { font-family:sans-serif; } ',
           head: html`

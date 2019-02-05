@@ -33,11 +33,15 @@ const getBoundAttr = (el, attr) => {
 }
 
 
-const assertValidAmphtml = (validator, string) => {
+const expectValidAmphtml = (validator, string) => {
   const {errors, status} = validator.validateString(string);
   expect(errors).to.deep.equal([]);
   expect(status).to.equal('PASS');
 };
 
 
-module.exports = {assertValidAmphtml, parseHtmlChunk, getBoundAttr};
+module.exports = {
+  expectValidAmphtml,
+  getBoundAttr,
+  parseHtmlChunk,
+};
