@@ -69,11 +69,11 @@ const LightboxControlsModes = {
  * The number of pixels of movement to go from the darkest to lightest overlay
  * while doing a swipe to close gesture.
  */
-const SWIPE_TO_CLOSE_DISTANCE = 50;
+const SWIPE_TO_CLOSE_DISTANCE = 200;
 /**
  * The number of pixels needed to close when doing a swipe to close gesture.
  */
-const SWIPE_TO_CLOSE_DISTANCE_THRESHOLD = SWIPE_TO_CLOSE_DISTANCE;
+const SWIPE_TO_CLOSE_DISTANCE_THRESHOLD = SWIPE_TO_CLOSE_DISTANCE / 4;
 /**
  * The number of pixels needed to completely fade out the controls when doing a
  * swipe to close gesture.
@@ -88,9 +88,9 @@ const SWIPE_TO_CLOSE_VELOCITY_THRESHOLD = 0.65;
  * The lowest opacity for the background and controls when doing swipe to close
  * gesture.
  */
-const SWIPE_TO_CLOSE_MIN_OPACITY = 0.1;
+const SWIPE_TO_CLOSE_MIN_OPACITY = 0.2;
 /** The smallest scale possible when doing swipe to close gesture. */
-const SWIPE_TO_CLOSE_MIN_SCALE = 0.9;
+const SWIPE_TO_CLOSE_MIN_SCALE = 0.85;
 /**
  * How much distance to cover, based on the velocity, when a user releases a
  * swipe to close gesture.
@@ -100,7 +100,7 @@ const SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR = 22.5;
  * How much time to spend, based on the distance to travel, when moving to the
  * final location of a swipe (after the user has released).
  */
-const SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR = 10;
+const SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR = 1;
 /**
  * How much time to spend, based on the distance to travel, when snapping back
  * after an cancelled swipe to close gesture.
@@ -110,7 +110,7 @@ const SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR = 5;
  * The timing function to use when carrying momentum after releasing a swipe to
  * close gesture. This closely approximates an expontential decay of velocity.
  */
-const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, 1.1, 0.1, 1)';
+const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, .55, .3, 0.95)';
 
 // Use S Curves for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
@@ -952,7 +952,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.startSwipeToDismiss_(sourceElement);
         return;
       }
-  
+
       if (last) {
         this.releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY)
             .then(() => {
@@ -964,7 +964,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
             });
         return;
       }
-  
+
       this.adjustForSwipePosition_(
           carousel_,
           `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
