@@ -46,7 +46,6 @@ const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
-const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
 const MAX_PARALLEL_TABS = 10;
@@ -382,7 +381,7 @@ async function generateSnapshots(percy, webpages) {
   if (argv.master) {
     const page = await newPage(browser);
     await page.goto(
-        `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
+        `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
 
@@ -405,10 +404,11 @@ async function generateSnapshots(percy, webpages) {
 async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   const testErrors = [];
+  let testNumber = 0;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
-    const fullUrl = `${BASE_URL}/${webpage.url}`;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
+      const fullUrl = `http://${testNumber++}.${HOST}:${PORT}/${webpage.url}`;
       while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
         await sleep(WAIT_FOR_TABS_MS);
       }
@@ -425,7 +425,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           height: viewport.height,
         });
       }
-      log('verbose', 'Navigating to page', colors.yellow(fullUrl));
+      log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Navigate to an empty page first to support different webpages that only
       // modify the #anchor name.
@@ -546,7 +546,8 @@ async function createEmptyBuild() {
     ],
   });
   await percy.startBuild();
-  await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`)
+  await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
   await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   await percy.finalizeBuild();
