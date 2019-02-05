@@ -26,6 +26,10 @@ const {matchIterator} = require('./regex');
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
 const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
 
+const containsTagRegex = tagName => new RegExp(`\\<${tagName}[\\s\\>]`);
+
+const containsRegex = (str, re) => str.search(re) > -1;
+
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
@@ -112,9 +116,7 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
     addExtension('amp-bind');
   }
 
-  const needsAmpForm = formTypes.some(tagName =>
-    docStr.search(new RegExp(`\\<${tagName}(\\s|\\>)`)) > -1);
-  if (needsAmpForm) {
+  if (formTypes.some(t => containsRegex(docStr, containsTagRegex(t)))) {
     addExtension('amp-form');
   }
 
