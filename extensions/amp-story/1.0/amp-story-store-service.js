@@ -431,7 +431,9 @@ export class AmpStoryStoreService {
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.INTERACTIVE_COMPONENT_STATE]: {},
+      [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
+        state: EmbeddedComponentState.HIDDEN,
+      },
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
