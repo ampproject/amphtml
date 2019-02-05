@@ -487,6 +487,7 @@ class IntegrationFixture {
 
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
+        name: 'test_' + iframeCount++,
         src: addParamsToUrl(url, {body, css, experiments, extensions})
             + `#${this.hash}`,
       });

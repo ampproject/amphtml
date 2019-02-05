@@ -270,7 +270,8 @@ function composeDocument(config) {
       const src = (cdn)
         ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
         : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
-      return `<script async custom-element="${name}" src="${src}"></script>`;
+      const type = name == 'amp-mustache' ? 'template' : 'element';
+      return `<script async custom-${type}="${name}" src="${src}"></script>`;
     }).join('\n');
   }
 
