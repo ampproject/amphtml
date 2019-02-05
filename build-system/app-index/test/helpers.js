@@ -18,17 +18,27 @@ const {expect} = require('chai');
 const {JSDOM} = require('jsdom');
 
 
-const parseHtmlChunk = htmlStr =>
-  (new JSDOM(htmlStr)).window.document.body.firstElementChild;
+const parseHtmlChunk = htmlStr => {
+  const {body} = (new JSDOM(htmlStr)).window.document;
+  expect(body.children).to.have.length(1);
+  return body.firstElementChild;
+};
+
+
+const boundAttrRe = attr => `\\[${attr}\\]=("[^"]+"|'[^']'+|[^\\s\\>]+)`;
 
 
 // JSDom doesn't parse attributes whose names don't follow the spec, so
 // our only way to test [attr] values is via regex.
 const getBoundAttr = (el, attr) => {
-  const match = el./*OK*/outerHTML.match(
-    new RegExp(`\\[${attr}\\]="?([^\\s"\\>]+)`), 'g');
+  const match = el./*OK*/outerHTML.match(new RegExp(boundAttrRe(attr), 'g'));
   if (match) {
-    return match[1];
+    const [_, valuePart] = match;
+    if (valuePart.charAt(0) == '"' ||
+        valuePart.charAt(0) == '\'') {
+      return valuePart.substring(1, valuePart.length - 1);
+    }
+    return valuePart;
   }
 }
 

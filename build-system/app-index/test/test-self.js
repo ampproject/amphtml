@@ -83,6 +83,17 @@ describe('devdash', () => {
         expect(getBoundAttr(fakeEl, 'whatever')).to.be.undefined;
       });
 
+      it('returns value with whitespace', () => {
+        const valueWithWhitespace = ` ^..^      /
+                                      /_/\_____/
+                                         /\   /\
+                                        /  \ /  \ `;
+        const fakeEl = {
+          outerHTML: `<div [foo]="${valueWithWhitespace}"></div>`,
+        };
+        expect(getBoundAttr(fakeEl, 'foo')).to.equal(valueWithWhitespace);
+      });
+
     });
 
     describe('expectValidAmphtml', () => {
