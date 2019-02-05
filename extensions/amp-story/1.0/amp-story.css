@@ -179,7 +179,6 @@ amp-story-page[active] {
 }
 
 amp-sidebar[side][open] {
-  background-color: #ffffff;
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
@@ -260,15 +259,17 @@ amp-story-page[distance="2"] {
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
+  visibility: visible;
   z-index: 100003 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  transition: visibility 0.3s, opacity 0.3s  cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-opacity-mask[hidden] {
   opacity: 0 !important;
   pointer-events: none !important;
   display: block !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) reverse !important;
+  visibility: hidden;
+  transition: visibility 0.2s, opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 .i-amphtml-sidebar-mask {

@@ -1635,7 +1635,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @private
    */
-  openOpacityMask_() {
+  initializeOpacityMask_() {
     if (!this.maskElement_) {
       const maskEl = this.win.document.createElement('div');
       maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
@@ -1651,8 +1651,15 @@ export class AmpStory extends AMP.BaseElement {
       this.maskElement_ = maskEl;
       this.mutateElement(() => {
         this.element.appendChild(this.maskElement_);
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
       });
     }
+  }
+
+  /**
+   * @private
+   */
+  openOpacityMask_() {
     this.mutateElement(() => {
       toggle(dev().assertElement(this.maskElement_), /* display */true);
     });
@@ -2172,6 +2179,7 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.sidebar_) {
       return;
     }
+    this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
 
