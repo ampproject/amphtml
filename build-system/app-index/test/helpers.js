@@ -46,9 +46,10 @@ const getBoundAttr = (el, attr) => {
 
 
 const expectValidAmphtml = (validator, string) => {
-  const {errors, status} = validator.validateString(string);
+  const {errors: errorsAndWarnings, status} = validator.validateString(string);
+  const errors = errorsAndWarnings.filter(({severity}) => severity == 'ERROR');
 
-  // Compare with empty array instring instead of checking `to.be.empty` so
+  // Compare with empty array instead of checking `to.be.empty` so
   // validation errors are output as AssertionErrors.
   expect(errors).to.deep.equal([]);
   expect(status).to.equal('PASS');
