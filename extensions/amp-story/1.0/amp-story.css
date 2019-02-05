@@ -187,7 +187,7 @@ amp-sidebar[side][open] {
   max-width: 320px !important;
 }
 
-amp-sidebar[side]{
+amp-sidebar[side] {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
