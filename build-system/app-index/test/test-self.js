@@ -15,10 +15,10 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const assert = require('assert');
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const path = require('path');
+const {expect} = require('chai');
 
 const {
   assertValidAmphtml,
@@ -34,7 +34,7 @@ describe('devdash', () => {
 
       it('returns firstElementChild', () => {
         const {tagName} = parseHtmlChunk('<my-tag></my-tag>');
-        assert.strictEqual(tagName, 'MY-TAG');
+        expect(tagName).to.equal(tagName);
       });
 
     });
@@ -64,12 +64,13 @@ describe('devdash', () => {
             expected: 'baz',
           },
         ].forEach(({outerHTML, attr, expected}) => {
-          assert.strictEqual(getBoundAttr({outerHTML}, attr), expected);
+          expect(getBoundAttr({outerHTML}, attr)).to.equal(expected);
         });
       });
 
-      it('returns nothing when not found', () => {
-        assert(!getBoundAttr({outerHTML: '<div></div>'}, 'whatever'));
+      it('returns undefined when not found', () => {
+        expect(getBoundAttr({outerHTML: '<div></div>'}, 'whatever'))
+            .to.be.undefined;
       });
 
     });
@@ -90,9 +91,9 @@ describe('devdash', () => {
 
         const validator = await amphtmlValidator.getInstance();
 
-        assert.throws(() => {
+        expect(() => {
           assertValidAmphtml(validator, invalidDoc);
-        });
+        }).to.throw;
       });
 
     });

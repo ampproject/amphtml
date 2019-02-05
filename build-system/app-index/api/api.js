@@ -52,8 +52,9 @@ async function handleListingRequest({query: {path, search}}, res) {
     assert(fileSet);
 
     res.json(await searchListing(fileSet, search));
-  } catch {
+  } catch (e) {
     res.status(400).end('Bad request.');
+    throw e; // to log in console
   }
 }
 

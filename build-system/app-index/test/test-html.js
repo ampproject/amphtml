@@ -14,40 +14,33 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
-
+const {expect} = require('chai');
 const {html, joinFragments} = require('../html');
 
+
 describe('devdash', () => {
-
   describe('html helpers', () => {
-
     describe('joinFragments', () => {
 
       it('joins simple fragments', () => {
-        assert.strictEqual(joinFragments(['a', 'b', 'c']), 'abc');
+        expect(joinFragments(['a', 'b', 'c'])).to.equal('abc');
       });
 
       it('joins mapped fragments', () => {
-        assert.strictEqual(joinFragments([1, 2, 3], a => a + 1), '234');
+        expect(joinFragments([1, 2, 3], a => a + 1)).to.equal('234');
       });
 
     });
 
     describe('html', () => {
-
       it('passes through simple string', () => {
-        assert.strictEqual(html`foo`, 'foo');
+        expect(html`foo`).to.equal('foo');
       });
 
       it('concatenates interpolated args', () => {
-        assert.strictEqual(
-            html`quesadilla ${'de'} chicharrón ${'con'} queso`,
-            'quesadilla de chicharrón con queso');
+        expect(html`quesadilla ${'de'} chicharrón ${'con'} queso`)
+            .to.equal('quesadilla de chicharrón con queso');
       });
-
     });
-
   });
-
 });

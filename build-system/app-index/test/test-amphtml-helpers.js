@@ -15,9 +15,9 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const assert = require('assert');
 
 const {assertValidAmphtml, parseHtmlChunk} = require('./helpers');
+const {expect} = require('chai');
 const {html} = require('../html');
 const {JSDOM} = require('jsdom');
 
@@ -38,15 +38,11 @@ describe('devdash', () => {
     describe('AmpDoc', () => {
 
       it('fails without args', () => {
-        assert.throws(() => {
-          AmpDoc();
-        });
+        expect(() => AmpDoc()).to.throw;
       });
 
       it('fails without min required fields', () => {
-        assert.throws(() => {
-          AmpDoc({});
-        });
+        expect(() => AmpDoc({})).to.throw;
       });
 
       it('creates valid doc with min required fields', async() => {
@@ -98,31 +94,28 @@ describe('devdash', () => {
 
     describe('ampStateKey', () => {
       it('concats arguments', () => {
-        assert.strictEqual(ampStateKey('foo', 'bar'), 'foo.bar');
-        assert.strictEqual(
-          ampStateKey('tacos', 'al', 'pastor'),
-          'tacos.al.pastor');
+        expect(ampStateKey('foo', 'bar')).to.equal('foo.bar');
+        expect(ampStateKey('tacos', 'al', 'pastor'))
+            .to.equal('tacos.al.pastor');
       });
 
     });
 
     describe('ternaryExpr', () => {
       it('creates expression', () => {
-        assert.strictEqual(ternaryExpr('a', 'b', 'c'), 'a ? b : c');
+        expect(ternaryExpr('a', 'b', 'c')).to.equal('a ? b : c');
       });
     });
 
     describe('containsExpr', () => {
       it('creates expression with literals', () => {
-        assert.strictEqual(
-          containsExpr('\'a\'', '\'b\'', '\'c\'', '\'d\''),
-          '\'a\'.indexOf(\'b\') > -1 ? \'c\' : \'d\'');
+        expect(containsExpr('\'a\'', '\'b\'', '\'c\'', '\'d\''))
+            .to.equal('\'a\'.indexOf(\'b\') > -1 ? \'c\' : \'d\'');
       });
 
       it('creates expression with vars', () => {
-        assert.strictEqual(
-          containsExpr('a', 'b', 'c', 'd'),
-          'a.indexOf(b) > -1 ? c : d');
+        expect(containsExpr('a', 'b', 'c', 'd'))
+            .to.equal('a.indexOf(b) > -1 ? c : d');
       });
     });
 
@@ -132,16 +125,15 @@ describe('devdash', () => {
         const state = 'bar';
         const root = parseHtmlChunk(AmpState(id, state));
 
-        assert.strictEqual(root.tagName, 'AMP-STATE');
-        assert.strictEqual(root.getAttribute('id'), id);
+        expect(root.tagName).to.equal('AMP-STATE');
+        expect(root.getAttribute('id')).to.equal(id);
 
-        assert.strictEqual(root.children.length, 1);
+        expect(root.children.length).to.equal(1);
 
         const {firstElementChild} = root;
-        assert.strictEqual(firstElementChild.tagName, 'SCRIPT');
-        assert.strictEqual(
-          firstElementChild.getAttribute('type'),
-          'application/json');
+        expect(firstElementChild.tagName).to.equal('SCRIPT');
+        expect(firstElementChild.getAttribute('type'))
+            .to.equal('application/json');
       });
 
       it('renders json object', () => {
@@ -151,7 +143,7 @@ describe('devdash', () => {
         const {textContent} =
             parseHtmlChunk(AmpState(id, state)).firstElementChild;
 
-        assert.deepStrictEqual(JSON.parse(textContent), state);
+        expect(JSON.parse(textContent)).to.deep.equal(state);
       });
 
       it('renders string literal', () => {
@@ -161,7 +153,7 @@ describe('devdash', () => {
         const {textContent} =
             parseHtmlChunk(AmpState(id, state)).firstElementChild;
 
-        assert.strictEqual(JSON.parse(textContent), state);
+        expect(JSON.parse(textContent)).to.equal(state);
       });
 
       it('renders array', () => {
@@ -171,7 +163,7 @@ describe('devdash', () => {
         const {textContent} =
             parseHtmlChunk(AmpState(id, state)).firstElementChild;
 
-        assert.deepEqual(JSON.parse(textContent), state);
+        expect(JSON.parse(textContent)).to.deep.equal(state);
       });
     });
 
@@ -186,7 +178,7 @@ describe('devdash', () => {
             </body>
           </html>`;
 
-        assert(new JSDOM(addRequiredExtensionsToHead(rawStr)));
+        expect(new JSDOM(addRequiredExtensionsToHead(rawStr))).to.be.ok;
       });
 
       it('adds mixed', () => {
@@ -228,32 +220,32 @@ describe('devdash', () => {
         const scripts =
             Array.from(document.head.getElementsByTagName('script'));
 
-        assert.strictEqual(
-          scripts.length,
-          expectedExtensions.length + expectedTemplates.length);
+        expect(scripts.length)
+            .to.equal(expectedExtensions.length + expectedTemplates.length);
 
         scripts.forEach(script => {
-          assert(script.getAttribute('src'));
-          assert.strictEqual(script.getAttribute('async'), '');
+          expect(script.getAttribute('src')).to.be.ok;
+          expect(script.getAttribute('async')).to.equal('');
         });
 
         expectedExtensions.forEach(expectedScript => {
-          assert(scripts.find(s => {
+          expect(scripts.some(s => {
             if (s.getAttribute('custom-element') == expectedScript) {
-              assert(!s.getAttribute('custom-template'));
-              return true;
-            }
-          }));
-        });
-
-        expectedTemplates.forEach(expectedScript => {
-          assert(scripts.find(s => {
-            if (s.getAttribute('custom-template') == expectedScript) {
-              assert(!s.getAttribute('custom-extension'));
+              expect(s.getAttribute('custom-template')).to.be.null;
               return true;
             }
             return false;
-          }));
+          })).to.be.true;
+        });
+
+        expectedTemplates.forEach(expectedScript => {
+          expect(scripts.some(s => {
+            if (s.getAttribute('custom-template') == expectedScript) {
+              expect(s.getAttribute('custom-extension')).to.be.null;
+              return true;
+            }
+            return false;
+          })).to.be.true;
         });
       });
 
@@ -285,17 +277,17 @@ describe('devdash', () => {
         const scripts =
             Array.from(document.head.getElementsByTagName('script'));
 
-        assert.strictEqual(scripts.length, expected.length);
+        expect(scripts.length).to.equal(expected.length);
 
         scripts.forEach(script => {
-          assert(script.getAttribute('src'));
-          assert.strictEqual(script.getAttribute('async'), '');
-          assert(!script.getAttribute('custom-template'));
+          expect(script.getAttribute('src')).to.be.ok
+          expect(script.getAttribute('async')).to.equal('');
+          expect(script.getAttribute('custom-template')).to.be.null;
         });
 
         expected.forEach(expectedScript => {
-          assert(scripts.find(s =>
-            s.getAttribute('custom-element') == expectedScript));
+          expect(scripts.some(s =>
+            s.getAttribute('custom-element') == expectedScript)).to.be.true;
         });
       });
 
@@ -320,14 +312,14 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        assert.strictEqual(scripts.length, 1);
+        expect(scripts.length).to.equal(1);
 
         const [script] = scripts;
 
-        assert(!script.getAttribute('custom-element'));
-        assert(script.getAttribute('src'));
-        assert.strictEqual(script.getAttribute('async'), '');
-        assert.strictEqual(script.getAttribute('custom-template'), expected);
+        expect(script.getAttribute('custom-element')).to.be.null;
+        expect(script.getAttribute('src')).to.be.ok;
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('custom-template')).to.equal(expected);
       });
 
       it('adds <amp-form> per <form>', () => {
@@ -347,14 +339,14 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        assert.strictEqual(scripts.length, 1);
+        expect(scripts.length).to.equal(1);
 
         const [script] = scripts;
 
-        assert(!script.getAttribute('custom-template'));
-        assert(script.getAttribute('src'));
-        assert.strictEqual(script.getAttribute('async'), '');
-        assert.strictEqual(script.getAttribute('custom-element'), expected);
+        expect(script.getAttribute('custom-template')).to.be.null;
+        expect(script.getAttribute('src')).to.be.ok;
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('custom-element')).to.equal(expected);
       });
 
       it('adds <amp-form> per <input>', () => {
@@ -376,14 +368,14 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        assert.strictEqual(scripts.length, 1);
+        expect(scripts.length).to.equal(1);
 
         const [script] = scripts;
 
-        assert(!script.getAttribute('custom-template'));
-        assert(script.getAttribute('src'));
-        assert.strictEqual(script.getAttribute('async'), '');
-        assert.strictEqual(script.getAttribute('custom-element'), expected);
+        expect(script.getAttribute('custom-template')).to.be.null;
+        expect(script.getAttribute('src')).to.be.ok;
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('custom-element')).to.equal(expected);
       });
 
       it('adds <amp-form> per <select>', () => {
@@ -403,14 +395,14 @@ describe('devdash', () => {
 
         const scripts = document.head.getElementsByTagName('script');
 
-        assert.strictEqual(scripts.length, 1);
+        expect(scripts.length).to.equal(1);
 
         const [script] = scripts;
 
-        assert(!script.getAttribute('custom-template'));
-        assert(script.getAttribute('src'));
-        assert.strictEqual(script.getAttribute('async'), '');
-        assert.strictEqual(script.getAttribute('custom-element'), expected);
+        expect(script.getAttribute('custom-template')).to.be.null;
+        expect(script.getAttribute('src')).to.be.ok;
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('custom-element')).to.equal(expected);
       });
 
     });

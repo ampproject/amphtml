@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-const thru = a => a;
+const identity = a => a;
 
 
 /**
  * Takes a set of HTML fragments and concatenates them.
  * @param {!Array<T>} fragments
- * @param {function(T):string=} opt_renderer
+ * @param {function(T):string} renderer
  * @return {string}
  * @template T
  */
-const joinFragments = (fragments, opt_renderer) =>
-  fragments.map(opt_renderer || thru).join('');
+const joinFragments = (fragments, renderer = identity) =>
+  fragments.map(renderer).join('');
 
 
 /**

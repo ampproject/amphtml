@@ -59,32 +59,29 @@ const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
 
-const renderTemplate = ({
-  basepath,
-  css,
-  isMainPage,
-  fileSet,
-  serveMode,
-  selectModePrefix}) =>
-  addRequiredExtensionsToHead(AmpDoc({
-    canonical: basepath,
-    css,
-    body: joinFragments([
-      html`<div class="wrap">
-        ${Header({isMainPage, links: headerLinks})}
-        ${ProxyFormOptional({isMainPage})}
-      </div>`,
+function renderTemplate({
+  basepath, css, isMainPage, fileSet, serveMode, selectModePrefix}) {
 
-      FileList({basepath, selectModePrefix, fileSet}),
+  const body = joinFragments([
+    html`<div class="wrap">
+      ${Header({isMainPage, links: headerLinks})}
+      ${ProxyFormOptional({isMainPage})}
+    </div>`,
 
-      html`<div class="center">
-        Built with 💙  by
-        <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
-      </div>`,
+    FileList({basepath, selectModePrefix, fileSet}),
 
-      SettingsModal({serveMode}),
-    ]),
-  }));
+    html`<div class="center">
+      Built with 💙  by
+      <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+    </div>`,
+
+    SettingsModal({serveMode}),
+  ]);
+
+  const docWithoutExtensions = AmpDoc({canonical: basepath, css, body});
+
+  return addRequiredExtensionsToHead(docWithoutExtensions);
+}
 
 
 module.exports = {renderTemplate};

@@ -15,10 +15,8 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const assert = require('assert');
 
 const {assertValidAmphtml} = require('./helpers');
-
 const {renderTemplate} = require('../template');
 
 describe('template', () => {

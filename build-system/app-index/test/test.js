@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
-const pc = process;
-
 const {bundleComponent} = require('../bundler');
+const {expect} = require('chai');
 const {join} = require('path');
 const {serveIndexForTesting} = require('../index');
 
@@ -31,7 +29,7 @@ describe('devdash', () => {
     it.skip('bundles', async() => {
       const mainComponentPath = '../components/main.js';
       const bundle = await bundleComponent(join(__dirname, mainComponentPath));
-      assert.ok(bundle);
+      expect(bundle).to.be.ok;
     });
 
   });
@@ -40,7 +38,7 @@ describe('devdash', () => {
 
     it('renders HTML', async() => {
       const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
-      assert.ok(renderedHtml);
+      expect(renderedHtml).to.be.ok;
     });
 
   });

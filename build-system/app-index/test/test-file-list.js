@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
-
+const {expect} = require('chai');
 const {FileList} = require('../file-list');
 const {getBoundAttr, parseHtmlChunk} = require('./helpers');
 
@@ -31,11 +30,11 @@ describe('devdash', () => {
         selectModePrefix: '/',
       }));
 
-      assert.strictEqual(root.className, 'file-list-container');
+      expect(root.className).to.equal('file-list-container');
 
       const {firstElementChild} = root;
 
-      assert.strictEqual(firstElementChild.className, 'wrap');
+      expect(firstElementChild.className).to.equal('wrap');
     });
 
     it('creates amp-list', () => {
@@ -45,9 +44,8 @@ describe('devdash', () => {
         selectModePrefix: '/',
       }));
 
-      const els = root.getElementsByTagName('amp-list');
-
-      assert.strictEqual(els.length, 1);
+      const {length} = root.getElementsByTagName('amp-list');
+      expect(length).to.equal(1);
     });
 
     it('creates placeholder inside amp-list with rendered data', () => {
@@ -61,16 +59,16 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list > [placeholder]');
 
-      assert.strictEqual(els.length, 1);
+      expect(els.length).to.equal(1);
 
       const [placeholder] = els;
       const {firstElementChild} = placeholder;
 
-      assert.strictEqual(firstElementChild.getAttribute('role'), 'list');
+      expect(firstElementChild.getAttribute('role')).to.equal('list');
 
       const items = firstElementChild.querySelectorAll('.file-link-container');
 
-      assert.strictEqual(items.length, fileSet.length);
+      expect(items.length).to.equal(fileSet.length);
     });
 
     it('binds /examples hrefs', () => {
@@ -85,11 +83,11 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      assert.strictEqual(els.length, fileSet.length);
+      expect(els.length).to.equal(fileSet.length);
 
       Array.from(els).forEach((el, i) => {
-        assert(getBoundAttr(el, 'href'));
-        assert.strictEqual(el.getAttribute('href'), basepath + fileSet[i]);
+        expect(getBoundAttr(el, 'href')).to.be.ok;
+        expect(el.getAttribute('href')).to.equal(basepath + fileSet[i]);
       });
     });
 
@@ -105,11 +103,11 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      assert.strictEqual(els.length, fileSet.length);
+      expect(els.length).to.equal(fileSet.length);
 
       Array.from(els).forEach((el, i) => {
-        assert(!getBoundAttr(el, 'href'));
-        assert.strictEqual(el.getAttribute('href'), basepath + fileSet[i]);
+        expect(getBoundAttr(el, 'href')).to.be.undefined;
+        expect(el.getAttribute('href')).to.equal(basepath + fileSet[i]);
       });
     });
 
@@ -126,18 +124,18 @@ describe('devdash', () => {
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
-      assert.strictEqual(els.length, bound.length + notBound.length);
+      expect(els.length).to.equal(bound.length + notBound.length);
 
       bound.forEach((expectedHref, i) => {
         const el = els[i];
-        assert(getBoundAttr(el, 'href'));
-        assert.strictEqual(el.getAttribute('href'), basepath + expectedHref);
+        expect(getBoundAttr(el, 'href')).to.be.ok;
+        expect(el.getAttribute('href')).to.equal(basepath + expectedHref);
       });
 
       notBound.forEach((expectedHref, i) => {
         const el = els[bound.length + i];
-        assert(!getBoundAttr(el, 'href'));
-        assert.strictEqual(el.getAttribute('href'), basepath + expectedHref);
+        expect(getBoundAttr(el, 'href')).to.be.undefined;
+        expect(el.getAttribute('href')).to.equal(basepath + expectedHref);
       });
     });
 

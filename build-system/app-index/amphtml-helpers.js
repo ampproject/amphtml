@@ -19,8 +19,8 @@
 const assert = require('assert');
 const boilerPlate = require('./boilerplate');
 
-const {forEachMatch} = require('./regex');
 const {html, joinFragments} = require('./html');
+const {matchIterator} = require('./regex');
 
 
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
@@ -80,6 +80,14 @@ const AmpDoc = ({body, css, head, canonical}) => {
 };
 
 
+const componentExtensionNameMapping = {
+  'amp-state': 'amp-bind',
+};
+
+const componentExtensionName = tagName =>
+  componentExtensionNameMapping[tagName] || tagName;
+
+
 const addRequiredExtensionsToHead = (docStr, extensionConf = {
   'amp-mustache': {version: '0.2'},
 }) => {
@@ -88,29 +96,26 @@ const addRequiredExtensionsToHead = (docStr, extensionConf = {
   const addExtension = (name, defaultConf = {}) =>
     extensions[name] = {name, ...defaultConf, ...(extensionConf[name] || {})};
 
-  forEachMatch(componentTagNameRegex, docStr, ([unusedFullMatch, tagName]) => {
-    if (tagName == 'amp-state') {
-      addExtension('amp-bind');
-      return;
-    }
-    addExtension(tagName);
-  });
+  const addTemplate = (name, defaultConf = {}) =>
+    addExtension(name, {isTemplate: true, ...defaultConf});
 
-  forEachMatch(templateTagTypeRegex, docStr, ([unusedFullMatch, type]) => {
-    addExtension(type, {isTemplate: true});
-  });
+  Array.from(matchIterator(componentTagNameRegex, docStr))
+      .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+      .forEach(addExtension);
+
+  Array.from(matchIterator(templateTagTypeRegex, docStr))
+      .map(([unusedFullMatch, type]) => type)
+      .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.
   if (docStr.indexOf('AMP.setState') >= 0) {
     addExtension('amp-bind');
   }
 
-  for (let i = 0; i < formTypes.length; i++) {
-    const tagName = formTypes[i];
-    if (docStr.search(new RegExp(`\\<${tagName}(\\s|\\>)`)) > -1) {
-      addExtension('amp-form');
-      break;
-    }
+  const needsAmpForm = formTypes.some(tagName =>
+    docStr.search(new RegExp(`\\<${tagName}(\\s|\\>)`)) > -1);
+  if (needsAmpForm) {
+    addExtension('amp-form');
   }
 
   return docStr.replace(/(\<\/head\>)/i, (_, headClosingTag) =>

@@ -67,13 +67,15 @@ async function serveIndex({url}, res, next) {
     return next();
   }
 
+  const css = (await fs.readFileAsync(mainCssFile)).toString();
+
   const renderedHtml = renderTemplate({
     fileSet,
     selectModePrefix: '/',
     isMainPage: isMainPageFromUrl(url),
     basepath: formatBasepath(mappedPath),
     serveMode: pc.env.SERVE_MODE || 'default',
-    css: (await fs.readFileAsync(mainCssFile)).toString(),
+    css,
   });
 
   res.end(renderedHtml);

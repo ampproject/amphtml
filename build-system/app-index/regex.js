@@ -15,13 +15,13 @@
  */
 
 
-const forEachMatch = (regex, subject, callback) => {
+function* matchIterator(regex, subject) {
   let match = regex.exec(subject);
   while (match != null) {
-    callback(match);
+    yield match;
     match = regex.exec(subject);
   }
-};
+}
 
 
-module.exports = {forEachMatch};
+module.exports = {matchIterator};

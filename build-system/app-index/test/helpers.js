@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
+const {expect} = require('chai');
 const {JSDOM} = require('jsdom');
 
 
@@ -35,9 +35,8 @@ const getBoundAttr = (el, attr) => {
 
 const assertValidAmphtml = (validator, string) => {
   const {errors, status} = validator.validateString(string);
-  // Assert errors before so they're output.
-  assert.deepStrictEqual(errors, []);
-  assert.strictEqual(status, 'PASS');
+  expect(errors).to.deep.equal([]);
+  expect(status).to.equal('PASS');
 };
 
 
