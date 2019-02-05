@@ -49,6 +49,7 @@ describes.realWin('amp-story', {
 
   let win;
   let element;
+  let hasSwipeCapability = false;
   let story;
   let replaceStateStub;
 
@@ -84,6 +85,10 @@ describes.realWin('amp-story', {
     win = env.win;
 
     replaceStateStub = sandbox.stub(win.history, 'replaceState');
+
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    sandbox.stub(viewer, 'hasCapability')
+        .withArgs('swipe').returns(hasSwipeCapability);
 
     sandbox.stub(Services, 'storyStoreService')
         .callsFake(() => new AmpStoryStoreService(win));
@@ -1240,8 +1245,71 @@ describes.realWin('amp-story', {
           });
     });
   });
-  describe('amp-story branching', () => {
 
+  describe('touch events handlers', () => {
+    const getTouchOptions = (x, y) => {
+      const touch = new Touch({
+        target: story.element,
+        identifier: Date.now(),
+        clientX: x,
+        clientY: y,
+      });
+
+      return {touches: [touch], bubbles: true};
+    };
+
+    const dispatchSwipeEvent = (deltaX, deltaY) => {
+      story.element.dispatchEvent(
+          new TouchEvent('touchstart', getTouchOptions(-10, -10)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchmove', getTouchOptions(0, 0)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchmove', getTouchOptions(deltaX, deltaY)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchend', getTouchOptions(deltaX, deltaY)));
+    };
+
+    describe('without #cap=swipe', () => {
+      it('should handle touch events at the story level', () => {
+        const touchmoveSpy = sandbox.spy();
+        story.win.document.addEventListener('touchmove', touchmoveSpy);
+        dispatchSwipeEvent(100, 0);
+        expect(touchmoveSpy).to.not.have.been.called;
+      });
+
+      it('should trigger the navigation overlay', () => {
+        dispatchSwipeEvent(100, 0);
+        return story.mutateElement(() => {
+          const hintEl =
+              story.element.querySelector('.i-amphtml-story-hint-container');
+          expect(hintEl).to.not.have.class('i-amphtml-hidden');
+        });
+      });
+    });
+
+    describe('with #cap=swipe', () => {
+      before(() => hasSwipeCapability = true);
+      after(() => hasSwipeCapability = false);
+
+      it('should let touch events bubble up to be forwarded', () => {
+        const touchmoveSpy = sandbox.spy();
+        story.win.document.addEventListener('touchmove', touchmoveSpy);
+        dispatchSwipeEvent(100, 0);
+        expect(touchmoveSpy).to.have.been.called;
+      });
+
+      it('should not trigger the navigation education overlay', () => {
+        dispatchSwipeEvent(100, 0);
+        return story.mutateElement(() => {
+          const hintEl =
+              story.element.querySelector('.i-amphtml-story-hint-container');
+          expect(hintEl).to.not.exist;
+        });
+      });
+    });
+  });
+
+  describe('amp-story branching', () => {
     beforeEach(() => {toggleExperiment(win, 'amp-story-branching', true);});
     afterEach(() => {toggleExperiment(win, 'amp-story-branching', false);});
 
