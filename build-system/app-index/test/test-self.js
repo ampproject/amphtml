@@ -41,13 +41,18 @@ describe('devdash', () => {
 
     describe('getBoundAttr', () => {
 
+      it('returns bound attr set with other bound attrs', () => {
+        const fakeEl = {outerHTML: '<div myHref=no [y]=b [myHref]=a></div>'};
+        expect(getBoundAttr(fakeEl, 'myHref')).to.equal('a');
+      });
+
       it('returns bound attr set without quotes with unbound attr', () => {
-        const fakeEl = {outerHTML: '<div myHref=a [myHref]=a></div>'};
+        const fakeEl = {outerHTML: '<div myHref=no [myHref]=a></div>'};
         expect(getBoundAttr(fakeEl, 'myHref')).to.equal('a');
       });
 
       it('returns bound attr set with quotes with unbound attr', () => {
-        const fakeEl = {outerHTML: '<div foo=a [foo]="blah"></div>'};
+        const fakeEl = {outerHTML: '<div foo=no [foo]="blah"></div>'};
         expect(getBoundAttr(fakeEl, 'foo')).to.equal('blah');
       });
 
@@ -62,8 +67,8 @@ describe('devdash', () => {
       });
 
       it('returns undefined when not found', () => {
-        expect(getBoundAttr({outerHTML: '<div></div>'}, 'whatever'))
-            .to.be.undefined;
+        const fakeEl = {outerHTML: '<div></div>'};
+        expect(getBoundAttr(fakeEl, 'whatever')).to.be.undefined;
       });
 
     });
