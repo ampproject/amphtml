@@ -402,7 +402,8 @@ export class Services {
   static storyAnalyticsServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true)));
+      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story',
+          true)));
   }
 
   /**
