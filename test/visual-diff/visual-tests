@@ -625,5 +625,14 @@
       "loading_complete_delay_ms": 1000,
       "interactive_tests": "examples/visual-tests/amp-accordion/amp-accordion.js"
     },
+    {
+      "url": "examples/visual-tests/amp-user-notification/amp-user-notification.amp.html",
+      "name": "amp-user-notification",
+      "viewport": {"width": 400, "height": 600},
+      "loading_complete_css": [
+        "amp-user-notification.amp-active",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-user-notification/amp-user-notification.js"
+    }
   ]
 }
