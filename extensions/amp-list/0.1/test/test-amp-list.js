@@ -458,7 +458,7 @@ describes.repeated('amp-list', {
           listMock.expects('toggleLoading').withExactArgs(false).once();
 
           return expect(list.layoutCallback()).to.eventually.be
-              .rejectedWith(/Server side response must be defined/);
+              .rejectedWith(/Expected response with format/);
         });
 
         it('should delegate template rendering to viewer', function*() {
