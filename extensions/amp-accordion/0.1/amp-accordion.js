@@ -357,7 +357,7 @@ class AmpAccordion extends AMP.BaseElement {
             setStyles(sectionChild, {
               'position': '',
               'opacity': '',
-              'width': 'auto',
+              'width': '',
             });
           });
     }).then(() => {
