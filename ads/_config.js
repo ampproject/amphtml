@@ -939,7 +939,7 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
-  tracdelight: {
+  'tracdelight': {
     prefetch: 'https://scripts.tracdelight.com/amp.js',
     preconnect: [
       'https://scripts.tracdelight.com',
@@ -947,7 +947,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  triplelift: {},
+  'triplelift': {},
 
   'trugaze': {
     clientIdScope: '__tg_amp',
