@@ -211,10 +211,10 @@ describes.realWin('amp-accordion', {
       impl.toggle_(impl.sections_[0], true);
       return poll('wait for first section to expand',
           () => impl.sections_[0].hasAttribute('expanded'));
-    })
-        .then(() => {
-          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
-        });
+    }).then(() => {
+      return poll('wait for second section to expand',
+          () => impl.sections_[2].hasAttribute('expanded'));
+    });
   });
 
   it('should trigger a section\'s collapse event the section is expanded ' +
@@ -230,10 +230,10 @@ describes.realWin('amp-accordion', {
       impl.toggle_(impl.sections_[1], false);
       return poll('wait for first section to expand',
           () => !impl.sections_[1].hasAttribute('expanded'));
-    })
-        .then(() => {
-          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
-        });
+    }).then(() => {
+      return poll('wait for second section to expand',
+          () => impl.sections_[2].hasAttribute('expanded'));
+    });
   });
 
   it('should stay expanded on the expand action when expanded',
