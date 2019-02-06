@@ -45,7 +45,7 @@
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "layers": 1,
+  "layers": 0,
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
