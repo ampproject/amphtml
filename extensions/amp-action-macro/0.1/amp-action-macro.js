@@ -62,24 +62,31 @@ export class AmpActionMacro extends AMP.BaseElement {
   /**
    * Invoke the action defined on the macro.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
    */
   execute_(invocation) {
     const {actionEventType, args, event, trust} = invocation;
-    let actionMetadata;
-    // Define the action metadata used to dictate how the action service
-    // should handle this action.
     if (args && this.arguments_) {
-      actionMetadata =
-        /** @type !../../../src/service/action-impl.ActionInfoMetadata */
-        ({
-          args,
-          argsAliases: this.arguments_,
-          nodeActionCache: event.target,
-        });
+      this.validateDefinedArgs_(args);
     }
     // Trigger the macro's action.
     this.actions_.trigger(
-        this.element, `${actionEventType}`, event, trust, actionMetadata);
+        this.element, `${actionEventType}`, event, trust, args);
+  }
+
+  /**
+   * Verifies that the argument variable names defined on the macro are used
+   * in the caller invocation. The strictness of this validation is necessary
+   * even if the caller were to use a valid argument name that is
+   * defined on the component, as validating that an arg is valid action
+   * argument on that component would be excessive.
+   * @param {?JsonObject} args
+   */
+  validateDefinedArgs_(args) {
+    for (const arg in args) {
+      userAssert(this.arguments_.includes(arg),
+          'Variable argument name %s is not used', arg);
+    }
   }
 
   /** @override */

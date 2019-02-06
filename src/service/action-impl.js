@@ -103,20 +103,6 @@ let ActionInfoArgValueDef;
 let ActionInfoArgsDef;
 
 /**
- * Metadata used to define the behavior of an action.
- *   - args Defines the arguments to use in the action.
- *   - action_cache Defines the node that triggered the action.
- *   - arg_alias Defines the arg name aliases used in args and that
- *     needs to be evaluated against args.
- * @typedef {{
- *   args: !JsonObject,
- *   argAliases: !JsonObject,
- *   nodeActionCache: !Element,
- * }}
- **/
-export let ActionInfoMetadata;
-
-/**
  * @typedef {{
  *   event: string,
  *   target: string,
@@ -384,10 +370,10 @@ export class ActionService {
    * @param {string} eventType
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
-   * @param {?ActionInfoMetadata=} opt_metadata
+   * @param {?JsonObject=} opt_args
    */
-  trigger(target, eventType, event, trust, opt_metadata) {
-    this.action_(target, eventType, event, trust, opt_metadata);
+  trigger(target, eventType, event, trust, opt_args) {
+    this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
@@ -486,10 +472,10 @@ export class ActionService {
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
-   * @param {?ActionInfoMetadata=} opt_metadata
+   * @param {?JsonObject=} opt_args
    * @private
    */
-  action_(source, actionEventType, event, trust, opt_metadata) {
+  action_(source, actionEventType, event, trust, opt_args) {
     const action =
         this.findAction_(source, actionEventType);
     if (!action) {
@@ -501,11 +487,9 @@ export class ActionService {
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    this.setNodeActionReference_(
-        actionEventType, action.actionInfos, event, opt_metadata);
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
-      const args = this.initializeArgs_(actionInfo, event, opt_metadata);
+      const args = this.initializeArgs_(actionInfo, event, opt_args);
       // Replace the unevaluated args with the initialized args.
       actionInfo.args = args;
       const invokeAction = () => {
@@ -532,59 +516,17 @@ export class ActionService {
   }
 
   /**
-   * Overrides the node actionMap key reference based on the data provided in
-   * the metadata.
-   * @param {string} actionEventType
-   * @param {!Array<!ActionInfoDef>} actionInfos
-   * @param {?ActionEventDef} event
-   * @param {?ActionInfoMetadata=} opt_metadata
-   */
-  setNodeActionReference_(actionEventType, actionInfos, event, opt_metadata) {
-    if (!opt_metadata) {
-      return;
-    }
-    // Element that triggered the action. e.g. button.
-    const triggerNode = event.target;
-    // If the action is to override an existing action cached on a node
-    // then set it on the triggerNode and delete it on the previously set node.
-    const nodeActionCache = opt_metadata && opt_metadata['nodeActionCache'];
-    if (nodeActionCache) {
-      const actionMap = dict({});
-      const actionMapKey = nodeActionCache['action-map'];
-      actionMap[`${actionEventType}`] = actionInfos;
-      triggerNode[`${actionMapKey}`] = actionMap;
-      delete nodeActionCache[`${actionMapKey}`];
-      delete nodeActionCache['action-map'];
-    }
-  }
-
-  /**
    * Initialize the action's arguments.
    * @param {!ActionInfoDef} actionInfo
    * @param {?ActionEventDef} event
-   * @param {?ActionInfoMetadata=} opt_metadata
+   * @param {?JsonObject=} opt_args
    * @return {?JsonObject}
    */
-  initializeArgs_(actionInfo, event, opt_metadata) {
-    let overriddenArgs;
-    // Use arguments provided by the metadata if provided.
-    if (opt_metadata) {
-      for (const arg in actionInfo.args) {
-        const variableArgName = actionInfo.args[`${arg}`];
-        const argsAliases = /** @type {!Array} */ (opt_metadata['argsAliases']);
-        // If the arg name used in a call is a listed argument alias/expression.
-        if (argsAliases && argsAliases.includes(variableArgName)) {
-          // Then it is an expression to be evaluated against the data provided
-          // in opt_args.
-          actionInfo.args[`${arg}`] = {expression: `event.${variableArgName}`};
-        }
-      }
-      overriddenArgs = opt_metadata['args'];
-    }
-
-    return dereferenceExprsInArgs(
-        actionInfo.args, overriddenArgs ? overriddenArgs
-          : getDetail(/** @type {!Event} */ (event)), 'event');
+  initializeArgs_(actionInfo, event, opt_args) {
+    const data = opt_args ? opt_args : getDetail(/** @type {!Event} */ (event));
+    const key = opt_args ? undefined : 'event';
+    // Replace any variables in args with values provided in data.
+    return dereferenceExprsInArgs(actionInfo.args, data, key);
   }
 
   /**
@@ -1072,21 +1014,23 @@ function argValueForTokens(tokens) {
 /**
  * Dereferences expression args in `args` using values in data.
  * @param {?ActionInfoArgsDef} args
- * @param {?JsonObject|string|undefined} data
- * @param {string} key The value to use in evaluating the argument expression.
+ * @param {!JsonObject|string|null|undefined} data
+ * @param {string=} opt_key The value to use in evaluating the argument expression.
  *    This will be parent property of provided data and the root property
  *    in the expression to evaluate against.
  * @return {?JsonObject}
  * @private
- * @visibleForTesting
  */
-export function dereferenceExprsInArgs(args, data, key) {
+export function dereferenceExprsInArgs(args, data, opt_key) {
   if (!args) {
     return args;
   }
-  const dataStore = dict();
-  if (data) {
-    dataStore[`${key}`] = data;
+  let dataStore = data;
+  if (dataStore) {
+    if (opt_key) {
+      dataStore = dict({});
+      dataStore[`${opt_key}`] = data;
+    }
   }
   const applied = map();
   Object.keys(args).forEach(key => {
@@ -1094,11 +1038,11 @@ export function dereferenceExprsInArgs(args, data, key) {
     if (typeof value == 'object' && value.expression) {
       const expr =
         /** @type {ActionInfoArgExpressionDef} */ (value).expression;
-      const exprValue = getValueForExpr(dataStore, expr);
+      const exprValue = getValueForExpr(devAssert(dataStore), expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;
     }
-    applied[key] = value;
+    applied[key] = !opt_key ? dataStore[value] : value;
   });
   return applied;
 }
