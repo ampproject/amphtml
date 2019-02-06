@@ -59,6 +59,9 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {
+  getAddThisMode, isProductCode, isPubId, isWidgetId,
+} from './addthis-utils/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -103,6 +106,9 @@ class AmpAddThis extends AMP.BaseElement {
     this.widgetId_ = '';
 
     /** @private {string} */
+    this.productCode_ = '';
+
+    /** @private {string} */
     this.canonicalUrl_ = '';
 
     /** @private {string} */
@@ -119,26 +125,54 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {string} */
     this.widgetType_ = '';
+
+    /** @private {string} */
+    this.containerClassName_ = '';
   }
 
   /**
    * @override
    */
   buildCallback() {
-    const pubId = this.element.getAttribute('data-pub-id');
-    const widgetId = this.element.getAttribute('data-widget-id');
+    const pubId = this.element.getAttribute('data-pub-id') || '';
+    const widgetId = this.element.getAttribute('data-widget-id') || '';
+    const productCode = this.element.getAttribute('data-product-code') || '';
+    if (getAddThisMode({pubId, widgetId, productCode}) === -1) {
+      if (isPubId(pubId)) {
+        if (!isProductCode(productCode) && !isWidgetId(widgetId)) {
+          userAssert(
+              widgetId,
+              'Widget id or product code is required for <amp-addthis> %s',
+              this.element
+          );
+        } else if (isProductCode(productCode) && isWidgetId(widgetId)) {
+          userAssert(
+              productCode,
+              'Only widget id or product code is required <amp-addthis> %s',
+              this.element
+          );
+        }
+      } else {
+        userAssert(
+            pubId,
+            'The data-pub-id attribute is required for <amp-addthis> %s',
+            this.element
+        );
+      }
+    }
 
-    // Required attributes
-    this.pubId_ = userAssert(
-        pubId,
-        'The data-pub-id attribute is required for <amp-addthis> %s',
-        this.element
-    );
-    this.widgetId_ = userAssert(
-        widgetId,
-        'The data-widget-id attribute is required for <amp-addthis> %s',
-        this.element
-    );
+    this.containerClassName_ =
+      this.element.getAttribute('data-class-name') || '';
+
+    // Required attributes (at least one or more of the following is required)
+    this.pubId_ = pubId;
+    this.widgetId_ = widgetId;
+    this.productCode_ = productCode;
+
+    // sets the widget type when we use a product code for WP modes
+    if (this.productCode_ === 'shfs') {
+      this.element.setAttribute('data-widget-type', 'floating');
+    }
 
     // Optional attributes
     const ampDoc = this.getAmpDoc();
@@ -243,6 +277,8 @@ class AmpAddThis extends AMP.BaseElement {
           'title': ALT_TEXT,
           'src': `${ORIGIN}/dc/amp-addthis.html`,
           'id': this.widgetId_,
+          'pco': this.productCode_,
+          'containerClassName': this.containerClassName_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
@@ -255,8 +291,10 @@ class AmpAddThis extends AMP.BaseElement {
     configManager.register({
       pubId: this.pubId_,
       widgetId: this.widgetId_,
+      productCode: this.productCode_,
       shareConfig: this.shareConfig_,
       atConfig: this.atConfig_,
+      containerClassName: this.containerClassName_,
       iframe,
       iframeLoadPromise,
       activeToolsMonitor,

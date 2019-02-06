@@ -22,12 +22,20 @@ import {
 } from '../constants';
 import {ConfigManager} from '../config-manager';
 
+import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
+import {
+  getAddThisMode,
+  isProductCode,
+  isPubId,
+  isWidgetId,
+} from '../addthis-utils/mode';
 import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
-import {isDateInFuture} from '../addthis-utils/cuid';
+import {getSessionId} from '../addthis-utils/session';
+import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
 
 describes.realWin('amp-addthis', {
@@ -40,6 +48,7 @@ describes.realWin('amp-addthis', {
   const widgetId = '29nf';
   const floatingPubId = 'ra-5b2947993c86010c';
   const floatingWidgetId = '4hvd';
+  const productCode = 'shin';
   let doc;
   let registerStub;
   let unregisterStub;
@@ -51,13 +60,20 @@ describes.realWin('amp-addthis', {
   });
 
   function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
-    const {pubId, widgetId, shareConfig = {}} = configuration;
+    const {shareConfig = {}} = configuration;
     const elementAttributes = dict({
-      'data-pub-id': pubId,
-      'data-widget-id': widgetId,
-      'width': 111,
-      'height': 222,
+      'width': '320px',
+      'height': '90px',
     });
+    if (configuration.pubId) {
+      elementAttributes['data-pub-id'] = configuration.pubId;
+    }
+    if (configuration.widgetId) {
+      elementAttributes['data-widget-id'] = configuration.widgetId;
+    }
+    if (configuration.productCode) {
+      elementAttributes['data-product-code'] = configuration.productCode;
+    }
     Object.keys(shareConfig).forEach(key => {
       elementAttributes[`data-share-${key}`] = shareConfig[key];
     });
@@ -109,20 +125,63 @@ describes.realWin('amp-addthis', {
     });
   });
 
-  it('requires data-pub-id', () => {
+  it('fails when tag needs pub id', () => {
     allowConsoleError(() => {
-      expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
-          /The data\-pub\-id attribute is required for/
+      expect(getAT({widgetId})).to.be.rejectedWith(
+          /The pub id attribute is required for /,
       );
     });
   });
 
-  it('requires data-widget-id', () => {
+  it('fails when tag needs widget id', () => {
     allowConsoleError(() => {
-      expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
-          /The data\-widget\-id attribute is required for/
+      expect(getAT({pubId})).to.be.rejectedWith(
+          /Widget id or product code is required for /,
       );
     });
+  });
+
+  it('fails when tag needs pub id and has empty product code', () => {
+    allowConsoleError(() => {
+      expect(getAT({widgetId})).to.be.rejectedWith(
+          /The pub id attribute is required for /,
+      );
+    });
+  });
+
+  it('fails when tag has pubId but not widget id or product code', () => {
+    allowConsoleError(() => {
+      expect(getAT({pubId})).to.be.rejectedWith(
+          /Widget id or product code is required for /,
+      );
+    });
+  });
+
+  it('fails when tag has no pub id, widget id, or product code', () => {
+    allowConsoleError(() => {
+      expect(getAT({})).to.be.rejectedWith(
+          /Widget id or product code is required for /,
+      );
+    });
+  });
+
+  // success here means "no errors thrown when creating element"
+  it('succeeds when tag has pub id and widget id', () => {
+    expect(getAT({
+      pubId, widgetId,
+    })).to.not.equal(void 0);
+  });
+
+  it('succeeds when tag has pub id and product code', () => {
+    expect(getAT({
+      pubId, productCode,
+    })).to.not.equal(void 0);
+  });
+
+  it('succeeds when tag has just a product code', () => {
+    expect(getAT({
+      productCode,
+    })).to.not.equal(void 0);
   });
 
   it('removes the iframe after unlayoutCallback', () => {
@@ -379,12 +438,120 @@ describes.realWin('amp-addthis', {
   });
 
   it('gives id for iframe if floating tool loaded', () => {
-    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
+    return getAT({
+      pubId: floatingPubId, widgetId: floatingWidgetId,
+    }).then(
         ({at}) => {
           testIframe(at.querySelector('iframe'));
           const iframe = at.querySelector('iframe');
           expect(iframe.getAttribute('id')).to.equal(floatingWidgetId);
-        }
+        },
     );
+  });
+
+  it('gets mode correctly based on attributes', () => {
+    const widgetId = 'abcd';
+    const pubId = 'ra-0000000000000000';
+    const productCode = 'shfs';
+    const mode1 = {widgetId, pubId};
+    const mode2 = {productCode, pubId};
+    const mode3 = {productCode};
+    const mode4 = {widgetId, productCode, pubId};
+    const mode5 = {widgetId};
+    const mode6 = {pubId};
+    const mode7 = {pubId, widgetId: ''};
+    const mode8 = {pubId, productCode: ''};
+    const mode9 = {pubId, widgetId: '', productCode: ''};
+
+    expect(getAddThisMode({})).to.equal(-1);
+    expect(getAddThisMode(mode1)).to.equal(1);
+    expect(getAddThisMode(mode2)).to.equal(2);
+    expect(getAddThisMode(mode3)).to.equal(3);
+    expect(getAddThisMode(mode4)).to.equal(-1);
+    expect(getAddThisMode(mode5)).to.equal(-1);
+    expect(getAddThisMode(mode6)).to.equal(-1);
+    expect(getAddThisMode(mode7)).to.equal(-1);
+    expect(getAddThisMode(mode8)).to.equal(-1);
+    expect(getAddThisMode(mode9)).to.equal(-1);
+  });
+
+  it('isPubId: pretty much knows if a thing is a pub id or not', () => {
+    expect(isPubId(1)).to.equal(false);
+    expect(isPubId(String('maybe'))).to.equal(true);
+    expect(isPubId('maybe')).to.equal(true);
+    expect(isPubId({})).to.equal(false);
+    expect(isPubId([])).to.equal(false);
+    expect(isPubId(void 0)).to.equal(false);
+    expect(isPubId(null)).to.equal(false);
+  });
+
+  it('isProductCode: pretty much knows if a thing is a product code or not',
+      () => {
+        expect(isProductCode(1)).to.equal(false);
+        expect(isProductCode(String('mayb'))).to.equal(false);
+        expect(isProductCode(String('shin'))).to.equal(true);
+        expect(isProductCode('maybe')).to.equal(false);
+        expect(isProductCode('shin')).to.equal(true);
+        expect(isProductCode('shfs')).to.equal(true);
+        expect(isProductCode({})).to.equal(false);
+        expect(isProductCode([])).to.equal(false);
+        expect(isProductCode(void 0)).to.equal(false);
+        expect(isProductCode(null)).to.equal(false);
+      });
+
+  it('isWidgetId: pretty much knows if a thing is a widget id or not', () => {
+    expect(isWidgetId(1)).to.equal(false);
+    expect(isWidgetId(String('mayb'))).to.equal(true);
+    expect(isWidgetId(String('101x'))).to.equal(true);
+    expect(isWidgetId('maybe')).to.equal(false);
+    expect(isWidgetId('shin')).to.equal(true);
+    expect(isWidgetId('shfs')).to.equal(true);
+    expect(isWidgetId({})).to.equal(false);
+    expect(isWidgetId([])).to.equal(false);
+    expect(isWidgetId(void 0)).to.equal(false);
+    expect(isWidgetId(null)).to.equal(false);
+  });
+
+  it('isString: knows if a thing is a string or not', () => {
+    expect(isString(1)).to.equal(false);
+    expect(isString(String('mayb'))).to.equal(true);
+    expect(isString(String('101x'))).to.equal(true);
+    expect(isString('maybe')).to.equal(true);
+    expect(isString('shin')).to.equal(true);
+    expect(isString('shfs')).to.equal(true);
+    expect(isString({})).to.equal(false);
+    expect(isString([])).to.equal(false);
+    expect(isString(void 0)).to.equal(false);
+    expect(isString(null)).to.equal(false);
+  });
+
+  it('getSessionId: returns a string of 16 characters containing 0-9 a-f',
+      () => {
+        expect(isString(getSessionId())).to.equal(true);
+        expect(getSessionId().length).to.equal(16);
+        expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
+
+        // within the same session, ids match
+        const a = getSessionId();
+        const b = getSessionId();
+        expect(a).to.equal(b);
+      });
+
+  it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
+    expect(isString(createCUID())).to.equal(true);
+
+    const a = createCUID();
+    const b = createCUID();
+    expect(a).to.not.equal(b);
+
+    const o = {};
+    for (let i = 0; i < 100000; i += 1) {
+      const c = createCUID().length;
+      if (!o[c]) {
+        o[c] = 0;
+      }
+      o[c] = o[c] + 1;
+    }
+    expect(o[16]).to.equal(100000);
   });
 });
