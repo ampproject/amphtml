@@ -490,7 +490,7 @@ export class AmpList extends AMP.BaseElement {
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, request, /* opt_templates */ null, attributes);
     }).then(response => {
-      userAssert(response && response['html'] !== 'undefined',
+      userAssert(response && !!response['html'],
           'Server side response must be defined');
       request.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
