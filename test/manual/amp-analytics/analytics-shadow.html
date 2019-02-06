@@ -19,9 +19,9 @@
         //let shadow = AMP.attachShadowDocAsStream(document.body);
         const div1 = document.getElementById('s1');
         const div2 = document.getElementById('s2');
-        const url = './custom-trigger-shadow.html';
+        const url = './analytics-shadow-root-1.html';
         const shadowDoc = AMP.attachShadowDocAsStream(div1, url);
-        const url2 = './custom-trigger-shadow-2.html';
+        const url2 = './analytics-shadow-root-2.html';
         const shadowDoc2 = AMP.attachShadowDocAsStream(div2, url2);
 
         fetch(url).then(response => {
