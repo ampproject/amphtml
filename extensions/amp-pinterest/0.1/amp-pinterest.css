@@ -62,31 +62,33 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.-amp-pinterest-en-gray {
+.-amp-pinterest-save-button-tall {
+  background-position-x: 6px;
+  border-radius: 4px;
+  text-indent: 25px;
+  text-decoration: none;
+  font: 14px/28px "Helvetica Neue", Helvetica, Arial, "sans-serif";
+  font-weight: bold;
+  background: #e60023 url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzBweCIgd2lkdGg9IjMwcHgiIHZpZXdCb3g9Ii0xIC0xIDMxIDMxIj48Zz48cGF0aCBkPSJNMjkuNDQ5LDE0LjY2MiBDMjkuNDQ5LDIyLjcyMiAyMi44NjgsMjkuMjU2IDE0Ljc1LDI5LjI1NiBDNi42MzIsMjkuMjU2IDAuMDUxLDIyLjcyMiAwLjA1MSwxNC42NjIgQzAuMDUxLDYuNjAxIDYuNjMyLDAuMDY3IDE0Ljc1LDAuMDY3IEMyMi44NjgsMC4wNjcgMjkuNDQ5LDYuNjAxIDI5LjQ0OSwxNC42NjIiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxIj48L3BhdGg+PHBhdGggZD0iTTE0LjczMywxLjY4NiBDNy41MTYsMS42ODYgMS42NjUsNy40OTUgMS42NjUsMTQuNjYyIEMxLjY2NSwyMC4xNTkgNS4xMDksMjQuODU0IDkuOTcsMjYuNzQ0IEM5Ljg1NiwyNS43MTggOS43NTMsMjQuMTQzIDEwLjAxNiwyMy4wMjIgQzEwLjI1MywyMi4wMSAxMS41NDgsMTYuNTcyIDExLjU0OCwxNi41NzIgQzExLjU0OCwxNi41NzIgMTEuMTU3LDE1Ljc5NSAxMS4xNTcsMTQuNjQ2IEMxMS4xNTcsMTIuODQyIDEyLjIxMSwxMS40OTUgMTMuNTIyLDExLjQ5NSBDMTQuNjM3LDExLjQ5NSAxNS4xNzUsMTIuMzI2IDE1LjE3NSwxMy4zMjMgQzE1LjE3NSwxNC40MzYgMTQuNDYyLDE2LjEgMTQuMDkzLDE3LjY0MyBDMTMuNzg1LDE4LjkzNSAxNC43NDUsMTkuOTg4IDE2LjAyOCwxOS45ODggQzE4LjM1MSwxOS45ODggMjAuMTM2LDE3LjU1NiAyMC4xMzYsMTQuMDQ2IEMyMC4xMzYsMTAuOTM5IDE3Ljg4OCw4Ljc2NyAxNC42NzgsOC43NjcgQzEwLjk1OSw4Ljc2NyA4Ljc3NywxMS41MzYgOC43NzcsMTQuMzk4IEM4Ljc3NywxNS41MTMgOS4yMSwxNi43MDkgOS43NDksMTcuMzU5IEM5Ljg1NiwxNy40ODggOS44NzIsMTcuNiA5Ljg0LDE3LjczMSBDOS43NDEsMTguMTQxIDkuNTIsMTkuMDIzIDkuNDc3LDE5LjIwMyBDOS40MiwxOS40NCA5LjI4OCwxOS40OTEgOS4wNCwxOS4zNzYgQzcuNDA4LDE4LjYyMiA2LjM4NywxNi4yNTIgNi4zODcsMTQuMzQ5IEM2LjM4NywxMC4yNTYgOS4zODMsNi40OTcgMTUuMDIyLDYuNDk3IEMxOS41NTUsNi40OTcgMjMuMDc4LDkuNzA1IDIzLjA3OCwxMy45OTEgQzIzLjA3OCwxOC40NjMgMjAuMjM5LDIyLjA2MiAxNi4yOTcsMjIuMDYyIEMxNC45NzMsMjIuMDYyIDEzLjcyOCwyMS4zNzkgMTMuMzAyLDIwLjU3MiBDMTMuMzAyLDIwLjU3MiAxMi42NDcsMjMuMDUgMTIuNDg4LDIzLjY1NyBDMTIuMTkzLDI0Ljc4NCAxMS4zOTYsMjYuMTk2IDEwLjg2MywyNy4wNTggQzEyLjA4NiwyNy40MzQgMTMuMzg2LDI3LjYzNyAxNC43MzMsMjcuNjM3IEMyMS45NSwyNy42MzcgMjcuODAxLDIxLjgyOCAyNy44MDEsMTQuNjYyIEMyNy44MDEsNy40OTUgMjEuOTUsMS42ODYgMTQuNzMzLDEuNjg2IiBmaWxsPSIjZTYwMDIzIj48L3BhdGg+PC9nPjwvc3ZnPg==) 3px 50% no-repeat;
+  background-size: 18px 18px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.-amp-pinterest-en-gray, .-amp-pinterest-en-gray-tall, .-amp-pinterest-ja-gray, .-amp-pinterest-ja-gray-tall {
   color: #fff;
   background-color: #888;
 }
 
-.-amp-pinterest-en-red {
+.-amp-pinterest-en-red, .-amp-pinterest-en-red-tall, .-amp-pinterest-ja-red, .-amp-pinterest-ja-red-tall {
   color: #fff;
   background-color: #e60023;
 }
 
-.-amp-pinterest-en-white {
+.-amp-pinterest-en-white, .-amp-pinterest-en-white-tall, .-amp-pinterest-ja-white, .-amp-pinterest-ja-white-tall {
   color: #e60023;
   background-color: #fff;
-}
-
-.-amp-pinterest-ja-gray {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_20_2.png);
-}
-
-.-amp-pinterest-ja-red {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_20_2.png);
-}
-
-.-amp-pinterest-ja-white {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_20_2.png);
+  box-sizing: border-box;
+  box-shadow: inset 0 0 1px #e60023;
 }
 
 /* large buttons */
@@ -104,32 +106,6 @@
 
 .-amp-pinterest-rect-tall:active{
   background-position: 0 -56px;
-}
-
-/* large background images */
-
-.-amp-pinterest-en-gray-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png);
-}
-
-.-amp-pinterest-en-red-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_28_2.png);
-}
-
-.-amp-pinterest-en-white-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_28_2.png);
-}
-
-.-amp-pinterest-ja-gray-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_28_2.png);
-}
-
-.-amp-pinterest-ja-red-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_28_2.png);
-}
-
-.-amp-pinterest-ja-white-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_28_2.png);
 }
 
 /* count bubble above */

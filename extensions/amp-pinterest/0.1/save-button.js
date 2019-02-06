@@ -135,12 +135,12 @@ export class SaveButton {
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
       'i-amphtml-fill-content',
-      '-amp-pinterest-save-button',
     ];
 
     let countBubble = null;
     if (!this.round) {
-      clazz.push(`-amp-pinterest${CLASS.lang}-${CLASS.color}${CLASS.height}`);
+      clazz.push(`-amp-pinterest-save-button${CLASS.height}`);
+      clazz.push(`-amp-pinterest${CLASS.lang}-${CLASS.color}`);
       if (count) {
         clazz.push(`-amp-pinterest-count-pad-${this.count}${CLASS.height}`);
         countBubble = this.renderCount(count['count'], CLASS.height);
@@ -150,7 +150,7 @@ export class SaveButton {
     const saveButton = Util.make(this.element.ownerDocument, {'a': {
       class: clazz.join(' '),
       href: this.href,
-      textContent: "Save",
+      textContent: this.round ? '' : (this.lang === 'ja' ? '保存' : 'Save'),
     }});
 
     if (countBubble) {
