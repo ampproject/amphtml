@@ -17,7 +17,7 @@
 import {simulateKeyboardInteraction} from './utils';
 
 const config = describe.configure().retryOnSaucelabs().ifChrome();
-config.run('amp-inputmask', () => {
+config.skip('amp-inputmask', () => {
   describes.integration('attributes', {
     body: `
     <form method="post" action-xhr="http://localhost:8081/form/post" target="_blank">
