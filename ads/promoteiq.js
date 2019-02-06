@@ -16,6 +16,7 @@
 
 import {dev} from '../src/log';
 import {loadScript, validateData} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 const TAG = 'PROMOTEIQ';
 const mandatoryDataFields = ['src', 'params', 'sfcallback'];
@@ -26,7 +27,7 @@ const mandatoryDataFields = ['src', 'params', 'sfcallback'];
  */
 export function promoteiq(global, data) {
   validateData(data, mandatoryDataFields, []);
-  const sfInputs = JSON.parse(data.params);
+  const sfInputs = parseJson(data.params);
 
   loadScript(global, data.src, () => {
     if (!!global.TagDeliveryContent) {
