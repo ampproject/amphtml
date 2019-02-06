@@ -154,13 +154,13 @@ export class ScrollAccessVendor extends AccessClientAdapter {
         .then(response => {
           const isStory = this.ampdoc.getRootNode().querySelector(
               'amp-story[standalone]');
-          if (response && response.scroll) {
+          if (response && response['scroll']) {
             if (!isStory) {
               const config = this.accessSource_.getAdapterConfig();
               new ScrollElement(this.ampdoc).handleScrollUser(
                   this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
-              if (response.features && response.features.readDepth) {
+              if (response['features'] && response['features']['readDepth']) {
                 new ReadDepthTracker(
                     this.ampdoc,
                     this.accessSource_,
@@ -171,7 +171,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           } else {
             if (
               response &&
-              response.blocker &&
+              response['blocker'] &&
               ScrollContentBlocker.shouldCheck(this.ampdoc)
             ) {
               new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
