@@ -554,6 +554,13 @@ data.categories;
 data.media;
 data.baseUrl;
 
+// promoteiq.js
+window.TagDeliveryContent;
+window.TagDeliveryContent.request;
+data.sfcallback;
+data.params;
+data.src;
+
 // pubguru.js
 data.height;
 data.publisher;
