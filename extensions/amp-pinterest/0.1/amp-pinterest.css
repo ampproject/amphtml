@@ -58,7 +58,9 @@
   font: 11px/20px "Helvetica Neue", Helvetica, sans-serif;
   font-weight: bold;
   max-height: 20px;
+  max-width: 50px;
   min-height: 20px;
+  min-width: 50px;
   text-indent: 20px;
   text-decoration: none;
   -webkit-font-smoothing: antialiased;
@@ -70,7 +72,9 @@
   background-size: 18px 18px;
   border-radius: 4px;
   max-height: 28px;
+  max-width: 68px;
   min-height: 28px;
+  min-width: 68px;
   text-indent: 29px;
   text-decoration: none;
   font: 14px/28px "Helvetica Neue", Helvetica, Arial, "sans-serif";
@@ -145,6 +149,7 @@
   border-left: 7px solid transparent;
   bottom: -4px;
   left: 4px;
+  content: "";
   position: absolute;
 }
 
@@ -170,47 +175,72 @@
   border-left: 7px solid transparent;
   bottom: -4px;
   left: 7px;
+  content: "";
   position: absolute;
 }
 
 /* count bubble beside */
 
 .-amp-pinterest-count-pad-beside {
+  margin-left: 0;
   width: 86px;
 }
 
 .-amp-pinterest-count-pad-beside-tall {
+  margin-left: 0;
   width: 120px;
 }
 
 .-amp-pinterest-bubble-beside {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -46px;
   height: 20px;
-  width: 45px;
+  width: 40px;
   text-align: center;
-  text-indent: 5px;
+  text-indent: 0;
   text-decoration: none;
   color: #555;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_20_2.png) 0 0 no-repeat;
-  background-size: 45px 20px;
+  background: #efefef;
+  background-size: 40px 20px;
+  border-radius: 4px;
   line-height: 20px;
+}
+
+.-amp-pinterest-bubble-beside::before {
+  top: 3px;
+  left: -4px;
+  border-right: 7px solid #efefef;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  content: "";
+  position: absolute;
 }
 
 .-amp-pinterest-bubble-beside-tall {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -62px;
   height: 28px;
-  width: 63px;
+  width: 56px;
   text-align: center;
-  text-indent: 7px;
+  text-indent: 0;
   text-decoration: none;
   color: #555;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_28_2.png) 0 0 no-repeat;
-  background-size: 63px 28px;
+  background: #efefef;
+  background-size: 56px 28px;
+  border-radius: 4px;
   line-height: 28px;
+}
+
+.-amp-pinterest-bubble-beside-tall::before{
+  top: 7px;
+  left: -4px;
+  border-right: 7px solid #efefef;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  content: "";
+  position: absolute;
 }
 
 .-amp-pinterest-follow-button {
