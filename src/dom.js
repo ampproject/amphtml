@@ -487,6 +487,30 @@ export function childElementsByTag(parent, tagName) {
 }
 
 /**
+ * Prefixes a selector for ancestor selection. Splits in subselectors and
+ * applies prefix to each.
+ *
+ * e.g.
+ * ```
+ *   scopeSelector('.i-amphtml-scoped', 'div'); // .i-amphtml-scoped div
+ *   scopeSelector(':scope', 'div, ul');        // :scope div, :scope ul
+ *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
+ * ```
+ *
+ * @param {string} ancestorSelector
+ * @param {string} descendantSelector
+ * @return {string}
+ */
+function scopeSelector(ancestorSelector, descendantSelector) {
+  return descendantSelector
+      .split(',')
+      .map(subSelector => `${ancestorSelector} ${subSelector}`)
+      .join(',');
+}
+
+export const scopeSelectorForTesting = scopeSelector;
+
+/**
  * Finds all elements that matche `selector`, scoped inside `root`
  * for user-agents that do not support native scoping.
  *
@@ -499,9 +523,10 @@ export function childElementsByTag(parent, tagName) {
 function scopedQuerySelectionFallback(root, selector) {
   const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
-  const element = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
+  const scopedSelector = scopeSelector(`.${unique}`, selector);
+  const elements = root./*OK*/querySelectorAll(scopedSelector);
   root.classList.remove(unique);
-  return element;
+  return elements;
 }
 
 /**
@@ -516,7 +541,7 @@ export function scopedQuerySelector(root, selector) {
     scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return root./*OK*/querySelector(`:scope ${selector}`);
+    return root./*OK*/querySelector(scopeSelector(':scope', selector));
   }
 
   // Only IE.
@@ -536,7 +561,7 @@ export function scopedQuerySelectorAll(root, selector) {
     scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return root./*OK*/querySelectorAll(`:scope ${selector}`);
+    return root./*OK*/querySelectorAll(scopeSelector(':scope', selector));
   }
 
   // Only IE.
