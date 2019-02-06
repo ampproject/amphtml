@@ -24,13 +24,21 @@ The goals of enforcing AMP code ownership are as follows:
 
 The Chromium open source project implements a code ownership
 [model](https://chromium.googlesource.com/chromium/src/+/master/docs/code_reviews.md#OWNERS-files)
-that we would like to use for AMP HTML. Unfortunately, with GitHub's
-[native](https://help.github.com/articles/about-codeowners/) code-ownership
-solution, a key feature is missing: `OWNERS` files are not recursive. In other
-words, the owner of a directory is not automatically the owner its
-subdirectories.
+that we would like to use for AMP HTML.
 
-## AMP's code ownership solution
+## GitHub's native code ownership solution
+
+GitHub's [native](https://help.github.com/articles/about-code-owners/) solution
+uses a CODEOWNERS file in each directory to determine who owns the files within
+the directory. It has wildcard support to specify different owners for different
+files / file types, and glob support to specify owners for an entire directory
+tree.
+
+Unfortunately, this solution is missing a key feature: `OWNERS` files are not
+recursive. In other words, the owner of a directory is not automatically the
+owner of its subdirectories.
+
+## AMP's custom code ownership solution
 
 The AMP project will use a custom open-source web service available on GitHub at
 [google/github-owners-bot](https://github.com/google/github-owners-bot). This
@@ -53,3 +61,16 @@ the bot was discontinued.
 Today, GitHub supports a new [status API](https://developer.github.com/v3/repos/statuses/)
 that will be used by the bot to directly update the status of pull requests as
 described above. Stay tuned for the latest changes.
+
+## Approvals required before merging a change
+
+In order to merge a PR, an approval will be required from at least one of the
+owners of each file modified by the PR. See [contributing-code.md](./contributing-code.md)
+for more details.
+
+## Criteria for being listed as an owner in an `OWNERS.yaml` file
+
+ The `OWNERS.yaml` file for each directory will typically list the creator(s) of
+ the component or extension it contains, along with those who are most familiar
+ with the directory contents. See [owners-and-committers.md](./owners-and-committers.md)
+ for more details.
