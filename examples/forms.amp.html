@@ -223,7 +223,7 @@
     <input hidden type="text" name="ampBind" [value]="ampBindStateGetNonXhrSameOrigin">
   </fieldset>
 
-  <button on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
     Submit AMP Bind Search
   </button>
 </form>
@@ -287,7 +287,7 @@
     <input hidden type="text" name="additionalFields" [value]="ampBindStateGetXhrSameOrigin">
   </fieldset>
 
-  <button on="tap:AMP.setState({ ampBindStateGetXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-get-xhr-same-origin.submit">
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-get-xhr-same-origin.submit">
     Submit AMP Bind Search
   </button>
 
