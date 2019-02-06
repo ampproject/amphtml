@@ -25,7 +25,6 @@ import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {
-  layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
@@ -168,6 +167,42 @@ export class ViewportBindingInabox {
     }
   }
 
+  /** @private */
+  listenForPosition_() {
+    this.iframeClient_.makeRequest(
+        MessageType.SEND_POSITIONS, MessageType.POSITION,
+        data => {
+          dev().fine(TAG, 'Position changed: ', data);
+          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+        });
+  }
+
+  /** @private */
+  listenForPositionSameDomain_() {
+    this.setUpNativeListener();
+  }
+
+  /** @visibleForTesting */
+  setUpNativeListener() {
+    // Set up listener but only after the resources service is properly
+    // registered (since it's registered after the inabox services so it won't
+    // be available immediately).
+    if (this.topWindowPositionObserver_) {
+      return Promise.resolve();
+    }
+    return Services.resourcesPromiseForDoc(this.win.document.documentElement)
+        .then(() => {
+          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
+          this.topWindowPositionObserver_.observe(
+              /** @type {!HTMLIFrameElement} */(this.win.frameElement),
+              data => {
+                this.updateLayoutRects_(
+                    data['viewportRect'],
+                    data['targetRect']);
+              });
+        });
+  }
+
   /**
    * @private
    * @param {!../layout-rect.LayoutRectDef} viewportRect
@@ -183,39 +218,6 @@ export class ViewportBindingInabox {
     if (isMoved(this.viewportRect_, oldViewportRect)) {
       this.fireScrollThrottle_();
     }
-  }
-
-  /** @private */
-  listenForPosition_() {
-    this.iframeClient_.makeRequest(
-        MessageType.SEND_POSITIONS, MessageType.POSITION,
-        data => {
-          dev().fine(TAG, 'Position changed: ', data);
-          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        });
-  }
-
-  /** @visibleForTesting */
-  setUpNativeListener() {
-    // Set up listener but only after the resources service is properly
-    // registered (since it's registered after the inabox services so it won't
-    // be available immediately).
-    return Services.resourcesPromiseForDoc(this.win.document.documentElement)
-        .then(() => {
-          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
-          this.topWindowPositionObserver_.observe(
-              /** @type {!HTMLIFrameElement} */(this.win.frameElement),
-              data => {
-                this.updateLayoutRects_(
-                    data['viewportRect'],
-                    data['targetRect']);
-              });
-        });
-  }
-
-  /** @private */
-  listenForPositionSameDomain_() {
-    this.setUpNativeListener();
   }
 
   /** @override */
@@ -325,10 +327,10 @@ export class ViewportBindingInabox {
   getRootClientRectAsync() {
     if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
         canInspectWindow(this.win.top)) {
-      return new Promise(resolve => {
-        resolve(layoutRectFromDomRect(
-            this.win.frameElement./*OK*/getBoundingClientRect()));
-      });
+      // Set up the listener if we haven't already.
+      return this.setUpNativeListener().then(() =>
+        this.topWindowPositionObserver_
+            .getTargetRect(this.win.frameElement));
     }
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {

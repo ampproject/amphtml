@@ -375,12 +375,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     // this is implicit but we make it explicit anyway for clarity
     sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
     toggleExperiment(win, 'inabox-viewport-friendly', true);
-    const iframeElement = {
-      getBoundingClientRect() {
-        return layoutRectLtwh(10, 20, 100, 100);
-      },
-    };
-    win.frameElement = iframeElement;
+    sandbox.stub(PositionObserver.prototype, 'getTargetRect')
+        .returns(layoutRectLtwh(10, 20, 100, 100));
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
     });
