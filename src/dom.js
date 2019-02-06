@@ -492,14 +492,9 @@ export function childElementsByTag(parent, tagName) {
  *
  * e.g.
  * ```
- *   // returns '.i-amphtml-scoped div'
- *   scopeSelector('.i-amphtml-scoped', 'div');
- *
- *   // returns ':scope div, :scope ul'
- *   scopeSelector(':scope', 'div, ul');
- *
- *   // returns 'article > div, article > ul'
- *   scopeSelector('article >', 'div, ul');
+ *   scopeSelector('.i-amphtml-scoped', 'div'); // .i-amphtml-scoped div
+ *   scopeSelector(':scope', 'div, ul');        // :scope div, :scope ul
+ *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
  * ```
  *
  * @param {string} ancestorSelector
