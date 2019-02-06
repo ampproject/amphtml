@@ -105,8 +105,8 @@ describes.sandboxed('StandardActions', {}, () => {
     return Object.assign({satisfiesTrust: () => true}, obj);
   }
 
-  function stubIsSafari(isSafari = true) {
-    sandbox.stub(Services, 'platformFor').returns({isSafari: () => isSafari});
+  function stubPlatformIsIos(isIos = true) {
+    sandbox.stub(Services, 'platformFor').returns({isIos: () => isIos});
   }
 
   beforeEach(() => {
@@ -194,12 +194,12 @@ describes.sandboxed('StandardActions', {}, () => {
       expectAmpElementToHaveBeenShown(element);
     });
 
-    describe('Safari force sync', () => {
+    describe('iOS force sync', () => {
 
       let html;
       beforeEach(() => {
         html = htmlFor(document);
-        stubIsSafari();
+        stubPlatformIsIos();
       });
 
       it('executes asynchronously when no autofocus (wrapped)', () => {
@@ -235,10 +235,10 @@ describes.sandboxed('StandardActions', {}, () => {
         html = htmlFor(document);
       });
 
-      describe('Safari force sync', () => {
+      describe('iOS force sync', () => {
 
         beforeEach(() => {
-          stubIsSafari();
+          stubPlatformIsIos();
         });
 
         it('focuses [autofocus] element synchronously (direct)', () => {
@@ -276,7 +276,7 @@ describes.sandboxed('StandardActions', {}, () => {
       });
 
       it('focuses [autofocus] element asynchronously (direct)', () => {
-        stubIsSafari(false);
+        stubPlatformIsIos(false);
 
         const node = html`<input autofocus>`;
         node.focus = sandbox.spy();
@@ -288,7 +288,7 @@ describes.sandboxed('StandardActions', {}, () => {
       });
 
       it('focuses [autofocus] element asynchronously (wrapped)', () => {
-        stubIsSafari(false);
+        stubPlatformIsIos(false);
 
         const wrapper = html`<div><div></div></div>`;
         const node = html`<input autofocus>`;
