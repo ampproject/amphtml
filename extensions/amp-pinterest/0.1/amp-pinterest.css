@@ -139,6 +139,16 @@
   line-height: 30px;
 }
 
+.-amp-pinterest-bubble-above::after {
+  border-top: 7px solid #efefef;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  bottom: -4px;
+  left: 4px;
+  content: "";
+  position: absolute;
+}
+
 .-amp-pinterest-bubble-above-tall {
   position: absolute;
   left: 0;
@@ -153,6 +163,16 @@
   border-radius: 4px;
   text-indent: 0;
   line-height: 44px;
+}
+
+.-amp-pinterest-bubble-above-tall::after {
+  border-top: 7px solid #efefef;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  bottom: -4px;
+  left: 7px;
+  content: "";
+  position: absolute;
 }
 
 /* count bubble beside */
