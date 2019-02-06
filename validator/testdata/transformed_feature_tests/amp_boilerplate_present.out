@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
@@ -16,22 +16,20 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Tests support for the amp-sidebar tag.
+|    Test for server side rendering transformer:
+|    - boilerplate is not required but can be present.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ transformed="google;v=1">
 |  <head>
 |    <meta charset="utf-8">
-|    <link rel="canonical" href="./regular-html-version.html">
-|    <meta name="viewport" content="width=device-width,minimum-scale=1">
-|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |  </head>
 |  <body>
-|    <!-- Invalid: Use of autoscroll outside amp-sidebar with autoscroll-->
-|    <div autoscroll></div>
->>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:32:2 The attribute 'autoscroll' may not appear in tag 'div'. [DISALLOWED_HTML]
+|    Hello, world.
 |  </body>
 |  </html>

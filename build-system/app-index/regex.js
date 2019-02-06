@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-/* eslint-disable amphtml-internal/html-template */
 
-const {html} = require('./html');
-
-
-const Option = ({value, name}) => html`<option value=${value}>${name}</option>`;
-
-
-const KeyValueOptions = options => Object.keys(options).map(name =>
-  Option({
-    name,
-    value: options[name],
-  })).join('');
+function* matchIterator(regex, subject) {
+  let match = regex.exec(subject);
+  while (match != null) {
+    yield match;
+    match = regex.exec(subject);
+  }
+}
 
 
-module.exports = {Option, KeyValueOptions};
+module.exports = {matchIterator};
