@@ -508,6 +508,8 @@ function scopeSelector(ancestorSelector, descendantSelector) {
       .join(',');
 }
 
+export const scopeSelectorForTesting = scopeSelector;
+
 /**
  * Finds all elements that matche `selector`, scoped inside `root`
  * for user-agents that do not support native scoping.
