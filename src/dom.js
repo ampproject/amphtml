@@ -833,15 +833,11 @@ export function whenUpgradedToCustomElement(element) {
  */
 export function fullscreenEnter(element) {
   const requestFs = element.requestFullscreen
-   || element.requestFullScreen
-   || element.webkitRequestFullscreen
-   || element.webkitRequestFullScreen
-   || element.webkitEnterFullscreen
-   || element.webkitEnterFullScreen
-   || element.msRequestFullscreen
-   || element.msRequestFullScreen
-   || element.mozRequestFullscreen
-   || element.mozRequestFullScreen;
+    || element.requestFullScreen
+    || element.webkitRequestFullscreen
+    || element.webkitEnterFullscreen
+    || element.msRequestFullscreen
+    || element.mozRequestFullScreen;
   if (requestFs) {
     requestFs.call(element);
   }
@@ -853,31 +849,30 @@ export function fullscreenEnter(element) {
  * @param {!Element} element
  */
 export function fullscreenExit(element) {
-  let exitFs = element.cancelFullScreen
-               || element.exitFullscreen
-               || element.exitFullScreen
-               || element.webkitExitFullscreen
-               || element.webkitExitFullScreen
-               || element.webkitCancelFullScreen
-               || element.mozCancelFullScreen
-               || element.msExitFullscreen;
-  if (exitFs) {
-    exitFs.call(element);
+  const elementBoundExit =
+      element.cancelFullScreen
+      || element.exitFullscreen
+      || element.webkitExitFullscreen
+      || element.webkitCancelFullScreen
+      || element.mozCancelFullScreen
+      || element.msExitFullscreen;
+  if (elementBoundExit) {
+    elementBoundExit.call(element);
     return;
   }
-  if (element.ownerDocument) {
-    exitFs = element.ownerDocument.cancelFullScreen
-             || element.ownerDocument.exitFullscreen
-             || element.ownerDocument.exitFullScreen
-             || element.ownerDocument.webkitExitFullscreen
-             || element.ownerDocument.webkitExitFullScreen
-             || element.ownerDocument.webkitCancelFullScreen
-             || element.ownerDocument.mozCancelFullScreen
-             || element.ownerDocument.msExitFullscreen;
-  }
-  if (exitFs) {
-    exitFs.call(element.ownerDocument);
+  const {ownerDocument} = element;
+  if (!ownerDocument) {
     return;
+  }
+  const docBoundExit =
+      ownerDocument.cancelFullScreen
+      || ownerDocument.exitFullscreencancelFullScreen
+      || ownerDocument.webkitExitFullscreencancelFullScreen
+      || ownerDocument.webkitCancelFullScreencancelFullScreen
+      || ownerDocument.mozCancelFullScreencancelFullScreen
+      || ownerDocument.msExitFullscreen;
+  if (docBoundExit) {
+    docBoundExit.call(ownerDocument);
   }
 }
 
@@ -889,20 +884,20 @@ export function fullscreenExit(element) {
  * @return {boolean}
  */
 export function isFullscreenElement(element) {
-  const isFullscreen = element.webkitDisplayingFullscreen;
-  if (isFullscreen) {
-    return true;
+  const {webkitDisplayingFullscreen} = element;
+  if (webkitDisplayingFullscreen !== undefined) {
+    return webkitDisplayingFullscreen;
   }
-  if (element.ownerDocument) {
-    const fullscreenElement = element.ownerDocument.fullscreenElement
-             || element.ownerDocument.webkitFullscreenElement
-             || element.ownerDocument.mozFullScreenElement
-             || element.webkitCurrentFullScreenElement;
-    if (fullscreenElement == element) {
-      return true;
-    }
+  const {ownerDocument} = element;
+  if (!ownerDocument) {
+    return false;
   }
-  return false;
+  const fullscreenElement =
+      ownerDocument.fullscreenElement
+      || ownerDocument.webkitFullscreenElement
+      || ownerDocument.mozFullScreenElement
+      || ownerDocument.webkitCurrentFullScreenElement;
+  return fullscreenElement == element;
 }
 
 /**
