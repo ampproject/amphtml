@@ -502,7 +502,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array|!JsonObject|string|undefined} data
+   * @param {!Array|!JsonObject|undefined} data
    * @param {boolean} append
    * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
@@ -555,18 +555,17 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     const isSSR = this.ssrTemplateHelper_.isSupported();
-    const renderTemplate = this.ssrTemplateHelper_.renderTemplate(
+    let renderPromise = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data)
-        .then(result => this.updateBindings_(isSSR ? [result] : result))
+        .then(result => this.updateBindings_(result))
         .then(element => this.render_(element, current.append));
-    if (isSSR) {
-      renderTemplate.then(onFulfilledCallback, onRejectedCallback);
-    } else {
+    if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      renderTemplate.then(() => this.maybeRenderLoadMoreTemplates_(payload))
-          .then(() => this.maybeSetLoadMore_())
-          .then(onFulfilledCallback, onRejectedCallback);
+      renderPromise = renderPromise
+          .then(() => this.maybeRenderLoadMoreTemplates_(payload))
+          .then(() => this.maybeSetLoadMore_());
     }
+    renderPromise.then(onFulfilledCallback, onRejectedCallback);
   }
 
   /**
@@ -610,15 +609,18 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!Element>|!Element} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
   updateBindings_(elements) {
+    if (!isArray(elements)) {
+      elements = [elements];
+    }
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
-      return Promise.resolve(elements);
+      return Promise.resolve(/** @type !Array<!Element> */ (elements));
     }
     const updateWith = bind => {
       // Forward elements to chained promise on success or failure.
@@ -631,7 +633,7 @@ export class AmpList extends AMP.BaseElement {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return updateWith(this.bind_);
       } else {
-        return Promise.resolve(elements);
+        return Promise.resolve(/** @type !Array<!Element> */ (elements));
       }
     }
     // "always" (default): Wait for Bind to scan for and evalute any bindings
