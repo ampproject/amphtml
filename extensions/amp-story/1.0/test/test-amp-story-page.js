@@ -265,7 +265,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     return page.layoutCallback()
         .then(() => {
-          const actions = page.actions();
+          const actions = page.actions_();
 
           expect(actions.length).to.be.equal(1);
           expect(actions[0]).to.be.equal('pageId');
@@ -284,7 +284,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     return page.layoutCallback()
         .then(() => {
-          const actions = page.actions();
+          const actions = page.actions_();
 
           expect(actions.length).to.be.equal(1);
           expect(actions[0]).to.be.equal('pageId');
@@ -304,7 +304,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     return page.layoutCallback()
         .then(() => {
-          const actions = page.actions();
+          const actions = page.actions_();
 
           expect(actions.length).to.be.equal(1);
           expect(actions[0]).to.be.equal('pageId');

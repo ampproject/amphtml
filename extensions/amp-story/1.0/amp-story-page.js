@@ -700,7 +700,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   getAdjacentPageIds() {
     const adjacentPageIds =
       isExperimentOn(this.win, 'amp-story-branching') ?
-        this.actions() :
+        this.actions_() :
         [];
 
     const autoAdvanceNext =
@@ -774,10 +774,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Finds any elements in the page that has a goToPage action.
    * @return {!Array<string>} The IDs of the potential next pages in the story
    * or null if there aren't any.
+   * @private
    */
-  actions() {
+  actions_() {
     const actionElements =
-      Array.prototype.slice.call(this.element.querySelectorAll('[on]'));
+      Array.prototype.slice.call(
+          this.element.querySelectorAll('[on*=goToPage]'));
+
     const actionAttrs = actionElements.map(action => action.getAttribute('on'));
 
     return actionAttrs.reduce((res, actions) => {
