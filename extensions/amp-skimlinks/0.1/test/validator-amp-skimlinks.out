@@ -13,7 +13,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Valid amp-test tag
+|    Valid amp-skimlinks tag
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -28,10 +28,11 @@ PASS
 |  <body>
 |      <amp-skimlinks
 |          layout="nodisplay"
-|          publisher-code="68019X1584676"
+|          publisher-code="123X123"
 |          excluded-domains="samsung.com  asos.com"
 |          link-selector="article:not(.no-skimlinks) a"
 |          custom-tracking-id="phones"
+|          custom-redirect-domain="go.publisher.com"
 |      ></amp-skimlinks>
 |  </body>
 |  </html>

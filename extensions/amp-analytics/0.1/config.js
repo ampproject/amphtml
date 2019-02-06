@@ -22,6 +22,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {variableServiceFor} from './variables';
 
 const TAG = 'amp-analytics/config';
 
@@ -208,7 +209,7 @@ export class AnalyticsConfig {
         return;
       }
 
-      const groupPromise = shallowExpandObject(this.element_, group)
+      const groupPromise = this.shallowExpandObject(this.element_, group)
           .then(expandedGroup => {
             // This is part of the user config and should not be sent.
             delete expandedGroup['enabled'];
@@ -252,7 +253,8 @@ export class AnalyticsConfig {
     mergeObjects(expandConfigRequest(defaultConfig), config);
     mergeObjects(expandConfigRequest(this.getTypeConfig_()), config,
         /* predefined */ true);
-    mergeObjects(expandConfigRequest(rewrittenConfig), config);
+    mergeObjects(expandConfigRequest(rewrittenConfig), config,
+        /* predefined */ true);
     return config;
   }
 
@@ -340,6 +342,34 @@ export class AnalyticsConfig {
     return 'AmpAnalytics ' +
         (this.element_.getAttribute('id') || '<unknown id>');
   }
+
+  /**
+   * Expands all key value pairs asynchronously and returns a promise that will
+   * resolve with the expanded object.
+   * @param {!Element|!ShadowRoot} element
+   * @param {!Object} obj
+   * @return {!Promise<!Object>}
+   */
+  shallowExpandObject(element, obj) {
+    const expandedObj = dict();
+    const keys = [];
+    const expansionPromises = [];
+
+    Object.keys(obj).forEach(key => {
+      keys.push(key);
+      const expanded = Services.urlReplacementsForDoc(element)
+          .expandStringAsync(obj[key],
+              variableServiceFor(/** @type {!Window} */
+                  (this.win_)).getMacros());
+      expansionPromises.push(expanded);
+    });
+
+    return Promise.all(expansionPromises).then(expandedValues => {
+      keys.forEach((key, i) =>
+        expandedObj[key] = expandedValues[i]);
+      return expandedObj;
+    });
+  }
 }
 
 
@@ -417,30 +447,4 @@ function expandRequestStr(request) {
   return {
     'baseUrl': request,
   };
-}
-
-/**
- * Expands all key value pairs asynchronously and returns a promise that will
- * resolve with the expanded object.
- * @param {!Element|!ShadowRoot} element
- * @param {!Object} obj
- * @return {!Promise<Object>}
- */
-function shallowExpandObject(element, obj) {
-  const expandedObj = dict();
-  const keys = [];
-  const expansionPromises = [];
-
-  Object.keys(obj).forEach(key => {
-    keys.push(key);
-    const expanded = Services.urlReplacementsForDoc(element)
-        .expandStringAsync(obj[key]);
-    expansionPromises.push(expanded);
-  });
-
-  return Promise.all(expansionPromises).then(expandedValues => {
-    keys.forEach((key, i) =>
-      expandedObj[key] = expandedValues[i]);
-    return expandedObj;
-  });
 }

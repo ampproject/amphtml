@@ -78,7 +78,7 @@ export function factory(Inputmask) {
         return opts.tokenizer;
     }
     function isValidDate(dateParts, currentResult) {
-        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
+        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || dateParts.year.length < 4 || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
     }
     function isDateInRange(dateParts, opts) {
         var result = true;
@@ -234,7 +234,7 @@ export function factory(Inputmask) {
                  }
                 return result;
             },
-            onKeyDown: function(e, buffer, caretPos, opts) {
+            onKeyDown: function(e, buffer, caretPos, opts, initial, previousPos) {
                 var input = this;
                 if (e.ctrlKey && e.keyCode === Inputmask.keyCode.RIGHT) {
                     var today = new Date(), match, date = "";
@@ -252,6 +252,80 @@ export function factory(Inputmask) {
                     input.inputmask._valueSet(date);
                     $(input).trigger("setvalue");
                 }
+
+                const {begin, end} = previousPos;
+                // If the user presses backspace in the middle of the input
+                // value, stop masking until the field is cleared.
+                if (e.keyCode === Inputmask.keyCode.BACKSPACE ||
+                    e.keyCode === Inputmask.keyCode.DELETE ||
+                    ((e.metaKey || e.ctrlKey) && e.keyCode === 'X'.charCodeAt(0))) {
+                    const length = input.value.length;
+                    const cursorIsInMiddle = input.selectionStart != length &&
+                        input.selectionEnd != length;
+                    if (length > 0 && cursorIsInMiddle) {
+                        disableMaskingUntilClear(input);
+
+                        // The library tries to be smart about moving the cursor
+                        // and autofilling values, but here we want to just
+                        // delete the text that was selected like a normal
+                        // input.
+                        // So we take the original selection and the origina
+                        // value before the library auto-changed them,
+                        // and apply the edits ourselves here.
+                        const difference = end - begin;
+                        if (e.keyCode === Inputmask.keyCode.BACKSPACE) {
+                            const selectionBegin =
+                                difference == 0 ? begin - 1 : begin;
+                            input.value =
+                                initial.slice(0, selectionBegin) +
+                                initial.slice(end);
+                            input.setSelectionRange(
+                                selectionBegin, selectionBegin);
+                        } else if (e.keyCode === Inputmask.keyCode.DELETE) { // delete
+                            const selectionEnd =
+                                difference == 0 ? end + 1 : end;
+                            input.value =
+                                initial.slice(0, begin) +
+                                initial.slice(selectionEnd);
+                            input.setSelectionRange(begin, begin);
+                        }
+                    }
+                    return;
+                }
+
+                // If the user enters text with a selection and causes delete...
+                if (previousPos.begin != previousPos.end) {
+                    // ... via paste
+                    if ((e.metaKey || e.ctrlKey) && e.keyCode === 'V'.charCodeAt(0)) {
+                        disableMaskingUntilClear(input);
+                        return;
+                    }
+
+                    // Don't handle CTRL+C/CMD+C or CTRL or CMD alone
+                    if (e.metaKey || e.ctrlKey) {
+                        return;
+                    }
+
+                    // ... via typing a char
+                    const fromCharCode = String.fromCharCode(e.keyCode);
+                    const char = e.shiftKey ?
+                        fromCharCode.toLocaleUpperCase() :
+                        fromCharCode.toLocaleLowerCase();
+                    if (!/\s/.test(char)) {
+                        disableMaskingUntilClear(input);
+                        // The library still sets the value after the keydown
+                        // handler returns, so we need to asynchronously
+                        // set the value here.
+                        setTimeout(() => {
+                            input.value =
+                                initial.slice(0, begin) +
+                                char +
+                                initial.slice(end);
+                            input.setSelectionRange(
+                                begin + 1, begin + 1);
+                        }, 0);
+                    }
+                }
             },
             onUnMask: function(maskedValue, unmaskedValue, opts) {
                 return parse(opts.outputFormat, analyseMask(maskedValue, opts.inputFormat, opts), opts, true);
@@ -265,5 +339,21 @@ export function factory(Inputmask) {
             shiftPositions: false
         }
     });
+
+    /**
+     * When the user clears the input, reapply the
+     * inputmask behavior.
+     * @param {!Element} input
+     */
+    function disableMaskingUntilClear(input) {
+        const cachedController = input.inputmask;
+        input.inputmask.remove();
+        input.addEventListener('input', function onclear() {
+            if (input.value.length == 0) {
+                input.removeEventListener('input', onclear);
+                cachedController.mask(input);
+            }
+        });
+    }
     return Inputmask;
 }

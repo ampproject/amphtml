@@ -120,14 +120,45 @@ export class Messaging {
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
    * @param {boolean=} opt_isWebview
+   * @param {string=} opt_token
    */
-  constructor(win, port, opt_isWebview) {
+  constructor(win, port, opt_isWebview, opt_token) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
     /** @const @private */
     this.isWebview_ = !!opt_isWebview;
+
+    /**
+     * A token that the viewer may include as an init parameter to enhance
+     * security for communication to opaque origin (a.k.a. null origin) AMP
+     * documents.
+     *
+     * For an AMP document embedded inside a sandbox iframe, the origin of the
+     * document would be "null", which defeats the purpose of an origin check.
+     * An attacker could simply create a sandboxed, malicious iframe (therefore
+     * having null origin), walk on the DOM frame tree to find a reference to
+     * the viewer iframe (this is not constrained by the same origin policy),
+     * and then send postMessage() calls to the viewer frame and pass the
+     * viewer's origin checks, if any.
+     *
+     * The viewer could also check the source of the message to be a legitimate
+     * AMP iframe window, but the attacker could bypass that by navigating the
+     * legitimate AMP iframe window away to a malicious document. Recent
+     * browsers have banned this kind of attack, but it's tricky to rely on it.
+     *
+     * To prevent the above attack in a null origin AMP document, the viewer
+     * should include this token in an init parameter, either in the `src` or
+     * `name` attribute of the iframe, and then verify that this token is
+     * included in all the messages sent from AMP to the viewer. The attacker
+     * would not be able to steal this token under the same origin policy,
+     * because the token is inside the viewer document at a different origin
+     * and the attacker can't access it.
+     * @const @private {string|undefined}
+     */
+    this.token_ = opt_token;
+
     /** @private {number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -256,10 +287,14 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
+    const /** Object<string, *> */ finalMessage = Object.assign(message, {});
+    if (this.token_) {
+      finalMessage['messagingToken'] = this.token_;
+    }
     this.port_./*OK*/postMessage(
         this.isWebview_
-          ? JSON.stringify(message)
-          : message);
+          ? JSON.stringify(/** @type {!JsonObject} */ (finalMessage))
+          : finalMessage);
   }
 
   /**

@@ -65,8 +65,6 @@ button.addEventListener('click', () => {
 });
 ```
 
-A live demo of this example is [deployed here](https://willchou-misc.firebaseapp.com/).
-
 {% call callout('Tip', type='success') %}
 Enable the experiment via `AMP.toggleExperiment('amp-script')` in dev console.
 {% endcall %}

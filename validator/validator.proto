@@ -230,10 +230,15 @@ message CssSpec {
   repeated string declaration = 7;
 }
 
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
+  // If false, bytes inside URLs are not included in the byte calculation for
+  // max_bytes. This is used for handling signed exchange transformations which
+  // can potentially take the number of bytes over the 50,000 byte limit due
+  // to rewriting URLs to point at an AMP Cache.
+  optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string max_bytes_spec_url = 2;
@@ -255,6 +260,9 @@ message CdataSpec {
 
   // If any of these regexes match, then this cdata spec does not validate.
   repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Specifies which AMP Layouts are supported by a given element.
@@ -417,7 +425,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 35
+// NEXT AVAILABLE TAG: 37
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -437,6 +445,16 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
+
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this TagSpec. If a Type Identifier is in enabled_by then this
+  // TagSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // TagSpec will not be used in validating parsed documents with that
+  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 35;
+  repeated string disabled_by = 36;
 
   // NamedId's are used to uniquely identify specific TagSpecs in the
   // validator rules in a stable manner. Most TagSpecs have no set NamedId.

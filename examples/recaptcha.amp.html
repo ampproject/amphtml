@@ -164,11 +164,10 @@
           </div>
         </div>
       </form>
-      <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
-      <form method="get"
-            action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-            action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-            target="_blank">
+      <h4>Search (POST xhr same origin current host > /recaptcha/submit)</h4>
+      <form method="post"
+            action-xhr="/recaptcha/submit"
+            target="_top">
         <fieldset>
           <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
           <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
