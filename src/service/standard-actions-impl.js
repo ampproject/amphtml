@@ -349,7 +349,7 @@ export class StandardActions {
       toggle(target, true);
     }
     if (autofocusElOrNull) {
-      tryFocus(dev().assertElement(autofocusElOrNull));
+      tryFocus(autofocusElOrNull);
     }
   }
 
