@@ -326,8 +326,7 @@ export class StandardActions {
     const autofocusElOrNull = getAutofocusElementForShowAction(target);
 
     // Safari only honors focus in sync operations.
-    if (Services.platformFor(ownerWindow).isSafari() &&
-        autofocusElOrNull) {
+    if (autofocusElOrNull && Services.platformFor(ownerWindow).isSafari()) {
       this.handleShowSync_(target, autofocusElOrNull);
     } else {
       this.resources_.mutateElement(target, () => {

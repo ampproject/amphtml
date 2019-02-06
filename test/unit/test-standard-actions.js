@@ -105,8 +105,8 @@ describes.sandboxed('StandardActions', {}, () => {
     return Object.assign({satisfiesTrust: () => true}, obj);
   }
 
-  function stubIsSafari() {
-    sandbox.stub(Services, 'platformFor').returns({isSafari: () => true});
+  function stubIsSafari(isSafari = true) {
+    sandbox.stub(Services, 'platformFor').returns({isSafari: () => isSafari});
   }
 
   beforeEach(() => {
@@ -126,18 +126,16 @@ describes.sandboxed('StandardActions', {}, () => {
       html = htmlFor(document);
     });
 
-    it('returns outer element when [autofocus]', () => {
+    it('returns element (direct)', () => {
       const el = html`<input autofocus>`;
       expect(getAutofocusElementForShowAction(el)).to.equal(el);
     });
 
-    it('returns inner [autofocus] element', () => {
-      const inner = html`<input autofocus>`;
-      const outer = html`<div><div></div></div>`;
-
-      outer.firstElementChild.appendChild(inner);
-
-      expect(getAutofocusElementForShowAction(outer)).to.equal(inner);
+    it('returns element (wrapped)', () => {
+      const el = html`<input autofocus>`;
+      const wrapper = html`<div><div></div></div>`;
+      wrapper.firstElementChild.appendChild(el);
+      expect(getAutofocusElementForShowAction(wrapper)).to.equal(el);
     });
 
     it('returns null', () => {
@@ -204,13 +202,13 @@ describes.sandboxed('StandardActions', {}, () => {
         stubIsSafari();
       });
 
-      it('executes asynchronously when not autofocus (wrapped)', () => {
+      it('executes asynchronously when no autofocus (wrapped)', () => {
         const node = html`<div><div><input></div></div>`;
         standardActions.handleShow(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ false);
       });
 
-      it('executes asynchronously when autofocus (direct)', () => {
+      it('executes asynchronously when no autofocus (direct)', () => {
         const node = html`<input>`;
         standardActions.handleShow(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ false);
@@ -235,10 +233,13 @@ describes.sandboxed('StandardActions', {}, () => {
       let html;
       beforeEach(() => {
         html = htmlFor(document);
-        stubIsSafari();
       });
 
       describe('Safari force sync', () => {
+
+        beforeEach(() => {
+          stubIsSafari();
+        });
 
         it('focuses [autofocus] element synchronously (direct)', () => {
           const node = html`<input autofocus>`;
@@ -268,13 +269,15 @@ describes.sandboxed('StandardActions', {}, () => {
 
           standardActions.handleShow(trustedInvocation({node}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementMutatedAsync(node);
           expect(node.focus).to.not.have.been.called;
         });
 
       });
 
       it('focuses [autofocus] element asynchronously (direct)', () => {
+        stubIsSafari(false);
+
         const node = html`<input autofocus>`;
         node.focus = sandbox.spy();
 
@@ -285,6 +288,8 @@ describes.sandboxed('StandardActions', {}, () => {
       });
 
       it('focuses [autofocus] element asynchronously (wrapped)', () => {
+        stubIsSafari(false);
+
         const wrapper = html`<div><div></div></div>`;
         const node = html`<input autofocus>`;
         node.focus = sandbox.spy();
