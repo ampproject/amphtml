@@ -15,29 +15,22 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {parser} from './bind-expr-impl';
+import {bindParser as parser} from './bind-expr-impl';
 
 const TAG = 'amp-bind';
 
 /**
- * Possible types of a Bind expression evaluation.
- * @typedef {(null|boolean|string|number|Array|Object)}
- */
-export let BindExpressionResultDef;
-
-/**
- * Default maximum number of nodes in an expression AST.
- * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const DEFAULT_MAX_AST_SIZE = 50;
+const MAX_AST_SIZE = 100;
 
 /** @const @private {string} */
-const BUILT_IN_FUNCTIONS = 'built-in-functions';
+const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
  * Map of object type to function name to whitelisted function.
@@ -51,15 +44,14 @@ let FUNCTION_WHITELIST;
  */
 function generateFunctionWhitelist() {
   /**
-   * Static, not-in-place variant of Array#splice.
+   * Deprecated. Static, not-in-place variant of Array#splice.
    * @param {!Array} array
-   * @param {number=} start
-   * @param {number=} deleteCount
-   * @param {...?} items
+   * @param {number=} unusedStart
+   * @param {number=} unusedDeleteCount
+   * @param {...?} unusedItems
    * @return {!Array}
    */
-  /*eslint "no-unused-vars": 0*/
-  function splice(array, start, deleteCount, items) {
+  function splice(array, unusedStart, unusedDeleteCount, unusedItems) {
     if (!isArray(array)) {
       throw new Error(`splice: ${array} is not an array.`);
     }
@@ -70,7 +62,28 @@ function generateFunctionWhitelist() {
   }
 
   /**
-   * Static, not-in-place variant of Array#sort.
+   * Needs to be wrapped to avoid a duplicate name conflict with the deprecated
+   * splice function above.
+   * @return {!Function}
+   */
+  function instanceSplice() {
+    /**
+     * @param {number=} unusedStart
+     * @param {number=} unusedDeleteCount
+     * @param {...?} unusedItems
+     * @return {!Array}
+     * @this {!Array}
+     */
+    function splice(unusedStart, unusedDeleteCount, unusedItems) {
+      const copy = Array.prototype.slice.call(this);
+      Array.prototype.splice.apply(copy, arguments);
+      return copy;
+    }
+    return splice;
+  }
+
+  /**
+   * Deprecated. Static, not-in-place variant of Array#sort.
    * @param {!Array} array
    * @return {!Array}
    */
@@ -84,25 +97,28 @@ function generateFunctionWhitelist() {
   }
 
   /**
-   * Polyfills Object.values for IE.
-   * @param {!Object} object
-   * @return {!Array}
-   * @see https://github.com/es-shims/Object.values
+   * Needs to be wrapped to avoid a duplicate name conflict with the deprecated
+   * sort function above.
+   * @return {!Function}
    */
-  function values(object) {
-    const v = [];
-    for (const key in object) {
-      if (hasOwn(object, key)) {
-        v.push(object[key]);
-      }
+  function instanceSort() {
+    /**
+     * @param {!Function} compareFunction
+     * @return {!Array}
+     * @this {!Array}
+     */
+    function sort(compareFunction) {
+      const copy = Array.prototype.slice.call(this);
+      Array.prototype.sort.call(copy, compareFunction);
+      return copy;
     }
-    return v;
+    return sort;
   }
 
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': {
-      // TODO(choumx): Need polyfill for Array#find and Array#findIndex.
+      // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
       'filter': Array.prototype.filter,
       'indexOf': Array.prototype.indexOf,
@@ -112,6 +128,8 @@ function generateFunctionWhitelist() {
       'reduce': Array.prototype.reduce,
       'slice': Array.prototype.slice,
       'some': Array.prototype.some,
+      'sort': instanceSort(),
+      'splice': instanceSplice(),
       'includes': Array.prototype.includes,
     },
     '[object Number]': {
@@ -136,7 +154,7 @@ function generateFunctionWhitelist() {
   });
 
   // Un-namespaced static functions.
-  whitelist[BUILT_IN_FUNCTIONS] = {
+  whitelist[CUSTOM_FUNCTIONS] = {
     'encodeURI': encodeURI,
     'encodeURIComponent': encodeURIComponent,
     'abs': Math.abs,
@@ -147,7 +165,8 @@ function generateFunctionWhitelist() {
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
-    'keys': Object.keys, // Object.values is polyfilled below.
+    'keys': Object.keys,
+    'values': Object.values,
   };
 
   // Creates a map of function name to the function itself.
@@ -160,9 +179,8 @@ function generateFunctionWhitelist() {
     Object.keys(functionsForType).forEach(name => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
+        devAssert(!func.name || name === func.name, 'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`);
-
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
@@ -171,13 +189,11 @@ function generateFunctionWhitelist() {
     });
   });
 
-  // Custom functions (non-js-built-ins) must be added manually as their names
+  // Custom functions (non-JS-built-ins) must be added manually as their names
   // will be minified at compile time.
-  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
-  out[BUILT_IN_FUNCTIONS]['sort'] = sort;
-  out[BUILT_IN_FUNCTIONS]['splice'] = splice;
-  out[BUILT_IN_FUNCTIONS]['values'] =
-      (typeof Object.values == 'function') ? Object.values : values;
+  out[CUSTOM_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
+  out[CUSTOM_FUNCTIONS]['sort'] = sort; // Deprecated.
+  out[CUSTOM_FUNCTIONS]['splice'] = splice; // Deprecated.
 
   return out;
 }
@@ -210,7 +226,7 @@ export class BindExpression {
     this.expressionSize = this.numberOfNodesInAst_(this.ast_);
 
     // Check if this expression string is too large (for performance).
-    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    const maxSize = opt_maxAstSize || MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
       throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
@@ -238,7 +254,7 @@ export class BindExpression {
     if (this.isMacroInvocationNode_(ast)) {
       const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
-      this.getInvocationArgNodes_(ast).forEach(arg => {
+      this.argumentsForInvocation_(ast).forEach(arg => {
         if (arg) {
           nodes += this.numberOfNodesInAst_(arg) - 1;
         }
@@ -273,23 +289,29 @@ export class BindExpression {
   }
 
   /**
-   * Gets the array of nodes for the arguments of the provided INVOCATION
-   * node, without the wrapping ARGS node and ARRAY node.
+   * Given an INVOCATION node, returns an array containing its arguments.
+   * Also unwraps its ARGS child, if it has one.
    * @param {!./bind-expr-defines.AstNode} ast
    * @return {!Array<./bind-expr-defines.AstNode>}
    * @private
    */
-  getInvocationArgNodes_(ast) {
-    if (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS) {
-      const argsNode = ast.args[1];
-      if (argsNode.args.length === 0) {
+  argumentsForInvocation_(ast) {
+    // The INVOCATION node may or may not contain an ARGS child node.
+    const argsNode =
+        (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS)
+          ? ast.args[1] : null;
+    if (argsNode) {
+      // An ARGS node can either have an empty array or an ARRAY child.
+      const {args} = argsNode;
+      if (args.length === 0) {
         return [];
-      } else if (argsNode.args.length === 1 &&
-          argsNode.args[0].type === AstNodeType.ARRAY) {
-        const arrayNode = argsNode.args[0];
+      } else if (args.length === 1 && args[0].type === AstNodeType.ARRAY) {
+        // An ARRAY node contains an actual array.
+        const arrayNode = args[0];
         return arrayNode.args || [];
       }
     }
+    // Otherwise, just return the array of its non-ARGS arguments.
     return ast.args || [];
   }
 
@@ -336,7 +358,7 @@ export class BindExpression {
                   scope, Array.prototype.slice.call(arguments));
             };
           } else {
-            validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+            validFunction = FUNCTION_WHITELIST[CUSTOM_FUNCTIONS][method];
           }
           if (!validFunction) {
             unsupportedError = `${method} is not a supported function.`;
@@ -353,6 +375,8 @@ export class BindExpression {
             const f = caller[method];
             if (f && f === whitelist[method]) {
               validFunction = f;
+            } else if (this.isCustomInstanceFunction_(method)) {
+              validFunction = whitelist[method];
             }
           }
           if (!validFunction) {
@@ -363,18 +387,11 @@ export class BindExpression {
 
         if (validFunction) {
           if (Array.isArray(params)) {
-            // Don't allow objects as parameters except for Object functions.
-            const invalidArgumentType = this.containsObject_(params)
-                && !this.isObjectMethod_(method);
-            if (!invalidArgumentType) {
-              return validFunction.apply(caller, params);
+            if (this.containsInvalidArgument_(method, params)) {
+              throw new Error(`Unexpected argument type in ${method}().`);
             }
-          } else if (typeof params == 'function') {
-            // Special case: `params` may be an arrow function, which are only
-            // supported as the sole argument to functions like Array#find.
-            return validFunction.call(caller, params);
+            return validFunction.apply(caller, params);
           }
-          throw new Error(`Unexpected argument type in ${method}().`);
         }
 
         throw new Error(unsupportedError);
@@ -384,25 +401,18 @@ export class BindExpression {
         const member = this.eval_(args[1], scope);
 
         if (target === null || member === null) {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const targetType = typeof target;
         if (targetType !== 'string' && targetType !== 'object') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
         const memberType = typeof member;
         if (memberType !== 'string' && memberType !== 'number') {
-          this.memberAccessWarning_(target, member);
           return null;
         }
-        // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object} */ (target), member)) {
+        if (hasOwn(target, String(member))) {
           return target[member];
-        } else {
-          this.memberAccessWarning_(target, member);
         }
         return null;
 
@@ -411,10 +421,8 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (Object.prototype.hasOwnProperty.call(scope, variable)) {
+        if (hasOwn(scope, String(variable))) {
           return scope[variable];
-        } else {
-          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
@@ -528,24 +536,29 @@ export class BindExpression {
   }
 
   /**
-   * @param {*} target
-   * @param {*} member
+   * Returns true if `method` is a non-standard instance function.
+   * We alter certain functions e.g. Array.sort to modify and return a copy
+   * instead of operating in-place.
+   * @param {string} method
+   * @return {boolean}
    * @private
    */
-  memberAccessWarning_(target, member) {
-    // Cast valid, because we don't care for the logging.
-    const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
-    user().warn(TAG, `Cannot read property ${stringified} of ` +
-        `${stringified}; returning null.`);
+  isCustomInstanceFunction_(method) {
+    return method === 'sort' || method === 'splice';
   }
 
   /**
-   * Returns true iff method is
    * @param {string} method
+   * @param {!Array} params
    * @return {boolean}
+   * @private
    */
-  isObjectMethod_(method) {
-    return method == 'keys' || method == 'values';
+  containsInvalidArgument_(method, params) {
+    // Don't allow objects as parameters except for certain functions.
+    if (method == 'keys' || method == 'values' || method == 'splice') {
+      return false;
+    }
+    return this.containsObject_(params);
   }
 
   /**

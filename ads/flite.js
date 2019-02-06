@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function flite(global, data) {
   // TODO: check mandatory fields
   validateData(data, [], ['guid','mixins']);
-  const guid = data.guid, o = global, e = encodeURIComponent, x = 0;
+  const {guid} = data, o = global, e = encodeURIComponent, x = 0;
   let r = '', dep = '';
   o.FLITE = o.FLITE || {};
   o.FLITE.config = o.FLITE.config || {};

@@ -6,7 +6,7 @@
 For AMP Fast Fetch, support publisher-specified, multiple, simultaneous callouts in order to augment targeting information included in the ad request.  
 ## Background
 
-Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors.
+Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors. Common use cases for RTC are to retrieve 1st party or 3rd party data, or to integrate 3rd party demand, also known as Header Bidding.
 
 ## Overview
 
@@ -120,6 +120,20 @@ Additionally, macros can be substituted in by the Fast Fetch implementation itse
 
 The `errorReportingUrl` property is optional. The only available macros are ERROR_TYPE and HREF. See [RTC Error Pingback](#rtc-error-pingback) section below for more information on how error reporting works.
 
+#### Currently Supported Vendors
+
+*   AppNexus
+*   APS
+*   Criteo
+*   IndexExchange
+*   Lotame
+*   Media.net
+*   PubMatic OpenWrap
+*   Purch
+*   Rubicon
+*   Salesforce
+*   Yieldbot
+
 ### RTC Callout Request Specification
 
 RTC callout requests are sent from the AMP runtime with the following headers:
@@ -195,6 +209,145 @@ In both cases, the requirements for an errorReportingUrl are the same:
     *   **HREF** - The actual full URL of the page.  Equivalent to historical value of AMP's window.context.location.href.
 
 The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-manager.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/real-time-config-manager.js) for implementation details.
+
+### AMP Consent Integration
+
+The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
+
+Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to whitelist specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either whitelist for all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`. 
+
+The value of `sendRegardlessOfConsentState` should either be the boolean `true` or an array of consent policy state strings as defined in src/consent-state.js (i.e. use the string keys, like`"UNKNOWN"` not its corresponding numeric value). In a case where the RTC callout would normally be supressed (for example if the AMP-consent response is `UNKNOWN`), it will instead be sent if `sendRegardlessOfConsentState` is set to boolean `true` or an array of values that contains a match for the AMP-consent state response (e.g. `['UNKNOWN']`). If set to an array, then only the values in that array (in addition to the defualt values of `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`) are treated as valid.
+
+The setting of `sendRegardlessOfConsentState` can either be done once for the entire ad slot by setting it as a top-level attribute on the RTC Config, or be done individually by setting it on any individual callouts as needed. If it is set at both the top-level and per-callout level, then if there is a mismatch, the per-callout level "wins". This is detailed below in the examples.
+
+Here are various examples of how to do this for any given ad slot:
+
+#### Whitelist all RTC callouts for all consent states
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              "https://www.AmpPublisher.biz/targetingA",
+              "https://www.AmpPublisher.biz/targetingB"
+            ],
+            "sendRegardlessOfConsentState": true}'>
+</amp-ad>
+```
+By setting `sendRegardlessOfConsentState` at top-level to `true`, this indicates that for any consent state, all of the callouts in this RTC configuration should still be sent.
+
+#### Whitelist all RTC callouts for only certain consent states
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              "https://www.AmpPublisher.biz/targetingA",
+              "https://www.AmpPublisher.biz/targetingB"
+            ],
+            "sendRegardlessOfConsentState": ["UNKNOWN"]}'>
+</amp-ad>
+```
+By setting `sendRegardlessOfConsentState` to an array, this indicates that only when the page consent state matches any of the consent states in the array (in this case only `UNKNOWN` in addition to the default states `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`) should all of the RTC callouts still be sent. For instance, if the page state is `INSUFFICIENT`, then none of the callout specified above will be sent. If the page state is `UNKNOWN`, then all of the callouts will be sent.
+
+#### Whitelist some RTC callouts in the "url" array
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              {"url": "https://www.AmpPublisher.biz/targetingA",
+               "sendRegardlessOfConsentState": true},
+              "https://www.AmpPublisher.biz/targetingB"
+            ]}'>
+</amp-ad>
+```
+In this example, `sendRegardlessOfConsentState` is only set for one specific URL, the first URL in the array "urls". Take the case when the page state is `UNKNOWN`. In that case, the only RTC callout that would be sent is the one to `https://www.AmpPublisher.biz/targetingA`.
+
+Is is also possible to set `sendRegardlessOfConsentState` here to an array as well, such as: 
+
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              {"url": "https://www.AmpPublisher.biz/targetingA",
+               "sendRegardlessOfConsentState": ["UNKNOWN", "INSUFFICIENT"]},
+              "https://www.AmpPublisher.biz/targetingB"
+            ]}'>
+</amp-ad>
+```
+
+#### Whitelist some RTC callouts in the "vendors" object
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"macros" {"SLOT_ID": "1"},
+                          "sendRegardlessOfConsentState": ["UNKNOWN"]},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              "https://www.AmpPublisher.biz/targetingA",
+              "https://www.AmpPublisher.biz/targetingB"
+            ]}'>
+</amp-ad>
+```
+In this example, `sendRegardlessOfConsentState` is only set for one specific URL, the first vendor in the "vendors" object. Take the case when the page state is `UNKNOWN`. In that case, the only RTC callout that would be sent is the one to vendorA.
+
+#### Mixture of settings
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"macros" {"SLOT_ID": "1"},
+                          "sendRegardlessOfConsentState": ["INSUFFICIENT"]},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+               {"url": "https://www.AmpPublisher.biz/targetingA",
+               "sendRegardlessOfConsentState": ["UNKNOWN"]},
+              "https://www.AmpPublisher.biz/targetingB"
+              ],
+            "sendRegardlessOfConsentState": true}'>
+</amp-ad>
+```
+In this example, we have a mixture of various settings. In addition to all the callouts allowing the default states `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`, VendorA is set to allow page consent-state `INSUFFICIENT`, the first url in the `urls` array only state `UNKNOWN`, and the top-level setting across all the RTC callouts is set to `true`, indicating that we should send all RTC callouts regardless of consent-state. How do we reconcile these various values? As explained above, in the case where a top-level setting and a per-callout setting disagree, the per-callout setting wins.
+
+Let's first take an example where the page consent-state is `SUFFICIENT`. This is a default allowed state, so trivially all the callouts will be sent.
+
+Next, let's take an example where the page consent-state is `UNKNOWN`. The callout to vendorA is set to allow consent-state `INSUFFICIENT`, so it will not be sent. The callouts to vendorB and vendorC do not have individual `sendRegardlessOfConsentState` settings, so the top-level setting of `true` applies to them, and they will each be sent. In the `urls` array, the first URL has an individual setting of `UNKNOWN`, which is the current state, so it will be sent. Lastly, the final url does not have an individual setting, so the top-level setting of `true` applies to it, and it will be sent. 
+
 
 ### URL Macro Substitution
 

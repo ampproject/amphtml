@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -28,9 +28,9 @@ import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -59,7 +59,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.configJson_ = null;
 
-    /** @private {?./web-animations.WebAnimationRunner} */
+    /** @private {?./web-animations.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?Promise} */
@@ -67,6 +67,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?Pass} */
     this.restartPass_ = null;
+
+    /** @private {boolean} */
+    this.hasPositionObserver_ = false;
   }
 
   /** @override */
@@ -76,7 +79,7 @@ export class AmpAnimation extends AMP.BaseElement {
     // Trigger.
     const trigger = this.element.getAttribute('trigger');
     if (trigger) {
-      this.triggerOnVisibility_ = user().assert(
+      this.triggerOnVisibility_ = userAssert(
           trigger == 'visibility',
           'Only allowed value for "trigger" is "visibility": %s',
           this.element);
@@ -84,16 +87,15 @@ export class AmpAnimation extends AMP.BaseElement {
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
     if (trigger == 'visibility') {
-      user().assert(
+      userAssert(
           this.element.parentNode == this.element.ownerDocument.body ||
           this.element.parentNode == ampdoc.getBody(),
-          `${TAG} is only allowed as a direct child of <body> element` +
-          ' when trigger is visibility.' +
-          ' This restriction will be removed soon.');
+          '%s is only allowed as a direct child of <body> element when trigger'
+          + ' is visibility. This restriction will be removed soon.', TAG);
     }
 
     // Parse config.
-    const scriptElement = user().assert(
+    const scriptElement = userAssert(
         childElementByTag(this.element, 'script'),
         '"<script type=application/json>" must be present');
     this.configJson_ = tryParseJson(scriptElement.textContent, error => {
@@ -110,9 +112,10 @@ export class AmpAnimation extends AMP.BaseElement {
           left: '0px',
           width: '1px',
           height: '1px',
-          display: 'block',
           position: 'fixed',
         });
+        toggle(this.element, true);
+        setInitialDisplay(this.element, 'block');
       });
     }
 
@@ -151,8 +154,10 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     // Actions.
-    this.registerAction('start',
-        this.startAction_.bind(this), ActionTrust.LOW);
+    this.registerDefaultAction(
+        this.startAction_.bind(this),
+        'start',
+        ActionTrust.LOW);
     this.registerAction('restart',
         this.restartAction_.bind(this), ActionTrust.LOW);
     this.registerAction('pause',
@@ -192,15 +197,11 @@ export class AmpAnimation extends AMP.BaseElement {
     this.setVisible_(false);
   }
 
-  /** @override */
-  activate(invocation) {
-    return this.startAction_(invocation);
-  }
-
   /**
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @return {?Promise}
    * @private
+   * @visibleForTesting
    */
   startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it
@@ -287,7 +288,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    return this.createRunnerIfNeeded_().then(() => {
+    this.hasPositionObserver_ = !!invocation.caller &&
+      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
+    const viewportData = (invocation && invocation.event) ?
+      invocation.event.additionalViewportData : null;
+    return this.createRunnerIfNeeded_(null, viewportData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -359,8 +364,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const triggered = this.triggered_;
-    const pausedByAction = this.pausedByAction_;
+    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
 
     // Stop animation right away.
     if (this.runner_) {
@@ -403,12 +407,14 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise}
    * @private
    */
-  createRunnerIfNeeded_(opt_args) {
+  createRunnerIfNeeded_(opt_args, opt_viewportData) {
     if (!this.runnerPromise_) {
-      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+      this.runnerPromise_ = this.createRunner_(
+          opt_args, opt_viewportData).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -442,10 +448,11 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_(opt_args) {
+  createRunner_(opt_args, opt_viewportData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
@@ -468,7 +475,8 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, args);
+      return builder.createRunner(configJson,
+          this.hasPositionObserver_, args, opt_viewportData);
     });
   }
 

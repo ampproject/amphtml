@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
   KeyframesOrFilterFnDef,
@@ -26,10 +27,14 @@ import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
-import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {map, omit} from '../../../src/utils/object';
-import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -47,8 +52,8 @@ const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /**
  * @param {!Element} element
  * @return {boolean}
+ * TODO(alanorozco): maybe memoize?
  */
-// TODO(alanorozco): maybe memoize?
 export function hasAnimations(element) {
   return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
@@ -126,11 +131,11 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    this.keyframes_.then(keyframes => dev().assert(
+    this.keyframes_.then(keyframes => devAssert(
         !keyframes[0].offset,
         'First keyframe offset for animation preset should be 0 or undefined'));
 
-    user().assert(
+    userAssert(
         this.delay_ >= 0,
         'Negative delays are not allowed in amp-story entrance animations.');
 
@@ -196,7 +201,7 @@ class AnimationRunner {
 
     return this.firstFrameProps_.then(firstFrameProps =>
       this.vsync_.mutatePromise(() => {
-        setStyles(this.target_, firstFrameProps);
+        setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
       }));
   }
 
@@ -217,7 +222,8 @@ class AnimationRunner {
     let promise = Promise.resolve();
 
     if (this.animationDef_.startAfterId) {
-      const startAfterId = this.animationDef_.startAfterId;
+      const startAfterId = /** @type {string} */(
+        this.animationDef_.startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
     }
 
@@ -239,8 +245,8 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        !!this.runner_ && dev().assert(this.runner_)
-            .getPlayState() == WebAnimationPlayState.RUNNING;
+        (!!this.runner_ && devAssert(this.runner_)
+            .getPlayState() == WebAnimationPlayState.RUNNING);
   }
 
   /** Force-finishes all animations. */
@@ -267,7 +273,7 @@ class AnimationRunner {
     this.scheduledWait_ = null;
 
     if (this.runner_) {
-      dev().assert(this.runner_).cancel();
+      devAssert(this.runner_).cancel();
     }
   }
 
@@ -298,7 +304,7 @@ class AnimationRunner {
         /**
          * @type {!../../amp-animation/0.1/web-animations.WebAnimationRunner}
          */
-        (dev().assert(
+        (devAssert(
             this.runner_,
             'Tried to execute playbackWhenReady_ before runner was resolved.'));
 
@@ -369,7 +375,7 @@ export class AnimationManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(root, ampdoc) {
-    dev().assert(hasAnimations(root));
+    devAssert(hasAnimations(root));
 
     /** @private @const */
     this.root_ = root;
@@ -439,7 +445,7 @@ export class AnimationManager {
 
   /** @private */
   getRunners_() {
-    return dev().assert(this.runners_, 'Executed before applyFirstFrame');
+    return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
 
   /**
@@ -452,7 +458,7 @@ export class AnimationManager {
           scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
           el => this.createRunner_(el));
     }
-    return dev().assert(this.runners_);
+    return devAssert(this.runners_);
   }
 
   /**
@@ -466,7 +472,7 @@ export class AnimationManager {
     return new AnimationRunner(
         this.root_,
         animationDef,
-        dev().assert(this.builderPromise_),
+        devAssert(this.builderPromise_),
         this.vsync_,
         this.timer_,
         this.sequence_);
@@ -514,7 +520,7 @@ export class AnimationManager {
   createAnimationBuilderPromise_() {
     return Services.extensionsFor(this.ampdoc_.win)
         .installExtensionForDoc(this.ampdoc_, 'amp-animation')
-        .then(() => Services.webAnimationServiceFor(this.ampdoc_))
+        .then(() => Services.webAnimationServiceFor(this.root_))
         .then(webAnimationService => webAnimationService.createBuilder());
   }
 
@@ -526,7 +532,7 @@ export class AnimationManager {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
     setStyleForPreset(el, name);
 
-    return user().assert(
+    return userAssert(
         PRESETS[name],
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,
@@ -538,6 +544,9 @@ export class AnimationManager {
 
 /** Bus for animation sequencing. */
 class AnimationSequence {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Object<string, !Promise>} */
     this.subscriptionPromises_ = map();
@@ -557,7 +566,7 @@ class AnimationSequence {
    */
   notifyFinish(id) {
     if (id in this.subscriptionPromises_) {
-      dev().assert(this.subscriptionResolvers_[id])();
+      devAssert(this.subscriptionResolvers_[id])();
 
       delete this.subscriptionPromises_[id];
     }
@@ -570,9 +579,9 @@ class AnimationSequence {
    */
   waitFor(id) {
     if (!(id in this.subscriptionPromises_)) {
-      this.subscriptionPromises_[id] = new Promise(resolve => {
-        this.subscriptionResolvers_[id] = resolve;
-      });
+      const deferred = new Deferred();
+      this.subscriptionPromises_[id] = deferred.promise;
+      this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
   }

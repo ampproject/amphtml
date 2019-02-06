@@ -31,15 +31,14 @@
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
 
   <h2>Overflowing</h2>
-  <amp-list class="list1" width="300" height="100"
-      src="./amp-list-data.json?RANDOM">
+  <amp-list class="list1" width="300" height="100" src="./amp-list-data.json?RANDOM">
     <template type="amp-mustache">
-      <div class="story-entry">
+      <div>
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
         {{title}}
       </div>
@@ -50,10 +49,9 @@
   </amp-list>
 
   <h2>Complete</h2>
-  <amp-list class="list2" width="300" height="130"
-      src="./amp-list-data.json?RANDOM">
+  <amp-list class="list2" width="300" height="130" src="./amp-list-data.json?RANDOM">
     <template type="amp-mustache">
-      <div class="story-entry">
+      <div>
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
         {{title}}
       </div>
@@ -61,6 +59,17 @@
     <div overflow>
       SEE MORE
     </div>
+  </amp-list>
+
+  <h3>Sanitizer should preserve custom AMP attributes e.g. "layout"</h3>
+  <p>Expected: The images should fill the width of the its parent amp-list.</p>
+  <amp-list class="list2" width="300" height="130" src="./amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div>
+        <amp-img src="{{imageUrl}}" width=80 height=60 layout=responsive></amp-img>
+        {{title}}
+      </div>
+    </template>
   </amp-list>
 </body>
 </html>

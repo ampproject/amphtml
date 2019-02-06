@@ -60,13 +60,22 @@ In this example, we display three sections, where the third section is expanded 
     resizable
     src="https://ampproject-b5f4c.firebaseapp.com/examples/ampaccordion.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
 {% call callout('Tip', type='success') %}
 To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
 {% endcall %}
+
+### Events
+The events below will be triggered on `section`s of `accordion`.
+
+#### `expand`
+This event is triggered on the target `section` that changes from collapsed state to expanded state. Notice that calling `expand` on an already expanded `section` would not trigger this event.
+
+#### `collapse`
+This event is triggered on the target `section` that changes from expanded state to collapsed state. Notice that calling `collapse` on an already collapsed `section` would not trigger this event.
 
 ### Actions
 
@@ -80,6 +89,10 @@ This action expands an `amp-accordion`. If it is already `expanded`, it will sta
 This action collapses an `amp-accordion`. If it is already collapsed, it will stay so. When called with no arguments, it will collapse all sections of the accordion. A single section may be specified with the `section` argument and the corresponding `id` as the value.
 
 #### Attributes
+
+##### `animate`
+
+Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
 
 ##### `disable-session-states`
 

@@ -15,7 +15,6 @@
  */
 
 import '../amp-youtube';
-import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -59,7 +58,7 @@ describes.realWin('amp-youtube', {
       return yt.layoutCallback();
     }).then(() => {
       const ytIframe = yt.querySelector('iframe');
-      yt.implementation_.handleYoutubeMessages_({
+      yt.implementation_.handleYoutubeMessage_({
         origin: 'https://www.youtube.com',
         source: ytIframe.contentWindow,
         data: JSON.stringify({event: 'onReady'}),
@@ -105,7 +104,7 @@ describes.realWin('amp-youtube', {
       }).then(yt => {
         const iframe = yt.querySelector('iframe');
         expect(iframe.src).to.contain('myParam=hello%20world');
-        // data-param-autoplay is black listed in favour of just autoplay
+        // data-param-autoplay is black listed in favor of just autoplay
         expect(iframe.src).to.not.contain('autoplay=1');
         // playsinline should default to 1 if not provided.
         expect(iframe.src).to.contain('playsinline=1');
@@ -132,7 +131,7 @@ describes.realWin('amp-youtube', {
         'data-videoid': datasource,
         'data-param-playsinline': '0',
       }).then(yt => {
-        const src = yt.querySelector('iframe').src;
+        const {src} = yt.querySelector('iframe');
         const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
         yt.implementation_.preconnectCallback();
         preloadSpy.should.have.been.calledWithExactly(src);
@@ -212,7 +211,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('requires data-videoid or data-live-channelid', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getYt({}).should.eventually.be.rejectedWith(
           /Exactly one of data-videoid or data-live-channelid should/);
     });
@@ -296,7 +295,6 @@ describes.realWin('amp-youtube', {
           return 90;
         },
       });
-      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -328,12 +326,12 @@ describes.realWin('amp-youtube', {
       expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('');
     });
   });
 
   function sendFakeInfoDeliveryMessage(yt, iframe, info) {
-    yt.implementation_.handleYoutubeMessages_({
+    yt.implementation_.handleYoutubeMessage_({
       origin: 'https://www.youtube.com',
       source: iframe.contentWindow,
       data: JSON.stringify({

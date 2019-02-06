@@ -16,7 +16,8 @@
 
 
 /**
- * @fileoverview Sets location specific CSS, bind variables, and attributes on AMP pages
+ * @fileoverview Sets location specific CSS, bind variables, and attributes on
+ * AMP pages
  * Example:
  * <code>
  * <amp-geo>
@@ -35,15 +36,25 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+
+/**
+ * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
+ * DO NOT GUARANTEE THE ACCURACY OR COMPLETENESS OF ANY INFORMATION CONTAINED
+ * HEREIN. THIS INFORMATION IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+import {ampGeoPresets} from './amp-geo-presets';
+
+import {GEO_IN_GROUP} from './amp-geo-in-group';
+import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
-import {isProxyOrigin} from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {user} from '../../../src/log';
-import {waitForBodyPromise} from '../../../src/dom';
-
+import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-geo';
@@ -73,6 +84,17 @@ const mode = {
 };
 
 
+/**
+  * @typedef {{
+  *   ISOCountry: string,
+  *   matchedISOCountryGroups: !Array<string>,
+  *   allISOCountryGroups: !Array<string>,
+  *   isInCountryGroup: (function(string):GEO_IN_GROUP),
+  * }}
+  */
+export let GeoDef;
+
+
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -80,88 +102,131 @@ export class AmpGeo extends AMP.BaseElement {
 
     /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
+    /** @private {boolean} */
+    this.error_ = false;
     /** @private {string} */
     this.country_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
+    /** @private {Array<string>} */
+    this.definedGroups_ = [];
     /** @Private {} */
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /** @override */
   buildCallback() {
     // All geo config within the amp-geo component.
     // The validator only allows one amp-geo per page
-    const children = this.element.children;
+    const {children} = this.element;
 
     if (children.length) {
-      user().assert(children.length === 1 &&
+      this.assertWithErrorReturn_(children.length === 1 &&
         isJsonScriptTag(children[0]),
       `${TAG} can only have one <script type="application/json"> child`);
     }
 
-    /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
-    const geo = this.addToBody_(
-        children.length ?
-          parseJson(children[0].textContent) : {});
+    const config = children.length ?
+      tryParseJson(
+          children[0].textContent,
+          () => this.assertWithErrorReturn_(false,
+              `${TAG} Unable to parse JSON`)
+      ) : {};
+
+    /** @type {!Promise<!GeoDef>} */
+    const geo = this.addToBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
-    geoResolver(geo);
+    geoDeferred.resolve(geo);
   }
 
   /**
+   * resolves geoDeferred with null if not shouldBeTrueish and then calls
+   * userAssert() to deal with the error as normal.
+   * @param {T} shouldBeTrueish The value to assert.
+   *  The assert fails if it does not evaluate to true.
+   * @param {string=} opt_message The assertion message
+   * @return {T} The value of shouldBeTrueish.
+   * @template T
+   * @private
+   */
+  assertWithErrorReturn_(shouldBeTrueish, opt_message) {
+    if (!shouldBeTrueish) {
+      geoDeferred.resolve(null);
+      return userAssert(shouldBeTrueish, opt_message);
+    }
+    return shouldBeTrueish;
+  }
+
+
+  /**
    * findCountry_, sets this.country_ and this.mode_
+   * @param {Document} doc
    */
   findCountry_(doc) {
-    // First see if we've been pre-rendered with a country, if so set it
+    // Flag to see if we've been pre-rendered with a country
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
+    // Trim the spaces off the patched country
+    const trimmedCountry = COUNTRY.trim();
 
-    if (preRenderMatch && !isProxyOrigin(doc.location)) {
-      this.mode_ = mode.GEO_PRERENDER;
-      /** @private {string} */
-      this.country_ = preRenderMatch[1];
-    } else {
-      this.mode_ = mode.GEO_HOT_PATCH;
-      this.country_ = COUNTRY.trim();
-      // If we got a country code it will be 2 characters
-      // If the lengths is 0 the country is unknown
-      // If the length is > 2 we didn't get patched
-      // (probably local dev) so we treat it as unknown.
-      if (this.country_.length !== 2) {
-        this.country_ = 'unknown';
-      }
-    }
+    // default country is 'unknown' which is also the zero length case
 
-    // Are we in debug override?
-    // match to \w characters only to prevent xss vector
     if (getMode(this.win).geoOverride &&
       (isCanary(this.win) || getMode(this.win).localDev) &&
       /^\w+$/.test(getMode(this.win).geoOverride)) {
+      // debug override case, only works in canary or localdev
+      // match to \w characters only to prevent xss vector
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride ;
+      this.country_ = getMode(this.win).geoOverride.toLowerCase();
+    } else if (preRenderMatch &&
+        !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
+      // pre-rendered by a publisher case, if we're a cache we ignore that
+      // since there is no way the publisher could know the geo of the client.
+      // When caches start pre-rendering geo we'll need to add specifc code
+      // to handle that.
+      this.mode_ = mode.GEO_PRERENDER;
+      this.country_ = preRenderMatch[1];
+    } else if (trimmedCountry.length == 2) {
+      // We have a valid 2 letter ISO country
+      this.mode_ = mode.GEO_HOT_PATCH;
+      this.country_ = trimmedCountry;
+    } else if (trimmedCountry.length > 2 && !getMode(this.win).localDev) {
+      // We were not patched, if we're not in dev this is an error
+      // and we leave the country at the default 'unknown'
+      this.error_ = true;
+      dev().error(TAG,
+          'GEONOTPATCHED: amp-geo served unpatched, ISO country not set');
     }
   }
+
   /**
    * Find matching country groups
    * @param {Object} config
    */
   matchCountryGroups_(config) {
-    /* ISOCountryGroups are optional but if specified at least one must exist  */
-    /** @private @const {!Object<string, Array<string>>} */
-    const ISOCountryGroups = config.ISOCountryGroups;
+    // ISOCountryGroups are optional but if specified at least one must exist
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
+      config['ISOCountryGroups']);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
-      user().assert(
+      this.assertWithErrorReturn_(
           isObject(ISOCountryGroups),
           `${errorPrefix} must be an object`);
-      Object.keys(ISOCountryGroups).forEach(group => {
-        user().assert(
+      this.definedGroups_ = Object.keys(ISOCountryGroups);
+      this.definedGroups_.forEach(group => {
+        this.assertWithErrorReturn_(
             /^[a-z]+[a-z0-9]*$/i.test(group) &&
             !/^amp/.test(group),
             `${errorPrefix}[${group}] name is invalid`);
-        user().assert(
+        this.assertWithErrorReturn_(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
-        if (ISOCountryGroups[group].includes(this.country_)) {
+
+        if (this.checkGroup_(ISOCountryGroups[group])) {
           this.matchedGroups_.push(group);
         }
       });
@@ -169,33 +234,56 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /**
+   * checkGroup_() does this.country_ match the group
+   * after expanding any presets and forceing to lower case.
+   * @param {!Array<string>} countryGroup The group to match against
+   * @return {boolean}
+   */
+  checkGroup_(countryGroup) {
+    /** @type {!Array<string>} */
+    const expandedGroup = countryGroup.reduce((countries, country) => {
+      // If it's a valid preset then we expand it.
+      if (/^preset-/.test(country)) {
+        this.assertWithErrorReturn_(
+            isArray(ampGeoPresets[country]),
+            `<amp-geo> preset ${country} not found`);
+        return countries.concat(ampGeoPresets[country]);
+      }
+      // Otherwise we add the country to the list
+      countries.push(country);
+      return countries;
+    }, []).map(c => c.toLowerCase());
+    return expandedGroup.includes(this.country_);
+  }
+
+  /**
    * clearPreRender_()
-   * Removes classes and amp-state block addred by server side
-   * pre-render when debug override is in effect
+   * Returns a list of classes to remove if pre-render has
+   * been invalidated by way of being on an amp cache
+   * @param {Document} doc
+   * @return {Array<string>}
    */
   clearPreRender_(doc) {
-    const klasses = doc.body.classList;
+    const {classList} = doc.body;
+    const classesToRemove = [];
     const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX ,'i');
-    for (let i = klasses.length - 1; i > 0; i--) {
-      if (stripRe.test(klasses[i])) {
-        doc.body.classList.remove(klasses[i]);
+    for (let i = classList.length - 1; i > 0; i--) {
+      if (stripRe.test(classList[i])) {
+        classesToRemove.push(classList[i]);
       }
     }
-    const geoState = doc.getElementById(GEO_ID);
-    if (geoState) {
-      geoState.parentNode.removeChild(geoState);
-    }
+    return classesToRemove;
   }
 
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<!Object<string, (string|Array<string>)>>} service response
+   * @return {!Promise<!GeoDef>} service response
    * @private
    */
   addToBody_(config) {
     const doc = this.win.document;
-    /** @private {Object} */
+    /** @type {Object} */
     const states = {};
     const self = this;
 
@@ -205,40 +293,103 @@ export class AmpGeo extends AMP.BaseElement {
       self.findCountry_(doc);
       self.matchCountryGroups_(config);
 
+      let classesToRemove = [];
+
       switch (self.mode_) {
         case mode.GEO_OVERRIDE:
-          self.clearPreRender_(doc);
+          classesToRemove = self.clearPreRender_(doc);
           // Intentionally fall through.
         case mode.GEO_HOT_PATCH:
           // Build the AMP State, add classes
           states.ISOCountry = self.country_;
 
-          for (let group = 0; group < self.matchedGroups_.length; group++) {
-            doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
-            states[self.matchedGroups_[group]] = true;
-          }
-          doc.body.classList.add(COUNTRY_PREFIX + this.country_);
-          states.ISOCountryGroups = self.matchedGroups_;
+          const classesToAdd = self.matchedGroups_.map(group => {
+            states[group] = true;
+            return GROUP_PREFIX + group;
+          });
 
-          // Only include amp state if user requests it to avoid validator issue
-          // with missing amp-bind js
-          if (config.AmpBind) {
-            const state = doc.createElement('amp-state');
-            const confScript = doc.createElement('script');
-            confScript.setAttribute('type', 'application/json');
-            confScript.textContent =
-                JSON.stringify(/** @type {!JsonObject} */(states)) ;
-            state.appendChild(confScript);
-            state.id = GEO_ID;
-            doc.body.appendChild(state);
+          if (!self.matchedGroups_.length) {
+            classesToAdd.push('amp-geo-no-group');
           }
+
+          if (self.error_) {
+            classesToAdd.push('amp-geo-error');
+          }
+
+          states.ISOCountryGroups = self.matchedGroups_;
+          classesToAdd.push(COUNTRY_PREFIX + this.country_);
+
+          // Let the runtime know we're mutating the doc.body
+          // Actual change happens in callback to runtime can
+          // optimize dom mutations.
+          self.mutateElement(() => {
+            const {classList} = doc.body;
+            // Always remove the pending class
+            classesToRemove.push('amp-geo-pending');
+            classesToRemove.forEach(toRemove => classList.remove(toRemove));
+
+            // add the new classes to <body>
+            classesToAdd.forEach(toAdd => classList.add(toAdd));
+
+            // Only include amp state if user requests it to
+            // avoid validator issue with missing amp-bind js
+            if (config['AmpBind']) {
+              const geoState = doc.getElementById(GEO_ID);
+              if (geoState) {
+                geoState.parentNode.removeChild(geoState);
+              }
+              const state = doc.createElement('amp-state');
+              const confScript = doc.createElement('script');
+              confScript.setAttribute('type', 'application/json');
+              confScript.textContent =
+                  JSON.stringify(/** @type {!JsonObject} */(states)) ;
+              state.appendChild(confScript);
+              state.id = GEO_ID;
+              doc.body.appendChild(state);
+            }
+          }, doc.body);
+
           break;
         case mode.GEO_PRERENDER:
           break;
       }
 
-      return {ISOCountry: self.country_, ISOCountryGroups: self.matchedGroups_};
+      return {
+        ISOCountry: self.country_,
+        matchedISOCountryGroups: self.matchedGroups_,
+        allISOCountryGroups: this.definedGroups_,
+        /* API */
+        isInCountryGroup: this.isInCountryGroup.bind(this),
+      };
     });
+  }
+
+
+  /**
+   * isInCountryGroup API
+   * @param {string} targetGroup group or comma delimited list of groups
+   * @return {GEO_IN_GROUP}
+   * @public
+   */
+  isInCountryGroup(targetGroup) {
+    const targets = targetGroup.trim().split(/,\s*/);
+
+    // If any of the group are missing it's an error
+    if (targets.filter(group => {
+      return this.definedGroups_.indexOf(group) >= 0;
+    }).length !== targets.length) {
+      return GEO_IN_GROUP.NOT_DEFINED;
+    }
+
+    // If any of the groups match it's a match
+    if (targets.filter(group => {
+      return this.matchedGroups_.indexOf(group) >= 0;
+    }).length > 0) {
+      return GEO_IN_GROUP.IN;
+    }
+
+    // If we got here nothing matched
+    return GEO_IN_GROUP.NOT_IN;
   }
 }
 
@@ -247,15 +398,11 @@ export class AmpGeo extends AMP.BaseElement {
  * Create the service promise at load time to prevent race between extensions
  */
 
-/** singleton @type {?Promise<!Object<string, (string|Array<string>)>>} */
-let geoResolver = null;
+/** singleton */
+let geoDeferred = null;
 
 AMP.extension('amp-geo', '0.1', AMP => {
-  /** @type {Promise<!Object<string, (string|Array<string>)>>} */
-  const geoPromise = new Promise(resolve => {
-    geoResolver = resolve;
-  });
+  geoDeferred = new Deferred();
   AMP.registerElement(TAG, AmpGeo);
-  AMP.registerServiceForDoc(SERVICE_TAG, () => geoPromise);
+  AMP.registerServiceForDoc(SERVICE_TAG, () => geoDeferred.promise);
 });
-

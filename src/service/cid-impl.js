@@ -27,7 +27,7 @@ import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, rethrowAsync, user} from '../log';
+import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
@@ -38,7 +38,7 @@ import {
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../url';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
@@ -49,7 +49,7 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 /**
  * We ignore base cids that are older than (roughly) one year.
  */
-const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+export const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
@@ -114,6 +114,7 @@ export class Cid {
      * Cached base cid once read from storage to avoid repeated
      * reads.
      * @private {?Promise<string>}
+     * @restricted
      */
     this.baseCid_ = null;
 
@@ -121,6 +122,7 @@ export class Cid {
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
      * @private {!Object<string, !Promise<string>>}
+     * @restricted
      */
     this.externalCidCache_ = Object.create(null);
 
@@ -163,7 +165,7 @@ export class Cid {
    *      given.
    */
   get(getCidStruct, consent, opt_persistenceConsent) {
-    user().assert(
+    userAssert(
         SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
             && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
         'The CID scope and cookie name must only use the characters ' +
@@ -203,16 +205,16 @@ export class Cid {
 
   /**
    * Returns the "external cid". This is a cid for a specific purpose
-   * (Say Analytics provider X). It is unique per user, that purpose
+   * (Say Analytics provider X). It is unique per user, userAssert, that purpose
    * and the AMP origin site.
    * @param {!GetCidDef} getCidStruct
    * @param {!Promise} persistenceConsent
    * @return {!Promise<?string>}
    */
   getExternalCid_(getCidStruct, persistenceConsent) {
-    const scope = getCidStruct.scope;
+    const {scope} = getCidStruct;
     /** @const {!Location} */
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
@@ -230,24 +232,38 @@ export class Cid {
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
-    if (this.cacheCidApi_.isSupported()) {
-      const apiKey = this.isScopeOptedIn_(scope);
-      if (!apiKey) {
-        return /** @type {!Promise<?string>} */ (Promise.resolve(null));
-      }
-      return this.cacheCidApi_.getScopedCid(scope);
-    }
+
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {
         const apiKey = this.isScopeOptedIn_(scope);
         return this.viewerCidApi_.getScopedCid(apiKey, scope);
       }
-      return getBaseCid(this, persistenceConsent)
-          .then(baseCid => {
-            return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-                baseCid + getProxySourceOrigin(url) + scope);
-          });
+
+      if (this.cacheCidApi_.isSupported() && this.isScopeOptedIn_(scope)) {
+        return this.cacheCidApi_.getScopedCid(scope).then(scopedCid => {
+          if (scopedCid) {
+            return scopedCid;
+          }
+          return this.scopeBaseCid_(persistenceConsent, scope, url);
+        });
+      }
+      return this.scopeBaseCid_(persistenceConsent, scope, url);
     });
+  }
+
+  /**
+   *
+   * @param {!Promise} persistenceConsent
+   * @param {*} scope
+   * @param {!Location} url
+   * @return {*}
+   */
+  scopeBaseCid_(persistenceConsent, scope, url) {
+    return getBaseCid(this, persistenceConsent)
+        .then(baseCid => {
+          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+              baseCid + getProxySourceOrigin(url) + scope);
+        });
   }
 
   /**
@@ -301,6 +317,7 @@ export class Cid {
  * User will be opted out of Cid issuance for all scopes.
  * When opted-out Cid service will reject all `get` requests.
  *
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  * @visibleForTesting
  */
@@ -355,8 +372,8 @@ function setCidCookie(win, scope, cookie) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const win = cid.ampdoc.win;
-  const scope = getCidStruct.scope;
+  const {win} = cid.ampdoc;
+  const {scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
   const existingCookie = getCookie(win, cookieName);
 
@@ -405,7 +422,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  userAssert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
@@ -423,7 +440,7 @@ function getBaseCid(cid, persistenceConsent) {
   if (cid.baseCid_) {
     return cid.baseCid_;
   }
-  const win = cid.ampdoc.win;
+  const {win} = cid.ampdoc;
 
   return cid.baseCid_ = read(cid.ampdoc).then(stored => {
     let needsToStore = false;
@@ -460,7 +477,7 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(ampdoc, persistenceConsent, cidString) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
     viewerBaseCid(ampdoc, createCidData(cidString));
@@ -530,7 +547,7 @@ function createCidData(cidString) {
  * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(ampdoc) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   let data;
   try {
     data = win.localStorage.getItem('amp-cid');

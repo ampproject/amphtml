@@ -15,12 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dev, devAssert} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getStyle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {getStyle, setStyles} from '../../../src/style';
+import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 
@@ -66,9 +65,9 @@ const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /**
- * Event listener callback for message events. If message is a Safeframe message,
- * handles the message.
- * This listener is registered within SafeframeHostApi.
+ * Event listener callback for message events. If message is a Safeframe
+ * message, handles the message. This listener is registered within
+ * SafeframeHostApi.
  * @param {!Event} event
  */
 export function safeframeListener(event) {
@@ -102,20 +101,20 @@ export function safeframeListener(event) {
  * Safeframe container APIs to work:
  *   - $sf.ext.expand()
  *   - $sf.ext.collapse()
- *   - $sf.ext.geom()
- * Expand and collapse are both implemented utilizing AMP's built in element
- * resizing.
+ *   - $sf.ext.geom() Expand and collapse are both implemented utilizing AMP's
+ *     built in element resizing.
  *
- * For geom, the host needs to send geometry updates into the container
- *  whenever a position change happens, at a max frequency of 1 message/second.
- *  To implement this messaging, we are leveraging the existing IntersectionObserver
- *  class that works with AMP elements. However, the safeframe iframe that we
- *  need to monitor is not an AMP element, but rather contained within an amp-ad.
- *  So, we are doing intersection observing on the amp-ad, and calculating
- *  the correct position for the iframe whenever we get an update.
+ * For geom, the host needs to send geometry updates into the container whenever
+ *  a position change happens, at a max frequency of 1 message/second. To
+ *  implement this messaging, we are leveraging the existing
+ *  IntersectionObserver class that works with AMP elements. However, the
+ *  safeframe iframe that we need to monitor is not an AMP element, but rather
+ *  contained within an amp-ad. So, we are doing intersection observing on the
+ *  amp-ad, and calculating the correct position for the iframe whenever we get
+ *  an update.
  *
- * We pass an instance of this class into the IntersectionObserver class, which then
- *  calls the instance of send() below whenever an update occurs.
+ * We pass an instance of this class into the IntersectionObserver class, which
+ *  then calls the instance of send() below whenever an update occurs.
  */
 export class SafeframeHostApi {
 
@@ -123,9 +122,8 @@ export class SafeframeHostApi {
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
    * @param {{width:number, height:number}} creativeSize
-   * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -165,9 +163,6 @@ export class SafeframeHostApi {
       /** @private {{width:number, height:number}} */
       (Object.assign({}, creativeSize));
 
-    /** @private {?string} */
-    this.fluidImpressionUrl_ = fluidImpressionUrl;
-
     /** @private {?Promise} */
     this.delay_ = null;
 
@@ -185,11 +180,11 @@ export class SafeframeHostApi {
         this.baseInstance_.element.getAttribute(
             'data-safeframe-config')) || {});
     /** @private {boolean} */
-    this.expandByOverlay_ = sfConfig.hasOwnProperty('expandByOverlay') ?
+    this.expandByOverlay_ = hasOwn(sfConfig, 'expandByOverlay') ?
       sfConfig['expandByOverlay'] : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = sfConfig.hasOwnProperty('expandByPush') ?
+    this.expandByPush_ = hasOwn(sfConfig, 'expandByPush') ?
       sfConfig['expandByPush'] : true;
 
     /** @private {?Function} */
@@ -245,8 +240,8 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const canonicalUrl = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
     const metaReferrer = this.win_.document.querySelector(
         "meta[name='referrer']");
     if (!metaReferrer) {
@@ -258,7 +253,7 @@ export class SafeframeHostApi {
       case 'no-referrer':
         return;
       case 'origin':
-        return parseUrl(canonicalUrl).origin;
+        return parseUrlDeprecated(canonicalUrl).origin;
     }
     return canonicalUrl;
   }
@@ -295,7 +290,7 @@ export class SafeframeHostApi {
    * that as well.
    */
   registerSafeframeHost() {
-    dev().assert(this.sentinel_);
+    devAssert(this.sentinel_);
     safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
     if (!safeframeListenerCreated_) {
       safeframeListenerCreated_ = true;
@@ -312,7 +307,7 @@ export class SafeframeHostApi {
     // Set the iframe here, because when class is first created the iframe
     // element does not yet exist on this.baseInstance_. The first time
     // we receive a message we know that it now exists.
-    dev().assert(this.baseInstance_.iframe);
+    devAssert(this.baseInstance_.iframe);
     this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
     this.setupGeom_();
@@ -331,7 +326,7 @@ export class SafeframeHostApi {
    * @private
    */
   setupGeom_() {
-    dev().assert(this.iframe_.contentWindow,
+    devAssert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
     const throttledUpdate = throttle(
         this.win_, this.updateGeometry_.bind(this), 1000);
@@ -595,9 +590,7 @@ export class SafeframeHostApi {
           (payload['resize_r'] + payload['resize_l']);
 
     // Make sure we are actually resizing here.
-    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
-        resizeWidth > this.creativeSize_.width ||
-        resizeHeight > this.creativeSize_.height) {
+    if (isNaN(resizeWidth) || isNaN(resizeHeight)) {
       dev().error(TAG, 'Invalid resize values.');
       return;
     }
@@ -684,35 +677,33 @@ export class SafeframeHostApi {
   handleFluidMessage_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.baseInstance_.forceCollapse();
       return;
     }
     this.baseInstance_.attemptChangeHeight(newHeight)
         .then(() => {
           this.checkStillCurrent_();
-          this.onFluidResize_();
+          this.onFluidResize_(newHeight);
         }).catch(err => {
           if (err.message == 'CANCELLED') {
             dev().error(TAG, err);
             return;
           }
-          // TODO(levitzky) Add more error handling here
-          this.baseInstance_.forceCollapse();
         });
   }
 
   /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
+   * @param {number} newHeight The height expanded to.
    * @private
    */
-  onFluidResize_() {
-    if (this.fluidImpressionUrl_) {
-      this.baseInstance_.fireDelayedImpressions(
-          this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
+  onFluidResize_(newHeight) {
+    const iframe = dev().assertElement(this.baseInstance_.iframe);
+    const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
+    if (iframeHeight != newHeight) {
+      setStyles(iframe, {height: `${newHeight}px`});
     }
+    this.baseInstance_.fireFluidDelayedImpression();
     this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
         SAFEFRAME_ORIGIN);

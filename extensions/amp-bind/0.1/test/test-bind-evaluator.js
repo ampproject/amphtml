@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {BindEvaluator, BindingDef} from '../bind-evaluator';
+import {BindEvaluator} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 
 describe('BindEvaluator', () => {
@@ -24,7 +23,7 @@ describe('BindEvaluator', () => {
 
   beforeEach(() => {
     evaluator = new BindEvaluator();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {

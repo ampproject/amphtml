@@ -15,12 +15,12 @@
  */
 
 
-import {Entitlement} from './entitlement';
+import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 
@@ -36,10 +36,8 @@ export class ViewerSubscriptionPlatform {
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    * @param {string} origin
-   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter, origin,
-    subscriptionAnalytics) {
+  constructor(ampdoc, platformConfig, serviceAdapter, origin) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
@@ -48,7 +46,7 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {!LocalSubscriptionPlatform} */
     this.platform_ = new LocalSubscriptionPlatform(
-        ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics);
+        ampdoc, platformConfig, serviceAdapter);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
@@ -68,7 +66,7 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    dev().assert(this.currentProductId_, 'Current product is not set');
+    devAssert(this.currentProductId_, 'Current product is not set');
 
     const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
         'auth',
@@ -101,7 +99,7 @@ export class ViewerSubscriptionPlatform {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (user().assert(
+      const currentProductId = /** @type {string} */ (userAssert(
           this.pageConfig_.getProductId(),
           'Product id is null'
       ));
@@ -116,26 +114,38 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          const entitlementObject =
-              Entitlement.parseFromJson(entitlements[index], token);
-          if (entitlementObject.enables(currentProductId)) {
-            entitlement = entitlementObject;
+          if (entitlements[index]['products'].indexOf(currentProductId)
+              !== -1) {
+            const entitlementObject = entitlements[index];
+            entitlement = new Entitlement({
+              source: 'viewer',
+              raw: token,
+              granted: true,
+              grantReason: entitlementObject.subscriptionToken ?
+                GrantReason.SUBSCRIBER : '',
+              dataObject: entitlementObject,
+            });
             break;
           }
         }
-      } else if (decodedData['metering'] && !decodedData['entitlements']) { // No entitlements
-        dev().assert(this.currentProductId_, 'Current product is not set');
+      } else if (decodedData['metering'] && !decodedData['entitlements']) {
+        // Special case where viewer gives metering but no entitlement
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
           raw: token,
-          service: 'local',
-          products: [this.currentProductId_],
-          subscriptionToken: null,
-          loggedIn: false,
-          metering: decodedData['metering'],
+          granted: true,
+          grantReason: GrantReason.METERING,
+          dataObject: decodedData['metering'],
         });
       } else if (entitlements) { // Not null
-        entitlement = Entitlement.parseFromJson(entitlements, token);
+        entitlement = new Entitlement({
+          source: 'viewer',
+          raw: token,
+          granted: entitlements.granted,
+          grantReason: entitlements.subscriptionToken ?
+            GrantReason.SUBSCRIBER : '',
+          dataObject: entitlements,
+        });
       }
 
       entitlement.service = 'local';
@@ -164,6 +174,10 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+  }
+
+  /** @override */
   isPingbackEnabled() {
     return this.platform_.isPingbackEnabled();
   }
@@ -173,9 +187,10 @@ export class ViewerSubscriptionPlatform {
     this.platform_.pingback(selectedPlatform);
   }
 
+
   /** @override */
-  supportsCurrentViewer() {
-    return this.platform_.supportsCurrentViewer();
+  getSupportedScoreFactor(factorName) {
+    return this.platform_.getSupportedScoreFactor(factorName);
   }
 
   /** @override */

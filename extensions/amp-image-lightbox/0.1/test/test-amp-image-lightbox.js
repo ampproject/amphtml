@@ -20,7 +20,7 @@ import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
 
@@ -68,7 +68,7 @@ describes.realWin('amp-image-lightbox component', {
 
       const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({caller: ampImage});
+      impl.open_({caller: ampImage});
 
       const container = lightbox
           .querySelector('.i-amphtml-image-lightbox-container');
@@ -117,7 +117,7 @@ describes.realWin('amp-image-lightbox component', {
 
       const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({caller: ampImage});
+      impl.open_({caller: ampImage});
 
       expect(viewportOnChanged).to.be.calledOnce;
       expect(impl.unlistenViewport_).to.not.equal(null);
@@ -189,13 +189,13 @@ describes.realWin('amp-image-lightbox component', {
       ampImage.setAttribute('src', 'data:');
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
-      impl.activate({caller: ampImage});
-      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
+      impl.open_({caller: ampImage});
+      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly
       expect(nullAddEventListenerSpy).to.have.not.been.called;
-      impl.activate({caller: ampImage});
+      impl.open_({caller: ampImage});
       expect(nullAddEventListenerSpy).to.have.not.been.called;
     });
   });
@@ -217,7 +217,7 @@ describes.realWin('amp-image-lightbox component', {
       const sourceElement = doc.createElement('amp-img');
       sourceElement.setAttribute('src', 'data:');
 
-      impl.activate({caller: sourceElement});
+      impl.open_({caller: sourceElement});
       impl.close();
 
       expect(tryFocus).to.be.calledOnce;
@@ -237,6 +237,19 @@ describes.realWin('amp-image-lightbox image viewer', {
   let lightboxMock;
   let imageViewer;
   let loadPromiseStub;
+
+  const sourceElement = {
+    offsetWidth: 101,
+    offsetHeight: 201,
+    getAttribute: name => {
+      if (name == 'src') {
+        return 'image1';
+      }
+      return undefined;
+    },
+    hasAttribute: () => undefined,
+    getImpl: () => Promise.resolve(sourceElement.implementation_),
+  };
 
   beforeEach(() => {
     win = env.win;
@@ -275,64 +288,27 @@ describes.realWin('amp-image-lightbox image viewer', {
 
 
   it('should init to the source element without image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
-
     imageViewer.init(sourceElement, null);
-
     expect(imageViewer.sourceWidth_).to.equal(101);
     expect(imageViewer.sourceHeight_).to.equal(201);
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with unloaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
     const sourceImage = {
       complete: false,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with loaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
     const sourceImage = {
       complete: true,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().getAttribute('src')).to

@@ -15,11 +15,12 @@
  */
 
 import {Observable} from '../../observable';
+import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
 import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
@@ -43,16 +44,22 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
+    /** @private {!../vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
     const doc = this.win.document;
-    const documentElement = doc.documentElement;
+    const {documentElement} = doc;
     const topClasses = documentElement.className;
-    documentElement.className = 'i-amphtml-ios-embed';
+    documentElement.classList.add('i-amphtml-ios-embed');
 
     const wrapper = doc.createElement('html');
     /** @private @const {!Element} */
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      wrapper.classList.add('i-amphtml-body-minheight');
+    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -68,6 +75,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
+
+    /** @private {number} */
+    this.paddingTop_ = 0;
 
     // Setup UI.
     /** @private {boolean} */
@@ -158,6 +168,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    this.paddingTop_ = paddingTop;
     setImportantStyles(this.wrapper_, {
       'padding-top': px(paddingTop),
     });
@@ -227,14 +238,32 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getContentHeight() {
-    // The reparented body inside wrapper will have the correct content height.
-    // Body is overflow: hidden so that the scrollHeight include the margins of
-    // body's first and last child.
-    // Body height doesn't include paddingTop on the parent, so we add on the
-    // position of the body from the top of the viewport and subtract the
-    // scrollTop (as position relative to the viewport changes as you scroll).
-    const rect = this.win.document.body./*OK*/getBoundingClientRect();
-    return rect.height + rect.top + this.getScrollTop();
+    // Don't use scrollHeight, since it returns `MAX(viewport_height,
+    // document_height)`, even though we only want the latter. Also, it doesn't
+    // account for margins
+    const scrollingElement = this.win.document.body;
+    const rect = scrollingElement./*OK*/getBoundingClientRect();
+    const style = computedStyle(this.win, scrollingElement);
+    return rect.height
+        + this.paddingTop_
+        + parseInt(style.marginTop, 10)
+        + parseInt(style.marginBottom, 10);
+  }
+
+  /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      const doc = this.win.document;
+      const {documentElement} = doc;
+      this.vsync_.mutate(() => {
+        documentElement.classList.remove('i-amphtml-ios-overscroll');
+        this.vsync_.mutate(() => {
+          documentElement.classList.add('i-amphtml-ios-overscroll');
+        });
+      });
+    }
   }
 
   /** @override */
@@ -292,5 +321,10 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getScrollingElement() {
     return this.wrapper_;
+  }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return false;
   }
 }

@@ -21,54 +21,54 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 
 const WHITELISTED_VARIABLES = [
-  'RANDOM',
-  'COUNTER',
-  'CANONICAL_URL',
+  'AMPDOC_HOST',
+  'AMPDOC_HOSTNAME',
+  'AMPDOC_URL',
+  'AMP_VERSION',
+  'AVAILABLE_SCREEN_HEIGHT',
+  'AVAILABLE_SCREEN_WIDTH',
+  'BACKGROUND_STATE',
+  'BROWSER_LANGUAGE',
   'CANONICAL_HOST',
   'CANONICAL_HOSTNAME',
   'CANONICAL_PATH',
-  'DOCUMENT_REFERRER',
-  'TITLE',
-  'AMPDOC_URL',
-  'AMPDOC_HOST',
-  'AMPDOC_HOSTNAME',
-  'SOURCE_URL',
-  'SOURCE_HOST',
-  'SOURCE_HOSTNAME',
-  'SOURCE_PATH',
-  'PAGE_VIEW_ID',
-  'CLIENT_ID',
-  'VARIANT',
-  'VARIANTS',
-  'SHARE_TRACKING_INCOMING',
-  'SHARE_TRACKING_OUTGOING',
-  'TIMESTAMP',
-  'TIMEZONE',
-  'TIMEZONE_CODE',
-  'SCROLL_TOP',
-  'SCROLL_LEFT',
-  'SCROLL_HEIGHT',
-  'SCROLL_WIDTH',
-  'VIEWPORT_HEIGHT',
-  'VIEWPORT_WIDTH',
-  'SCREEN_WIDTH',
-  'SCREEN_HEIGHT',
-  'AVAILABLE_SCREEN_HEIGHT',
-  'AVAILABLE_SCREEN_WIDTH',
-  'SCREEN_COLOR_DEPTH',
+  'CANONICAL_URL',
+  'COUNTER',
   'DOCUMENT_CHARSET',
-  'BROWSER_LANGUAGE',
-  'VIEWER',
-  'TOTAL_ENGAGED_TIME',
-  'AMP_VERSION',
-  'USER_AGENT',
+  'DOCUMENT_REFERRER',
   'FIRST_CONTENTFUL_PAINT',
   'FIRST_VIEWPORT_READY',
   'MAKE_BODY_VISIBLE',
+  'PAGE_VIEW_ID',
+  'RANDOM',
+  'SCREEN_COLOR_DEPTH',
+  'SCREEN_HEIGHT',
+  'SCREEN_WIDTH',
+  'SCROLL_HEIGHT',
+  'SCROLL_LEFT',
+  'SCROLL_TOP',
+  'SCROLL_WIDTH',
+  'SHARE_TRACKING_INCOMING',
+  'SHARE_TRACKING_OUTGOING',
+  'SOURCE_HOST',
+  'SOURCE_HOSTNAME',
+  'SOURCE_PATH',
+  'SOURCE_URL',
+  'TIMESTAMP',
+  'TIMEZONE',
+  'TIMEZONE_CODE',
+  'TITLE',
+  'TOTAL_ENGAGED_TIME',
+  'USER_AGENT',
+  'VARIANT',
+  'VARIANTS',
+  'VIEWER',
+  'VIEWPORT_HEIGHT',
+  'VIEWPORT_WIDTH',
 ];
 
 /** Provides A4A specific variable substitution. */
@@ -79,9 +79,13 @@ export class A4AVariableSource extends VariableSource {
    */
   constructor(ampdoc, embedWin) {
     super(ampdoc);
+
+    // Use parent URL replacements service for fallback.
+    const headNode = ampdoc.getHeadNode();
+    const urlReplacements = Services.urlReplacementsForDoc(headNode);
+
     /** @private {VariableSource} global variable source for fallback. */
-    this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
-        .getVariableSource();
+    this.globalVariableSource_ = urlReplacements.getVariableSource();
 
     /** @private {!Window} */
     this.win_ = embedWin;
@@ -90,14 +94,14 @@ export class A4AVariableSource extends VariableSource {
   /** @override */
   initialize() {
     this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataSync(
           this.win_,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataAsync(
           this.win_,
@@ -115,6 +119,8 @@ export class A4AVariableSource extends VariableSource {
 
     this.set('HTML_ATTR',
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
+
+    this.set('CLIENT_ID', () => null);
 
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];
@@ -134,7 +140,7 @@ export class A4AVariableSource extends VariableSource {
    *     set, up to a max of 10. May be URI encoded.
    * @param {...string} var_args Additional params will be the names of
    *     attributes whose values will be returned. There should be at least 1.
-   * @returns {string} A stringified JSON array containing one member for each
+   * @return {string} A stringified JSON array containing one member for each
    *     matching element. Each member will contain the names and values of the
    *     specified attributes, if the corresponding element has that attribute.
    *     Note that if an element matches the cssSelected but has none of the

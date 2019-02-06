@@ -16,7 +16,7 @@
 import {AbstractAmpContext} from './ampcontext';
 import {adConfig} from '../ads/_config';
 import {computeInMasterFrame} from './3p';
-import {dev, user} from '../src/log';
+import {dev, user, userAssert} from '../src/log';
 import {dict} from '../src/utils/object';
 
 
@@ -31,10 +31,10 @@ import {dict} from '../src/utils/object';
  */
 export function masterSelection(win, type) {
   type = type.toLowerCase();
+  const configType = adConfig[type] &&
+      adConfig[type]['masterFrameAccessibleType'];
   // The master has a special name.
-  const masterName = 'frame_' +
-      (adConfig[type] && adConfig[type]['masterFrameAccessibleType'] || type) +
-      '_master';
+  const masterName = 'frame_' + (configType || type) + '_master';
   let master;
   try {
     // Try to get the master from the parent. If it does not
@@ -70,7 +70,11 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     return (this.embedType_ === 'facebook'
         || this.embedType_ === 'twitter'
         || this.embedType_ === 'github'
-        || this.embedType_ === 'mathml');
+        || this.embedType_ === 'mathml'
+        || this.embedType_ === 'reddit'
+        || this.embedType_ === 'yotpo'
+        || this.embedType_ === 'embedly'
+    );
   }
 
   /** @return {!Window} */
@@ -98,10 +102,13 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {number} height
    */
   updateDimensions(width, height) {
-    user().assert(this.updateDimensionsEnabled_(), 'Not available.');
+    userAssert(this.updateDimensionsEnabled_(), 'Not available.');
     this.requestResize(width, height);
   }
 
+  /**
+   * Sends bootstrap loaded message.
+   */
   bootstrapLoaded() {
     this.client_.sendMessage('bootstrap-loaded');
   }

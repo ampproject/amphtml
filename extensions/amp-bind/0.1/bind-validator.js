@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -66,6 +66,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
+  'xlink:href': true,
 };
 
 /**
@@ -76,9 +77,17 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
+   * @param {boolean} allowUrlBindings
+   */
+  constructor(allowUrlBindings) {
+    /** @const @private {boolean} */
+    this.allowUrlBindings_ = allowUrlBindings;
+  }
+
+  /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
+   * NOTE: `tag` and `property` are case-sensitive.
    * @param {string} tag
    * @param {string} property
    * @return {boolean}
@@ -97,22 +106,18 @@ export class BindValidator {
    */
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
-
     // `alternativeName` is a reference to another property's rules.
     if (rules && rules.alternativeName) {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
-
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
     }
-
     // If binding is allowed but have no specific rules, return true.
     if (rules === null) {
       return true;
     }
-
     // Validate URL(s) if applicable.
     if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
@@ -128,16 +133,14 @@ export class BindValidator {
       } else {
         urls = [value];
       }
-
       for (let i = 0; i < urls.length; i++) {
         if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
-
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -156,20 +159,24 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
-    if (allowedProtocols && url) {
-      const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(url);
-      if (match !== null) {
-        const protocol = match[1].toLowerCase().trim();
-        // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
-          return false;
+    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    if (url) {
+      if (/__amp_source_origin/.test(url)) {
+        return false;
+      }
+      const {allowedProtocols} = rules;
+      if (allowedProtocols) {
+        const re = /^([^:\/?#.]+):[\s\S]*$/;
+        const match = re.exec(url);
+        if (match !== null) {
+          const protocol = match[1].toLowerCase().trim();
+          // hasOwn() needed since nested objects are not prototype-less.
+          if (!hasOwn(allowedProtocols, protocol)) {
+            return false;
+          }
         }
       }
     }
-
     return true;
   }
 
@@ -177,6 +184,8 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
@@ -184,6 +193,10 @@ export class BindValidator {
     // Allow binding to all ARIA attributes.
     if (startsWith(property, 'aria-')) {
       return null;
+    }
+    // Disallow URL property bindings if configured as such.
+    if (ownProperty(URL_PROPERTIES, property) && !this.allowUrlBindings_) {
+      return undefined;
     }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {
@@ -218,6 +231,33 @@ function createElementRules_() {
     },
     'AMP-CAROUSEL': {
       'slide': null,
+      // For carousel v2
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
+    },
+    'AMP-DATE-PICKER': {
+      'max': null,
+      'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
     },
     'AMP-IFRAME': {
       'src': null,
@@ -236,6 +276,9 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIGHTBOX': {
+      'open': null,
+    },
     'AMP-LIST': {
       'src': {
         'allowedProtocols': {
@@ -243,6 +286,7 @@ function createElementRules_() {
         },
       },
       'state': null,
+      'is-layout-container': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,
@@ -254,6 +298,10 @@ function createElementRules_() {
           'https': true,
         },
       },
+    },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+      'title': null,
     },
     'AMP-VIDEO': {
       'alt': null,
@@ -297,8 +345,19 @@ function createElementRules_() {
       'type': null,
       'value': null,
     },
+    'DETAILS': {
+      'open': null,
+    },
     'FIELDSET': {
       'disabled': null,
+    },
+    'IMAGE': {
+      'xlink:href': {
+        'allowedProtocols': {
+          'http': true,
+          'https': true,
+        },
+      },
     },
     'INPUT': {
       'accept': null,
@@ -322,7 +381,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,
@@ -368,6 +427,7 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
+      'pattern': null,
       'placeholder': null,
       'readonly': null,
       'required': null,

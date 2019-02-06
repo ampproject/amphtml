@@ -18,12 +18,13 @@
  * @fileoverview This is a sample bootstrap script for AMP in-a-box host.
  */
 
-initInaboxHost(window);
+const win = window.top;
+initInaboxHost(win);
 
 // Enable amp-inabox APIs for all iframes. Normally, the actualy bootstrap
 // script would be more specific about which iframes to support.
 Array.prototype.push.apply(
-    window.ampInaboxIframes, document.querySelectorAll('iframe'));
+    win.ampInaboxIframes, document.querySelectorAll('iframe'));
 
 /**
  * A sample bootstrap script that is to be run in ads tag.
@@ -31,7 +32,7 @@ Array.prototype.push.apply(
  * @param {!Window} win
  */
 function initInaboxHost(win) {
-  const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
+  const hostScriptUrl = '/dist/amp-inabox-host.js';
   preloadScript(win, hostScriptUrl);
   // Optional: preload a4a-v0.js as well.
 

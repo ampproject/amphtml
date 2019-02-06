@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
-import {dev} from './log';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 
@@ -60,7 +60,7 @@ function intersectionRatio(smaller, larger) {
  * @private
  */
 export function getIntersectionChangeEntry(element, owner, viewport) {
-  dev().assert(element.width >= 0 && element.height >= 0,
+  devAssert(element.width >= 0 && element.height >= 0,
       'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 
@@ -95,26 +95,24 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 /**
  * The IntersectionObserver class lets any element share its viewport
  * intersection data with an iframe of its choice (most likely contained within
- * the element itself.). When instantiated the class will start listening for
- * a 'send-intersections' postMessage from the iframe, and only then  would start
+ * the element itself.). When instantiated the class will start listening for a
+ * 'send-intersections' postMessage from the iframe, and only then  would start
  * sending intersection data to the iframe. The intersection data would be sent
- * when the element is moved inside or outside the viewport as well as on
- * scroll and resize.
- * The element should create an IntersectionObserver instance once the Iframe
- * element is created.
- * The IntersectionObserver class exposes a `fire` method that would send the
- * intersection data to the iframe.
- * The IntersectionObserver class exposes a `onViewportCallback` method that
- * should be called inside if the viewportCallback of the element. This would
- * let the element sent intersection data automatically when there element comes
- * inside or goes outside the viewport and also manage sending intersection data
- * onscroll and resize.
- * Note: The IntersectionObserver would not send any data over to the iframe if
- * it had not requested the intersection data already via a postMessage.
+ * when the element is moved inside or outside the viewport as well as on scroll
+ * and resize. The element should create an IntersectionObserver instance once
+ * the Iframe element is created. The IntersectionObserver class exposes a
+ * `fire` method that would send the intersection data to the iframe. The
+ * IntersectionObserver class exposes a `onViewportCallback` method that should
+ * be called inside if the viewportCallback of the element. This would let the
+ * element sent intersection data automatically when there element comes inside
+ * or goes outside the viewport and also manage sending intersection data
+ * onscroll and resize. Note: The IntersectionObserver would not send any data
+ * over to the iframe if it had not requested the intersection data already via
+ * a postMessage.
  */
 export class IntersectionObserver {
   /**
-   * @param {!AMP.BaseElement} element.
+   * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
@@ -155,6 +153,9 @@ export class IntersectionObserver {
     this.unlistenViewportChanges_ = null;
   }
 
+  /**
+   * Fires element intersection
+   */
   fire() {
     this.sendElementIntersection_();
   }

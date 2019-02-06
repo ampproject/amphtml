@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num)\(/i;
+const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num|length)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
@@ -31,7 +31,7 @@ const INFINITY_RE = /^(infinity|infinite)$/i;
  * @return {boolean}
  */
 export function isVarCss(css, normalize) {
-  return VAR_CSS_RE.test(css) || normalize && NORM_CSS_RE.test(css);
+  return VAR_CSS_RE.test(css) || (normalize && NORM_CSS_RE.test(css));
 }
 
 
@@ -62,6 +62,12 @@ export class CssContext {
    * @return {number}
    */
   getCurrentIndex() {}
+
+  /**
+   * Returns the number of selected targets.
+   * @return {number}
+   */
+  getTargetLength() {}
 
   /**
    * Returns the current font size.
@@ -118,6 +124,9 @@ export class CssContext {
  * @abstract
  */
 export class CssNode {
+  /**
+   * Creates an instance of CssNode.
+   */
   constructor() {}
 
   /**
@@ -817,6 +826,9 @@ export class CssRandNode extends CssNode {
  * target in a list of all selected targets.
  */
 export class CssIndexNode extends CssNode {
+  /**
+   * Creates an instance of CssIndexNode.
+   */
   constructor() {
     super();
   }
@@ -834,6 +846,34 @@ export class CssIndexNode extends CssNode {
   /** @override */
   calc(context) {
     return new CssNumberNode(context.getCurrentIndex());
+  }
+}
+
+
+/**
+ * AMP-specific `length()` function. Returns number of targets selected.
+ */
+export class CssLengthFuncNode extends CssNode {
+  /**
+   * Creates an instance of CssLengthFuncNode.
+   */
+  constructor() {
+    super();
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    return new CssNumberNode(context.getTargetLength());
   }
 }
 

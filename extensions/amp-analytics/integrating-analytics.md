@@ -22,18 +22,22 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime.
 1. Develop a patch that implements the following:
-    1. A new block in ANALYTICS_CONFIG in  [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
+    1. A new configuration file in the vendors [folder](https://github.com/ampproject/amphtml/tree/master/extensions/amp-analytics/0.1/vendors) including any options above and beyond the default, such as:
         1. ```"vars": {}``` for additional default variables.
         1. ```"requests": {}``` for requests that your service will use.
         1. ```"optout":``` if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
-    1. If you are using iframe transport, add a new block to ANALYTICS_IFRAME_TRANSPORT_CONFIG in vendors.js containing ```"transport": { "iframe": *url* }```
+    1. Import your configuration and include it in ANALYTICS_CONFIG in  [vendors.js](0.1/vendors.js).
+    1. If you are using iframe transport, add a new line to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing ```"*vendor-name*": "*url*"```
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 reference.
+    1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
+    ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file.
     1. A new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
-1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/ads_analytics/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
+1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/analytics/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
 1. Update your service's usage documentation and inform your customers.
+1. It's highly recommended to maintain [an integration test outside AMP repo](../../3p/README.md#adding-proper-integration-tests).
 
 
 
@@ -51,17 +55,6 @@ The endpoint approach is the same as the standard approach detailed in the previ
 ```
 
 To take this approach, review the documentation for publishers' integration with AMP Analytics.
-
-## Add Batch Plugin
-Batch plugin provides an easy way to construct batched requests on client side. Follow the instructions below to add a batch plugin.
-1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding the batch plugin to your analytics service AMP HTML's runtime.
-1. Develop a patch that implements the following:
-    1. Add new plugin function in [batching-plugins.js](0.1/batching-plugins.js)
-    1. Add test coverage to your plugin function
-    1. Test your example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
-1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
-
-Please note that every new plugin will be reviewed by AMP team on a case by case basis. The idea is to avoid a plugin as much as possible if there is a more generic approach.
 
 ## Further Resources
 * Deep Dive: [Why not just use an iframe?](why-not-iframe.md)

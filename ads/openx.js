@@ -18,7 +18,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {startsWith} from '../src/string';
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+const {hasOwnProperty} = Object.prototype;
 
 /**
  * Sort of like Object.assign.
@@ -107,6 +107,11 @@ export function openx(global, data) {
   }
 }
 
+/**
+ * @param {!Window} global
+ * @param {string} jssdk
+ * @param {!Object} dfpData
+ */
 function standardImplementation(global, jssdk, dfpData) {
   writeScript(global, jssdk, () => {
     /*eslint "google-camelcase/google-camelcase": 0*/
@@ -114,6 +119,12 @@ function standardImplementation(global, jssdk, dfpData) {
   });
 }
 
+/**
+ * @param {!Window} global
+ * @param {string} jssdk
+ * @param {!Object} dfpData
+ * @param {*} data
+ */
 function advanceImplementation(global, jssdk, dfpData, data) {
   const size = [data.width + 'x' + data.height];
   let customVars = {};
@@ -136,6 +147,10 @@ function advanceImplementation(global, jssdk, dfpData, data) {
   loadScript(global, jssdk);
 }
 
+/**
+ * @param {*} oxRequest
+ * @param {!Object} customVars
+ */
 function setCustomVars(oxRequest, customVars) {
   const customVarKeys = Object.keys(customVars);
   customVarKeys.forEach(customVarKey => {
@@ -150,6 +165,10 @@ function setCustomVars(oxRequest, customVars) {
   });
 }
 
+/**
+ * @param {!Object} customVars
+ * @return {!Object}
+ */
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
   const filteredKeys = Object.keys(customVars)

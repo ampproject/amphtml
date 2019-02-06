@@ -17,18 +17,25 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeType} from '../../amp-story/0.1/navigation-state';
-import {StateProperty} from '../../amp-story/0.1/amp-story-store-service';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {
+  StateChangeEventDef,
+  StateChangeType,
+} from '../../amp-story/1.0/navigation-state';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {isJsonScriptTag} from '../../../src/dom';
+import {getUniqueId} from './utils';
+import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
+/** @const {number} */
+const FIRST_AD_MIN = 7;
 
-/** @const */
-const MIN_INTERVAL = 3;
+/** @const {number} */
+const MIN_INTERVAL = 7;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -46,6 +53,12 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const */
+const LOADING_ATTR = 'i-amphtml-loading';
+
+/** @const {string} */
+const NEXT_PAGE_NO_AD = 'next-page-no-ad';
+
+/** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
   CTA_URL: 'data-vars-ctaurl',
@@ -53,10 +66,29 @@ const DATA_ATTR = {
 
 /** @const */
 const CTA_TYPES = {
+  APPLY_NOW: 'Apply Now',
+  BOOK_NOW: 'Book',
+  BUY_TICKETS: 'Buy Tickets',
+  DOWNLOAD: 'Download',
   EXPLORE: 'Explore Now',
-  SHOP: 'Shop Now',
-  READ: 'Read Now',
+  GET_NOW: 'Get Now',
   INSTALL: 'Install Now',
+  LEARN_MORE: 'Learn More',
+  LISTEN: 'Listen Now',
+  MORE: 'More',
+  OPEN_APP: 'Open App',
+  ORDER_NOW: 'Order Now',
+  PLAY: 'Play',
+  READ: 'Read Now',
+  SHOP: 'Shop Now',
+  SHOW: 'Show',
+  SHOWTIMES: 'Showtimes',
+  SIGN_UP: 'Sign Up',
+  SUBSCRIBE: 'Subscribe Now',
+  USE_APP: 'Use App',
+  VIEW: 'View',
+  WATCH: 'Watch',
+  WATCH_EPISODE: 'Watch Episode',
 };
 
 /** @const */
@@ -72,8 +104,15 @@ const ALLOWED_AD_TYPES = map({
   'doubleclick': true,
 });
 
+/** @enum {boolean} */
+const DISALLOWED_AD_ATTRS = {
+  'height': true,
+  'layout': true,
+  'width': true,
+};
+
 /** @enum {string} */
-const EVENTS = {
+const Events = {
   AD_REQUESTED: 'story-ad-request',
   AD_LOADED: 'story-ad-load',
   AD_INSERTED: 'story-ad-insert',
@@ -84,14 +123,30 @@ const EVENTS = {
 };
 
 /** @enum {string} */
-const VARS = {
-  AD_REQUESTED: 'requestTime', // when ad is requested
-  AD_LOADED: 'loadTime', // when ad emits `INI_LOAD` signal
-  AD_INSERTED: 'insertTime', // added as page after next
-  AD_VIEWED: 'viewTime', // page becomes active
-  AD_CLICKED: 'clickTime', // optional
-  AD_EXITED: 'exitTime', // page moves from active => inactive
-  AD_DISCARDED: 'discardTime', // discared due to bad metadata etc
+const Vars = {
+  // Timestamp when ad is requested.
+  AD_REQUESTED: 'requestTime',
+  // Timestamp when ad emits `INI_LOAD` signal.
+  AD_LOADED: 'loadTime',
+  // Timestamp when ad is inserted into story as page after next.
+  AD_INSERTED: 'insertTime',
+  // Timestamp when page becomes active page.
+  AD_VIEWED: 'viewTime',
+  // Timestamp when ad is clicked.
+  AD_CLICKED: 'clickTime',
+  // Timestamp when ad page moves from active => inactive.
+  AD_EXITED: 'exitTime',
+  // Timestamp when ad is discared due to bad metadata etc.
+  AD_DISCARDED: 'discardTime',
+  // Index of the ad generating the trigger.
+  AD_INDEX: 'adIndex',
+  // Id that should be unique for every ad.
+  AD_UNIQUE_ID: 'adUniqueId',
+  // Position in the parent story. Number of page before ad + 1. Does not count
+  // previously inserted ad pages.
+  POSITION: 'position',
+  // Given cta-type of inserted ad.
+  CTA_TYPE: 'ctaType',
 };
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -136,12 +191,22 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, *>} */
     this.analyticsData_ = {};
 
+    /** @private {Object<string, number>} */
+    this.adPageIds_ = {};
+
+    /** @private {number|null} */
+    this.idOfAdShowing_ = null;
+
+    /** @private {boolean} */
+    this.firstAdViewed_ = false;
+
+    /** @private {boolean} */
+    this.pendingAdView_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
      * the publisher is loading. They all have the same implementation.
-     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|
-     *           ?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
   }
@@ -149,7 +214,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
-      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
       this.storeService_ = storeService;
 
       if (!this.isAutomaticAdInsertionAllowed_()) {
@@ -157,7 +222,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
 
       const ampStoryElement = this.element.parentElement;
-      user().assert(ampStoryElement.tagName === 'AMP-STORY',
+      userAssert(ampStoryElement.tagName === 'AMP-STORY',
           `<${TAG}> should be child of <amp-story>`);
 
       const ampdoc = this.getAmpDoc();
@@ -169,8 +234,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
       return ampStoryElement.getImpl().then(impl => {
         this.ampStory_ = impl;
-        this.navigationState_ = this.ampStory_.getNavigationState();
-        this.navigationState_.observe(this.handleStateChange_.bind(this));
       });
     });
   }
@@ -188,6 +251,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    this.navigationState_ = this.ampStory_.getNavigationState();
+    this.navigationState_.observe(this.handleStateChange_.bind(this));
+
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
           this.createAdOverlay_();
@@ -197,9 +263,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
 
+  /**
+   * Determines whether or not ad insertion is allowed based on how the story
+   * is served.
+   * @return {boolean}
+   * @private
+   */
   isAutomaticAdInsertionAllowed_() {
-    return this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
   }
+
 
   /**
    * load in config from child <script> element
@@ -207,7 +280,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   readConfig_() {
     const child = this.element.children[0];
-    user().assert(
+    userAssert(
         isJsonScriptTag(child),
         `The <${TAG}> config should ` +
         'be inside a <script> tag with type="application/json"');
@@ -240,11 +313,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   validateConfig_() {
     const adAttributes = this.config_['ad-attributes'];
-    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
+    userAssert(adAttributes, `<${TAG}>: Error reading config.` +
       'Top level JSON should have an "ad-attributes" key');
 
-    const type = adAttributes.type;
-    user().assert(type, `<${TAG}>: Error reading config.` +
+    const {type} = adAttributes;
+    userAssert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
   }
 
@@ -258,8 +331,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
-    this.analyticsEvent_(EVENTS.AD_REQUESTED,
-        {[VARS.AD_REQUESTED]: Date.now()});
+    this.analyticsEventWithCurrentAd_(Events.AD_REQUESTED,
+        {[Vars.AD_REQUESTED]: Date.now()});
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
@@ -297,8 +370,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
-      this.analyticsEvent_(EVENTS.AD_LOADED,
-          {[VARS.AD_LOADED]: Date.now()});
+      // Ensures the video-manager does not follow the autoplay attribute on
+      // amp-video tags, which would play the ad in the background before it is
+      // displayed.
+      ampStoryAdPage.getImpl().then(impl => impl.delegateVideoAutoplay());
+
+      // remove loading attribute once loaded so that desktop CSS will position
+      // offscren with all other pages
+      const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+      currentPageEl.removeAttribute(LOADING_ATTR);
+
+      this.analyticsEventWithCurrentAd_(Events.AD_LOADED,
+          {[Vars.AD_LOADED]: Date.now()});
       this.isCurrentAdLoaded_ = true;
     });
 
@@ -312,10 +395,23 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   createPageElement_() {
     const id = ++this.adPagesCreated_;
+    const pageId = `i-amphtml-ad-page-${id}`;
+
+    // Keep track of ids created so far and a mapping to their index. This
+    // is used to check if a page id is an ad later.
+    this.adPageIds_[pageId] = id;
+
+    // Also create a new object to keep track of any future analytics data.
+    this.analyticsData_[id] = {
+      [Vars.AD_INDEX]: id,
+      [Vars.AD_UNIQUE_ID]: getUniqueId(this.win),
+    };
+
     const attributes = dict({
-      'id': `i-amphtml-ad-page-${id}`,
+      'id': pageId,
       'ad': '',
       'distance': '2',
+      'i-amphtml-loading': '',
     });
 
     return createElementWithAttributes(
@@ -336,14 +432,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const configAttrs = this.config_['ad-attributes'];
 
-    ['height', 'width', 'layout'].forEach(attr => {
-      if (configAttrs[attr] !== undefined) {
-        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+    for (const attr in configAttrs) {
+      const value = configAttrs[attr];
+      if (isObject(value)) {
+        configAttrs[attr] = JSON.stringify(value);
+      }
+      if (DISALLOWED_AD_ATTRS[attr]) {
+        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
         delete configAttrs[attr];
       }
-    });
+    }
 
-    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
+    userAssert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
       `"${configAttrs.type}" ad type is not supported`);
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
@@ -369,6 +469,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return false;
     }
 
+    // Store the cta-type as an accesible var for any further pings.
+    this.analyticsData_[this.adPagesCreated_][Vars.CTA_TYPE] = ctaType;
+
     const ctaText = CTA_TYPES[ctaType];
     if (!ctaType) {
       user().error(TAG, 'invalid "CTA Type" in ad response');
@@ -390,6 +493,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
+    setStyles(a, {
+      'font-size': '0',
+      opactiy: '0',
+      transform: 'scale(0)',
+    });
     a.href = ctaUrl;
     a.textContent = ctaText;
 
@@ -397,6 +505,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       user().warn(TAG, 'CTA url is not valid. Ad was discarded');
       return false;
     }
+
+    // Click listener so that we can fire `story-ad-click` analytics trigger at
+    // the appropriate time.
+    const adIndex = this.adPagesCreated_;
+    a.addEventListener('click', () => {
+      const vars = {
+        [Vars.AD_INDEX]: adIndex,
+        [Vars.AD_CLICKED]: Date.now(),
+      };
+      this.analyticsEvent_(Events.AD_CLICKED, vars);
+    });
 
     const ctaLayer = this.win.document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
@@ -406,6 +525,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
+   * @param {!StateChangeEventDef} stateChangeEvent
    * @private
    */
   handleStateChange_(stateChangeEvent) {
@@ -431,55 +551,146 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.uniquePageIds_[pageId] = true;
     }
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL) {
+    if (this.adPagesCreated_ === 0) {
+      // This is protection against us running our placement algorithm in a
+      // story where no ads have been created. Most likely because INI_LOAD on
+      // the story has not fired yet.
+      return;
+    }
+
+    if (this.idOfAdShowing_) {
+      // We are transitioning away from an ad, so fire the exit event.
+      this.analyticsEvent_(Events.AD_EXITED, {
+        [Vars.AD_EXITED]: Date.now(),
+        [Vars.AD_INDEX]: this.idOfAdShowing_,
+      });
+      this.idOfAdShowing_ = null;
+    }
+
+    if (this.adPageIds_[pageId]) {
+      // We are switching to an ad, so fire the view event on the
+      // corresponding Ad.
+      const adIndex = this.adPageIds_[pageId];
+      this.analyticsEvent_(Events.AD_VIEWED, {
+        [Vars.AD_VIEWED]: Date.now(),
+        [Vars.AD_INDEX]: adIndex,
+      });
+
+      // Previously inserted ad has been viewed.
+      this.pendingAdView_ = false;
+
+      // Start loading next ad.
+      this.startNextAdPage_();
+
+      // Keeping track of this here so that we can contain the logic for when
+      // we exit the ad within this extension.
+      this.idOfAdShowing_ = adIndex;
+    }
+
+    // If there is already an ad inserted, but not viewed it doesn't matter how
+    // many pages we have seen, we should not keep trying to insert more ads.
+    if (!this.pendingAdView_ && this.enoughContentPagesViewed_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
-        this.analyticsEvent_(EVENTS.AD_INSERTED,
-            {[VARS.AD_INSERTED]: Date.now()});
+        this.analyticsEventWithCurrentAd_(Events.AD_INSERTED,
+            {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
-        // start loading next ad
-        this.startNextPage_();
+        // We have an ad inserted that has yet to be viewed.
+        this.pendingAdView_ = true;
       }
 
       if (adState === AD_STATE.FAILED) {
-        this.analyticsEvent_(EVENTS.AD_DISCARDED,
-            {[VARS.AD_DISCARDED]: Date.now()});
-        this.startNextPage_();
+        this.analyticsEventWithCurrentAd_(Events.AD_DISCARDED,
+            {[Vars.AD_DISCARDED]: Date.now()});
+        this.startNextAdPage_(/* failure */ true);
       }
     }
   }
 
-
   /**
-   * start the process over
+   * Determine if user has seen enough pages to show an ad. We want a certain
+   * number of pages before the first ad, and then a separate interval
+   * thereafter.
+   * @return {boolean}
    * @private
    */
-  startNextPage_() {
-    this.uniquePagesCount_ = 0;
+  enoughContentPagesViewed_() {
+    // In desktop we have to insert ads two pages away, because the next page is
+    // already visible. This adjustment ensures the ads show in the same place
+    // on mobile and desktop.
+    const adjustedInterval = this.isDesktopView_ ? MIN_INTERVAL - 1
+      : MIN_INTERVAL;
+    const adjustedFirst = this.isDesktopView_ ? FIRST_AD_MIN - 1 : FIRST_AD_MIN;
+
+    if (this.firstAdViewed_ && this.uniquePagesCount_ >= adjustedInterval) {
+      return true;
+    }
+
+    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= adjustedFirst) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Start the process over.
+   * @private
+   * @param {boolean=} opt_failure If we are calling this due to failed ad.
+   */
+  startNextAdPage_(opt_failure) {
+    if (!this.firstAdViewed_) {
+      this.firstAdViewed_ = true;
+    }
+
+    if (!opt_failure) {
+      // Don't reset the count on a failed ad.
+      this.uniquePagesCount_ = 0;
+    }
+
     this.schedulePage_();
   }
 
 
   /**
    * Place ad based on user config
-   * @param {string} currentPageId
+   * @param {string} pageBeforeAdId
    * @private
    */
-  tryToPlaceAdAfterPage_(currentPageId) {
+  tryToPlaceAdAfterPage_(pageBeforeAdId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
     if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
       // timeout fail
       return AD_STATE.FAILED;
     }
 
-    const currentPage = this.ampStory_.getPageById(currentPageId);
-    const nextPage = this.ampStory_.getNextPage(currentPage);
+    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
 
-    if (!this.isCurrentAdLoaded_ || currentPage.isAd() ||
-        (nextPage && nextPage.isAd())) {
-      // if we are going to cause two consecutive ads or ad is still
-      // loading we will try again on next user interaction
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    if (this.isDesktopView_()) {
+      // If we are in desktop view the ad must be inserted 2 pages away because
+      // the next page will already be in view
+      pageBeforeAd = pageAfterAd;
+      pageBeforeAdId = pageAfterAd.element.id;
+      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
+    }
+
+    if (!pageAfterAd) {
+      return AD_STATE.PENDING;
+    }
+
+    // There are three checks here that we check before inserting an ad. If
+    // any of these fail we will try again on next page navigation.
+    if (!this.isCurrentAdLoaded_ // 1. Ad must be loaded.
+        // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
+        || this.nextPageNoAd_(pageBeforeAd)
+        // 3. We will not show two ads in a row.
+        || pageBeforeAd.isAd() || pageAfterAd.isAd()) {
       return AD_STATE.PENDING;
     }
 
@@ -489,8 +700,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.FAILED;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
+
+    // If we are inserted we now have a `position` macro available for any
+    // analytics events moving forward.
+    const adIndex = this.adPageIds_[nextAdPageEl.id];
+    const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
+    this.analyticsData_[adIndex][Vars.POSITION] = pageNumber + 1;
+
     return AD_STATE.INSERTED;
+  }
+
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isDesktopView_() {
+    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
 
@@ -502,21 +729,42 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
 
+  /**
+   * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
+   * from showing as the next page.
+   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @return {boolean}
+   * @private
+   */
+  nextPageNoAd_(page) {
+    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
+  }
 
   /**
+   * Call an analytics event with the last created Ad.
    * @param {string} eventType
-   * @param {!Object<string, string>=} vars A map of vars and their values.
+   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEventWithCurrentAd_(eventType, vars) {
+    Object.assign(vars, {[Vars.AD_INDEX]: this.adPagesCreated_});
+    this.analyticsEvent_(eventType, vars);
+  }
+
+
+  /**
+   * Construct an analytics event and trigger it.
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    const adIndex = this.adPagesCreated_;
-    if (this.analyticsData_['adIndex'] !== adIndex) {
-      this.analyticsData_ = {adIndex};
-    }
-    this.analyticsData_ = Object.assign(this.analyticsData_,
+    const adIndex = vars['adIndex'];
+    this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
         vars);
+
     triggerAnalyticsEvent(this.element, eventType,
-        this.analyticsData_);
+        this.analyticsData_[adIndex]);
   }
 }
 

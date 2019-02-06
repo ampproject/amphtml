@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {
   LoadTask,
   MuteTask,
@@ -34,7 +33,7 @@ describes.realWin('media-tasks', {}, () => {
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     el = document.createElement('video');
 
     // Mock vsync
@@ -118,16 +117,28 @@ describes.realWin('media-tasks', {}, () => {
   });
 
   describe('UpdateSourcesTask', () => {
+    /**
+     * @param {number} index
+     * @return {string}
+     */
     function getFakeVideoUrl(index) {
       return `http://example.com/video${index}.mp4`;
     }
 
+    /**
+     * @param {number} index
+     * @return {!Element}
+     */
     function getFakeSource(index) {
       const source = document.createElement('source');
       source.src = getFakeVideoUrl(index);
       return source;
     }
 
+    /**
+     * @param {!Array<number>} indices
+     * @return {!Array<!Element>}
+     */
     function getFakeSources(indices) {
       return indices.map(index => getFakeSource(index));
     }

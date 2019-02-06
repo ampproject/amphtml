@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {dev, user} from './log';
+import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -108,6 +108,9 @@ import {preconnectForElement} from './preconnect';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
+ * When the dimensions of an element has changed, the 'onMeasureChanged'
+ * callback is called.
+ *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -119,16 +122,16 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
-    same symbol it would use in the core compilation unit for the private
-    property in the extensions compilation unit's private properties.
+    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
+    reuse the same symbol it would use in the core compilation unit for the
+    private property in the extensions compilation unit's private properties.
      */
 
     /** @package {!Layout} */
@@ -151,6 +154,9 @@ export class BaseElement {
      *   minTrust: ActionTrust,
      * }>} */
     this.actionMap_ = null;
+
+    /** @private {?string} */
+    this.defaultActionAlias_ = null;
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
@@ -175,6 +181,14 @@ export class BaseElement {
    */
   signals() {
     return this.element.signals();
+  }
+
+  /**
+   * The element's default action alias.
+   * @return {?string}
+   */
+  getDefaultActionAlias() {
+    return this.defaultActionAlias_;
   }
 
   /**
@@ -395,6 +409,10 @@ export class BaseElement {
   /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
    * @return {boolean}
    */
   prerenderAllowed() {
@@ -405,7 +423,7 @@ export class BaseElement {
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {?Element}
+   * @return {?Element}
    */
   createPlaceholderCallback() {
     return null;
@@ -422,8 +440,7 @@ export class BaseElement {
    */
   renderOutsideViewport() {
     // Inabox allow layout independent of viewport location.
-    return getMode(this.win).runtime == 'inabox' &&
-        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
+    return getMode(this.win).runtime == 'inabox' || 3;
   }
 
   /**
@@ -580,14 +597,29 @@ export class BaseElement {
    * The handler is only invoked by events with trust equal to or greater than
    * `minTrust`. Otherwise, a user error is logged.
    *
-   * @param {string} method
+   * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
-    this.actionMap_[method] = {handler, minTrust};
+    this.actionMap_[alias] = {handler, minTrust};
+  }
+
+  /**
+   * Registers the default action for this component.
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {string=} alias
+   * @param {ActionTrust=} minTrust
+   * @public
+   */
+  registerDefaultAction(
+    handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
+    devAssert(!this.defaultActionAlias_,
+        'Default action "%s" already registered.', this.defaultActionAlias_);
+    this.registerAction(alias, handler, minTrust);
+    this.defaultActionAlias_ = alias;
   }
 
   /**
@@ -595,25 +627,24 @@ export class BaseElement {
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
    * @param {!./service/action-impl.ActionInvocation} invocation The invocation data.
-   * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
+   * @param {boolean=} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
    */
   executeAction(invocation, unusedDeferred) {
-    if (invocation.method == 'activate') {
-      if (invocation.satisfiesTrust(this.activationTrust())) {
-        return this.activate(invocation);
-      }
-    } else {
-      this.initActionMap_();
-      const holder = this.actionMap_[invocation.method];
-      user().assert(holder, `Method not found: ${invocation.method} in %s`,
-          this);
-      const {handler, minTrust} = holder;
-      if (invocation.satisfiesTrust(minTrust)) {
-        return handler(invocation);
-      }
+    let {method} = invocation;
+    // If the default action has an alias, the handler will be stored under it.
+    if (method === DEFAULT_ACTION) {
+      method = this.defaultActionAlias_ || method;
+    }
+    this.initActionMap_();
+    const holder = this.actionMap_[method];
+    const {tagName} = this.element;
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
+    const {handler, minTrust} = holder;
+    if (invocation.satisfiesTrust(minTrust)) {
+      return handler(invocation);
     }
   }
 
@@ -673,15 +704,6 @@ export class BaseElement {
   }
 
   /**
-   * Must be executed in the mutate context. Removes `display:none` from the
-   * element set via `layout=nodisplay`.
-   * @param {boolean} displayOn
-   */
-  toggleLayoutDisplay(displayOn) {
-    this.element.toggleLayoutDisplay(displayOn);
-  }
-
-  /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
    * @public @final
@@ -722,14 +744,16 @@ export class BaseElement {
    * Hides or shows the loading indicator. This function must only
    * be called inside a mutate context.
    * @param {boolean} state
+   * @param {boolean=} opt_force
    * @public @final
    */
-  toggleLoading(state) {
-    this.element.toggleLoading(state, {force: true});
+  toggleLoading(state, opt_force) {
+    this.element.toggleLoading(state, {force: !!opt_force});
   }
 
   /**
-   * Returns whether the loading indicator is reused again after the first render.
+   * Returns whether the loading indicator is reused again after the first
+   * render.
    * @return {boolean}
    * @public
    */
@@ -952,7 +976,7 @@ export class BaseElement {
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
+   * layouts are performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -970,7 +994,8 @@ export class BaseElement {
 
   /**
    * Runs the specified measure, then runs the mutation on the element and
-   * ensures that remeasures and layouts performed for the affected elements.
+   * ensures that remeasures and layouts are performed for the affected
+   * elements.
    *
    * This method should be called whenever a measure and significant mutations
    * are done on the DOM that could affect layout of elements inside this
@@ -1017,8 +1042,9 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * @note Must be called inside a mutate context.
-   * @note Boolean attributes have a value of `true` and `false` when
+   * Note:
+   * - Must be called inside a mutate context.
+   * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
    *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -1037,6 +1063,16 @@ export class BaseElement {
    */
   onLayoutMeasure() {}
 
+  /**
+   * Called only when the measurements of an amp-element changes. This
+   * would not trigger for every measurement invalidation caused by a mutation.
+   * @public
+   */
+  onMeasureChanged() {}
+
+  /**
+   * @return {./log.Log}
+   */
   user() {
     return user(this.element);
   }
@@ -1046,13 +1082,12 @@ export class BaseElement {
    * @param {!Element=} opt_element
    */
   declareLayer(opt_element) {
-    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+    devAssert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
         ' to declare layer.');
     if (opt_element) {
-      dev().assert(this.element.contains(opt_element));
+      devAssert(this.element.contains(opt_element));
     }
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
+
 }
-
-

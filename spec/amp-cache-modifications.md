@@ -143,7 +143,7 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 </details>
 
-#### All image URLs are rewritten as AMP cache URLs except those in `amp-mustache` `template`
+#### <a name="cache-urls"></a>All image URLs are rewritten as AMP cache URLs except those in `amp-mustache` `template`
 
 <details>
 <summary>example</summary>
@@ -292,14 +292,16 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - have attribute `charset`
  - do not have attributes `content`, `itemprop`, `name` and `property`
- - have attribute `http-equiv` where attribute value is not `x-dns-prefetch-control`
+ - have attribute `http-equiv` where attribute value is not one of:
+   - `content-security-policy`
+   - `refresh`
+   - `x-dns-prefetch-control`
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
  - have attribute `name` with case-insensitive prefix `i-amphtml-`
  - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
- - have attribute `name=copyright`
  - have attribute `name=referrer` [note: this may be inserted by AMP Cache]
  - have attribute `name=robots` [note: this is inserted by AMP Cache]
  - have attribute `name=viewport`
@@ -418,19 +420,6 @@ Remove unused custom-element extensions with the following exceptions:
 | before | after |
 | --- | --- |
 | `<head>`<br>`...`<br>`<script async custom-element=amp-accordion src=https://cdn.ampproject.org/v0/amp-accordion-0.1.js></script>`<br>`<script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>`<br>`<script async custom-element=amp-youtube src=https://cdn.ampproject.org/v0/amp-youtube-0.1.js></script>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`<amp-youtube ...></amp-youtube>`<br>`...`<br>`</body>` | `<head>`<br>`...`<br>`<script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>`<br>`<script async custom-element=amp-youtube src=https://cdn.ampproject.org/v0/amp-youtube-0.1.js></script>`<br>`...`<br>`</head>`<br>`<body>`<br>`...`<br>`<amp-youtube ...></amp-youtube>`<br>`...`<br>`</body>` |
-
-</details>
-
-#### Remove `<script type=application/ld+json>...</script>`
-
-Remove JSON-based linked data from the document.
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`<script type=application/ld+json>`<br>`{`<br>`"@context": "http://schema.org",`<br>`"@type": "Person",`<br>`"name": "Lorem Ipsum",`<br>`}`<br>`</script>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
 
 </details>
 

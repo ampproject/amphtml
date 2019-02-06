@@ -26,7 +26,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
@@ -74,8 +74,8 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
         htmlAccessAllowed: '',
       });
 
-      // make sure the context.data is the same instance as the data param passed
-      // into the vendor function. see #10628
+      // make sure the context.data is the same instance as the data param
+      // passed into the vendor function. see #10628
       expect(context.data).to.equal(
           iframe.contentWindow.networkIntegrationDataParamForTesting);
 
@@ -87,7 +87,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
         top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
         width: 300,
       });
-      const initialIntersection = context.initialIntersection;
+      const {initialIntersection} = context;
       expect(initialIntersection.rootBounds).to.deep
           .equal(layoutRectLtwh(0, 0, 500, 3000));
       expect(initialIntersection.boundingClientRect).to.deep
@@ -160,7 +160,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
     }).then(() => {
       return poll('wait for attemptChangeSize', () => {
         return iframe.contentWindow.ping.resizeSuccess != undefined;
-      });
+      }, null, 5000);
     }).then(() => {
       lastIO = null;
       iframe.contentWindow.context.observeIntersection(changes => {

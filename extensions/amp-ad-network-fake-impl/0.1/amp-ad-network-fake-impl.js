@@ -16,7 +16,7 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
@@ -31,7 +31,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.hasAttribute('src'),
+    userAssert(this.element.hasAttribute('src'),
         'Attribute src required for <amp-ad type="fake">: %s', this.element);
     super.buildCallback();
   }
@@ -61,7 +61,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         return null;
       }
       const {status, headers} =
-          /** @type {{status: number, headers: !Headers}} */ (response);
+      /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelop for testing.

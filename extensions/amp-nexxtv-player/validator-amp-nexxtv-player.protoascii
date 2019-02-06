@@ -19,8 +19,8 @@ tags: {  # amp-nexxtv-player
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-nexxtv-player"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -39,19 +39,25 @@ tags: {  # <amp-nexxtv-player>
   }
   attrs: {
     name: "data-mode"
-    value_regex: "api|static"
+    value: "api"
+    value: "static"
   }
   attrs: {
     name: "data-origin"
     value_url: {
+      protocol: "https"
+      protocol: "http"
       allow_empty: true
-      allowed_protocol: "https"
-      allowed_protocol: "http"
     }
   }
   attrs: {
     name: "data-streamtype"
-    value_regex: "album|audio|live|playlist|playlist-marked|video"
+    value: "album"
+    value: "audio"
+    value: "live"
+    value: "playlist"
+    value: "playlist-marked"
+    value: "video"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

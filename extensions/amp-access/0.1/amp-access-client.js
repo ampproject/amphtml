@@ -16,7 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -42,7 +43,7 @@ export class AccessClientAdapter {
     this.context_ = context;
 
     /** @const @private {string} */
-    this.authorizationUrl_ = user().assert(configJson['authorization'],
+    this.authorizationUrl_ = userAssert(configJson['authorization'],
         '"authorization" URL must be specified');
     assertHttpsUrl(this.authorizationUrl_, '"authorization"');
 
@@ -52,7 +53,7 @@ export class AccessClientAdapter {
     /** @const @private {string} */
     this.pingbackUrl_ = configJson['pingback'];
     if (this.isPingbackEnabled_) {
-      user().assert(this.pingbackUrl_, '"pingback" URL must be specified');
+      userAssert(this.pingbackUrl_, '"pingback" URL must be specified');
       assertHttpsUrl(this.pingbackUrl_, '"pingback"');
     }
 
@@ -77,7 +78,7 @@ export class AccessClientAdapter {
     }
 
     let timeout = configJson['authorizationTimeout'];
-    user().assert(typeof timeout == 'number',
+    userAssert(typeof timeout == 'number',
         '"authorizationTimeout" must be a number');
     if (!(getMode().localDev || getMode().development)) {
       timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
@@ -136,16 +137,16 @@ export class AccessClientAdapter {
 
   /** @override */
   pingback() {
-    const promise = this.context_.buildUrl(dev().assert(this.pingbackUrl_),
+    const promise = this.context_.buildUrl(devAssert(this.pingbackUrl_),
         /* useAuthData */ true);
     return promise.then(url => {
       dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        }),
         body: '',
       });
     });

@@ -136,7 +136,17 @@
   background-position-y: calc(50% - 2px) !important;
 }
 
-.i-amphtml-story-no-sharing .i-amphtml-story-share-control {
+.i-amphtml-story-info-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
+  display: none !important;
+}
+
+.i-amphtml-embedded.first-page-active .i-amphtml-story-info-control {
+  display: block !important;
+}
+
+.i-amphtml-story-no-sharing .i-amphtml-story-share-control,
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
   display: none !important;
 }
 
@@ -145,17 +155,17 @@
   top: auto!important;
   bottom: 0!important;
   height: 96px!important;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-direction: row-reverse;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row-reverse !important;
 }
 
 [desktop] .i-amphtml-story-progress-bar {
   position: relative !important;
+  margin: 0px 24px !important;
   height: 3px !important;
-  width: calc(100vw/3) !important;
-  margin: 0px !important;
+  width: calc(100vw / 3) !important;
 }
 
 [desktop] .i-amphtml-story-page-progress-bar {
@@ -164,14 +174,12 @@
 
 [desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
   display: flex !important;
+  margin-top: 0px !important;
   height: 40px !important;
-  width: calc(100vw/3) !important;
-  min-width: 200px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-right: 32px;
+  align-items: center !important;
+  justify-content: flex-end !important;
 }
 
 [desktop] .i-amphtml-story-share-control {
-  display: none;
+  display: none !important;
 }

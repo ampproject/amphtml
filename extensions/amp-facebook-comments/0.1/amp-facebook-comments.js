@@ -86,7 +86,10 @@ class AmpFacebookComments extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleFacebookMessages_(event) {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;

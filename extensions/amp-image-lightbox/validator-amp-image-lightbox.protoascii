@@ -15,12 +15,12 @@
 #
 tags: {  # amp-image-lightbox
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-image-lightbox"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -32,8 +32,8 @@ tags: {  # amp-image-lightbox
   spec_name: "SCRIPT[custom-element=amp-image-lightbox] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-image-lightbox"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }

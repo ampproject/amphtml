@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const astUtils = require('eslint/lib/ast-utils');
+const astUtils = require('eslint/lib/util/ast-utils');
 
 const GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';
@@ -24,7 +24,7 @@ GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 module.exports = function(context) {
   return {
     Identifier: function(node) {
-      const name = node.name;
+      const {name} = node;
       if (!(name in GLOBALS)) {
         return;
       }
@@ -47,7 +47,7 @@ module.exports = function(context) {
       if (GLOBALS[name]) {
         message += ' ' + GLOBALS[name];
       }
-      context.report(node, message);
+      context.report({node, message});
     },
   };
 };

@@ -16,12 +16,9 @@
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isProtocolValid, isProxyOrigin} from '../../../src/url';
 import {openWindowDialog, removeElement} from '../../../src/dom';
-import {parseUrl} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
@@ -46,15 +43,22 @@ export class AbstractAppBanner extends AMP.BaseElement {
   /**
    * Subclasses should override this method to specify action when open button
    * is clicked.
+   * @param {string} unusedOpenInAppUrl
+   * @param {string} unusedInstallAppUrl
    * @protected
    */
   openButtonClicked(unusedOpenInAppUrl, unusedInstallAppUrl) {
     // Subclasses may override.
   }
 
-  /** @protected */
-  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
-    openButton.addEventListener('click', () => {
+  /**
+   * @param {!Element} button
+   * @param {string} openInAppUrl
+   * @param {string} installAppUrl
+   * @protected
+   */
+  setupOpenButton_(button, openInAppUrl, installAppUrl) {
+    button.addEventListener('click', () => {
       this.openButtonClicked(openInAppUrl, installAppUrl);
     });
   }
@@ -95,7 +99,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @private */
   getStorageKey_() {
-    const elementId = user().assert(this.element.id,
+    const elementId = userAssert(this.element.id,
         'amp-app-banner should have an id.');
     return 'amp-app-banner:' + elementId;
   }
@@ -230,7 +234,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    this.openButton_ = user().assert(
+    this.openButton_ = userAssert(
         this.element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, this.element);
 
@@ -282,13 +286,19 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
 
     if (openUrl) {
-      user().assert(isProtocolValid(openUrl),
+      userAssert(Services.urlForDoc(this.element).isProtocolValid(openUrl),
           'The url in app-argument has invalid protocol: %s', openUrl);
+    } else {
+      user().error(TAG,
+          '<meta name="apple-itunes-app">\'s content should contain ' +
+          'app-argument to allow opening an already installed application ' +
+          'on iOS.');
     }
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(
+        dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
   }
 }
 
@@ -329,15 +339,22 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
+    const {win, element} = this;
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    this.manifestLink_ = this.win.document.head.querySelector(
+    this.manifestLink_ = win.document.head.querySelector(
         'link[rel=manifest],link[rel=origin-manifest]');
 
-    const platform = Services.platformFor(this.win);
+    const platform = Services.platformFor(win);
+    const url = Services.urlForDoc(element);
+
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
-    this.canShowBuiltinBanner_ = !isProxyOrigin(this.win.location) &&
-        !viewer.isEmbedded() && isChromeAndroid;
+    const isProxyOrigin = url.isProxyOrigin(win.location);
+
+    this.canShowBuiltinBanner_ =
+        !isProxyOrigin &&
+          !viewer.isEmbedded() &&
+          isChromeAndroid;
 
     if (this.canShowBuiltinBanner_) {
       user().info(TAG,
@@ -354,11 +371,12 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
 
     this.manifestHref_ = this.manifestLink_.getAttribute('href');
-    assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
 
-    this.openButton_ = user().assert(
-        this.element.querySelector('button[open-button]'),
-        '<button open-button> is required inside %s: %s', TAG, this.element);
+    url.assertHttpsUrl(this.manifestHref_, element, 'manifest href');
+
+    this.openButton_ = userAssert(
+        element.querySelector('button[open-button]'),
+        '<button open-button> is required inside %s: %s', TAG, element);
 
     this.checkIfDismissed_();
   }
@@ -391,7 +409,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     openWindowDialog(this.win, openInAppUrl, '_top');
   }
 
-  /** @private */
+  /**
+   * @param {string} link
+   * @private
+   */
   redirectTopLocation_(link) {
     this.win.top.location.assign(link);
   }
@@ -415,7 +436,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+        this.setupOpenButton_(
+            dev().assertElement(this.openButton_), openInAppUrl, installAppUrl);
         return;
       }
     }
@@ -424,13 +446,17 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         this.element);
   }
 
-  /** @private */
+  /**
+   * @param {string} appId
+   * @return {string}
+   */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedUrl = parseUrl(canonicalUrl);
+    const {element} = this;
+    const {canonicalUrl} = Services.documentInfoForDoc(element);
+    const parsedUrl = Services.urlForDoc(element).parse(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
-    const host = parsedUrl.host;
-    const pathname = parsedUrl.pathname;
+    const {host, pathname} = parsedUrl;
+
     return `android-app://${appId}/${cleanProtocol}/${host}${pathname}`;
   }
 }

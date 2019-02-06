@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# DoubleClick
+# Google Ad Manager
 
 ### <a name="amp-ad-network-doubleclick-impl"></a> `amp-ad-network-doubleclick-impl`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/extensions/amp-a4a/amp-a4a-internal.md">here</a>
+    <td>Google Ad Manager implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
     for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
@@ -58,7 +58,7 @@ limitations under the License.
   <tr>
     <td><a href="fluid.md">Fluid</a></td>
     <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="doubleclick-rtc.md">Real Time Config</a></td>
@@ -85,10 +85,19 @@ limitations under the License.
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
     <td>Beta</td>
   </tr>
+  <tr>
+    <td><a href="single-page-ad.md">Single Page Ads</a></td>
+    <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
+    <td>Beta</td>
+  <tr>
+    <td><a href="amp-consent.md">AMP Consent Integration</a></td>
+    <td>Integration with AMP Consent extension.</td>
+    <td>Launched</td>
+  </tr>
 </table>
 
 #### Examples
-Example - DoubleClick Ad
+Example - Google Ad Manager Ad
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"
@@ -135,7 +144,7 @@ See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/37219
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
-Example with json attribute: 
+Example with json attribute:
 
 ```html
 <amp-ad width=320 height=50
@@ -146,7 +155,7 @@ Example with json attribute:
 ```
 
 ### Supported DFP Formats
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
 - Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats

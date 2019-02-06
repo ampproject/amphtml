@@ -29,7 +29,12 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
+    <td>
+      <ul>
+        <li>carousel: fixed, fixed-height, and nodisplay.</li>
+        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
+      </ul>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -55,7 +60,7 @@ The carousel advances between items if the user swipes, uses arrow keys, or clic
               resizable
               src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.basic.embed.html">
     <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-    <div placeholder></div> 
+    <div placeholder></div>
   </amp-iframe>
 </div>
 
@@ -74,13 +79,13 @@ In the following example, we have a carousel of three images with preview button
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.advance-slide.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
 ## Attributes
 
-##### type 
+##### type
 
 Specifies the display type for the carousel items, which can be:
 
@@ -93,7 +98,9 @@ Specifies the height of the carousel, in pixels.
 
 ##### controls (optional)
 
-Displays left and right arrows for the user to navigate carousel items on mobile devices. The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
+Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
+By default, navigational arrows disappear after a few seconds on mobile.
+The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
 
 ##### data-next-button-aria-label (optional)
 
@@ -103,16 +110,25 @@ Sets the aria-label for the `amp-carousel-button-next`. If no value is given, th
 
 Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
 
+##### data-button-count-format (optional)
+
+A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.
+
 #####  autoplay (optional)
 
 Advances the slide to the next slide without user interaction.
 
-If present:
+If present without a value:
 
 - By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
 - Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
-- Requires at least 3 slides for autoplay to occur.
+- Requires at least 2 slides for autoplay to occur.
 - Applies only to carousels with `type=slides`.
+
+If present with a value:
+
+- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
+- Removes the `loop` attribute after the requisite number of loops are made.
 
 ##### delay (optional)
 
@@ -120,9 +136,9 @@ Specifies the duration (in milliseconds) to delay advancing to the next slide wh
 
 ##### loop  (optional)
 
-Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The `loop` attribute is only applicable to carousels with `type=slides`. 
+Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The `loop` attribute is only applicable to carousels with `type=slides`.
 
-*Example: Displays a slides carousel with controls, looping, and delayed autoplay* 
+*Example: Displays a slides carousel with controls, looping, and delayed autoplay*
 
 <!--embedded example - displays in ampproject.org -->
 <div>
@@ -132,7 +148,7 @@ Allows the user to advance past the first item or the final item. There must be 
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 

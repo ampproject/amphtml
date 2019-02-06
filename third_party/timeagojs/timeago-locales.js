@@ -84,7 +84,7 @@ export const be = function(number, index) {
    * @param s - 2-4, 22-24, 32-34 ...
    * @param t - 5-20, 25-30, ...
    * @param n
-   * @returns {string}
+   * @return {string}
    */
   function formatNum(f1, f, s, t, n) {
     const n10 = n % 10;
@@ -741,7 +741,7 @@ export const ru = function(number, index) {
    * @param s - 2-4, 22-24, 32-34 ...
    * @param t - 5-20, 25-30, ...
    * @param n
-   * @returns {string}
+   * @return {string}
    */
   function formatNum(f1, f, s, t, n) {
     const n10 = n % 10;

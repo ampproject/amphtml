@@ -14,12 +14,50 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
+
+
+/**
+ * Variants service provides VARIANT variables for the experiment config.
+ */
+export class Variants {
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
+
+    /** @private @const {!Deferred<!Object<string, ?string>>} */
+    this.variantsDeferred_ = new Deferred();
+  }
+
+  /**
+   * @param {!Object<string, ?string>|!Promise<!Object<string, ?string>>} variants
+   * @package
+   * @restricted
+   */
+  init(variants) {
+    this.variantsDeferred_.resolve(variants);
+  }
+
+  /**
+   * Returns a promise for the experiment variants.
+   * @return {!Promise<!Object<string, ?string>>}
+   */
+  getVariants() {
+    return this.variantsDeferred_.promise;
+  }
+}
+
 
 /**
  * Allocates the current page view to an experiment variant based on the given
@@ -36,7 +74,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
   // Variant can be overridden from URL fragment.
   const viewer = Services.viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
-  if (override && config['variants'].hasOwnProperty(override)) {
+  if (override && hasOwn(config['variants'], override)) {
     return Promise.resolve(/** @type {?string} */ (override));
   }
 
@@ -46,11 +84,12 @@ export function allocateVariant(ampdoc, experimentName, config) {
   let hasConsentPromise = Promise.resolve(true);
 
   if (sticky && config['consentNotificationId']) {
-    hasConsentPromise = Services.userNotificationManagerForDoc(ampdoc)
+    const element = ampdoc.getHeadNode();
+    hasConsentPromise = Services.userNotificationManagerForDoc(element)
         .then(manager => manager.getNotification(
             config['consentNotificationId']))
         .then(userNotification => {
-          user().assert(userNotification,
+          userAssert(userNotification,
               `Notification not found: ${config['consentNotificationId']}`);
           return userNotification.isDismissed();
         });
@@ -86,17 +125,17 @@ export function allocateVariant(ampdoc, experimentName, config) {
  */
 function validateConfig(config) {
   const variants = config['variants'];
-  user().assert(isObject(variants) && Object.keys(variants).length > 0,
+  userAssert(isObject(variants) && Object.keys(variants).length > 0,
       'Missing experiment variants config.');
   if (config['group']) {
     assertName(config['group']);
   }
   let totalPercentage = 0;
   for (const variantName in variants) {
-    if (variants.hasOwnProperty(variantName)) {
+    if (hasOwn(variants, variantName)) {
       assertName(variantName);
       const percentage = variants[variantName];
-      user().assert(
+      userAssert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
           'Invalid percentage %s:%s.'
               + ' Has to be greater than 0 and less than 100',
@@ -104,7 +143,7 @@ function validateConfig(config) {
       totalPercentage += percentage;
     }
   }
-  user().assert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
+  userAssert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
       'Total percentage is bigger than 100: ' + totalPercentage);
 }
 
@@ -133,7 +172,11 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
       .then(hash => hash * 100);
 }
 
+/**
+ * Asserts if the nae is valid.
+ * @param {string} name
+ */
 function assertName(name) {
-  user().assert(nameValidator.test(name),
-      `Invalid name ${name}: %s. Allowed chars are [a-zA-Z0-9-_].`);
+  userAssert(nameValidator.test(name),
+      'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].', name);
 }

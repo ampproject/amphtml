@@ -16,13 +16,17 @@
 
 import {Actions} from './actions';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -35,9 +39,8 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
-   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -55,36 +58,32 @@ export class LocalSubscriptionPlatform {
 
     /** @private @const {string} */
     this.authorizationUrl_ = assertHttpsUrl(
-        user().assert(
+        userAssert(
             this.serviceConfig_['authorizationUrl'],
             'Service config does not have authorization Url'
         ),
         'Authorization Url'
     );
 
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
-    this.cid_ = Services.cidForDoc(ampdoc);
+    /** @private @const {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(
+        this.ampdoc_,
+        this.serviceAdapter_.getReaderId('local'));
 
-    /** @private {!UrlBuilder} */
-    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+    /** @private @const {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = serviceAdapter.getAnalytics();
 
-    /** @private {!./analytics.SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = subscriptionAnalytics;
-
-    user().assert(this.serviceConfig_['actions'],
+    userAssert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
 
-    /** @private {!Actions} */
+    /** @private @const {!Actions} */
     this.actions_ = new Actions(
         this.ampdoc_, this.urlBuilder_,
         this.subscriptionAnalytics_,
         this.validateActionMap(this.serviceConfig_['actions'])
     );
 
-    /** @private {?Promise<string>} */
-    this.readerIdPromise_ = null;
-
-    /** @private {!LocalSubscriptionPlatformRenderer}*/
+    /** @private @const {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog(), this.serviceAdapter_);
 
@@ -104,31 +103,14 @@ export class LocalSubscriptionPlatform {
   /**
    * Validates the action map
    * @param {!JsonObject<string, string>} actionMap
-   * @returns {!JsonObject<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
-    user().assert(actionMap['login'],
+    userAssert(actionMap['login'],
         'Action "login" is not present in action map');
-    user().assert(actionMap['subscribe'],
+    userAssert(actionMap['subscribe'],
         'Action "subscribe" is not present in action map');
     return actionMap;
-  }
-
-  /**
-   * @return {!Promise<string>}
-   * @private
-   */
-  getReaderId_() {
-    if (!this.readerIdPromise_) {
-      const consent = Promise.resolve();
-      this.readerIdPromise_ = this.cid_.then(cid => {
-        return cid.get(
-            {scope: 'amp-access', createCookieIfNotPresent: true},
-            consent
-        );
-      });
-    }
-    return this.readerIdPromise_;
   }
 
   /**
@@ -151,24 +133,37 @@ export class LocalSubscriptionPlatform {
   handleClick_(element) {
     if (element) {
       const action = element.getAttribute('subscriptions-action');
-      if (element.hasAttribute('subscriptions-service')) {
-        const serviceId = element.getAttribute('subscriptions-service');
-        this.serviceAdapter_.delegateActionToService(action, serviceId);
-      } else {
+      const serviceAttr = element.getAttribute('subscriptions-service');
+      if (serviceAttr == 'local') {
         this.executeAction(action);
+      } else if ((serviceAttr || 'auto') == 'auto') {
+        if (action == 'login') {
+          // The "login" action is somewhat special b/c viewers can
+          // enhance this action, e.g. to provide save/link feature.
+          const platform = this.serviceAdapter_.selectPlatformForLogin();
+          this.serviceAdapter_.delegateActionToService(
+              action, platform.getServiceId());
+        } else {
+          this.executeAction(action);
+        }
+      } else if (serviceAttr) {
+        this.serviceAdapter_.delegateActionToService(action, serviceAttr);
       }
     }
   }
 
-  /**
-   * Renders the platform specific UI
-   * @param {!./amp-subscriptions.RenderState} renderState
-   */
-  activate(renderState) {
-    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
     this.actions_.build().then(() => {
       this.renderer_.render(renderState);
     });
+  }
+
+  /** @override */
+  reset() {
+    this.renderer_.reset();
   }
 
   /** @override */
@@ -176,7 +171,7 @@ export class LocalSubscriptionPlatform {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
       if (result) {
-        this.serviceAdapter_.reAuthorizePlatform(this);
+        this.serviceAdapter_.resetPlatforms();
       }
       return !!result;
     });
@@ -204,26 +199,27 @@ export class LocalSubscriptionPlatform {
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+    const pingbackUrl = /** @type {string} */ (devAssert(this.pingbackUrl_,
         'pingbackUrl is null'));
 
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
+      // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'text/plain',
-        },
+        }),
         body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

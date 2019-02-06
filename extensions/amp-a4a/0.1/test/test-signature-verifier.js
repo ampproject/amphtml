@@ -16,7 +16,6 @@
 
 // TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
-import * as sinon from 'sinon';
 
 import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 import {base64EncodeFromBytes} from '../../../../src/utils/base64';
@@ -24,7 +23,6 @@ import {dev, user} from '../../../../src/log';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
-const noop = () => {};
 
 describes.fakeWin('SignatureVerifier', {amp: true}, env => {
 
@@ -54,7 +52,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
     verifier.loadKeyset('service-1');
     return verifier
         .verifyCreativeAndSignature(
-            'service-1', 'key-1', creative1, new Uint8Array(256), noop)
+            'service-1', 'key-1', creative1, new Uint8Array(256))
         .then(status => {
           expect(status).to.equal(VerificationStatus.CRYPTO_UNAVAILABLE);
           expect(env.fetchMock.called()).to.be.false;
@@ -143,29 +141,8 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.OK);
-        }));
-
-    it('should call the lifecycle callback',
-        () => key1.sign(creative1).then(signature => {
-          env.fetchMock.getOnce(
-              'https://signingservice1.net/keyset.json', jwkSet([key1]));
-          verifier.loadKeyset('service-1');
-          const lifecycleSpy = env.sandbox.spy();
-          return verifier
-              .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, lifecycleSpy)
-              .then(status => {
-                expect(status).to.equal(VerificationStatus.OK);
-                expect(lifecycleSpy).to.be.calledOnce;
-                expect(lifecycleSpy).to.be.calledWithExactly(
-                    'signatureVerifySuccess',
-                    sinon.match({
-                      'met.delta.AD_SLOT_ID': sinon.match.number,
-                      'signingServiceName.AD_SLOT_ID': 'service-1',
-                    }));
-              });
         }));
 
     it('should verify multiple signatures with only one network request',
@@ -176,13 +153,13 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.OK);
                   });
             })));
@@ -195,7 +172,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     env.fetchMock.getOnce(
@@ -204,7 +181,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                     verifier.loadKeyset('service-2');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-2', 'key-2', signature2, creative2, noop))
+                            'service-2', 'key-2', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.OK);
                   });
             })));
@@ -218,7 +195,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             verifier.loadKeyset('service-1');
             return verifier
                 .verifyCreativeAndSignature(
-                    'service-1', 'key-1', signature1, creative1, noop)
+                    'service-1', 'key-1', signature1, creative1)
                 .then(status => {
                   expect(status).to.equal(VerificationStatus.OK);
                   env.fetchMock.getOnce(
@@ -227,7 +204,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                   verifier.loadKeyset('service-2');
                   return expect(
                       verifier.verifyCreativeAndSignature(
-                          'service-2', 'key-1', signature2, creative2, noop))
+                          'service-2', 'key-1', signature2, creative2))
                       .to.eventually.equal(VerificationStatus.OK);
                 });
           });
@@ -245,7 +222,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-2', signature, creative1, noop))
+                  'service-1', 'key-2', signature, creative1))
               .to.eventually.equal(VerificationStatus.OK);
         }));
 
@@ -261,7 +238,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.ERROR_KEY_NOT_FOUND);
         }));
 
@@ -278,14 +255,14 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(
                         VerificationStatus.ERROR_KEY_NOT_FOUND);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(
                             VerificationStatus.ERROR_KEY_NOT_FOUND);
                   });
@@ -298,7 +275,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
         }));
 
@@ -314,7 +291,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.UNVERIFIED);
         }));
 
@@ -325,7 +302,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.UNVERIFIED);
         }));
 
@@ -337,13 +314,13 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.UNVERIFIED);
                   });
             })));
@@ -358,13 +335,13 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.UNVERIFIED);
                   });
             })));
@@ -379,13 +356,13 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.UNVERIFIED);
                   });
             })));
@@ -402,7 +379,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           verifier.loadKeyset('service-1');
           return expect(
               verifier.verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature, creative1, noop))
+                  'service-1', 'key-1', signature, creative1))
               .to.eventually.equal(VerificationStatus.OK);
         }));
 
@@ -416,13 +393,13 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
                     return expect(
                         verifier.verifyCreativeAndSignature(
-                            'service-1', 'key-1', signature2, creative2, noop))
+                            'service-1', 'key-1', signature2, creative2))
                         .to.eventually.equal(VerificationStatus.UNVERIFIED);
                   });
             })));
@@ -439,8 +416,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                     new Headers({
                       'AMP-Fast-Fetch-Signature':
                          `service-1:key-1:${base64EncodeFromBytes(signature)}`,
-                    }),
-                    noop))
+                    })))
                 .to.eventually.equal(VerificationStatus.OK);
           }));
 
@@ -448,7 +424,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
         env.fetchMock.getOnce(
             'https://signingservice1.net/keyset.json', jwkSet([key1]));
         verifier.loadKeyset('service-1');
-        return expect(verifier.verify(creative1, new Headers(), noop))
+        return expect(verifier.verify(creative1, new Headers()))
             .to.eventually.equal(VerificationStatus.UNVERIFIED);
       });
 
@@ -458,7 +434,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             env.fetchMock.getOnce(
                 'https://signingservice1.net/keyset.json', jwkSet([key1]));
             verifier.loadKeyset('service-1');
-            return expect(verifier.verify(creative1, new Headers(), noop))
+            return expect(verifier.verify(creative1, new Headers()))
                 .to.eventually.equal(VerificationStatus.UNVERIFIED);
           });
 
@@ -472,8 +448,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                 creative1,
                 new Headers({
                   'AMP-Fast-Fetch-Signature': 'service-1:key-1:Invalid base64!',
-                }),
-                noop))
+                })))
             .to.eventually.equal(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
       });
     });

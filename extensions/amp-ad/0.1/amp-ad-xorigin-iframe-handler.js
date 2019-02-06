@@ -15,10 +15,15 @@
  */
 
 import {
+  ADSENSE_EXPERIMENTS,
+  ADSENSE_EXP_NAMES,
+} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
   CONSTANTS,
   MessageType,
 } from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {
   IntersectionObserver,
 } from '../../../src/intersection-observer';
@@ -29,11 +34,14 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getData, loadPromise} from '../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -62,7 +70,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?AMP.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** {?Element} iframe instance */
+    /** @type {?Element} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -76,9 +84,6 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private {boolean} */
     this.isInaboxPositionApiInit_ = false;
-
-    /** @private {?SubscriptionApi} */
-    this.inaboxRequestPositionApi_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
@@ -101,7 +106,7 @@ export class AmpAdXOriginIframeHandler {
    * @return {!Promise} awaiting render complete promise
    */
   init(iframe, opt_isA4A) {
-    dev().assert(
+    devAssert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
@@ -116,16 +121,24 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
-    // To provide position to inabox.
-    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+    // TODO(bradfrizzell): Would be better to turn this on if
+    // A4A.isXhrEnabled() is false, or if we simply decide it is
+    // ok to turn this on for all traffic.
+    if (getExperimentBranch(
+        this.win_, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
+       ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
+       getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
+        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
+       isExperimentOn(this.win_, 'inabox-position-api')) {
+      // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            // TODO(@zhouyx): Make sendPosition_ only send to
+            // message origin iframe
             this.sendPosition_();
             this.registerPosition_();
           });
     }
-
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
@@ -152,6 +165,9 @@ export class AmpAdXOriginIframeHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
+          if (!!data['hasOverflow']) {
+            this.element_.warnOnMissingOverflow = false;
+          }
           this.handleResize_(data['height'], data['width'], source, origin);
         }, true, true));
 
@@ -165,38 +181,33 @@ export class AmpAdXOriginIframeHandler {
         }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
-    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
-      // Wait just a little to allow `no-content` message to arrive.
-      if (this.iframe) {
-        // Chrome does not reflect the iframe readystate.
-        this.iframe.readyState = 'complete';
-      }
-      return timer.promise(10);
-    });
-    if (this.baseInstance_.emitLifecycleEvent) {
-      // Only set up a load listener if we know that we can send lifecycle
-      // messages.
-      iframeLoadPromise.then(() => {
-        this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
-      });
-    }
+    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe)
+        .then(() => {
+          // Wait just a little to allow `no-content` message to arrive.
+          if (this.iframe) {
+            // Chrome does not reflect the iframe readystate.
+            this.iframe.readyState = 'complete';
+          }
+          return timer.promise(10);
+        });
 
     // Calculate render-start and no-content signals.
-    let renderStartResolve;
-    const renderStartPromise = new Promise(resolve => {
-      renderStartResolve = resolve;
-    });
-    let noContentResolve;
-    const noContentPromise = new Promise(resolve => {
-      noContentResolve = resolve;
-    });
+    const {
+      promise: renderStartPromise,
+      resolve: renderStartResolve,
+    } = new Deferred();
+    const {
+      promise: noContentPromise,
+      resolve: noContentResolve,
+    } = new Deferred();
+
     if (this.baseInstance_.config &&
             this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-        const data = info.data;
+        const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStart_(info);
           renderStartResolve();
@@ -244,7 +255,6 @@ export class AmpAdXOriginIframeHandler {
       // Set iframe initially hidden which will be removed on render-start or
       // load, whichever is earlier.
       setStyle(this.iframe, 'visibility', 'hidden');
-      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
 
     Promise.race([
@@ -254,9 +264,6 @@ export class AmpAdXOriginIframeHandler {
     ]).then(() => {
       if (this.iframe) {
         setStyle(this.iframe, 'visibility', '');
-        if (this.baseInstance_.emitLifecycleEvent) {
-          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-        }
       }
     });
 
@@ -305,9 +312,6 @@ export class AmpAdXOriginIframeHandler {
     const data = getData(opt_info);
     this.handleResize_(
         data['height'], data['width'], opt_info['source'], opt_info['origin']);
-    if (this.baseInstance_.emitLifecycleEvent) {
-      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
-    }
   }
 
   /**
@@ -435,7 +439,7 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
-      dev().assert(position,
+      devAssert(position,
           'element clientRect should intersects with root clientRect');
       const viewport = this.viewport_.getRect();
       return dict({

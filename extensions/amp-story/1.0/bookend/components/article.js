@@ -14,145 +14,118 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
-import {isProtocolValid, parseUrl} from '../../../../../src/url';
-import {user} from '../../../../../src/log';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: (string|undefined),
+ *   domainName: string,
  * }}
  */
-export let BookendArticleComponentDef;
-
-const TAG = 'amp-story-bookend';
+export let ArticleComponentDef;
 
 /**
  * Builder class for the small article component.
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
+
   /** @override */
-  assertValidity(articleJson) {
-    if (!articleJson['title'] || !articleJson['url']) {
-      user().error(TAG, 'Articles must contain `title` and `url` ' +
-        'fields, skipping invalid.');
-    }
+  assertValidity(articleJson, element) {
 
-    if (!isProtocolValid(articleJson['url'])) {
-      user().error(TAG, 'Unsupported protocol for article URL ' +
-        `${articleJson['url']}`);
-    }
+    const requiredFields = ['title', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in articleJson));
+    userAssert(
+        hasAllRequiredFields,
+        'Small article component must contain ' +
+            requiredFields.map(field => '`' + field + '`').join(', ') +
+            ' fields, skipping invalid.');
 
-    if (!isProtocolValid(articleJson['image'])) {
-      user().error(TAG, 'Unsupported protocol for article image URL' +
-      ` ${articleJson['image']}`);
+    userAssertValidProtocol(element, articleJson['url']);
+
+    const image = articleJson['image'];
+    if (image) {
+      userAssertValidProtocol(element, image);
     }
   }
 
-  /**
-   * @override
-   * @return {!BookendArticleComponentDef}
-   * */
-  build(articleJson) {
+  /** @override */
+  build(articleJson, element) {
+    const url = articleJson['url'];
+    const domainName = getSourceOriginForElement(element, url);
+
     const article = {
-      type: 'small',
+      url,
+      domainName,
+      type: articleJson['type'],
       title: articleJson['title'],
-      url: articleJson['url'],
-      domainName: parseUrl(articleJson['url']).hostname,
     };
 
     if (articleJson['image']) {
       article.image = articleJson['image'];
     }
 
-    return /** @type {!BookendArticleComponentDef} */ (article);
+    if (articleJson['amphtml']) {
+      article.amphtml = articleJson['amphtml'];
+    }
+
+    return /** @type {!ArticleComponentDef} */ (article);
   }
 
   /** @override */
-  buildTemplate(articleData, doc) {
-
+  buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const template =
+    const el =
         html`
-        <a class="i-amphtml-story-bookend-article"
+        <a class="i-amphtml-story-bookend-article
+          i-amphtml-story-bookend-component"
           target="_top">
-          <div class="i-amphtml-story-bookend-article-meta">
+          <div class="i-amphtml-story-bookend-article-text-content">
+            <h2
+              class="i-amphtml-story-bookend-article-heading" ref="heading">
+            </h2>
+            <div
+              class="i-amphtml-story-bookend-component-meta" ref="meta">
+            </div>
           </div>
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
+    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    if (articleData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     if (articleData.image) {
-      const ampImg =
+      const imgEl =
           html`
-          <amp-img class="i-amphtml-story-bookend-article-image"
-                  width="100"
-                  height="100">
-          </amp-img>`;
+          <div class="i-amphtml-story-bookend-article-image">
+            <img ref="image">
+            </img>
+          </div>`;
 
-      addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
+      const {image} = htmlRefs(imgEl);
+      addAttributesToElement(image, dict({'src': articleData.image}));
+      el.appendChild(imgEl);
     }
 
-    const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
+    const articleElements = htmlRefs(el);
+    const {heading, meta} = articleElements;
+
     heading.textContent = articleData.title;
-    template.appendChild(heading);
+    meta.textContent = articleData.domainName;
 
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
-    template.appendChild(articleMeta);
-
-    return template;
-  }
-}
-
-/**
- * @typedef {{
- *   type: string,
- *   heading: string
- * }}
- */
-export let BookendArticleTitleComponentDef;
-
-/**
- * Builder class for the article titles used to separate article sets.
- * @implements {BookendComponentInterface}
- */
-export class ArticleTitleComponent {
-
-  /** @override */
-  assertValidity(titleJson) {
-    if (!titleJson['title']) {
-      user().error(TAG, 'Titles must contain `title` field, skipping' +
-      ' invalid.');
-    }
-  }
-
-  /** @override */
-  build(titleJson) {
-    const title = {
-      type: 'article-set-title',
-      heading: titleJson.title,
-    };
-    return title;
-  }
-
-  /** @override */
-  buildTemplate(titleData, doc) {
-    const html = htmlFor(doc);
-    const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
-
-    template.textContent = titleData.heading;
-
-    return template;
+    return el;
   }
 }

@@ -70,6 +70,9 @@ export class AmpGist extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
+  /**
+   * @override
+   */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);

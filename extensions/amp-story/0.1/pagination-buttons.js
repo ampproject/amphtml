@@ -17,7 +17,7 @@ import {Action} from './amp-story-store-service';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -91,6 +91,9 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
+/**
+ * Desktop navigation buttons.
+ */
 class PaginationButton {
   /**
    * @param {!Document} doc
@@ -129,7 +132,7 @@ class PaginationButton {
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.element, dev().assert(this.state_.triggers),
+      dispatch(this.element, devAssert(this.state_.triggers),
           /* opt_bubbles */ true);
       return;
     }

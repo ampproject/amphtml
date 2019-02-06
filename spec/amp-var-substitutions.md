@@ -70,7 +70,7 @@ The following table lists the features that enable variable substitutions, as we
       <ul>
         <li>Page’s source origin</li>
         <li>Page’s canonical origin</li>
-        <li>An origin whitelisted via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
+        <li>An origin white listed via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
@@ -91,6 +91,9 @@ Variable substitutions that are dependent on a user action like links and form i
 Please take note of the following scenarios:
 * `CLIENT_ID` is available once it has been computed. This can be accomplished through use by another feature such as `amp-analytics` or `amp-pixel`. Note that `CLIENT_ID` may also be blocked on an `amp-user-notification` that is pending acceptance.
 * Asynchronously resolved variables are not available
+
+### Restrictions
+The `host` string of an URL does not accept variables. It fails on AMP cache.
 
 ## Variable substitution in links
 
@@ -115,13 +118,13 @@ If you need to append dynamic parameters to the href, specify the parameters by 
 <a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
 ```
 
-### Whitelisted domains for link substitution
+### White listed domains for link substitution
 
 Link substitutions are restricted and will only be fulfilled for URLs matching:
 
 * The page’s source origin
 * The page’s canonical origin
-* A whitelisted origin
+* A white listed origin
 
 To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
@@ -155,7 +158,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
-| [HTML Attributes](#html-attr)           | `HTML_ATTR`      | `${htmlAttr}` |
+| [HTML Attributes](#html-attributes) | `HTML_ATTR`      | `${htmlAttr}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
@@ -245,6 +248,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
 | [AMP Version](#amp-version) | `AMP_VERSION` | `${ampVersion}` |
+| [AMP State](#amp-state) | `AMP_STATE` | `${ampState}` |
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
@@ -297,6 +301,19 @@ Provides the AMP document's URL. The URL contains the scheme, domain, port and f
   Makes a request to something like  `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 * **amp-analytics variable**: `${ampdocUrl}`
   * Example value: `http://example.com:8000/examples/analytics.amp.html`
+
+#### AMP State
+
+Pulls a value from the provided AMP state key.
+
+* **platform variable**: `AMP_STATE`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?bar=AMP_STATE(foo.bar)"></amp-pixel>
+  ```
+  If `foo.bar` exists in the AMP state, the corresponding value is inserted into the pixel src.
+* **amp-analytics variable**: `${ampState}`
+  * Example value: `${ampState(foo.bar)}`: If `foo.bar` is available, its associated value is returned; otherwise, null is returned.
 
 #### AMP Version
 
@@ -669,7 +686,7 @@ requested attribute names and the object values are the elements' values for tho
 
 #### Intersection Ratio
 
-Provides the fraction of the selected element that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
+Provides the fraction of the target that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${intersectionRatio}`
@@ -1096,7 +1113,7 @@ Provides the time (in seconds) the user has been engaged with the page since the
 
 #### Total Time
 
-Provides the total time from the time page has become visible to the time a ping was sent out.
+Provides the total time from the time page has become visible to the time a ping was sent out. Only applicable to visible trigger events.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`

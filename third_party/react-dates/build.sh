@@ -1,6 +1,6 @@
 #!/bin/sh
 ./node_modules/.bin/browserify \
--t [ babelify --presets env ] \
+-t [ babelify --presets [ @babel/preset-env ] ] \
 -g [ envify purge --NODE_ENV production ] \
 -g uglifyify \
 -r prop-types -r preact:react -r preact-compat:react-dom \

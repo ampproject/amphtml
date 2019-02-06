@@ -88,7 +88,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 <dl>
   <dt><code>window.context.getHtml (selector, attrs, callback)</code></dt>
-  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.</dd>
+  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.<p>This API is by default disabled. To enable it, the `amp-ad` needs to put attribute <code>data-html-access-allowed</code> to explicitly opt-in.</dd>
   <dt><code>window.context.noContentAvailable()</code></dt>
   <dd>Informs the AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise tries to collapse the ad slot.</dd>
   <dt><code>window.context.renderStart(opt_data)</code></dt>
@@ -156,13 +156,15 @@ Additionally, one can observe the `amp:visibilitychange` on the `window` object 
 ### Ad resizing
 
 Ads can call the special API
-`window.context.requestResize(width, height)` to send a resize request.
+`window.context.requestResize(width, height, opt_hasOverflow)` to send a resize request.
 
 Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
 Ads can observe whether resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+
+The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOverflow` to `true` to let AMP runtime know that the ad context can handle overflow when attempt to resize is denied, and not to throw warning in such cases.
 
 *Example:*
 
@@ -215,15 +217,16 @@ In case the resize is not successful, AMP will horizontally and vertically cente
 window.context.renderStart({width: 200, height: 100});
 ```
 
-Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
+Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height, opt_hasOverflow)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### amp-consent integration
 If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
-In that case, the `amp-ad` element will be blocked for loading until the consent
-responded. Once `amp-ad` is unblocked, 3rd party ad scripts can access the consent
-related information via the following
-`window.context` APIs.
+In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
+Individual ad network can override this default consent handling by putting a `consentHandlingOverride: true` in `ads/_config.js`.
+Doing so will unblock the ad loading once the consent is responded. It will be then the ad network's responsibility
+to respect user's consent choice, for example to serve non-personalized ads on consent rejection.
+AMP runtime provides the following `window.context` APIs for ad network to access the consent state.
 
 <dl>
   <dt><code>window.context.initialConsentState</code></dt>
@@ -232,12 +235,20 @@ related information via the following
     The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
     (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
   </dd>
+  <dt><code>window.context.getConsentState(callback)</code></dt>
+  <dd>
+    Queries the current consent state asynchronously. The `callback` function
+    will be invoked with the current consent state.
+  </dd>
   <dt><code>window.context.consentSharedData</code></dt>
   <dd>
     Provides additional user privacy related data retrieved from publishers.
     See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
   </dd>
 </dl>
+
+After overriding the default consent handling behavior, don't forget to update your publisher facing
+ documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/master/ads/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 
@@ -328,11 +339,11 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+gulp test --watch --nobuild --files=test/unit/{test-ads-config.js,test-integration.js}
 
 ```
 
-If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
+If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/unit/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
@@ -340,6 +351,7 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
+- It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
   1. Using a different email address in the git commit.

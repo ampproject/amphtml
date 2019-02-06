@@ -15,7 +15,8 @@
  */
 
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
-import {getSourceUrl, parseUrl} from '../src/url';
+import {getSourceUrl, parseUrlDeprecated} from '../src/url';
+import {hasOwn} from '../src/utils/object';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [
@@ -26,7 +27,8 @@ const mandatoryParams = ['tagtype', 'cid'],
       'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
       'experimentId', 'multiSize', 'multiSizeValidation',
     ];
-//useSameDomainRenderingUntilDeprecated is included to ensure publisher amp-tags don't break before 29th March
+// useSameDomainRenderingUntilDeprecated is included to ensure publisher
+// amp-tags don't break before 29th March
 
 /**
  * @param {!Window} global
@@ -72,17 +74,23 @@ function getCallbacksObject() {
  * @param {?string} referrerUrl
  */
 function loadCMTag(global, data, publisherUrl, referrerUrl) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /**
+   * Sets macro type.
+   * @param {string} type
+   */
   function setMacro(type) {
     if (!type) {
       return;
     }
     const name = 'medianet_' + type;
-    if (data.hasOwnProperty(type)) {
+    if (hasOwn(data, type)) {
       global[name] = data[type];
     }
   }
 
+  /**
+   * Sets additional data.
+   */
   function setAdditionalData() {
     data.requrl = publisherUrl || '';
     data.refurl = referrerUrl || '';
@@ -97,10 +105,16 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
     setMacro('misc');
   }
 
+  /**
+   * Sets callback.
+   */
   function setCallbacks() {
     global._mNAmp = getCallbacksObject();
   }
 
+  /**
+   * Loads the script.
+   */
   function loadScript() {
     let url = 'https://contextual.media.net/ampnmedianet.js?';
     url += 'cid=' + encodeURIComponent(data.cid);
@@ -110,6 +124,9 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
     writeScript(global, url);
   }
 
+  /**
+   * Initializer.
+   */
   function init() {
     setAdditionalData();
     setCallbacks();
@@ -127,6 +144,9 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
  */
 function loadHBTag(global, data, publisherUrl, referrerUrl) {
 
+  /**
+   * Loads MNETAd.
+   */
   function loadMNETAd() {
     if (loadMNETAd.alreadyCalled) {
       return;
@@ -149,6 +169,9 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     global.advBidxc.loadAmpAd(global, data);
   }
 
+  /**
+   * Handler for mnet.
+   */
   function mnetHBHandle() {
     global.advBidxc = global.context.master.advBidxc;
     if (global.advBidxc &&
@@ -174,7 +197,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       },
     };
     global.advBidxc.amp = getCallbacksObject();
-    const publisherDomain = parseUrl(publisherUrl).hostname;
+    const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
     writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(publisherDomain), () => {
       done(null);
     });

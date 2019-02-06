@@ -102,7 +102,12 @@ example:
 </html>
 ```
 
-Inline `style` attributes are not allowed, as per the AMP spec.
+Inline `style` attributes are also allowed. For example:
+```html
+  <p style="color:blue;font-weight:bold;">AMPlify!</p>
+
+```
+
 
 ### Width, Height, and Layout
 
@@ -172,6 +177,6 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-Built-in components include [amp-img](../builtins/amp-img.md), [amp-ad](../builtins/amp-ad.md), [amp-pixel](../builtins/amp-pixel.md) and [amp-video](../builtins/amp-video.md).
+Built-in components include [amp-img](../builtins/amp-img.md), [amp-layout](../builtins/amp-layout.md) and [amp-pixel](../builtins/amp-pixel.md).
 
 AMP HTML extensions include [extended components](../extensions) and extended templates.

@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
@@ -57,6 +57,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      * @private
      */
     this.container_ = null;
+
+    this.firstLayoutCompleted_ = false;
   }
 
 
@@ -67,6 +69,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
@@ -86,15 +89,22 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     clip.appendChild(container);
     this.element.appendChild(clip);
 
-    this.getViewport().addToFixedLayer(container);
+    // Make the fixed-layer track the container, but never transfer it out of
+    // this DOM tree. Tracking allows us to compensate for the Viewer's header,
+    // but transferring would break the clipping UI.
+    this.getViewport().addToFixedLayer(container, /* opt_forceTransfer */false);
   }
 
   /** @override */
-  onLayoutMeasure() {
+  onMeasureChanged() {
     const width = this.getLayoutWidth();
-    this.getVsync().mutate(() => {
+    this.mutateElement(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
+    if (this.firstLayoutCompleted_) {
+      this.scheduleLayout(this.children_);
+      listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+    }
   }
 
   /** @override */
@@ -118,14 +128,14 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     // Hmm, can the page height change and affect us?
     const minTop = viewportHeight * 0.75;
     const maxTop = docHeight - viewportHeight * 0.95;
-    user().assert(
+    userAssert(
         layoutBox.top >= minTop,
         '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
       ' first viewport: %s Current position: %s. Min: %s',
         this.element,
         layoutBox.top,
         minTop);
-    user().assert(
+    userAssert(
         layoutBox.top <= maxTop,
         '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
@@ -145,6 +155,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     }
     this.scheduleLayout(this.children_);
     listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+    this.firstLayoutCompleted_ = true;
     return Promise.resolve();
   }
 
@@ -172,6 +183,14 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
         return this.attemptCollapse().catch(() => {});
       }
     }
+  }
+
+  /**
+   * Returns our discovered children
+   * @return {!Array<!Element>}
+   */
+  getChildren() {
+    return this.children_;
   }
 
   /**

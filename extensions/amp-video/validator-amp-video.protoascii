@@ -17,6 +17,7 @@
 tags: {  # amp-video
   html_format: AMP
   html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   # Typically the extension_spec takes care of this, but we have
   # a unique situation where we need to refer to this earlier in
@@ -24,8 +25,8 @@ tags: {  # amp-video
   spec_name: "amp-video extension .js script"
   extension_spec: {
     name: "amp-video"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
@@ -53,6 +54,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
     name: "loop"
     value: ""
   }
@@ -60,10 +65,17 @@ attr_lists: {
     name: "muted"
     value: ""
   }
+  attrs: {
+    name: "noaudio"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"
-    value_regex: "(none|metadata|auto|)"
+    value: "auto"
+    value: "metadata"
+    value: "none"
+    value: ""
   }
   attrs: {
     name: "rotate-to-fullscreen"
@@ -72,7 +84,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -95,6 +107,7 @@ attr_lists: {
 tags: {  # <amp-video> not in amp-story.
   html_format: AMP
   html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "AMP-VIDEO"
   # There is an alternate spec for amp-video in amp-story.
   disallowed_ancestor: "AMP-STORY"

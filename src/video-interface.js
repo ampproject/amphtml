@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
+
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
@@ -155,6 +157,12 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
+
+  /**
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
+   */
+  seekTo(unusedTimeSeconds) {}
 }
 
 
@@ -173,7 +181,7 @@ export const VideoAttributes = {
    * Whether the developer has configured autoplay on the component.
    * This is normally done by setting `autoplay` attribute on the component.
    *
-   * AMP runtime manages autoplay behaviour itself using methods such as `play`,
+   * AMP runtime manages autoplay behavior itself using methods such as `play`,
    * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
@@ -208,6 +216,12 @@ export const VideoAttributes = {
    * and http://caniuse.com/#feat=fullscreen
    */
   ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+  /**
+   * noaudio
+   *
+   * If set and autoplay, the equalizer icon will not be displayed.
+   */
+  NO_AUDIO: 'noaudio',
 };
 
 
@@ -239,6 +253,15 @@ export const VideoEvents = {
    * @event load
    */
   LOAD: 'load',
+
+  /**
+   * loadedmetadata
+   *
+   * Fired when the video's metadata becomes available (e.g. duration).
+   *
+   * @event loadedmetadata
+   */
+  LOADEDMETADATA: 'loadedmetadata',
 
   /**
    * playing
@@ -428,32 +451,43 @@ export const VideoAnalyticsEvents = {
    * @event video-session-visible
    */
   SECONDS_PLAYED: 'video-seconds-played',
+
+  /**
+   * video-hosted-custom
+   *
+   * Indicates that a custom event incoming from a 3p frame is to be logged.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  CUSTOM: 'video-hosted-custom',
+
+  /**
+   * video-percentage-played
+   *
+   * Indicates that a percentage interval has been played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  PERCENTAGE_PLAYED: 'video-percentage-played',
 };
 
 
 /**
- * @typedef {{
- *   autoplay: boolean,
- *   currentTime: number,
- *   duration: number,
- *   height: number,
- *   id: string,
- *   playedRangesJson: string,
- *   playedTotal: number,
- *   muted: boolean,
- *   state: string,
- *   width: number
- * }}
+ * Helper union type to be used internally, so that the compiler treats
+ * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use this at the service level. Its `register` method should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
-export let VideoAnalyticsDetailsDef;
+export let VideoOrBaseElementDef;
 
 
 /**
- * Helper function to be used internally to cast types from VideoInterface to
- * the public AMP component interface.
- * @param {!VideoInterface} video
- * @return {!./base-element.BaseElement}
+ * @param {!Element} element
+ * @return {boolean}
  */
-export function asBaseElement(video) {
-  return /** @type {!./base-element.BaseElement} */ (video);
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
 }

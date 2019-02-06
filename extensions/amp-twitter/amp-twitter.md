@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Twitter Tweet.</td>
+    <td>Displays a Twitter Tweet or Moment.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -39,7 +39,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet for the specified Twitter ID.  
+The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.  
 
 Here's an example of a basic embedded Tweet:
 
@@ -57,11 +57,11 @@ Here's an example of a basic embedded Tweet:
 
 ## Appearance
 
-Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets. Currently, AMP automatically proportionally scales the Tweet to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets or Moments. Currently, AMP automatically proportionally scales the Tweet or Moment to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
 
 Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
@@ -93,13 +93,22 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
 
 ## Attributes
 
-##### data-tweetid (required)
+##### data-tweetid / data-momentid / data-timeline-source-type (required)
 
-The ID of the Tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweetID.
+The ID of the Tweet or Moment, or the source type if a Timeline should be displayed.
+In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweet id.
+In a URL like https://twitter.com/i/moments/1009149991452135424, `1009149991452135424` is the moment id.
+Valid timeline source types include `profile`, `likes`, `list`, `collection`, `url`, and `widget`.
+
+##### data-timeline-* (optional)
+
+When displaying a timeline, further arguments need to be provided in addition to `timeline-source-type`. For example, `data-timeline-screen-name="amphtml"` in combination with `data-timeline-source-type="profile"` will display a timeline of the AMP Twitter account.
+For details on the available arguments, see the "Timelines" section in [Twitter's JavaScript Factory Functions Guide](https://developer.twitter.com/en/docs/twitter-for-websites/javascript-api/guides/scripting-factory-functions).
 
 ##### data-* (optional)
 
-You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards. For details on the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+You can specify options for the Tweet, Moment, or Timeline appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
+For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference), [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0) and [for timelines](https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference). 
 
 <div>
 <amp-iframe height="202"

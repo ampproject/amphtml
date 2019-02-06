@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -132,7 +132,7 @@ export class LaterpayVendor {
     /** @private {?Node} */
     this.innerContainer_ = null;
 
-    /** @private {?Node} */
+    /** @private {?Element} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -211,8 +211,8 @@ export class LaterpayVendor {
           }
           return response.json().catch(() => undefined).then(responseJson => {
             this.purchaseConfig_ = responseJson;
-            // empty before rendering, in case authorization is being called again
-            // with the same state
+            // empty before rendering, in case authorization is being called
+            // again with the same state
             this.emptyContainer_()
                 .then(this.renderPurchaseOverlay_.bind(this));
             return {access: false};
@@ -242,6 +242,7 @@ export class LaterpayVendor {
   }
 
   /**
+   * @param {string} name
    * @return {!Element}
    * @private
    */
@@ -256,7 +257,7 @@ export class LaterpayVendor {
   getArticleTitle_() {
     const title = this.ampdoc.getRootNode().querySelector(
         this.laterpayConfig_['articleTitleSelector']);
-    user().assert(
+    userAssert(
         title, 'No article title element found with selector %s',
         this.laterpayConfig_['articleTitleSelector']);
     return title.textContent.trim();
@@ -333,7 +334,7 @@ export class LaterpayVendor {
     purchaseButton.textContent = this.i18n_['defaultButton'];
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      const value = this.selectedPurchaseOption_.value;
+      const {value} = this.selectedPurchaseOption_;
       const purchaseType = this.selectedPurchaseOption_.dataset['purchaseType'];
       this.handlePurchase_(ev, value, purchaseType);
     });
@@ -532,7 +533,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return{!Promise}
+   * @return {!Promise}
    */
   pingback() {
     return Promise.resolve();

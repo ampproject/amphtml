@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>All</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-selector/">amp-selector example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
@@ -89,9 +93,9 @@ Example:
 ```html
 <button on="tap:mySelector.clear">Clear Selection</button>
 <amp-selector id="mySelector" layout="container" multiple>
-  <div>Option One</div>
-  <div>Option Two</div>
-  <div>Option Three</div>
+  <div option>Option One</div>
+  <div option>Option Two</div>
+  <div option>Option Three</div>
 </amp-selector>
 ```
 
@@ -106,6 +110,14 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-selec
 ##### disabled, form, multiple, name
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
+
+##### keyboard-select-mode
+
+The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<amp-selector>`. 
+
+* `none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled. 
+* `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection. 
+* `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys. 
 
 ### Attributes on `<amp-selector>` options
 
@@ -129,6 +141,9 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 `amp-selector` triggers the `select` event when the user selects an option.
 Multi-selectors and single-selectors fire this when selecting or unselecting options.
 Tapping disabled options does not trigger the `select` event.
+
+- `event.targetOption` contains the `option` attribute value of the selected element.
+- `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
 
 ## Validation
 

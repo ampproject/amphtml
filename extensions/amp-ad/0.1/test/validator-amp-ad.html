@@ -27,7 +27,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 </head>
 <body>
   <template type="amp-mustache" id="template-1">
@@ -49,7 +49,13 @@
     <amp-ad height="300" type="foo"></amp-ad>
   </amp-fx-flying-carpet>
   <!-- Valid -->
-  <amp-ad type=doubleclick width="100" height="fluid" layout="fluid"></amp-ad>
+  <amp-ad type=doubleclick layout=fluid></amp-ad>
+  <!-- Valid -->
+  <amp-ad type=doubleclick height=fluid layout=fluid></amp-ad>
+  <!-- Valid -->
+  <amp-ad type=doubleclick height=fluid width=fluid layout=fluid></amp-ad>
+  <!-- Valid -->
+  <amp-ad type=doubleclick height=300 width=400 layout=fluid></amp-ad>
   <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
   <amp-fx-flying-carpet height="300">
     <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>

@@ -16,16 +16,16 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {ancestorElementsByTag} from '../../../src/dom';
 import {
+  ancestorElementsByTag,
   childElementByTag,
   removeChildren,
 } from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -52,7 +52,7 @@ export class AmpAdCustom extends AMP.BaseElement {
      *  responses will be keyed by slot */
     this.slot_ = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
   }
 
@@ -69,11 +69,14 @@ export class AmpAdCustom extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Builds AmpAdUIHandler callback
+   */
   buildCallback() {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
     // Ensure that the slot value is legal
-    user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
+    userAssert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
 
     this.uiHandler = new AmpAdUIHandler(this);
@@ -95,7 +98,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
+        templateData = hasOwn(data, this.slot_) ? data[this.slot_] :
           null;
       }
 
@@ -112,10 +115,10 @@ export class AmpAdCustom extends AMP.BaseElement {
         Services.templatesFor(this.win)
             .findAndRenderTemplate(this.element, templateData)
             .then(renderedElement => {
-              // Get here when the template has been rendered
-              // Clear out the child template and replace it by the rendered version
-              // Note that we can't clear templates that's not ad's child because
-              // they maybe used by other ad component.
+              // Get here when the template has been rendered Clear out the
+              // child template and replace it by the rendered version Note that
+              // we can't clear templates that's not ad's child because they
+              // maybe used by other ad component.
               removeChildren(this.element);
               this.element.appendChild(renderedElement);
               this.signals().signal(CommonSignals.INI_LOAD);
@@ -155,9 +158,9 @@ export class AmpAdCustom extends AMP.BaseElement {
     }
 
     // If use remote template specified by response
-    user().assert(templateData['templateId'], 'TemplateId not specified');
+    userAssert(templateData['templateId'], 'TemplateId not specified');
 
-    user().assert(
+    userAssert(
         templateData['data'] && typeof templateData['data'] == 'object',
         'Template data not specified');
 
@@ -194,7 +197,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
-   * @returns {string} The URL with the "ampslots" parameter appended
+   * @return {string} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL

@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-// TODO(calebcordry) remove this once experiment is launched
-// also remove from dep-check-config whitelist;
-import {isExperimentOn} from '../../../src/experiments';
+import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
-const TAG = 'Analytics.Variables';
+const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
@@ -62,6 +60,18 @@ export class ExpansionOptions {
   freezeVar(str) {
     this.freezeVars[str] = true;
   }
+
+  /**
+   * @param {string} name
+   * @return {*}
+   */
+  getVar(name) {
+    let value = this.vars[name];
+    if (value == null) {
+      value = '';
+    }
+    return value;
+  }
 }
 
 
@@ -74,12 +84,12 @@ export class ExpansionOptions {
  */
 function substrMacro(str, s, opt_l) {
   const start = Number(s);
-  let length = str.length;
-  user().assert(isFiniteNumber(start),
+  let {length} = str;
+  userAssert(isFiniteNumber(start),
       'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {
     length = Number(opt_l);
-    user().assert(isFiniteNumber(length),
+    userAssert(isFiniteNumber(length),
         'Length ' + length + ' in substr macro should be a number');
   }
 
@@ -102,7 +112,7 @@ function defaultMacro(value, defaultValue) {
  * @param {string} string input to be replaced
  * @param {string} matchPattern string representation of regex pattern
  * @param {string=} opt_newSubStr pattern to be substituted in
- * @returns {string}
+ * @return {string}
  */
 function replaceMacro(string, matchPattern, opt_newSubStr) {
   if (!matchPattern) {
@@ -132,27 +142,24 @@ export class VariableService {
     /** @private {!Object<string, *>} */
     this.macros_ = {};
 
-    this.register_('DEFAULT', defaultMacro);
-    this.register_('SUBSTR', substrMacro);
-    this.register_('TRIM', value => value.trim());
-    this.register_('JSON', value => JSON.stringify(value));
-    this.register_('TOLOWERCASE', value => value.toLowerCase());
-    this.register_('TOUPPERCASE', value => value.toUpperCase());
-    this.register_('NOT', value => String(!value));
-    this.register_('BASE64', value => btoa(value));
-    this.register_('HASH', this.hashMacro_.bind(this));
-    this.register_('IF',
+    this.register_('$DEFAULT', defaultMacro);
+    this.register_('$SUBSTR', substrMacro);
+    this.register_('$TRIM', value => value.trim());
+    this.register_('$TOLOWERCASE', value => value.toLowerCase());
+    this.register_('$TOUPPERCASE', value => value.toUpperCase());
+    this.register_('$NOT', value => String(!value));
+    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$HASH', this.hashMacro_.bind(this));
+    this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
-    this.register_('REPLACE', replaceMacro);
+    this.register_('$REPLACE', replaceMacro);
   }
 
   /**
    * @return {!Object} contains all registered macros
    */
   getMacros() {
-    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        REPLACEMENT_EXP_NAME);
-    return isV2ExpansionOn ? this.macros_ : {};
+    return this.macros_;
   }
 
   /**
@@ -160,7 +167,7 @@ export class VariableService {
    * @param {*} macro
    */
   register_(name, macro) {
-    dev().assert(!this.macros_[name], 'Macro "' + name
+    devAssert(!this.macros_[name], 'Macro "' + name
         + '" already registered.');
     this.macros_[name] = macro;
   }
@@ -171,93 +178,53 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string
    */
   expandTemplate(template, options) {
-    if (options.iterations < 0) {
-      user().error(TAG, 'Maximum depth reached while expanding variables. ' +
-          'Please ensure that the variables are not recursive.');
-      return Promise.resolve(template);
-    }
+    return tryResolve(this.expandTemplateSync.bind(this, template, options));
+  }
 
-    const replacementPromises = [];
-    let replacement = template.replace(/\${([^}]*)}/g, (match, key) => {
-      if (!key) {
-        return Promise.resolve('');
+  /**
+   * @param {string} template The template to expand
+   * @param {!ExpansionOptions} options configuration to use for expansion
+   * @return {string} The expanded string
+   * @visibleForTesting
+   */
+  expandTemplateSync(template, options) {
+    return template.replace(/\${([^}]*)}/g, (match, key) => {
+      if (options.iterations < 0) {
+        user().error(TAG, 'Maximum depth reached while expanding variables. ' +
+            'Please ensure that the variables are not recursive.');
+        return match;
       }
 
-      const {name, argList} = this.getNameArgs_(key);
+      if (!key) {
+        return '';
+      }
+
+      // Split the key to name and args
+      // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
+      const {name, argList} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
       }
 
-      const raw = options.vars[name] != null ? options.vars[name] : '';
+      let value = options.getVar(name);
 
-      let p;
-      if (typeof raw == 'string') {
-        // Expand string values further.
-        p = this.expandTemplate(raw,
+      if (typeof value == 'string') {
+        value = this.expandTemplateSync(value,
             new ExpansionOptions(options.vars, options.iterations - 1,
                 true /* noEncode */));
-      } else {
-        // Values can also be arrays and objects. Don't expand them.
-        p = Promise.resolve(raw);
       }
 
-      p = p.then(finalRawValue => {
-        // Then encode the value
-        const val = options.noEncode
-          ? finalRawValue
-          : this.encodeVars(name, finalRawValue);
-        return val ? val + argList : val;
-      })
-          .then(encodedValue => {
-          // Replace it in the string
-            replacement = replacement.replace(match, encodedValue);
-          });
-
-      // Queue current replacement promise after the last replacement.
-      replacementPromises.push(p);
-
-      // Since the replacement will happen later, return the original template.
-      return match;
+      if (!options.noEncode) {
+        value = encodeVars(/** @type {string|?Array<string>} */(value));
+      }
+      if (value) {
+        value += argList;
+      }
+      return value;
     });
-
-    // Once all the promises are complete, return the expanded value.
-    return Promise.all(replacementPromises).then(() => replacement);
   }
 
-  /**
-   * Returns an array containing two values: name and args parsed from the key.
-   *
-   * @param {string} key The key to be parsed.
-   * @return {!FunctionNameArgsDef}
-   * @private
-   */
-  getNameArgs_(key) {
-    if (!key) {
-      return {name: '', argList: ''};
-    }
-    const match = key.match(VARIABLE_ARGS_REGEXP);
-    user().assert(match, 'Variable with invalid format found: ' + key);
-    return {name: match[1] || match[0], argList: match[2] || ''};
-  }
-
-  /**
-   * @param {string} unusedName Name of the variable. Only used in tests.
-   * @param {string|!Array<string>} raw The values to URI encode.
-   * @return {string} The encoded value.
-   */
-  encodeVars(unusedName, raw) {
-    if (raw == null) {
-      return '';
-    }
-
-    if (isArray(raw)) {
-      return raw.map(this.encodeVars.bind(this, unusedName)).join(',');
-    }
-    // Separate out names and arguments from the value and encode the value.
-    const {name, argList} = this.getNameArgs_(String(raw));
-    return encodeURIComponent(name) + argList;
-  }
 
   /**
    * @param {string} value
@@ -268,6 +235,40 @@ export class VariableService {
   }
 }
 
+/**
+ * @param {string|?Array<string>} raw The values to URI encode.
+ * @return {string} The encoded value.
+ */
+export function encodeVars(raw) {
+  if (raw == null) {
+    return '';
+  }
+
+  if (isArray(raw)) {
+    return raw.map(encodeVars).join(',');
+  }
+  // Separate out names and arguments from the value and encode the value.
+  const {name, argList} = getNameArgs(String(raw));
+  return encodeURIComponent(name) + argList;
+}
+
+/**
+ * Returns an array containing two values: name and args parsed from the key.
+ *
+ * case 1) 'SOME_MACRO(abc,def)' => name='SOME_MACRO', argList='(abc,def)'
+ * case 2) 'randomString' => name='randomString', argList=''
+ * @param {string} key The key to be parsed.
+ * @return {!FunctionNameArgsDef}
+ */
+export function getNameArgs(key) {
+  if (!key) {
+    return {name: '', argList: ''};
+  }
+  const match = key.match(VARIABLE_ARGS_REGEXP);
+  userAssert(match, 'Variable with invalid format found: ' + key);
+
+  return {name: match[1] || match[0], argList: match[2] || ''};
+}
 
 /**
  * @param {!Window} win
@@ -282,4 +283,13 @@ export function installVariableService(win) {
  */
 export function variableServiceFor(win) {
   return getService(win, 'amp-analytics-variables');
+}
+
+/**
+ * @param {string} key
+ * @return {{name, argList}|!FunctionNameArgsDef}
+ * @visibleForTesting
+ */
+export function getNameArgsForTesting(key) {
+  return getNameArgs(key);
 }

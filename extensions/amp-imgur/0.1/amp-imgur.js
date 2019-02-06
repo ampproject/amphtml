@@ -33,7 +33,7 @@ import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpImgur extends AMP.BaseElement {
 
@@ -58,7 +58,7 @@ export class AmpImgur extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.imgurid_ = user().assert(
+    this.imgurid_ = userAssert(
         this.element.getAttribute('data-imgur-id'),
         'The data-imgur-id attribute is required for <amp-imgur> %s',
         this.element);
@@ -86,7 +86,10 @@ export class AmpImgur extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   * */
   handleImgurMessages_(event) {
     if (event.origin != 'https://imgur.com' ||
         event.source != this.iframe_.contentWindow) {

@@ -94,7 +94,8 @@ export function targetFitsWithinPage(dimensions) {
 }
 
 /**
- * Calculate target scaling factor so that it is at least 25% larger than the page.
+ * Calculate target scaling factor so that it is at least 25% larger than the
+ * page.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
  * @return {number}
  */

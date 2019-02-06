@@ -25,12 +25,13 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
 import {parseIfNeeded} from '../src/iframe-helper';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
 
 let iframeCount = 0;
 
@@ -69,13 +70,13 @@ export function createFixtureIframe(
       [AmpEvents.ATTACHED]: 0,
       [AmpEvents.DOM_UPDATE]: 0,
       [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD_END]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
-      [AmpEvents.LOAD_END]: 0,
     };
     const messages = [];
     let html = __html__[fixture]; // eslint-disable-line no-undef
@@ -146,7 +147,7 @@ export function createFixtureIframe(
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
-      const setTimeout = win.setTimeout;
+      const {setTimeout} = win;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -227,6 +228,10 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      // Required for timer service, which now refers not to the global
+      // Promise but the passed in window Promise in it's constructor as
+      // it is an embedabble service. b\17733
+      iframe.contentWindow.Promise = window.Promise;
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc =
           Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
@@ -309,8 +314,8 @@ const IFRAME_STUB_URL =
  *
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
- * @param win {!Window}
- * @returns {!HTMLIFrameElement}
+ * @param {!Window} win
+ * @return {!HTMLIFrameElement}
  */
 export function createIframeWithMessageStub(win) {
   const element = win.document.createElement('iframe');
@@ -318,6 +323,7 @@ export function createIframeWithMessageStub(win) {
 
   /**
    * Instructs the iframe to send a message to parent window.
+   * @param {!Object} msg
    */
   element.postMessageToParent = msg => {
     element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
@@ -369,10 +375,10 @@ export function createIframeWithMessageStub(win) {
  * Returns a Promise that resolves when a post message is observed from the
  * given source window to target window.
  *
- * @param sourceWin {!Window}
- * @param targetwin {!Window}
- * @param msg {!Object}
- * @returns {!Promise<!Object>}
+ * @param {!Window} sourceWin
+ * @param {!Window} targetwin
+ * @param {!Object} msg
+ * @return {!Promise<!Object>}
  */
 export function expectPostMessage(sourceWin, targetwin, msg) {
   return new Promise(resolve => {
@@ -471,8 +477,9 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const createElement = win.document.createElement;
-  win.document.createElement = function(tagName) {
+  const {prototype} = win.Document;
+  const {createElement} = prototype;
+  prototype.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
@@ -554,7 +561,7 @@ function maybeSwitchToCompiledJs(html) {
 
 /**
  * @param {*} data
- * @returns {?}
+ * @return {?}
  * @private
  */
 function parseMessageData(data) {

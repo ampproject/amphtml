@@ -20,16 +20,23 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 322
+min_validator_revision_required: 370
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 616
+spec_file_revision: 816
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
+
+css_length_spec: {
+  html_format: AMP
+  max_bytes: 50000
+  max_bytes_per_inline_style: 1000
+  spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
+}
 
 # Validator extensions.
 # =====================
@@ -42,8 +49,33 @@ script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 # (https://www.ampproject.org/docs/reference/spec)
 
 tags: {
+  html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype"
+  mandatory_parent: "$ROOT"
+  mandatory: true
+  unique: true
+  explicit_attrs_only: true
+  attrs: {
+    name: "html"
+    mandatory: true
+    value: ""
+  }
+  # `lang` is not supported per spec but is allowed because it has been observed
+  # on existing AMP documents.
+  attrs: {
+    name: "lang"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
+}
+# AMP4ADS may need time to transition <!doctype> to using explicit attrs only.
+# Tracking in b/123227526 to merge into tagspec with spec name "html doctype".
+tags: {
+  html_format: AMP4ADS
+  tag_name: "!DOCTYPE"
+  spec_name: "html doctype (AMP4ADS)"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -63,53 +95,23 @@ tags: {
 # 4.1.1 The html element
 tags: {  # AMP
   html_format: AMP
-  tag_name: "HTML"
-  spec_name: "html ⚡ for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡"
-    alternative_names: "amp"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
-}
-tags: {  # AMP4ADS
   html_format: AMP4ADS
-  tag_name: "HTML"
-  spec_name: "html ⚡4ads for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡4ads"
-    alternative_names: "amp4ads"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#a4a-format-rules"
-}
-tags: {  # AMP4EMAIL
   html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "HTML"
-  spec_name: "html ⚡4email for top-level html"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
-  attrs: {
-    name: "⚡4email"
-    alternative_names: "amp4email"
-    mandatory: true
-    value: ""
-  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
 # 4.2 Document metadata
 # 4.2.1 The head element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "HEAD"
   mandatory: true
   mandatory_parent: "HTML"
@@ -118,6 +120,10 @@ tags: {
 }
 # 4.2.2 The title element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TITLE"
   spec_name: "title"
   attrs: { name: "[text]" }
@@ -126,7 +132,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "BASE"
   unique: true
   mandatory_parent: "HEAD"
@@ -139,7 +145,9 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex_casei: "(_blank|_self|_top)"
+    value_casei: "_blank"
+    value_casei: "_self"
+    value_casei: "_top"
   }
 }
 # Disallowed.
@@ -158,7 +166,7 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel="
   disallowed_ancestor: "TEMPLATE"
@@ -188,13 +196,17 @@ tags: {
         "stylesheet|"  # Handled separately below, has specific requirements.
         "subresource|"
         ")(\\s|$)"
+    # It is worth noting that user-authored tags for dns-prefectch, preconnect,
+    # prefetch, and prerender will be disabled by the transformations applied
+    # in the AMP Cache. Therefore, these hints will only be used on publisher
+    # origins, not on the AMP Cache.
   }
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=canonical"
   mandatory_parent: "HEAD"
@@ -204,9 +216,8 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -231,8 +242,7 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -248,7 +258,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=preload"
   disallowed_ancestor: "TEMPLATE"
@@ -267,11 +277,13 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attrs: { name: "async" }
+  attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: {
     name: "href"
     mandatory: true
@@ -285,10 +297,12 @@ tags: {
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://use\\.fontawesome\\.com/releases/"
-                 "v([0-9]+\\.?)+/css/(all|brands|solids|fontawesome)\\.css|"
+                 "https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
+                 "/css/(all|brands|solid|regular|light|fontawesome)\\.css|"
+                 "https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z]+\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
+  attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: { name: "media" }
   attrs: {
     name: "rel"
@@ -300,16 +314,13 @@ tags: {
     name: "type"
     value_casei: "text/css"
   }
-  # SRI attributes (https://www.w3.org/TR/SRI/)
-  attrs: { name: "crossorigin" }
-  attrs: { name: "integrity" }
   spec_url: "https://www.ampproject.org/docs/reference/spec#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
   attrs: {
@@ -329,7 +340,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop="
   attrs: {
@@ -347,7 +358,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link property="
   attrs: {
@@ -364,6 +375,10 @@ tags: {
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta charset=utf-8"
   mandatory: true
@@ -380,7 +395,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=viewport"
   mandatory: true
@@ -393,7 +408,7 @@ tags: {
       properties: { name: "width" mandatory: true value: "device-width" }
       properties: { name: "height" }
       properties: { name: "initial-scale" }
-      properties: { name: "minimum-scale" mandatory: true value_double: 1.0 }
+      properties: { name: "minimum-scale" }
       properties: { name: "maximum-scale" }
       properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
@@ -413,16 +428,10 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
   mandatory_ancestor: "HEAD"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value_casei: "x-ua-compatible"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
   attrs: {
     name: "content"
     mandatory: true
@@ -430,6 +439,12 @@ tags: {
       properties: { name: "ie" value: "edge" }
       properties: { name: "chrome" value: "1" }
     }
+  }
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value_casei: "x-ua-compatible"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -442,16 +457,17 @@ tags: {
   mandatory_parent: "HEAD"
   satisfies: "amp-app-banner data source"
   attrs: {
+    name: "content"
+    mandatory: true
+    value_regex: ".*app-id=.*"
+  }
+  attrs: {
     name: "name"
     value_casei: "apple-itunes-app"
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_regex: ".*app-id=.*"
-  }
+
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
@@ -463,14 +479,14 @@ tags: {
   spec_name: "meta name=amp-experiments-opt-in"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiments-opt-in"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-3p-iframe-src
@@ -480,19 +496,38 @@ tags: {
   spec_name: "meta name=amp-3p-iframe-src"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-3p-iframe-src"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+}
+# AMP metadata, name=amp-consent-blocking
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-consent-blocking"
+  mandatory_parent: "HEAD"
+  satisfies: "meta name=amp-consent-blocking"
+  unique: true
   attrs: {
     name: "content"
     mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-    }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-consent-blocking"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
 }
 # AMP metadata, name=amp-experiment-token
 # Related to AMP Origin Experiments
@@ -502,14 +537,14 @@ tags: {
   spec_name: "meta name=amp-experiment-token"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
@@ -520,14 +555,14 @@ tags: {
   spec_name: "meta name=amp-link-variable-allowed-origin"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-link-variable-allowed-origin"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-google-client-id-api
@@ -537,14 +572,14 @@ tags: {
   spec_name: "meta name=amp-google-clientid-id-api"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-google-client-id-api"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-ad-doubleclick-sra
@@ -569,22 +604,25 @@ tags: {
   spec_name: "meta name=amp4ads-id"
   mandatory_parent: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp4ads-id"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name= and content="
+  attrs: { name: "content" }
+  attrs: { name: "itemprop" }  # itemprop is non-standard, but commonly seen.
   # The validator accepts any name="..." attribute values except
   # for a few specific name values which have more specific rules above or
   # are altogether disallowed.
@@ -599,10 +637,7 @@ tags: {
         "viewport"
         ")(\\s|$)"
   }
-  attrs: { name: "content" }
-  # itemprop / property is non-standard, but commonly seen.
-  attrs: { name: "itemprop" }
-  attrs: { name: "property" }
+  attrs: { name: "property" }  # property is non-standard, but commonly seen.
   # scheme is used by Dublin Core, see issue #13993
   attrs: { name: "scheme" }
 }
@@ -611,20 +646,20 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "text/html; charset=utf-8"
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-type"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_casei: "text/html; charset=utf-8"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -632,19 +667,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=content-language"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-language"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -653,19 +688,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=pics-label"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "pics-label"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -674,19 +709,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=imagetoolbar"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "imagetoolbar"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -695,20 +730,20 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Style-Type"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "text/css"
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-style-type"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_casei: "text/css"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -717,20 +752,20 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Script-Type"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "text/javascript"
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-script-type"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_casei: "text/javascript"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -738,19 +773,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=origin-trial"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "origin-trial"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -759,19 +794,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=resource-type"
   mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
   attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "resource-type"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -783,15 +818,16 @@ tags: {
   spec_name: "meta http-equiv=x-dns-prefetch-control"
   mandatory_ancestor: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+    value_casei: "off"
+    value_casei: "on"
+  }
+  attrs: {
     name: "http-equiv"
     mandatory: true
     value_casei: "x-dns-prefetch-control"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_regex_casei: "(off|on)"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -804,34 +840,34 @@ tags: {
   spec_name: "meta name=amp-ad-enable-refresh"
   mandatory_ancestor: "HEAD"
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-ad-enable-refresh"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-to-amp-navigation
 # Enables AMP-to-AMP navigation
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=amp-to-amp-navigation"
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-to-amp-navigation"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-cta-type
@@ -843,14 +879,14 @@ tags: {
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-cta-type"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
   }
 }
 # AMP metadata, name=amp-cta-url
@@ -862,25 +898,47 @@ tags: {
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
     name: "name"
     mandatory: true
     value_casei: "amp-cta-url"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+}
+# AMP metadata, name=amp-cta-landing-page-type
+# Specifies the Single Page Story Ad landing page type
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-landing-page-type"
+  mandatory_parent: "HEAD"
+  unique: true
   attrs: {
     name: "content"
     mandatory: true
+    value_casei: "amp"
+    value_casei: "nonamp"
+    value_casei: "story"
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-landing-page-type"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
 }
-
-
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  disabled_by: "transformed"
+  named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -915,6 +973,10 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_RULES
       }
       at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
         name: 'supports'
         type: PARSE_AS_RULES
       }
@@ -923,18 +985,102 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "!important"
+      error_message: "CSS !important"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
+}
+# For transformed AMP non-data URLs are not counted against the total byte
+# limit for <style amp-custom>. This is done by setting url_bytes_included
+# to false for CdataSpec below.
+tags: {  # Special custom 'author' spreadsheet for transformed AMP
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (transformed)"
+  enabled_by: "transformed"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: 50000
+    url_bytes_included: false
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
+        allow_empty: true
+      }
+      font_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
     }
@@ -991,6 +1137,18 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: false
+          type: 'all'
+          type: 'print'
+          type: 'screen'
+          type: 'speech'
+          feature: 'width'
+          feature: 'height'
+          feature: 'aspect-ratio'
+          feature: 'orientation'
+          feature: 'resolution'
+        }
       }
       at_rule_spec: {
         name: 'supports'
@@ -1001,18 +1159,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
       validate_amp4ads: true
@@ -1063,157 +1219,28 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
       }
       at_rule_spec: {
         name: '$DEFAULT'  # matches if none of the above match
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
+        protocol: "https"
       }
-      # Allowed CSS properties in AMP4Email.
-      allowed_declarations: "azimuth"
-      allowed_declarations: "background"
-      allowed_declarations: "background-blend-mode"
-      allowed_declarations: "background-clip"
-      allowed_declarations: "background-color"
-      allowed_declarations: "background-image"
-      allowed_declarations: "background-origin"
-      allowed_declarations: "background-position"
-      allowed_declarations: "background-repeat"
-      allowed_declarations: "background-size"
-      allowed_declarations: "border"
-      allowed_declarations: "border-bottom"
-      allowed_declarations: "border-bottom-color"
-      allowed_declarations: "border-bottom-left-radius"
-      allowed_declarations: "border-bottom-right-radius"
-      allowed_declarations: "border-bottom-style"
-      allowed_declarations: "border-bottom-width"
-      allowed_declarations: "border-collapse"
-      allowed_declarations: "border-color"
-      allowed_declarations: "border-left"
-      allowed_declarations: "border-left-color"
-      allowed_declarations: "border-left-style"
-      allowed_declarations: "border-left-width"
-      allowed_declarations: "border-radius"
-      allowed_declarations: "border-right"
-      allowed_declarations: "border-right-color"
-      allowed_declarations: "border-right-style"
-      allowed_declarations: "border-right-width"
-      allowed_declarations: "border-spacing"
-      allowed_declarations: "border-style"
-      allowed_declarations: "border-top"
-      allowed_declarations: "border-top-color"
-      allowed_declarations: "border-top-left-radius"
-      allowed_declarations: "border-top-right-radius"
-      allowed_declarations: "border-top-style"
-      allowed_declarations: "border-top-width"
-      allowed_declarations: "border-width"
-      allowed_declarations: "box-sizing"
-      allowed_declarations: "break-after"
-      allowed_declarations: "break-before"
-      allowed_declarations: "break-inside"
-      allowed_declarations: "caption-side"
-      allowed_declarations: "clear"
-      allowed_declarations: "color"
-      allowed_declarations: "column-count"
-      allowed_declarations: "column-fill"
-      allowed_declarations: "column-gap"
-      allowed_declarations: "column-rule"
-      allowed_declarations: "column-rule-color"
-      allowed_declarations: "column-rule-style"
-      allowed_declarations: "column-rule-width"
-      allowed_declarations: "column-span"
-      allowed_declarations: "column-width"
-      allowed_declarations: "columns"
-      allowed_declarations: "direction"
-      allowed_declarations: "display"
-      allowed_declarations: "elevation"
-      allowed_declarations: "empty-cells"
-      allowed_declarations: "float"
-      allowed_declarations: "font"
-      allowed_declarations: "font-family"
-      allowed_declarations: "font-feature-settings"
-      allowed_declarations: "font-kerning"
-      allowed_declarations: "font-size"
-      allowed_declarations: "font-size-adjust"
-      allowed_declarations: "font-stretch"
-      allowed_declarations: "font-style"
-      allowed_declarations: "font-synthesis"
-      allowed_declarations: "font-variant"
-      allowed_declarations: "font-variant-alternates"
-      allowed_declarations: "font-variant-caps"
-      allowed_declarations: "font-variant-east-asian"
-      allowed_declarations: "font-variant-ligatures"
-      allowed_declarations: "font-variant-numeric"
-      allowed_declarations: "font-weight"
-      allowed_declarations: "height"
-      allowed_declarations: "image-orientation"
-      allowed_declarations: "image-resolution"
-      allowed_declarations: "isolation"
-      allowed_declarations: "letter-spacing"
-      allowed_declarations: "line-height"
-      allowed_declarations: "list-style"
-      allowed_declarations: "list-style-position"
-      allowed_declarations: "list-style-type"
-      allowed_declarations: "margin"
-      allowed_declarations: "margin-bottom"
-      allowed_declarations: "margin-left"
-      allowed_declarations: "margin-right"
-      allowed_declarations: "margin-top"
-      allowed_declarations: "max-height"
-      allowed_declarations: "max-width"
-      allowed_declarations: "min-height"
-      allowed_declarations: "min-width"
-      allowed_declarations: "mix-blend-mode"
-      allowed_declarations: "object-fit"
-      allowed_declarations: "object-position"
-      allowed_declarations: "opacity"
-      allowed_declarations: "outline"
-      allowed_declarations: "outline-color"
-      allowed_declarations: "outline-style"
-      allowed_declarations: "outline-width"
-      allowed_declarations: "overflow"
-      allowed_declarations: "padding"
-      allowed_declarations: "padding-bottom"
-      allowed_declarations: "padding-left"
-      allowed_declarations: "padding-right"
-      allowed_declarations: "padding-top"
-      allowed_declarations: "pause"
-      allowed_declarations: "pause-after"
-      allowed_declarations: "pause-before"
-      allowed_declarations: "pitch"
-      allowed_declarations: "pitch-range"
-      allowed_declarations: "quotes"
-      allowed_declarations: "richness"
-      allowed_declarations: "speak"
-      allowed_declarations: "speak-header"
-      allowed_declarations: "speak-numeral"
-      allowed_declarations: "speak-punctuation"
-      allowed_declarations: "speech-rate"
-      allowed_declarations: "stress"
-      allowed_declarations: "table-layout"
-      allowed_declarations: "text-align"
-      allowed_declarations: "text-combine-upright"
-      allowed_declarations: "text-decoration"
-      allowed_declarations: "text-decoration-color"
-      allowed_declarations: "text-decoration-line"
-      allowed_declarations: "text-decoration-skip"
-      allowed_declarations: "text-decoration-style"
-      allowed_declarations: "text-emphasis"
-      allowed_declarations: "text-emphasis-color"
-      allowed_declarations: "text-emphasis-style"
-      allowed_declarations: "text-indent"
-      allowed_declarations: "text-orientation"
-      allowed_declarations: "text-overflow"
-      allowed_declarations: "text-transform"
-      allowed_declarations: "text-underline-position"
-      allowed_declarations: "unicode-bidi"
-      allowed_declarations: "vertical-align"
-      allowed_declarations: "voice-family"
-      allowed_declarations: "width"
-      allowed_declarations: "word-spacing"
-      allowed_declarations: "writing-mode"
     }
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -1232,49 +1259,15 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
 }
-
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
-  tag_name: "STYLE"
-  spec_name: "head > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "HEAD"
-  deprecation: "head > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata: {
-    cdata_regex: "body ?{opacity: ?0}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-}
-tags: {
-  html_format: AMP
-  tag_name: "STYLE"
-  spec_name: "noscript > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "NOSCRIPT"
-  mandatory_ancestor: "HEAD"
-  deprecation: "noscript > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata {
-    cdata_regex: "body ?{opacity: ?1}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-}
-tags: {
-  html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
-  satisfies: "head > style[amp-boilerplate]"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
+  disabled_by: "transformed"
+  mandatory: true
   unique: true
   mandatory_parent: "HEAD"
-  requires: "noscript > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -1285,7 +1278,29 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate] (transformed)"
+  enabled_by: "transformed"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
@@ -1307,7 +1322,7 @@ tags: {
     # This regex allows arbitrary whitespace around the body statement, but
     # not inside it. This is a compromise to keep things simple, but allow
     # pretty printing tools some latitude.
-    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#boilerplate"
 }
@@ -1328,21 +1343,20 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
-  satisfies: "noscript > style[amp-boilerplate]"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
+  disabled_by: "transformed"
+  mandatory: true
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
-  requires: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -1351,7 +1365,28 @@ tags: {
   }
   attrs: { name: "nonce" }
   cdata {
-    cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate] (transformed)"
+  enabled_by: "transformed"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  cdata {
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
@@ -1359,7 +1394,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style[amp-keyframes]"
   unique: true
@@ -1392,18 +1427,43 @@ tags: {
         type: PARSE_AS_ERROR
       }
       validate_keyframes: true
-      allowed_declarations: "animation-timing-function"
-      allowed_declarations: "offset-distance"
-      allowed_declarations: "opacity"
-      allowed_declarations: "transform"
-      allowed_declarations: "visibility"
+      declaration: "animation-timing-function"
+      declaration: "offset-distance"
+      declaration: "opacity"
+      declaration: "transform"
+      declaration: "visibility"
     }
   }
+}
+tags: {
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style[amp-runtime] (transformed)"
+  enabled_by: "transformed"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-runtime"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-version"
+    mandatory: true
+    value_regex: "^\\d{15}|latest$"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
 }
 
 # 4.3 Sections
 # 4.3.1 The body element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BODY"
   mandatory: true
   unique: true
@@ -1412,71 +1472,135 @@ tags: {
 }
 # 4.3.2 The article element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "ARTICLE"
 }
 # 4.3.3 The section element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SECTION"
   disallowed_ancestor: "AMP-ACCORDION"
 }
 # 4.3.4 The nav element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "NAV"
 }
 # 4.3.5 The aside element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "ASIDE"
 }
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H1"
   attrs: { name: "align" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H2"
   attrs: { name: "align" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H3"
   attrs: { name: "align" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H4"
   attrs: { name: "align" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H5"
   attrs: { name: "align" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "H6"
   attrs: { name: "align" }
 }
 # 4.3 7 The header element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "HEADER"
 }
 # 4.3 7 The footer element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "FOOTER"
 }
 # 4.3 7 The address element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "ADDRESS"
 }
 
 # 4.4 Grouping Content
 # 4.4.1 The p element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "P"
   attrs: { name: "align" }
 }
 # 4.4.2 The hr element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "HR"
 }
 # 4.4.3 The pre element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "PRE"
 }
 # 4.4.4 The blockquote element
@@ -1485,21 +1609,28 @@ attr_lists: {
   attrs: {
     name: "cite"
     value_url: {
+      protocol: "http"
+      protocol: "https"
       allow_empty: true
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
 }
 # 4.4.5 The ol element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "OL"
   attrs: {
     name: "reversed"
@@ -1516,10 +1647,18 @@ tags: {
 }
 # 4.4.6 The ul element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "UL"
 }
 # 4.4.7 The li element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "LI"
   attrs: {
     name: "value"
@@ -1528,31 +1667,59 @@ tags: {
 }
 # 4.4.8 The dl element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DL"
 }
 # 4.4.9 The dt element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DT"
 }
 # 4.4.10 The dd element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DD"
 }
 # 4.4.11 The figure element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "FIGURE"
 }
 # 4.4.12 The figcaption element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "FIGCAPTION"
 }
 # 4.4.13 The div element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DIV"
   attrs: { name: "align" }
 }
 # 4.4.14 The main element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "MAIN"
 }
 
@@ -1561,43 +1728,50 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "A"
+  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "download" }
   attrs: {
     name: "href"
     value_url: {
-      allow_empty: true
-      allow_relative: true
-      allowed_protocol: "ftp"
-      allowed_protocol: "geo"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
-      allowed_protocol: "maps"
+      protocol: "ftp"
+      protocol: "geo"
+      protocol: "http"
+      protocol: "https"
+      protocol: "mailto"
+      protocol: "maps"
       # Whitelisting additional commonly observed third party
-      # protocols which should be safe
+      # protocols which should be safe.
+      # BiP Messenger
+      protocol: "bip"
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
-      allowed_protocol: "bbmi"
-      allowed_protocol: "fb-messenger"
-      allowed_protocol: "intent"
+      protocol: "bbmi"
+      protocol: "fb-me"
+      protocol: "fb-messenger"
+      protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
-      allowed_protocol: "line"
-      allowed_protocol: "skype"
-      allowed_protocol: "sms"
-      allowed_protocol: "snapchat"
-      allowed_protocol: "tel"
-      allowed_protocol: "tg"
-      allowed_protocol: "threema"
-      allowed_protocol: "twitter"
-      allowed_protocol: "viber"
-      allowed_protocol: "webcal"
-      allowed_protocol: "web+mastodon"  # See GitHub issue #14793
-      allowed_protocol: "whatsapp"
+      protocol: "line"
+      protocol: "skype"
+      protocol: "sms"
+      protocol: "snapchat"
+      protocol: "tel"
+      protocol: "tg"
+      protocol: "threema"
+      protocol: "twitter"
+      protocol: "viber"
+      protocol: "webcal"
+      protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "wh"
+      protocol: "whatsapp"
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "hreflang" }
+  attrs: { name: "media" }
+  attrs: { name: "name" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "referrerpolicy" }
   attrs: {
     name: "rel"
@@ -1637,31 +1811,32 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "(_blank|_self|_top)"
+    value: "_blank"
+    value: "_self"
+    value: "_top"
   }
-  attrs: { name: "download" }
-  attrs: { name: "media" }
-  attrs: { name: "type" value_casei: "text/html" }
-  # These are not valid html5 but are commonly used and are supported in all
-  # major browsers.
-  attrs: { name: "border" }
-  attrs: { name: "name" }
+  attrs: {
+    name: "type"
+    value_casei: "text/html"
+  }
   # <amp-bind>
   attrs: { name: "[href]" }
   spec_url: "https://www.ampproject.org/docs/reference/spec#links"
 }
 # AMP4EMAIL restricts the use of mustache delimiters in href. The only allowed
-# protocols for href are https and mailto. Relative urls are disallowed.
+# protocols for href are http, https and mailto. Relative urls are disallowed.
 tags: {
   html_format: AMP4EMAIL
   tag_name: "A"
   spec_name: "A (AMP4EMAIL)"
+  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "href"
     value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "mailto"
       allow_relative: false
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
     # appear at the beginnig of the attribute's value. Likewise closing doubly
@@ -1669,7 +1844,7 @@ tags: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "(__amp_source_origin|"
+    blacklisted_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -1678,9 +1853,12 @@ tags: {
         "{{$|"    # Also caught by the requirements on balanced delimiters.
         "{{#|"    # Section delimiters are disallowed.
         "{{/|"    # Section delimiters are disallowed.
-        "{{\\^)"  # Section delimiters are disallowed.
+        "{{\\^"   # Section delimiters are disallowed.
   }
   attrs: { name: "hreflang" }
+  # TODO(gregable): Specify the set of allowed media queries.
+  attrs: { name: "media" }
+  attrs: { name: "name" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "role"
     implicit: true
@@ -1691,56 +1869,93 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "_blank"
+    value: "_blank"
   }
-  # TODO(gregable): Specify the set of allowed media queries.
-  attrs: { name: "media" }
-  attrs: { name: "type" value_casei: "text/html" }
-  # These are not valid html5 but are commonly used and are supported in all
-  # major browsers.
-  attrs: { name: "border" }
-  attrs: { name: "name" }
+  attrs: {
+    name: "type"
+    value_casei: "text/html"
+  }
 }
 
 # 4.5.2 The em element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "EM"
 }
 # 4.5.3 The strong element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "STRONG"
 }
 # 4.5.4 The small element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SMALL"
 }
 # 4.5.5 The s element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "S"
 }
 # 4.5.6 The cite element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "CITE"
 }
 # 4.5.7 The q element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "Q"
   attr_lists: "cite-attr"
 }
 # 4.5.8 The dfn element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DFN"
 }
 # 4.5.9 The abbr element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "ABBR"
 }
 # 4.5.10 The data element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DATA"
 }
 # 4.5.11 The time element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TIME"
   attrs: {
     name: "datetime"
@@ -1748,88 +1963,172 @@ tags: {
 }
 # 4.5.12 The code element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "CODE"
 }
 # 4.5.13 The var element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "VAR"
 }
 # 4.5.14 The samp element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SAMP"
 }
 # 4.5.15 The kbd element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "KBD"
 }
 # 4.5.16 The sub and sup elements
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SUB"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SUP"
 }
 # 4.5.17 The i element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "I"
 }
 # 4.5.18 The b element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "B"
 }
 # 4.5.19 The u element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "U"
 }
 # 4.5.20 The mark element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "MARK"
 }
 # 4.5.21 The ruby element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "RUBY"
 }
 # 4.5.22 The rb element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "RB"
 }
 # 4.5.23 The rt element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "RT"
 }
 # 4.5.24 The rtc element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "RTC"
 }
 # 4.5.25 The rp element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "RP"
 }
 # 4.5.26 The bdi element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BDI"
 }
 # 4.5.27 The bdo element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BDO"
   attrs: { name: "dir" }
 }
 # 4.5.28 The span element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SPAN"
 }
 # 4.5.29 The br element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BR"
 }
 # 4.5.30 The wbr element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "WBR"
 }
 
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "INS"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
@@ -1840,6 +2139,10 @@ tags: {
 }
 # 4.6.2 The del element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DEL"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
@@ -1860,13 +2163,21 @@ tags: {
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
+  attrs: {
+    name: "decoding"
+    value: "async"
+    value: "auto"
+    value: "sync"
+  }
+  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "ismap" }
   attrs: {
     name: "longdesc"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -1875,18 +2186,14 @@ tags: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  # These are not supported in html5, but are widely supported by browsers
-  # and are commonly used. Since these are only used in noscript contexts,
-  # we allow them.
-  attrs: { name: "border" }
-  attrs: { name: "height" }
-  attrs: { name: "width" }
+  attrs: { name: "sizes" }
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.7.2 The iframe element
 tags: {
@@ -1896,33 +2203,32 @@ tags: {
   mandatory_ancestor_suggested_alternative: "AMP-IFRAME"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   attrs: {
-    name: "name"
-  }
-  attrs: {
     name: "frameborder"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
+  attrs: { name: "height" }
+  attrs: { name: "name" }
   attrs: { name: "referrerpolicy" }
   attrs: {
     name: "resizable"
     value: ""
   }
   attrs: {
-    name: "height"
-  }
-  attrs: {
     name: "sandbox"
   }
   attrs: {
     name: "scrolling"
-    value_regex: "auto|yes|no"
+    value: "auto"
+    value: "yes"
+    value: "no"
   }
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -1957,8 +2263,8 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -1981,31 +2287,59 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
+# 4.7.7 The picture element
+# Only allowed in noscript tags which support img tags.
+tags: {
+  html_format: AMP
+  tag_name: "PICTURE"
+  mandatory_parent: "NOSCRIPT"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
 # 4.7.8 The source element
 tags: {
   html_format: AMP
+  tag_name: "SOURCE"
+  spec_name: "picture > source"
+  mandatory_parent: "PICTURE"  # PICTURE is only allowed inside NOSCRIPT
+  attrs: { name: "media" }
+  attrs: { name: "sizes" }
+  attrs: {
+    name: "srcset"
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
+tags: {
+  html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-video > source"
   mandatory_parent: "AMP-VIDEO"
+  attrs: { name: "media" }
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "media" }
   attrs: { name: "type" }
   # <amp-bind>
   attrs: { name: "[src]" }
@@ -2015,19 +2349,19 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-audio > source"
   mandatory_parent: "AMP-AUDIO"
+  attrs: { name: "media" }
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "media" }
   attrs: { name: "type" }
   # <amp-bind>
   attrs: { name: "[src]" }
@@ -2037,15 +2371,16 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "audio > source"
   mandatory_parent: "AUDIO"
+  attrs: { name: "media" }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2054,21 +2389,21 @@ tags: {
     name: "type"
     mandatory: true
   }
-  attrs: { name: "media" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "video > source"
   mandatory_parent: "VIDEO"
+  attrs: { name: "media" }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2077,13 +2412,12 @@ tags: {
     name: "type"
     mandatory: true
   }
-  attrs: { name: "media" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-ima-video > source"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -2092,7 +2426,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2111,40 +2445,49 @@ tags: {
 attr_lists: {
   name: "track-attrs-no-subtitles"
   attrs: {
+    name: "default"
+    value: ""
+  }
+  attrs: {
+    name: "kind"
+    value: "captions"
+    value: "chapters"
+    value: "descriptions"
+    value: "metadata"
+  }
+  attrs: { name: "label" }
+  attrs: {
     name: "src"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "default" value: "" }
-  attrs: {
-    name: "kind"
-    value_regex: "(captions|descriptions|chapters|metadata)"
-  }
-  attrs: { name: "label" }
   attrs: { name: "srclang" }
 }
 attr_lists: {
   name: "track-attrs-subtitles"
   attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
+    name: "default"
+    value: ""
   }
-  attrs: { name: "default" value: "" }
   attrs: {
     name: "kind"
     mandatory: true
     value_casei: "subtitles"
   }
   attrs: { name: "label" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
   attrs: {
     name: "srclang"
     mandatory: true
@@ -2153,7 +2496,7 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "audio > track"
   mandatory_parent: "AUDIO"
@@ -2162,7 +2505,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "audio > track[kind=subtitles]"
   mandatory_parent: "AUDIO"
@@ -2171,7 +2514,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "video > track"
   mandatory_parent: "VIDEO"
@@ -2180,7 +2523,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "video > track[kind=subtitles]"
   mandatory_parent: "VIDEO"
@@ -2189,7 +2532,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
@@ -2202,7 +2545,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
@@ -2215,7 +2558,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
@@ -2228,7 +2571,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
@@ -2241,7 +2584,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-ima-video > track[kind=subtitles]"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -2302,6 +2645,7 @@ attr_lists: {
   attrs: { name: "filter" }
   attrs: { name: "flood-color" }
   attrs: { name: "flood-opacity" }
+  attrs: { name: "focusable" }
   attrs: { name: "font-family" }
   attrs: { name: "font-size" }
   attrs: { name: "font-size-adjust" }
@@ -2361,9 +2705,8 @@ attr_lists: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
   }
@@ -2379,6 +2722,283 @@ attr_lists: {
   attrs: {
     name: "style"
     blacklisted_value_regex: "!important"
+    # CSS proprities: https://www.w3schools.com/cssref/default.asp
+    # SVG specific properties: https://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
+    # Disallowed:
+    # css_declaration: { name: "@charset" }
+    # css_declaration: { name: "@font-face" }
+    # css_declaration: { name: "@font-feature-values" }
+    # css_declaration: { name: "@import" }
+    # css_declaration: { name: "@keyframes" }
+    # css_declaration: { name: "@media" }
+    # Allowed:
+    css_declaration: { name: "align-content" }
+    css_declaration: { name: "align-items" }
+    css_declaration: { name: "align-self" }
+    css_declaration: { name: "alignment-baseline" } # SVG
+    css_declaration: { name: "all" }
+    css_declaration: { name: "animation" }
+    css_declaration: { name: "animation-delay" }
+    css_declaration: { name: "animation-direction" }
+    css_declaration: { name: "animation-duration" }
+    css_declaration: { name: "animation-fill-mode" }
+    css_declaration: { name: "animation-iteration-count" }
+    css_declaration: { name: "animation-name" }
+    css_declaration: { name: "animation-play-state" }
+    css_declaration: { name: "animation-timing-function" }
+    css_declaration: { name: "backface-visibility" }
+    css_declaration: { name: "background" }
+    css_declaration: { name: "background-attachment" }
+    css_declaration: { name: "background-blend-mode" }
+    css_declaration: { name: "background-clip" }
+    css_declaration: { name: "background-color" }
+    css_declaration: { name: "background-image" }
+    css_declaration: { name: "background-origin" }
+    css_declaration: { name: "background-position" }
+    css_declaration: { name: "background-repeat" }
+    css_declaration: { name: "background-size" }
+    css_declaration: { name: "baseline-shift" } # SVG
+    css_declaration: { name: "border" }
+    css_declaration: { name: "border-bottom" }
+    css_declaration: { name: "border-bottom-color" }
+    css_declaration: { name: "border-bottom-left-radius" }
+    css_declaration: { name: "border-bottom-right-radius" }
+    css_declaration: { name: "border-bottom-style" }
+    css_declaration: { name: "border-bottom-width" }
+    css_declaration: { name: "border-collapse" }
+    css_declaration: { name: "border-color" }
+    css_declaration: { name: "border-image" }
+    css_declaration: { name: "border-image-outset" }
+    css_declaration: { name: "border-image-repeat" }
+    css_declaration: { name: "border-image-slice" }
+    css_declaration: { name: "border-image-source" }
+    css_declaration: { name: "border-image-width" }
+    css_declaration: { name: "border-left" }
+    css_declaration: { name: "border-left-color" }
+    css_declaration: { name: "border-left-style" }
+    css_declaration: { name: "border-left-width" }
+    css_declaration: { name: "border-radius" }
+    css_declaration: { name: "border-right" }
+    css_declaration: { name: "border-right-color" }
+    css_declaration: { name: "border-right-style" }
+    css_declaration: { name: "border-right-width" }
+    css_declaration: { name: "border-spacing" }
+    css_declaration: { name: "border-style" }
+    css_declaration: { name: "border-top" }
+    css_declaration: { name: "border-top-color" }
+    css_declaration: { name: "border-top-left-radius" }
+    css_declaration: { name: "border-top-right-radius" }
+    css_declaration: { name: "border-top-style" }
+    css_declaration: { name: "border-top-width" }
+    css_declaration: { name: "border-width" }
+    css_declaration: { name: "bottom" }
+    css_declaration: { name: "box-decoration-break" }
+    css_declaration: { name: "box-shadow" }
+    css_declaration: { name: "box-sizing" }
+    css_declaration: { name: "break-after" }
+    css_declaration: { name: "break-before" }
+    css_declaration: { name: "break-inside" }
+    css_declaration: { name: "caption-side" }
+    css_declaration: { name: "caret-color" }
+    css_declaration: { name: "clear" }
+    css_declaration: { name: "clip" }
+    css_declaration: { name: "clip-path" } # SVG
+    css_declaration: { name: "clip-rule" } # SVG
+    css_declaration: { name: "color" }
+    css_declaration: { name: "color-interpolation" } # SVG
+    css_declaration: { name: "color-interpolation-filters" } # SVG
+    css_declaration: { name: "color-profile" } # SVG
+    css_declaration: { name: "color-rendering" } # SVG
+    css_declaration: { name: "column-count" }
+    css_declaration: { name: "column-fill" }
+    css_declaration: { name: "column-gap" }
+    css_declaration: { name: "column-rule" }
+    css_declaration: { name: "column-rule-color" }
+    css_declaration: { name: "column-rule-style" }
+    css_declaration: { name: "column-rule-width" }
+    css_declaration: { name: "column-span" }
+    css_declaration: { name: "column-width" }
+    css_declaration: { name: "columns" }
+    css_declaration: { name: "content" }
+    css_declaration: { name: "counter-increment" }
+    css_declaration: { name: "counter-reset" }
+    css_declaration: { name: "cursor" }
+    css_declaration: { name: "direction" }
+    css_declaration: { name: "display" }
+    css_declaration: { name: "dominant-baseline" } # SVG
+    css_declaration: { name: "empty-cells" }
+    css_declaration: { name: "enable-background" } # SVG
+    css_declaration: { name: "fill" } # SVG
+    css_declaration: { name: "fill-opacity" } # SVG
+    css_declaration: { name: "fill-rule" } # SVG
+    css_declaration: { name: "filter" }
+    css_declaration: { name: "flex" }
+    css_declaration: { name: "flex-basis" }
+    css_declaration: { name: "flex-direction" }
+    css_declaration: { name: "flex-flow" }
+    css_declaration: { name: "flex-grow" }
+    css_declaration: { name: "flex-shrink" }
+    css_declaration: { name: "flex-wrap" }
+    css_declaration: { name: "float" }
+    css_declaration: { name: "flood-color" } # SVG
+    css_declaration: { name: "flood-opacity" } # SVG
+    css_declaration: { name: "font" }
+    css_declaration: { name: "font-family" }
+    css_declaration: { name: "font-feature-settings" }
+    css_declaration: { name: "font-kerning" }
+    css_declaration: { name: "font-language-override" }
+    css_declaration: { name: "font-size" }
+    css_declaration: { name: "font-size-adjust" }
+    css_declaration: { name: "font-stretch" }
+    css_declaration: { name: "font-style" }
+    css_declaration: { name: "font-synthesis" }
+    css_declaration: { name: "font-variant" }
+    css_declaration: { name: "font-variant-alternates" }
+    css_declaration: { name: "font-variant-caps" }
+    css_declaration: { name: "font-variant-east-asian" }
+    css_declaration: { name: "font-variant-ligatures" }
+    css_declaration: { name: "font-variant-numeric" }
+    css_declaration: { name: "font-variant-position" }
+    css_declaration: { name: "font-weight" }
+    css_declaration: { name: "glyph-orientation-horizontal" } # SVG
+    css_declaration: { name: "glyph-orientation-vertical" } # SVG
+    css_declaration: { name: "grid" }
+    css_declaration: { name: "grid-area" }
+    css_declaration: { name: "grid-auto-columns" }
+    css_declaration: { name: "grid-auto-flow" }
+    css_declaration: { name: "grid-auto-rows" }
+    css_declaration: { name: "grid-column" }
+    css_declaration: { name: "grid-column-end" }
+    css_declaration: { name: "grid-column-gap" }
+    css_declaration: { name: "grid-column-start" }
+    css_declaration: { name: "grid-gap" }
+    css_declaration: { name: "grid-row" }
+    css_declaration: { name: "grid-row-end" }
+    css_declaration: { name: "grid-row-gap" }
+    css_declaration: { name: "grid-row-start" }
+    css_declaration: { name: "grid-template" }
+    css_declaration: { name: "grid-template-areas" }
+    css_declaration: { name: "grid-template-columns" }
+    css_declaration: { name: "grid-template-rows" }
+    css_declaration: { name: "hanging-punctuation" }
+    css_declaration: { name: "height" }
+    css_declaration: { name: "hyphens" }
+    css_declaration: { name: "image-rendering" }
+    css_declaration: { name: "isolation" }
+    css_declaration: { name: "justify-content" }
+    css_declaration: { name: "kerning" } # SVG
+    css_declaration: { name: "left" }
+    css_declaration: { name: "letter-spacing" }
+    css_declaration: { name: "lighting-color" } # SVG
+    css_declaration: { name: "line-break" }
+    css_declaration: { name: "line-height" }
+    css_declaration: { name: "list-style" }
+    css_declaration: { name: "list-style-image" }
+    css_declaration: { name: "list-style-position" }
+    css_declaration: { name: "list-style-type" }
+    css_declaration: { name: "margin" }
+    css_declaration: { name: "margin-bottom" }
+    css_declaration: { name: "margin-left" }
+    css_declaration: { name: "margin-right" }
+    css_declaration: { name: "margin-top" }
+    css_declaration: { name: "marker" } # SVG
+    css_declaration: { name: "marker-end" } # SVG
+    css_declaration: { name: "marker-mid" } # SVG
+    css_declaration: { name: "marker-start" } # SVG
+    css_declaration: { name: "mask" } # SVG
+    css_declaration: { name: "max-height" }
+    css_declaration: { name: "max-width" }
+    css_declaration: { name: "min-height" }
+    css_declaration: { name: "min-width" }
+    css_declaration: { name: "mix-blend-mode" }
+    css_declaration: { name: "object-fit" }
+    css_declaration: { name: "object-position" }
+    css_declaration: { name: "opacity" }
+    css_declaration: { name: "order" }
+    css_declaration: { name: "orphans" }
+    css_declaration: { name: "outline" }
+    css_declaration: { name: "outline-color" }
+    css_declaration: { name: "outline-offset" }
+    css_declaration: { name: "outline-style" }
+    css_declaration: { name: "outline-width" }
+    css_declaration: { name: "overflow" }
+    css_declaration: { name: "overflow-wrap" }
+    css_declaration: { name: "overflow-x" }
+    css_declaration: { name: "overflow-y" }
+    css_declaration: { name: "padding" }
+    css_declaration: { name: "padding-bottom" }
+    css_declaration: { name: "padding-left" }
+    css_declaration: { name: "padding-right" }
+    css_declaration: { name: "padding-top" }
+    css_declaration: { name: "page-break-after" }
+    css_declaration: { name: "page-break-before" }
+    css_declaration: { name: "page-break-inside" }
+    css_declaration: { name: "perspective" }
+    css_declaration: { name: "perspective-origin" }
+    css_declaration: { name: "pointer-events" }
+    # CSS property `position` with values `fixed` and `sticky are not allowed.
+    # From https://www.w3schools.com/cssref/pr_class_position.asp
+    css_declaration: {
+      name: "position"
+      value_casei: "absolute"
+      value_casei: "inherit"
+      value_casei: "initial"
+      value_casei: "relative"
+      value_casei: "static"
+    }
+    css_declaration: { name: "quotes" }
+    css_declaration: { name: "resize" }
+    css_declaration: { name: "right" }
+    css_declaration: { name: "shape-rendering" } # SVG
+    css_declaration: { name: "stop-color" } # SVG
+    css_declaration: { name: "stop-opacity" } # SVG
+    css_declaration: { name: "stroke" } # SVG
+    css_declaration: { name: "stroke-dasharray" } # SVG
+    css_declaration: { name: "stroke-dashoffset" } # SVG
+    css_declaration: { name: "stroke-linecap" } # SVG
+    css_declaration: { name: "stroke-linejoin" } # SVG
+    css_declaration: { name: "stroke-miterlimit" } # SVG
+    css_declaration: { name: "stroke-opacity" } # SVG
+    css_declaration: { name: "stroke-width" } # SVG
+    css_declaration: { name: "tab-size" }
+    css_declaration: { name: "table-layout" }
+    css_declaration: { name: "text-align" }
+    css_declaration: { name: "text-align-last" }
+    css_declaration: { name: "text-anchor" } # SVG
+    css_declaration: { name: "text-combine-upright" }
+    css_declaration: { name: "text-decoration" }
+    css_declaration: { name: "text-decoration-color" }
+    css_declaration: { name: "text-decoration-line" }
+    css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-indent" }
+    css_declaration: { name: "text-justify" }
+    css_declaration: { name: "text-orientation" }
+    css_declaration: { name: "text-overflow" }
+    css_declaration: { name: "text-rendering" } # SVG
+    css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-transform" }
+    css_declaration: { name: "text-underline-position" }
+    css_declaration: { name: "top" }
+    css_declaration: { name: "transform" }
+    css_declaration: { name: "transform-origin" }
+    css_declaration: { name: "transform-style" }
+    css_declaration: { name: "transition" }
+    css_declaration: { name: "transition-delay" }
+    css_declaration: { name: "transition-duration" }
+    css_declaration: { name: "transition-property" }
+    css_declaration: { name: "transition-timing-function" }
+    css_declaration: { name: "unicode-bidi" }
+    css_declaration: { name: "user-select" }
+    css_declaration: { name: "vertical-align" }
+    css_declaration: { name: "visibility" }
+    css_declaration: { name: "white-space" }
+    css_declaration: { name: "widows" }
+    css_declaration: { name: "width" }
+    css_declaration: { name: "word-break" }
+    css_declaration: { name: "word-spacing" }
+    css_declaration: { name: "word-wrap" }
+    css_declaration: { name: "writing-mode" }
+    css_declaration: { name: "z-index" }
   }
 }
 
@@ -2386,21 +3006,21 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "G"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "GLYPH"
   mandatory_ancestor: "SVG"
   attrs: { name: "arabic-form" }
@@ -2409,18 +3029,18 @@ tags: {
   attrs: { name: "horiz-adv-x" }
   attrs: { name: "orientation" }
   attrs: { name: "unicode" }
+  attrs: { name: "vert-adv-y" }
   attrs: { name: "vert-origin-x" }
   attrs: { name: "vert-origin-y" }
-  attrs: { name: "vert-adv-y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "GLYPHREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2429,16 +3049,16 @@ tags: {
   attrs: { name: "glyphref" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "IMAGE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2447,8 +3067,6 @@ tags: {
   attrs: { name: "transform" }
   attrs: { name: "width" }
   attrs: { name: "x" }
-  attrs: { name: "y" }
-  # XLink Attributes:
   attrs: { name: "xlink:actuate" }
   attrs: { name: "xlink:arcrole" }
   attrs: {
@@ -2456,10 +3074,9 @@ tags: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
@@ -2469,48 +3086,48 @@ tags: {
   attrs: { name: "xlink:show" }
   attrs: { name: "xlink:title" }
   attrs: { name: "xlink:type" }
-
-  attr_lists: "svg-style-attr"
+  attrs: { name: "y" }
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "MARKER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "markerheight" }
   attrs: { name: "markerunits" }
   attrs: { name: "markerwidth" }
-  attrs: { name: "markerheight" }
   attrs: { name: "orient" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "refx" }
   attrs: { name: "refy" }
   attrs: { name: "transform" }
   attrs: { name: "viewbox" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "METADATA"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "PATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "d" }
@@ -2518,36 +3135,40 @@ tags: {
   attrs: { name: "pathlength" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SOLIDCOLOR"
   mandatory_ancestor: "SVG"
   attrs: { name: "solid-color" }
   attrs: { name: "solid-opacity" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SVG"
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
   attrs: { name: "preserveaspectratio" }
-  attrs: { name: "version" value_regex: "(1.0|1.1)" }
+  attrs: {
+    name: "version"
+    value: "1.0"
+    value: "1.1"
+  }
   attrs: { name: "viewbox" }
   attrs: { name: "width" }
   attrs: { name: "x" }
@@ -2556,40 +3177,41 @@ tags: {
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SWITCH"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "VIEW"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
   attrs: { name: "viewtarget" }
   attrs: { name: "zoomandpan" }
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Shapes
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "CIRCLE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2598,16 +3220,16 @@ tags: {
   attrs: { name: "r" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "ELLIPSE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2617,16 +3239,16 @@ tags: {
   attrs: { name: "ry" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2636,48 +3258,48 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y1" }
   attrs: { name: "y2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "POLYGON"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "POLYLINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "RECT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2689,17 +3311,17 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Text
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TEXT"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2712,83 +3334,83 @@ tags: {
   attrs: { name: "transform" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TEXTPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "method" }
   attrs: { name: "spacing" }
   attrs: { name: "startoffset" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TSPAN"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
   attrs: { name: "dy" }
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "rotate" }
   attrs: { name: "lengthadjust" }
+  attrs: { name: "rotate" }
   attrs: { name: "textlength" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Rendering
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "CLIPPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "clippathunits" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FILTER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2799,16 +3421,16 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "HKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2816,34 +3438,34 @@ tags: {
   attrs: { name: "k" }
   attrs: { name: "u1" }
   attrs: { name: "u2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LINEARGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "gradientunits" }
   attrs: { name: "gradienttransform" }
+  attrs: { name: "gradientunits" }
   attrs: { name: "spreadmethod" }
   attrs: { name: "x1" }
-  attrs: { name: "y1" }
   attrs: { name: "x2" }
+  attrs: { name: "y1" }
   attrs: { name: "y2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "MASK"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2853,39 +3475,39 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "PATTERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
-  attrs: { name: "patternunits" }
   attrs: { name: "patterncontentunits" }
   attrs: { name: "patterntransform" }
+  attrs: { name: "patternunits" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "RADIALGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2894,20 +3516,20 @@ tags: {
   attrs: { name: "fr" }
   attrs: { name: "fx" }
   attrs: { name: "fy" }
-  attrs: { name: "gradientunits" }
   attrs: { name: "gradienttransform" }
+  attrs: { name: "gradientunits" }
   attrs: { name: "r" }
   attrs: { name: "spreadmethod" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STOP"
   spec_name: "lineargradient > stop"
   mandatory_ancestor: "LINEARGRADIENT"
@@ -2920,7 +3542,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STOP"
   spec_name: "radialgradient > stop"
   mandatory_ancestor: "RADIALGRADIENT"
@@ -2933,7 +3555,7 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "VKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2941,43 +3563,43 @@ tags: {
   attrs: { name: "k" }
   attrs: { name: "u1" }
   attrs: { name: "u2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Special
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "DEFS"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SYMBOL"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "USE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2986,10 +3608,10 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -2997,22 +3619,22 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FECOLORMATRIX"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
   attrs: { name: "type" }
   attrs: { name: "values" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FECOMPOSITE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -3022,97 +3644,97 @@ tags: {
   attrs: { name: "k3" }
   attrs: { name: "k4" }
   attrs: { name: "operator" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FEFLOOD"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FEGAUSSIANBLUR"
   mandatory_ancestor: "SVG"
   attrs: { name: "edgemode" }
   attrs: { name: "in" }
   attrs: { name: "stddeviation" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FEMERGE"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FEMERGENODE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FEOFFSET"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
   attrs: { name: "dy" }
   attrs: { name: "in" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # ARIA
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "DESC"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TITLE"
   spec_name: "svg title"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 
@@ -3122,45 +3744,79 @@ tags: {
 # 4.9 Tabular data
 # 4.9.1 The table element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TABLE"
+  attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
+  attrs: {  # Not valid html5 but commonly used and supported.
+    name: "border"
+    value: "0"
+    value: "1"
+  }
+  attrs: { name: "cellpadding" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "cellspacing" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "sortable" }
-  # These attributes are not supported in HTML5, but are widely supported and
-  # commonly found.
-  attrs: { name: "align" }
-  attrs: { name: "border" value_regex: "0|1" }
-  attrs: { name: "bgcolor" }
-  attrs: { name: "cellpadding" }
-  attrs: { name: "cellspacing" }
-  attrs: { name: "width" }
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.9.2 The caption element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "CAPTION"
 }
 # 4.9.3 The colgroup element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "COLGROUP"
   attrs: { name: "span" }
 }
 # 4.9.4 The col element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "COL"
   attrs: { name: "span" }
 }
 # 4.9.5 The tbody element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TBODY"
 }
 # 4.9.6 The thead element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "THEAD"
 }
 # 4.9.7 The tfoot element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TFOOT"
 }
 # 4.9.8 The tr element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TR"
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
@@ -3171,34 +3827,38 @@ tags: {
 }
 # 4.9.9 The td element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TD"
+  attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
+  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "rowspan" }
-  # These attributes are not supported in HTML5, but are widely supported and
-  # commonly found.
-  attrs: { name: "align" }
-  attrs: { name: "bgcolor" }
-  attrs: { name: "height" }
-  attrs: { name: "valign" }
-  attrs: { name: "width" }
+  attrs: { name: "valign" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.9.10 The th element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TH"
   attrs: { name: "abbr" }
+  attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
+  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "rowspan" }
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
-  # These attributes are not supported in HTML5, but are widely supported and
-  # commonly found.
-  attrs: { name: "align" }
-  attrs: { name: "bgcolor" }
-  attrs: { name: "height" }
-  attrs: { name: "valign" }
-  attrs: { name: "width" }
+  attrs: { name: "valign" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 
 # 4.10 Forms
@@ -3208,7 +3868,7 @@ tags: {
 tags {  # <form method=GET ...>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "FORM"
   spec_name: "FORM [method=GET]"
   requires_extension: "amp-form"
@@ -3220,26 +3880,24 @@ tags {  # <form method=GET ...>
     name: "action"
     mandatory: true
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "action-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3253,13 +3911,13 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "target"
     mandatory: true
-    value_regex_casei: "(_blank|_top)"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3267,7 +3925,6 @@ tags {  # <form method=GET ...>
 tags {  # <form method=POST ...>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
   requires_extension: "amp-form"
@@ -3279,18 +3936,17 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3301,16 +3957,78 @@ tags {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
+  # The target attribute has no effect, and should not be in POST forms.
+  # However, in the past it was required, so disallowing it would break many
+  # pages. See: https://github.com/ampproject/amphtml/issues/5607
   attrs: {
     name: "target"
-    mandatory: true
-    value_regex_casei: "(_blank|_top)"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+}
+# ACTIONS <form method=POST ...> for POST identity token
+tags: {  # <form method=POST ...>
+  html_format: ACTIONS
+  tag_name: "FORM"
+  spec_name: "FORM [method=POST] (ACTIONS)"
+  requires_extension: "amp-form"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  attrs: { name: "accept" }
+  attrs: { name: "accept-charset" }
+  # For method=POST forms, we require `action-xhr` and disallow `action`.
+  attrs: {
+    name: "action-xhr"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin|"
+        "{{|}}"    # Mustache is disallowed in action-xhr.
+  }
+  attrs: { name: "autocomplete" }
+  attrs: {
+    name: "cross-origin"
+    value: "amp-viewer-auth-token-via-post"
+    trigger: {
+      also_requires_attr: "action-xhr"
+    }
+  }
+  attrs: {
+    name: "custom-validation-reporting"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
+  }
+  attrs: { name: "enctype" }
+  attrs: {
+    name: "method"
+    mandatory: true
+    value_casei: "post"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: { name: "name" }
+  attrs: { name: "novalidate" }
+  # The target attribute has no effect, and should not be in POST forms.
+  # However, in the past it was required, so disallowing it would break many
+  # pages. See: https://github.com/ampproject/amphtml/issues/5607
+  attrs: {
+    name: "target"
+    value_casei: "_blank"
+    value_casei: "_top"
+  }
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3329,18 +4047,18 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "action-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
-    blacklisted_value_regex: "(__amp_source_origin|"
-        "{{|}})"    # Mustache is disallowed in action-xhr.
+    blacklisted_value_regex: "__amp_source_origin|"
+        "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3351,14 +4069,6 @@ tags {  # <form method=GET ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3372,19 +4082,19 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
-    blacklisted_value_regex: "(__amp_source_origin|"
-        "{{|}})"    # Mustache is disallowed in action-xhr.
+    blacklisted_value_regex: "__amp_source_origin|"
+        "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3395,32 +4105,80 @@ tags {  # <form method=POST ...>
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
+}
+# Will add verify state template if requested by users
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "FORM DIV [verify-error]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
   attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
+    name: "verify-error"
+    mandatory: true
   }
 }
-
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submitting]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [verify-error][template]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "verify-error"
+    mandatory: true
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+  }
+}
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "FORM DIV [submitting]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submitting"
     mandatory: true
-    # Avoid triggering errors for non-form divs.
-    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
+  # AMP4EMAIL is omitted. There is additional latency in rendering A4E
+  # templates, which reduces the time available to render the template during
+  # the submitting state.
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submitting][template]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "submitting"
+    mandatory: true
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+  }
+}
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "FORM DIV [submit-success]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3428,9 +4186,13 @@ tags {
   }
 }
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-success][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3442,9 +4204,13 @@ tags {
   }
 }
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
@@ -3452,9 +4218,13 @@ tags {
   }
 }
 tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
@@ -3513,7 +4283,6 @@ attr_lists: {
   attrs: { name: "[size]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[step]" }
-  attrs: { name: "[type]" }
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
 }
@@ -3642,13 +4411,25 @@ attr_lists: {
 }
 # 4.10.4 The label element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "LABEL"
   attrs: { name: "for" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
-# 4.10.5 The input element
+# 4.10.5 The input element.
+# The input tag is also defined by extensions/amp-inputmask/validator-amp-inputmask.protoascii
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "INPUT"
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
@@ -3660,6 +4441,28 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
+  # Note that this amp-bind attribute is not available for the AMP4Email format
+  # thus we add this manually for the formats that should.
+  attrs: { name: "[type]" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [type=file]"
+   attrs: {
+    name: "no-verify"
+    value: ""
+  }
+  attrs: {
+    name: "type"
+    value_casei: "file"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "input-name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags: {
@@ -3677,8 +4480,30 @@ tags: {
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
+# amp-bind usage of [type] is not allowed in AMP4EMAIL
+tags: {
+  html_format: AMP4EMAIL
+  tag_name: "INPUT"
+  spec_name: "INPUT (AMP4EMAIL)"
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "input-name-attr"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+}
 # 4.10.6 The button element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "BUTTON"
   attrs: {
     name: "disabled"
@@ -3727,10 +4552,18 @@ tags: {
 }
 # 4.10.7 The select element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SELECT"
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: { name: "required" }
   attrs: { name: "size" }
   # <amp-bind>
@@ -3744,11 +4577,19 @@ tags: {
 }
 # 4.10.8 The datalist element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "DATALIST"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.9 The optgroup element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "OPTGROUP"
   mandatory_parent: "SELECT"
   attrs: { name: "disabled" }
@@ -3760,6 +4601,10 @@ tags: {
 }
 # 4.10.10 The option element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "OPTION"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
@@ -3774,6 +4619,10 @@ tags: {
 }
 # 4.10.11 The textarea element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "TEXTAREA"
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
@@ -3781,6 +4630,11 @@ tags: {
   attrs: { name: "disabled" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
+  attrs: { name: "pattern" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
@@ -3797,6 +4651,7 @@ tags: {
   attrs: { name: "[disabled]" }
   attrs: { name: "[maxlength]" }
   attrs: { name: "[minlength]" }
+  attrs: { name: "[pattern]" }
   attrs: { name: "[placeholder]" }
   attrs: { name: "[readonly]" }
   attrs: { name: "[required]" }
@@ -3811,6 +4666,10 @@ tags: {
 }
 # 4.10.13 The output element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "OUTPUT"
   attrs: { name: "for" }
   attrs: { name: "form" }
@@ -3818,12 +4677,20 @@ tags: {
 }
 # 4.10.14 The progress element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "PROGRESS"
   attrs: { name: "max" }
   attrs: { name: "value" }
 }
 # 4.10.15 The meter element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "METER"
   attrs: { name: "high" }
   attrs: { name: "low" }
@@ -3834,6 +4701,10 @@ tags: {
 }
 # 4.10.16 The fieldset element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
   # <amp-bind>
@@ -3842,17 +4713,47 @@ tags: {
 }
 # 4.10.17 The legend element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "LEGEND"
+}
+
+# 4.11 (HTML5.3) Interactive elements
+# 4.11.1 (HTML5.3) The details element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DETAILS"
+  attrs: {
+    name: "open"
+    value: ""
+  }
+  attrs: { name: "[open]" }
+}
+# 4.11.2 (HTML5.3) The summary element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "SUMMARY"
+  mandatory_parent: "DETAILS"
 }
 
 # 4.11 Scripting
 # 4.11.1 The script element
-# Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed.
+# Only the amphtml script, custom extensions and the LD/JSON or TEXT/PLAIN
+# description are allowed.
+# Note that the type TEXT/PLAIN description is define in
+# validator-amp-mustache.protoascii.
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
   mandatory: true
@@ -3915,6 +4816,10 @@ tags: {
 }
 # JSON Linked Data
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
   attrs: { name: "nonce" }
@@ -3934,22 +4839,22 @@ tags: {
 # AMP RTC (Real Time Config)
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script id=amp-rtc"
   unique: true
   mandatory_parent: "HEAD"
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value_casei: "application/json"
-  }
   attrs: {
     name: "id"
     mandatory: true
     value_casei: "amp-rtc"
     dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -3961,7 +4866,7 @@ tags: {
 # AMP IMA VIDEO
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-ima-video > script[type=application/json]"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -3982,10 +4887,21 @@ tags: {
 # 4.11.2 The noscript element
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
+  disabled_by: "transformed"
   mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "NOSCRIPT"
+  spec_name: "noscript enclosure for boilerplate (transformed)"
+  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
@@ -4006,62 +4922,62 @@ tags: {
 # 11.2 Non-conforming features
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "ACRONYM"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "BIG"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "CENTER"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "DIR"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "HGROUP"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "LISTING"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "MULTICOL"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "NEXTID"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "NOBR"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SPACER"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "STRIKE"
 }
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "TT"
 }
 
@@ -4071,7 +4987,7 @@ tags: {
 # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SLOT"
   attrs: { name: "name" }
 }
@@ -4093,10 +5009,9 @@ attr_lists: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -4111,7 +5026,7 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4120,7 +5035,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "(__amp_source_origin|"
+    blacklisted_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4129,7 +5044,7 @@ attr_lists: {
         "{{$|"    # Also caught by the requirements on balanced delimiters.
         "{{#|"    # Section delimiters are disallowed.
         "{{/|"    # Section delimiters are disallowed.
-        "{{\\^)"  # Section delimiters are disallowed.
+        "{{\\^"  # Section delimiters are disallowed.
   }
 }
 # Same as above except that the attribute is not mandatory.
@@ -4138,7 +5053,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4147,7 +5062,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "(__amp_source_origin|"
+    blacklisted_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4156,7 +5071,7 @@ attr_lists: {
         "{{$|"    # Also caught by the requirements on balanced delimiters.
         "{{#|"    # Section delimiters are disallowed.
         "{{/|"    # Section delimiters are disallowed.
-        "{{\\^)"  # Section delimiters are disallowed.
+        "{{\\^"  # Section delimiters are disallowed.
   }
 }
 
@@ -4169,7 +5084,7 @@ attr_lists: {
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
@@ -4220,7 +5135,8 @@ tags: {  # <amp-img>
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
@@ -4232,12 +5148,13 @@ tags: {  # <amp-layout>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: CONTAINER
   }
 }
 tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-PIXEL"
   attrs: { name: "allow-ssr-img" }
   attrs: {
@@ -4248,7 +5165,7 @@ tags: {  # <amp-pixel>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
@@ -4330,6 +5247,249 @@ attr_lists: {
   }
   attrs: { name: "resource" }
   attrs: { name: "rev" }
+  attrs: {
+    name: "style"
+    blacklisted_value_regex: "(!important|<!--)"
+    # CSS proprities: https://www.w3schools.com/cssref/default.asp
+    # Disallowed:
+    # css_declaration: { name: "@charset" }
+    # css_declaration: { name: "@font-face" }
+    # css_declaration: { name: "@font-feature-values" }
+    # css_declaration: { name: "@import" }
+    # css_declaration: { name: "@keyframes" }
+    # css_declaration: { name: "@media" }
+    # Allowed:
+    css_declaration: { name: "align-content" }
+    css_declaration: { name: "align-items" }
+    css_declaration: { name: "align-self" }
+    css_declaration: { name: "all" }
+    css_declaration: { name: "animation" }
+    css_declaration: { name: "animation-delay" }
+    css_declaration: { name: "animation-direction" }
+    css_declaration: { name: "animation-duration" }
+    css_declaration: { name: "animation-fill-mode" }
+    css_declaration: { name: "animation-iteration-count" }
+    css_declaration: { name: "animation-name" }
+    css_declaration: { name: "animation-play-state" }
+    css_declaration: { name: "animation-timing-function" }
+    css_declaration: { name: "backface-visibility" }
+    css_declaration: { name: "background" }
+    css_declaration: { name: "background-attachment" }
+    css_declaration: { name: "background-blend-mode" }
+    css_declaration: { name: "background-clip" }
+    css_declaration: { name: "background-color" }
+    css_declaration: { name: "background-image" }
+    css_declaration: { name: "background-origin" }
+    css_declaration: { name: "background-position" }
+    css_declaration: { name: "background-repeat" }
+    css_declaration: { name: "background-size" }
+    css_declaration: { name: "border" }
+    css_declaration: { name: "border-bottom" }
+    css_declaration: { name: "border-bottom-color" }
+    css_declaration: { name: "border-bottom-left-radius" }
+    css_declaration: { name: "border-bottom-right-radius" }
+    css_declaration: { name: "border-bottom-style" }
+    css_declaration: { name: "border-bottom-width" }
+    css_declaration: { name: "border-collapse" }
+    css_declaration: { name: "border-color" }
+    css_declaration: { name: "border-image" }
+    css_declaration: { name: "border-image-outset" }
+    css_declaration: { name: "border-image-repeat" }
+    css_declaration: { name: "border-image-slice" }
+    css_declaration: { name: "border-image-source" }
+    css_declaration: { name: "border-image-width" }
+    css_declaration: { name: "border-left" }
+    css_declaration: { name: "border-left-color" }
+    css_declaration: { name: "border-left-style" }
+    css_declaration: { name: "border-left-width" }
+    css_declaration: { name: "border-radius" }
+    css_declaration: { name: "border-right" }
+    css_declaration: { name: "border-right-color" }
+    css_declaration: { name: "border-right-style" }
+    css_declaration: { name: "border-right-width" }
+    css_declaration: { name: "border-spacing" }
+    css_declaration: { name: "border-style" }
+    css_declaration: { name: "border-top" }
+    css_declaration: { name: "border-top-color" }
+    css_declaration: { name: "border-top-left-radius" }
+    css_declaration: { name: "border-top-right-radius" }
+    css_declaration: { name: "border-top-style" }
+    css_declaration: { name: "border-top-width" }
+    css_declaration: { name: "border-width" }
+    css_declaration: { name: "bottom" }
+    css_declaration: { name: "box-decoration-break" }
+    css_declaration: { name: "box-shadow" }
+    css_declaration: { name: "box-sizing" }
+    css_declaration: { name: "break-after" }
+    css_declaration: { name: "break-before" }
+    css_declaration: { name: "break-inside" }
+    css_declaration: { name: "caption-side" }
+    css_declaration: { name: "caret-color" }
+    css_declaration: { name: "clear" }
+    css_declaration: { name: "clip" }
+    css_declaration: { name: "color" }
+    css_declaration: { name: "column-count" }
+    css_declaration: { name: "column-fill" }
+    css_declaration: { name: "column-gap" }
+    css_declaration: { name: "column-rule" }
+    css_declaration: { name: "column-rule-color" }
+    css_declaration: { name: "column-rule-style" }
+    css_declaration: { name: "column-rule-width" }
+    css_declaration: { name: "column-span" }
+    css_declaration: { name: "column-width" }
+    css_declaration: { name: "columns" }
+    css_declaration: { name: "content" }
+    css_declaration: { name: "counter-increment" }
+    css_declaration: { name: "counter-reset" }
+    css_declaration: { name: "cursor" }
+    css_declaration: { name: "direction" }
+    css_declaration: { name: "display" }
+    css_declaration: { name: "empty-cells" }
+    css_declaration: { name: "filter" }
+    css_declaration: { name: "flex" }
+    css_declaration: { name: "flex-basis" }
+    css_declaration: { name: "flex-direction" }
+    css_declaration: { name: "flex-flow" }
+    css_declaration: { name: "flex-grow" }
+    css_declaration: { name: "flex-shrink" }
+    css_declaration: { name: "flex-wrap" }
+    css_declaration: { name: "float" }
+    css_declaration: { name: "font" }
+    css_declaration: { name: "font-family" }
+    css_declaration: { name: "font-feature-settings" }
+    css_declaration: { name: "font-kerning" }
+    css_declaration: { name: "font-language-override" }
+    css_declaration: { name: "font-size" }
+    css_declaration: { name: "font-size-adjust" }
+    css_declaration: { name: "font-stretch" }
+    css_declaration: { name: "font-style" }
+    css_declaration: { name: "font-synthesis" }
+    css_declaration: { name: "font-variant" }
+    css_declaration: { name: "font-variant-alternates" }
+    css_declaration: { name: "font-variant-caps" }
+    css_declaration: { name: "font-variant-east-asian" }
+    css_declaration: { name: "font-variant-ligatures" }
+    css_declaration: { name: "font-variant-numeric" }
+    css_declaration: { name: "font-variant-position" }
+    css_declaration: { name: "font-weight" }
+    css_declaration: { name: "grid" }
+    css_declaration: { name: "grid-area" }
+    css_declaration: { name: "grid-auto-columns" }
+    css_declaration: { name: "grid-auto-flow" }
+    css_declaration: { name: "grid-auto-rows" }
+    css_declaration: { name: "grid-column" }
+    css_declaration: { name: "grid-column-end" }
+    css_declaration: { name: "grid-column-gap" }
+    css_declaration: { name: "grid-column-start" }
+    css_declaration: { name: "grid-gap" }
+    css_declaration: { name: "grid-row" }
+    css_declaration: { name: "grid-row-end" }
+    css_declaration: { name: "grid-row-gap" }
+    css_declaration: { name: "grid-row-start" }
+    css_declaration: { name: "grid-template" }
+    css_declaration: { name: "grid-template-areas" }
+    css_declaration: { name: "grid-template-columns" }
+    css_declaration: { name: "grid-template-rows" }
+    css_declaration: { name: "hanging-punctuation" }
+    css_declaration: { name: "height" }
+    css_declaration: { name: "hyphens" }
+    css_declaration: { name: "image-rendering" }
+    css_declaration: { name: "isolation" }
+    css_declaration: { name: "justify-content" }
+    css_declaration: { name: "left" }
+    css_declaration: { name: "letter-spacing" }
+    css_declaration: { name: "line-break" }
+    css_declaration: { name: "line-height" }
+    css_declaration: { name: "list-style" }
+    css_declaration: { name: "list-style-image" }
+    css_declaration: { name: "list-style-position" }
+    css_declaration: { name: "list-style-type" }
+    css_declaration: { name: "margin" }
+    css_declaration: { name: "margin-bottom" }
+    css_declaration: { name: "margin-left" }
+    css_declaration: { name: "margin-right" }
+    css_declaration: { name: "margin-top" }
+    css_declaration: { name: "max-height" }
+    css_declaration: { name: "max-width" }
+    css_declaration: { name: "min-height" }
+    css_declaration: { name: "min-width" }
+    css_declaration: { name: "mix-blend-mode" }
+    css_declaration: { name: "object-fit" }
+    css_declaration: { name: "object-position" }
+    css_declaration: { name: "opacity" }
+    css_declaration: { name: "order" }
+    css_declaration: { name: "orphans" }
+    css_declaration: { name: "outline" }
+    css_declaration: { name: "outline-color" }
+    css_declaration: { name: "outline-offset" }
+    css_declaration: { name: "outline-style" }
+    css_declaration: { name: "outline-width" }
+    css_declaration: { name: "overflow" }
+    css_declaration: { name: "overflow-wrap" }
+    css_declaration: { name: "overflow-x" }
+    css_declaration: { name: "overflow-y" }
+    css_declaration: { name: "padding" }
+    css_declaration: { name: "padding-bottom" }
+    css_declaration: { name: "padding-left" }
+    css_declaration: { name: "padding-right" }
+    css_declaration: { name: "padding-top" }
+    css_declaration: { name: "page-break-after" }
+    css_declaration: { name: "page-break-before" }
+    css_declaration: { name: "page-break-inside" }
+    css_declaration: { name: "perspective" }
+    css_declaration: { name: "perspective-origin" }
+    css_declaration: { name: "pointer-events" }
+    # CSS property `position` with values `fixed` and `sticky are not allowed.
+    # From https://www.w3schools.com/cssref/pr_class_position.asp
+    css_declaration: {
+      name: "position"
+      value_casei: "absolute"
+      value_casei: "inherit"
+      value_casei: "initial"
+      value_casei: "relative"
+      value_casei: "static"
+    }
+    css_declaration: { name: "quotes" }
+    css_declaration: { name: "resize" }
+    css_declaration: { name: "right" }
+    css_declaration: { name: "tab-size" }
+    css_declaration: { name: "table-layout" }
+    css_declaration: { name: "text-align" }
+    css_declaration: { name: "text-align-last" }
+    css_declaration: { name: "text-combine-upright" }
+    css_declaration: { name: "text-decoration" }
+    css_declaration: { name: "text-decoration-color" }
+    css_declaration: { name: "text-decoration-line" }
+    css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-indent" }
+    css_declaration: { name: "text-justify" }
+    css_declaration: { name: "text-orientation" }
+    css_declaration: { name: "text-overflow" }
+    css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-transform" }
+    css_declaration: { name: "text-underline-position" }
+    css_declaration: { name: "top" }
+    css_declaration: { name: "transform" }
+    css_declaration: { name: "transform-origin" }
+    css_declaration: { name: "transform-style" }
+    css_declaration: { name: "transition" }
+    css_declaration: { name: "transition-delay" }
+    css_declaration: { name: "transition-duration" }
+    css_declaration: { name: "transition-property" }
+    css_declaration: { name: "transition-timing-function" }
+    css_declaration: { name: "unicode-bidi" }
+    css_declaration: { name: "user-select" }
+    css_declaration: { name: "vertical-align" }
+    css_declaration: { name: "visibility" }
+    css_declaration: { name: "white-space" }
+    css_declaration: { name: "widows" }
+    css_declaration: { name: "width" }
+    css_declaration: { name: "word-break" }
+    css_declaration: { name: "word-spacing" }
+    css_declaration: { name: "word-wrap" }
+    css_declaration: { name: "writing-mode" }
+    css_declaration: { name: "z-index" }
+  }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.
@@ -4548,15 +5708,15 @@ attr_lists: {
   }
   attrs: {
     name: "visible-when-invalid"
-    value_regex: "(badInput|"
-      "customError|"
-      "patternMismatch|"
-      "rangeOverflow|"
-      "rangeUnderflow|"
-      "stepMismatch|"
-      "tooLong|"
-      "typeMismatch|"
-      "valueMissing)"
+    value: "badInput"
+    value: "customError"
+    value: "patternMismatch"
+    value: "rangeOverflow"
+    value: "rangeUnderflow"
+    value: "stepMismatch"
+    value: "tooLong"
+    value: "typeMismatch"
+    value: "valueMissing"
     trigger: {
       also_requires_attr: "validation-for"
     }
@@ -4565,7 +5725,21 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "(fade-in|fade-in-scroll|parallax)"
+    value_regex_casei: "(fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)"
+                       "(\\s|"
+                        "fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)*"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
@@ -4580,6 +5754,10 @@ attr_lists: {
     requires_extension: "amp-subscriptions"
   }
   attrs: {
+    name: "subscriptions-decorate"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
     name: "subscriptions-dialog"
     value: ""
     requires_extension: "amp-subscriptions"
@@ -4590,15 +5768,14 @@ attr_lists: {
   }
   attrs: {
     name: "subscriptions-section"
-    value_regex_casei: "(actions|content|content-not-granted)"
+    value_casei: "actions"
+    value_casei: "content"
+    value_casei: "content-not-granted"
+    value_casei: "loading"
     requires_extension: "amp-subscriptions"
   }
   attrs: {
     name: "subscriptions-service"
-    requires_extension: "amp-subscriptions"
-  }
-  attrs: {
-    name: "subscriptions-decorate"
     requires_extension: "amp-subscriptions"
   }
   # <amp-bind>
@@ -4649,109 +5826,113 @@ error_specificity { code: UNKNOWN_CODE specificity: 0 }
 error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
 error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
 error_specificity { code: NON_WHITESPACE_CDATA_ENCOUNTERED specificity: 3 }
-error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 4 }
-error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 5 }
-error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 6 }
-error_specificity { code: MANDATORY_TAG_MISSING specificity: 7 }
-error_specificity { code: WRONG_PARENT_TAG specificity: 8 }
-error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 9 }
-error_specificity { code: TAG_EXCLUDED_BY_TAG specificity: 10 }
-error_specificity { code: MISSING_REQUIRED_EXTENSION specificity: 11 }
-error_specificity { code: ATTR_MISSING_REQUIRED_EXTENSION specificity: 12 }
-error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 13 }
-error_specificity { code: EXTENSION_UNUSED specificity: 14 }
-error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 15 }
-error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 16 }
-error_specificity { code: DISALLOWED_TAG specificity: 17 }
-error_specificity { code: DISALLOWED_ATTR specificity: 18 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 19 }
-error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 20 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 21 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 22 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 23 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 24 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 25 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 26 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 27 }
-error_specificity { code: CSS_SYNTAX specificity: 28 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 29 }
+error_specificity { code: INVALID_JSON_CDATA specificity: 4 }
+error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 5 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 6 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 7 }
+error_specificity { code: MANDATORY_TAG_MISSING specificity: 8 }
+error_specificity { code: WRONG_PARENT_TAG specificity: 9 }
+error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 10 }
+error_specificity { code: TAG_EXCLUDED_BY_TAG specificity: 11 }
+error_specificity { code: MISSING_REQUIRED_EXTENSION specificity: 12 }
+error_specificity { code: ATTR_MISSING_REQUIRED_EXTENSION specificity: 13 }
+error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 14 }
+error_specificity { code: EXTENSION_UNUSED specificity: 15 }
+error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 16 }
+error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 17 }
+error_specificity { code: DISALLOWED_TAG specificity: 18 }
+error_specificity { code: DISALLOWED_ATTR specificity: 19 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 20 }
+error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 21 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 22 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 23 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 24 }
+error_specificity { code: MANDATORY_ANYOF_ATTR_MISSING specificity: 25 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 26 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 27 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 28 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 29 }
+error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 30 }
+error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 31 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 32 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 30
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 33
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 31 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 32 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 33 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 34 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 35 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 36 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 34 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 35 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 36 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 37 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 38 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 39 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 37
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 40
 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 38 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 39 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 40 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 41 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 42 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 43 }
-error_specificity { code: MISSING_URL specificity: 44 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 45 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 46 }
-error_specificity { code: INVALID_URL specificity: 47 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 48 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 49 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 50 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 51 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 52 }
+error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 41 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 42 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 43 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 44 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 45 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 46 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 47 }
+error_specificity { code: MISSING_URL specificity: 48 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 49 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 50 }
+error_specificity { code: INVALID_URL specificity: 51 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 52 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 53 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 54 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 55 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 56 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 53
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 57
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 54 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 55 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 56 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 57 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 58 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 58 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 59 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 60 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 61 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 62 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 59
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 63
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 60 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 61 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 62 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 63 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 64 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 65 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 66 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 67 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 68 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 64 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 65 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 66 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 67 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 68 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 69 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 70 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 71 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 72 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 69
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 73
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 70 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 71 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 72 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 74 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 75 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 76 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 73
+  specificity: 77
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 74 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 78 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 75
+  specificity: 79
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
-  specificity: 76
+  specificity: 80
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
-  specificity: 77
+  specificity: 81
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
-  specificity: 78
+  specificity: 82
 }
 error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
-  specificity: 79
+  specificity: 83
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
@@ -4852,7 +6033,7 @@ error_formats {
 }
 error_formats {
   code: DISALLOWED_SCRIPT_TAG
-  format: "Only AMP runtime 'script' tags are allowed, and only in the document head."
+  format: "Custom JavaScript is not allowed."
 }
 error_formats {
   code: DISALLOWED_ATTR
@@ -4878,6 +6059,11 @@ error_formats {
           "for layout '%4', set the attribute '%2' to value '%5'."
 }
 error_formats {
+  code: MISSING_LAYOUT_ATTRIBUTES
+  format: "Incomplete layout attributes specified for tag '%1'. For example, "
+          "provide attributes 'width' and 'height'."
+}
+error_formats {
   code: IMPLIED_LAYOUT_INVALID
   format: "The implied layout '%1' is not supported by tag '%2'."
 }
@@ -4897,7 +6083,18 @@ error_formats {
 error_formats {
   code: STYLESHEET_TOO_LONG
   format: "The author stylesheet specified in tag '%1' is too "
-          "long - we saw %2 bytes whereas the limit is %3 bytes."
+          "long - document contains %2 bytes whereas the limit is %3 bytes."
+}
+error_formats {
+  code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG
+  format: "The author stylesheet specified in tag 'style amp-custom' and "
+          "the combined inline styles is too large - document contains %1 "
+          "bytes whereas the limit is %2 bytes."
+}
+error_formats {
+  code: INLINE_STYLE_TOO_LONG
+  format: "The inline style specified in tag '%1' is too long - it "
+          "contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
@@ -4910,6 +6107,10 @@ error_formats {
 error_formats {
   code: NON_WHITESPACE_CDATA_ENCOUNTERED
   format: "The tag '%1' contains text, which is disallowed."
+}
+error_formats {
+  code: INVALID_JSON_CDATA
+  format: "The script tag contains invalid JSON that cannot be parsed."
 }
 error_formats {
   code: DISALLOWED_PROPERTY_IN_ATTR_VALUE
@@ -4975,6 +6176,11 @@ error_formats {
 error_formats {
   code: MANDATORY_ONEOF_ATTR_MISSING
   format: "The tag '%1' is missing a mandatory attribute - pick one of %2."
+}
+error_formats {
+  code: MANDATORY_ANYOF_ATTR_MISSING
+  format: "The tag '%1' is missing a mandatory attribute - pick at least "
+          "one of %2."
 }
 error_formats {
   code: WRONG_PARENT_TAG
@@ -5095,10 +6301,6 @@ error_formats {
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
-error_formats {
-  code: CSS_SYNTAX
-  format: "CSS syntax error in tag '%1' - %2."
-}
 error_formats {
   code: CSS_SYNTAX_INVALID_AT_RULE
   format: "CSS syntax error in tag '%1' - saw invalid at rule '@%2'."
@@ -5233,4 +6435,3 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
 }
-

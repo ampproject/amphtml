@@ -20,9 +20,7 @@ const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const depCheckConfig = require('../dep-check-config');
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
@@ -30,12 +28,14 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -57,6 +57,7 @@ let GlobsDef;
 
 /**
  * @constructor @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
   /** @private @const {!RuleConfigDef} */
@@ -117,6 +118,17 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
+
+        // Allow extension files to depend on their own code.
+        const dir = path.dirname(dep);
+        if (dir.startsWith('extensions/')) {
+          // eg, 'extensions/amp-geo/0.1'
+          const match = /extensions\/[^\/]+\/[^\/]+/.exec(dir);
+          if (match && path.dirname(moduleName).startsWith(match[0])) {
+            return;
+          }
+        }
+
         const inWhitelist = this.whitelist_.some(entry => {
           const pair = entry.split('->');
           const whitelistedModuleName = pair[0];
@@ -156,6 +168,15 @@ function getSrcs() {
         .map(getEntryModule)
         // Concat the core binary and integration binary as entry points.
         .concat('src/amp.js', '3p/integration.js'));
+  }).then(files => {
+    // Write all the entry modules into a single file so they can be processed
+    // together.
+    fs.mkdirpSync('./.amp-build');
+    const filename = './.amp-build/gulp-dep-check-collection.js';
+    fs.writeFileSync(filename, files.map(file => {
+      return `import '../${file}';`;
+    }).join('\n'));
+    return [filename];
   });
 }
 
@@ -174,8 +195,13 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babelify, {compact: false});
+  const bundler = browserify(entryModule, {debug: true})
+      .transform(babelify, {
+        compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
+      });
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -189,7 +215,9 @@ function getGraph(entryModule) {
       .pipe(source(entryModule))
       // Unfortunately we need to write the files out.
       .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
+      .on('end', () => {
+        resolve(module);
+      });
   return promise;
 }
 
@@ -213,7 +241,7 @@ function getEntryModule(extensionFolder) {
  * with nested dependencies. We flatten it so all we have are individual
  * modules and their imports as well as making the entries unique.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -223,7 +251,7 @@ function flattenGraph(entryPoints) {
   // Now make the graph have unique entries
   return flatten(entryPoints)
       .reduce((acc, cur) => {
-        const name = cur.name;
+        const {name} = cur;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
               // Get rid of the absolute path for minimatch'ing
@@ -288,7 +316,7 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays.
  *
- * @type {!Array<!Array>}
+ * @param {!Array<!Array>} arr
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
@@ -297,5 +325,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['update-packages', 'css'],
+    maybeUpdatePackages.concat(['css']),
     depCheck);

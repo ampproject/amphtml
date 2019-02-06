@@ -40,55 +40,73 @@ export class Services {
 
   /**
    * Returns a promise for the Access service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
    */
-  static accessServiceForDoc(nodeOrDoc) {
-    return (/** @type {!Promise<
-        !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
-        getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
+  static accessServiceForDoc(element) {
+    return (/** @type {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceForDoc(element, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Access service or a promise for null if the
+   * service is not available on the current page.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
+   */
+  static accessServiceForDocOrNull(element) {
+    return (/** @type {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceIfAvailableForDoc(element, 'access',
+          'amp-access')));
   }
 
   /**
    * Returns a promise for the Subscriptions service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!SubscriptionService>}
    */
-  static subscriptionsServiceForDoc(nodeOrDoc) {
-    return (/** @type {!Promise<SubscriptionService>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+  static subscriptionsServiceForDoc(element) {
+    return (/** @type {!Promise<!SubscriptionService>} */ (
+      getElementServiceForDoc(element, 'subscriptions',
           'amp-subscriptions')));
   }
 
   /**
-   * Returns a promise for the Access service or a promise for null if the service
-   * is not available on the current page.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
+   * Returns a promise for the Subscriptions service.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?SubscriptionService>}
    */
-  static accessServiceForDocOrNull(nodeOrDoc) {
-    return (/** @type {
-        !Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
-        getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access')));
+  static subscriptionsServiceForDocOrNull(element) {
+    return (/** @type {!Promise<?SubscriptionService>} */ (
+      getElementServiceIfAvailableForDoc(element, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/action-impl.ActionService}
    */
-  static actionServiceForDoc(nodeOrDoc) {
+  static actionServiceForDoc(element) {
     return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'action'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!Promise<!Activity>}
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/standard-actions-impl.StandardActions}
    */
-  static activityForDoc(nodeOrDoc) {
-    return /** @type {!Promise<!Activity>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'activity', 'amp-analytics'));
+  static standardActionsForDoc(element) {
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (
+      getExistingServiceForDocInEmbedScope(element, 'standard-actions'));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
+   */
+  static activityForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>} */ (
+      getElementServiceForDoc(element, 'activity', 'amp-analytics'));
   }
 
   /**
@@ -105,40 +123,38 @@ export class Services {
 
   /**
    * Returns the AmpDoc for the specified context node.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
-  static ampdoc(nodeOrDoc) {
-    return getAmpdoc(nodeOrDoc);
+  static ampdoc(elementOrAmpDoc) {
+    return getAmpdoc(elementOrAmpDoc);
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @param {boolean=} loadAnalytics
    * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
-  static analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
+  static analyticsForDoc(element, loadAnalytics = false) {
     if (loadAnalytics) {
       // Get Extensions service and force load analytics extension.
-      const ampdoc = getAmpdoc(nodeOrDoc);
+      const ampdoc = getAmpdoc(element);
       Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
           ampdoc, 'amp-analytics');
     }
-    return (/** @type {!Promise<
-              !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceForDoc(
-          nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+    return /** @type {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
+      getElementServiceForDoc(element, 'amp-analytics-instrumentation',
+          'amp-analytics'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
-  static analyticsForDocOrNull(nodeOrDoc) {
-    return (/** @type {!Promise<
-              ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-            >} */ (getElementServiceIfAvailableForDoc(
-          nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+  static analyticsForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
+      getElementServiceIfAvailableForDoc(element,
+          'amp-analytics-instrumentation', 'amp-analytics'));
   }
 
   /**
@@ -151,31 +167,31 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(nodeOrDoc) {
+  static bindForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          nodeOrDoc, 'bind', 'amp-bind'));
+          element, 'bind', 'amp-bind'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.Cid>}
    */
-  static cidForDoc(nodeOrDoc) {
+  static cidForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/cid-impl.Cid>} */ (
-      getServicePromiseForDoc(nodeOrDoc, 'cid'));
+      getServicePromiseForDoc(elementOrAmpDoc, 'cid'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/navigation.Navigation}
    */
-  static navigationForDoc(nodeOrDoc) {
+  static navigationForDoc(elementOrAmpDoc) {
     return /** @type {!./service/navigation.Navigation} */ (
-      getServiceForDoc(nodeOrDoc, 'navigation'));
+      getServiceForDoc(elementOrAmpDoc, 'navigation'));
   }
 
   /**
@@ -188,12 +204,12 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/document-info-impl.DocumentInfoDef} Info about the doc
    */
-  static documentInfoForDoc(nodeOrDoc) {
+  static documentInfoForDoc(elementOrAmpDoc) {
     return /** @type {!./service/document-info-impl.DocInfo} */ (
-      getServiceForDoc(nodeOrDoc, 'documentInfo')).get();
+      getServiceForDoc(elementOrAmpDoc, 'documentInfo')).get();
   }
 
   /**
@@ -214,13 +230,36 @@ export class Services {
   }
 
   /**
+   * Returns a service to register callbacks we wish to execute when an
+   * amp-form is submitted. This is the sync version used by amp-form only, all
+   * other extensions should use `formSubmitPromiseForDoc` below.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
+   */
+  static formSubmitForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (
+      getServiceForDoc(elementOrAmpDoc, 'form-submit-service'));
+  }
+
+  /**
+   * Returns a service to register callbacks we wish to execute when an
+   * amp-form is submitted.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
+   */
+  static formSubmitPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'form-submit-service'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
    */
-  static historyForDoc(nodeOrDoc) {
+  static historyForDoc(elementOrAmpDoc) {
     return /** @type {!./service/history-impl.History} */ (
-      getServiceForDoc(nodeOrDoc, 'history'));
+      getServiceForDoc(elementOrAmpDoc, 'history'));
   }
 
   /**
@@ -231,13 +270,24 @@ export class Services {
     return getService(win, 'input');
   }
 
+  /**s
+   * Returns a promise for the Inputmask service.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>}
+   */
+  static inputmaskServiceForDocOrNull(element) {
+    return (/** @type {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>} */ (
+      getElementServiceIfAvailableForDoc(
+          element, 'inputmask', 'amp-inputmask')));
+  }
+
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/layers-impl.LayoutLayers}
    */
-  static layersForDoc(nodeOrDoc) {
+  static layersForDoc(elementOrAmpDoc) {
     return /** @type {!./service/layers-impl.LayoutLayers} */ (
-      getServiceForDoc(nodeOrDoc, 'layers'));
+      getServiceForDoc(elementOrAmpDoc, 'layers'));
   }
 
   /**
@@ -268,12 +318,12 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-impl.Resources}
    */
-  static resourcesForDoc(nodeOrDoc) {
+  static resourcesForDoc(elementOrAmpDoc) {
     return /** @type {!./service/resources-impl.Resources} */ (
-      getServiceForDoc(nodeOrDoc, 'resources'));
+      getServiceForDoc(elementOrAmpDoc, 'resources'));
   }
 
   /**
@@ -281,10 +331,9 @@ export class Services {
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
   static shareTrackingForOrNull(win) {
-    return (/** @type {
-      !Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
-        getElementServiceIfAvailable(win, 'share-tracking',
-            'amp-share-tracking', true)));
+    return (/** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
+      getElementServiceIfAvailable(win, 'share-tracking',
+          'amp-share-tracking', true)));
   }
 
   /**
@@ -302,30 +351,30 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|
-   *                   ?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|
-                        ?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+   * @return {?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreService(win) {
-    return getService(win, 'story-store');
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+      (getExistingServiceOrNull(win, 'story-store')));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
+   * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
   static storyRequestService(win) {
-    return getService(win, 'story-request');
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
+      (getExistingServiceOrNull(win, 'story-request')));
   }
 
   /**
@@ -344,6 +393,26 @@ export class Services {
    */
   static localizationService(win) {
     return getService(win, 'localization');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
+   */
+  static storyAnalyticsServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
+      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story',
+          true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService}
+   */
+  static storyAnalyticsService(win) {
+    return (/** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
+      (getExistingServiceOrNull(win, 'story-analytics')));
   }
 
   /**
@@ -397,22 +466,22 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */
-  static webAnimationServiceFor(nodeOrDoc) {
-    return (/** @type {
-        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
-      (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
+  static webAnimationServiceFor(element) {
+    return (/** @type {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+      (getElementServiceForDoc(
+          element, 'web-animation', 'amp-animation')));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
-  static storageForDoc(nodeOrDoc) {
+  static storageForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
-      getServicePromiseForDoc(nodeOrDoc, 'storage'));
+      getServicePromiseForDoc(elementOrAmpDoc, 'storage'));
   }
 
   /**
@@ -429,92 +498,106 @@ export class Services {
    * @return {!./service/timer-impl.Timer}
    */
   static timerFor(window) {
+    // TODO(alabiaga): This will always return the top window's Timer service.
     return /** @type {!./service/timer-impl.Timer} */ (
       getService(window, 'timer'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
-  static urlReplacementsForDoc(nodeOrDoc) {
+  static urlReplacementsForDoc(element) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url-replace'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
    */
-  static userNotificationManagerForDoc(nodeOrDoc) {
+  static userNotificationManagerForDoc(element) {
     return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
-      (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
+      (getElementServiceForDoc(element, 'userNotificationManager',
           'amp-user-notification')));
   }
 
   /**
    * Returns a promise for the consentPolicy Service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
    */
-  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+  static consentPolicyServiceForDocOrNull(element) {
     return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
-      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
-          'amp-consent')));
+      (getElementServiceIfAvailableForDoc(element,
+          'consentPolicyManager', 'amp-consent')));
   }
 
   /**
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
-   * @param {!Window} win
-   * @return {!Promise<?Object<string,(string|Array<string>)>>}
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-geo/0.1/amp-geo.GeoDef>}
    */
-  static geoForOrNull(win) {
-    return /** @type {!Promise<?Object<string,(string|Array<string>)>>} */ (
-      getElementServiceIfAvailable(win, 'geo', 'amp-geo', true));
+  static geoForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-geo/0.1/amp-geo.GeoDef>} */ (
+      getElementServiceIfAvailableForDoc(
+          element, 'geo', 'amp-geo', true));
   }
 
   /**
-   * Returns a promise for the experiment variants or a promise for null if it is
-   * not available on the current page.
-   * @param {!Window} win
-   * @return {!Promise<?Object<string>>}
+   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
+   * services since sometimes we only have the FIE Document for context.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/url-impl.Url}
    */
-  static variantForOrNull(win) {
-    return /** @type {!Promise<?Object<string>>} */ (
-      getElementServiceIfAvailable(win, 'variant', 'amp-experiment', true));
+  static urlForDoc(element) {
+    return /** @type {!./service/url-impl.Url} */ (
+      getExistingServiceForDocInEmbedScope(element, 'url'));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoService}
+   * Returns a promise for the experiment variants or a promise for null if it
+   * is not available on the current page.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-experiment/0.1/variant.Variants>}
    */
-  static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoService} */ (
-      getServiceForDoc(nodeOrDoc, 'video-manager'));
+  static variantsForDocOrNull(element) {
+    return (/** @type {!Promise<?../extensions/amp-experiment/0.1/variant.Variants>} */ (
+      getElementServiceIfAvailableForDoc(element, 'variant',
+          'amp-experiment', true)));
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/video-service-interface.VideoServiceInterface}
+   */
+  static videoManagerForDoc(elementOrAmpDoc) {
+    return (
+      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
+        getServiceForDoc(elementOrAmpDoc, 'video-manager')));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewer-impl.Viewer}
    */
-  static viewerForDoc(nodeOrDoc) {
+  static viewerForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewer-impl.Viewer} */ (
-      getServiceForDoc(nodeOrDoc, 'viewer'));
+      getServiceForDoc(elementOrAmpDoc, 'viewer'));
   }
 
   /**
    * Returns promise for the viewer. This is an unusual case and necessary only
    * for services that need reference to the viewer before it has been
    * initialized. Most of the code, however, just should use `viewerForDoc`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/viewer-impl.Viewer>}
    */
-  static viewerPromiseForDoc(nodeOrDoc) {
+  static viewerPromiseForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/viewer-impl.Viewer>} */ (
-      getServicePromiseForDoc(nodeOrDoc, 'viewer'));
+      getServicePromiseForDoc(elementOrAmpDoc, 'viewer'));
   }
 
   /**
@@ -527,12 +610,12 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewport/viewport-impl.Viewport}
    */
-  static viewportForDoc(nodeOrDoc) {
+  static viewportForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
-      getServiceForDoc(nodeOrDoc, 'viewport'));
+      getServiceForDoc(elementOrAmpDoc, 'viewport'));
   }
 
   /**

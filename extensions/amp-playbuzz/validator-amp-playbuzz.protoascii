@@ -19,8 +19,8 @@ tags: {  # amp-playbuzz
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-playbuzz"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -29,24 +29,27 @@ tags: {  # <amp-playbuzz>
   tag_name: "AMP-PLAYBUZZ"
   requires_extension: "amp-playbuzz"
   attrs: {
-    name: "src"
-    mandatory_oneof: "['src', 'data-item']"
+    name: "data-comments"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-item"
-    mandatory_oneof: "['src', 'data-item']"
+    mandatory_oneof: "['data-item', 'src']"
   }
   attrs: {
     name: "data-item-info"
-    value_regex_casei: "(false|true)"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-share-buttons"
-    value_regex_casei: "(false|true)"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
-    name: "data-comments"
-    value_regex_casei: "(false|true)"
+    name: "src"
+    mandatory_oneof: "['data-item', 'src']"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

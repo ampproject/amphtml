@@ -56,7 +56,8 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
       win = env.win;
     });
 
-    it('should focus on opener on close', () => {
+    // TODO (#16157): this tests times out on Chrome Mobile Webview Android
+    it.configure().skipChrome().run('should focus on opener on close', () => {
       const openerButton = win.document.getElementById('sidebarOpener');
       const openedPromise = waitForSidebarOpen(win.document);
       openerButton.click();
@@ -70,40 +71,43 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
       });
     });
 
-    it('should not change scroll position after close', () => {
-      const openerButton = win.document.getElementById('sidebarOpener');
-      const sidebar = win.document.getElementById('sidebar1');
-      const viewport = sidebar.implementation_.getViewport();
-      const openedPromise = waitForSidebarOpen(win.document);
-      openerButton.click();
-      expect(viewport.getScrollTop()).to.equal(0);
-      return openedPromise.then(() => {
-        viewport.setScrollTop(1000);
-        expect(viewport.getScrollTop()).to.equal(1000);
-        const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = waitForSidebarClose(win.document);
-        closerButton.click();
-        return closedPromise;
-      }).then(() => {
-        // Firefox resets scroll to top on pop history
-        // Safari resets scroll to top somewhere unrelated to focus
-        // expect(viewport.getScrollTop()).to.equal(1000);
-        expect(win.document.activeElement).to.not.equal(openerButton);
-      });
-    });
+    it.configure().skipIfPropertiesObfuscated().run(
+        'should not change scroll position after close', () => {
+          const openerButton = win.document.getElementById('sidebarOpener');
+          const sidebar = win.document.getElementById('sidebar1');
+          const viewport = sidebar.implementation_.getViewport();
+          const openedPromise = waitForSidebarOpen(win.document);
+          openerButton.click();
+          expect(viewport.getScrollTop()).to.equal(0);
+          return openedPromise.then(() => {
+            viewport.setScrollTop(1000);
+            expect(viewport.getScrollTop()).to.equal(1000);
+            const closerButton = win.document.getElementById('sidebarCloser');
+            const closedPromise = waitForSidebarClose(win.document);
+            closerButton.click();
+            return closedPromise;
+          }).then(() => {
+            // Firefox resets scroll to top on pop history
+            // Safari resets scroll to top somewhere unrelated to focus
+            // expect(viewport.getScrollTop()).to.equal(1000);
+            expect(win.document.activeElement).to.not.equal(openerButton);
+          });
+        });
   });
 });
 
 function waitForSidebarOpen(document) {
   return poll('wait for sidebar to open', () => {
     const dummy = document.getElementById('dummy');
-    return dummy.style.display == 'none';
+    const styles = document.defaultView.getComputedStyle(dummy);
+    return styles.display == 'none';
   });
 }
 
 function waitForSidebarClose(document) {
   return poll('wait for sidebar to open', () => {
     const dummy = document.getElementById('dummy');
-    return dummy.style.display == '';
+    const styles = document.defaultView.getComputedStyle(dummy);
+    return styles.display != 'none';
   });
 }

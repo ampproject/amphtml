@@ -19,8 +19,8 @@ tags: {  # amp-call-tracking
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-call-tracking"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
@@ -33,7 +33,7 @@ tags: {  # <amp-call-tracking>
     name: "config"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"

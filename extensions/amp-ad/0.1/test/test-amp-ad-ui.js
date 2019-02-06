@@ -15,8 +15,11 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
+import * as dom from '../../../../src/dom';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
 import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-ad-ui handler', {
@@ -42,13 +45,99 @@ describes.realWin('amp-ad-ui handler', {
   });
 
   describe('applyNoContentUI', () => {
-    it('should force collapse ad in special container', () => {
+    it('should force collapse ad in sticky ad container', () => {
       adContainer = 'AMP-STICKY-AD';
       const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
       const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
       uiHandler.applyNoContentUI();
       expect(collapseSpy).to.be.calledOnce;
       expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should force collapse ad inside flying carpet, ' +
+      'if it is the only and direct child of flying carpet', function* () {
+      adContainer = 'AMP-FX-FLYING-CARPET';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
+
+      sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+        return [{
+          getImpl: () => Promise.resolve({
+            getChildren: () => [adElement],
+          }),
+        }];
+      });
+
+      uiHandler.applyNoContentUI();
+      yield macroTask();
+
+      expect(collapseSpy).to.be.calledOnce;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should NOT force collapse ad inside flying carpet, ' +
+      'if there is another element', function* () {
+      adContainer = 'AMP-FX-FLYING-CARPET';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
+
+      const otherElement = env.win.document.createElement('div');
+
+      sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+        return [{
+          getImpl: () => Promise.resolve({
+            getChildren: () => [adElement, otherElement],
+          }),
+        }];
+      });
+
+      uiHandler.applyNoContentUI();
+      yield macroTask();
+
+      expect(collapseSpy).to.not.be.called;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should NOT force collapse ad inside flying carpet, ' +
+      'if it is not a direct child of flying carpet.', function* () {
+      adContainer = 'AMP-FX-FLYING-CARPET';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
+
+      const otherElement = env.win.document.createElement('div');
+      adElement.remove();
+      otherElement.appendChild(adElement);
+
+      sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+        return [{
+          getImpl: () => Promise.resolve({
+            getChildren: () => [otherElement],
+          }),
+        }];
+      });
+
+      uiHandler.applyNoContentUI();
+      yield macroTask();
+
+      expect(collapseSpy).to.not.be.called;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+
+
+    it('should collapse ad amp-layout container if there is one', () => {
+      adElement = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-ad-container-id': 'test',
+      });
+      const container = createElementWithAttributes(env.win.document,
+          'amp-layout', {'id': 'test'});
+      container.appendChild(adElement);
+      env.win.document.body.appendChild(container);
+      adImpl = new BaseElement(adElement);
+      uiHandler = new AmpAdUIHandler(adImpl);
+      const adAttemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      uiHandler.applyNoContentUI();
+      expect(adAttemptCollapseSpy).to.not.be.called;
     });
 
     it('should try to collapse element first', () => {

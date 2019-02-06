@@ -20,6 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {hasOwn} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 
@@ -65,6 +66,9 @@ function findEngagedTimeBetween(activityEvent, time) {
 
 class ActivityHistory {
 
+  /**
+   * Creates an instance of ActivityHistory.
+   */
   constructor() {
     /** @private {number} */
     this.totalEngagedTime_ = 0;
@@ -157,9 +161,6 @@ export class Activity {
 
     /** @private @const {function()} */
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
-
-    /** @private @const {function()} */
-    this.boundHandleInactive_ = this.handleInactive_.bind(this);
 
     /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
@@ -304,7 +305,10 @@ export class Activity {
     this.unlistenFuncs_ = [];
   }
 
-  /** @private */
+  /**
+   * @private
+   * @visibleForTesting
+   */
   cleanup_() {
     this.unlisten_();
   }
@@ -317,6 +321,7 @@ export class Activity {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
   }
+
   /**
    * Get the incremental engaged time since the last push and reset it if asked.
    * @param {string} name
@@ -324,10 +329,11 @@ export class Activity {
    * @return {number}
    */
   getIncrementalEngagedTime(name, reset = true) {
-    if (!this.totalEngagedTimeByTrigger_.hasOwnProperty(name)) {
-      this.totalEngagedTimeByTrigger_[name] =
-        this.getTotalEngagedTime();
-      return this.totalEngagedTimeByTrigger_[name];
+    if (!hasOwn(this.totalEngagedTimeByTrigger_, name)) {
+      if (reset) {
+        this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+      }
+      return this.getTotalEngagedTime();
     }
     const currentIncrementalEngagedTime =
       this.totalEngagedTimeByTrigger_[name];

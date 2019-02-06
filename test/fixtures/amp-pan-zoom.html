@@ -1,0 +1,33 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Pan Zoom Demo</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-pan-zoom" src="/dist/v0/amp-pan-zoom-0.1.max.js"></script>
+  <script async src="/dist/amp.js"></script>
+</head>
+<body>
+  <amp-pan-zoom id="amp-pan-zoom-1" layout="fixed" width="300" height="241">
+    <amp-img id="img1"
+      src="/examples/img/sample.jpg"
+      width="641" height="481" layout="fixed"></amp-img>
+  </amp-pan-zoom>
+  <amp-pan-zoom id="amp-pan-zoom-2"
+    initial-x="50"
+    initial-y="100"
+    initial-scale="2"
+    max-scale="5"
+    layout="fixed"
+    width="300"
+    height="240">
+    <amp-img id="img2"
+      src="/examples/img/sample.jpg"
+      width="641" height="481" layout="fixed"></amp-img>
+  </amp-pan-zoom>
+
+</body>
+</html>
+

@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for A4A (AMP for Ads).</td>
+    <td>Provides configurable behavior for ad exits for <a href="https://www.ampproject.org/docs/ads/amphtml_ads">AMPHTML ads</a>.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
@@ -29,14 +29,14 @@ limitations under the License.
   </tr>
   <tr>
     <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>`nodisplay` or unspecified. The element is not presentational.</td>
+    <td>nodisplay or do not specify a layout</td>
   </tr>
 </table>
 
 ## Overview
 
-The `amp-ad-exit` element is configured with a JSON child script element and 
-exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a/amp-a4a-format.md) creative. Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
+The `amp-ad-exit` element is configured with a JSON child script element and
+exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampproject.org/docs/ads/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
 
 1. Parse the JSON config (if it hasn't yet been parsed).
 2. Find the requested exit target.
@@ -62,7 +62,10 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
     },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3sClick", "borderProtection"]
+      "filters": ["3sClick", "borderProtection"],
+      "behaviors": {
+        "clickTarget": "_top"
+      }
     },
     "bannetons": {
       "finalUrl": "https://example.com/artisan-baking/bannetons",
@@ -109,7 +112,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
 Filters are specified in the `filters` section of the config. Targets reference
 filters by their property name in the `filters` section.
 
-There are three types of filters: location-based, time-based, and element-based. Other filters (such as a confirmation prompt) could be added as needed. 
+There are three types of filters: location-based, time-based, and element-based. Other filters (such as a confirmation prompt) could be added as needed.
 
 ### clickLocation filter
 
@@ -163,7 +166,45 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
     <td class="col-twenty"><code>number</code></td>
     <td>Time in ms to reject any clicks after entering the viewport.</td>
   </tr>
+  <tr>
+    <td class="col-thirty"><code>startTimingEvent</code></td>
+    <td class="col-twenty"><code>string</code></td>
+    <td>Based on window performance timing, name of event to use as delay start interval (e.g. navigationStart).</td>
+  </tr>
 </table>
+
+Note that the default 1 second click delay uses time from extension load as interval.  However, this can be overridden to use startTimingEvent value via options object in the root of the config.  All other click filters will use the startTimingEvent if a value is not explicitly given.  Example:
+
+```html
+<amp-ad-exit id="exit-api">
+<script type="application/json">
+{
+  "targets": {
+    "flour": {
+      "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
+      "filters": ["3sClick", "2sClick"]
+    },
+  },
+  "options": {
+    "startTimingEvent": "navigationStart"
+  },
+  "filters": {
+    "3sClick": {
+      "type": "clickDelay",
+      "delay": 3000,
+      "startTimingEvent": "domContentLoadedEventStart"
+    },
+    "2sClick": {
+      "type": "clickDelay",
+      "delay": 2000,
+    }
+  }
+}
+</script>
+</amp-ad-exit>
+```
+
+In this case, the default click protection will impose a 1 second delay from navigationStart with two additional, specified click protections of 2 seconds from navigationStart and 3 seconds from DOMContentLoaded start.
 
 ### inactiveElement filter
 
@@ -280,7 +321,7 @@ Variable values can also come from 3P analytics. Use
 vendor iframe and reference it in the variable definition with the
 `"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
 `"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
-is the name of the vendor and `collected-data` is a key in the message from the 
+is the name of the vendor and `collected-data` is a key in the message from the
 vendor iframe. There must not be a space after the comma.
 
 Example:
@@ -317,6 +358,13 @@ replaced. For example, if you define a custom variable named "_b" with value
 "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
 {% endcall %}
 
+## Behaviors
+Behaviors specify additional properties of the exit action.
+
+### Click Target
+
+The `clickTarget` behavior specifies where a target's click should try to open.  A click defaults to opening a new tab, if it is possible in the environment.  With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`.  If this is not set to `"_top"`, then it will fall back to opening a new tab.
+
 ## `exit` action
 
 The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
@@ -346,8 +394,8 @@ See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/a
 
 ##### id
 
-An `id` is required so that `amp-exit` can be referenced by tappable elements. 
+An `id` is required so that `amp-exit` can be referenced by tappable elements.
 
 ## Validation
-The `amp-ad-exit` element is only available for [A4A (AMP for Ads)](../amp-a4a/amp-a4a-format.md) documents. 
+The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).
 See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii) for the AMP validator specification.

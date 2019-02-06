@@ -16,6 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -31,17 +32,23 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  getVendorJsPropertyName,
+  setStyles,
+} from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
-import {setStyles} from '../../../src/style';
 
 
 /** @const {string} */
@@ -80,18 +87,280 @@ const SERVICE_PROPS = {
 
 /**
  */
-export class WebAnimationRunner {
+export class AnimationRunner {
 
   /**
    * @param {!Array<!InternalWebAnimationRequestDef>} requests
    */
   constructor(requests) {
-    /** @const @private */
+    /** @const @protected */
     this.requests_ = requests;
+  }
 
-    /** @private {?Array<!Animation>} */
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} unusedHandler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(unusedHandler) {
+  }
+
+  /**
+  * Initializes the players but does not change the state.
+   */
+  init() {
+  }
+
+  /**
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+  }
+
+  /**
+   */
+  pause() {
+  }
+
+  /**
+   */
+  resume() {
+  }
+
+  /**
+   */
+  reverse() {
+  }
+
+  /**
+   * @param {time} unusedTime
+   */
+  seekTo(unusedTime) {
+  }
+
+  /**
+   * Seeks to a relative position within the animation timeline given a
+   * percentage (0 to 1 number).
+   * @param {number} unusedPercent between 0 and 1
+   */
+  seekToPercent(unusedPercent) {
+  }
+
+  /**
+   */
+  finish() {
+  }
+
+  /**
+   */
+  cancel() {
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} unusedPlayState
+   * @private
+   */
+  setPlayState_(unusedPlayState) {
+  }
+}
+
+/**
+ */
+export class AnimationWorkletRunner extends AnimationRunner {
+
+  /**
+   * @param {!Window} win
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {?Object=} viewportData
+   */
+  constructor(win, requests, viewportData) {
+    super(requests);
+
+    /** @const @private */
+    this.win_ = win;
+
+    /** @protected {?Array<!WorkletAnimation>} */
+    this.players_ = [];
+
+    /** @private {number} */
+    this.topRatio_ = viewportData['top-ratio'];
+
+    /** @private {number} */
+    this.bottomRatio_ = viewportData['bottom-ratio'];
+
+    /** @private {number} */
+    this.topMargin_ = viewportData['top-margin'];
+
+    /** @private {number} */
+    this.bottomMargin_ =
+      viewportData['bottom-margin'];
+  }
+
+  /**
+   * @return {string}
+   */
+  createCodeBlob_() {
+    //TODO(nainar): This code should be moved into a self-
+    // contained file.
+    // See issue: https://github.com/ampproject/amphtml/issues/19155
+    return `
+    registerAnimator('anim${++animIdCounter}', class {
+      constructor(options = {
+        'time-range': 0,
+        'start-offset': 0,
+        'end-offset': 0,
+        'top-ratio': 0,
+        'bottom-ratio': 0,
+        'element-height': 0,
+      }) {
+        this.timeRange = options['time-range'];
+        this.startOffset = options['start-offset'];
+        this.endOffset = options['end-offset'];
+        this.topRatio = options['top-ratio'];
+        this.bottomRatio = options['bottom-ratio'];
+        this.height = options['element-height'];
+      }
+      animate(currentTime, effect) {
+        if (currentTime == NaN) {
+          return;
+        }
+
+        // This function mirrors updateVisibility_ in amp-position-observer
+        const currentScrollPos =
+        ((currentTime / this.timeRange) *
+        (this.endOffset - this.startOffset)) +
+        this.startOffset;
+        const halfViewport = (this.startOffset + this.endOffset) / 2;
+        const relativePositionTop = currentScrollPos > halfViewport;
+
+        const ratioToUse = relativePositionTop ?
+        this.topRatio : this.bottomRatio;
+        const offset = this.height * ratioToUse;
+        let isVisible = false;
+
+        if (relativePositionTop) {
+          isVisible =
+          currentScrollPos + this.height >= (this.startOffset + offset);
+        } else {
+          isVisible =
+          currentScrollPos <= (this.endOffset - offset);
+        }
+        if (isVisible) {
+          effect.localTime = currentTime;
+        }
+
+      }
+    });
+    `;
+  }
+
+  /**
+  * @override
+  * Initializes the players but does not change the state.
+   */
+  init() {
+    this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
+      }
+      // TODO(nainar): This switches all animations to AnimationWorklet.
+      // Limit only to Scroll based animations for now.
+      CSS.animationWorklet.addModule(
+          URL.createObjectURL(new Blob([this.createCodeBlob_()],
+              {type: 'text/javascript'}))).then(() => {
+        const {documentElement} = this.win_.document;
+        const viewportService = Services.viewportForDoc(documentElement);
+
+        const scrollSource = viewportService.getScrollingElement();
+        const elementRect = request.target./*OK*/getBoundingClientRect();
+        const scrollTimeline = new this.win_.ScrollTimeline({
+          scrollSource,
+          orientation: 'block',
+          timeRange: request.timing.duration,
+          startScrollOffset: `${this.topMargin_}px`,
+          endScrollOffset: `${this.bottomMargin_}px`,
+          fill: request.timing.fill,
+        });
+        const keyframeEffect = new KeyframeEffect(request.target,
+            request.keyframes, request.timing);
+        const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
+            [keyframeEffect],
+            scrollTimeline, {
+              'time-range': request.timing.duration,
+              'start-offset': this.topMargin_,
+              'end-offset': this.bottomMargin_,
+              'top-ratio': this.topRatio_,
+              'bottom-ratio': this.bottomRatio_,
+              'element-height': elementRect.height,
+            });
+        player.play();
+        this.players_.push(player);
+      });
+    });
+  }
+
+  /**
+   * Readjusts the given rect using the configured exclusion margins.
+   * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
+   * @private
+   */
+  applyMargins_(rect) {
+    devAssert(rect);
+    rect = layoutRectLtwh(
+        rect.left,
+        (rect.top + this.topMargin_),
+        rect.width,
+        (rect.height - this.bottomMargin_ - this.topMargin_)
+    );
+
+    return rect;
+  }
+
+  /**
+   * @override
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+  }
+
+  /**
+   * @override
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+}
+
+/**
+ */
+export class WebAnimationRunner extends AnimationRunner {
+
+  /**
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   */
+  constructor(requests) {
+    super(requests);
+
+    /** @protected {?Array<!Animation>} */
     this.players_ = null;
-
 
     /** @private {number} */
     this.runningCount_ = 0;
@@ -104,6 +373,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @return {!WebAnimationPlayState}
    */
   getPlayState() {
@@ -111,6 +381,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {function(!WebAnimationPlayState)} handler
    * @return {!UnlistenDef}
    */
@@ -119,16 +390,19 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players but does not change the state.
    */
   init() {
-    dev().assert(!this.players_);
+    devAssert(!this.players_);
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target, request.vars);
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
-      const player = request.target.animate(request.keyframes, request.timing);
+      const player = request.target.animate(
+          request.keyframes, request.timing);
       player.pause();
       return player;
     });
@@ -144,6 +418,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -155,9 +430,10 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   pause() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
@@ -167,9 +443,10 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   resume() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     const oldRunnerPlayState = this.playState_;
     if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
@@ -186,19 +463,22 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   reverse() {
-    dev().assert(this.players_);
+    devAssert(this.players_);
+    // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach(player => {
       player.reverse();
     });
   }
 
   /**
+   * @override
    * @param {time} time
    */
   seekTo(time) {
-    dev().assert(this.players_);
+    devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       player.pause();
@@ -207,18 +487,20 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number).
    * @param {number} percent between 0 and 1
    */
   seekToPercent(percent) {
-    dev().assert(percent >= 0 && percent <= 1);
+    devAssert(percent >= 0 && percent <= 1);
     const totalDuration = this.getTotalDuration_();
     const time = totalDuration * percent;
     this.seekTo(time);
   }
 
   /**
+   * @override
    */
   finish() {
     if (!this.players_) {
@@ -233,6 +515,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   cancel() {
     if (!this.players_) {
@@ -245,6 +528,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {!WebAnimationPlayState} playState
    * @private
    */
@@ -262,9 +546,9 @@ export class WebAnimationRunner {
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
-      const timing = this.requests_[i].timing;
+      const {timing} = this.requests_[i];
 
-      user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
+      userAssert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +
       'timeline. Use "time" for seekTo or remove infinite iterations');
 
@@ -304,7 +588,8 @@ class Scanner {
       return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|
+    //                   !WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
     } else if (spec.switch) {
@@ -373,6 +658,9 @@ export class Builder {
    */
   constructor(win, rootNode, baseUrl, vsync, resources) {
     /** @const @private */
+    this.win_ = win;
+
+    /** @const @private */
     this.css_ = new CssContextImpl(win, rootNode, baseUrl);
 
     /** @const @private */
@@ -386,22 +674,34 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
+
+    /** @private {boolean} */
+    this.useAnimationWorklet_ =
+      Services.platformFor(this.win_).isChrome() &&
+      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+      'animationWorklet' in CSS;
   }
 
   /**
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args,
+    opt_viewportData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return new WebAnimationRunner(requests);
+        return this.useAnimationWorklet_ && hasPositionObserver ?
+          new AnimationWorkletRunner(this.win_, requests,
+              opt_viewportData) :
+          new WebAnimationRunner(requests);
       });
     });
   }
@@ -411,6 +711,7 @@ export class Builder {
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
@@ -564,7 +865,7 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onCompAnimation(spec) {
-    user().assert(this.path_.indexOf(spec.animation) == -1,
+    userAssert(this.path_.indexOf(spec.animation) == -1,
         `Recursive animations are not allowed: "${spec.animation}"`);
     const newPath = this.path_.concat(spec.animation);
     const animationElement = user().assertElement(
@@ -572,16 +873,18 @@ export class MeasureScanner extends Scanner {
         `Animation not found: "${spec.animation}"`);
     // Currently, only `<amp-animation>` supplies animations. In the future
     // this could become an interface.
-    user().assert(animationElement.tagName == 'AMP-ANIMATION',
+    userAssert(animationElement.tagName == 'AMP-ANIMATION',
         `Element is not an animation: "${spec.animation}"`);
     const otherSpecPromise = animationElement.getImpl().then(impl => {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
-      const target = this.target_;
-      const index = this.index_;
-      const vars = this.vars_;
-      const timing = this.timing_;
+      const {
+        target_: target,
+        index_: index,
+        vars_: vars,
+        timing_: timing,
+      } = this;
       const promise = otherSpecPromise.then(otherSpec => {
         if (!otherSpec) {
           return;
@@ -620,7 +923,7 @@ export class MeasureScanner extends Scanner {
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
       const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
-      user().assert(keyframes,
+      userAssert(keyframes,
           `Keyframes not found in stylesheet: "${specKeyframes}"`);
       specKeyframes = keyframes;
     }
@@ -631,7 +934,7 @@ export class MeasureScanner extends Scanner {
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -660,7 +963,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -704,7 +1007,7 @@ export class MeasureScanner extends Scanner {
     if (SERVICE_PROPS[prop]) {
       return;
     }
-    user().assert(isWhitelistedProp(prop),
+    userAssert(isWhitelistedProp(prop),
         'Property is not whitelisted for animation: %s', prop);
   }
 
@@ -716,16 +1019,19 @@ export class MeasureScanner extends Scanner {
    */
   with_(spec, callback) {
     // Save context.
-    const prevTarget = this.target_;
-    const prevIndex = this.index_;
-    const prevVars = this.vars_;
-    const prevTiming = this.timing_;
+    const {
+      target_: prevTarget,
+      index_: prevIndex,
+      vars_: prevVars,
+      timing_: prevTiming,
+    } = this;
 
     // Push new context and perform calculations.
     const targets =
         (spec.target || spec.selector) ?
           this.resolveTargets_(spec) :
           [null];
+    this.css_.setTargetLength(targets.length);
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
@@ -757,7 +1063,7 @@ export class MeasureScanner extends Scanner {
   resolveTargets_(spec) {
     let targets;
     if (spec.selector) {
-      user().assert(!spec.target,
+      userAssert(!spec.target,
           'Both "selector" and "target" are not allowed');
       targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
@@ -809,7 +1115,7 @@ export class MeasureScanner extends Scanner {
     if (spec.matcher) {
       return spec.matcher;
     }
-    user().assert(
+    userAssert(
         (spec.index !== undefined || spec.selector !== undefined) &&
         (spec.index === undefined || spec.selector === undefined),
         'Only one "index" or "selector" must be specified');
@@ -897,9 +1203,9 @@ export class MeasureScanner extends Scanner {
     this.validateTime_(duration, newTiming.duration, 'duration');
     this.validateTime_(delay, newTiming.delay, 'delay', /* negative */ true);
     this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
-    user().assert(iterations != null && iterations >= 0,
+    userAssert(iterations != null && iterations >= 0,
         '"iterations" is invalid: %s', newTiming.iterations);
-    user().assert(iterationStart != null &&
+    userAssert(iterationStart != null &&
         iterationStart >= 0 && isFinite(iterationStart),
     '"iterationStart" is invalid: %s', newTiming.iterationStart);
     user().assertEnumValue(WebAnimationTimingDirection,
@@ -927,8 +1233,8 @@ export class MeasureScanner extends Scanner {
    */
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
-    user().assert(
-        value != null && (value >= 0 || value < 0 && opt_allowNegative),
+    userAssert(
+        value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
@@ -965,6 +1271,9 @@ class CssContextImpl {
 
     /** @private {!Object<string, ?./css-expr-ast.CssNode>} */
     this.parsedCssCache_ = map();
+
+    /** @private {?number} */
+    this.targetLength_ = null;
 
     /** @private {?Element} */
     this.currentTarget_ = null;
@@ -1052,6 +1361,14 @@ class CssContextImpl {
   }
 
   /**
+   * @param {number} len
+   * @protected
+   */
+  setTargetLength(len) {
+    this.targetLength_ = len;
+  }
+
+  /**
    * @param {?Element} target
    * @param {?number} index
    * @param {function(?Element):T} callback
@@ -1060,8 +1377,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const prev = this.currentTarget_;
-    const prevIndex = this.currentIndex_;
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);
@@ -1219,7 +1535,7 @@ class CssContextImpl {
 
   /** @override */
   getVar(varName) {
-    user().assert(
+    userAssert(
         this.varPath_.indexOf(varName) == -1,
         `Recursive variable: "${varName}"`);
     this.varPath_.push(varName);
@@ -1269,6 +1585,12 @@ class CssContextImpl {
   }
 
   /** @override */
+  getTargetLength() {
+    this.requireTarget_();
+    return dev().assertNumber(this.targetLength_);
+  }
+
+  /** @override */
   getCurrentFontSize() {
     return this.getElementFontSize_(this.requireTarget_());
   }
@@ -1304,7 +1626,7 @@ class CssContextImpl {
    * @private
    */
   getElement_(selector, selectionMethod) {
-    dev().assert(
+    devAssert(
         selectionMethod == null || selectionMethod == 'closest',
         'Unknown selection method: %s', selectionMethod);
     let element;

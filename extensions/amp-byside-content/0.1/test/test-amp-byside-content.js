@@ -15,6 +15,7 @@
  */
 
 import '../amp-byside-content';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 describes.realWin('amp-byside-content', {
   amp: {
@@ -22,11 +23,14 @@ describes.realWin('amp-byside-content', {
   },
   ampAdCss: true,
 }, env => {
-  let win, doc;
+  let win, doc, urlMock;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
+      'expandUrlAsync',
+    ]);
   });
 
   function getElement(attributes, opt_responsive, opt_beforeLayoutCallback) {
@@ -44,6 +48,9 @@ describes.realWin('amp-byside-content', {
 
     doc.body.appendChild(elem);
     return elem.build().then(() => {
+      urlMock.expandUrlAsync
+          .returns(Promise.resolve(elem.implementation_.baseUrl_))
+          .withArgs(sinon.match.any);
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(elem);
       }
@@ -55,7 +62,7 @@ describes.realWin('amp-byside-content', {
   function testIframe(elem) {
     const iframe = elem.querySelector('iframe');
     expect(iframe).to.not.be.null;
-    expect(iframe.getAttribute('scrolling')).to.equal('no');
+    expect(iframe.getAttribute('frameborder')).to.equal('0');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.fakeSrc).to.satisfy(src => {
       return src.startsWith(elem.implementation_.baseUrl_);
@@ -67,12 +74,12 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'amp-simple',
     }).then(elem => {
-	  testIframe(elem);
+      testIframe(elem);
     });
   });
 
   it('requires data-label', () => {
-    allowConsoleError(() => { return getElement({
+    return allowConsoleError(() => { return getElement({
       'data-webcare-id': 'D6604AE5D0',
     }).should.eventually.be.rejectedWith(
         /The data-label attribute is required for/);
@@ -80,7 +87,7 @@ describes.realWin('amp-byside-content', {
   });
 
   it('requires data-webcare-id', () => {
-    allowConsoleError(() => { return getElement({
+    return allowConsoleError(() => { return getElement({
       'data-label': 'placeholder-label',
     }).should.eventually.be.rejectedWith(
         /The data-webcare-id attribute is required for/);
@@ -93,7 +100,7 @@ describes.realWin('amp-byside-content', {
       'data-label': 'placeholder-label',
     }).then(elem => {
       expect(elem.implementation_.origin_).to.equal(
-		  'https://webcare.byside.com'
+          'https://webcare.byside.com'
       );
     });
   });
@@ -117,10 +124,10 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'placeholder-label',
     }).then(elem => {
-	  const loader = elem.querySelector(
+      const loader = elem.querySelector(
           '.i-amphtml-byside-content-loading-animation'
       );
-	  expect(loader).to.not.be.null;
+      expect(loader).to.not.be.null;
     });
   });
 
@@ -134,22 +141,49 @@ describes.realWin('amp-byside-content', {
       const placeholder = elem.querySelector('[placeholder]');
       const iframe = elem.querySelector('iframe');
       expect(iframe).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('none');
     }).then(elem => {
       const placeholder = elem.querySelector('[placeholder]');
       elem.getVsync = () => {
         return {
           mutate: fn => fn(),
         };
-	  };
+      };
 
-	  // test iframe
-	  testIframe(elem);
+      // test iframe
+      testIframe(elem);
 
       // test placeholder too
       elem.implementation_.iframePromise_.then(() => {
-        expect(placeholder.style.display).to.be.equal('none');
+        expect(placeholder).to.have.display('none');
       });
+    });
+  });
+
+  it('passes down sandbox attribute to iframe', () => {
+    const sandbox = 'allow-scripts allow-same-origin allow-popups';
+    const attributes = {
+      'data-webcare-id': 'D6604AE5D0',
+      'data-label': 'placeholder-label',
+    };
+
+    return getElement(attributes, false).then(elem => {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('sandbox')).to.equal(sandbox);
+    });
+  });
+
+  it('sets scrollable atribute in iframe', () => {
+    const attributes = {
+      'data-webcare-id': 'D6604AE5D0',
+      'data-label': 'placeholder-label',
+    };
+
+    return getElement(attributes, false).then(elem => {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('scrolling')).to.equal('no');
     });
   });
 });

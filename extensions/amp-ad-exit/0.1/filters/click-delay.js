@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, user} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';
@@ -27,10 +27,16 @@ export class ClickDelayFilter extends Filter {
    * @param {!Window} win
    */
   constructor(name, spec, win) {
-    super(name);
-    user().assert(spec.type == FilterType.CLICK_DELAY &&
+    super(name, spec.type);
+    userAssert(spec.type == FilterType.CLICK_DELAY &&
       typeof spec.delay == 'number' && spec.delay > 0,
     'Invalid ClickDelay spec');
+
+    /**
+     * @const {!../config.ClickDelayConfig}
+     * @visibleForTesting
+     */
+    this.spec = spec;
 
     /**
     * @type {number}
@@ -52,17 +58,19 @@ export class ClickDelayFilter extends Filter {
           win['performance']['timing'][spec.startTimingEvent];
       }
     }
-
-    /** @private {number} */
-    this.delay_ = spec.delay;
   }
 
   /** @override */
   filter() {
-    return (Date.now() - this.intervalStart) >= this.delay_;
+    return (Date.now() - this.intervalStart) >= this.spec.delay;
   }
 }
 
-export function makeClickDelaySpec(delay) {
-  return {type: FilterType.CLICK_DELAY, delay};
+/**
+ * @param {number} delay
+ * @param {string=} startTimingEvent
+ * @return {!../config.ClickDelayConfig}
+ */
+export function makeClickDelaySpec(delay, startTimingEvent = undefined) {
+  return {type: FilterType.CLICK_DELAY, delay, startTimingEvent};
 }

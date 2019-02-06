@@ -15,7 +15,6 @@
  */
 
 
-import * as sinon from 'sinon';
 import {Poller} from '../poller';
 import {Services} from '../../../../src/services';
 
@@ -28,7 +27,7 @@ describe('Poller', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     const obj = {
       work() {},
@@ -246,7 +245,7 @@ describe('Poller', () => {
     clock.tick(4000);
 
     expect(poller.lastTimeoutId_).to.be.a('number');
-    let lastTimeoutId_ = poller.lastTimeoutId_;
+    let {lastTimeoutId_} = poller;
 
     // Reject 1
     return poller.lastWorkPromise_.then(() => {

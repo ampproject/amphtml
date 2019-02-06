@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {dev, user} from './log';
+import {Services} from './services';
+import {devAssert, userAssert} from './log';
 import {isArray, isObject} from './types';
-import {isProtocolValid} from './url';
 import {tryParseJson} from './json';
 
 /**
@@ -41,23 +40,23 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
+ * @param {!Element} element
  * @param {!Window} win
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(win,
-  metadata,
-  playHandler,
-  pauseHandler) {
-  const navigator = win.navigator;
+export function setMediaSession(
+  element, win, metadata, playHandler, pauseHandler
+) {
+  const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
     // Add metadata
-    validateMetadata(metadata);
+    validateMetadata(element, metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -135,16 +134,20 @@ export function parseFavicon(doc) {
 }
 
 /**
+ * @param {!Element} element
+ * @param {!MetadataDef} metadata
  * @private
  */
-function validateMetadata(metadata) {
+function validateMetadata(element, metadata) {
+  const urlService = Services.urlForDoc(element);
   // Ensure src of artwork has valid protocol
   if (metadata && metadata.artwork) {
-    dev().assert(isArray(metadata.artwork));
-    metadata.artwork.forEach(artwork => {
-      if (artwork) {
-        const src = isObject(artwork) ? artwork.src : artwork;
-        user().assert(isProtocolValid(src));
+    const {artwork} = metadata;
+    devAssert(isArray(artwork));
+    artwork.forEach(item => {
+      if (item) {
+        const src = isObject(item) ? item.src : item;
+        userAssert(urlService.isProtocolValid(src));
       }
     });
   }

@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
+import {
+  ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
+} from './utils';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';
+import {hasOwn} from '../../src/utils/object';
 import {setStyles} from '../../src/style';
-import {user} from '../../src/log';
+import {userAssert} from '../../src/log';
 import {validateData} from '../../3p/3p';
 
 /**
@@ -30,13 +36,15 @@ export function adsense(global, data) {
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package',
-        'npaOnUnknownConsent']);
+        'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
+        'matchedContentColumnsNum']);
 
-  if (data['autoFormat'] == 'rspv') {
-    user().assert(data.hasOwnProperty('fullWidth'),
+  if (data['autoFormat'] == ADSENSE_RSPV_TAG ||
+      data['autoFormat'] == ADSENSE_MCRSPV_TAG) {
+    userAssert(hasOwn(data, 'fullWidth'),
         'Responsive AdSense ad units require the attribute data-full-width.');
 
-    user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+    userAssert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
         `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
       `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
       'responsive AdSense ad units.');
@@ -55,7 +63,8 @@ export function adsense(global, data) {
 
   const i = global.document.createElement('ins');
   ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
-    'package']
+    'package', 'matchedContentUiType', 'matchedContentRowsNum',
+    'matchedContentColumnsNum']
       .forEach(datum => {
         if (data[datum]) {
           i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
@@ -70,12 +79,12 @@ export function adsense(global, data) {
   });
   const initializer = {};
   switch (global.context.initialConsentState) {
-    case 0: // CONSENT_POLICY_STATE.UNKNOWN
+    case CONSENT_POLICY_STATE.UNKNOWN:
       if (data['npaOnUnknownConsent'] != 'true') {
         // Unknown w/o NPA results in no ad request.
         return;
       }
-    case 2: // CONSENT_POLICY_STATE.INSUFFICIENT
+    case CONSENT_POLICY_STATE.INSUFFICIENT:
       (global.adsbygoogle = global.adsbygoogle || [])
           ['requestNonPersonalizedAds'] = true;
       break;

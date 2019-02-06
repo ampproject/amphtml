@@ -64,6 +64,21 @@ describes.realWin('amp-audio', {
     }).then(() => ampAudio);
   }
 
+  function attachToAmpStoryAndRun(attributes) {
+    naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
+    const ampAudio = doc.createElement('amp-audio');
+    const ampStory = doc.createElement('amp-story');
+    for (const key in attributes) {
+      ampAudio.setAttribute(key, attributes[key]);
+    }
+    ampStory.appendChild(ampAudio);
+    doc.body.appendChild(ampStory);
+
+    return ampAudio.build().then(() => {
+      return ampAudio.layoutCallback();
+    }).then(() => ampAudio);
+  }
+
   it('should load audio through attribute', () => {
     return attachAndRun({
       src: 'https://origin.com/audio.mp3',
@@ -95,6 +110,25 @@ describes.realWin('amp-audio', {
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(audio.getAttribute('preload')).to.be.equal('metadata');
+    });
+  });
+
+  it('should attach `<audio>` element and execute relevant actions for ' +
+  'layout="nodisplay"', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      preload: 'none',
+      layout: 'nodisplay',
+    }).then(ampAudio => {
+      const audio = ampAudio.querySelector('audio');
+      expect(audio).to.not.be.null;
+
+      const impl = ampAudio.implementation_;
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.true;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
     });
   });
 
@@ -173,7 +207,7 @@ describes.realWin('amp-audio', {
     const element = doc.createElement('div');
     element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
-    const promise = audio.layoutCallback();
+    const promise = audio.buildAudioElement();
     doc.createElement = savedCreateElement;
     return promise.then(() => {
       expect(element.toggleFallback).to.be.calledOnce;
@@ -193,4 +227,34 @@ describes.realWin('amp-audio', {
       expect(audio.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
+
+  it('should play/pause when `play`/`pause` actions are called', () => {
+    return attachAndRun({
+      'width': '500',
+      src: 'https://origin.com/audio.mp3',
+    }).then(ampAudio => {
+      const impl = ampAudio.implementation_;
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.true;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
+    });
+  });
+
+  it('should not play/pause when `amp-audio` is a direct descendant ' +
+    'of `amp-story`', () => {
+    return attachToAmpStoryAndRun({
+      'width': '500',
+      src: 'https://origin.com/audio.mp3',
+    }).then(ampAudio => {
+      const impl = ampAudio.implementation_;
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
+    });
+  });
+
 });

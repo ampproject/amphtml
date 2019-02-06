@@ -16,28 +16,18 @@
 
 
 /**
- * @fileoverview Embeds an instagram photo.
- * The data-shortcode attribute can be easily copied from a normal instagram
- * URL.
- * Example:
- * <code>
- * <amp-instagram
- *   data-shortcode="fBwFP"
- *   data-captioned
- *   data-default-framing
- *   alt="Fastest page in the west."
- *   width="320"
- *   height="392"
- *   layout="responsive">
- * </amp-instagram>
+ * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
+ * easily copied from a normal instagram URL. Example: <code> <amp-instagram
+ * data-shortcode="fBwFP" data-captioned data-default-framing alt="Fastest page
+ * in the west." width="320" height="392" layout="responsive"> </amp-instagram>
  * </code>
  *
- * For responsive embedding the width and height can be left unchanged from
- * the example above and should produce the correct aspect ratio. amp-instagram
- * will attempt to resize on load based on the height reported by the embedded
- * frame. If captions are specified (data-captioned) then a resize will be
- * requested every time due to the fact that it's not possible to know the height
- * of the caption in advance.
+ * For responsive embedding the width and height can be left unchanged from the
+ * example above and should produce the correct aspect ratio. amp-instagram will
+ * attempt to resize on load based on the height reported by the embedded frame.
+ * If captions are specified (data-captioned) then a resize will be requested
+ * every time due to the fact that it's not possible to know the height of the
+ * caption in advance.
  *
  * If captions are included it is stringly reccomended that an overflow element
  * is also included.  See description of overflow in amp-iframe.
@@ -54,7 +44,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -101,7 +91,7 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.shortcode_ = user().assert(
+    this.shortcode_ = userAssert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
@@ -167,7 +157,7 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/' +
-        this.captioned_ + '?cr=1&v=7';
+        this.captioned_ + '?cr=1&v=9';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
@@ -182,7 +172,10 @@ class AmpInstagram extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleInstagramMessages_(event) {
     if (event.origin != 'https://www.instagram.com' ||
         event.source != this.iframe_.contentWindow) {

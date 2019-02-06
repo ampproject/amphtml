@@ -63,7 +63,7 @@
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -108,6 +108,7 @@
         <option>amoad</option>
         <option>appnexus</option>
         <option>atomx</option>
+        <option>baidu</option>
         <option>bidtellect</option>
         <option>brainy</option>
         <option>bringhub</option>
@@ -451,6 +452,12 @@
       data-id="1234">
   </amp-ad>
 
+  <h2>Baidu</h2>
+  <amp-ad width="300" height="250"
+      type="baidu"
+      data-cproid="u2697398">
+  </amp-ad>
+
   <h2 id="bidtellect">Bidtellect</h2>
   <amp-ad width=320 height=200
       type="bidtellect"
@@ -544,17 +551,6 @@
       type="criteo"
       data-tagtype="passback"
       data-zone="314159">
-  </amp-ad>
-
-  <h2>Criteo RTA</h2>
-  <p>Due to ad targeting, the slot might not load ad.</p>
-
-  <amp-ad width="300" height="250"
-      type="criteo"
-      data-tagtype="rta"
-      data-slot="/2729856/iframe_test_new_tag"
-      data-adserver="DFP"
-      data-networkid="1976">
   </amp-ad>
 
   <h2>CSA</h2>

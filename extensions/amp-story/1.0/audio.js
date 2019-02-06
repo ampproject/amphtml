@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {Services} from '../../../src/services';
 
 /**
  * @const {string}
@@ -32,10 +32,10 @@ export function upgradeBackgroundAudio(element) {
   if (!element.hasAttribute('background-audio')) {
     return null;
   }
-
   const audioEl = element.ownerDocument.createElement('audio');
   const audioSrc =
-      assertHttpsUrl(element.getAttribute('background-audio'), element);
+      Services.urlForDoc(element).assertHttpsUrl(
+          element.getAttribute('background-audio'), element);
   audioEl.setAttribute('src', audioSrc);
   audioEl.setAttribute('preload', 'auto');
   audioEl.setAttribute('loop', '');

@@ -16,6 +16,7 @@
 
 import {AmpStoryHint} from '../amp-story-hint';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -28,6 +29,9 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   beforeEach(() => {
     win = env.win;
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
@@ -89,10 +93,10 @@ describes.fakeWin('amp-story hint layer', {}, env => {
  * @return {?Element}
  */
 function getHintContainerFromHost(host) {
-  if (!host.lastElementChild || !host.lastElementChild.shadowRoot) {
+  if (!host.lastElementChild) {
     return null;
   }
 
-  return host.lastElementChild.shadowRoot.querySelector(
-      '.i-amphtml-story-hint-container');
+  const hintRoot = host.lastElementChild.shadowRoot || host.lastElementChild;
+  return hintRoot.querySelector('.i-amphtml-story-hint-container');
 }

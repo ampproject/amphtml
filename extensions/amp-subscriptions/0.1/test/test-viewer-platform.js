@@ -16,7 +16,7 @@
 
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
@@ -31,8 +31,6 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   const origin = 'origin';
   const entitlementData = {source: 'local', raw: 'raw',
     service: 'local', products: [currentProductId], subscriptionToken: 'token'};
-  const entitlement = new Entitlement(entitlementData);
-  entitlement.setCurrentProduct(currentProductId);
   const fakeAuthToken = {
     'authorization': 'faketoken',
   };
@@ -53,13 +51,17 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     ampdoc = env.ampdoc;
     win = env.win;
     serviceAdapter = new ServiceAdapter(null);
+    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    sandbox.stub(serviceAdapter, 'getAnalytics')
+        .callsFake(() => analytics);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig(currentProductId, true));
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
+    sandbox.stub(serviceAdapter, 'getReaderId')
+        .callsFake(() => Promise.resolve('reader1'));
     viewerPlatform = new ViewerSubscriptionPlatform(
-        ampdoc, serviceConfig, serviceAdapter, origin,
-        new SubscriptionAnalytics(ampdoc.getRootNode()));
+        ampdoc, serviceConfig, serviceAdapter, origin);
     sandbox.stub(viewerPlatform.viewer_,
         'sendMessageAwaitResponse').callsFake(() =>
       Promise.resolve(fakeAuthToken));
@@ -128,32 +130,41 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             expect(resolvedEntitlement).to.be.not.undefined;
             expect(resolvedEntitlement.service).to.equal(
                 entitlementData.service);
-            expect(resolvedEntitlement.source).to.equal(entitlementData.source);
-            expect(resolvedEntitlement.products).to.deep
-                .equal(entitlementData.products);
-            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            expect(resolvedEntitlement.source).to.equal('viewer');
+            expect(resolvedEntitlement.granted).to.be
+                .equal(entitlementData.products.indexOf(currentProductId)
+                  !== -1);
+            expect(resolvedEntitlement.grantReason).to.be
+                .equal(GrantReason.SUBSCRIBER);
+            // raw should be the data which was resolved via
+            // sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
           });
     });
 
-    it('should resolve empty entitlement, with metering and current product if '
+    it('should resolve granted entitlement, with metering in data if '
         + 'viewer only sends metering', () => {
       sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
           .callsFake(() => {return {
             'aud': getWinOrigin(win),
             'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-            'metering': {},
+            'metering': {
+              left: 3,
+            },
           };});
       return viewerPlatform.verifyAuthToken_('faketoken').then(
           resolvedEntitlement => {
             expect(resolvedEntitlement).to.be.not.undefined;
             expect(resolvedEntitlement.service).to.equal('local');
-            expect(resolvedEntitlement.products).to.deep
-                .equal([currentProductId]);
-            // raw should be the data which was resolved via sendMessageAwaitResponse.
-            expect(resolvedEntitlement.metering).to.deep
-                .equal({});
+            expect(resolvedEntitlement.granted).to.be.equal(true);
+            expect(resolvedEntitlement.grantReason).to.be
+                .equal(GrantReason.METERING);
+            // raw should be the data which was resolved via
+            // sendMessageAwaitResponse.
+            expect(resolvedEntitlement.data).to.deep.equal({
+              left: 3,
+            });
           });
     });
   });
@@ -177,10 +188,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       viewerPlatform.pingback();
       expect(proxyStub).to.be.called;
     });
-    it('should delegate supportsCurrentViewer', () => {
+    it('should delegate getSupportedScoreFactor', () => {
       const proxyStub =
-        sandbox.stub(viewerPlatform.platform_, 'supportsCurrentViewer');
-      viewerPlatform.supportsCurrentViewer();
+        sandbox.stub(viewerPlatform.platform_, 'getSupportedScoreFactor');
+      viewerPlatform.getSupportedScoreFactor('currentViewer');
       expect(proxyStub).to.be.called;
     });
   });

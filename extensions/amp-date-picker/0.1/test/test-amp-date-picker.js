@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
+import * as lolex from 'lolex';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
-import {toggleExperiment} from '../../../../src/experiments';
-
-// TODO(cvializ): use fake time instead of real time
 
 describes.realWin('amp-date-picker', {
   amp: {
@@ -28,6 +26,7 @@ describes.realWin('amp-date-picker', {
   },
 }, env => {
   const moment = requireExternal('moment');
+  let clock;
   let win;
   let document;
 
@@ -101,7 +100,16 @@ describes.realWin('amp-date-picker', {
   beforeEach(() => {
     win = env.win;
     document = env.win.document;
-    toggleExperiment(win, 'amp-date-picker', true);
+    clock = lolex.install({
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      target: window,
+      now: new Date('2018-01-01T08:00:00Z'),
+    });
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should render in the simplest case', () => {
@@ -120,7 +128,7 @@ describes.realWin('amp-date-picker', {
     it('should use the value of a single input at load-time', () => {
       const input = document.createElement('input');
       input.id = 'date';
-      input.value = '2018-01-01 08Z';
+      input.value = '2018-01-01';
       document.body.appendChild(input);
 
       const {picker, buildCallback} = createDatePicker({
@@ -137,12 +145,12 @@ describes.realWin('amp-date-picker', {
     it('should use the value of a range input at load-time', () => {
       const startInput = document.createElement('input');
       startInput.id = 'startdate';
-      startInput.value = '2018-01-01 08Z';
+      startInput.value = '2018-01-01';
       document.body.appendChild(startInput);
 
       const endInput = document.createElement('input');
       endInput.id = 'enddate';
-      endInput.value = '2018-01-02 08Z';
+      endInput.value = '2018-01-02';
       document.body.appendChild(endInput);
 
       const {picker, buildCallback} = createDatePicker({
@@ -164,7 +172,7 @@ describes.realWin('amp-date-picker', {
         'layout': 'fixed-height',
         'height': '360',
       });
-      sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01 08Z'});
+      sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01'});
 
       return layoutCallback().then(() => {
         expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
@@ -178,8 +186,8 @@ describes.realWin('amp-date-picker', {
         'type': 'range',
       });
       sandbox.stub(picker, 'fetchSrc_').resolves({
-        'startDate': '2018-01-01 08Z',
-        'endDate': '2018-01-02 08Z',
+        'startDate': '2018-01-01',
+        'endDate': '2018-01-02',
       });
 
       return layoutCallback().then(() => {
@@ -192,23 +200,27 @@ describes.realWin('amp-date-picker', {
   describe('getFormattedDate_', () => {
     it('should render dates in the default format', () => {
       const {picker} = createDatePicker({locale: 'en'});
-      const date = moment('2018-01-01 08Z');
+      const date = moment();
       const formattedDate = picker.getFormattedDate_(date);
       expect(formattedDate).to.equal('2018-01-01');
     });
 
     it('should always render Unix epoch seconds in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'X'});
-      const date = moment('2018-01-01 08Z');
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600');
+      const date = moment();
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600');
+      });
     });
 
     it('should always render Unix epoch millis in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'x'});
-      const date = moment('2018-01-01 08Z');
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600000');
+      const date = moment();
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600000');
+      });
     });
   });
 
@@ -227,7 +239,8 @@ describes.realWin('amp-date-picker', {
     });
 
     describe('src templates', () => {
-      it('should parse RRULE and date templates', () => {
+      it('should parse RRULE and date templates', function() {
+        this.timeout(4000);
         const template = createDateTemplate('{{val}}', {
           dates: '2018-01-01',
           id: 'srcTemplate',
@@ -381,6 +394,26 @@ describes.realWin('amp-date-picker', {
         allowConsoleError(() => {
           expect(layoutCallback()).to.be.rejectedWith(
               'another #start-date input exists');
+        });
+      });
+    });
+
+    describe('src attribute', () => {
+      it('should set highlighted and blocked dates', () => {
+        const {element} = createDatePicker({
+          src: 'http://localhost:9876/date-picker/src-data/get',
+        });
+
+        const impl = element.implementation_;
+
+        sandbox.stub(impl, 'fetchSrc_').resolves({
+          blocked: ['2018-01-03'],
+          highlighted: ['2018-01-04'],
+        });
+
+        return impl.setupSrcAttributes_().then(() => {
+          expect(impl.blocked_.contains('2018-01-03')).to.be.true;
+          expect(impl.highlighted_.contains('2018-01-04')).to.be.true;
         });
       });
     });

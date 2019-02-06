@@ -40,6 +40,10 @@ describes.realWin('media-pool', {}, env => {
     });
   });
 
+  /**
+   * @param {string} tagName
+   * @return {!HTMLMediaElement}
+   */
   function createMediaElement(tagName) {
     const el = env.win.document.createElement(tagName);
     el.src = `http://example.com/${tagName}.xyz`;
@@ -47,6 +51,11 @@ describes.realWin('media-pool', {}, env => {
     return el;
   }
 
+  /**
+   * @param {string} tagName
+   * @param {number} count
+   * @return {!Array<!HTMLMediaElement>}
+   */
   function createMediaElements(tagName, count) {
     const results = [];
 
@@ -57,6 +66,10 @@ describes.realWin('media-pool', {}, env => {
     return results;
   }
 
+  /**
+   * @param {!Object|!Array} poolOrPools
+   * @return {!Array<!HTMLMediaElement>}
+   */
   function getElements(poolOrPools) {
     const results = [];
 
@@ -72,6 +85,11 @@ describes.realWin('media-pool', {}, env => {
     return results;
   }
 
+  /**
+   * @param {!Array<!HTMLMediaElement>} array
+   * @param {!HTMLMediaElement} element
+   * @return {boolean>}
+   */
   function isElementInPool(array, element) {
     const index = findIndex(array, el => {
       return el['replaced-media'] === element.getAttribute('id');

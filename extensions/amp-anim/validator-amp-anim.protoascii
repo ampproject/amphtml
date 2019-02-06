@@ -17,12 +17,12 @@
 tags: {  # amp-anim
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -34,20 +34,19 @@ tags: {  # amp-anim
   spec_name: "amp-anim extension .js script (AMP4EMAIL)"
   extension_spec: {
     name: "amp-anim"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-anim>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-ANIM"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
@@ -68,7 +67,6 @@ tags: {  # <amp-anim>
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"

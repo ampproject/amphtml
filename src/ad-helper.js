@@ -39,7 +39,7 @@ const CONTAINERS = {
  * @return {boolean}
  */
 function isPositionFixed(el, win) {
-  const position = computedStyle(win, el).position;
+  const {position} = computedStyle(win, el);
   // We consider sticky positions as fixed, since they can be fixed.
   return position == 'fixed' || position == 'sticky';
 }
@@ -82,13 +82,13 @@ export function isAdPositionAllowed(element, win) {
  */
 export function getAdContainer(element) {
   if (element[AD_CONTAINER_PROP] === undefined) {
-    let el = element;
-    do {
-      el = el.parentElement;
+    let el = element.parentElement;
+    while (el && el.tagName != 'BODY') {
       if (CONTAINERS[el.tagName]) {
         return element[AD_CONTAINER_PROP] = el.tagName;
       }
-    } while (el && el.tagName != 'BODY');
+      el = el.parentElement;
+    }
     element[AD_CONTAINER_PROP] = null;
   }
   return element[AD_CONTAINER_PROP];
@@ -98,6 +98,8 @@ export function getAdContainer(element) {
  * Gets the resource ID of the amp-ad element containing the passed node.
  * If there is no containing amp-ad tag, then null will be returned.
  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @param {!Element} node
+ * @param {!Window} topWin
  * @return {?string}
  */
 export function getAmpAdResourceId(node, topWin) {

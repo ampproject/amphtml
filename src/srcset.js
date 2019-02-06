@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from './log';
+import {devAssert, userAssert} from './log';
 
 
 /**
@@ -50,7 +50,7 @@ export function srcsetFromElement(element) {
   // We can't push `src` via `parseSrcset` because URLs in `src` are not always
   // RFC compliant and can't be easily parsed as an `srcset`. For instance,
   // they sometimes contain space characters.
-  const srcAttr = user().assert(element.getAttribute('src'),
+  const srcAttr = userAssert(element.getAttribute('src'),
       'Either non-empty "srcset" or "src" attribute must be specified: %s',
       element);
   return srcsetFromSrc(srcAttr);
@@ -114,7 +114,7 @@ export class Srcset {
    * @param {!Array<!SrcsetSourceDef>} sources
    */
   constructor(sources) {
-    user().assert(sources.length > 0, 'Srcset must have at least one source');
+    userAssert(sources.length > 0, 'Srcset must have at least one source');
     /** @private @const {!Array<!SrcsetSourceDef>} */
     this.sources_ = sources;
 
@@ -126,7 +126,7 @@ export class Srcset {
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
     }
-    user().assert(!!(hasWidth ^ hasDpr),
+    userAssert(!!(hasWidth ^ hasDpr),
         'Srcset must have width or dpr sources, but not both');
 
     // Source and assert duplicates.
@@ -165,8 +165,8 @@ export class Srcset {
    * @return {string}
    */
   select(width, dpr) {
-    dev().assert(width, 'width=%s', width);
-    dev().assert(dpr, 'dpr=%s', dpr);
+    devAssert(width, 'width=%s', width);
+    devAssert(dpr, 'dpr=%s', dpr);
     let index = 0;
     if (this.widthBased_) {
       index = this.selectByWidth_(width * dpr);
@@ -260,12 +260,26 @@ export class Srcset {
   }
 }
 
+/**
+ * Sorts by width
+ *
+ * @param {number} s1
+ * @param {number} s2
+ * @return {number}
+ */
 function sortByWidth(s1, s2) {
-  user().assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
+  userAssert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
   return s1.width - s2.width;
 }
 
+/**
+ * Sorts by dpr
+ *
+ * @param {!Object} s1
+ * @param {!Object} s2
+ * @return {number}
+ */
 function sortByDpr(s1, s2) {
-  user().assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
+  userAssert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
   return s1.dpr - s2.dpr;
 }

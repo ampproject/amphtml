@@ -15,6 +15,7 @@
  */
 
 import {doubleclick} from '../ads/google/doubleclick';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
@@ -67,9 +68,12 @@ export function imonomy(global, data) {
   }
 }
 
+/**
+ * @param {*} data
+ */
 function prepareData(data) {
   for (const attr in data) {
-    if (data.hasOwnProperty(attr) && imonomyData.indexOf(attr) >= 0) {
+    if (hasOwn(data, attr) && imonomyData.indexOf(attr) >= 0) {
       delete data[attr];
     }
   }
@@ -77,6 +81,10 @@ function prepareData(data) {
   data.targeting['IMONOMY_AMP'] = '1';
 }
 
+/**
+ * @param {*} data
+ * @param {number} code
+ */
 function reportStats(data, code) {
   try {
     if (code == EVENT_BADTAG) { return; }
@@ -87,8 +95,7 @@ function reportStats(data, code) {
     if (typeof window.context.location.href !== 'undefined') {
       pageLocation = encodeURIComponent(window.context.location.href);
     }
-    const subId = data.subId,
-        pid = data.pid,
+    const {subId, pid} = data,
         trackId = 'AMP',
         notFirst = true,
         cid = '',

@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, user} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
 import {matches} from '../../../../src/dom';
 
 /**
@@ -28,8 +28,8 @@ export class InactiveElementFilter extends Filter {
    * @param {!../config.InactiveElementConfig} spec
    */
   constructor(name, spec) {
-    super(name);
-    user().assert(isValidInactiveElementSpec(spec),
+    super(name, spec.type);
+    userAssert(isValidInactiveElementSpec(spec),
         'Invalid InactiveElementspec');
 
     /** @private {string} */

@@ -22,10 +22,9 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {dev, user} from '../src/log';
+import {devAssert, rethrowAsync, userAssert} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
-import {rethrowAsync} from '../src/log';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -57,7 +56,7 @@ export function getRegistrations() {
  */
 export function register(id, draw) {
   const registrations = getRegistrations();
-  dev().assert(!registrations[id], 'Double registration %s', id);
+  devAssert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }
 
@@ -69,7 +68,7 @@ export function register(id, draw) {
  */
 export function run(id, win, data) {
   const fn = registrations[id];
-  user().assert(fn, 'Unknown 3p: ' + id);
+  userAssert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
@@ -185,7 +184,7 @@ export function validateSrcContains(string, src) {
  *     done. The first argument is the result.
  */
 export function computeInMasterFrame(global, taskId, work, cb) {
-  const master = global.context.master;
+  const {master} = global.context;
   let tasks = master.__ampMasterTasks;
   if (!tasks) {
     tasks = master.__ampMasterTasks = {};
@@ -232,7 +231,7 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       validateExactlyOne(data, field);
       allowedFields = allowedFields.concat(field);
     } else {
-      user().assert(data[field],
+      userAssert(data[field],
           'Missing attribute for %s: %s.', data.type, field);
       allowedFields.push(field);
     }
@@ -249,7 +248,7 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
  * @param {!Array<string>} alternativeFields
  */
 function validateExactlyOne(data, alternativeFields) {
-  user().assert(alternativeFields.filter(field => data[field]).length === 1,
+  userAssert(alternativeFields.filter(field => data[field]).length === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));
@@ -272,13 +271,16 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
+    blockOnConsent: true,
     ampSlotIndex: true,
     adHolderText: true,
     loadingStrategy: true,
+    htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
-    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+    if (!hasOwn(data, field) || field in defaultAvailableFields) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
@@ -299,7 +301,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**

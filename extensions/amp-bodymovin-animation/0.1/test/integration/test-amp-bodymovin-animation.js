@@ -14,32 +14,57 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
-
-describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
+describe.configure().ifChrome().run('amp-bodymovin-animation', function() {
   const extensions = ['amp-bodymovin-animation'];
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
       layout="fixed" width="200" height="200"
-      src="https://nainar.github.io/loader.json">
-    </amp-bodymovin-animation>`;
+      src="testresource.json">
+    </amp-bodymovin-animation>
+    <div id="stop" on="tap:anim.stop">Stop</div>`;
+
   describes.integration('amp-bodymovin-animation iframe renders', {
     body: bodymovinBody,
     extensions,
-  }, () => {
+  }, unusedEnv => {
+    // TODO(nainar): Add test.
+  });
 
-    it('iframe renders', () => {
-      const loadPromise = waitForAnimationLoad();
-      return loadPromise.then(iframeExists => {
-        expect(iframeExists).to.be.true;
-      });
-    });
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinBody,
+    extensions,
+  }, unusedEnv => {
+    // TODO(nainar): Add test.
+  });
+
+  const bodymovinNoAutoplayBody = `
+    <amp-bodymovin-animation id="anim"
+      layout="fixed" width="200" height="200"
+      src="testresource.json"
+      noautoplay>
+    </amp-bodymovin-animation>
+    <div id="play" on="tap:anim.play">Play</div>
+    <div id="pause" on="tap:anim.pause">Pause</div>`;
+
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinNoAutoplayBody,
+    extensions,
+  }, unusedEnv => {
+    // TODO(nainar): Add test.
+  });
+
+  const bodymovinSeekToBody = `
+    <amp-bodymovin-animation id="anim"
+      layout="fixed" width="200" height="200"
+      src="testresource.json"
+      noautoplay>
+    </amp-bodymovin-animation>
+    <div id="seekToHalf" on="tap:anim.seekTo(percent=0.5)">Seek to 1/2</div>`;
+
+  describes.integration('amp-bodymovin-animation actions work', {
+    body: bodymovinSeekToBody,
+    extensions,
+  }, unusedEnv => {
+    // TODO(nainar): Add test.
   });
 });
-
-function waitForAnimationLoad() {
-  return poll('wait for iframe to load', () => {
-    const iframe = document.getElementsByTagName('iframe')[0];
-    return iframe !== null;
-  });
-}

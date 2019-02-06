@@ -19,8 +19,8 @@ tags: {
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-date-picker"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -68,6 +68,7 @@ tags: {
     value_casei: "single"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-single-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -121,6 +122,7 @@ tags: {
     value_casei: "range"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-range-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -165,22 +167,38 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
+  # amp-bind
+  attrs: { name: "[src]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[min]" }
 }
 
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "minimum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: { name: "start-date" }
   attrs: { name: "start-input-selector" }
+
 }
 
 attr_lists: {
   name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "date" }
   attrs: { name: "input-selector" }
 }
 
@@ -192,47 +210,34 @@ attr_lists: {
   }
 }
 
+attr_lists: {
+  name: "amp-date-picker-overlay-mode-attributes"
+  attrs: {
+    name: "touch-keyboard-editable"
+    value: ""
+  }
+}
+
 # HTML5, 4.11.3 The template element
 # The template element is also defined at
 # extensions/amp-mustache/validator-amp-mustache.protoascii
 tags: {
   html_format: AMP
   tag_name: "TEMPLATE"
-  spec_name: "amp-date-picker > template [date-template] [dates]"
+  spec_name: "amp-date-picker > template [date-template]"
   mandatory_parent: "AMP-DATE-PICKER"
   requires_extension: "amp-mustache"
   attrs: {
     name: "date-template"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    name: "dates"
-    mandatory: true
     dispatch_key: NAME_DISPATCH
-  }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "amp-mustache"
-  }
-}
-tags: {
-  html_format: AMP
-  tag_name: "TEMPLATE"
-  spec_name: "amp-date-picker > template [date-template] [default]"
-  mandatory_parent: "AMP-DATE-PICKER"
-  requires_extension: "amp-mustache"
-  attrs: {
-    name: "date-template"
-    mandatory: true
-    value: ""
   }
   attrs: {
     name: "default"
-    mandatory: true
-    value: ""
-    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "dates"
   }
   attrs: {
     name: "type"

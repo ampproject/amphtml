@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
@@ -24,15 +25,14 @@ import {
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
-const TAG = 'amp-analytics';
-
+const TAG = 'amp-analytics/analytics-root';
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -61,6 +61,9 @@ export class AnalyticsRoot {
 
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
+
+    /** @private {?./scroll-manager.ScrollManager} */
+    this.scrollManager_ = null;
   }
 
   /** @override */
@@ -71,6 +74,9 @@ export class AnalyticsRoot {
     }
     if (this.visibilityManager_) {
       this.visibilityManager_.dispose();
+    }
+    if (this.scrollManager_) {
+      this.scrollManager_.dispose();
     }
   }
 
@@ -162,7 +168,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -220,7 +226,7 @@ export class AnalyticsRoot {
           found = this.getRoot().querySelector(selector);
         }
       } catch (e) {
-        user().assert(false, `Invalid query selector ${selector}`);
+        userAssert(false, `Invalid query selector ${selector}`);
       }
 
       // DOM search can "look" outside the boundaries of the root, thus make
@@ -245,7 +251,7 @@ export class AnalyticsRoot {
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      user().assert(
+      userAssert(
           element.classList.contains('i-amphtml-element'),
           'Element "%s" is required to be an AMP element', selector);
       return element;
@@ -278,7 +284,7 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
-      let target = event.target;
+      let {target} = event;
       while (target) {
 
         // Target must be contained by this root.
@@ -299,7 +305,7 @@ export class AnalyticsRoot {
 
         // Check if the target matches the selector.
         if (isSelectAny ||
-            isSelectRoot && target == rootElement ||
+            (isSelectRoot && target == rootElement) ||
             matchesNoInline(target, selector)) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one
@@ -339,6 +345,20 @@ export class AnalyticsRoot {
    * @abstract
    */
   createVisibilityManager() {}
+
+  /**
+   *  Returns the Scroll Managet corresponding to this analytics root.
+   * The Scroll Manager is created lazily as needed, and will handle
+   * calling all handlers for a scroll event.
+   * @return {!./scroll-manager.ScrollManager}
+   */
+  getScrollManager() {
+    if (!this.scrollManager_) {
+      this.scrollManager_ = new ScrollManager(this.ampdoc);
+    }
+
+    return this.scrollManager_;
+  }
 }
 
 

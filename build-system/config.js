@@ -56,24 +56,13 @@ const builtRuntimePaths = [
   },
 ];
 
-const commonTestPaths =
+const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+
+const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
-const coveragePaths = [
-  {
-    pattern: 'test/coverage/**/*',
-    included: false,
-    nocache: false,
-    watched: false,
-  },
-];
-
-const simpleTestPath = [
-  'test/simple-test.js',
-];
-
-const testPaths = commonTestPaths.concat([
-  'test/**/*.js',
+const testPaths = commonIntegrationTestPaths.concat([
+  'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);
@@ -88,50 +77,76 @@ const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
 ];
 
-const unitTestPaths = initTestsPath.concat(fixturesExamplesPaths, [
-  'test/functional/**/*.js',
+const unitTestPaths = [
+  'test/unit/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
-]);
+];
 
-const unitTestOnSaucePaths = initTestsPath.concat(fixturesExamplesPaths, [
-  'test/functional/**/*.js',
+const unitTestOnSaucePaths = [
+  'test/unit/**/*.js',
   'ads/**/test/test-*.js',
-]);
+];
 
-const integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = [
   'test/integration/**/*.js',
-  'test/functional/test-error.js',
+  'test/unit/test-error.js',
   'extensions/**/test/integration/**/*.js',
-]);
+];
+
+const e2eTestPaths = [
+  'test/e2e/*.js',
+  'extensions/**/test-e2e/*.js',
+];
+
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
+];
+
+const lintGlobs = [
+  '**/*.js',
+  // To ignore a file / directory, add it to .eslintignore.
+];
+
+/**
+ * Array of 3p bootstrap urls
+ * Defined by the following object schema:
+ * basename: the name of the 3p frame without extension
+ * max: the path of the readable html
+ * min: the name of the minimized html
+ */
+const thirdPartyFrames = [
+  {
+    basename: 'frame',
+    max: '3p/frame.max.html',
+    min: 'frame.html',
+  },
+  {
+    basename: 'nameframe',
+    max: '3p/nameframe.max.html',
+    min: 'nameframe.html',
+  },
+  {
+    basename: 'recaptcha',
+    max: '3p/recaptcha.max.html',
+    min: 'recaptcha.html',
+  },
+];
 
 /** @const  */
 module.exports = {
-  commonTestPaths,
-  simpleTestPath,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
+  commonUnitTestPaths,
+  commonIntegrationTestPaths,
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
-  coveragePaths,
-  lintGlobs: [
-    '**/*.js',
-    '!**/*.extern.js',
-    '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party}/**/*.*',
-    '!examples/**/*.*',
-    // TODO: temporary, remove when validator is up to date
-    '!validator/**/*.*',
-    '!eslint-rules/**/*.*',
-    '!karma.conf.js',
-    '!**/local-amp-chrome-extension/background.js',
-    '!extensions/amp-access/0.1/access-expr-impl.js',
-    '!extensions/amp-animation/0.1/css-expr-impl.js',
-    '!extensions/amp-bind/0.1/bind-expr-impl.js',
-    '!test/coverage/**/*.*',
-  ],
+  e2eTestPaths,
+  lintGlobs,
+  devDashboardTestPaths,
+  thirdPartyFrames,
   jsonGlobs: [
     '**/*.json',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
@@ -146,12 +161,16 @@ module.exports = {
         'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
+    '!out/**/*.*',
+    '!validator/validator.pb.go',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
+    '!build-system/tasks/visual-diff/node_modules/**/*.*',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!third_party/**/*.*',
@@ -159,9 +178,10 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/*.js',
+    '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!firebase/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

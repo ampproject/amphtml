@@ -20,7 +20,17 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacy settings',
+    description: 'Title for a section that allows the user to configure ' +
+        'their privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Change data privacy settings',
+    description: 'Label for a button that allows the user to change their ' +
+        'choice to consent to providing their cookie access.',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
     description: 'Label for a button that allows the user to consent to ' +
@@ -31,10 +41,15 @@ export default {
     description: 'Label for a button that allows the user to disconsent to ' +
         'providing their cookie access.',
   },
-  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
-    string: 'Ok',
-    description: 'Label for a button that allows the user to dismiss the ' +
-        'cookie consent dialog.',
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'View on original domain:',
+    description: 'Label for a heading of a dialog that shows the user the ' +
+        'domain from which the story is served.',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'More about AMP results',
+    description: 'Label for a link to documentation on how AMP links are ' +
+        'handled.',
   },
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Enable',
@@ -146,4 +161,4 @@ export default {
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-};
+});

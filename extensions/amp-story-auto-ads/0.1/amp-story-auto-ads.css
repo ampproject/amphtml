@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+
+[desktop] amp-story-page[i-amphtml-loading] {
+  /* Move below viewport so that ad preloads */
+  transform: scale(1.0) translateX(-100%) translateY(200%) !important;
+}
+
 .i-amphtml-story-ad-link {
   background-color: #FFFFFF !important;
   border-radius: 20px !important;
@@ -21,16 +27,13 @@
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
   color: #4285F4 !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 0px !important;
   font-weight: bold !important;
   height: 36px !important;
   left: 50% !important;
   letter-spacing: 0.2px !important;
   line-height: 36px;
   margin-left: -60px !important;
-  opacity: 0 !important;
   position: absolute !important;
-  transform: scale(0) !important;
   text-align: center;
   text-decoration: none !important;
   width: 120px !important;
@@ -67,6 +70,24 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   z-index: 100001 !important;
 }
 
+[dir=rtl] .i-amphtml-ad-overlay-container {
+  left: auto !important;
+  right: 0 !important;
+}
+
+[desktop] .i-amphtml-ad-overlay-container {
+  /* On desktop a story page has a with of 45vh. */
+  left: calc(50vw - 22.5vh) !important;
+  /* And a height of 75 vh. */
+  top: 12.5vh !important;
+}
+
+[dir=rtl] [desktop] .i-amphtml-ad-overlay-container {
+  left: auto !important;
+  /* On desktop a story page has a with of 45vh. */
+  right: calc(50vw - 22.5vh) !important;
+}
+
 .i-amphtml-story-ad-attribution {
   color: #FFFFFF !important;
   font-size: 18px !important;
@@ -74,12 +95,25 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   font-weight: bold !important;
   letter-spacing: 0.5px !important;
   margin: 0 0 0 16px !important;
+  opacity: 0 !important;
   padding: 0 !important;
   visibility: hidden !important;
 }
 
+[dir=rtl] .i-amphtml-story-ad-attribution {
+  margin-left: 0px !important;
+  margin-right: 16px !important;
+}
+
+amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {
+  /* Have to wait for page to slide in. */
+  transition: opacity 0.1s linear 0.3s;
+}
+
+
 amp-story[ad-showing] .i-amphtml-story-ad-attribution {
   visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .i-amphtml-glass-pane {

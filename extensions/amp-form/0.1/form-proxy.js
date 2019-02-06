@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {Services} from '../../../src/services';
+import {dev, devAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
@@ -88,49 +88,60 @@ function createFormProxyConstr(win) {
   }
 
   const FormProxyProto = FormProxy.prototype;
+  const {Object} = win;
+  const ObjectProto = Object.prototype;
 
   // Hierarchy:
   //   Node  <==  Element <== HTMLElement <== HTMLFormElement
   //   EventTarget  <==  HTMLFormElement
-  const inheritance = [
+  const baseClasses = [
     win.HTMLFormElement,
-    win.HTMLElement,
-    win.Element,
-    win.Node,
     win.EventTarget,
   ];
-  inheritance.forEach(function(klass) {
-    const prototype = klass && klass.prototype;
-    for (const name in prototype) {
-      const property = win.Object.getOwnPropertyDescriptor(prototype, name);
+  const inheritance = baseClasses.reduce((all, klass) => {
+    let proto = klass && klass.prototype;
+    while (proto && proto !== ObjectProto) {
+      if (all.indexOf(proto) >= 0) {
+        break;
+      }
+      all.push(proto);
+      proto = Object.getPrototypeOf(proto);
+    }
+
+    return all;
+  }, []);
+
+  inheritance.forEach(proto => {
+    for (const name in proto) {
+      const property = win.Object.getOwnPropertyDescriptor(proto, name);
       if (!property ||
           // Exclude constants.
           name.toUpperCase() == name ||
           // Exclude on-events.
           startsWith(name, 'on') ||
           // Exclude properties that already been created.
-          win.Object.prototype.hasOwnProperty.call(FormProxyProto, name) ||
+          ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
           // Exclude some properties. Currently only used for testing.
-          blacklistedProperties && blacklistedProperties.indexOf(name) != -1) {
+          (blacklistedProperties && blacklistedProperties.includes(name))) {
         continue;
       }
       if (typeof property.value == 'function') {
         // A method call. Call the original prototype method via `call`.
         const method = property.value;
         FormProxyProto[name] = function() {
-          return method.apply(this.form_, arguments);
+          return method.apply(/** @type {!FormProxy} */(this).form_, arguments);
         };
       } else {
         // A read/write property. Call the original prototype getter/setter.
         const spec = {};
         if (property.get) {
           spec.get = function() {
-            return property.get.call(this.form_);
+            return property.get.call(/** @type {!FormProxy} */(this).form_);
           };
         }
         if (property.set) {
-          spec.set = function(value) {
-            return property.set.call(this.form_, value);
+          spec.set = function(v) {
+            return property.set.call(/** @type {!FormProxy} */(this).form_, v);
           };
         }
         win.Object.defineProperty(FormProxyProto, name, spec);
@@ -176,8 +187,7 @@ function setupLegacyProxy(form, proxy) {
           // The overriding input, if present, has to be removed and re-added
           // (renaming does NOT work). Completely insane, I know.
           const element = dev().assertElement(current);
-          const nextSibling = element.nextSibling;
-          const parent = element.parentNode;
+          const {nextSibling, parentNode: parent} = element;
           parent.removeChild(element);
           try {
             actual = form[name];
@@ -198,17 +208,21 @@ function setupLegacyProxy(form, proxy) {
         const attr = desc.attr || name;
         Object.defineProperty(proxy, name, {
           get() {
-            let value = proxy.getAttribute(attr);
+            const value = proxy.getAttribute(attr);
             if (value == null && desc.def !== undefined) {
-              value = desc.def;
-            } else if (desc.type == LegacyPropDataType.BOOL) {
-              value = (value === 'true');
-            } else if (desc.type == LegacyPropDataType.TOGGLE) {
-              value = (value != null);
-            } else if (desc.type == LegacyPropDataType.URL) {
+              return desc.def;
+            }
+            if (desc.type == LegacyPropDataType.BOOL) {
+              return (value === 'true');
+            }
+            if (desc.type == LegacyPropDataType.TOGGLE) {
+              return (value != null);
+            }
+            if (desc.type == LegacyPropDataType.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
               // document's base.
-              value = parseUrl(/** @type {string} */ (value || '')).href;
+              const str = /** @type {string} */ (value || '');
+              return Services.urlForDoc(form).parse(str).href;
             }
             return value;
           },
@@ -228,7 +242,7 @@ function setupLegacyProxy(form, proxy) {
           },
         });
       } else {
-        dev().assert(false, 'unknown property access type: %s', desc.access);
+        devAssert(false, 'unknown property access type: %s', desc.access);
       }
     } else {
       // Not a known property - proxy directly.

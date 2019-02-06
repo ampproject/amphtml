@@ -22,22 +22,24 @@ export class BookendComponentInterface {
 
   /**
    * Asserts whether the comopnent is valid.
-   * @param {../bookend-component.BookendComponentDef} opt_componentJson
+   * @param {../bookend-component.BookendComponentDef} unusedComponentJson
+   * @param {!Element} unusedElement
    */
-  assertValidity(opt_componentJson) {}
+  assertValidity(unusedComponentJson, unusedElement) {}
 
   /**
    * Builds the component.
-   * @param {../bookend-component.BookendComponentDef} opt_componentJson
+   * @param {../bookend-component.BookendComponentDef} unusedComponentJson
+   * @param {!Element} unusedElement
    * @return {../bookend-component.BookendComponentDef}
    */
-  build(opt_componentJson) {}
+  build(unusedComponentJson, unusedElement) {}
 
   /**
-   * Builds the template for the component.
-   * @param {../bookend-component.BookendComponentDef} opt_componentJson
-   * @param {!Document} opt_doc
+   * Builds the DOM element for the component.
+   * @param {../bookend-component.BookendComponentDef} unusedComponentJson
+   * @param {!Document} unusedDoc
    * @return {!Element}
    */
-  buildTemplate(opt_componentJson, opt_doc) {}
+  buildElement(unusedComponentJson, unusedDoc) {}
 }

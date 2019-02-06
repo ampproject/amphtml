@@ -45,10 +45,82 @@
             [src]="foo.bar" [state]="baz.qux">
     <div></div>
   </amp-list>
-  <!-- Valid amp-list with reset-on-refresh attribute -->
+  <!-- Valid: amp-list with src and reset-on-refresh attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
             reset-on-refresh>
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with src and reset-on-refresh="fetch" attributes -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            reset-on-refresh="fetch">
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with src and reset-on-refresh="always" attributes -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            reset-on-refresh="always">
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with [src] and reset-on-refresh attributes -->
+  <amp-list width=10 height=10
+            [src]="foo.bar"
+            reset-on-refresh>
+    <div></div>
+  </amp-list>
+  <!-- Valid amp-list with binding="refresh" attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="refresh">
+    <div></div>
+  </amp-list>
+  <!-- Valid amp-list with binding="no" attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="no">
+    <div></div>
+  </amp-list>
+  <!-- Valid amp-list with deprecated auto-resize attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    auto-resize>
+  <div></div>
+  <!-- Valid amp-list with load-more="auto" attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="auto"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with load-more="manual" attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with load-more and optional load-more-bookmark attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with custom children -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next">
+    <amp-list-load-more load-more-button></amp-list-load-more>
+    <amp-list-load-more load-more-loading></amp-list-load-more>
+    <amp-list-load-more load-more-failed></amp-list-load-more>
+    <amp-list-load-more load-more-end></amp-list-load-more>
+  </amp-list>
+  <!-- Valid amp-list with [is-layout-container] attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    [is-layout-container]="containerState"></amp-list>
+  </amp-list>
+  <!-- Invalid: unsupported "binding" attribute value -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="this-is-an-error">
     <div></div>
   </amp-list>
   <!-- Invalid: width is mistyped. -->
@@ -56,7 +128,7 @@
             wdith=10 height=10>
     <div></div>
   </amp-list>
-  <!-- Invalid: src is missing. -->
+  <!-- Invalid: missing at least src or [src]. -->
   <amp-list width=10 height=10>
     <div></div>
   </amp-list>
@@ -65,5 +137,22 @@
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
+  <!-- Invalid amp-list with load-more attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more></amp-list>
+  </amp-list>
+  <!-- Invalid amp-list with bad load-more attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="gibberish"
+    load-more-bookmark="next"></amp-list>
+  </amp-list>
+  <!-- Invalid load-more attributes -->
+  <div load-more-button></div>
+  <div load-more-loading></div>
+  <div load-more-failed></div>
+  <div load-more-end></div>
+  <amp-list-load-more></amp-list-load-more>
 </body>
 </html>

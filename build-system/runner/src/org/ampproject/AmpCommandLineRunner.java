@@ -44,13 +44,15 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   private boolean is_production_env = true;
 
+  private boolean single_file_compilation = false;
+
   /**
    * List of string suffixes to eliminate from the AST.
    */
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev", ImmutableSet.of(
           "assert", "fine", "assertElement", "assertString",
-          "assertNumber", "assertBoolean"),
+          "assertNumber", "assertBoolean", "assertArray"),
       "module$src$log.user", ImmutableSet.of("fine"));
 
 
@@ -78,18 +80,23 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
-    options.optimizeParameters = true;
-    options.optimizeReturns = true;
     options.optimizeCalls = true;
-    // Have to turn this off because we cannot know whether sub classes
-    // might override a method. In the future this might be doable
-    // with using a more complete extern file instead.
-    options.setRemoveUnusedPrototypeProperties(false);
-    options.setInlineProperties(false);
-    options.setComputeFunctionSideEffects(false);
-    // Property renaming. Relies on AmpCodingConvention to be safe.
-    options.setRenamingPolicy(VariableRenamingPolicy.ALL,
-        PropertyRenamingPolicy.ALL_UNQUOTED);
+    if (single_file_compilation) {
+      options.renamePrefixNamespace = "_";
+    } else {
+      // Have to turn this off because we cannot know whether sub classes
+      // might override a method. In the future this might be doable
+      // with using a more complete extern file instead.
+      options.setRemoveUnusedPrototypeProperties(false);
+      options.setInlineProperties(false);
+      options.setComputeFunctionSideEffects(false);
+      // Since we are not computing function side effects, at least let the
+      // compiler remove calls to functions with `@nosideeffects`.
+      options.setMarkNoSideEffectCalls(true);
+      // Property renaming. Relies on AmpCodingConvention to be safe.
+      options.setRenamingPolicy(VariableRenamingPolicy.ALL,
+          PropertyRenamingPolicy.ALL_UNQUOTED);
+    }
     options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
     return options;
@@ -98,7 +105,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected void setRunOptions(CompilerOptions options)
       throws IOException, FlagUsageException {
     super.setRunOptions(options);
-    options.setCodingConvention(new AmpCodingConvention());
+    options.setCodingConvention(new AmpCodingConvention(single_file_compilation));
   }
 
   /**
@@ -116,12 +123,14 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
-      if (arg.contains("--define=TYPECHECK_ONLY=true")) {
+      if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
-      } else if (arg.contains("--define=FORTESTING=true")) {
+      } else if (arg.contains("FORTESTING=true")) {
         runner.is_production_env = false;
-      } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
+      } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
+      } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
+        runner.single_file_compilation = true;
       }
     }
 

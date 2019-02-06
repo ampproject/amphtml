@@ -5,16 +5,7 @@
 
 /*global define: false Mustache: true*/
 
-(function defineMustache (global, factory) {
-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
-    factory(exports); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory); // AMD
-  } else {
-    global.Mustache = {};
-    factory(Mustache); // script, wsh, asp
-  }
-}(this, function mustacheFactory (mustache) {
+function mustacheFactory (mustache) {
 
   var objectToString = Object.prototype.toString;
   var isArray = Array.isArray || function isArrayPolyfill (object) {
@@ -640,7 +631,7 @@
 
   // Export the sanitizing function for unescaped values.
   mustache.sanitizeUnescaped = null;
-  mustache.setUnescapedSanitizier = function setUnescapedSanitizier (sanitizeUnescaped) {
+  mustache.setUnescapedSanitizer = function setUnescapedSanitizer(sanitizeUnescaped) {
     mustache.sanitizeUnescaped = sanitizeUnescaped;
   };
 
@@ -649,4 +640,8 @@
   mustache.Context = Context;
   mustache.Writer = Writer;
 
-}));
+};
+
+const Mustache = {};
+mustacheFactory(Mustache);
+export default Mustache;

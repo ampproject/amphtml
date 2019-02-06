@@ -89,7 +89,7 @@ export function ownProperty(obj, key) {
  *                       will be used instead.
  * @return {!Object}
  * @throws {Error} If source contains a circular reference.
- * @note Only nested objects are deep-merged, primitives and arrays are not.
+ * Note: Only nested objects are deep-merged, primitives and arrays are not.
  */
 export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.

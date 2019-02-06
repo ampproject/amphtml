@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
 
@@ -189,9 +190,9 @@ export class Vsync {
     if (this.nextFramePromise_) {
       return this.nextFramePromise_;
     }
-    return this.nextFramePromise_ = new Promise(resolve => {
-      this.nextFrameResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextFrameResolver_ = deferred.resolve;
+    return this.nextFramePromise_ = deferred.promise;
   }
 
   /**
@@ -259,7 +260,7 @@ export class Vsync {
    * @return {boolean}
    */
   canAnimate(contextNode) {
-    return this.canAnimate_(dev().assert(contextNode));
+    return this.canAnimate_(devAssert(contextNode));
   }
 
   /**
@@ -280,8 +281,8 @@ export class Vsync {
 
     // Multi-doc: animations depend on the state of the relevant doc.
     if (opt_contextNode) {
-      const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
-      return Services.viewerForDoc(ampdoc).isVisible();
+      const ampdoc = this.ampdocService_.getAmpDocIfAvailable(opt_contextNode);
+      return !ampdoc || Services.viewerForDoc(ampdoc).isVisible();
     }
 
     return true;
@@ -391,9 +392,11 @@ export class Vsync {
     this.scheduled_ = false;
     this.jankMeter_.onRun();
 
-    const tasks = this.tasks_;
-    const states = this.states_;
-    const resolver = this.nextFrameResolver_;
+    const {
+      tasks_: tasks,
+      states_: states,
+      nextFrameResolver_: resolver,
+    } = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering
@@ -450,7 +453,7 @@ export class Vsync {
  * @param {!VsyncStateDef} state
  */
 function callTaskNoInline(callback, state) {
-  dev().assert(callback);
+  devAssert(callback);
   try {
     callback(state);
   } catch (e) {

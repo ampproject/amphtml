@@ -27,8 +27,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -73,12 +73,22 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
+/**
+ * Grid layer template templating system.
+ */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private @const {boolean} Only prerender if child of the first page. */
+    /** @private {boolean} */
+    this.prerenderAllowed_ = false;
+  }
+
+
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender if child of the first page.
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type amp-story-grid-layer');
   }
@@ -147,14 +157,16 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    *     its attributes.
    */
   setCssGridStyles_(element) {
+    const styles = {};
     for (let i = element.attributes.length - 1; i >= 0; i--) {
       const attribute = element.attributes[i];
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
-        setStyle(element, propertyName, attribute.value);
+        styles[propertyName] = attribute.value;
         element.removeAttribute(attributeName);
       }
     }
+    setStyles(element, assertDoesNotContainDisplay(styles));
   }
 }

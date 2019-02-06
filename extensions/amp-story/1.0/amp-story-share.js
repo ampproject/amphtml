@@ -20,9 +20,10 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
-import {isArray, isObject} from '../../../src/types';
+import {getRequestService} from './amp-story-request-service';
+import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
@@ -62,11 +63,16 @@ const DEFAULT_BUTTON_PADDING = 16;
 const MIN_BUTTON_PADDING = 10;
 
 /**
- * Share providers tag.
+ * Key for share providers in bookend config.
  * @private @const {string}
  */
-const SHARE_PROVIDERS = 'share-providers';
+export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
+/**
+ * Deprecated key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -99,7 +105,13 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+  children: [
+    {
+      tag: 'span',
+      attrs: dict({'class': 'i-amphtml-story-share-label'}),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+    },
+  ],
 };
 
 
@@ -116,6 +128,7 @@ function buildProviderParams(opt_params) {
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field => {
+      if (field === 'provider') { return; }
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -131,7 +144,7 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = dev().assert(
+  const shareProviderLocalizedStringId = devAssert(
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
       `No localized string to display name for share type ${shareType}.`);
 
@@ -142,12 +155,18 @@ function buildProvider(doc, shareType, opt_params) {
           attrs: /** @type {!JsonObject} */ (Object.assign(
               dict({
                 'width': 48,
-                'height': 66,
+                'height': 48,
                 'class': 'i-amphtml-story-share-icon',
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          localizedStringId: shareProviderLocalizedStringId,
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({'class': 'i-amphtml-story-share-label'}),
+              localizedStringId: shareProviderLocalizedStringId,
+            },
+          ],
         },
       ]));
 }
@@ -182,13 +201,19 @@ function buildCopySuccessfulToast(doc, url) {
  * Social share widget for story bookend.
  */
 export class ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
     /** @protected @const {!Window} */
     this.win = win;
+
+    /** @protected @const {!Element} */
+    this.storyEl = storyEl;
 
     /** @protected {?Element} */
     this.root = null;
@@ -197,12 +222,16 @@ export class ShareWidget {
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win);
+    this.requestService_ = getRequestService(this.win, storyEl);
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ShareWidget(win, storyEl);
   }
 
   /**
@@ -210,7 +239,7 @@ export class ShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    dev().assert(!this.root, 'Already built.');
+    devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
     this.localizationServicePromise_ =
@@ -231,7 +260,7 @@ export class ShareWidget {
    */
   getAmpDoc_() {
     return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-      dev().assert(this.ampdoc_));
+      devAssert(this.ampdoc_));
   }
 
   /** @private */
@@ -253,22 +282,21 @@ export class ShareWidget {
   }
 
   /** @private */
-  // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
-        dev().assert(localizationService,
+        devAssert(localizationService,
             'Could not retrieve LocalizationService.');
         const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
-        Toast.show(this.win, failureString);
+        Toast.show(this.storyEl, failureString);
       });
       return;
     }
 
-    Toast.show(this.win, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */
@@ -313,7 +341,8 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config[SHARE_PROVIDERS];
+      const providers = config && (config[SHARE_PROVIDERS_KEY] ||
+        config[DEPRECATED_SHARE_PROVIDERS_KEY]);
       if (!providers) {
         return;
       }
@@ -322,66 +351,26 @@ export class ShareWidget {
   }
 
   /**
-   * TODO(#14591): Remove when bookend API v0.1 is deprecated.
-   * If using the bookend API v1.0, converts the contents to match with the bookend API v0.1.
-   * @param {!Array<!Object|string>} providers
-   * @return {!Object<string, (!JsonObject|boolean)>}
-   */
-  parseToClassicApi_(providers) {
-    const providersMap = {};
-
-    providers.forEach(currentProvider => {
-      if (!isObject(currentProvider)) {
-        providersMap[currentProvider] = true;
-        return;
-      }
-      if (currentProvider['provider'] == 'facebook') {
-        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
-        return;
-      }
-      providersMap[currentProvider['provider']] = true;
-    });
-
-    return providersMap;
-  }
-
-  /**
    * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
    * @private
+   * TODO(alanorozco): Set story metadata in share config.
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
-    if (providers && isArray(providers)) {
-      providers = this.parseToClassicApi_(
-          /** @type !Array<!Object|string> */ (providers));
-    }
+    providers.forEach(provider => {
+      if (isObject(provider)) {
+        this.add_(buildProvider(this.win.document,
+            provider['provider'], provider));
+        return;
+      }
 
-    Object.keys(providers).forEach(type => {
-      if (type == 'system') {
+      if (provider == 'system') {
         user().warn('AMP-STORY',
             '`system` is not a valid share provider type. Native sharing is ' +
             'enabled by default and cannot be turned off.',
-            type);
+            provider);
         return;
       }
-
-      if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win.document, type,
-            /** @type {!JsonObject} */ (providers[type])));
-        return;
-      }
-
-      // Bookend config API requires real boolean, not just truthy
-      if (providers[type] === true) {
-        this.add_(buildProvider(this.win.document, type));
-        return;
-      }
-
-      user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+      this.add_(buildProvider(this.win.document, provider));
     });
   }
 
@@ -398,7 +387,7 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = dev().assert(this.root).firstElementChild;
+    const list = devAssert(this.root).firstElementChild;
     const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
@@ -415,9 +404,12 @@ export class ShareWidget {
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
 export class ScrollableShareWidget extends ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
+    super(win, storyEl);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
@@ -430,9 +422,13 @@ export class ScrollableShareWidget extends ShareWidget {
     this.containerWidth_ = null;
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ScrollableShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ScrollableShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ScrollableShareWidget(win, storyEl);
   }
 
   /**
@@ -445,8 +441,20 @@ export class ScrollableShareWidget extends ShareWidget {
     this.root.classList.add(SCROLLABLE_CLASSNAME);
 
     Services.viewportForDoc(ampdoc).onResize(
-        // we don't require a lot of smoothness here, so we throttle
         throttle(this.win, () => this.applyButtonPadding_(), 100));
+
+    this.vsync_.measure(() => {
+      // If the element is actually scrollable, don't propagate the touch events
+      // so it is not interpreted as a swipe to the next story.
+      if (this.root./*OK*/offsetWidth < this.root./*OK*/scrollWidth) {
+        this.root.addEventListener(
+            'touchstart', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchmove', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchend', event => event.stopPropagation(), {capture: true});
+      }
+    });
 
     return this.root;
   }
@@ -473,30 +481,31 @@ export class ScrollableShareWidget extends ShareWidget {
           return;
         }
 
-        const icon = dev().assert(items[0].firstElementChild);
+        const icon = devAssert(items[0].firstElementChild);
 
         const leftMargin = icon./*OK*/offsetLeft - this.root./*OK*/offsetLeft;
         const iconWidth = icon./*OK*/offsetWidth;
 
         // Total width that the buttons will occupy with minimum padding.
         const totalItemWidth =
-            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+            (iconWidth * items.length) + ((2 * MIN_BUTTON_PADDING) *
                 (items.length - 1));
 
         // If buttons don't fit within the available area, calculate padding so
         // that there will be an element cut-off.
-        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
-          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+        if (totalItemWidth > (containerWidth - (leftMargin * 2))) {
+          const availableWidth = containerWidth - leftMargin - (iconWidth / 2);
           const amountVisible =
-              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+              Math.floor(
+                  availableWidth / (iconWidth + (MIN_BUTTON_PADDING * 2)));
 
-          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+          state.padding = 0.5 * ((availableWidth / amountVisible) - iconWidth);
         } else {
           // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
           // so that all elements fit and take as much area as possible.
           const totalPadding =
-              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
-              (items.length - 1);
+              ((containerWidth - (leftMargin * 2)) -
+              (iconWidth * items.length)) / (items.length - 1);
 
           state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
         }

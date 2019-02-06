@@ -16,7 +16,8 @@
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {listenFor} from '../../../src/iframe-helper';
+import {userAssert} from '../../../src/log';
 
 class AmpReddit extends AMP.BaseElement {
 
@@ -50,15 +51,19 @@ class AmpReddit extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    user().assert(this.element.getAttribute('data-src'),
+    userAssert(this.element.getAttribute('data-src'),
         'The data-src attribute is required for <amp-reddit> %s',
         this.element);
-    user().assert(this.element.getAttribute('data-embedtype'),
+    userAssert(this.element.getAttribute('data-embedtype'),
         'The data-embedtype attribute is required for <amp-reddit> %s',
         this.element);
 
-    const iframe = getIframe(this.win, this.element, 'reddit');
+    const iframe = getIframe(this.win, this.element, 'reddit', null,
+        {allowFullscreen: true});
     this.applyFillContent(iframe);
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }

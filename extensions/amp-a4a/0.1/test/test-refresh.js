@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
@@ -22,7 +21,9 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {RefreshIntersectionObserverWrapper} from '../refresh-intersection-observer-wrapper';
+import {
+  RefreshIntersectionObserverWrapper,
+} from '../refresh-intersection-observer-wrapper';
 import {Services} from '../../../../src/services';
 
 function getTestElement() {
@@ -44,7 +45,7 @@ describe('refresh', () => {
   };
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockA4a = {
       win: window,
       element: getTestElement(),
@@ -141,8 +142,7 @@ describe('refresh', () => {
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.
-      const initiateRefreshCycle =
-          RefreshManager.prototype.initiateRefreshCycle;
+      const {initiateRefreshCycle} = RefreshManager.prototype;
       RefreshManager.prototype.initiateRefreshCycle = () => {};
 
       const refreshManager = new RefreshManager(mockA4a, config, 30000);
@@ -182,6 +182,19 @@ describe('refresh', () => {
         y: 0,
       });
 
+      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getRect,
+        };
+      });
+      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+        return {
+          getRootNode: () => {return window.document;},
+          win: window,
+          isSingleDoc: () => {return true;},
+        };
+      });
+
       mockA4a.element.setAttribute(DATA_MANAGER_ID_NAME, '0');
       mockA4a.element.viewportCallback = () => {};
       mockA4a.element.getLayoutBox = getRect;
@@ -199,7 +212,6 @@ describe('refresh', () => {
 
     it('should invoke callback with intersection ratio 1', () => {
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(true);
       return callbackPromise.then(entries => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
@@ -221,7 +233,6 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(true);
       return callbackPromise.then(entries => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
@@ -244,7 +255,6 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(false);
       return Services.timerFor(window).promise(500).then(() => {
         expect(callbackSpy).to.not.be.called;
       });

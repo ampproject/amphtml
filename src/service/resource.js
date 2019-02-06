@@ -15,13 +15,15 @@
  */
 
 import {AmpEvents} from '../amp-events';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
+  layoutRectSizeEquals,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
@@ -73,6 +75,13 @@ export const ResourceState = {
 };
 
 
+/** @typedef {{
+  distance: (boolean|number),
+    viewportHeight: (number|undefined),
+    scrollPenalty: (number|undefined),
+  }} */
+let ViewportRatioDef;
+
 /**
  * A Resource binding for an AmpElement.
  * @package
@@ -85,7 +94,7 @@ export class Resource {
    */
   static forElement(element) {
     return /** @type {!Resource} */ (
-      dev().assert(Resource.forElementOptional(element),
+      devAssert(Resource.forElementOptional(element),
           'Missing resource prop on %s', element));
   }
 
@@ -104,7 +113,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev().assert(owner.contains(element), 'Owner must contain the element');
+    devAssert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
       Resource.forElementOptional(element).updateOwner(owner);
     }
@@ -177,11 +186,12 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {?Promise} */
-    this.renderOutsideViewportPromise_ = null;
-
-    /** @private {?Function} */
-    this.renderOutsideViewportResolve_ = null;
+    /**
+     * Really, this is a <number, !Deferred> map,
+     * but CC's type system can't handle it.
+     * @private {?Object<string, !Deferred>}
+     */
+    this.withViewportDeferreds_ = null;
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
@@ -195,13 +205,13 @@ export class Resource {
     /** @private {boolean} */
     this.loadedOnce_ = false;
 
-    /** @private {?Function} */
-    this.loadPromiseResolve_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.loadPromise_ = new Promise(resolve => {
-      this.loadPromiseResolve_ = resolve;
-    });
+    this.loadPromise_ = deferred.promise;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = deferred.resolve;
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
@@ -318,7 +328,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox());
+        this.element.updateLayoutBox(this.getLayoutBox(), true);
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -328,13 +338,21 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      if (!isBlockedByConsent(reason)) {
-        dev().error(TAG, 'failed to build:', this.debugid, reason);
-      }
+      this.maybeReportErrorOnBuildFailure(reason);
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
+  }
+
+  /**
+   * @param {*} reason
+   * @visibleForTesting
+   */
+  maybeReportErrorOnBuildFailure(reason) {
+    if (!isBlockedByConsent(reason)) {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+    }
   }
 
   /**
@@ -363,8 +381,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
-   *     requestedMargins
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
     requestedMargins) {
@@ -379,6 +396,7 @@ export class Resource {
         requestedMargins);
   }
 
+  /** reset pending change sizes */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -421,20 +439,18 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    const oldBox = this.getPageLayoutBox();
+    const oldBox = this.layoutBox_;
     if (this.useLayers_) {
       this.measureViaLayers_();
     } else {
       this.measureViaResources_();
     }
-    const box = this.getPageLayoutBox();
+    const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
+    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
+          oldBox.top != box.top || sizeChanges) {
       if (this.element.isUpgraded() &&
               this.state_ != ResourceState.NOT_BUILT &&
               (this.state_ == ResourceState.NOT_LAID_OUT ||
@@ -447,9 +463,10 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
 
-    this.element.updateLayoutBox(box);
+    this.element.updateLayoutBox(box, sizeChanges);
   }
 
+  /** Use resources for measurement */
   measureViaResources_() {
     const viewport = this.resources_.getViewport();
     const box = this.resources_.getViewport().getLayoutRect(this.element);
@@ -458,8 +475,8 @@ export class Resource {
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const win = this.resources_.win;
-      const body = win.document.body;
+      const {win} = this.resources_;
+      const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
@@ -483,6 +500,7 @@ export class Resource {
     }
   }
 
+  /** Use layers for measurement */
   measureViaLayers_() {
     const {element} = this;
     const layers = element.getLayers();
@@ -498,6 +516,7 @@ export class Resource {
      * for both 2 and 3, we need for force it.
      */
     layers.remeasure(element, /* opt_force */ true);
+    this.layoutBox_ = this.getPageLayoutBox();
   }
 
   /**
@@ -528,7 +547,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 
@@ -647,51 +665,55 @@ export class Resource {
   }
 
   /**
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
    * @return {!Promise} resolves when underlying element is built and within the
-   *    range specified by implementation's renderOutsideViewport
+   *    viewport range given.
    */
-  whenWithinRenderOutsideViewport() {
-    if (!this.isLayoutPending()) {
+  whenWithinViewport(viewport) {
+    devAssert(viewport !== false);
+    // Resolve is already laid out or viewport is true.
+    if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
     }
-    if (this.renderOutsideViewportPromise_) {
-      return this.renderOutsideViewportPromise_;
+    // See if pre-existing promise.
+    const viewportNum = dev().assertNumber(viewport);
+    const key = String(viewportNum);
+    if (this.withViewportDeferreds_ &&
+        this.withViewportDeferreds_[key]) {
+      return this.withViewportDeferreds_[key].promise;
     }
-    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
-      this.renderOutsideViewportResolve_ = resolver;
-    });
+    // See if already within viewport multiplier.
+    if (this.isWithinViewportRatio(viewportNum)) {
+      return Promise.resolve();
+    }
+    // return promise that will trigger when within viewport multiple.
+    this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
+    this.withViewportDeferreds_[key] = new Deferred();
+    return this.withViewportDeferreds_[key].promise;
   }
 
-  /**
-   * @private resolves render outside viewport promise if one was created via
-   *    whenWithinRenderOutsideViewport.
-   */
-  resolveRenderOutsideViewport_() {
-    if (!this.renderOutsideViewportResolve_) {
+  /** @private resolves promises populated via whenWithinViewport. */
+  resolveDeferredsWhenWithinViewports_() {
+    if (!this.withViewportDeferreds_) {
       return;
     }
-    this.renderOutsideViewportResolve_();
-    this.renderOutsideViewportPromise_ = null;
-    this.renderOutsideViewportResolve_ = null;
+    const viewportRatio = this.getDistanceViewportRatio();
+    for (const key in this.withViewportDeferreds_) {
+      if (this.isWithinViewportRatio(parseFloat(key), viewportRatio)) {
+        this.withViewportDeferreds_[key].resolve();
+        delete this.withViewportDeferreds_[key];
+      }
+    }
   }
 
-  /**
-   * @param {number|boolean} multiplier
-   * @return {boolean} whether resource is within provider multiplier of
-   *    viewports from current visible viewport.
-   * @visibleForTesting
-   */
-  withinViewportMultiplier(multiplier) {
-    // Boolean interface controls explicit result.
-    if (multiplier === true || multiplier === false) {
-      return multiplier;
-    }
-    multiplier = Math.max(multiplier, 0);
-
+  /** @return {!ViewportRatioDef} */
+  getDistanceViewportRatio() {
     if (this.useLayers_) {
       const {element} = this;
-      return element.getLayers().iterateAncestry(element,
-          this.layersDistanceRatio_);
+      return {
+        distance: element.getLayers().iterateAncestry(element,
+            this.layersDistanceRatio_),
+      };
     }
 
     // Numeric interface, element is allowed to render outside viewport when it
@@ -704,8 +726,9 @@ export class Resource {
 
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+      // If outside of viewport's x-axis, element is not in viewport so return
+      // false.
+      return {distance: false};
     }
 
     if (viewportBox.bottom < layoutBox.top) {
@@ -725,10 +748,31 @@ export class Resource {
         scrollPenalty = 2;
       }
     } else {
-      // Element is in viewport
-      return true;
+      // Element is in viewport so return true for all but boolean false.
+      return {distance: true};
     }
-    return distance < viewportBox.height * multiplier / scrollPenalty;
+    return {distance, scrollPenalty, viewportHeight: viewportBox.height};
+  }
+
+  /**
+   * @param {number|boolean} multiplier
+   * @param {ViewportRatioDef=} opt_viewportRatio
+   * @return {boolean} whether multiplier given is within viewport ratio
+   * @visibleForTesting
+   */
+  isWithinViewportRatio(multiplier, opt_viewportRatio) {
+    if (typeof multiplier === 'boolean') {
+      return multiplier;
+    }
+    const {distance, scrollPenalty, viewportHeight} =
+      opt_viewportRatio || this.getDistanceViewportRatio();
+    if (this.useLayers_) {
+      return dev().assertNumber(distance) < multiplier;
+    }
+    if (typeof distance == 'boolean') {
+      return distance;
+    }
+    return distance < viewportHeight * multiplier / scrollPenalty;
   }
 
   /**
@@ -736,12 +780,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
@@ -760,15 +805,9 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    if (this.hasOwner()) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    if (this.withinViewportMultiplier(this.element.renderOutsideViewport())) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    return false;
+    this.resolveDeferredsWhenWithinViewports_();
+    return this.hasOwner() || this.isWithinViewportRatio(
+        this.element.renderOutsideViewport());
   }
 
   /**
@@ -777,7 +816,7 @@ export class Resource {
    * @return {boolean}
    */
   idleRenderOutsideViewport() {
-    return this.withinViewportMultiplier(
+    return this.isWithinViewportRatio(
         this.element.idleRenderOutsideViewport());
   }
 
@@ -818,9 +857,9 @@ export class Resource {
       return Promise.reject(this.lastLayoutError_);
     }
 
-    dev().assert(this.state_ != ResourceState.NOT_BUILT,
+    devAssert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
-    dev().assert(this.isDisplayed(),
+    devAssert(this.isDisplayed(),
         'Not displayed for layout: %s', this.debugid);
 
     // Unwanted re-layouts are ignored.
@@ -902,7 +941,11 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.element.isInViewport();
+    const isInViewport = this.element.isInViewport();
+    if (isInViewport) {
+      this.resolveDeferredsWhenWithinViewports_();
+    }
+    return isInViewport;
   }
 
   /**
@@ -933,8 +976,8 @@ export class Resource {
 
   /**
    * Returns the task ID for this resource.
-   * @param localId
-   * @returns {string}
+   * @param {string} localId
+   * @return {string}
    */
   getTaskId(localId) {
     return this.debugid + '#' + localId;
@@ -978,6 +1021,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

@@ -18,9 +18,10 @@ const MAX_HEX = 0xffffffff;
 const CUID_SESSION_TIME = Date.now();
 
 /**
- * Get the date from the CUID (first 8 hex digits are the time from epoch in seconds).
+ * Get the date from the CUID (first 8 hex digits are the time from epoch in
+ * seconds).
  * @param {string} cuid
- * @returns {Date}
+ * @return {Date}
  */
 const getDateFromCuid = cuid => {
   let date = new Date();
@@ -33,7 +34,7 @@ const getDateFromCuid = cuid => {
 /**
  * Check if the CUID is in the future (allowing for up to one day of jitter).
  * @param {string} cuid
- * @returns {boolean}
+ * @return {boolean}
  */
 const isCuidInFuture = cuid => {
   const date = getDateFromCuid(cuid);
@@ -60,8 +61,8 @@ export const isDateInFuture = date => {
 
 /**
  * Check that the CUID is a 16 digit hex number that is not in the future.
- * @param cuid
- * @returns {boolean}
+ * @param {string} cuid
+ * @return {boolean}
  */
 export const isValidCUID = cuid => {
   return Boolean(cuid && cuid.match(RE_CUID) && !isCuidInFuture(cuid));
@@ -71,7 +72,7 @@ export const isValidCUID = cuid => {
  * Create a 16 digit CUID.
  * 0-8 = The date the CUID was created in seconds in hex format, max 8 digits.
  * 9-15 = Random hex number
- * @returns {string}
+ * @return {string}
  */
 export const createCUID = () => {
   const suffix = '00000000' +

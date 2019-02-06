@@ -95,6 +95,31 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   font-size: 0;
 }
 
+.DayPicker {
+  background: #fdfdfd;
+}
+
+.DayPicker__withBorder {
+  background-color: #fdfdfd;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+amp-lightbox .DayPicker__withBorder {
+  border: 0;
+}
+
+amp-date-picker[mode="overlay"] .DayPicker__withBorder {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.07);
+  border: 0;
+}
+
+.CalendarMonth,
+.CalendarMonthGrid {
+  background-color: transparent;
+}
+
 .CalendarDay__highlighted_calendar,
 .CalendarDay__highlighted_calendar:hover {
   background-color: #fff;
@@ -103,6 +128,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 
 .CalendarDay_container, /* remove after update to react-dates v16 */
 .CalendarDay__default {
+  background-color: transparent;
   border: 1px solid transparent;
 }
 
@@ -114,9 +140,10 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 
 .CalendarDay__blocked_calendar {
   border: 1px solid #cacccd;
+  background-color: #cacccd;
 }
 
-.CalendarDay__blocked_calendar.CalendarDay__hovered_span {
+amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.CalendarDay__hovered_span {
   background-color: #ff8080;
   border: 1px solid #ff8080;
 }
@@ -126,6 +153,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 .CalendarDay__blocked_out_of_range:hover {
   color: rgb(0, 0, 0, .1);
   border: 1px solid transparent;
+  background: transparent;
 }
 
 .CalendarDay__hovered_span,
@@ -224,71 +252,10 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
  * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
  * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
  * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
+ * NOTE: If this is updated, make sure to change DEFAULT_MIN_HEIGHT in amp-date-picker.js
  */
-.DayPicker_transitionContainer {
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
   min-height: 354px;
-}
-
-[data-date-tooltip] {
-  position: relative;
-}
-
-[data-date-tooltip]::before,
-[data-date-tooltip]::after {
-  pointer-events: none;
-  outline: none;
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  margin: 0;
-  padding: 0;
-  opacity: 0;
-  transform: translate(-50%, 12px);
-}
-
-[data-date-tooltip]:hover::before,
-[data-date-tooltip]:hover::after {
-  transition: transform 300ms ease-out, opacity 300ms ease-out;
-}
-
-[data-date-tooltip]::before {
-  content: "";
-  width: 0;
-  height: 0;
-  line-height: 0;
-  border: 5px solid transparent;
-  border-top: 5px solid #000;
-  border-bottom: 0px;
-  overflow: hidden;
-}
-
-[data-date-tooltip]::after {
-  content: attr(data-date-tooltip);
-  width: 85px;
-  margin-bottom: 5px;
-  letter-spacing: normal;
-  text-align: center;
-  text-decoration: none;
-  word-spacing: normal;
-  word-wrap: normal;
-  word-break: normal;
-  line-height: 1.2;
-  font-weight: normal;
-  font-size: 14px;
-  padding: 6px;
-  min-height: 18px;
-  color: #e9e6e6;
-  background-color: #222;
-  border-radius: 3px;
-}
-
-/* Allow keyboard focus to trigger tooltip */
-.CalendarDay_button:focus [data-date-tooltip]::before,
-.CalendarDay_button:focus [data-date-tooltip]::after,
-/* Allow mouse hover to trigger tooltip */
-[data-date-tooltip]:hover::before,
-[data-date-tooltip]:hover::after {
-  transform: translate(-50%, 0);
-  pointer-events: auto;
-  opacity: 1;
+  max-width: 100%;
+  border-radius: 0;
 }

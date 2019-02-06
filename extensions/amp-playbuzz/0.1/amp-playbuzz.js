@@ -41,20 +41,18 @@
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-/** @const */
-const EXPERIMENT = 'amp-playbuzz';
+import {userAssert} from '../../../src/log';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 
@@ -105,14 +103,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
   buildCallback() {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Enable ${EXPERIMENT} experiment`);
+    userAssert(isExperimentOn(this.win, 'amp-playbuzz'),
+        'Enable amp-playbuzz experiment');
 
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');
 
-    user().assert(src || itemId,
+    userAssert(src || itemId,
         'Either src or data-item attribute is required for <amp-playbuzz> %s',
         this.element);
 
@@ -157,7 +155,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the overflow element
-   * @returns {!Element} overflowElement
+   * @return {!Element} overflowElement
    *
    */
   getOverflowElement_() {
@@ -257,15 +255,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the composed embed source url
-   * @returns {string} url
+   * @return {string} url
    *
    */
   generateEmbedSourceUrl_() {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedPageUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedPageUrl = parseUrlDeprecated(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
-      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
+      relativeUrl: parseUrlDeprecated(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
@@ -277,6 +275,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return embedUrl;
   }
 
+  /**
+   * Relays scroll data to iframe.
+   *
+   * @param {{height: number, left: number, relayoutAll: boolean, top: number, velocity: number, width: number }} changeEvent
+   */
   sendScrollDataToItem_(changeEvent) {
     if (!this.isInViewport()) {
       return;

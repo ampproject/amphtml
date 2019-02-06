@@ -15,7 +15,7 @@
  */
 
 .i-amphtml-story-no-rotation-overlay {
-  position: fixed !important;
+  position: absolute !important;
   z-index: 200000!important; /** unsupported-browser-overlay - 1 */
   font-family: 'Roboto', sans-serif;
   font-weight: 700 !important;
@@ -31,6 +31,10 @@
   justify-content: center !important;
   text-align: center !important;
   display: none !important;
+}
+
+.i-amphtml-story-no-rotation-overlay .i-amphtml-story-overlay-text {
+  color: #fff !important;
 }
 
 .i-amphtml-story-landscape.i-amphtml-story-no-rotation-overlay {

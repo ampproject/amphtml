@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {devAssert} from '../log';
 
 /**
  * Interpret a byte array as a UTF-8 string.
@@ -52,7 +52,7 @@ export function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
-    dev().assert(charCode <= 255, 'Characters must be in range [0,255]');
+    devAssert(charCode <= 255, 'Characters must be in range [0,255]');
     bytes[i] = charCode;
   }
   return bytes;
@@ -94,6 +94,7 @@ export function bytesToUInt32(bytes) {
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
+ * @param {!Window} win
  * @param {number} length
  * @return {?Uint8Array}
  */

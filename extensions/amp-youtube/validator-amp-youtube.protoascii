@@ -17,12 +17,12 @@
 tags: {  # amp-youtube
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-youtube"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -31,13 +31,14 @@ tags: {  # amp-youtube
 tags: {  # <amp-youtube>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-YOUTUBE"
   requires_extension: "amp-youtube"
   attrs: { name: "autoplay" }
   attrs: {
     name: "credentials"
-    value_regex_casei: "(include|omit)"
+    value_casei: "include"
+    value_casei: "omit"
   }
   attrs: {
     name: "data-live-channelid"
@@ -48,6 +49,10 @@ tags: {  # <amp-youtube>
     name: "data-videoid"
     mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
   }
   # <amp-bind>
   attrs: { name: "[data-videoid]" }

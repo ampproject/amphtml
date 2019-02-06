@@ -17,18 +17,19 @@
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/dom';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {
+  assertHttpsUrl,
   isProxyOrigin,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
+import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/dom';
+import {fetchDocument} from '../../../src/document-fetcher';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';
@@ -109,7 +110,7 @@ export class AccessServerJwtAdapter {
     this.serverState_ = stateElement ?
       stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
@@ -127,7 +128,7 @@ export class AccessServerJwtAdapter {
     /** @const @private {?string} */
     this.keyUrl_ = configJson['publicKeyUrl'] || null;
 
-    user().assert(this.key_ || this.keyUrl_,
+    userAssert(this.key_ || this.keyUrl_,
         '"publicKey" or "publicKeyUrl" must be specified');
     if (this.keyUrl_) {
       assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
@@ -205,7 +206,7 @@ export class AccessServerJwtAdapter {
       return resp.text();
     }).then(encoded => {
       const jwt = this.jwtHelper_.decode(encoded);
-      user().assert(jwt['amp_authdata'],
+      userAssert(jwt['amp_authdata'],
           '"amp_authdata" must be present in JWT');
       return {encoded, jwt};
     });
@@ -260,13 +261,13 @@ export class AccessServerJwtAdapter {
 
     // exp: expiration time.
     const exp = jwt['exp'];
-    user().assert(exp, '"exp" field must be specified');
-    user().assert(parseFloat(exp) * 1000 > now,
+    userAssert(exp, '"exp" field must be specified');
+    userAssert(parseFloat(exp) * 1000 > now,
         'token has expired: %s', exp);
 
     // aud: audience.
     const aud = jwt['aud'];
-    user().assert(aud, '"aud" field must be specified');
+    userAssert(aud, '"aud" field must be specified');
     let audForAmp = false;
     if (isArray(aud)) {
       for (let i = 0; i < aud.length; i++) {
@@ -278,7 +279,7 @@ export class AccessServerJwtAdapter {
     } else {
       audForAmp = (aud == AMP_AUD);
     }
-    user().assert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
+    userAssert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
   }
 
   /**
@@ -300,8 +301,7 @@ export class AccessServerJwtAdapter {
   authorizeOnServer_() {
     dev().fine(TAG, 'Proceed via server protocol');
     return this.fetchJwt_().then(resp => {
-      const encoded = resp.encoded;
-      const jwt = resp.jwt;
+      const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
       const request = serializeQueryString(dict({
         'url': removeFragment(this.ampdoc.win.location.href),
@@ -314,12 +314,12 @@ export class AccessServerJwtAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           })).then(response => {
         dev().fine(TAG, 'Authorization response: ', response);

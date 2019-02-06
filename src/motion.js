@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 
 /** @const {function()} */
@@ -133,17 +134,16 @@ export class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
-    /** @private {!Function} */
-    this.resolve_;
-
-    /** @private {!Function} */
-    this.reject_;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.promise_ = deferred.promise;
+
+    /** @private {!Function} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {!Function} */
+    this.reject_ = deferred.reject;
 
     /** @private {boolean} */
     this.continuing_ = false;

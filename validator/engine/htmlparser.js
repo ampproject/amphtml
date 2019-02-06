@@ -138,11 +138,13 @@ const ElementsWhichClosePTag = {
  * @enum {number}
  */
 const TagRegion = {
-  PRE_HEAD: 0,
-  IN_HEAD: 1,
-  PRE_BODY: 2,  // After closing head tag, but before open body tag.
-  IN_BODY: 3,
-  IN_SVG: 4,
+  PRE_DOCTYPE: 0,
+  PRE_HTML: 1,
+  PRE_HEAD: 2,
+  IN_HEAD: 3,
+  PRE_BODY: 4,  // After closing head tag, but before open body tag.
+  IN_BODY: 5,
+  IN_SVG: 6,
   // We don't track the region after the closing body tag.
 };
 
@@ -186,7 +188,7 @@ class TagNameStack {
      * @type {number}
      * @private
      */
-    this.region_ = TagRegion.PRE_HEAD;
+    this.region_ = TagRegion.PRE_DOCTYPE;
 
     /**
      * Tracks when the start <head> tag has been encountered or manufactured.
@@ -237,8 +239,52 @@ class TagNameStack {
     // This section deals with manufacturing <head>, </head>, and <body> tags
     // if the document has left them out or placed them in the wrong location.
     switch (this.region_) {
+      case TagRegion.PRE_DOCTYPE:
+        if (tag.upperName() === '!DOCTYPE') {
+          this.region_ = TagRegion.PRE_HTML;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
+      case TagRegion.PRE_HTML:
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE') {
+          return;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
       case TagRegion.PRE_HEAD:
-        if (tag.upperName() === 'HEAD') {
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML') {
+          return;
+        } else if (tag.upperName() === 'HEAD') {
           this.region_ = TagRegion.IN_HEAD;
         } else if (tag.upperName() === 'BODY') {
           this.region_ = TagRegion.IN_BODY;
@@ -247,17 +293,21 @@ class TagNameStack {
             this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
           } else {
             if (this.handler_.markManufacturedBody)
-              this.handler_.markManufacturedBody();
+            {this.handler_.markManufacturedBody();}
             this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
           }
         }
         break;
       case TagRegion.IN_HEAD:
-        if (!HeadElements.hasOwnProperty(tag.upperName())) {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (!HeadElements.hasOwnProperty(tag.upperName())) {
           this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
           if (tag.upperName() !== 'BODY') {
             if (this.handler_.markManufacturedBody)
-              this.handler_.markManufacturedBody();
+            {this.handler_.markManufacturedBody();}
             this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
           } else {
             this.region_ = TagRegion.IN_BODY;
@@ -265,16 +315,24 @@ class TagNameStack {
         }
         break;
       case TagRegion.PRE_BODY:
-        if (tag.upperName() !== 'BODY') {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (tag.upperName() !== 'BODY') {
           if (this.handler_.markManufacturedBody)
-            this.handler_.markManufacturedBody();
+          {this.handler_.markManufacturedBody();}
           this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
         } else {
           this.region_ = TagRegion.IN_BODY;
         }
         break;
       case TagRegion.IN_BODY:
-        if (tag.upperName() === 'BODY') {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (tag.upperName() === 'BODY') {
           // We only report the first body for each document - either
           // a manufactured one, or the first one encountered.
           return;
@@ -294,7 +352,7 @@ class TagNameStack {
             // <dd> and <dt> tags can be implicitly closed by other <dd> and
             // <dt> tags. See https://www.w3.org/TR/html-markup/dd.html
           } else if (
-              (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
+            (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
               (parentTagName == 'DD' || parentTagName == 'DT')) {
             this.endTag(new amp.htmlparser.ParsedHtmlTag(parentTagName));
             // <li> tags can be implicitly closed by other <li> tags.
@@ -335,18 +393,18 @@ class TagNameStack {
   pcdata(text) {
     if (!amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
       switch (this.region_) {
+        // Fallthroughs intentional.
+        case TagRegion.PRE_DOCTYPE:  // doctype is not manufactured
+        case TagRegion.PRE_HTML:
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('HTML'));
         case TagRegion.PRE_HEAD:
-        case TagRegion.PRE_BODY:
-          if (this.handler_.markManufacturedBody)
-            this.handler_.markManufacturedBody();
-          this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
-          break;
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
         case TagRegion.IN_HEAD:
           this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+        case TagRegion.PRE_BODY:
           if (this.handler_.markManufacturedBody)
-            this.handler_.markManufacturedBody();
+          {this.handler_.markManufacturedBody();}
           this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
-          break;
         default:
           break;
       }
@@ -361,14 +419,14 @@ class TagNameStack {
    */
   endTag(tag) {
     if (this.region_ == TagRegion.IN_HEAD && tag.upperName() === 'HEAD')
-      this.region_ = TagRegion.PRE_BODY;
+    {this.region_ = TagRegion.PRE_BODY;}
 
     // We ignore close body tags (</body) and instead insert them when their
     // outer scope is closed (/html). This is closer to how a browser parser
     // works. The idea here is if other tags are found after the <body>,
     // (ex: <div>) which are only allowed in the <body>, we will effectively
     // move them into the body section.
-    if (tag.upperName() === 'BODY') return;
+    if (tag.upperName() === 'BODY') {return;}
 
     // We look for tag.upperName() from the end. If we can find it, we pop
     // everything from thereon off the stack. If we can't find it,
@@ -436,7 +494,7 @@ amp.htmlparser.HtmlParser = class {
     let tagName;         // The name of the tag currently being processed.
     let eflags;          // The element flags for the current tag.
     let openTag;         // True if the current tag is an open tag.
-    let tagStack = new TagNameStack(handler);
+    const tagStack = new TagNameStack(handler);
 
     // Only provide location information if the handler implements the
     // setDocLocator method.
@@ -453,7 +511,7 @@ amp.htmlparser.HtmlParser = class {
     // processed.
     while (htmlText) {
       const regex = inTag ? amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
-                            amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
+        amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
       // Gets the next token
       const m = htmlText.match(regex);
       if (locator) {
@@ -464,7 +522,7 @@ amp.htmlparser.HtmlParser = class {
 
       // TODO(goto): cleanup this code breaking it into separate methods.
       if (inTag) {
-        if (m[1]) {  // Attribute.
+        if (m[1]) { // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
           const attribName = amp.htmlparser.toLowerCase(m[1]);
           // Use empty string as value for valueless attribs, so
@@ -485,7 +543,7 @@ amp.htmlparser.HtmlParser = class {
           }
           attribs.push(attribName, decodedValue);
         } else if (m[4]) {
-          if (eflags !== void 0) {  // False if not in whitelist.
+          if (eflags !== void 0) { // False if not in whitelist.
             if (openTag) {
               tagStack.startTag(new amp.htmlparser.ParsedHtmlTag(
                   /** @type {string} */ (tagName), attribs));
@@ -529,9 +587,9 @@ amp.htmlparser.HtmlParser = class {
           inTag = false;
         }
       } else {
-        if (m[1]) {  // Entity.
+        if (m[1]) { // Entity.
           tagStack.pcdata(m[0]);
-        } else if (m[3]) {  // Tag.
+        } else if (m[3]) { // Tag.
           openTag = !m[2];
           if (locator) {
             locator.snapshotPos();
@@ -539,14 +597,14 @@ amp.htmlparser.HtmlParser = class {
           inTag = true;
           tagName = amp.htmlparser.toUpperCase(m[3]);
           eflags = amp.htmlparser.HtmlParser.Elements.hasOwnProperty(tagName) ?
-              amp.htmlparser.HtmlParser.Elements[tagName] :
-              amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
-        } else if (m[4]) {  // Text.
+            amp.htmlparser.HtmlParser.Elements[tagName] :
+            amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
+        } else if (m[4]) { // Text.
           if (locator) {
             locator.snapshotPos();
           }
           tagStack.pcdata(m[4]);
-        } else if (m[5]) {  // Cruft.
+        } else if (m[5]) { // Cruft.
           switch (m[5]) {
             case '<':
               tagStack.pcdata('&lt;');
@@ -558,6 +616,7 @@ amp.htmlparser.HtmlParser = class {
               tagStack.pcdata('&amp;');
               break;
           }
+        } else {
         }
       }
     }
@@ -645,7 +704,7 @@ amp.htmlparser.HtmlParser.Entities = {
   'amp': '&',
   'nbsp': '\u00a0',
   'quot': '"',
-  'apos': '\''
+  'apos': '\'',
 };
 
 
@@ -660,7 +719,7 @@ amp.htmlparser.HtmlParser.EFlags = {
   RCDATA: 8,
   UNSAFE: 16,
   FOLDABLE: 32,
-  UNKNOWN_OR_CUSTOM: 64
+  UNKNOWN_OR_CUSTOM: 64,
 };
 
 /**
@@ -789,7 +848,7 @@ amp.htmlparser.HtmlParser.Elements = {
   'TT': 0,
   'U': 0,
   'UL': 0,
-  'VAR': 0
+  'VAR': 0,
 };
 
 
@@ -860,10 +919,14 @@ amp.htmlparser.HtmlParser.ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
 /**
  * Regular expression that matches strings composed of all space characters:
  * https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#space-character
+ *
+ * Note: Do not USE \s to match whitespace as this includes byte order mark
+ * characters, which html parsing does not consider whitespace.
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.SPACE_RE_ = /^\s*$/;
+amp.htmlparser.HtmlParser.SPACE_RE_ =
+    /^[ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/;
 
 
 /**
@@ -960,73 +1023,73 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
  */
 amp.htmlparser.HtmlParser.DocLocatorImpl =
     class extends amp.htmlparser.DocLocator {
-  /**
+      /**
    * @param {string} htmlText text of the entire HTML document to be processed.
    */
-  constructor(htmlText) {
-    super();
-    // Precomputes a mapping from positions within htmlText to line /
-    // column numbers. TODO(johannes): This uses a fair amount of
-    // space and we can probably do better, but it's also quite simple
-    // so here we are for now.
-    this.lineByPos_ = [];
-    this.colByPos_ = [];
-    let currentLine = 1;
-    let currentCol = 0;
-    for (let i = 0; i < htmlText.length; ++i) {
-      this.lineByPos_[i] = currentLine;
-      this.colByPos_[i] = currentCol;
-      if (htmlText.charAt(i) == '\n') {
-        ++currentLine;
-        currentCol = 0;
-      } else {
-        ++currentCol;
+      constructor(htmlText) {
+        super();
+        // Precomputes a mapping from positions within htmlText to line /
+        // column numbers. TODO(johannes): This uses a fair amount of
+        // space and we can probably do better, but it's also quite simple
+        // so here we are for now.
+        this.lineByPos_ = [];
+        this.colByPos_ = [];
+        let currentLine = 1;
+        let currentCol = 0;
+        for (let i = 0; i < htmlText.length; ++i) {
+          this.lineByPos_[i] = currentLine;
+          this.colByPos_[i] = currentCol;
+          if (htmlText.charAt(i) == '\n') {
+            ++currentLine;
+            currentCol = 0;
+          } else {
+            ++currentCol;
+          }
+        }
+
+        // The current position in the htmlText.
+        this.pos_ = 0;
+        // The previous position in the htmlText - we need this to know where a
+        // tag or attribute etc. started.
+        this.previousPos_ = 0;
+
+        // This gets computed from the maps above and the previousPos in
+        // snapshotPos, and it's what client code of the DocLocator will
+        // see.
+        this.line_ = 1;
+        this.col_ = 0;
       }
-    }
-
-    // The current position in the htmlText.
-    this.pos_ = 0;
-    // The previous position in the htmlText - we need this to know where a
-    // tag or attribute etc. started.
-    this.previousPos_ = 0;
-
-    // This gets computed from the maps above and the previousPos in
-    // snapshotPos, and it's what client code of the DocLocator will
-    // see.
-    this.line_ = 1;
-    this.col_ = 0;
-  }
 
 
-  /**
+      /**
    * Advances the internal position by the characters in {code tokenText}.
    * This method is to be called only from within the parser.
    * @param {string} tokenText The token text which we examine to advance the
    *   line / column location within the doc.
    */
-  advancePos(tokenText) {
-    this.previousPos_ = this.pos_;
-    this.pos_ += tokenText.length;
-  }
+      advancePos(tokenText) {
+        this.previousPos_ = this.pos_;
+        this.pos_ += tokenText.length;
+      }
 
-  /**
+      /**
    * Snapshots the previous internal position so that getLine / getCol will
    * return it. These snapshots happen as the parser enter / exits a tag.
    * This method is to be called only from within the parser.
    */
-  snapshotPos() {
-    if (this.previousPos_ < this.lineByPos_.length) {
-      this.line_ = this.lineByPos_[this.previousPos_];
-      this.col_ = this.colByPos_[this.previousPos_];
-    }
-  }
+      snapshotPos() {
+        if (this.previousPos_ < this.lineByPos_.length) {
+          this.line_ = this.lineByPos_[this.previousPos_];
+          this.col_ = this.colByPos_[this.previousPos_];
+        }
+      }
 
-  /** @inheritDoc */
-  getLine() { return this.line_; }
+      /** @inheritDoc */
+      getLine() { return this.line_; }
 
-  /** @inheritDoc */
-  getCol() { return this.col_; }
-};
+      /** @inheritDoc */
+      getCol() { return this.col_; }
+    };
 
 /**
  * @param {string} str The string to lower case.

@@ -146,6 +146,28 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="6"] #container6 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="6"] #show-container6-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="7"] #container7 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="7"] #show-container7-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -183,10 +205,9 @@
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
       this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
-      // TODO(dvoytenko): Set to the final value when crbug/577330 is fixed:
-      // this.iframe.setAttribute('sandbox',
-      //     'allow-popups allow-scripts allow-forms allow-pointer-lock' +
-      //     ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('sandbox',
+          'allow-popups allow-scripts allow-forms allow-pointer-lock' +
+          ' allow-popups-to-escape-sandbox allow-same-origin');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -219,9 +240,9 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        origin: parseUrl(window.location.href).origin,
+        origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a,swipe',
+        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -229,7 +250,7 @@
       if (window.location.hash && window.location.hash.length > 1) {
         inputUrl += '&' + window.location.hash.substring(1);
       }
-      var parsedUrl = parseUrl(inputUrl);
+      var parsedUrl = parseUrlDeprecated(inputUrl);
       var url = parsedUrl.href;
       this.frameOrigin_ = parsedUrl.origin;
       log('AMP URL = ', url);
@@ -384,8 +405,13 @@
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
       switch(name) {
+        case 'bindReady':
+          return Promise.resolve();
         case 'documentLoaded':
           return this.documentReady_();
+        case 'focusin':
+          log('Focusin event', data);
+          return Promise.resolve();
         case 'requestFullOverlay':
           return this.requestFullOverlay_();
         case 'cancelFullOverlay':
@@ -413,6 +439,15 @@
         case 'touchend':
           log('touch event!', name);
           return Promise.resolve();
+        case 'viewerRenderTemplate':
+        const ampComponentType = data.ampComponent.type
+        if (ampComponentType === 'amp-list') {
+          return this.ssrRenderAmpListTemplate_(data);
+        } else if (ampComponentType == 'amp-form') {
+          return this.ssrRenderAmpFormTemplate_(data);
+        } else {
+          return Promise.reject({error: 'source amp component is not valid'})
+        }
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
@@ -425,6 +460,37 @@
       }
     };
 
+    Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
+      // Mocked response.
+      new Response
+      return Promise.resolve({
+        "html":
+            "<ul>" +
+              "<li><p [text]='data.foo'></p></li>" +
+              "<li>Some list item</li>" +
+              "<li>Some list item</li></ul>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
+      });
+    };
+
+    Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html": "<div>Server side rendered search result</div>",
+        "body": "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+            "AMP-Access-Control-Allow-Source-Origin": "http://localhost:8000"
+          }
+        }
+      });
+    };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.handleUnload_');
@@ -441,7 +507,7 @@
       console/*OK*/.log.apply(console, var_args);
     }
 
-    function parseUrl(urlString) {
+    function parseUrlDeprecated(urlString) {
       var a = document.createElement('a');
       a.href = urlString;
       return {
@@ -510,6 +576,20 @@
           false).start();
       addShowContainer('5');
 
+      new Viewer(
+          'container6',
+          '6',
+          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('6');
+
+      new Viewer(
+          'container7',
+          '7',
+          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('7');
+
       showContainer('1');
     }
 
@@ -552,6 +632,8 @@
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
+      <a class="show-container-anchor" id="show-container6-anchor">Six</a>
+      <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -580,6 +662,16 @@
         Please wait, the AMP doc will appear here...
       </div>
     </container>
+    <container id="container6">
+        <div class="wait">
+          Please wait, the AMP doc will appear here...
+        </div>
+    </container>
+    <container id="container7">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+</container>
   </viewer>
 </body>
 </html>

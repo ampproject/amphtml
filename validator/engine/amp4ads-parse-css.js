@@ -17,7 +17,6 @@
 
 goog.provide('parse_css.validateAmp4AdsCss');
 
-goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.RuleVisitor');
@@ -83,29 +82,17 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
     const ident = firstIdent(declaration.value);
     if (ident === 'fixed' || ident === 'sticky') {
-      if (amp.validator.LIGHT) {
-        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-        return;
-      }
       this.errors.push(createParseErrorTokenAt(
           declaration, amp.validator.ValidationError.Code
-                           .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
           ['style', 'position', ident]));
     }
   }
 
   /** @inheritDoc */
   visitQualifiedRule(qualifiedRule) {
-    // Precompute a determination whether transition or animation are
-    // present for the checks below this first loop.
-    /** @type {parse_css.Declaration} */
-    let transitionOrAnimation = null;
     for (const decl of qualifiedRule.declarations) {
       const name = parse_css.stripVendorPrefix(decl.name);
-      if (name === 'transition' || name === 'animation') {
-        transitionOrAnimation = decl;
-      }
-
       // The name of the property may identify a transition. The only
       // properties that may be transitioned are opacity and transform.
       if (name === 'transition') {
@@ -114,16 +101,12 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             parse_css.stripVendorPrefix(transitionedProperty);
         if (transitionedPropertyStripped !== 'opacity' &&
             transitionedPropertyStripped !== 'transform') {
-          if (amp.validator.LIGHT) {
-            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-            return;
-          }
           this.errors.push(createParseErrorTokenAt(
               decl, amp.validator.ValidationError.Code
-                        .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
               [
                 'style', 'transition', transitionedProperty,
-                '[\'opacity\', \'transform\']'
+                '[\'opacity\', \'transform\']',
               ]));
         }
       }
@@ -132,43 +115,14 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       // are opacity, transform, and animation-timing-function.
       if (this.inKeyframes !== null && name !== 'transform' &&
           name !== 'opacity' && name !== 'animation-timing-function') {
-        if (amp.validator.LIGHT) {
-          this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          return;
-        }
         this.errors.push(createParseErrorTokenAt(
             decl, amp.validator.ValidationError.Code
-                      .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
+                .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
             [
               'style', decl.name, this.inKeyframes.name,
-              '[\'animation-timing-function\', \'opacity\', \'transform\']'
+              '[\'animation-timing-function\', \'opacity\', \'transform\']',
             ]));
       }
-    }
-
-    // If transition or animation are present:
-    // Only transition, animation, transform, visibility, opacity allowed.
-    if (transitionOrAnimation === null) {
-      return;
-    }
-    for (const decl of qualifiedRule.declarations) {
-      // (1) Check that the declaration is in the allowed sorted (!) list.
-      const allowed =
-          ['animation', 'opacity', 'transform', 'transition', 'visibility'];
-      if (allowed.indexOf(parse_css.stripVendorPrefix(decl.name)) !== -1) {
-        continue;
-      }
-      if (amp.validator.LIGHT) {
-        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-        return;
-      }
-      this.errors.push(createParseErrorTokenAt(
-          decl, amp.validator.ValidationError.Code
-                    .CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH,
-          [
-            'style', decl.name, transitionOrAnimation.name,
-            '[\'' + allowed.join('\', \'') + '\']'
-          ]));
     }
   }
 

@@ -15,7 +15,8 @@
  */
 
 import './access-vendor';
-import {dev, user} from '../../../src/log';
+import {Deferred} from '../../../src/utils/promise';
+import {dev, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
@@ -39,7 +40,7 @@ export class AccessVendorAdapter {
     this.ampdoc = ampdoc;
 
     /** @const @private {string} */
-    this.vendorName_ = user().assert(configJson['vendor'],
+    this.vendorName_ = userAssert(configJson['vendor'],
         '"vendor" name must be specified');
 
     /** @const @private {!JsonObject} */
@@ -48,13 +49,13 @@ export class AccessVendorAdapter {
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];
 
-    /** @private {?function(!./access-vendor.AccessVendor)} */
-    this.vendorResolve_ = null;
+    const deferred = new Deferred();
 
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
-    this.vendorPromise_ = new Promise(resolve => {
-      this.vendorResolve_ = resolve;
-    });
+    this.vendorPromise_ = deferred.promise;
+
+    /** @private {?function(!./access-vendor.AccessVendor)} */
+    this.vendorResolve_ = deferred.resolve;
   }
 
   /** @return {string} */
@@ -71,7 +72,7 @@ export class AccessVendorAdapter {
    * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(vendor) {
-    user().assert(this.vendorResolve_, 'Vendor has already been registered');
+    userAssert(this.vendorResolve_, 'Vendor has already been registered');
     this.vendorResolve_(vendor);
     this.vendorResolve_ = null;
   }

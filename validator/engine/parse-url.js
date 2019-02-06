@@ -69,36 +69,36 @@ function hostCharIsEnd(code) {
 function hostCharIsValid(code) {
   return (!isNaN(code) &&
           code > /* unprintable */ 0x1F &&
-          code !== /* ' ' */ 0x20  &&
-          code !== /* '!' */ 0x21  &&
-          code !== /* '"' */ 0x22  &&
-          code !== /* '#' */ 0x23  &&
-          code !== /* '$' */ 0x24  &&
-          code !== /* '%' */ 0x25  &&
-          code !== /* '&' */ 0x26  &&
-          code !== /* ''' */ 0x27  &&
-          code !== /* '(' */ 0x28  &&
-          code !== /* ')' */ 0x29  &&
-          code !== /* '*' */ 0x2A  &&
-          code !== /* '+' */ 0x2B  &&
-          code !== /* ',' */ 0x2C  &&
-          code !== /* '/' */ 0x2F  &&
-          code !== /* ':' */ 0x3A  &&
-          code !== /* ';' */ 0x3B  &&
-          code !== /* '<' */ 0x3C  &&
-          code !== /* '=' */ 0x3D  &&
-          code !== /* '>' */ 0x3E  &&
-          code !== /* '?' */ 0x3F  &&
-          code !== /* '@' */ 0x3A  &&
-          code !== /* '[' */ 0x5B  &&
-          code !== /* '\' */ 0x5C  &&
-          code !== /* ']' */ 0x5D  &&
-          code !== /* '^' */ 0x5E  &&
-          code !== /* '`' */ 0x60  &&
-          code !== /* '{' */ 0x7B  &&
-          code !== /* '|' */ 0x7C  &&
-          code !== /* '}' */ 0x7D  &&
-          code !== /* '~' */ 0x7E  &&
+          code !== /* ' ' */ 0x20 &&
+          code !== /* '!' */ 0x21 &&
+          code !== /* '"' */ 0x22 &&
+          code !== /* '#' */ 0x23 &&
+          code !== /* '$' */ 0x24 &&
+          code !== /* '%' */ 0x25 &&
+          code !== /* '&' */ 0x26 &&
+          code !== /* ''' */ 0x27 &&
+          code !== /* '(' */ 0x28 &&
+          code !== /* ')' */ 0x29 &&
+          code !== /* '*' */ 0x2A &&
+          code !== /* '+' */ 0x2B &&
+          code !== /* ',' */ 0x2C &&
+          code !== /* '/' */ 0x2F &&
+          code !== /* ':' */ 0x3A &&
+          code !== /* ';' */ 0x3B &&
+          code !== /* '<' */ 0x3C &&
+          code !== /* '=' */ 0x3D &&
+          code !== /* '>' */ 0x3E &&
+          code !== /* '?' */ 0x3F &&
+          code !== /* '@' */ 0x3A &&
+          code !== /* '[' */ 0x5B &&
+          code !== /* '\' */ 0x5C &&
+          code !== /* ']' */ 0x5D &&
+          code !== /* '^' */ 0x5E &&
+          code !== /* '`' */ 0x60 &&
+          code !== /* '{' */ 0x7B &&
+          code !== /* '|' */ 0x7C &&
+          code !== /* '}' */ 0x7D &&
+          code !== /* '~' */ 0x7E &&
           code !== /*     */ 0x7B);
 }
 
@@ -112,10 +112,10 @@ function hostIsIPv6Literal(host) {
   const hexRe = /^[0-9A-Fa-f]{1,4}$/;
   // IPv4 address
   const ipv4Re = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
-  var hasEmpty = false;
+  let hasEmpty = false;
   const parts = host.split(':');
-  var numParts = parts.length;
-  for (var i = 0; i < parts.length; ++i) {
+  let numParts = parts.length;
+  for (let i = 0; i < parts.length; ++i) {
     const part = parts[i];
 
     // Look for empty parts, caused abbreviating contiguous zero values with
@@ -123,7 +123,7 @@ function hostIsIPv6Literal(host) {
     if (part === '') {
       // There can be exactly one empty 'part'
       if (hasEmpty)
-        return false;
+      {return false;}
       hasEmpty = true;
       // Leading and trailing empty parts are written as '::' resulting in
       // host.split returning two empty parts. We skip these in this case.
@@ -153,9 +153,9 @@ function hostIsIPv6Literal(host) {
   // There should be 8 parts, with an empty part possibly counting as more than
   // one.
   if (numParts > 8)
-    return false;
+  {return false;}
   if (numParts < 8 && !hasEmpty)
-    return false;
+  {return false;}
   return true;
 }
 
@@ -172,9 +172,9 @@ parse_url.URL = class {
     /** @type {boolean} */
     this.hasProtocol = false;
     /** @type {string} */
-    this.protocol = '';  // Guaranteed to be lower case.
+    this.protocol = ''; // Guaranteed to be lower case.
     /** @type {string} */
-    this.defaultProtocol = 'https';  // Must be set to a lower case value.
+    this.defaultProtocol = 'https'; // Must be set to a lower case value.
     /** @type {string} */
     this.schemeSpecificPart = '';
     /** @type {boolean} */
@@ -243,12 +243,12 @@ parse_url.URL = class {
     if (goog.string./*OK*/ startsWith(unparsed, 'https:')) {
       this.hasProtocol = true;
       this.protocol = 'https';
-      return unparsed.substr(6);  // skip over 'https:' prefix
+      return unparsed.substr(6); // skip over 'https:' prefix
     }
     if (goog.string./*OK*/ startsWith(unparsed, 'http:')) {
       this.hasProtocol = true;
       this.protocol = 'http';
-      return unparsed.substr(5);  // skip over 'http:' prefix
+      return unparsed.substr(5); // skip over 'http:' prefix
     }
 
     const colon = unparsed.indexOf(':');
@@ -271,8 +271,8 @@ parse_url.URL = class {
     this.protocol = unparsed.substr(0, colon).toLowerCase();
     unparsed = unparsed.substr(colon + 1);
 
-    if (this.protocol != "http" && this.protocol != "https" &&
-        this.protocol != "ftp" && this.protocol != "sftp") {
+    if (this.protocol != 'http' && this.protocol != 'https' &&
+        this.protocol != 'ftp' && this.protocol != 'sftp') {
       // For protocols like "foo:bar", we don't parse up the part after the
       // protocol, we just record it, eg "bar".
       this.schemeSpecificPart = unparsed;
@@ -315,7 +315,7 @@ parse_url.URL = class {
     if (goog.string./*OK*/ startsWith(host, '.') ||
         host.indexOf('..') !== -1) {
       this.isValid = false;
-    } else if (host.substr(-1) === '.') {  // strip trailing '.'.
+    } else if (host.substr(-1) === '.') { // strip trailing '.'.
       host = host.substr(0, host.length - 1);
     }
     return host;
@@ -335,7 +335,7 @@ parse_url.URL = class {
     let skipColons = false;
     if (unparsed !== '' && unparsed.charCodeAt(0) === /* '[' */ 0x5B) {
       skipColons = true;
-      idx++;  // skip over the '['
+      idx++; // skip over the '['
     }
 
     // look for '@' and ':', e.g. user:password@example.com:1234
@@ -347,9 +347,9 @@ parse_url.URL = class {
     for (; !hostCharIsEnd(charCode); charCode = unparsed.charCodeAt(++idx)) {
       switch (charCode) {
         case /* '@' */ 0x40:
-          atIdx = idx;  // save the last occurrence of '@'
+          atIdx = idx; // save the last occurrence of '@'
           passwordIdx = portIdx;
-          portIdx = -1;  // we have a login, so reset the port
+          portIdx = -1; // we have a login, so reset the port
 
           // Any [ before here must have been junk, or part of the password
           // so we reset.
@@ -362,7 +362,7 @@ parse_url.URL = class {
           break;
         case /* ':' */ 0x3A:
           if ((portIdx === -1) && !skipColons) {
-            portIdx = idx + 1;  // might be password; save as port anyway
+            portIdx = idx + 1; // might be password; save as port anyway
           }
           break;
         case /* '[' */ 0x5B:
@@ -401,7 +401,7 @@ parse_url.URL = class {
         unparsed.charCodeAt(hostEndIdx - 1) === /* ']' */ 0x5D &&
         hostBeginIdx != hostEndIdx) {
       isIPv6Literal = hostIsIPv6Literal(unparsed.substr(hostBeginIdx + 1,
-                                        hostEndIdx - hostBeginIdx - 2));
+          hostEndIdx - hostBeginIdx - 2));
       if (isIPv6Literal) {
         ++hostBeginIdx;
         --hostEndIdx;
@@ -416,7 +416,7 @@ parse_url.URL = class {
     }
     this.host = this.processHostDots_(host);
     if (this.host === '')
-      this.isValid = false;
+    {this.isValid = false;}
 
     // Extract the port, if present.
     if (portIdx !== -1) {
@@ -438,10 +438,10 @@ parse_url.URL = class {
       // 0 indicates a default port.
       if (this.port === 0) {
         this.port = {
-          "http": 80,
-          "https": 443,
-          "ftp": 21,
-          "sftp": 22}[this.protocol];
+          'http': 80,
+          'https': 443,
+          'ftp': 21,
+          'sftp': 22}[this.protocol];
       }
     }
 

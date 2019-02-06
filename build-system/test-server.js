@@ -16,7 +16,8 @@
 'use strict';
 
 /**
- * @fileoverview Creates an http server to handle responses for different test cases.
+ * @fileoverview Creates an http server to handle responses for different test
+ * cases.
  */
 const app = require('express')();
 const bodyParser = require('body-parser');
@@ -108,6 +109,12 @@ app.use('/form/post', function(req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     json: req.body,
+  });
+});
+
+app.use('/form/verify-error', function(req, res) {
+  res.status(400).json({
+    verifyErrors: [{name: 'email', message: 'That email is already taken.'}],
   });
 });
 

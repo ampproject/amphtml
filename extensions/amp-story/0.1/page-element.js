@@ -208,7 +208,14 @@ export class PageElement {
   }
 }
 
+/**
+ * Media element.
+ */
 class MediaElement extends PageElement {
+  /**
+   * @param {!Element} element The element on the page.
+   * @param {!./amp-story-page.AmpStoryPage} page The page that the element is on.
+   */
   constructor(element, page) {
     super(element, page);
 
@@ -317,7 +324,14 @@ class MediaElement extends PageElement {
   }
 }
 
+/**
+ * Image element.
+ */
 class ImageElement extends PageElement {
+  /**
+   * @param {!Element} element The element on the page.
+   * @param {!./amp-story-page.AmpStoryPage} page The page that the element is on.
+   */
   constructor(element, page) {
     super(element, page);
 
@@ -363,6 +377,9 @@ class ImageElement extends PageElement {
   }
 }
 
+/**
+ * Video interface.
+ */
 class VideoInterfaceElement extends PageElement {
   /** @private */
   isLaidOut_() {

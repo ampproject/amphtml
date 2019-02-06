@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -46,11 +47,11 @@ export function adplugg(global,data) {
 
   // Get a handle on the AdPlugg SDK.
   global.AdPlugg = (global.AdPlugg || []);
-  const AdPlugg = global.AdPlugg;
+  const {AdPlugg} = global;
 
   // Register event listeners (via async wrapper).
   AdPlugg.push(function() {
-    const AdPlugg = global.AdPlugg;
+    const {AdPlugg} = global;
     // Register the renderStart event listener.
     AdPlugg.on(
         adTag,
@@ -58,10 +59,10 @@ export function adplugg(global,data) {
         function(event) {
           // Create the opt_data object.
           const optData = {};
-          if (event.hasOwnProperty('width')) {
+          if (hasOwn(event, 'width')) {
             optData.width = event.width;
           }
-          if (event.hasOwnProperty('height')) {
+          if (hasOwn(event, 'height')) {
             optData.height = event.height;
           }
           global.context.renderStart(optData);

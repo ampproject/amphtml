@@ -62,7 +62,7 @@ function createIframeMessagingClient(win) {
 
 /**
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function getRandom(win) {
   return String(win.Math.random()).substr(2);

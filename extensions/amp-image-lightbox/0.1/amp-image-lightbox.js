@@ -26,17 +26,18 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 
@@ -47,6 +48,10 @@ const SUPPORTED_ELEMENTS_ = {
   'amp-img': true,
   'amp-anim': true,
 };
+
+/** @private @const */
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
 
 /** @private @const {!../../../src/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
@@ -94,13 +99,6 @@ export class ImageViewer {
 
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
-
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -197,9 +195,8 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    Object.keys(this.ariaAttributes_).forEach(key => {
+    ARIA_ATTRIBUTES.forEach(key => {
       this.image_.removeAttribute(key);
-      this.ariaAttributes_[key] = null;
     });
     this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
@@ -228,32 +225,20 @@ export class ImageViewer {
   }
 
   /**
-   * @param {!Element} sourceElement
-   * @param {?Element} sourceImage
-   * @return {number}
+   * Sets the source width and height based the natural dimensions of the
+   * source image if loaded, and the offset dimensions of amp-img element
+   * if not.
+   * @param {!Element} ampImg
+   * @param {?Element} img
    * @private
    */
-  getSourceWidth_(sourceElement, sourceImage) {
-    if (sourceElement.hasAttribute('width')) {
-      return parseInt(sourceElement.getAttribute('width'), 10);
+  setSourceDimensions_(ampImg, img) {
+    if (img) {
+      this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
     } else {
-      return sourceImage ? sourceImage.naturalWidth
-        : sourceElement./*OK*/offsetWidth;
-    }
-  }
-
-  /**
-   * @param {!Element} sourceElement
-   * @param {?Element} sourceImage
-   * @return {number}
-   * @private
-   */
-  getSourceHeight_(sourceElement, sourceImage) {
-    if (sourceElement.hasAttribute('height')) {
-      return parseInt(sourceElement.getAttribute('height'), 10);
-    } else {
-      return sourceImage ? sourceImage.naturalHeight
-        : sourceElement./*OK*/offsetHeight;
+      this.sourceWidth_ = ampImg./*OK*/offsetWidth;
+      this.sourceHeight_ = ampImg./*OK*/offsetHeight;
     }
   }
 
@@ -265,15 +250,11 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = this.getSourceWidth_(sourceElement, sourceImage);
-    this.sourceHeight_ = this.getSourceHeight_(sourceElement, sourceImage);
+    this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
-      }
+    sourceElement.getImpl().then(elem => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
@@ -315,7 +296,7 @@ export class ImageViewer {
         Math.round(width),
         Math.round(height));
 
-    st.setStyles(this.image_, {
+    setStyles(this.image_, {
       top: st.px(this.imageBox_.top),
       left: st.px(this.imageBox_.left),
       width: st.px(this.imageBox_.width),
@@ -498,7 +479,7 @@ export class ImageViewer {
    * @private
    */
   updatePanZoom_() {
-    st.setStyles(this.image_, {
+    setStyles(this.image_, {
       transform: st.translate(this.posX_, this.posY_) +
           ' ' + st.scale(this.scale_),
     });
@@ -753,14 +734,17 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?Element} */
     this.captionElement_ = null;
 
-    /** @private {function(this:AmpImageLightbox, Event)} */
+    /** @private {!Function} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+
+    this.registerDefaultAction(
+        invocation => this.open_(invocation), 'open');
   }
 
   /**
-  * Lazily builds the image-lightbox DOM on the first open.
-  * @private
-  * */
+   * Lazily builds the image-lightbox DOM on the first open.
+   * @private
+   */
   buildLightbox_() {
     if (this.container_) {
       return;
@@ -817,15 +801,18 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  activate(invocation) {
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} invocation
+   * @private
+   */
+  open_(invocation) {
     if (this.active_) {
       return;
     }
     this.buildLightbox_();
 
     const source = invocation.caller;
-    user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    userAssert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;
@@ -864,11 +851,12 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /**
    * Handles closing the lightbox when the ESC key is pressed.
-   * @param {!Event} event.
+   * @param {!Event} event
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == KeyCodes.ESCAPE) {
+    if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }
@@ -922,7 +910,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = dom.elementByTag(sourceElement, 'img');
+    this.sourceImage_ = dom.childElementByTag(sourceElement, 'img');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.
@@ -965,9 +953,9 @@ class AmpImageLightbox extends AMP.BaseElement {
   enter_() {
     this.entering_ = true;
 
-    st.setStyles(this.element, {
+    toggle(this.element, true);
+    setStyles(this.element, {
       opacity: 0,
-      display: '',
     });
     this.imageViewer_.measure();
 
@@ -985,14 +973,14 @@ class AmpImageLightbox extends AMP.BaseElement {
             this.sourceImage_.src) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.element.ownerDocument.body.appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
       const imageBox = this.imageViewer_.getImageBox();
       const clone = this.sourceImage_.cloneNode(true);
       clone.className = '';
-      st.setStyles(clone, {
+      setStyles(clone, {
         position: 'absolute',
         top: st.px(rect.top),
         left: st.px(rect.left),
@@ -1020,7 +1008,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       }), motionTime, ENTER_CURVE_);
 
       // Fade in the container. This will mostly affect the caption.
-      st.setStyles(dev().assertElement(this.container_), {opacity: 0});
+      setStyles(dev().assertElement(this.container_), {opacity: 0});
       anim.add(0.8, tr.setStyles(dev().assertElement(this.container_), {
         opacity: tr.numeric(0, 1),
       }), 0.1, ENTER_CURVE_);
@@ -1033,10 +1021,10 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     return anim.start(dur).thenAlways(() => {
       this.entering_ = false;
-      st.setStyles(this.element, {opacity: ''});
-      st.setStyles(dev().assertElement(this.container_), {opacity: ''});
+      setStyles(this.element, {opacity: ''});
+      setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.element.ownerDocument.body.removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
     });
   }
@@ -1062,12 +1050,12 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (isLoaded(image) && image.src && this.sourceImage_) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.element.ownerDocument.body.appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
       const clone = image.cloneNode(true);
-      st.setStyles(clone, {
+      setStyles(clone, {
         position: 'absolute',
         top: st.px(imageBox.top),
         left: st.px(imageBox.left),
@@ -1122,12 +1110,12 @@ class AmpImageLightbox extends AMP.BaseElement {
         this.sourceImage_.classList.remove('i-amphtml-ghost');
       }
       this./*OK*/collapse();
-      st.setStyles(this.element, {
+      setStyles(this.element, {
         opacity: '',
       });
-      st.setStyles(dev().assertElement(this.container_), {opacity: ''});
+      setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.element.ownerDocument.body.removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
       this.reset_();
     });

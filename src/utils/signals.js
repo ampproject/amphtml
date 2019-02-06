@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './promise';
 import {map} from './object';
 
 
@@ -23,6 +24,9 @@ import {map} from './object';
  */
 export class Signals {
 
+  /**
+   * Creates an instance of Signals.
+   */
   constructor() {
     /**
      * A mapping from a signal name to the signal response: either time or
@@ -72,11 +76,9 @@ export class Signals {
       } else {
         // Allocate the promise/resolver for when the signal arrives in the
         // future.
-        let resolve, reject;
-        const promise = new Promise((aResolve, aReject) => {
-          resolve = aResolve;
-          reject = aReject;
-        });
+        const deferred = new Deferred();
+        const {promise, resolve, reject} = deferred;
+
         promiseStruct = {promise, resolve, reject};
       }
       if (!this.promiseMap_) {

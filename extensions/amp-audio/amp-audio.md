@@ -67,7 +67,7 @@ Required if no `<source>` children are present. Must be HTTPS.
 
 ##### preload
 
-If present, sets the preload attribute in the html <audio> tag which specifies if the author thinks that the audio file should be loaded when the page loads.
+If present, sets the preload attribute in the html `<audio>` tag which specifies if the author thinks that the audio file should be loaded when the page loads.
 
 ##### autoplay
 

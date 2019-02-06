@@ -28,17 +28,6 @@ rules.  Similar in spirit to the
 [AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
 
-**Table of Contents**
-
-* [AMPHTML ad format rules](#amphtml-ad-format-rules)
-    * [Boilerplate](#boilerplate)
-    * [CSS](#css)
-        * [CSS animations and transitions](#css-animations-and-transitions)
-            * [Selectors](#selectors)
-            * [Transitionable and animatable properties](#transitionable-and-animatable-properties)
-    * [Allowed AMP extensions and builtins](#allowed-amp-extensions-and-builtins)
-    * [HTML tags](#html-tags)
-
 ## AMPHTML ad format rules
 
 Unless otherwise specified below, the creative must obey all rules given by the
@@ -166,7 +155,7 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
   </tr>
 </tbody>
 </table>
-  
+
 
 #### CSS animations and transitions
 
@@ -253,18 +242,20 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-anim](https://www.ampproject.org/docs/reference/components/amp-anim)
 * [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 * [amp-audio](https://www.ampproject.org/docs/reference/components/amp-audio)
+* [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind)
 * [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel)
 * [amp-fit-text](https://www.ampproject.org/docs/reference/components/amp-fit-text)
 * [amp-font](https://www.ampproject.org/docs/reference/components/amp-font)
 * [amp-form](https://www.ampproject.org/docs/reference/components/amp-form)
 * [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
 * [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
+* [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox)
 * [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
 * [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
 * [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
 * [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
 * [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube) 
+* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
 
 
 

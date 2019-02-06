@@ -40,7 +40,8 @@ export function appnexus(global, data) {
   }
 
   /**
-   * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
+   * Construct the TTJ URL.
+   * Note params should be properly encoded first (use encodeURIComponent);
    * @param  {!Array<string>} args query string params to add to the base URL.
    * @return {string}      Formated TTJ URL.
    */
@@ -58,6 +59,10 @@ export function appnexus(global, data) {
 
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
@@ -103,19 +108,32 @@ function appnexusAst(global, data) {
 
   if (!apntag) {
     apntag = context.master.apntag;
-
     //preserve a global reference
+    /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
   }
 
+  // check for ad responses received for a slot but before listeners are
+  // registered, for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
-    apntag.onEvent('adAvailable', data.target, adObj => {
-      global.context.renderStart({width: adObj.width, height: adObj.height});
-      apntag.showTag(data.target, global.window);
-    });
-
-    apntag.onEvent('adNoBid', data.target, () => {
-      context.noContentAvailable();
-    });
+    if (typeof apntag.checkAdAvailable === 'function') {
+      const getAd = apntag.checkAdAvailable(data.target);
+      getAd({resolve: isAdAvailable, reject: context.noContentAvailable});
+    }
   });
+
+  apntag.anq.push(() => {
+    apntag.onEvent('adAvailable', data.target, isAdAvailable);
+    apntag.onEvent('adNoBid', data.target, context.noContentAvailable);
+  });
+
+  /**
+   * resolve getAd with an available ad object
+   *
+   * @param {{targetId: string}} adObj
+   */
+  function isAdAvailable(adObj) {
+    global.context.renderStart({width: adObj.width, height: adObj.height});
+    global.apntag.showTag(adObj.targetId, global.window);
+  }
 }

@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
@@ -120,9 +123,17 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    // Keep CSS Scroll Snap points turned on for the following:
+    // - All iOS devices except for 10.3
+    // - All places where the experiment flag is deliberately set.
+    // Conversely turn CSS Scroll Snap points off for the following:
+    // - iOS devices on version 10.3
+    // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
     this.shouldDisableCssSnap_ = startsWith(
-        Services.platformFor(this.win).getIosVersionString(), '10.3');
+        Services.platformFor(this.win).getIosVersionString(),
+        '10.3') ? true : this.isIos_ ? false : !isExperimentOn(
+          this.win, 'amp-carousel-chrome-scroll-snap');
   }
 
   /** @override */
@@ -198,23 +209,23 @@ export class AmpSlideScroll extends BaseSlides {
         'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
-        this.showSlideWhenReady(args['index']);
+        this.goToSlide(args['index']);
       }
     }, ActionTrust.LOW);
   }
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.showSlideWhenReady(slide);
+      this.goToSlide(slide);
     }
   }
 
@@ -261,12 +272,6 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
-    if (this.slideIndex_ !== null) {
-      // Reset scrollLeft on orientationChange.
-      this.slidesContainer_./*OK*/scrollLeft =
-          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
-    }
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
@@ -274,11 +279,18 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.slideIndex_ === null) {
       this.showSlide_(this.initialSlideIndex_);
     } else {
+      const index = user().assertNumber(
+          this.slideIndex_, 'E#19457 this.slideIndex_');
+      const scrollLeft = this.getScrollLeftForIndex_(index);
       // When display is toggled on a partcular media or element resizes,
       // it will need to be re-laid-out. This is only needed when the slide
       // does not change (example when browser window size changes,
       // or orientation changes)
-      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
+      this.scheduleLayout(this.slides_[index]);
+      // Reset scrollLeft on orientationChange or anything that changes the
+      // size of the carousel.
+      this.slidesContainer_./*OK*/scrollLeft = scrollLeft;
+      this.previousScrollLeft_ = scrollLeft;
     }
     return Promise.resolve();
   }
@@ -293,7 +305,8 @@ export class AmpSlideScroll extends BaseSlides {
   updateViewportState(inViewport) {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(
-          this.slides_[dev().assertNumber(this.slideIndex_)], inViewport);
+          this.slides_[user().assertNumber(this.slideIndex_,
+              'E#19457 this.slideIndex_')], inViewport);
     }
   }
 
@@ -404,18 +417,16 @@ export class AmpSlideScroll extends BaseSlides {
   customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
-    let toScrollLeft;
+    // Default behavior should be stays on current slide
     let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
+    let toScrollLeft = hasPrev ? this.slideWidth_ : 0;
 
     if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
       diff = opt_forceDir;
     }
 
-    if (diff == 0) {
-      // Snap and stay.
-      toScrollLeft = hasPrev ? this.slideWidth_ : 0;
-    } else if (diff == 1 ||
+    if (diff == 1 ||
         (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
@@ -468,10 +479,54 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * A format string for the button label. Should be a string, containing two
+   * placeholders of "%s", where the index and total count will go.
+   * @return {string}
+   * @private
+   */
+  getButtonSuffixFormat_() {
+    return this.element.getAttribute('data-button-count-format') ||
+        '(%s of %s)';
+  }
+
+  /**
+   * @param {number} buttonIndex The index that the button will take the user
+   *    to.
+   * @return {string} The formatted suffix for the button title.
+   */
+  getButtonTitleSuffix_(buttonIndex) {
+    const index = String(buttonIndex + 1);
+    const count = String(this.noOfSlides_);
+    return ' ' + this.getButtonSuffixFormat_().replace('%s', index)
+        .replace('%s', count);
+  }
+
+  /**
+   * @override
+   */
+  getPrevButtonTitle() {
+    const prevIndex = this.getPrevIndex_(this.slideIndex_);
+    const index = prevIndex == null ? 0 : prevIndex;
+    return super.getPrevButtonTitle() + this.getButtonTitleSuffix_(index);
+  }
+
+  /**
+   * @override
+   */
+  getNextButtonTitle() {
+    const nextIndex = this.getNextIndex_(this.slideIndex_);
+    const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
+    return super.getNextButtonTitle() + this.getButtonTitleSuffix_(index);
+  }
+
+  /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   updateOnScroll_(currentScrollLeft) {
+    if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
+      return;
+    }
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
@@ -498,11 +553,11 @@ export class AmpSlideScroll extends BaseSlides {
    * when element has been laid out.
    * @param {*} value
    */
-  showSlideWhenReady(value) {
+  goToSlide(value) {
     const index = parseInt(value, 10);
 
     if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
-      this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      this.user().error(TAG, 'Invalid [slide] value: ', value);
       return;
     }
 
@@ -516,50 +571,66 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * @param {?number} currentIndex
+   * @return {?number} The previous index that would be navigated to, or null
+   *    if at the start and not looping.
+   * @private
+   */
+  getPrevIndex_(currentIndex) {
+    return (currentIndex - 1 >= 0) ? currentIndex - 1 :
+      (this.shouldLoop) ? this.noOfSlides_ - 1 : null;
+  }
+
+  /**
+   * @param {?number} currentIndex
+   * @return {?number} The next index that would be navigated to, or null if at
+   *    the end and not looping.
+   * @private
+   */
+  getNextIndex_(currentIndex) {
+    return (currentIndex + 1 < this.noOfSlides_) ? currentIndex + 1 :
+      (this.shouldLoop) ? 0 : null;
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *     it available for display.
-   * @note Element must be laid out.
+   * Note: Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
    * @return {boolean} true if the slide changed, otherwise false.
    * @private
    */
   showSlide_(newIndex) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     newIndex = dev().assertNumber(newIndex);
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
       return false;
     }
-    const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-      (this.shouldLoop) ? noOfSlides_ - 1 : null;
-    const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-      (this.shouldLoop) ? 0 : null;
+    const prevIndex = this.getPrevIndex_(newIndex);
+    const nextIndex = this.getNextIndex_(newIndex);
 
     const showIndexArr = [];
     if (prevIndex != null) {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
-          dev().assertNumber(this.slideIndex_)], false);
+          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')],
+      false);
     }
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
-      const error = new Error('Attempting to access a non-existant slide');
-      error.args = {
-        'index': newIndex,
-        'noOfSlides': noOfSlides_,
-      };
-      dev().error(TAG, error);
+      dev().error(TAG, 'Attempting to access a non-existant slide %s / %s',
+          newIndex, noOfSlides_);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
@@ -579,8 +650,19 @@ export class AmpSlideScroll extends BaseSlides {
         this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
+    // If we have a specified number of autoplay loops and
+    // we have reached the last slide in the set
+    // carry out removing autoplay logic.
+    // This only works because the initial Slide is always the first slide.
+    if (this.autoplayLoops_ && this.slideIndex_ === this.noOfSlides_ - 1) {
+      this.loopsMade_++;
+      if (this.loopsMade_ == this.autoplayLoops_) {
+        this.removeAutoplay();
+      }
+    }
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    this.updateButtonTitles();
     return true;
   }
 
@@ -595,7 +677,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (slideChanged) {
       const name = 'slideChange';
       const event =
-          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+          createCustomEvent(this.win, `slidescroll.${name}`,
+              dict({'index': newIndex}));
       this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
@@ -614,7 +697,7 @@ export class AmpSlideScroll extends BaseSlides {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.shouldLoop && index == 0) {
+    if ((!this.shouldLoop && index == 0) || this.slides_.length <= 1) {
       newScrollLeft = 0;
     }
     return newScrollLeft;
@@ -627,7 +710,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   hideRestOfTheSlides_(indexArr) {
-    const noOfSlides_ = this.noOfSlides_;
+    const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
       if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
         continue;
@@ -637,7 +720,8 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        dev().assertElement(this.slideWrappers_[i]).classList
+            .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
@@ -649,8 +733,8 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * Animate scrollLeft of the container.
-   * @param {number} fromScrollLeft.
-   * @param {number} toScrollLeft.
+   * @param {number} fromScrollLeft
+   * @param {number} toScrollLeft
    * @return {!Promise}
    * @private
    */
@@ -660,7 +744,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {
@@ -702,10 +786,10 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ === null ?
           'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = {
-      fromSlide,
+    const vars = dict({
+      'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    };
+    });
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
@@ -717,7 +801,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

@@ -14,44 +14,112 @@
  * limitations under the License.
  */
 
-import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
+
+import {ArticleComponent} from './components/article';
+import {CtaLinkComponent} from './components/cta-link';
+import {HeadingComponent} from './components/heading';
+import {LandscapeComponent} from './components/landscape';
+import {LocalizedStringId} from '../localization';
+import {PortraitComponent} from './components/portrait';
+import {TextBoxComponent} from './components/text-box';
+import {dev} from '../../../../src/log';
+import {htmlFor} from '../../../../src/static-template';
+
+/** @type {string} */
+export const TAG = 'amp-story-bookend';
 
 /**
  * @typedef {{
- *   bookend-version: string,
+ *   bookendVersion: string,
  *   components: !Array<!BookendComponentDef>,
- *   share-providers: !Array<(!JsonObject|string|undefined)>,
+ *   shareProviders: !Array<(!JsonObject|string|undefined)>,
  * }}
  */
 export let BookendDataDef;
 
 /**
- * @typedef {(!BookendArticleComponentDef|!BookendArticleTitleComponentDef)}
+ * @typedef {
+ *   (!./components/article.ArticleComponentDef|
+ *    !./components/cta-link.CtaLinkDef|
+ *    !./components/heading.HeadingComponentDef|
+ *    !./components/landscape.LandscapeComponentDef|
+ *    !./components/portrait.PortraitComponentDef|
+ *    !./components/text-box.TextBoxComponentDef)
+ * }
  */
 export let BookendComponentDef;
 
-const articleComponentBuilder = new ArticleComponent();
-const articleTitleComponentBuilder = new ArticleTitleComponent();
 
 /**
- * @typedef {(!ArticleComponent|!ArticleTitleComponent)}
+ * @typedef {
+ *   (!ArticleComponent|
+ *    !CtaLinkComponent|
+ *    !HeadingComponent|
+ *    !LandscapeComponent|
+ *    !PortraitComponent|
+ *    !TextBoxComponent)
+ * }
  */
 export let BookendComponentClass;
 
+
+/** @private @const {!Object<string, !BookendComponentClass>} */
+const builderInstances = {};
+
+
+/**
+ * @param {string} type
+ * @param {function(new:BookendComponentClass)} ctor
+ * @return {!BookendComponentClass}
+ * @restricted
+ */
+function setBuilderInstance(type, ctor) {
+  return (builderInstances[type] = builderInstances[type] || new ctor());
+}
+
+
 /**
  * Dispatches the components to their specific builder classes.
- * @param {string} componentType
+ * @param {string} type
  * @return {?BookendComponentClass}
+ * @restricted
  */
-function componentBuilderInstanceFor(componentType) {
-  switch (componentType) {
+function componentBuilderInstanceFor(type) {
+  switch (type) {
     case 'small':
-      return articleComponentBuilder;
-    case 'article-set-title':
-      return articleTitleComponentBuilder;
+      return setBuilderInstance(type, ArticleComponent);
+    case 'cta-link':
+      return setBuilderInstance(type, CtaLinkComponent);
+    case 'heading':
+      return setBuilderInstance(type, HeadingComponent);
+    case 'landscape':
+      return setBuilderInstance(type, LandscapeComponent);
+    case 'portrait':
+      return setBuilderInstance(type, PortraitComponent);
+    case 'textbox':
+      return setBuilderInstance(type, TextBoxComponent);
     default:
       return null;
   }
+}
+
+/**
+ * Prepend a heading to the related articles section if first component is not a
+ * heading already.
+ * @param {!Array<BookendComponentDef>} components
+ * @param {?../localization.LocalizationService} localizationService
+ * @return {!Array<BookendComponentDef>}
+ */
+function prependTitle(components, localizationService) {
+  if (components[0] && components[0].type == 'heading') {
+    return components;
+  }
+
+  const title = localizationService
+      .getLocalizedString(
+          LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL);
+  components.unshift({'type': 'heading', 'text': title});
+  return components;
 }
 
 /**
@@ -63,36 +131,58 @@ export class BookendComponent {
    * Takes components from JSON and delegates them to their corresponding
    * builder class.
    * @param {!Array<BookendComponentDef>} components
+   * @param {!Element} el
    * @return {!Array<BookendComponentDef>}
    */
-  static buildFromJson(components) {
+  static buildFromJson(components, el) {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
       if (!componentBuilder) {
-        return;
+        dev().error(TAG, 'Component type `' + component.type +
+        '` is not supported. Skipping invalid.');
+        return builtComponents;
       }
-      componentBuilder.assertValidity(component);
-      builtComponents.push(componentBuilder.build(component));
+      componentBuilder.assertValidity(component, el);
+      builtComponents.push(componentBuilder.build(component, el));
       return builtComponents;
     }, []);
   }
 
   /**
-   * Delegates components to their corresponding template builder.
-   * class.
+   * Builds the bookend components elements by choosing the appropriate builder
+   * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
+   * @param {?../localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
-  static buildTemplates(components, doc) {
+  static buildElements(components, doc, localizationService) {
     const fragment = doc.createDocumentFragment();
+
+    components = prependTitle(components, localizationService);
+
     components.forEach(component => {
-      const type = component.type;
+      const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
-            .buildTemplate(component, doc));
+            .buildElement(component, doc));
       }
     });
     return fragment;
+  }
+
+  /**
+   * Builds container for components.
+   * @param {!Element} element Bookend container
+   * @param {!Document} doc
+   * @return {?Element}
+   */
+  static buildContainer(element, doc) {
+    const html = htmlFor(doc);
+    const containerTemplate =
+      html`<div class="i-amphtml-story-bookend-component-set
+          i-amphtml-story-bookend-top-level"></div>`;
+    element.appendChild(containerTemplate);
+    return element.lastElementChild;
   }
 }

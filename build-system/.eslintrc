@@ -5,6 +5,26 @@
   "globals": {
     "require": false,
     "process": false,
-    "exports": false
+    "exports": false,
+    "it": false,
+    "chai": false,
+    "expect": false,
+    "describe": false,
+    "beforeEach": false,
+    "afterEach": false,
+    "before": false,
+    "after": false,
+    "assert": false,
+    "describes": true,
+    "Key": false
+  },
+  "rules": {
+    "amphtml-internal/no-array-destructuring": 0,
+    "amphtml-internal/no-export-side-effect": 0,
+    "amphtml-internal/no-for-of-statement": 0,
+    "amphtml-internal/no-has-own-property-method": 0,
+    "amphtml-internal/no-module-exports": 0,
+    "amphtml-internal/no-spread": 0,
+    "require-jsdoc": 0
   }
 }

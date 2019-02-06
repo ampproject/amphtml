@@ -18,12 +18,12 @@
 tags: {  # amp-analytics
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-analytics"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -32,7 +32,7 @@ tags: {  # amp-analytics
 tags: {  # amp-analytics (json)
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   requires_extension: "amp-analytics"
@@ -55,19 +55,19 @@ tags: {  # amp-analytics (json)
 tags: {  # <amp-analytics>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-ANALYTICS"
   requires_extension: "amp-analytics"
-  attrs: { name: "type" }
   attrs: {
     name: "config"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "type" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 

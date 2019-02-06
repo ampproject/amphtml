@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   poll,
@@ -49,7 +48,8 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
   });
 
   // TODO(lannka, #3561): unmute the test.
-  // it.configure().skipEdge().run('should create an iframe loaded', function() {
+  // it.configure().skipEdge().run(
+  // 'should create an iframe loaded', function() {
   it.skip('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
@@ -111,7 +111,7 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
       const canvas = iframe.contentWindow.document.querySelector('#c');
       expect(pubads.get('page_url')).to.equal(
           'https://www.example.com/doubleclick.html');
-      const slot = canvas.slot;
+      const {slot} = canvas;
       expect(slot).to.not.be.null;
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
       expect(slot.getTargeting('amptest')).to.jsonEqual(['true']);
@@ -124,8 +124,10 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
     }).then(() => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
-        iframe.contentWindow.addEventListener(
-            AmpEvents.VISIBILITY_CHANGE, resolve);
+        // Listening to the "amp:visibilitychange" string literal because it's
+        // part of the public API.
+        // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
+        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
         fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
           state: 'hidden',
         });

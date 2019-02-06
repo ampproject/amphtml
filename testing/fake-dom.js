@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl, resolveRelativeUrl} from '../src/url';
+import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 
 /**
@@ -64,6 +64,8 @@ export class FakeWindow {
     this.DOMTokenList = window.DOMTokenList;
     /** @const */
     this.Math = window.Math;
+    /** @const */
+    this.Promise = window.Promise;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
@@ -172,7 +174,7 @@ export class FakeWindow {
     // Navigator.
     /** @const {!Navigator} */
     this.navigator = {
-      userAgent: spec.navigator && spec.navigator.userAgent ||
+      userAgent: (spec.navigator && spec.navigator.userAgent) ||
           window.navigator.userAgent,
     };
 
@@ -185,40 +187,22 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
+    /** polyfill setTimeout. */
     this.setTimeout = function() {
       return window.setTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
+    /** polyfill clearTimeout. */
     this.clearTimeout = function() {
       return window.clearTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
+    /** polyfill setInterval. */
     this.setInterval = function() {
       return window.setInterval.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
+    /** polyfill clearInterval. */
     this.clearInterval = function() {
       return window.clearInterval.apply(window, arguments);
     };
@@ -239,18 +223,10 @@ export class FakeWindow {
     this.requestAnimationFrame = raf;
   }
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill addEventListener. */
   addEventListener() {}
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill removeEventListener. */
   removeEventListener() {}
 }
 
@@ -277,8 +253,10 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
-    const originalAdd = target.addEventListener;
-    const originalRemove = target.removeEventListener;
+    const {
+      addEventListener: originalAdd,
+      removeEventListener: originalRemove,
+    } = target;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {
@@ -293,6 +271,7 @@ class EventListeners {
     };
   }
 
+  /** Create empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
@@ -399,7 +378,7 @@ export class FakeLocation {
     this.changes = [];
 
     /** @private {!Location} */
-    this.url_ = parseUrl(href, true);
+    this.url_ = parseUrlDeprecated(href, true);
 
     // href
     Object.defineProperty(this, 'href', {
@@ -426,7 +405,7 @@ export class FakeLocation {
    */
   set_(href) {
     const oldHash = this.url_.hash;
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
     if (this.url_.hash != oldHash) {
       this.win.eventListeners.fire({type: 'hashchange'});
     }
@@ -436,7 +415,7 @@ export class FakeLocation {
    * @param {!Object} args
    */
   change_(args) {
-    const change = parseUrl(this.url_.href);
+    const change = parseUrlDeprecated(this.url_.href);
     Object.assign({}, change, args);
     this.changes.push(change);
   }
@@ -478,7 +457,7 @@ export class FakeLocation {
    * @param {string} href
    */
   resetHref(href) {
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
   }
 }
 
@@ -682,6 +661,54 @@ export class FakeCustomElements {
     }
     this.elements[name] = klass.prototype;
     this.count++;
+  }
+}
+
+export class FakeMutationObserver {
+  /**
+   * @param {function(!Array<!Object>)} callback
+   */
+  constructor(callback) {
+    this.callback_ = callback;
+
+    /** @type {!Array{!Object}} */
+    this.mutations_ = [];
+
+    /** @type {Promise} */
+    this.scheduled_ = null;
+  }
+
+  observe() {
+    // I'm not implementing this. Wayyyy to complicated.
+  }
+
+  disconnect() {
+    // If observe isn't implemnted, this doesn't need to be.
+  }
+
+  takeRecords() {
+    return this.takeRecords_();
+  }
+
+  takeRecords_() {
+    return this.mutations_.splice(0, Infinity);
+  }
+
+  /**
+   * This is a non-standard method that allows you to queue a mutation.
+   *
+   * @param {!Object} mutation
+   * @return {!Promise}
+   */
+  __mutate(mutation) {
+    this.mutations_.push(mutation);
+    if (this.scheduled_) {
+      return this.scheduled_;
+    }
+    return this.scheduled_ = Promise.resolve().then(() => {
+      this.scheduled_ = null;
+      this.callback_(this.takeRecords_());
+    });
   }
 }
 

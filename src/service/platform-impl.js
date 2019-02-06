@@ -111,6 +111,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is running on Windows.
+   * @return {boolean}
+   */
+  isWindows() {
+    return /Windows/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Whether the current browser is isStandalone.
    * @return {boolean}
    */
@@ -174,7 +182,7 @@ export class Platform {
    * Returns the minor ios version in string.
    * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
    * Direct string equality check is not suggested, use startWith instead.
-   * @returns {string}
+   * @return {string}
    */
   getIosVersionString() {
     if (!this.navigator_.userAgent) {

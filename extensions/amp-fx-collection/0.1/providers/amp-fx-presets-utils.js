@@ -19,8 +19,13 @@
  * presets.
  */
 
+import {Services} from '../../../../src/services';
+import {mapRange} from '../../../../src/utils/math';
 import {startsWith} from '../../../../src/string';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
+
+const MAX_MOBILE_WIDTH = 480;
+const MAX_TABLET_WIDTH = 1000;
 
 /**
  * Converts the data-fade-ineasing input into the corresponding `cubic-bezier()`
@@ -39,16 +44,158 @@ export function convertEasingKeyword(keyword) {
     case 'ease-out':
       return 'cubic-bezier(0.40, 0.00, 0.40, 1.00)';
     default:
-      user().assert(startsWith(keyword, 'cubic-bezier'),
+      userAssert(startsWith(keyword, 'cubic-bezier'),
           'All custom bezier curves should be specified by following the ' +
             '`cubic-bezier()` function notation.');
       return keyword;
   }
 }
 
+/**
+ * Returns absolute number for a given percentage
+ *
+ * @param {string} val
+ * @return {?number}
+ */
 export function resolvePercentageToNumber(val) {
   const precentageStrippedVal = parseFloat(val);
   if (!isNaN(precentageStrippedVal)) {
     return precentageStrippedVal / 100;
+  }
+  return null;
+}
+
+/**
+ * Returns styles for the animation.
+ *
+ * @param {Element} element
+ * @param {string} fxType
+ * @return {!Object<string, string>}
+ */
+export function installStyles(element, fxType) {
+  switch (fxType) {
+    case 'parallax':
+      return {
+        'will-change': 'transform',
+      };
+    case 'fade-in':
+      return {
+        'will-change': 'opacity',
+        'opacity': 0,
+      };
+    case 'fade-in-scroll':
+      return {
+        'will-change': 'opacity',
+        'opacity': 0,
+      };
+    case 'fly-in-bottom':
+    case 'fly-in-top':
+    case 'fly-in-left':
+    case 'fly-in-right':
+      return {
+        'will-change': 'transform',
+      };
+    default:
+      return {
+        'visibility': 'visible',
+      };
+  }
+}
+
+/**
+ * Returns animation duration for the given animation type.
+ *
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} fxType
+ * @return {string}
+ */
+export function defaultDurationValues(ampdoc, fxType) {
+  switch (fxType) {
+    case 'fade-in':
+      return '1000ms';
+    case 'fly-in-bottom':
+    case 'fly-in-top':
+    case 'fly-in-left':
+    case 'fly-in-right':
+      const {width} = Services.viewportForDoc(ampdoc).getSize();
+      return mapRange(
+          Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600)
+          + 'ms';
+    default:
+      return '1ms';
+  }
+}
+
+/**
+ * Returns fly-in distance for the given ampdoc and animation type.
+ *
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} fxType
+ * @return {number}
+ */
+export function defaultFlyInDistanceValues(ampdoc, fxType) {
+  switch (fxType) {
+    case 'fly-in-bottom':
+    case 'fly-in-top':
+      const {width} = Services.viewportForDoc(ampdoc).getSize();
+      if (width < MAX_TABLET_WIDTH) { // mobile and tablets
+        return 25;
+      }
+      // laptops and desktops
+      return 33;
+    case 'fly-in-left':
+    case 'fly-in-right':
+      return 100;
+    default:
+      return 1;
+  }
+}
+
+/**
+ * Returns margin values for defaultMarginValues
+ *
+ * @param {string} fxType
+ * @return {!Object<string, number>}
+ */
+export function defaultMarginValues(fxType) {
+  switch (fxType) {
+    case 'fade-in':
+    case 'fly-in-right':
+    case 'fly-in-left':
+    case 'fly-in-top':
+    case 'fly-in-bottom':
+      return {
+        'start': 0.05,
+      };
+    case 'fade-in-scroll':
+      return {
+        'start': 0,
+        'end': 0.5,
+      };
+    default:
+      return {
+        'start': 0,
+        'end': 1,
+      };
+  }
+}
+
+/**
+ * Returns easing values for the given function
+ *
+ * @param {string} fxType
+ * @return {string}
+ */
+export function defaultEasingValues(fxType) {
+  switch (fxType) {
+    case 'fade-in':
+      return 'ease-in';
+    case 'fly-in-right':
+    case 'fly-in-left':
+    case 'fly-in-top':
+    case 'fly-in-bottom':
+      return 'ease-out';
+    default:
+      return 'ease-in';
   }
 }

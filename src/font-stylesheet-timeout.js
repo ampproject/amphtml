@@ -56,7 +56,7 @@ function maybeTimeoutFonts(win) {
   win.setTimeout(() => {
     // Try again, more fonts might have loaded.
     timeoutFontFaces(win);
-    const styleSheets = win.document.styleSheets;
+    const {styleSheets} = win.document;
     if (!styleSheets) {
       return;
     }
@@ -123,7 +123,7 @@ function timeoutFontFaces(win) {
   }
   const doc = win.document;
   // TODO(@cramforce) Switch to .values when FontFaceSet extern supports it.
-  if (!doc.fonts && !doc.fonts['values']) {
+  if (!doc.fonts || !doc.fonts['values']) {
     return;
   }
   const it = doc.fonts['values']();

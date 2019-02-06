@@ -15,12 +15,14 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
+import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
@@ -28,17 +30,13 @@ import {
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'AMP-AD': true,
   'AMP-IMG': true,
-  'AMP-VIDEO': true,
-  'AMP-YOUTUBE': true,
 };
 
 export const ELIGIBLE_TAP_TAGS = {
@@ -53,7 +51,7 @@ export const VIDEO_TAGS = {
 const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAG = 'AMP-CAROUSEL';
 const FIGURE_TAG = 'FIGURE';
-const SLIDE_SELECTOR = '.amp-carousel-slide';
+const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
@@ -79,9 +77,6 @@ export class LightboxManager {
    */
   constructor(ampdoc) {
 
-    // Extra safety check, we don't install this service if experiment is off
-    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-gallery'));
-
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -105,6 +100,8 @@ export class LightboxManager {
      */
     this.counter_ = 0;
 
+    // TODO(alanorozco): Improve performance of visited lookup by setting
+    // mapped unique ids.
     /**
      * List of lightbox elements that have already been scanned.
      * @private {!Array<!Element>}
@@ -121,11 +118,21 @@ export class LightboxManager {
     if (this.scanPromise_) {
       return this.scanPromise_;
     }
+
     this.scanPromise_ = this.scanLightboxables_();
+
+    const root = this.ampdoc_.getRootNode();
+
     // Rescan whenever DOM changes happen.
-    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
+
+    // Process elements where the `lightbox` attr is dynamically set.
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
+      this.processLightboxElement_(dev().assertElement(target));
+    });
+
     return this.scanPromise_;
   }
 
@@ -136,8 +143,8 @@ export class LightboxManager {
    * @return {boolean}
    */
   meetsHeuristicsForTap_(element) {
-    dev().assert(element);
-    dev().assert(element.hasAttribute('lightbox'));
+    devAssert(element);
+    devAssert(element.hasAttribute('lightbox'));
 
     if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
@@ -187,7 +194,11 @@ export class LightboxManager {
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
         if (!shouldExcludeSlide) {
+          if (this.seen_.includes(slide)) {
+            return;
+          }
           slide.setAttribute('lightbox', lightboxGroupId);
+          this.seen_.push(slide);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
       });
@@ -246,19 +257,20 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element),
-        `The element ${element.tagName} isn't supported in lightbox yet.`);
+    userAssert(this.baseElementIsSupported_(element),
+        'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
 
-    this.lightboxGroups_[lightboxGroupId]
-        .push(dev().assertElement(element));
-    if (this.meetsHeuristicsForTap_(element)) {
-      const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
-      element.setAttribute('on', `tap:${gallery.id}.activate`);
+    this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
+    if (!this.meetsHeuristicsForTap_(element)) {
+      return;
     }
+    const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
+    const actions = Services.actionServiceForDoc(element);
+    actions.setActions(element, `tap:${gallery.id}.activate`);
   }
 
   /**
@@ -279,7 +291,7 @@ export class LightboxManager {
    */
   getElementsForLightboxGroup(lightboxGroupId) {
     return this.maybeInit()
-        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
+        .then(() => devAssert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**
@@ -299,36 +311,18 @@ export class LightboxManager {
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaDescribedBy);
+      const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
         return descriptionElement./*OK*/innerText;
       }
     }
-    const alt = element.getAttribute('alt');
-    if (alt) {
-      return alt;
-    }
-    const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) {
-      return ariaLabel;
-    }
-    const ariaLabelledBy = element.getAttribute('aria-labelledby');
-    if (ariaLabelledBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaLabelledBy);
-      if (descriptionElement) {
-        return descriptionElement./*OK*/innerText;
-      }
-    }
-
     return null;
   }
 
   /**
    * Gets the duration of a supported video element
    * @param {!Element} element
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    * @private
    */
   getVideoTimestamp_(element) {
@@ -365,6 +359,8 @@ export class LightboxManager {
     switch (type) {
       case 'AMP-AD':
         return LIGHTBOX_THUMBNAIL_AD;
+      // TODO(alanorozco): This can be replaced by a check of video service
+      // registration signal, were this list to grow larger.
       case 'AMP-VIDEO':
       case 'AMP-YOUTUBE':
         return LIGHTBOX_THUMBNAIL_VIDEO;
@@ -382,7 +378,7 @@ export class LightboxManager {
   getThumbnailSrcset_(element) {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
-      const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
+      const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
       if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
         return srcsetFromElement(thumbnailImage);
       }

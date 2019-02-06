@@ -53,31 +53,44 @@ message PropertySpecList {
 
 // Used for validating urls in attribute values (such as href/src/srcset).
 message UrlSpec {
-  // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
-  repeated string allowed_protocol = 1;
+  // protocol must be in lowercase (e.g. "javascript" not "JavaScript").
+  repeated string protocol = 1;
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
-  // Must be lowercase. Subdomains of disallowed domains are also disallowed,
-  // so if 'example.com' is disallowed then 'www.example.com' is also disallowed
-  // but 'some-example.com' is allowed.
-  repeated string disallowed_domain = 4;
+
+  // Deprecated fields, do not resuse.
+  // reserved 4;
+}
+
+// NEXT AVAILABLE TAG: 3
+message CssDeclaration {
+  // The name of the declaration (e.g. display). Use lower-case attribute names
+  // only.
+  optional string name = 1;
+  // The valid values of the declaration (e.g. block).
+  repeated string value_casei = 2;
 }
 
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 20
+// NEXT AVAILABLE TAG: 22
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
   repeated string alternative_names = 2;
   optional bool mandatory = 3;
-  // Within the context of the tag, exactly one of the attributes tagged
+  // Within the context of the tag, *exactly one* of the attributes tagged
   // with this identifier must be present. Per convention, this identifier
-  // should list the tags participating in the mandatory oneof, with or,
-  // e.g. "foo or bar or baz".
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
   optional string mandatory_oneof = 12;
+  // Within the context of the tag, *at least one* of the attributes tagged
+  // with this identifier must be present. Per convention, this identifier
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
+  optional string mandatory_anyof = 21;
 
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
   // begin oneof {
@@ -87,8 +100,8 @@ message AttrSpec {
   // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
-  optional string value = 4;              // case sensitive
-  optional string value_casei = 18;       // case insensitive
+  repeated string value = 4;              // case sensitive
+  repeated string value_casei = 18;       // case insensitive
   optional string value_regex = 15;       // case sensitive
   optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;
@@ -107,6 +120,9 @@ message AttrSpec {
   optional string deprecation = 7;
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 8;
+
+  // Valid CSS declarations.
+  repeated CssDeclaration css_declaration = 20;
 
   enum DispatchKeyType {
     // Indicates that the attribute does not form a dispatch key.
@@ -145,7 +161,7 @@ message AttrList {
 // great-grandchildren, etc).
 message DescendantTagList {
   optional string name = 1;
-  repeated string allowed_tags = 2;
+  repeated string tag = 2;
 }
 
 // Regex which, if matches the cdata of a tag, causes the tag validation to
@@ -154,6 +170,17 @@ message BlackListedCDataRegex {
   // Syntax is partial match, use ^ and $ if you want global match.
   optional string regex = 1;
   optional string error_message = 2;
+}
+
+// This spec is used when parsing a media query inside a CSS @media rule.
+message MediaQuerySpec {
+  // If issues_as_error is true, then parsing errors and invalid
+  // types / features will be treated as validator errors, otherwise warnings.
+  optional bool issues_as_error = 1 [default = false];
+  // These are the media query types and features allowed within the stylesheet.
+  // http://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Syntax
+  repeated string type = 2;
+  repeated string feature = 3;
 }
 
 // This spec is used by our CSS parser to determine how the contents of a given
@@ -175,6 +202,11 @@ message AtRuleSpec {
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
+
+  // A MediaQuerySpec may only be set for an AtRuleSpec with the name
+  // "media". If not set, media queries will be left unparsed, so no errors or
+  // warnings about them will be reported.
+  optional MediaQuerySpec media_query_spec = 3;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -194,13 +226,19 @@ message CssSpec {
   // TODO(chenshay): Make this more generic.
   optional bool validate_keyframes = 6;
 
-  repeated string allowed_declarations = 7;
+  // Any declaration listed here are allowed.
+  repeated string declaration = 7;
 }
 
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
   optional int32 max_bytes = 1 [ default = -1 ];
+  // If false, bytes inside URLs are not included in the byte calculation for
+  // max_bytes. This is used for handling signed exchange transformations which
+  // can potentially take the number of bytes over the 50,000 byte limit due
+  // to rewriting URLs to point at an AMP Cache.
+  optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string max_bytes_spec_url = 2;
@@ -222,6 +260,9 @@ message CdataSpec {
 
   // If any of these regexes match, then this cdata spec does not validate.
   repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Specifies which AMP Layouts are supported by a given element.
@@ -322,11 +363,10 @@ message ExtensionSpec {
   // value.
   optional string name = 1;
   // e.g. "0.1", "1.0", "latest".
-  repeated string allowed_versions = 2;
-  // deprecated_versions must be a strict subset of allowed_versions. If
-  // the version matches a deprecated_versions field, validation will emit
-  // a warning.
-  repeated string deprecated_versions = 3;
+  repeated string version = 2;
+  // deprecated_version must be a strict subset of version. If the version
+  // matches a deprecated_version, validation will emit a warning.
+  repeated string deprecated_version = 3;
 
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
@@ -363,16 +403,20 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  extensions 5;
+  // reserved 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
-// prescribes a particular set of validation rules.
+// prescribes a particular set of validation rules. This should be kept in sync
+// with Request.HtmlFormat in
+// github.com/ampproject/amppackager/transformer/request/request.proto.
 message HtmlFormat {
   enum Code {
+    UNKNOWN_CODE = 0;  // Never used
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
+    ACTIONS = 5;
     EXPERIMENTAL = 4;  // Currently unused
   }
 }
@@ -381,12 +425,12 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 33
+// NEXT AVAILABLE TAG: 37
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
-  // If the repeated field is empty, this indicates that the TagSpec is allowed
-  // for all formats, rather than none.
+  // The repeated field is not allowed to be empty, it must have at least one
+  // HtmlFormat.
   repeated HtmlFormat.Code html_format = 21;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
@@ -401,6 +445,29 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
+
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this TagSpec. If a Type Identifier is in enabled_by then this
+  // TagSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // TagSpec will not be used in validating parsed documents with that
+  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 35;
+  repeated string disabled_by = 36;
+
+  // NamedId's are used to uniquely identify specific TagSpecs in the
+  // validator rules in a stable manner. Most TagSpecs have no set NamedId.
+  // If a TagSpec has a NamedId it must be unique. In other words, no two
+  // TagSpec's may have the same NamedId except for the NOT_SET (0) value.
+  // NEXT AVAILABLE TAG: 3
+  enum NamedId {
+    NOT_SET = 0;
+    // By convention, the first "word" in the Id should be the tag_name.
+    LINK_FONT_STYLESHEET = 1;
+    STYLE_AMP_CUSTOM = 2;
+  }
+  optional NamedId named_id = 33 [default = NOT_SET];
 
   // If provided, this is a SCRIPT tag defining an amp custom element
   // extension. The other fields, such as expected attributes, will be
@@ -466,6 +533,12 @@ message TagSpec {
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 18;
 
+  // This TagSpec will only validate against attributes explicitly
+  // listed within the TagSpec (attrs and attr_lists). No attributes
+  // from $GLOBAL_ATTRS and $AMP_LAYOUT_ATTRS are valid unless explicitly
+  // added as an attribute within the TagSpec. The field `amp_layout` is not
+  // allowed to be set when `explicit_attrs_only` is true.
+  optional bool explicit_attrs_only = 34 [default = false];
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
   // Top level attr lists of shared tags, identified by unique key
@@ -502,12 +575,34 @@ message TagSpec {
   optional AmpLayout amp_layout = 11;
 
   // Deprecated fields, do not reuse.
-  extensions 14, 26;
+  // reserved 14, 26;
+}
+
+// Defines how much css is allowed on the document including inline styles.
+// If a CssLengthSpec is not defined for a particular html_format, then
+// no limit is enforced for inline styles but a limit may be enforced on
+// particular style tags. Those would be defined in that tag's CdataSpec.
+message CssLengthSpec {
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
+  optional HtmlFormat.Code html_format = 1;
+
+  // If set, the combined style amp-custom cdata contents and all inline style
+  // contents cannot be greater than this length, in bytes.
+  optional int32 max_bytes = 2 [default = -1];
+
+  // If set, the inline style content (per use) cannot be greater than this
+  // length, in bytes.
+  optional int32 max_bytes_per_inline_style = 4 [default = -1];
+
+  // If provided, a URL which linking to a section / sentence in the
+  // AMP HTML spec.
+  optional string spec_url = 3;
 }
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 18
+// NEXT AVAILABLE TAG: 19
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -530,8 +625,10 @@ message ValidatorRules {
 
   repeated DescendantTagList descendant_tag_list = 16;
 
+  repeated CssLengthSpec css_length_spec = 18;
+
   // Deprecated fields, do not reuse.
-  extensions 2, 5, 11, 12, 14;
+  // reserved 2, 5, 11, 12, 14;
 }
 
 // We categorize error messages into higher-level groups. This makes it
@@ -595,7 +692,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 102
+  // NEXT AVAILABLE TAG: 107
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -614,18 +711,23 @@ message ValidationError {
     INVALID_ATTR_VALUE = 4;
     DUPLICATE_ATTRIBUTE = 94;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
+    MISSING_LAYOUT_ATTRIBUTES = 105;
     IMPLIED_LAYOUT_INVALID = 22;
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    MANDATORY_ANYOF_ATTR_MISSING = 104;
     DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     DUPLICATE_UNIQUE_TAG_WARNING = 77;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG = 50;
+    STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
+    INLINE_STYLE_TOO_LONG = 103;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
+    INVALID_JSON_CDATA = 106;
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
@@ -664,7 +766,6 @@ message ValidationError {
     DOCUMENT_TOO_COMPLEX = 86;
     INVALID_UTF8 = 96;
 
-    CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;
     CSS_SYNTAX_UNTERMINATED_COMMENT = 39;
@@ -691,13 +792,16 @@ message ValidationError {
     CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
     CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
     CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
+    CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
 
     // The following codes are currently used only by A4A CSS validation.
-    CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT = 72;
     CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE = 73;
     CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
     CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
+
+    // Deprecated fields, do not reuse.
+    // reserved 13;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -716,7 +820,8 @@ message ValidationError {
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
 
-  extensions 4;  // Previously used tag ids.
+  // Deprecated fields, do not reuse.
+  // reserved 4;
 }
 
 // Used in the verbose validator to select between multiple generated error
@@ -744,6 +849,18 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // If the AMP document is a transformed AMP document, then this is the
+  // version of the transformers that were used to transform it. If the document
+  // is not transformed, then the transformer_version's value will be 0.
+  // Note: the AMP Pacakager's transformer library specifies the version as
+  // int64. However, JavaScript does not natively support int64 so int32 is
+  // used instead.
+  // https://github.com/ampproject/amppackager/blob/master/transformer/transformers/context.go
+  optional int32 transformer_version = 6 [default = 0];
+  // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
+  // type that has yet to be defined. These are declared on the HTML tag and
+  // parsed by the Validator Engine.
+  repeated string type_identifier = 5;
 }
 
 // Information about the validator returned by ValidatorFactory

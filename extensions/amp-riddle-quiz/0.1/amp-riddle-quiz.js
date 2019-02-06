@@ -17,7 +17,7 @@ import {getData, listen} from './../../../src/event-helper';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
 
@@ -38,6 +38,11 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
+  /**
+   * Handles message.
+   *
+   * @param {!Event} event
+   */
   handleMessage_(event) {
     if (!this.iframe_ ||
         event.origin != 'https://www.riddle.com' ||
@@ -64,7 +69,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.riddleId_ = user().assert(
+    this.riddleId_ = userAssert(
         this.element.getAttribute('data-riddle-id'),
         'The data-riddle-id attribute is required for <amp-riddle-quiz> %s',
         this.element);

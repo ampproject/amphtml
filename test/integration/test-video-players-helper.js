@@ -38,7 +38,7 @@ function skipIfAutoplayUnsupported(win) {
     if (isSupported) {
       return;
     }
-    this.skip();
+    this.skipTest();
   });
 }
 
@@ -63,29 +63,30 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  describe.configure().ifNewChrome().run('Video Interface', function() {
-    this.timeout(TIMEOUT);
+  describe.configure().skipIfPropertiesObfuscated()
+      .ifChrome().run('Video Interface', function() {
+        this.timeout(TIMEOUT);
 
-    it('should override the video interface methods', function() {
-      this.timeout(TIMEOUT);
-      return getVideoPlayer({outsideView: false, autoplay: true})
-          .then(r => {
-            const impl = r.video.implementation_;
-            const methods = Object.getOwnPropertyNames(
-                Object.getPrototypeOf(new VideoInterface()));
+        it('should override the video interface methods', function() {
+          this.timeout(TIMEOUT);
+          return getVideoPlayer({outsideView: false, autoplay: true})
+              .then(r => {
+                const impl = r.video.implementation_;
+                const methods = Object.getOwnPropertyNames(
+                    Object.getPrototypeOf(new VideoInterface()));
 
-            expect(methods.length).to.be.above(1);
-            for (let i = 0; i < methods.length; i++) {
-              const methodName = methods[i];
-              expect(impl[methodName]).to.exist;
-            }
-          });
-    });
+                expect(methods.length).to.be.above(1);
+                for (let i = 0; i < methods.length; i++) {
+                  const methodName = methods[i];
+                  expect(impl[methodName]).to.exist;
+                }
+              });
+        });
 
-    afterEach(cleanUp);
-  });
+        afterEach(cleanUp);
+      });
 
-  describe.configure().ifNewChrome().run('Actions', function() {
+  describe.configure().ifChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     // TODO(cvializ, #14827): Fails on Chrome 66.
@@ -135,198 +136,218 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifNewChrome().run('Analytics Triggers', function() {
-    this.timeout(TIMEOUT);
-    let video;
+  describe.configure()
+      .skipIfPropertiesObfuscated()
+      .ifChrome()
+      .skipWindows() // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+      .run('Analytics Triggers', function() {
+        this.timeout(TIMEOUT);
+        let video;
 
-    // TODO(cvializ, #14827): Fails on Chrome 66.
-    it.skip('should trigger play analytics when the video plays', function() {
-      let playButton;
+        // TODO(cvializ, #14827): Fails on Chrome 66.
+        it.skip('should trigger play analytics on play', function() {
+          let playButton;
 
-      return getVideoPlayer(
-          {
-            outsideView: true,
-            autoplay: false,
-          }
-      ).then(r => {
-        video = r.video;
-        playButton = createButton(r, 'play');
-        const viewport = video.implementation_.getViewport();
-        const promise = listenOncePromise(video, VideoEvents.LOAD);
-        viewport.scrollIntoView(video);
-        return promise;
-      }).then(() => {
-        const promise = listenOncePromise(video, VideoAnalyticsEvents.PLAY);
-        playButton.click();
-        return promise;
-      });
-    });
+          return getVideoPlayer(
+              {
+                outsideView: true,
+                autoplay: false,
+              }
+          ).then(r => {
+            video = r.video;
+            playButton = createButton(r, 'play');
+            const viewport = video.implementation_.getViewport();
+            const promise = listenOncePromise(video, VideoEvents.LOAD);
+            viewport.scrollIntoView(video);
+            return promise;
+          }).then(() => {
+            const promise = listenOncePromise(video,
+                VideoAnalyticsEvents.PLAY);
+            playButton.click();
+            return promise;
+          });
+        });
 
-    it('should trigger pause analytics when the video pauses', function() {
-      let pauseButton;
+        it('should trigger pause analytics when the video pauses', function() {
+          let pauseButton;
 
-      return getVideoPlayer(
-          {
-            outsideView: false,
-            autoplay: true,
-          }
-      ).then(r => {
-        video = r.video;
-        pauseButton = createButton(r, 'pause');
-        return listenOncePromise(video, VideoEvents.PLAYING);
-      }).then(() => {
-        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
-        pauseButton.click();
-        return promise;
-      });
-    });
+          return getVideoPlayer(
+              {
+                outsideView: false,
+                autoplay: true,
+              }
+          ).then(r => {
+            video = r.video;
+            pauseButton = createButton(r, 'pause');
+            return listenOncePromise(video, VideoEvents.PLAYING);
+          }).then(() => {
+            const promise = listenOncePromise(video,
+                VideoAnalyticsEvents.PAUSE);
+            pauseButton.click();
+            return promise;
+          });
+        });
 
-    it('should trigger session analytics when a session ends', function() {
-      let pauseButton;
+        it('should trigger session analytics when a session ends', function() {
+          let pauseButton;
 
-      return getVideoPlayer(
-          {
-            outsideView: false,
-            autoplay: true,
-          }
-      ).then(r => {
-        video = r.video;
-        const promise = listenOncePromise(video, VideoEvents.PLAYING);
-        pauseButton = createButton(r, 'pause');
-        return promise;
-      }).then(() => {
-        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
-        pauseButton.click();
-        return promise;
-      });
-    });
+          return getVideoPlayer(
+              {
+                outsideView: false,
+                autoplay: true,
+              }
+          ).then(r => {
+            video = r.video;
+            const promise = listenOncePromise(video, VideoEvents.PLAYING);
+            pauseButton = createButton(r, 'pause');
+            return promise;
+          }).then(() => {
+            const promise = listenOncePromise(video,
+                VideoAnalyticsEvents.PAUSE);
+            pauseButton.click();
+            return promise;
+          });
+        });
 
-    it('should trigger session analytics when ' +
+        // TODO (#16154): this test times out on master
+        it.skip('should trigger session analytics when ' +
         'a visible session ends', function() {
-      let viewport;
-      return getVideoPlayer(
-          {
-            outsideView: true,
-            autoplay: true,
-          }
-      ).then(r => {
-        video = r.video;
-        viewport = video.implementation_.getViewport();
-        // scroll to the bottom, make video fully visible
-        viewport.scrollIntoView(video);
-        return listenOncePromise(video, VideoEvents.PLAYING);
-      }).then(() => {
-        // scroll to the bottom, make video fully visible
-        viewport.setScrollTop(0);
-        return listenOncePromise(video, VideoAnalyticsEvents.SESSION_VISIBLE);
-      });
-    });
+          let viewport;
+          return getVideoPlayer(
+              {
+                outsideView: true,
+                autoplay: true,
+              }
+          ).then(r => {
+            video = r.video;
+            viewport = video.implementation_.getViewport();
+            // scroll to the bottom, make video fully visible
+            viewport.scrollIntoView(video);
+            return listenOncePromise(video, VideoEvents.PLAYING);
+          }).then(() => {
+            // scroll to the bottom, make video fully visible
+            viewport.setScrollTop(0);
+            return listenOncePromise(video,
+                VideoAnalyticsEvents.SESSION_VISIBLE);
+          });
+        });
 
-    it('should trigger ended analytics when the video ends', function() {
-      return getVideoPlayer(
-          {
-            outsideView: false,
-            autoplay: true,
-          }
-      ).then(r => {
-        // TODO(cvializ): Better way to detect which classes implement methods
-        // needed for tracking?
-        const tagName = r.video.tagName;
-        if (tagName !== 'AMP-VIDEO' &&
-            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
-          this.skip();
-          return;
-        }
 
-        video = r.video;
-        return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
-      });
-    });
+        describe('should trigger ended analytics', () => {
+          let player;
+          before(function() {
+            return getVideoPlayer(
+                {
+                  outsideView: false,
+                  autoplay: true,
+                }
+            ).then(r => {
+              // TODO(cvializ): Better way to detect which classes implement
+              // methods needed for tracking?
+              const {tagName} = r.video;
+              if (tagName !== 'AMP-VIDEO' &&
+              tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
+                this.skipTest();
+                return;
+              }
+              player = r;
+            });
+          });
+          it('when the video ends', function() {
+            video = player.video;
+            return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
+          });
+        });
 
-    // TODO(cvializ, #14827): Fails on Chrome 66.
-    it.skip('should include current time, play state, etc.', function() {
-      let playButton;
-      let pauseButton;
+        // TODO(cvializ, #14827): Fails on Chrome 66.
+        it.skip('should include current time, play state, etc.', function() {
+          let playButton;
+          let pauseButton;
 
-      return getVideoPlayer(
-          {
-            outsideView: false,
-            autoplay: false,
-          }
-      ).then(r => {
-        video = r.video;
-        playButton = createButton(r, 'play');
-        pauseButton = createButton(r, 'pause');
-        return listenOncePromise(video, VideoEvents.LOAD);
-      }).then(() => {
-        const promise = listenOncePromise(video, VideoEvents.PLAYING);
-        playButton.click();
-        return promise;
-      }).then(() => {
-        pauseButton.click();
-        return listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
-      }).then(event => {
-        const details = getData(event);
-        const playedRanges = JSON.parse(details.playedRangesJson);
-        expect(details.autoplay).to.be.a('boolean');
-        expect(details.currentTime).to.be.a('number');
-        expect(details.duration).to.be.a('number');
-        expect(details.height).to.be.a('number');
-        expect(details.id).to.be.a('string');
-        expect(details.playedTotal).to.be.a('number');
-        expect(playedRanges).to.be.an('array');
-        expect(details.state).to.be.a('string');
-        expect(details.width).to.be.a('number');
-      });
-    });
+          return getVideoPlayer(
+              {
+                outsideView: false,
+                autoplay: false,
+              }
+          ).then(r => {
+            video = r.video;
+            playButton = createButton(r, 'play');
+            pauseButton = createButton(r, 'pause');
+            return listenOncePromise(video, VideoEvents.LOAD);
+          }).then(() => {
+            const promise = listenOncePromise(video, VideoEvents.PLAYING);
+            playButton.click();
+            return promise;
+          }).then(() => {
+            pauseButton.click();
+            return listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
+          }).then(event => {
+            const details = getData(event);
+            const playedRanges = JSON.parse(details.playedRangesJson);
+            expect(details.autoplay).to.be.a('boolean');
+            expect(details.currentTime).to.be.a('number');
+            expect(details.duration).to.be.a('number');
+            expect(details.height).to.be.a('number');
+            expect(details.id).to.be.a('string');
+            expect(details.playedTotal).to.be.a('number');
+            expect(playedRanges).to.be.an('array');
+            expect(details.state).to.be.a('string');
+            expect(details.width).to.be.a('number');
+          });
+        });
 
-    it('should trigger video-seconds-played when visible' +
+        it.skip('should trigger video-seconds-played when visible' +
         'and playing', () => {
-      let video;
-      let timer;
-      let pauseButton;
-      let playButton;
+          let video;
+          let timer;
+          let pauseButton;
+          let playButton;
 
-      return getVideoPlayer(
-          {
-            outsideView: true,
-            autoplay: true,
-          }
-      ).then(r => {
-        timer = Services.timerFor(r.video.implementation_.win);
-        video = r.video;
-        pauseButton = createButton(r, 'pause');
-        playButton = createButton(r, 'play');
-        return Promise.race([
-          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
-              () => Promise.reject('Triggered video-seconds-played')),
-          timer.promise(2000),
-        ]);
-      }).then(() => {
-        const viewport = video.implementation_.getViewport();
-        viewport.scrollIntoView(video);
-        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
-      }).then(() => {
-        pauseButton.click();
-        return listenOncePromise(video, VideoEvents.PAUSE);
-      }).then(() => {
-        return Promise.race([
-          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
-              () => Promise.reject('Triggered video-seconds-played')),
-          timer.promise(2000),
-        ]);
-      }).then(() => {
-        playButton.click();
-        return listenOncePromise(video, VideoEvents.PLAYING);
-      }).then(() => {
-        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
+          return getVideoPlayer(
+              {
+                outsideView: true,
+                autoplay: true,
+              }
+          ).then(r => {
+            timer = Services.timerFor(r.video.implementation_.win);
+            video = r.video;
+            pauseButton = createButton(r, 'pause');
+            playButton = createButton(r, 'play');
+            return Promise.race([
+              listenOncePromise(video,
+                  VideoAnalyticsEvents.SECONDS_PLAYED).then(
+                  () => Promise.reject('Triggered video-seconds-played')),
+              timer.promise(2000),
+            ]);
+          }).then(() => {
+            const viewport = video.implementation_.getViewport();
+            viewport.scrollIntoView(video);
+            return listenOncePromise(video,
+                VideoAnalyticsEvents.SECONDS_PLAYED);
+          }).then(() => {
+            pauseButton.click();
+            return listenOncePromise(video, VideoEvents.PAUSE);
+          }).then(() => {
+            return Promise.race([
+              listenOncePromise(video,
+                  VideoAnalyticsEvents.SECONDS_PLAYED).then(
+                  () => Promise.reject('Triggered video-seconds-played')),
+              timer.promise(2000),
+            ]);
+          }).then(() => {
+            playButton.click();
+            return listenOncePromise(video, VideoEvents.PLAYING);
+          }).then(() => {
+            return listenOncePromise(video,
+                VideoAnalyticsEvents.SECONDS_PLAYED);
+          });
+        });
+
+        afterEach(cleanUp);
       });
-    });
 
-    afterEach(cleanUp);
-  });
-
-  describe.configure().ifNewChrome().run('Autoplay', function() {
+  const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
+  t.run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
@@ -348,7 +369,8 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO(aghassemi, #9379): Flaky on Safari 9.
-      it('should play/pause when video enters/exits viewport', function() {
+      // TODO(aghassemi): Flaky on Chrome 67 on Windows 7.
+      it.skip('should play/pause when video enters/exits viewport', function() {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
@@ -423,6 +445,74 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
+  describe.configure().ifChrome().run('Rotate-to-fullscreen', function() {
+    this.timeout(TIMEOUT);
+
+    let video;
+    let sandbox;
+    let playButton;
+    let autoFullscreen;
+    let isInLandscapeStub;
+
+    // TODO(alanorozco): Fails on Chrome 66.
+    it.skip('should enter fullscreen on rotation', function() {
+
+      function mockLandscape(isLandscape) {
+        if (!autoFullscreen) {
+          const manager = Services.videoManagerForDoc(video.getAmpDoc());
+          autoFullscreen = manager.getAutoFullscreenManagerForTesting_();
+        }
+        if (!isInLandscapeStub) {
+          isInLandscapeStub = sandbox.stub(autoFullscreen, 'isInLandscape');
+        }
+        isInLandscapeStub.returns(isLandscape);
+      }
+
+      return getVideoPlayer({
+        autoplay: false,
+        outsideView: true,
+        'rotate-to-fullscreen': true,
+      }).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        mockLandscape(false);
+        const whenLoaded = listenOncePromise(video, VideoEvents.LOAD);
+        const viewport = video.implementation_.getViewport();
+        viewport.scrollIntoView(video);
+        return whenLoaded;
+      }).then(() => {
+        const whenPlaying = listenOncePromise(video, VideoEvents.PLAYING);
+        playButton.click();
+        return whenPlaying;
+      }).then(() => {
+        const enter = sandbox.stub(video.implementation_, 'fullscreenEnter');
+        mockLandscape(true);
+        autoFullscreen.onRotation_();
+        return poll('fullscreen enter', () => enter.called);
+      });
+    });
+
+    // Although these tests are not about autoplay, we can ony run them in
+    // browsers that do support autoplay, this is because a synthetic click
+    // event will not be considered a user-action and mobile browsers that
+    // don't support muted autoplay will block it. In real life, the click
+    // would be considered a user-initiated action, but no way to do that in a
+    // scripted test environment.
+    before(function() {
+      this.timeout(TIMEOUT);
+      // Skip autoplay tests if browser does not support autoplay.
+      return skipIfAutoplayUnsupported.call(this, window);
+    });
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+  });
+
   function getVideoPlayer(options) {
     options = options || {};
     const top = options.outsideView ? '100vh' : '0';
@@ -443,17 +533,22 @@ export function runVideoPlayerIntegrationTests(
               video.signals().whenSignal(VideoEvents.REGISTERED)
                   .then(() => ({video, fixture}));
 
-          if (options.autoplay) {
-            video.setAttribute('autoplay', '');
-          }
-          if (options.dock) {
-            video.setAttribute('dock', '');
-          }
+          [
+            'autoplay',
+            'dock',
+            'rotate-to-fullscreen',
+          ].forEach(option => {
+            if (options[option]) {
+              video.setAttribute(option, '');
+            }
+          });
+
           video.setAttribute('id', 'myVideo');
           video.setAttribute('controls', '');
           video.setAttribute('layout', 'fixed');
           video.setAttribute('width', '300px');
           video.setAttribute('height', '50vh');
+          video.setAttribute('i-amphtml-integration-test', '');
 
           video.style.position = 'absolute';
           video.style.top = top;

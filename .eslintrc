@@ -1,9 +1,11 @@
 {
+  "root": true,
   "parser": "babel-eslint",
   "plugins": [
     "chai-expect",
     "eslint-plugin-amphtml-internal",
     "eslint-plugin-google-camelcase",
+    "jsdoc",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -16,40 +18,62 @@
     "sourceType": "module"
   },
   "globals": {
-    "it": false,
-    "chai": false,
-    "expect": false,
-    "describe": false,
-    "beforeEach": false,
-    "afterEach": false,
-    "before": false,
-    "after": false,
     "AMP": false,
-    "assert": false,
-    "sinon": true,
-    "sandbox": true,
     "context": false,
-    "global": false,
-    "describes": true,
-    "allowConsoleError": false
+    "global": false
+  },
+  "settings": {
+    "jsdoc": {
+      "tagNamePreference": {
+        "returns": "return",
+        "constant": "const",
+        "class": "constructor"
+      },
+      "additionalTagNames": {
+        "customTags": [
+          "deprecated",
+          "export",
+          "final",
+          "package",
+          "restricted",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
+      },
+      "allowOverrideWithoutParam" : true
+    }
   },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
     "amphtml-internal/dict-string-keys": 2,
     "amphtml-internal/enforce-private-props": 2,
     "amphtml-internal/html-template": 2,
+    "amphtml-internal/is-experiment-on": 2,
     "amphtml-internal/no-array-destructuring": 2,
+    "amphtml-internal/no-deep-destructuring": 2,
+    "amphtml-internal/no-duplicate-import": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
+    "amphtml-internal/no-has-own-property-method": 1,
+    "amphtml-internal/no-import": 2,
+    "amphtml-internal/no-import-rename": 2,
+    "amphtml-internal/no-is-amp-alt": 2,
+    "amphtml-internal/no-mixed-operators": 2,
+    "amphtml-internal/no-module-exports": 2,
+    "amphtml-internal/no-mixed-interpolation": 2,
     "amphtml-internal/no-spread": 2,
+    "amphtml-internal/no-style-display": 2,
     "amphtml-internal/no-style-property-setting": 2,
+    "amphtml-internal/no-swallow-return-from-allow-console-error": 2,
+    "amphtml-internal/prefer-deferred-promise": 1,
+    "amphtml-internal/prefer-destructuring": 2,
     "amphtml-internal/query-selector": 2,
-    "amphtml-internal/resolve-inside-promise-resolver": 1,
     "amphtml-internal/todo-format": 0,
     "amphtml-internal/unused-private-field": 1,
-    "amphtml-internal/vsync": 0,
+    "amphtml-internal/vsync": 1,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
@@ -63,11 +87,18 @@
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
+    "jsdoc/check-param-names": 2,
+    "jsdoc/check-tag-names": 2,
+    "jsdoc/check-types": 2,
+    "jsdoc/require-param": 2,
+    "jsdoc/require-param-name": 2,
+    "jsdoc/require-param-type": 2,
+    "jsdoc/require-returns-type": 2,
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
-      "ignoreComments": true,
+      "ignoreTrailingComments": true,
       "ignoreRegExpLiterals": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$",
+      "ignorePattern": "^} from.*;|= require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
       "ignoreUrls": true
     }],
     "no-alert": 2,
@@ -86,6 +117,7 @@
     "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
+    "no-restricted-globals": [2, "error", "event"],
     "no-script-url": 2,
     "no-self-compare": 2,
     "no-sequences": 2,
@@ -94,8 +126,8 @@
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
     "no-unused-vars": [2, {
-      "argsIgnorePattern": "^var_|opt_|unused",
-      "varsIgnorePattern": "AmpElement|Def|Interface$"
+      "argsIgnorePattern": "^(var_args$|opt_|unused)",
+      "varsIgnorePattern": "(AmpElement|Def|Interface)$"
     }],
     "no-useless-call": 2,
     "no-useless-concat": 2,
@@ -110,6 +142,15 @@
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
+    "require-jsdoc": [2, {
+      "require": {
+        "FunctionDeclaration": true,
+        "MethodDefinition": true,
+        "ClassDeclaration": false,
+        "ArrowFunctionExpression": false,
+        "FunctionExpression": false
+      }
+    }],
     "semi": 2,
     "keyword-spacing": [2, { "before": true, "after": true }],
     "sort-imports-es6-autofix/sort-imports-es6": [2, {
@@ -124,5 +165,53 @@
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
     "wrap-iife": [2, "any"]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "test/**/*.js",
+        "extensions/**/test/**/*.js",
+        "extensions/**/test-e2e/*.js",        
+        "ads/**/test/**/*.js",
+        "testing/**/*.js"
+      ],
+      "rules": {
+        "require-jsdoc": 0,
+        "jsdoc/check-param-names": 0,
+        "jsdoc/check-tag-names": 0,
+        "jsdoc/check-types": 0,
+        "jsdoc/require-param": 0,
+        "jsdoc/require-param-name": 0,
+        "jsdoc/require-param-type": 0,
+        "jsdoc/require-returns-type": 0
+      },
+      "globals": {
+        "it": false,
+        "chai": false,
+        "expect": false,
+        "describe": false,
+        "beforeEach": false,
+        "afterEach": false,
+        "before": false,
+        "after": false,
+        "assert": false,
+        "sinon": true,
+        "sandbox": true,
+        "describes": true,
+        "allowConsoleError": false,
+        "expectAsyncConsoleError": false,
+        "restoreAsyncErrorThrows": false,
+        "stubAsyncErrorThrows": false,
+        "Key": false
+      }
+    },
+    {
+      "files": ["babel.config.js"],
+      "globals": {
+        "module": false,
+        "process": false,
+        "require": false
+      }
+    }
+  ]
 }

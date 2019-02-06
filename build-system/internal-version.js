@@ -16,28 +16,33 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const crypto = require('crypto');
+const {gitCommitFormattedTime, gitStatusPorcelain} = require('./git');
 
-// Used to e.g. references the ads binary from the runtime to get
-// version lock.
-exports.VERSION = argv.version ?
-  String(argv.version) : String(Date.now());
-
-// A token that changes its value each time we release AMP. This is intended
-// to verify that two iframes of AMP have the same version of AMP. It is
-// also intended to make running iframes with custom software very unpleasant,
-// so that we are more likely to have everybody on the same version.
-exports.TOKEN = getToken();
-
-function getToken() {
-  const task = process.argv[2];
-  // For tests build parent and child frame can get out of sync because
-  // we do not version lock them. To fix this we use a fixed token.
-  if (!task || task == 'build' || task == 'test') {
-    return 'development--token';
+function getVersion() {
+  if (argv.version) {
+    return String(argv.version);
+  } else {
+    // Generate a consistent version number by using the commit* time of the
+    // latest commit on the active branch as the twelve digits, and use the
+    // state of the working directory as the last digit: 0 for a "clean" tree, 1
+    // if there are uncommited changes in the working directory.
+    //
+    // e.g., the version number of a clean (no uncommited changes) tree that was
+    // commited on August 1, 2018 at 14:31:11 EDT would be `1808011831110`
+    // (notice that due to timezone shift, the hour value changes from EDT's 14
+    // to UTC's 18. The last digit denotes that this is a clean tree.)
+    //
+    // *Commit time is different from author time! Commit time is the time that
+    // the PR was merged into master; author time is when the author ran the
+    // "git commit" command.
+    const lastCommitFormattedTime = gitCommitFormattedTime();
+    if (gitStatusPorcelain()) {
+      return `${lastCommitFormattedTime}1`;
+    } else {
+      return `${lastCommitFormattedTime}0`;
+    }
   }
-  // For every other build, most importantly `dist` we assume production.
-  return crypto.createHmac(
-      'sha256', crypto.randomBytes(16)).update(exports.VERSION)
-      .digest('hex');
 }
+
+// Used to e.g. references the ads binary from the runtime to get version lock.
+exports.VERSION = getVersion();

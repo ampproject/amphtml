@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
-import {dev} from '../../../src/log';
+import {
+  IntersectionObserverPolyfill,
+} from '../../../src/intersection-observer-polyfill';
+import {devAssert} from '../../../src/log';
 
 export class RefreshIntersectionObserverWrapper {
   /**
@@ -60,7 +62,7 @@ export class RefreshIntersectionObserverWrapper {
     // DATA_MANAGER_ID_NAME, but unfortunately, it can't be imported without
     // creating a cyclical dependency.
     const refreshId = element.getAttribute('data-amp-ad-refresh-id');
-    dev().assert(refreshId, 'observe invoked on element without refresh id');
+    devAssert(refreshId, 'observe invoked on element without refresh id');
 
     if (!this.viewportCallbacks_[refreshId]) {
       const viewportCallback = element.viewportCallback.bind(element);
@@ -75,6 +77,10 @@ export class RefreshIntersectionObserverWrapper {
 
     this.updateObserver_ = true;
     this.intersectionObserver_.observe(element);
+    // Elements that appear and remain within the viewport for the duration of
+    // their existence may never have viewportCallback invoked. To ensure that
+    // refresh is triggered, we need to make this initial call.
+    this.intersectionObserver_.tick(this.viewport_.getRect());
   }
 
   /**

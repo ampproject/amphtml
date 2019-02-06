@@ -20,6 +20,10 @@ import {
   validateData,
 } from '../3p/3p';
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function swoop(global, data) {
   // Required properties
   validateData(data, [

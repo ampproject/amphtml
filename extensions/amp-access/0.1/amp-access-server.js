@@ -16,9 +16,10 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -92,7 +93,7 @@ export class AccessServerAdapter {
     this.serverState_ = stateElement ?
       stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server');
 
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
@@ -152,17 +153,17 @@ export class AccessServerAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           this.clientAdapter_.getAuthorizationTimeout(),
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           }));
     }).then(responseDoc => {
       dev().fine(TAG, 'Authorization response: ', responseDoc);
-      const accessDataString = dev().assert(
+      const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
       const accessData = parseJson(accessDataString);

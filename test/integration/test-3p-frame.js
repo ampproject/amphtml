@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import {Services} from '../../src/services';
 import {
   addDataAndJsonAttributes_,
+  applySandbox,
   getBootstrapBaseUrl,
   getDefaultBootstrapBaseUrl,
   getIframe,
@@ -35,9 +35,8 @@ import {dev} from '../../src/log';
 import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
 import {toggleExperiment} from '../../src/experiments';
-import {validateData} from '../../3p/3p';
 
-describe.configure().ifNewChrome().run('3p-frame', () => {
+describe.configure().ifChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -45,7 +44,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   let preconnect;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -72,8 +71,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   }
 
   function setupElementFunctions(div) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     div.getIntersectionChangeEntry = function() {
       return {
         time: 1234567888,
@@ -160,8 +158,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     setupElementFunctions(div);
 
     const viewer = Services.viewerForDoc(window.document);
@@ -176,7 +173,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
         () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
-    const src = iframe.src;
+    const {src} = iframe;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
     const docInfo = Services.documentInfoForDoc(window.document);
@@ -249,7 +246,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
-      validateData(win.context.data, ['ping', 'testAttr']);
+      expect(win.context.data).to.have.property('ping', 'pong');
+      expect(win.context.data).to.have.property('testAttr', 'value');
       document.head.removeChild(link);
     });
   });
@@ -287,6 +285,53 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     container.appendChild(div);
     const iframe = getIframe(window, div, 'none');
     expect(iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+  });
+
+  it('should not set sandbox with sandbox-ads off', () => {
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
+  });
+
+  it('should set sandbox with sandbox-ads on', () => {
+    toggleExperiment(window, 'sandbox-ads', true);
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('sandbox')).to.equal(
+        'allow-top-navigation-by-user-activation ' +
+        'allow-popups-to-escape-sandbox allow-forms ' +
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
+  });
+
+  it('should set sandbox (direct call)', () => {
+    const iframe = document.createElement('iframe');
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(
+        'allow-top-navigation-by-user-activation ' +
+        'allow-popups-to-escape-sandbox allow-forms ' +
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
+  });
+
+  it('should not set sandbox without feature detection', () => {
+    const iframe = document.createElement('iframe');
+    iframe.sandbox.supports = null;
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
+  });
+
+  it('should not set sandbox with failing feature detection', () => {
+    const iframe = document.createElement('iframe');
+    iframe.sandbox.supports = function(flag) {
+      return flag != 'allow-top-navigation-by-user-activation';
+    };
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
   });
 
   it('should pick the right bootstrap url for local-dev mode', () => {
@@ -353,7 +398,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
   it('should pick default url if custom disabled', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
+    expect(getBootstrapBaseUrl(window, true, true)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
@@ -382,7 +427,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   it('should prefetch default bootstrap frame if custom disabled', () => {
     window.AMP_MODE = {localDev: true};
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    preloadBootstrap(window, preconnect, undefined, true);
+    preloadBootstrap(window, preconnect, true);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       expect(document.querySelectorAll('link[rel=preload]' +

@@ -30,6 +30,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
+  </tr>
 </table>
 
 [TOC]

@@ -21,7 +21,6 @@ YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 
 PID_FILE="sauce_connect_pid"
 LOG_FILE="sauce_connect_log"
-STOP_MESSAGE="Goodbye."
 LOG_PREFIX=$(YELLOW "stop_sauce_connect.sh")
 
 # Early exit if there's no proxy running.
@@ -30,11 +29,10 @@ if [[ ! -f "$PID_FILE" ]]; then
   exit 0
 fi
 
-# Wait for clean exit.
+# Stop the sauce connect proxy.
 PID="$(cat "$PID_FILE")"
 echo "$LOG_PREFIX Stopping Sauce Connect Proxy pid $(CYAN "$PID")"
 kill "$PID"
-( tail -f -n0 "$LOG_FILE" & ) | grep -q "$STOP_MESSAGE"
 
 # Clean up files.
 if [[ -f "$LOG_FILE" ]]; then

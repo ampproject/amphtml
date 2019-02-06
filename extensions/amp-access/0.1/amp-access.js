@@ -15,11 +15,13 @@
  */
 
 import {AccessSource, AccessType} from './amp-access-source';
+import {AccessVars} from './access-vars';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
+import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {evaluateAccessExpr} from './access-expr';
 import {getSourceOrigin} from '../../../src/url';
@@ -43,6 +45,7 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
 
 /**
  * AccessService implements the complete lifecycle of the AMP Access system.
+ * @implements {AccessVars}
  */
 export class AccessService {
   /**
@@ -117,6 +120,9 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
+    /** @private @const {!Observable} */
+    this.applyAuthorizationsObservable_ = new Observable();
+
     // This will fire after the first received authorization, even if
     // there are multiple sources.
     this.lastAuthorizationPromises_.then(() => {
@@ -134,13 +140,7 @@ export class AccessService {
         this.onDomUpdate_.bind(this));
   }
 
-  /**
-   * Returns the promise that will yield the access READER_ID.
-   *
-   * This is a restricted API.
-   *
-   * @return {?Promise<string>}
-   */
+  /** @override from AccessVars */
   getAccessReaderId() {
     if (!this.enabled_) {
       return null;
@@ -165,6 +165,21 @@ export class AccessService {
   }
 
   /**
+   * @return {boolean}
+   */
+  areFirstAuthorizationsCompleted() {
+    return this.firstAuthorizationsCompleted_;
+  }
+
+  /**
+   * Registers a callback to be triggered when the document gets (re)authorized.
+   * @param {!Function} callback
+   */
+  onApplyAuthorizations(callback) {
+    this.applyAuthorizationsObservable_.add(callback);
+  }
+
+  /**
    * @return {!Array<!AccessSource>}
    * @private
    */
@@ -178,8 +193,8 @@ export class AccessService {
       const contentArray = rawContent;
       for (let i = 0; i < contentArray['length']; i++) {
         const namespace = contentArray[i]['namespace'];
-        user().assert(!!namespace, 'Namespace required');
-        user().assert(!configMap[namespace],
+        userAssert(!!namespace, 'Namespace required');
+        userAssert(!configMap[namespace],
             'Namespace already used: ' + namespace);
         configMap[namespace] = contentArray[i];
       }
@@ -205,9 +220,9 @@ export class AccessService {
     // Only re-authorize sections if authorization already fired, otherwise
     // just wait and existing callback will cover new sections.
     if (this.firstAuthorizationsCompleted_) {
+      const target = dev().assertElement(event.target);
       // Guard against anything else in flight.
       return this.lastAuthorizationPromises_.then(() => {
-        const target = dev().assertElement(event.target);
         const responses = this.combinedResponses();
         this.applyAuthorizationToRoot_(target, responses);
       });
@@ -231,7 +246,7 @@ export class AccessService {
         }
       }
     }
-    user().assert(false,
+    userAssert(false,
         'Access vendor "%s" can only be used for "type=vendor", but none found',
         name);
     // Should not happen, just to appease type checking.
@@ -265,6 +280,7 @@ export class AccessService {
   /**
    * @return {!AccessService}
    * @private
+   * @restricted
    */
   start_() {
     if (!this.enabled_) {
@@ -277,9 +293,8 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
-    // is migrated to ampdoc as well.
-    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
+    const actionService = Services.actionServiceForDoc(this.accessElement_);
+    actionService.installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     for (let i = 0; i < this.sources_.length; i++) {
@@ -378,17 +393,7 @@ export class AccessService {
         });
   }
 
-  /**
-   * Returns the promise that will yield the value of the specified field from
-   * the authorization response. This method will wait for the most recent
-   * authorization request to complete. It will return null values for failed
-   * requests with no fallback, but could be modified to block indefinitely.
-   *
-   * This is a restricted API.
-   *
-   * @param {string} field
-   * @return {?Promise<*|null>}
-   */
+  /** @override from AccessVars */
   getAuthdataField(field) {
     if (!this.enabled_) {
       return null;
@@ -412,7 +417,9 @@ export class AccessService {
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
     }
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => {
+      this.applyAuthorizationsObservable_.fire();
+    });
   }
 
   /**
@@ -651,6 +658,11 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_(invocation.method.substring('login-'.length));
+    } else if (invocation.method == 'refresh') {
+      if (invocation.event) {
+        invocation.event.preventDefault();
+      }
+      this.runAuthorization_();
     }
     return null;
   }
@@ -661,13 +673,14 @@ export class AccessService {
    * @return {!AccessSource}
    */
   getSource(index) {
-    user().assert(index >= 0 && index < this.sources_.length,
+    userAssert(index >= 0 && index < this.sources_.length,
         'Invalid index: %d', index);
     return this.sources_[index];
   }
 
   /**
-   * Runs the login flow using one of the predefined urls in the amp-access config
+   * Runs the login flow using one of the predefined urls in the amp-access
+   * config
    *
    * @private
    * @param {string} type Type of login defined in the config
@@ -687,7 +700,7 @@ export class AccessService {
     }
 
     // If there is only one source, process as standalone
-    user().assert(singleSource, 'Login must match namespace: %s', namespace);
+    userAssert(singleSource, 'Login must match namespace: %s', namespace);
     return this.sources_[0].loginWithType(type);
   }
 
@@ -716,3 +729,9 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return new AccessService(ampdoc).start_();
   });
 });
+
+
+/** @package Visible for testing only. */
+export function getAccessVarsClassForTesting() {
+  return AccessVars;
+}

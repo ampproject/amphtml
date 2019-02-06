@@ -22,10 +22,6 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.</td>
   </tr>
-   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>
@@ -133,3 +129,78 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 
 If no thumbnail is specified, `<amp-img>` elements will be cropped per `object-fit: cover`, `<amp-video>` will use the image src specified in its `poster` attribute, and placeholder images will be used for lightboxed elements that have one.
 
+## Analytics events
+
+To track usage of `amp-lightbox-gallery`, please use one of the following analytics events:
+
+### `lightboxOpened`
+
+This event tracks when the lightbox is opened when the user clicks on a lightboxed `<amp-img>`.
+
+You can track this event using the following code snippet:
+
+```html
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "open": "https://foo.com/open",
+        },
+        "triggers": {
+          "trackLightboxOpened": {
+            "on": "lightboxOpened",
+            "request": "open"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
+```
+
+### `thumbnailsViewToggled`
+
+This event tracks when the thumbnails view is triggered by clicking on the trigger when the user is in the lightbox view.
+
+You can track this event using the following code snippet:
+
+```html
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "thumb": "https://foo.com/thumb",
+        },
+        "triggers": {
+          "trackThumbnailsViewToggled": {
+            "on": "thumbnailsViewToggled",
+            "request": "thumb"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
+```
+
+### `descriptionOverflowToggled`
+
+This event tracks when the user toggles the description by clicking on the description to expand/collapse it, tracking engagement with the description for the lightboxed image.
+
+You can track this event using the following code snippet:
+
+```html
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "descOverflow": "https://foo.com/descOverflow"
+        },
+        "triggers": {
+          "trackDescriptionOverflowed": {
+            "on": "descriptionOverflowToggled",
+            "request": "descOverflow"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
+```

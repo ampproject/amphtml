@@ -91,7 +91,10 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 ##### data-loading-strategy (optional)
 
-Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
+Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. Without the `data-loading-strategy` attribute, the number is 3 by default. You can specify a float value in the range of [0, 3] (If the value is not specified the value is set to 1.25). Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
+
+##### data-ad-container-id (optional)
+Informs the ad of the container component id in the case of attempting to collapse. The container component must be an `<amp-layout>` component that's parent of the ad. When the `data-ad-container-id` is specified, and such a `<amp-layout>` container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
 
 ##### common attributes
 
@@ -110,9 +113,9 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
+If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
-If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled, and AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
 Example with fallback:
 
@@ -161,9 +164,11 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 ### Enhance incoming ad configuration
 
-This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
+This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-This is supported by passing a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+If your ad network supports [fast fetch](https://www.ampproject.org/docs/ads/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+
+If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
 Example:
 
@@ -206,24 +211,29 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdOcean](../../ads/adocean.md)
 - [AdPicker](../../ads/adpicker.md)
 - [AdPlugg](../../ads/adplugg.md)
+- [Adpon](../../ads/adpon.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
+- [AdSensor](../../ads/adsensor.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpeed](../../ads/adspeed.md)
 - [AdSpirit](../../ads/adspirit.md)
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [AdThrive](../../ads/adthrive.md)
+- [AdUnity](../../ads/adunity.md)
 - [Ad Up Technology](../../ads/aduptech.md)
 - [Adventive](../../ads/adventive.md)
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
 - [AdvertServe](../../ads/advertserve.md)
+- [Adyoulike](../../ads/adyoulike.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
+- [Baidu](../../ads/baidu.md)
 - [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
@@ -251,6 +261,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [FlexOneHARRIER](../../ads/f1h.md)
 - [Flite](../../ads/flite.md)
 - [fluct](../../ads/fluct.md)
+- [FreeWheel](../../ads/freewheel.md)
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
 - [Giraff](../../ads/giraff.md)
@@ -281,31 +292,42 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [MixiMedia](../../ads/miximedia.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
+- [mox](../../ads/mox.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
 - [NETLETIX](../../ads/netletix.md)
+- [Noddus](../../ads/noddus.md)
 - [Nokta](../../ads/nokta.md)
+- [OneAD](../../ads/onead.md)
+- [OnNetwork](../../ads/onnetwork.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
+- [Pressboard](../../ads/pressboard.md)
 - [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
 - [Purch](../../ads/purch.md)
 - [Rambler&Co](../../ads/capirs.md)
+- [RbInfoxSg](../../ads/rbinfox.md)
+- [Realclick](../../ads/realclick.md)
+- [recomAD](../../ads/recomad.md)
+- [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
+- [RUNative](../../ads/runative.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
@@ -315,21 +337,28 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [sogou Ad](../../ads/sogouad.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [Speakol](../../ads/speakol.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
+- [TcsEmotion](../../ads/tcsemotion.md)
 - [Teads](../../ads/teads.md)
 - [Tracdelight](../../ads/tracdelight.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
+- [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
+- [Unruly](../../ads/unruly.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [Wisteria](../../ads/wisteria.md)
+- [WPMedia](../../ads/wpmedia.md)
 - [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
@@ -345,12 +374,15 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Supported embed types
 
 - [24smi](../../ads/24smi.md)
+- [AJA](../../ads/aja.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
+- [Epeex](../../ads/epeex.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
 - [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
+- [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

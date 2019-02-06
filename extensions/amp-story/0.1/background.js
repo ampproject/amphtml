@@ -136,7 +136,8 @@ export class AmpStoryBackground {
   }
 
   /**
-   * Rotates the classes on page background to bring the new bacground in foreground.
+   * Rotates the classes on page background to bring the new bacground in
+   * foreground.
    * @private
    */
   rotateActiveBackground_() {

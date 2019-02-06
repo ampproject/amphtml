@@ -16,9 +16,8 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {FxProvider} from './providers/fx-provider';
-import {Presets} from './providers/amp-fx-presets';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
@@ -33,6 +32,20 @@ const FxType = {
   PARALLAX: 'parallax',
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
+  FLY_IN_BOTTOM: 'fly-in-bottom',
+  FLY_IN_LEFT: 'fly-in-left',
+  FLY_IN_RIGHT: 'fly-in-right',
+  FLY_IN_TOP: 'fly-in-top',
+};
+
+const restrictedFxTypes = {
+  'parallax': ['fly-in-top', 'fly-in-bottom'],
+  'fly-in-top': ['parallax', 'fly-in-bottom'],
+  'fly-in-bottom': ['fly-in-top', 'parallax'],
+  'fly-in-right': ['fly-in-left'],
+  'fly-in-left': ['fly-in-right'],
+  'fade-in': ['fade-in-scroll'],
+  'fade-in-scroll': ['fade-in'],
 };
 
 /**
@@ -99,9 +112,9 @@ export class AmpFxCollection {
    * @param {!Element} fxElement
    */
   register_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
-    dev().assert(!this.seen_.includes(fxElement));
-    dev().assert(this.viewer_.isVisible());
+    devAssert(fxElement.hasAttribute('amp-fx'));
+    devAssert(!this.seen_.includes(fxElement));
+    devAssert(this.viewer_.isVisible());
 
     const fxTypes = this.getFxTypes_(fxElement);
 
@@ -117,23 +130,49 @@ export class AmpFxCollection {
    * e.g. `amp-fx="parallax fade-in"
    *
    * @param {!Element} fxElement
-   * @returns {!Array<!FxType>}
+   * @return {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
+    devAssert(fxElement.hasAttribute('amp-fx'));
     const fxTypes = fxElement.getAttribute('amp-fx')
         .trim()
         .toLowerCase()
         .split(/\s+/);
 
-    user().assert(fxTypes.length, 'No value provided for `amp-fx` attribute');
+    userAssert(fxTypes.length, 'No value provided for `amp-fx` attribute');
 
     // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {
-      Presets[fxType].isFxTypeSupported(this.ampdoc_.win);
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
 
+    this.sanitizeFxTypes_(fxTypes);
+
+    return fxTypes;
+  }
+
+  /**
+   * Returns the array of fx types this component after checking that no
+   * clashing fxTypes are present on the same element.
+   * e.g. `amp-fx="parallax fade-in"
+   *
+   * @param {!Array<!FxType>} fxTypes
+   * @return {!Array<!FxType>}
+   */
+  sanitizeFxTypes_(fxTypes) {
+    for (let i = 0; i < fxTypes.length; i++) {
+      const currentType = fxTypes[i];
+      if (currentType in restrictedFxTypes) {
+        for (let j = i + 1; j < fxTypes.length; j++) {
+          if (restrictedFxTypes[currentType].indexOf(fxTypes[j]) !== -1) {
+            user().warn(TAG,
+                '%s preset can\'t be combined with %s preset as the ' +
+                'resulting animation isn\'t valid.', currentType, fxTypes[j]);
+            fxTypes.splice(j, 1);
+          }
+        }
+      }
+    }
     return fxTypes;
   }
 

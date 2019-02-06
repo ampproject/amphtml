@@ -19,12 +19,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
+const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -35,9 +36,7 @@ function getMarkdownFiles() {
   if (!!argv.files) {
     return argv.files.split(',');
   }
-  const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  return filesInPr.filter(function(file) {
+  return gitDiffNameOnlyMaster().filter(function(file) {
     return path.extname(file) == '.md' && !file.startsWith('examples/');
   });
 }
@@ -115,10 +114,7 @@ function checkLinks() {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  const filesAdded =
-      getStdout('git diff --name-only --diff-filter=ARC master...HEAD')
-          .trim().split('\n');
-  return filesAdded.some(function(file) {
+  return gitDiffAddedNameOnlyMaster().some(function(file) {
     return (file.length > 0 && link.includes(path.parse(file).base));
   });
 }
@@ -180,7 +176,7 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
-    ['update-packages'],
+    maybeUpdatePackages,
     checkLinks,
     {
       options: {

@@ -15,12 +15,12 @@
 #
 tags: {  # amp-sidebar
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -32,31 +32,44 @@ tags: {  # amp-sidebar
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-sidebar>
+tags: {  # <amp-sidebar> not in amp-story
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-SIDEBAR"
+  # There is an alternate spec for amp-sidebar in amp-story.
+  disallowed_ancestor: "AMP-STORY"
   mandatory_parent: "BODY"
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
-    value_regex: "(left|right)"
+    value: "left"
+    value: "right"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
+}
+tags: { #<amp-sidebar> in amp-story
+  html_format: AMP
+  tag_name: "AMP-SIDEBAR"
+  spec_name: "amp-story >> amp-sidebar"
+  requires_extension: "amp-sidebar"
+  mandatory_parent: "AMP-STORY"
+  amp_layout: { supported_layouts: NODISPLAY }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
 }
 tags: {  # amp-sidebar > nav
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "NAV"
   spec_name: "amp-sidebar > nav"
   mandatory_parent: "AMP-SIDEBAR"

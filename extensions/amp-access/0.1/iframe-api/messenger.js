@@ -22,6 +22,8 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
+import {Deferred} from '../../../../src/utils/promise';
+
 const SENTINEL = '__AMP__';
 
 
@@ -150,10 +152,10 @@ export class Messenger {
    */
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
-    let resolver;
-    const promise = new Promise(resolve => {
-      resolver = resolve;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve: resolver} = deferred;
+
+
     this.waiting_[rsvpId] = {
       promise,
       resolver,
@@ -189,7 +191,7 @@ export class Messenger {
    */
   handleEvent_(e) {
     const event = /** @type {!MessageEvent} */ (e);
-    const data = event.data;
+    const {data} = event;
     if (!data || data['sentinel'] != SENTINEL) {
       return;
     }

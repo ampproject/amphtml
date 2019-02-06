@@ -16,7 +16,7 @@
 
 import {Observable} from './observable';
 import {Pass} from './pass';
-import {dev} from './log';
+import {devAssert} from './log';
 import {findIndex} from './utils/array';
 import {toWin} from './types';
 
@@ -80,6 +80,7 @@ export class Gestures {
 
   /**
    * @param {!Element} element
+   * @param {boolean} shouldNotPreventDefault
    */
   constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
@@ -295,8 +296,14 @@ export class Gestures {
         this.stopTracking_(i);
         continue;
       }
+
       this.recognizers_[i].onTouchEnd(event);
-      if (!this.pending_[i] || this.pending_[i] < now) {
+
+      const isReady = !this.pending_[i];
+      const isExpired = this.pending_[i] < now;
+      const isEventing = this.eventing_ == this.recognizers_[i];
+
+      if (!isEventing && (isReady || isExpired)) {
         this.stopTracking_(i);
       }
     }
@@ -398,7 +405,7 @@ export class Gestures {
    * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
-    dev().assert(this.eventing_ == recognizer,
+    devAssert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
@@ -418,7 +425,7 @@ export class Gestures {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+                (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
-import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -36,11 +37,11 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     renderer = new LocalSubscriptionPlatformRenderer(
         ampdoc, dialog, serviceAdapter);
     const serviceIds = ['service1', 'service2'];
-    const currentProduct = 'currentProductId';
-    const sampleEntitlement1 =
-      new Entitlement(serviceIds[0], ['currentProductId'], '');
-    entitlementsForService1 = new Entitlement(
-        serviceIds[0], '', [sampleEntitlement1], currentProduct);
+    entitlementsForService1 = new Entitlement({
+      service: serviceIds[0],
+      granted: false,
+      grantReason: null,
+    });
   });
 
   describe('render method', () => {
@@ -110,6 +111,15 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         expect(delegateUIStub).to.be.called;
       });
     });
+
+    it('should hide sections on reset', () => {
+      return renderer.render({subscribed: true}).then(() => {
+        displayed([actions2]);
+        return renderer.reset();
+      }).then(() => {
+        displayed([]);
+      });
+    });
   });
 
   describe('dialog renderer', () => {
@@ -149,7 +159,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
 
     afterEach(() => {
       templatesMock.verify();
-      // dialogMock.verify();
+      dialogMock.verify();
     });
 
     it('should render an element', () => {
@@ -189,10 +199,15 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       });
     });
 
-    it('should ignore rendering if nothign found', () => {
+    it('should ignore rendering if nothing found', () => {
       templatesMock.expects('renderTemplate').never();
       dialogMock.expects('open').never();
       return renderer.render({value: 'C'});
+    });
+
+    it('should hide the dialog on reset', () => {
+      dialogMock.expects('close').once();
+      return renderer.reset();
     });
   });
 });

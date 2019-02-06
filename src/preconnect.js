@@ -24,7 +24,7 @@ import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
-import {parseUrl} from './url';
+import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -100,7 +100,7 @@ class PreconnectService {
     /** @private @const {!./service/platform-impl.Platform}  */
     this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
-    this.origins_[parseUrl(win.location.href).origin] = true;
+    this.origins_[parseUrlDeprecated(win.location.href).origin] = true;
 
     /**
      * Detect support for the given resource hints.
@@ -150,12 +150,12 @@ class PreconnectService {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
-    const origin = parseUrl(url).origin;
+    const {origin} = parseUrlDeprecated(url);
     const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
-        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS ;
+        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
       }
       return;
     }
@@ -226,6 +226,11 @@ class PreconnectService {
     });
   }
 
+  /**
+   * Performs a preload using `<link rel="preload">`.
+   * @param {string} url
+   * @private
+   */
   performPreload_(url) {
     const preload = htmlFor(this.document_)`
         <link rel="preload" referrerpolicy="origin" />`;
@@ -283,7 +288,8 @@ class PreconnectService {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
-    if (this.features_.preconnect || !this.platform_.isSafari()) {
+    if (this.features_.preconnect ||
+        !(this.platform_.isSafari() || this.platform_.isIos())) {
       return;
     }
 

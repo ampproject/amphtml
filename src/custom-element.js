@@ -16,10 +16,6 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {
-  CONSENT_POLICY_STATE,
-  getConsentPolicyState,
-} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -35,7 +31,7 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
-import {dev, rethrowAsync, user} from './log';
+import {dev, devAssert, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
@@ -44,7 +40,9 @@ import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
+import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
+import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -111,10 +109,15 @@ export function createCustomElementClass(win, name) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       return super(self);
     }
+    /**
+     * The name of the custom element.
+     * @return {string}
+     */
     elementName() {
       return name;
     }
@@ -139,6 +142,7 @@ function createBaseCustomElementClass(win) {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
+     * @param {HTMLElement} self
      */
     constructor(self) {
       self = super(self);
@@ -220,6 +224,9 @@ function createBaseCustomElementClass(win) {
       /** @private {!./size-list.SizeList|null|undefined} */
       this.heightsList_ = undefined;
 
+      /** @public {boolean} */
+      this.warnOnMissingOverflow = true;
+
       /**
        * This element can be assigned by the {@link applyStaticLayout} to a
        * child element that will be used to size this element.
@@ -248,7 +255,7 @@ function createBaseCustomElementClass(win) {
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
-      dev().assert(Ctor);
+      devAssert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
@@ -321,9 +328,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getAmpDoc() {
-      return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_,
-            'no ampdoc yet, since element is not attached'));
+      return devAssert(this.ampdoc_,
+          'no ampdoc yet, since element is not attached');
     }
 
     /**
@@ -334,9 +340,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getResources() {
-      return /** @type {!./service/resources-impl.Resources} */ (
-        dev().assert(this.resources_,
-            'no resources yet, since element is not attached'));
+      return devAssert(this.resources_,
+          'no resources yet, since element is not attached');
     }
 
     /**
@@ -347,9 +352,8 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getLayers() {
-      return /** @type {!./service/layers-impl.LayoutLayers} */ (
-        dev().assert(this.layers_,
-            'no layers yet, since element is not attached'));
+      return devAssert(this.layers_,
+          'no layers yet, since element is not attached');
     }
 
     /**
@@ -419,7 +423,7 @@ function createBaseCustomElementClass(win) {
       this.getResources().upgraded(this);
     }
 
-    /* @private */
+    /** @private */
     assertLayout_() {
       if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
@@ -458,9 +462,21 @@ function createBaseCustomElementClass(win) {
      * @return {number} @this {!Element}
      */
     getLayoutPriority() {
-      dev().assert(
+      devAssert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * Get the default action alias.
+     * @return {?string}
+     */
+    getDefaultActionAlias() {
+      devAssert(
+          this.isUpgraded(),
+          'Cannot get default action alias of unupgraded element');
+      return this.implementation_.getDefaultActionAlias();
+
     }
 
     /**
@@ -474,22 +490,25 @@ function createBaseCustomElementClass(win) {
      */
     build() {
       assertNotTemplate(this);
-      dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
+      devAssert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const policyId = this.implementation_.getConsentPolicy();
+        const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
         } else {
-          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
-                state == CONSENT_POLICY_STATE.UNKNOWN) {
-              // Need to change after support more policy state
-              reject(blockedByConsentError());
-            } else {
+          Services.consentPolicyServiceForDocOrNull(this).then(policy => {
+            if (!policy) {
+              return true;
+            }
+            return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
+          }).then(shouldUnblock => {
+            if (shouldUnblock) {
               resolve(this.implementation_.buildCallback());
+            } else {
+              reject(blockedByConsentError());
             }
           });
         }
@@ -538,6 +557,14 @@ function createBaseCustomElementClass(win) {
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
         Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+          const TAG = this.tagName;
+          if (!this.ownerDocument) {
+            dev().error(TAG, 'preconnect without ownerDocument');
+            return;
+          } else if (!this.ownerDocument.defaultView) {
+            dev().error(TAG, 'preconnect without defaultView');
+            return;
+          }
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
@@ -556,9 +583,10 @@ function createBaseCustomElementClass(win) {
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @param {boolean=} opt_measurementsChanged
      * @this {!Element}
      */
-    updateLayoutBox(layoutBox) {
+    updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -566,6 +594,9 @@ function createBaseCustomElementClass(win) {
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
+          if (opt_measurementsChanged) {
+            this.implementation_.onMeasureChanged();
+          }
         } catch (e) {
           reportError(e, this);
         }
@@ -600,11 +631,12 @@ function createBaseCustomElementClass(win) {
     /**
      * If the element has a media attribute, evaluates the value as a media
      * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the element
-     * which in turn prevents any of the resource loading to happen for the
-     * element.
+     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
+     * element which in turn prevents any of the resource loading to happen for
+     * the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else.
      *
      * @final
      * @package @this {!Element}
@@ -617,7 +649,7 @@ function createBaseCustomElementClass(win) {
         this.mediaQuery_ = this.getAttribute('media') || null;
       }
       if (this.mediaQuery_) {
-        const defaultView = this.ownerDocument.defaultView;
+        const {defaultView} = this.ownerDocument;
         this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
       }
@@ -650,8 +682,8 @@ function createBaseCustomElementClass(win) {
     /**
      * Changes the size of the element.
      *
-     * This method is called by Resources and shouldn't be called by anyone else.
-     * This method must always be called in the mutation context.
+     * This method is called by Resources and shouldn't be called by anyone
+     * else. This method must always be called in the mutation context.
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
@@ -694,19 +726,30 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
+      this.signals_.signal(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected.  Chrome and Safari can trigger connectedCallback even when
+     * the node is disconnected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+     * connectedCallback will later be called when the disconnected root is
+     * connected to the document tree.
+     *
      * @final @this {!Element}
      */
     connectedCallback() {
-      // Chrome and Safari can trigger connectedCallback even when the node is
-      // disconnected. See #12849, https://crbug.com/821195, and
-      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
-      // connectedCallback will later be called when the disconnected root is
-      // connected to the document tree.
+      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
+        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+      }
+      if (this.isInTemplate_) {
+        return;
+      }
+
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -718,12 +761,6 @@ function createBaseCustomElementClass(win) {
         this.classList.add('amp-notbuilt');
       }
 
-      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
-      }
-      if (this.isInTemplate_) {
-        return;
-      }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
@@ -809,7 +846,7 @@ function createBaseCustomElementClass(win) {
      */
     tryUpgrade_() {
       const impl = this.implementation_;
-      dev().assert(!isStub(impl), 'Implementation must not be a stub');
+      devAssert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
@@ -841,23 +878,53 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when the element is disconnected from the DOM.
+     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      if (this.isInTemplate_) {
-        return;
-      }
-      if (!this.isConnected_ || dom.isConnectedNode(this)) {
-        return;
-      }
-      this.isConnected_ = false;
-      this.getResources().remove(this);
-      this.implementation_.detachedCallback();
+      this.disconnect(/* pretendDisconnected */ false);
     }
 
     /** The Custom Elements V0 sibling to `disconnectedCallback`. */
     detachedCallback() {
       this.disconnectedCallback();
+    }
+
+    /**
+     * Called when an element is disconnected from DOM, or when an ampDoc is
+     * being disconnected (the element itself may still be connected to ampDoc).
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     * If the element is still connected to the document, you'll need to pass
+     * opt_pretendDisconnected.
+     *
+     * @param {boolean} pretendDisconnected Forces disconnection regardless
+     *     of DOM isConnected.
+     */
+    disconnect(pretendDisconnected) {
+      if (this.isInTemplate_ || !this.isConnected_) {
+        return;
+      }
+      if (!pretendDisconnected && dom.isConnectedNode(this)) {
+        return;
+      }
+
+      // This path only comes from Resource#disconnect, which deletes the
+      // Resource instance tied to this element. Therefore, it is no longer
+      // an AMP Element. But, DOM queries for i-amphtml-element assume that
+      // the element is tied to a Resource.
+      if (pretendDisconnected) {
+        this.classList.remove('i-amphtml-element');
+      }
+
+      this.isConnected_ = false;
+      this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
+      this.implementation_.detachedCallback();
     }
 
     /**
@@ -901,7 +968,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a placeholder for the element.
-     * @returns {?Element}
+     * @return {?Element}
      * @final @this {!Element}
      */
     createPlaceholder() {
@@ -1029,7 +1096,7 @@ function createBaseCustomElementClass(win) {
      */
     layoutCallback() {
       assertNotTemplate(this);
-      dev().assert(this.isBuilt(),
+      devAssert(this.isBuilt(),
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0); // First layout is "load".
@@ -1040,9 +1107,11 @@ function createBaseCustomElementClass(win) {
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
       }
-      const promise = this.implementation_.layoutCallback();
+
+      const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
+
       return promise.then(() => {
         if (isLoadEvent) {
           this.signals_.signal(CommonSignals.LOAD_END);
@@ -1055,9 +1124,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-          // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1165,9 +1232,10 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Requests the resource to resume its activity when the document returns from
-     * an inactive state. The scope is up to the actual component. Among other
-     * things the active playback of video or audio content may be resumed.
+     * Requests the resource to resume its activity when the document returns
+     * from an inactive state. The scope is up to the actual component. Among
+     * other things the active playback of video or audio content may be
+     * resumed.
      *
      * @package @final @this {!Element}
      */
@@ -1212,6 +1280,7 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.reset(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
@@ -1272,12 +1341,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when one or more attributes are mutated.
-     * @note Must be called inside a mutate context.
-     * @note Boolean attributes have a value of `true` and `false` when
-     *       present and missing, respectively.
-     * @param {
-     *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
-     * } mutations
+     * Note: Must be called inside a mutate context.
+     * Note: Boolean attributes have a value of `true` and `false` when
+     *     present and missing, respectively.
+     * @param {!JsonObject<string, (null|boolean|string|number|Array|Object)>} mutations
      */
     mutatedAttributesCallback(mutations) {
       this.implementation_.mutatedAttributesCallback(mutations);
@@ -1297,7 +1364,7 @@ function createBaseCustomElementClass(win) {
         if (this.actionQueue_ === undefined) {
           this.actionQueue_ = [];
         }
-        dev().assert(this.actionQueue_).push(invocation);
+        devAssert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
       }
@@ -1313,7 +1380,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      const actionQueue = dev().assert(this.actionQueue_);
+      const actionQueue = devAssert(this.actionQueue_);
       this.actionQueue_ = null;
 
       // Notice, the actions are currently not de-duped.
@@ -1334,14 +1401,38 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-            invocation.target.tagName, invocation.method);
+            invocation.node.tagName, invocation.method);
       }
     }
 
     /**
-     * Returns the original nodes of the custom element without any service nodes
-     * that could have been added for markup. These nodes can include Text,
-     * Comment and other child nodes.
+     * Get the consent policy to follow.
+     * @return {?string}
+     */
+    getConsentPolicy_() {
+      let policyId = this.getAttribute('data-block-on-consent');
+      if (policyId === null) {
+        if (shouldBlockOnConsentByMeta(this)) {
+          policyId = 'default';
+          this.setAttribute('data-block-on-consent', policyId);
+        } else {
+          // data-block-on-consent attribute not set
+          return null;
+        }
+      }
+      if (policyId == '' || policyId == 'default') {
+        // data-block-on-consent value not set, up to individual element
+        // Note: data-block-on-consent and data-block-on-consent='default' is
+        // treated exactly the same
+        return this.implementation_.getConsentPolicy();
+      }
+      return policyId;
+    }
+
+    /**
+     * Returns the original nodes of the custom element without any service
+     * nodes that could have been added for markup. These nodes can include
+     * Text, Comment and other child nodes.
      * @return {!Array<!Node>}
      * @package @final @this {!Element}
      */
@@ -1358,15 +1449,6 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(this, element =>
         !isInternalOrServiceNode(element));
-    }
-
-    /**
-     * Must be executed in the mutate context. Removes `display:none` from the
-     * element set via `layout=nodisplay`.
-     * @param {boolean} displayOn
-     */
-    toggleLayoutDisplay(displayOn) {
-      this.classList.toggle('i-amphtml-display', displayOn);
     }
 
     /**
@@ -1394,7 +1476,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          placeholder.classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
@@ -1433,10 +1515,10 @@ function createBaseCustomElementClass(win) {
           resourceState == ResourceState.READY_FOR_LAYOUT)) {
         return;
       }
-      // This implementation is notably less efficient then placeholder toggling.
-      // The reasons for this are: (a) "not supported" is the state of the whole
-      // element, (b) some relayout is expected and (c) fallback condition would
-      // be rare.
+      // This implementation is notably less efficient then placeholder
+      // toggling. The reasons for this are: (a) "not supported" is the state of
+      // the whole element, (b) some relayout is expected and (c) fallback
+      // condition would be rare.
       this.classList.toggle('amp-notsupported', show);
       if (show == true) {
         const fallbackElement = this.getFallback();
@@ -1463,12 +1545,13 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     isLoadingEnabled_() {
-      // No loading indicator will be shown if either one of these
-      // conditions true:
+      // No loading indicator will be shown if either one of these conditions
+      // true:
       // 1. `noloading` attribute is specified;
       // 2. The element has not been whitelisted;
       // 3. The element is too small or has not yet been measured;
-      // 4. The element has already been laid out (include having loading error);
+      // 4. The element has already been laid out (include having loading
+      //    error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
@@ -1494,7 +1577,7 @@ function createBaseCustomElementClass(win) {
     isInA4A_() {
       return (
       // in FIE
-        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1511,7 +1594,8 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (!this.loadingContainer_) {
-        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
+        const doc = this.ownerDocument;
+        devAssert(doc);
 
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
@@ -1529,7 +1613,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @param {{cleanup:boolean, force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
     toggleLoading(state, opt_options) {
@@ -1625,7 +1709,7 @@ function createBaseCustomElementClass(win) {
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
       if (!this.overflowElement_) {
-        if (overflown) {
+        if (overflown && this.warnOnMissingOverflow) {
           user().warn(TAG,
               'Cannot resize element and overflow is not available', this);
         }
@@ -1673,7 +1757,7 @@ function isInputPlaceholder(element) {
 
 /** @param {!Element} element */
 function assertNotTemplate(element) {
-  dev().assert(!element.isInTemplate_, 'Must never be called in template');
+  devAssert(!element.isInTemplate_, 'Must never be called in template');
 }
 
 
@@ -1710,15 +1794,14 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
- *     testing only.
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
-export function createAmpElementProtoForTesting(
+export function createAmpElementForTesting(
   win, name, opt_implementationClass) {
-  const ElementProto = createCustomElementClass(win, name).prototype;
+  const Element = createCustomElementClass(win, name);
   if (getMode().test && opt_implementationClass) {
-    ElementProto.implementationClassForTesting = opt_implementationClass;
+    Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
-  return ElementProto;
+  return Element;
 }

@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "description": "Web UI for Validator for AMP HTML (www.ampproject.org)",
   "engines": {
-    "node": "^4.0.0"
+    "node": "^10.0.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
+  },
+  "scripts": {
+    "preinstall": "node ../../build-system/check-package-manager.js"
   },
   "dependencies": {
     "@polymer/font-roboto": "0.0.3",

@@ -15,8 +15,15 @@
  */
 'use strict';
 
-const getStdout = require('./exec').getStdout;
+/*
+ * NOTE: DO NOT use non-native node modules in this file.
+ *       This file runs before installing any packages,
+ *       so it must work with vanilla NodeJS code.
+ * github.com/ampproject/amphtml/pull/19386
+ */
+const fs = require('fs');
 const https = require('https');
+const {getStdout} = require('./exec');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
@@ -24,6 +31,8 @@ const gulpHelpUrl = 'https://medium.com/gulpjs/gulp-sips-command-line-interface-
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
+
+const updatesNeeded = [];
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -84,6 +93,7 @@ function checkNodeVersion() {
               cyan('"nvm install --lts"'), yellow('or see'),
               cyan('https://nodejs.org/en/download/package-manager'),
               yellow('for instructions.'));
+          updatesNeeded.push('node');
         } else {
           console.log(green('Detected'), cyan('node'), green('version'),
               cyan(nodeVersion + ' (latest LTS)') +
@@ -132,7 +142,7 @@ function checkYarnVersion() {
         cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
         yellow('or see'), cyan('https://yarnpkg.com/docs/install'),
         yellow('for instructions.'));
-    console.log(yellow('Attempting to install packages...'));
+    updatesNeeded.push('yarn');
   } else {
     console.log(green('Detected'), cyan('yarn'), green('version'),
         cyan(yarnVersion + ' (stable)') +
@@ -151,6 +161,7 @@ function getYarnStableVersion(infoJson) {
 }
 
 function checkGlobalGulp() {
+  const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
@@ -163,12 +174,13 @@ function checkGlobalGulp() {
         cyan('"yarn global add gulp-cli"') + yellow('.'));
     console.log(yellow('⤷ See'), cyan(gulpHelpUrl),
         yellow('for more information.'));
+    updatesNeeded.push('gulp');
   } else if (!globalGulpCli) {
     console.log(yellow('WARNING: Could not find'),
         cyan('gulp-cli') + yellow('.'));
     console.log(yellow('⤷ To install it, run'),
         cyan('"yarn global add gulp-cli"') + yellow('.'));
-  } else {
+  } else if (!firstInstall) {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
     const gulpVersion = gulpVersions.match(/Local version (.*?)$/);
     if (gulpVersion && gulpVersion.length == 2) {
@@ -190,6 +202,21 @@ function main() {
   return checkNodeVersion().then(() => {
     checkGlobalGulp();
     checkYarnVersion();
+    if (!process.env.TRAVIS && updatesNeeded.length > 0) {
+      console.log(yellow('\nWARNING: Detected missing updates for'),
+          cyan(updatesNeeded.join(', ')));
+      console.log(yellow('⤷ Continuing install in'), cyan('5'),
+          yellow('seconds...'));
+      console.log(yellow('⤷ Press'), cyan('Ctrl + C'),
+          yellow('to abort and fix...'));
+      let resolver;
+      const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+      setTimeout(() => {
+        console.log(yellow('\nAttempting to install packages...'));
+        resolver();
+      }, 5000);
+      return deferred;
+    }
   });
 }
 

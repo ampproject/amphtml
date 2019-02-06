@@ -15,26 +15,26 @@
  */
 
 import {Services} from '../../../src/services';
-import {parseUrl} from '../../../src/url';
 
 
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {string}
+ * @return {string}
  */
 function referrerDomain(ampdoc) {
   const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
-  if (referrer) {
-    return parseUrl(referrer).hostname;
+  if (!referrer) {
+    return '';
   }
-  return '';
+  const {hostname} = Services.urlForDoc(ampdoc.getHeadNode()).parse(referrer);
+  return hostname;
 }
 
 /**
  * Grabs the User Agent string.
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function userAgent(win) {
   return win.navigator.userAgent;
@@ -64,7 +64,7 @@ export function referrers_(referrer) {
 /**
  * Normalizes certain referrers across devices.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {!Array<string>}
+ * @return {!Array<string>}
  */
 function normalizedReferrers(ampdoc) {
   const referrer = referrerDomain(ampdoc);
@@ -104,7 +104,7 @@ function addDynamicCssClasses(ampdoc, classes) {
  * @param {!Array<string>} classes
  */
 function addCssClassesToBody(body, classes) {
-  const classList = body.classList;
+  const {classList} = body;
   for (let i = 0; i < classes.length; i++) {
     classList.add(classes[i]);
   }

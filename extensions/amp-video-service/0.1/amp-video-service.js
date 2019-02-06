@@ -21,16 +21,18 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {asBaseElement} from '../../../src/video-interface';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
+import {createCustomEvent, listen} from '../../../src/event-helper';
+import {dev, devAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isFiniteNumber} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
 
 
 /** @private @const {string} */
@@ -92,10 +94,12 @@ export class VideoService {
 
   /** @param {!../../../src/video-interface.VideoInterface} video */
   register(video) {
-    const {element} = asBaseElement(video);
+    const {element} =
+    /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
+        video);
 
     if (this.getEntryOrNull(element)) {
-      return dev().assert(this.getEntryOrNull(element));
+      return devAssert(this.getEntryOrNull(element));
     }
 
     if (!video.supportsPlatform()) {
@@ -156,18 +160,6 @@ export class VideoService {
 
 
 /**
- * This union type allows the compiler to treat VideoInterface objects as
- * `BaseElement`s, which they should be anyway.
- *
- * WARNING: Don't use this at the service level. Its `register` method should
- * only allow `VideoInterface` as a guarding measure.
- *
- * @typedef {!../../../src/video-interface.VideoInterface|!AMP.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
  * Handler for a registered video component.
  * @visibleForTesting
  */
@@ -176,7 +168,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   constructor(ampdoc, videoService, video) {
 
@@ -186,7 +178,7 @@ export class VideoEntry {
     /** @private @const {!VideoService} */
     this.service_ = videoService;
 
-    /** @private @const {!VideoOrBaseElementDef} */
+    /** @private @const {!../../../src/video-interface.VideoOrBaseElementDef} */
     this.video_ = video;
 
     /** @private {boolean} */
@@ -196,7 +188,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!VideoService} videoService
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   static create(ampdoc, videoService, video) {
     const entry = new VideoEntry(ampdoc, videoService, video);
@@ -275,11 +267,22 @@ export class VideoEntry {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAuto */ false), trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(), trust);
+    registerAction('play', () => video.play(/* isAuto */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+        fn();
+      }, trust);
+    }
   }
 
   /**
@@ -303,10 +306,11 @@ export class VideoEntry {
 
       const {win} = this.ampdoc_;
       const {element} = this.video_;
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      const actions = Services.actionServiceForDoc(element);
       const name = 'timeUpdate';
       const percent = time / duration;
-      const event = createCustomEvent(win, `${TAG}.${name}`, {time, percent});
+      const event = createCustomEvent(win, `${TAG}.${name}`,
+          dict({'time': time, 'percent': percent}));
       actions.trigger(element, name, event, ActionTrust.LOW);
     });
   }
@@ -318,7 +322,7 @@ export class VideoEntry {
  * @private
  */
 function warnUnimplemented(feature) {
-  dev().warn(TAG, `${feature} unimplemented.`);
+  dev().warn(TAG, '%s unimplemented.', feature);
 }
 
 

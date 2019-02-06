@@ -49,6 +49,9 @@ describes.fakeWin('amp-share-tracking', {
     toggleExperiment(win, 'amp-share-tracking', false);
   });
 
+  /**
+   * @param {string=} optVendorUrl
+   */
   function getAmpShareTracking(optVendorUrl) {
     const element = win.document.createElement('amp-share-tracking');
     if (optVendorUrl) {
@@ -187,6 +190,8 @@ describes.fakeWin('amp-share-tracking', {
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
+    expectAsyncConsoleError('[amp-share-tracking] The response from ' +
+      '[http://foo.bar] does not have a fragment value.');
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.resolve({
       json() {
@@ -202,7 +207,7 @@ describes.fakeWin('amp-share-tracking', {
         });
   });
 
-  it('should call fetchJson with correct request when getting outgoing' +
+  it('should call fetchJson with correct request when getting outgoing ' +
       'fragment', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.resolve({
@@ -228,6 +233,8 @@ describes.fakeWin('amp-share-tracking', {
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the xhr fails', () => {
+    expectAsyncConsoleError('[amp-share-tracking] The request to ' +
+      'share-tracking endpoint failed: [object Object]');
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.reject({
       status: 404,

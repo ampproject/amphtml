@@ -21,14 +21,9 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {OriginExperiments} from './origin-experiments';
-import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
+import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
-import {user} from './log';
-
-/** @const {string} */
-const TAG = 'experiments';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
@@ -41,23 +36,6 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
-
-/** @const {!webCrypto.JsonWebKey} */
-const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
-  'alg': 'RS256',
-  'e': 'AQAB',
-  'ext': true,
-  'key_ops': ['verify'],
-  'kty': 'RSA',
-  /*eslint "max-len": 0*/
-  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
-});
-
-/** @type {?Promise} */
-let originExperimentsPromise;
-
-/** @private {?OriginExperiments} */
-let originExperiments;
 
 /**
  * @typedef {{
@@ -77,86 +55,13 @@ export function isCanary(win) {
 }
 
 /**
- * Returns binary type, e.g., canary, control, or production.
+ * Returns binary type, e.g., canary, production, control, or rc.
  * @param {!Window} win
  * @return {string}
  */
 export function getBinaryType(win) {
   return win.AMP_CONFIG && win.AMP_CONFIG.type ?
     win.AMP_CONFIG.type : 'unknown';
-}
-
-/**
- * Verifies a single origin experiment token and enables the corresponding
- * experiment on success. If token verification fails, a user error is logged.
- * @param {!Window} win
- * @param {string} token
- * @param {!./service/crypto-impl.Crypto} crypto
- * @param {!webCrypto.CryptoKey} publicKey
- * @return {!Promise}
- * @private
- */
-function verifyOriginExperimentToken(win, token, crypto, publicKey) {
-  if (!crypto.isPkcsAvailable()) {
-    user().error(TAG, 'Crypto is unavailable.');
-    return Promise.resolve();
-  }
-  if (!originExperiments) {
-    originExperiments = new OriginExperiments(crypto);
-  }
-  const verify = originExperiments.verifyToken(token, win.location, publicKey);
-  return verify.then(experimentId => {
-    toggleExperiment(win, experimentId, true, /* transientExperiment */ true);
-  }, error => {
-    user().error(TAG, 'Failed to verify experiment token:' + error);
-  });
-}
-
-/**
- * Scan the page for origin experiment tokens, verifies them, and enables
- * the corresponding experiments for verified tokens.
- * @param {!Window} win
- * @param {!webCrypto.JsonWebKey} publicJwk
- * @return {!Promise}
- * @private
- */
-function scanForOriginExperimentTokens(win, publicJwk) {
-  const metas =
-      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0) {
-    return Promise.resolve();
-  }
-  const crypto = Services.cryptoFor(win);
-  return crypto.importPkcsKey(publicJwk).then(publicKey => {
-    const promises = [];
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const token = meta.getAttribute('content');
-      if (token) {
-        const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
-        promises.push(p);
-      } else {
-        user().error(TAG, 'Missing content for experiment token.');
-      }
-    }
-    return Promise.all(promises);
-  });
-}
-
-/**
- * Asynchronously checks whether the specified origin experiment is on or off.
- * On the first invocation, triggers scan of origin experiment tokens on page.
- * @param {!Window} win
- * @param {string} experimentId
- * @param {boolean=} opt_forceScan Forces rescan of page for experiment tokens.
- * @return {!Promise<boolean>}
- */
-export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
-  if (!originExperimentsPromise || opt_forceScan) {
-    originExperimentsPromise =
-        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
-  }
-  return originExperimentsPromise.then(() => isExperimentOn(win, experimentId));
 }
 
 /**
@@ -184,7 +89,7 @@ export function isExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
   opt_transientExperiment) {
-  const currentlyOn = isExperimentOn(win, experimentId);
+  const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
@@ -393,10 +298,10 @@ export function randomlySelectUnsetExperiments(win, experiments) {
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName)) {
+    if (!hasOwn(experiments, experimentName)) {
       continue;
     }
-    if (win.experimentBranches.hasOwnProperty(experimentName)) {
+    if (hasOwn(win.experimentBranches, experimentName)) {
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];
       continue;
@@ -412,8 +317,8 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
     if (!win.experimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
-      const branches = experiments[experimentName].branches;
+      isExperimentOn(win, /*OK*/experimentName)) {
+      const {branches} = experiments[experimentName];
       win.experimentBranches[experimentName] = selectRandomItem(branches);
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];

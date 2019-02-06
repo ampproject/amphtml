@@ -19,6 +19,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
+import {LocalizationService} from '../localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -56,6 +57,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
         vsyncTaskSpec.mutate(vsyncState);
       },
     });
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
@@ -140,7 +144,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_.style.display).to.equal('none');
+    expect(shareMenu.element_).to.have.display('none');
   });
 
   it('should load the amp-social-share extension if system share', () => {

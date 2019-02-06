@@ -1,5 +1,7 @@
 {
   "rules": {
+    "amphtml-internal/no-style-display": 0,
+    "amphtml-internal/no-module-exports": 0,
     "amphtml-internal/query-selector": 0
   }
 }

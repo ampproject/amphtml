@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -24,78 +23,47 @@ import {
   setMediaSession,
 } from '../mediasession-helper';
 import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
-  asBaseElement,
 } from '../video-interface';
 import {Services} from '../services';
-import {VideoServiceSync} from './video-service-sync-impl';
+import {
+  VideoServiceInterface,
+  VideoServiceSignals,
+} from './video-service-interface';
+import {
+  VideoServiceSync,
+  setVideoComponentClassname,
+} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils} from '../utils/video';
+import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
+import {clamp} from '../utils/math';
 import {
   createCustomEvent,
   getData,
   listen,
+  listenOnce,
   listenOncePromise,
 } from '../event-helper';
-import {dev, user} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
+import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
+import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
-import {setStyles} from '../style';
+import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {startsWith} from '../string';
-import {throttle} from '../utils/rate-limit';
+import {toggle} from '../style';
 
 
 /** @private @const {string} */
 const TAG = 'video-manager';
 
-
-/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
-let VideoAnalyticsDef; // alias for line length
-
-
-/**
- * Internal event triggered when a video's visibility changes.
- * @private @const {string}
- */
-const VISIBILITY_CHANGED = 'amp:visibilitychanged';
-
-
-/** @interface */
-export class VideoService {
-
-  /** @param {!../video-interface.VideoInterface} unusedVideo */
-  register(unusedVideo) {}
-
-  /**
-   * Gets the current analytics details for the given video.
-   * Fails silently if the video is not registered.
-   * @param {!AmpElement} unusedVideo
-   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
-   */
-  getAnalyticsDetails(unusedVideo) {}
-
-  /**
-   * Delegates autoplay.
-   * @param {!AmpElement} unusedVideo
-   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
-   *    If provided, video will be played or paused when this observable fires.
-   */
-  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
-}
-
-
-/**
- * @const {number} Percentage of the video that should be in viewport before it
- * is considered visible.
- */
-const VISIBILITY_PERCENT = 75;
 
 /**
  * @private {number} The minimum number of milliseconds to wait between each
@@ -105,23 +73,35 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
 
 
 /**
+ * @param {!../video-interface.VideoOrBaseElementDef} video
+ * @private
+ */
+function userInteractedWith(video) {
+  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+}
+
+
+/**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
  *
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {VideoService}
+ * @implements {VideoServiceInterface}
+ * @implements {../service.Disposable}
  */
 export class VideoManager {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
+
+    /** @const */
+    this.installAutoplayStyles = once(() =>
+      installAutoplayStylesForDoc(this.ampdoc));
 
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -136,19 +116,30 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
-        once(() => new AutoFullscreenManager(this.ampdoc));
+        once(() => new AutoFullscreenManager(this.ampdoc, this));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
     // video analytics are not present.
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /** @override */
+  dispose() {
+    if (!this.entries_) {
+      return;
+    }
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      entry.dispose();
+    }
   }
 
   /**
@@ -171,6 +162,7 @@ export class VideoManager {
    * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
    * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
    * every 1 second for now.
+   * @param {!VideoEntry} entry
    * @private
    */
   timeUpdateActionEvent_(entry) {
@@ -182,14 +174,14 @@ export class VideoManager {
         duration > 0) {
       const perc = currentTime / duration;
       const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
-          {time: currentTime, percent: perc});
+          dict({'time': currentTime, 'percent': perc}));
       this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
     }
   }
 
   /** @override */
   register(video) {
-    dev().assert(video);
+    devAssert(video);
 
     this.registerCommonActions_(video);
 
@@ -205,21 +197,18 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
+    setVideoComponentClassname(element);
+
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    element.signals().signal(VideoEvents.REGISTERED);
+    const signals =
+        (/** @type {!../base-element.BaseElement} */ (video)).signals();
+
+    signals.signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
-  }
-
-  /** @override */
-  delegateAutoplay(videoElement, opt_unusedObservable) {
-    videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
-      const entry = this.getEntryForElement_(videoElement);
-      entry.delegateAutoplay();
-    });
   }
 
   /**
@@ -227,23 +216,30 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
   registerCommonActions_(video) {
-    const videoImpl = asBaseElement(video);
-
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    videoImpl.registerAction('play', () => video.play(/* isAutoplay */ false),
-        trust);
-    videoImpl.registerAction('pause', () => video.pause(), trust);
-    videoImpl.registerAction('mute', () => video.mute(), trust);
-    videoImpl.registerAction('unmute', () => video.unmute(), trust);
-    videoImpl.registerAction('fullscreen', () => video.fullscreenEnter(),
-        trust);
+    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        userInteractedWith(video);
+        fn();
+      }, trust);
+    }
   }
 
   /**
@@ -251,13 +247,13 @@ export class VideoManager {
    * in the viewport.
    *
    * Visibility of a video is defined by being in the viewport AND having
-   * {@link VISIBILITY_PERCENT} of the video element visible.
+   * {@link MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} of the video element visible.
    *
    * @param {VideoEntry} entry
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    const element = entry.video.element;
+    const {element} = entry.video;
 
     listen(element, VideoEvents.VISIBILITY, details => {
       const data = getData(details);
@@ -340,41 +336,33 @@ export class VideoManager {
   }
 
   /**
-   * Returns whether the video was interacted with or not
-   *
    * @param {!../video-interface.VideoInterface} video
    * @return {boolean}
    */
-  userInteractedWithAutoPlay(video) {
-    return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
+  isMuted(video) {
+    return this.getEntryForVideo_(video).isMuted();
+  }
+
+  /**
+   * @param {!../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  userInteracted(video) {
+    return this.getEntryForVideo_(video).userInteracted();
   }
 
   /** @param {!VideoEntry} entry */
   registerForAutoFullscreen(entry) {
     this.getAutoFullscreenManager_().register(entry);
   }
-}
 
-
-/**
- * This union type allows the compiler to treat VideoInterface objects as
- * `BaseElement`s, which they should be anyway.
- *
- * WARNING: Don't use this at the service level. Its `register` method should
- * only allow `VideoInterface` as a guarding measure.
- *
- * @typedef {!../video-interface.VideoInterface|!../base-element.BaseElement}
- */
-let VideoOrBaseElementDef;
-
-
-/**
- * @param {!Element} element
- * @return {!Element}
- * @restricted
- */
-function getInternalElementFor(element) {
-  return dev().assertElement(element.querySelector('video, iframe'));
+  /**
+   * @return {!AutoFullscreenManager}
+   * @visibleForTesting
+   */
+  getAutoFullscreenManagerForTesting_() {
+    return this.getAutoFullscreenManager_();
+  }
 }
 
 
@@ -384,7 +372,7 @@ function getInternalElementFor(element) {
 class VideoEntry {
   /**
    * @param {!VideoManager} manager
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    */
   constructor(manager, video) {
     /** @private @const {!VideoManager} */
@@ -393,7 +381,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @package @const {!VideoOrBaseElementDef} */
+    /** @package @const {!../video-interface.VideoOrBaseElementDef} */
     this.video = video;
 
     /** @private {boolean} */
@@ -426,10 +414,11 @@ class VideoEntry {
       return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
     };
 
-    // Autoplay Variables
+    /** @private @const {function(): !AnalyticsPercentageTracker} */
+    this.getAnalyticsPercentageTracker_ = once(() =>
+      new AnalyticsPercentageTracker(this.ampdoc_.win, this));
 
-    /** @private {boolean} */
-    this.userInteractedWithAutoPlay_ = false;
+    // Autoplay Variables
 
     /** @private {boolean} */
     this.playCalledByAutoplay_ = false;
@@ -445,10 +434,24 @@ class VideoEntry {
 
     this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
+    if (this.hasAutoplay) {
+      this.manager_.installAutoplayStyles();
+    }
+
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
+
+    /** @private @const {function()} */
+    this.boundMediasessionPlay_ = () => {
+      this.video.play(/* isAutoplay */ false);
+    };
+
+    /** @private @const {function()} */
+    this.boundMediasessionPause_ = () => {
+      this.video.pause();
+    };
 
     listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -458,7 +461,16 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    video.element.signals().whenSignal(VideoEvents.REGISTERED)
+    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      const data = getData(e);
+      const eventType = data['eventType'];
+      const vars = data['vars'];
+      this.logCustomAnalytics_(
+          dev().assertString(eventType, '`eventType` missing'),
+          vars);
+    });
+
+    video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
     /**
@@ -469,19 +481,49 @@ class VideoEntry {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
-          /* detail */ {});
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
-      actions.trigger(this.video.element, firstPlay, event, trust);
+          /* detail */ dict({}));
+      const {element} = this.video;
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, firstPlay, event, trust);
+    });
+
+    this.listenForAutoplayDelegation_();
+  }
+
+  /** @public */
+  dispose() {
+    this.getAnalyticsPercentageTracker_().stop();
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars
+   */
+  logCustomAnalytics_(eventType, vars) {
+    const prefixedVars = {};
+
+    Object.keys(vars).forEach(key => {
+      prefixedVars[`custom_${key}`] = vars[key];
+    });
+
+    analyticsEvent(this, eventType, prefixedVars);
+  }
+
+  /** Listens for signals to delegate autoplay to a different module. */
+  listenForAutoplayDelegation_() {
+    const signals = this.video.signals();
+    signals.whenSignal(VideoServiceSignals.AUTOPLAY_DELEGATED).then(() => {
+      this.allowAutoplay_ = false;
+
+      if (this.isPlaying_) {
+        this.video.pause();
+      }
     });
   }
 
-  /** Delegates autoplay to a different module. */
-  delegateAutoplay() {
-    this.allowAutoplay_ = false;
-
-    if (this.isPlaying_) {
-      this.video.pause();
-    }
+  /** @return {boolean} */
+  isMuted() {
+    return this.muted_;
   }
 
   /** @private */
@@ -497,17 +539,17 @@ class VideoEntry {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    * @private
    */
   requiresAutoFullscreen_() {
-    const element = this.video.element;
+    const {element} = this.video;
     if (this.video.preimplementsAutoFullscreen() ||
         !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
       return false;
     }
-    return user().assert(this.video.isInteractive(),
-        'Only interactive videos are allowed to enter fullscreen on rotate.',
+    return userAssert(this.video.isInteractive(),
+        'Only interactive videos are allowed to enter fullscreen on rotate. ' +
         'Set the `controls` attribute on %s to enable.',
         element);
   }
@@ -523,20 +565,18 @@ class VideoEntry {
       this.firstPlayEventOrNoop_();
     }
 
-    if (!this.video.preimplementsMediaSessionAPI()) {
-      const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
-      };
-      const pauseHandler = () => {
-        this.video.pause();
-      };
-      // Update the media session
+    const {video} = this;
+    const {element} = video;
+
+    if (!video.preimplementsMediaSessionAPI() &&
+        !element.classList.contains('i-amphtml-disable-mediasession')) {
+
       setMediaSession(
+          element,
           this.ampdoc_.win,
           this.metadata_,
-          playHandler,
-          pauseHandler
-      );
+          this.boundMediasessionPlay_,
+          this.boundMediasessionPause_);
     }
 
     this.actionSessionManager_.beginSession();
@@ -578,9 +618,11 @@ class VideoEntry {
   videoLoaded() {
     this.loaded_ = true;
 
-    this.internalElement_ = getInternalElementFor(this.video.element);
+    this.internalElement_ = getInternalVideoElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
+
+    this.getAnalyticsPercentageTracker_().start();
 
     this.updateVisibility();
     if (this.isVisible_) {
@@ -639,7 +681,6 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
-    this.video.element.dispatchCustomEvent(VISIBILITY_CHANGED);
   }
 
   /**
@@ -651,7 +692,8 @@ class VideoEntry {
       return;
     }
     this.supportsAutoplay_().then(supportsAutoplay => {
-      const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
+      const canAutoplay = this.hasAutoplay &&
+          !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
@@ -661,7 +703,7 @@ class VideoEntry {
     });
   }
 
-  /* Autoplay Behaviour */
+  /* Autoplay Behavior */
 
   /**
    * Called when an autoplay video is built.
@@ -687,76 +729,88 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      if (this.video.isInteractive()) {
-        this.autoplayInteractiveVideoBuilt_();
-      }
+      this.installAutoplayArtifacts_();
     });
   }
 
   /**
-   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
-   * It handles hiding controls, installing autoplay animation and handling
-   * user interaction by unmuting and showing controls.
+   * Installs autoplay animation and interaction mask when interactive.
+   * The animated icon is appended always, but only displayed by CSS when
+   * `controls` is set. See `video-autoplay.css`.
    * @private
    */
-  autoplayInteractiveVideoBuilt_() {
-    const toggleAnimation = playing => {
-      this.video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', playing);
+  installAutoplayArtifacts_() {
+    const {video} = this;
+    const {element, win} = this.video;
+
+    if (element.hasAttribute(VideoAttributes.NO_AUDIO) ||
+        element.signals().get(VideoServiceSignals.USER_INTERACTED)) {
+      return;
+    }
+
+    const animation = renderIcon(win, element);
+
+    /** @param {boolean} isPlaying */
+    const toggleAnimation = isPlaying => {
+      video.mutateElement(() => {
+        animation.classList.toggle('amp-video-eq-play', isPlaying);
       });
     };
 
-    // Hide the controls.
-    this.video.hideControls();
-
-    // Create autoplay animation and the mask to detect user interaction.
-    const animation = this.createAutoplayAnimation_();
-    const mask = this.createAutoplayMask_();
-    this.video.mutateElement(() => {
-      this.video.element.appendChild(animation);
-      this.video.element.appendChild(mask);
+    video.mutateElement(() => {
+      element.appendChild(animation);
     });
 
-    // Listen to pause, play and user interaction events.
-    const unlisteners = [];
-    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
-    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
+    const unlisteners = [
+      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
+      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+    ];
 
-    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false)));
-
-    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true)));
-
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
-        adStart.bind(this)));
-
-    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
-        adEnd.bind(this)));
-
-    function onInteraction() {
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED).then(() => {
+      const {video} = this;
+      const {element} = video;
       this.firstPlayEventOrNoop_();
-      this.userInteractedWithAutoPlay_ = true;
-      this.video.showControls();
-      this.video.unmute();
+      if (video.isInteractive()) {
+        video.showControls();
+      }
+      video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
       });
-      removeElement(animation);
-      removeElement(mask);
+      const animation = element.querySelector('.amp-video-eq');
+      const mask = element.querySelector('i-amphtml-video-mask');
+      if (animation) {
+        removeElement(animation);
+      }
+      if (mask) {
+        removeElement(mask);
+      }
+    });
+
+    if (!video.isInteractive()) {
+      return;
     }
 
-    function adStart() {
-      setStyles(mask, {
-        'display': 'none',
-      });
-    }
+    const mask = renderInteractionOverlay(win, element);
 
-    function adEnd() {
-      setStyles(mask, {
-        'display': 'block',
+    /** @param {boolean} display */
+    const setMaskDisplay = display => {
+      video.mutateElement(() => {
+        toggle(mask, display);
       });
-    }
+    };
+
+    video.hideControls();
+
+    video.mutateElement(() => {
+      element.appendChild(mask);
+    });
+
+    [
+      listen(mask, 'click', () => userInteractedWith(video)),
+      listen(element, VideoEvents.AD_START, () => setMaskDisplay(false)),
+      listen(element, VideoEvents.AD_END, () => setMaskDisplay(true)),
+    ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
   /**
@@ -793,55 +847,6 @@ class VideoEntry {
   }
 
   /**
-   * Creates a pure CSS animated equalizer icon.
-   * @private
-   * @return {!Element}
-   */
-  createAutoplayAnimation_() {
-    const doc = this.ampdoc_.win.document;
-    const anim = doc.createElement('i-amphtml-video-eq');
-    anim.classList.add('amp-video-eq');
-    // Four columns for the equalizer.
-    for (let i = 1; i <= 4; i++) {
-      const column = doc.createElement('div');
-      column.classList.add('amp-video-eq-col');
-      // Two overlapping filler divs that animate at different rates creating
-      // randomness illusion.
-      for (let j = 1; j <= 2; j++) {
-        const filler = doc.createElement('div');
-        filler.classList.add(`amp-video-eq-${i}-${j}`);
-        column.appendChild(filler);
-      }
-      anim.appendChild(column);
-    }
-    const platform = Services.platformFor(this.ampdoc_.win);
-    if (platform.isIos()) {
-      // iOS can not pause hardware accelerated animations.
-      anim.setAttribute('unpausable', '');
-    }
-    return anim;
-  }
-
-  /**
-   * Creates a mask to overlay on top of an autoplay video to detect the first
-   * user tap.
-   * We have to do this since many players are iframe-based and we can not get
-   * the click event from the iframe.
-   * We also can not rely on hacks such as constantly checking doc.activeElement
-   * to know if user has tapped on the iframe since they won't be a trusted
-   * event that would allow us to unmuted the video as only trusted
-   * user-initiated events can be used to interact with the video.
-   * @private
-   * @return {!Element}
-   */
-  createAutoplayMask_() {
-    const doc = this.ampdoc_.win.document;
-    const mask = doc.createElement('i-amphtml-video-mask');
-    mask.classList.add('i-amphtml-fill-content');
-    return mask;
-  }
-
-  /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
    * @param {?boolean=} opt_forceVisible
@@ -850,21 +855,19 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    this.video.measureMutateElement(() => {
-      if (opt_forceVisible == true) {
-        this.isVisible_ = true;
-      } else {
-        // Calculate what percentage of the video is in viewport.
-        const change = this.video.element.getIntersectionChangeEntry();
-        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
-      }
-    }, () => {
-      if (this.isVisible_ != wasVisible) {
-        this.videoVisibilityChanged_();
-      }
-    });
+    if (opt_forceVisible) {
+      this.isVisible_ = true;
+    } else {
+      const {element} = this.video;
+      const ratio = element.getIntersectionChangeEntry().intersectionRatio;
+      this.isVisible_ =
+          (!isFiniteNumber(ratio) ? 0 : ratio) >=
+            MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
+    }
+
+    if (this.isVisible_ != wasVisible) {
+      this.videoVisibilityChanged_();
+    }
   }
 
   /**
@@ -879,7 +882,7 @@ class VideoEntry {
 
     if (this.isPlaying_
        && this.playCalledByAutoplay_
-       && !this.userInteractedWithAutoPlay_) {
+       && !this.userInteracted()) {
       return PlayingStates.PLAYING_AUTO;
     }
 
@@ -890,17 +893,17 @@ class VideoEntry {
    * Returns whether the video was interacted with or not
    * @return {boolean}
    */
-  userInteractedWithAutoPlay() {
-    return this.userInteractedWithAutoPlay_;
+  userInteracted() {
+    return (
+      this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null);
   }
-
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
+   * @return {!Promise<!VideoAnalyticsDetailsDef>}
    */
   getAnalyticsDetails() {
-    const video = this.video;
+    const {video} = this;
     return this.supportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
@@ -926,10 +929,6 @@ class VideoEntry {
 }
 
 
-/** @private @const {string} */
-const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
-
-
 /**
  * @param {!AmpElement} video
  * @return {boolean}
@@ -937,45 +936,53 @@ const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
  */
 function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
-  return video.tagName.toLowerCase() == 'amp-dailymotion';
+  return !!({
+    'amp-dailymotion': true,
+    'amp-ima-video': true,
+  }[video.tagName.toLowerCase()]);
 }
 
 
 /** Manages rotate-to-fullscreen video. */
 export class AutoFullscreenManager {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    const {win} = ampdoc;
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./video-service-interface.VideoServiceInterface} manager
+   */
+  constructor(ampdoc, manager) {
+
+    /** @private @const {!./video-service-interface.VideoServiceInterface} */
+    this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {number} */
-    this.nextId_ = 0;
-
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private {?VideoEntry} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyInFullscreen_ = null;
 
-    /** @private {?Element} */
+    /** @private {?../video-interface.VideoOrBaseElementDef} */
     this.currentlyCentered_ = null;
 
-    /** @private @const {!Array<!Element>} */
-    this.visibleElements_ = [];
-
-    /**
-     * Maps rotate-to-fullscreen entry id to entry.
-     * @private @const {!Object<string, !VideoEntry>}
-     */
-    this.entries_ = {};
+    /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
+    this.entries_ = [];
 
     /** @private @const {function()} */
-    this.trackOnScroll_ = once(() =>
-      Services.viewportForDoc(ampdoc).onScroll(
-          throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 300)));
+    this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} video
+     * @return {boolean}
+     */
+    this.boundIncludeOnlyPlaying_ = video =>
+      this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
+
+    /**
+     * @param {!../video-interface.VideoOrBaseElementDef} a
+     * @param {!../video-interface.VideoOrBaseElementDef} b
+     * @return {number}
+     */
+    this.boundCompareEntries_ = (a, b) => this.compareEntries_(a, b);
 
     this.installOrientationObserver_();
     this.installFullscreenListener_();
@@ -983,28 +990,24 @@ export class AutoFullscreenManager {
 
   /** @param {!VideoEntry} entry */
   register(entry) {
-    if (!this.canFullscreen_(entry.video.element)) {
+    const {video} = entry;
+    const {element} = video;
+
+    if (!this.canFullscreen_(element)) {
       return;
     }
 
-    const id = this.nextId_++;
-    const {element} = entry.video;
+    this.entries_.push(video);
 
-    element[AUTO_FULLSCREEN_ID_PROP] = id.toString();
+    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
-    this.entries_[id.toString()] = entry;
-
-    listen(element, VISIBILITY_CHANGED, e => {
-      if (isLandscape(this.ampdoc_.win)) {
-        return;
-      }
-      this.updateVisibility_(dev().assertElement(e.target));
-    });
-
-    this.trackOnScroll_();
+    video.signals().whenSignal(VideoServiceSignals.USER_INTERACTED)
+        .then(this.boundSelectBestCentered_);
 
     // Set always
-    this.updateVisibility_(element);
+    this.selectBestCenteredInPortrait_();
   }
 
   /** @private */
@@ -1018,6 +1021,14 @@ export class AutoFullscreenManager {
   }
 
   /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isInLandscape() {
+    return isLandscape(this.ampdoc_.win);
+  }
+
+  /**
    * @param {!AmpElement} video
    * @return {boolean}
    * @private
@@ -1027,7 +1038,7 @@ export class AutoFullscreenManager {
     // where the player component is implemented via an <iframe>, we need to
     // rely on a postMessage API to fullscreen. Such an API is not necessarily
     // provided by every player.
-    const internalElement = getInternalElementFor(video);
+    const internalElement = getInternalVideoElementFor(video);
     if (internalElement.tagName.toLowerCase() == 'video') {
       return true;
     }
@@ -1047,7 +1058,7 @@ export class AutoFullscreenManager {
   installOrientationObserver_() {
     // TODO(alanorozco) Update based on support
     const {win} = this.ampdoc_;
-    const screen = win.screen;
+    const {screen} = win;
     // Chrome considers 'orientationchange' to be an untrusted event, but
     // 'change' on screen.orientation is considered a user interaction.
     // We still need to listen to 'orientationchange' on Chrome in order to
@@ -1063,11 +1074,10 @@ export class AutoFullscreenManager {
 
   /** @private */
   onRotation_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      if (!this.currentlyCentered_) {
-        return;
+    if (this.isInLandscape()) {
+      if (this.currentlyCentered_ != null) {
+        this.enter_(this.currentlyCentered_);
       }
-      this.enter_(this.getEntryForElement_(this.currentlyCentered_));
       return;
     }
     if (this.currentlyInFullscreen_) {
@@ -1076,19 +1086,13 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  enter_(entry) {
-    const {video} = entry;
+  enter_(video) {
+    const platform = Services.platformFor(this.ampdoc_.win);
 
-    if (entry.getPlayingState() !== PlayingStates.PLAYING_MANUAL) {
-      return;
-    }
-
-    const platform = Services.platformFor(this.win_);
-
-    this.currentlyInFullscreen_ = entry;
+    this.currentlyInFullscreen_ = video;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
@@ -1102,13 +1106,11 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @param {!VideoEntry} entry
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @private
    */
-  exit_(entry) {
+  exit_(video) {
     this.currentlyInFullscreen_ = null;
-
-    const {video} = entry;
 
     this.scrollIntoIfNotVisible_(video, 'center')
         .then(() => video.fullscreenExit());
@@ -1116,7 +1118,7 @@ export class AutoFullscreenManager {
 
   /**
    * Scrolls to a video if it's not in view.
-   * @param {!VideoOrBaseElementDef} video
+   * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
    * @private
    */
@@ -1149,107 +1151,75 @@ export class AutoFullscreenManager {
   /** @private @return {!Promise} */
   onceOrientationChanges_() {
     const magicNumber = 330;
-    return Services.timerFor(this.win_).promise(magicNumber);
-  }
-
-  /**
-   * @param {!AmpElement} element
-   * @private
-   */
-  updateVisibility_(element) {
-    const intersectionChangeEntry = element.getIntersectionChangeEntry();
-    const isVisible = intersectionChangeEntry.intersectionRatio > 0.75;
-    const i = this.visibleElements_.indexOf(element);
-
-    if (!isVisible) {
-      if (i >= 0) {
-        this.visibleElements_.splice(i, 1);
-      }
-      return;
-    }
-
-    if (i < 0) {
-      this.visibleElements_.push(element);
-    }
-
-    this.selectBestCenteredInPortrait_();
-  }
-
-  /** @private */
-  selectOnScroll_() {
-    if (isLandscape(this.ampdoc_.win)) {
-      return;
-    }
-    this.selectBestCenteredInPortrait_();
+    return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
   /** @private */
   selectBestCenteredInPortrait_() {
+    if (this.isInLandscape()) {
+      return this.currentlyCentered_;
+    }
+
     this.currentlyCentered_ = null;
-    this.visibleElements_
-        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
-        .sort((a, b) => this.compareIntersectionEntries_(a, b))
-        .forEach((entry, i) => {
-          if (entry.intersectionRatio >= 0.8 && i == 0) {
-            this.currentlyCentered_ = entry.target;
-          }
-        });
+
+    const selected = this.entries_
+        .filter(this.boundIncludeOnlyPlaying_)
+        .sort(this.boundCompareEntries_)[0];
+
+    if (selected) {
+      const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
+      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
+        this.currentlyCentered_ = selected;
+      }
+    }
+
     return this.currentlyCentered_;
   }
 
   /**
-   * Compares two intersection entries in order to sort them by "best centered".
-   * @param {!IntersectionObserverEntry} a
-   * @param {!IntersectionObserverEntry} b
+   * Compares two videos in order to sort them by "best centered".
+   * @param {!../video-interface.VideoOrBaseElementDef} a
+   * @param {!../video-interface.VideoOrBaseElementDef} b
    * @return {number}
    */
-  compareIntersectionEntries_(a, b) {
-    // Prioritize videos that are playing
-    const aPlayingState = this.getEntryForElement_(a.target).getPlayingState();
-    const bPlayingState = this.getEntryForElement_(b.target).getPlayingState();
-    if (aPlayingState == PlayingStates.PLAYING_MANUAL &&
-        bPlayingState != PlayingStates.PLAYING_MANUAL) {
-      return -1;
-    }
-    if (aPlayingState != PlayingStates.PLAYING_MANUAL &&
-        bPlayingState == PlayingStates.PLAYING_MANUAL) {
-      return 1;
-    }
+  compareEntries_(a, b) {
+    const {
+      intersectionRatio: ratioA,
+      boundingClientRect: rectA,
+    } = a.element.getIntersectionChangeEntry();
+    const {
+      intersectionRatio: ratioB,
+      boundingClientRect: rectB,
+    } = b.element.getIntersectionChangeEntry();
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;
-    const ratioDelta = (a.intersectionRatio - b.intersectionRatio);
-    if (ratioDelta < -ratioTolerance) {
-      return -1;
-    }
-    if (ratioDelta > ratioTolerance) {
-      return 1;
+    const ratioDelta = ratioA - ratioB;
+    if (Math.abs(ratioDelta) > ratioTolerance) {
+      return ratioDelta;
     }
 
     // Prioritize by distance from center.
     const viewport = Services.viewportForDoc(this.ampdoc_);
-    const aCenter = centerDist(viewport, a.boundingClientRect);
-    const bCenter = centerDist(viewport, b.boundingClientRect);
-    if (aCenter < bCenter) {
-      return -1;
-    }
-    if (aCenter > bCenter) {
-      return 1;
+    const centerA = centerDist(viewport, rectA);
+    const centerB = centerDist(viewport, rectB);
+    if (centerA < centerB ||
+        centerA > centerB) {
+      return centerA - centerB;
     }
 
     // Everything else failing, choose the highest element.
-    const topDelta = (a.boundingClientRect.top - b.boundingClientRect.top);
-    return topDelta < 0 ? -1 : (topDelta > 0 ? 1 : 0);
+    return rectA.top - rectB.top;
   }
 
   /**
-   * @param {!Element} element
-   * @return {!VideoEntry}
+   * @param {!../video-interface.VideoOrBaseElementDef} video
+   * @return {!../video-interface.VideoInterface} PlayingStates
    * @private
    */
-  getEntryForElement_(element) {
-    const id = dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
-    return dev().assert(this.entries_[id]);
+  getPlayingState_(video) {
+    return this.manager_.getPlayingState(
+        /** @type {!../video-interface.VideoInterface} */ (video));
   }
 }
 
@@ -1260,7 +1230,7 @@ export class AutoFullscreenManager {
  * @return {number}
  */
 function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
+  const centerY = rect.top + (rect.height / 2);
   const centerViewport = viewport.getSize().height / 2;
   return Math.abs(centerY - centerViewport);
 }
@@ -1278,28 +1248,235 @@ function isLandscape(win) {
 }
 
 
+/** @visibleForTesting */
+export const PERCENTAGE_INTERVAL = 5;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MIN_MS = 250;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
+
+
+/**
+ * Calculates the "ideal" analytics check frequency from playback start, e.g.
+ * the amount of ms after each PERCENTAGE_INTERVAL.
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateIdealPercentageFrequencyMs(durationSeconds) {
+  return durationSeconds * 10 * PERCENTAGE_INTERVAL;
+}
+
+
+/**
+ * Calculates the "actual" analytics check frequency by calculating the ideal
+ * frequency and clamping it between MIN and MAX.
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateActualPercentageFrequencyMs(durationSeconds) {
+  return clamp(
+      calculateIdealPercentageFrequencyMs(durationSeconds),
+      PERCENTAGE_FREQUENCY_MIN_MS,
+      PERCENTAGE_FREQUENCY_MAX_MS);
+}
+
+
+/** @visibleForTesting */
+export class AnalyticsPercentageTracker {
+  /**
+   * @param {!Window} win
+   * @param {!VideoEntry} entry
+   */
+  constructor(win, entry) {
+
+    // This is destructured in `calculate_()`, but the linter thinks it's unused
+    /** @private @const {!./timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win); // eslint-disable-line
+
+    /** @private @const {!VideoEntry} */
+    this.entry_ = entry;
+
+    /** @private {?Array<!UnlistenDef>} */
+    this.unlisteners_ = null;
+
+    /** @private {number} */
+    this.last_ = 0;
+
+    /**
+     * Counter for each trigger `start`. This is to prevent duplicate events if
+     * two consecutive triggers take place, or to prevent events firing once
+     * the tracker is stopped.
+     * @private {number}
+     */
+    this.triggerId_ = 0;
+  }
+
+  /** @public */
+  start() {
+    const {element} = this.entry_.video;
+
+    this.stop();
+
+    this.unlisteners_ = this.unlisteners_ || [];
+
+    this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        }),
+
+        listen(element, VideoEvents.ENDED, () => {
+          if (this.hasDuration_()) {
+            this.maybeTrigger_(/* normalizedPercentage */ 100);
+          }
+        }));
+  }
+
+  /** @public */
+  stop() {
+    if (!this.unlisteners_) {
+      return;
+    }
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop().call();
+    }
+    this.triggerId_++;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasDuration_() {
+    const {video} = this.entry_;
+    const duration = video.getDuration();
+
+    // Livestreams or videos with no duration information available.
+    if (!duration ||
+      isNaN(duration) ||
+      duration <= 0) {
+      return false;
+    }
+
+    if (calculateIdealPercentageFrequencyMs(duration) <
+        PERCENTAGE_FREQUENCY_MIN_MS) {
+
+      const bestResultLength = Math.ceil(
+          PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
+
+      this.warnForTesting_(
+          'This video is too short for `video-percentage-played`. ' +
+          'Reports may be innacurate. For best results, use videos over',
+          bestResultLength,
+          'seconds long.',
+          video.element);
+    }
+
+    return true;
+  }
+
+  /**
+   * @param  {...*} args
+   * @private
+   */
+  warnForTesting_(...args) {
+    user().warn.apply(user(), [TAG].concat(args));
+  }
+
+  /**
+   * @param {number=} triggerId
+   * @private
+   */
+  calculate_(triggerId) {
+    if (triggerId != this.triggerId_) {
+      return;
+    }
+
+    const {
+      entry_: entry,
+      timer_: timer,
+    } = this;
+    const {video} = entry;
+
+    const calculateAgain = () => this.calculate_(triggerId);
+
+    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
+      return;
+    }
+
+    const duration = video.getDuration();
+
+    const frequencyMs = calculateActualPercentageFrequencyMs(duration);
+
+    const percentage = (video.getCurrentTime() / duration) * 100;
+    const normalizedPercentage =
+      Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
+
+    devAssert(isFiniteNumber(normalizedPercentage));
+
+    this.maybeTrigger_(normalizedPercentage);
+
+    timer.delay(calculateAgain, frequencyMs);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  maybeTrigger_(normalizedPercentage) {
+    if (normalizedPercentage <= 0) {
+      return;
+    }
+
+    if (this.last_ == normalizedPercentage) {
+      return;
+    }
+
+    this.last_ = normalizedPercentage;
+
+    this.analyticsEventForTesting_(normalizedPercentage);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  analyticsEventForTesting_(normalizedPercentage) {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+      'normalizedPercentage': normalizedPercentage.toString(),
+    });
+  }
+}
+
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents|string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {
-  const video = entry.video;
-  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-    entry.getAnalyticsDetails();
+  const {video} = entry;
 
-  detailsPromise.then(details => {
-    video.element.dispatchCustomEvent(
-        eventType, details);
+  entry.getAnalyticsDetails().then(details => {
+    if (opt_vars) {
+      Object.assign(details, opt_vars);
+    }
+    video.element.dispatchCustomEvent(eventType, details);
   });
 }
 
 
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
-// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
+  // TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
   // TODO(alanorozco, #13674): Rename to `video-service`
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
     const {win} = ampdoc;

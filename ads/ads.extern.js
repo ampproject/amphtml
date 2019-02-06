@@ -60,8 +60,108 @@ data.tweetid
 data.formula
 var mathjax
 mathjax.Hub
+mathjax.Hub.Config
 mathjax.Hub.Queue
 window.MathJax
+
+//3d-gltf/index.js
+var THREE;
+
+THREE.LoaderUtils
+THREE.LoaderUtils.extractUrlBase
+
+THREE.WebGLRenderer = class {
+  /** @param {!JsonObject} opts */
+  constructor(opts) {
+    /** @type {?Element} */ this.domElement = null;}};
+THREE.WebGLRenderer.prototype.setSize
+THREE.WebGLRenderer.prototype.setPixelRatio
+THREE.WebGLRenderer.prototype.setClearColor
+THREE.WebGLRenderer.prototype.render
+/** @type {boolean} */
+THREE.WebGLRenderer.prototype.gammaOutput
+/** @type {number} */
+THREE.WebGLRenderer.prototype.gammaFactor
+
+THREE.Light = class extends THREE.Object3D {};
+THREE.DirectionalLight = class extends THREE.Light {};
+THREE.AmbientLight = class extends THREE.Light {};
+
+THREE.Box3 = class {};
+THREE.Box3.prototype.getSize
+THREE.Box3.prototype.getCenter
+THREE.Box3.prototype.setFromObject
+THREE.Box3.prototype.min
+THREE.Box3.prototype.max
+
+THREE.Vector3 = class {
+  /** @param {number=} opt_x
+   * @param {number=} opt_y
+   * @param {number=} opt_z */
+  constructor(opt_x, opt_y, opt_z) {}
+};
+THREE.Vector3.prototype.lerpVectors
+THREE.Vector3.prototype.copy
+THREE.Vector3.prototype.clone
+THREE.Vector3.prototype.subVectors
+THREE.Vector3.prototype.multiplyScalar
+THREE.Vector3.prototype.setFromMatrixColumn
+THREE.Vector3.prototype.add
+THREE.Vector3.prototype.set
+THREE.Vector3.prototype.applyQuaternion
+THREE.Vector3.prototype.setFromSpherical
+THREE.Vector3.prototype.distanceToSquared
+THREE.Vector3.prototype.length
+THREE.Vector3.prototype.fromArray
+
+THREE.Euler = class {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;}};
+
+THREE.Euler.prototype.set;
+
+THREE.Object3D = class {
+  constructor() {
+    this.position = new THREE.Vector3();
+    this.rotation = new THREE.Euler();
+    this.children = [];}};
+
+THREE.Object3D.prototype.applyMatrix
+THREE.Object3D.prototype.add
+THREE.Object3D.prototype.updateMatrixWorld
+THREE.Object3D.prototype.lookAt
+THREE.Object3D.prototype.clone
+
+THREE.OrbitControls = class {
+  /** @param {THREE.Camera} camera
+   * @param {Element} domElement */
+  constructor(camera, domElement) {
+    this.target = new THREE.Vector3(); }};
+THREE.OrbitControls.prototype.update
+THREE.OrbitControls.prototype.addEventListener
+
+THREE.Scene = class extends THREE.Object3D {};
+THREE.Group = class extends THREE.Object3D {};
+
+THREE.Camera = class extends THREE.Object3D {
+  constructor() {
+    super();
+    this.fov = 0;
+    this.far = 0;
+    this.near = 0;
+    this.aspect = 0;
+    this.zoom = 0;}};
+THREE.Camera.prototype.updateProjectionMatrix
+THREE.Camera.prototype.setFromUnitVectors
+
+THREE.PerspectiveCamera = class extends THREE.Camera {};
+
+THREE.GLTFLoader = class {
+  constructor() {
+    this.crossOrigin = false;}};
+THREE.GLTFLoader.prototype.load
 
 // Under ads/google folder
 
@@ -107,6 +207,8 @@ data.slot;
 // imaVideo.js
 var google;
 google.ima;
+google.ima.Ad;
+google.ima.Ad.getSkipTimeOffset;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
@@ -131,11 +233,20 @@ google.ima.UiElements;
 google.ima.UiElements.AD_ATTRIBUTION;
 google.ima.UiElements.COUNTDOWN;
 google.ima.AdEvent;
+google.ima.AdEvent.getAd;
+google.ima.AdEvent.getAdData;
 google.ima.AdEvent.Type;
+google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
+google.ima.AdsManager.getRemainingTime;
 google.ima.AdsManager.setVolume;
+google.ima.AdProgressData;
+google.ima.AdProgressData.adPosition;
+google.ima.AdProgressData.totalAds;
 google.ima.settings;
 google.ima.settings.setLocale;
 google.ima.settings.setVpaidMode;
@@ -260,22 +371,8 @@ data.url;
 // criteo.js
 var Criteo;
 Criteo.DisplayAd;
-Criteo.Log.Debug;
-Criteo.CallRTA;
-Criteo.ComputeDFPTargetingForAMP;
-Criteo.PubTag = {};
-Criteo.PubTag.Adapters = {};
-Criteo.PubTag.Adapters.AMP = {};
-Criteo.PubTag.Adapters.AMP.Standalone;
-Criteo.PubTag.RTA = {};
-Criteo.PubTag.RTA.DefaultCrtgContentName;
-Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
 data.tagtype;
-data.networkid;
-data.cookiename;
-data.varname;
 data.zone;
-data.adserver;
 
 // distroscale.js
 data.tid;
@@ -453,6 +550,10 @@ data.item;
 data.geo;
 data.categories;
 
+// pressboard.js
+data.media;
+data.baseUrl;
+
 // pubguru.js
 data.height;
 data.publisher;
@@ -604,6 +705,13 @@ data.channel;
 data.publisher;
 data.dim;
 data.renderer;
+
+// zen.js
+var YandexZen;
+YandexZen.renderWidget;
+data.clid;
+data.successCalback;
+data.failCallback;
 
 // zergnet.js
 window.zergnetWidgetId;

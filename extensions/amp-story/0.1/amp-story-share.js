@@ -20,7 +20,7 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
@@ -61,6 +61,17 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
+/**
+ * Key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const SHARE_PROVIDERS_KEY = 'shareProviders';
+
+/**
+ * Deprecated key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -125,7 +136,7 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = dev().assert(
+  const shareProviderLocalizedStringId = devAssert(
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
       `No localized string to display name for share type ${shareType}.`);
 
@@ -204,7 +215,7 @@ export class ShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    dev().assert(!this.root, 'Already built.');
+    devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
     this.localizationServicePromise_ =
@@ -225,7 +236,7 @@ export class ShareWidget {
    */
   getAmpDoc_() {
     return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-      dev().assert(this.ampdoc_));
+      devAssert(this.ampdoc_));
   }
 
   /** @private */
@@ -247,13 +258,12 @@ export class ShareWidget {
   }
 
   /** @private */
-  // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
-        dev().assert(localizationService,
+        devAssert(localizationService,
             'Could not retrieve LocalizationService.');
         const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
@@ -307,7 +317,8 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config['share-providers'];
+      const providers = config && (config[SHARE_PROVIDERS_KEY] ||
+        config[DEPRECATED_SHARE_PROVIDERS_KEY]);
       if (!providers) {
         return;
       }
@@ -316,11 +327,36 @@ export class ShareWidget {
   }
 
   /**
+   * @param {!Array<!JsonObject|string>} providers
+   * @return {!Object<string, !JsonObject>} providers
+   */
+  parseProvidersToClassicApi(providers) {
+    const providersMap = {};
+
+    providers.forEach(currentProvider => {
+      if (isObject(currentProvider) &&
+          currentProvider['provider'] == 'facebook') {
+        providersMap['facebook'] = ({'app_id': currentProvider['app_id']});
+      } else if (isObject(currentProvider)) {
+        providersMap[currentProvider['provider']] = true;
+      } else {
+        providersMap[currentProvider] = true;
+      }
+    });
+
+    return providersMap;
+  }
+
+  /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @private
+   * TODO(alanorozco): Set story metadata in share config.
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
+    if (Array.isArray(providers)) {
+      providers = this.parseProvidersToClassicApi(providers);
+    }
+
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',
@@ -343,9 +379,8 @@ export class ShareWidget {
       }
 
       user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+          `Invalid share providers configuration for "${type}" in bookend. ` +
+          'Value must be `true` or a params object.');
     });
   }
 
@@ -362,7 +397,7 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = dev().assert(this.root).firstElementChild;
+    const list = devAssert(this.root).firstElementChild;
     const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
@@ -437,30 +472,31 @@ export class ScrollableShareWidget extends ShareWidget {
           return;
         }
 
-        const icon = dev().assert(items[0].firstElementChild);
+        const icon = devAssert(items[0].firstElementChild);
 
         const leftMargin = icon./*OK*/offsetLeft - this.root./*OK*/offsetLeft;
         const iconWidth = icon./*OK*/offsetWidth;
 
         // Total width that the buttons will occupy with minimum padding.
         const totalItemWidth =
-            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+            (iconWidth * items.length) + ((2 * MIN_BUTTON_PADDING) *
                 (items.length - 1));
 
         // If buttons don't fit within the available area, calculate padding so
         // that there will be an element cut-off.
-        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
-          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+        if (totalItemWidth > (containerWidth - (leftMargin * 2))) {
+          const availableWidth = containerWidth - leftMargin - (iconWidth / 2);
           const amountVisible =
-              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+              Math.floor(
+                  availableWidth / (iconWidth + (MIN_BUTTON_PADDING * 2)));
 
-          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+          state.padding = 0.5 * ((availableWidth / amountVisible) - iconWidth);
         } else {
           // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
           // so that all elements fit and take as much area as possible.
           const totalPadding =
-              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
-              (items.length - 1);
+              ((containerWidth - (leftMargin * 2)) -
+              (iconWidth * items.length)) / (items.length - 1);
 
           state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
         }

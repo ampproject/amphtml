@@ -15,7 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
 
@@ -31,6 +31,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
     /** @private {string} */
     this.domain_ = '';
+
+    /** @private {string} */
+    this.siteId_ = '';
+
+    /** @private {string} */
+    this.playerId_ = '';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -52,44 +58,44 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.mode_ = user().assert(
+    this.mode_ = userAssert(
         this.element.getAttribute('data-mode'),
         'The data-mode attribute is required for <amp-springboard-player> %s',
         this.element);
-    this.contentId_ = user().assert(
+    this.contentId_ = userAssert(
         this.element.getAttribute('data-content-id'),
         'The data-content-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    this.domain_ = user().assert(
+    this.domain_ = userAssert(
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
+        this.element);
+    this.siteId_ = userAssert(
+        this.element.getAttribute('data-site-id'),
+        'The data-site-id attribute is required for' +
+        '<amp-springboard-player> %s',
+        this.element);
+    this.playerId_ = userAssert(
+        this.element.getAttribute('data-player-id'),
+        'The data-player-id attribute is required for' +
+        '<amp-springboard-player> %s',
         this.element);
   }
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const siteId = user().assert(
-        this.element.getAttribute('data-site-id'),
-        'The data-site-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
-    const playerId = user().assert(
-        this.element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
     const items = this.element.getAttribute('data-items') || '10';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.id = playerId + '_' + this.contentId_;
+    iframe.id = this.playerId_ + '_' + this.contentId_;
     iframe.src = 'https://cms.springboardplatform.com/embed_iframe/' +
-        encodeURIComponent(siteId) + '/' +
+        encodeURIComponent(this.siteId_) + '/' +
         encodeURIComponent(this.mode_) +
         '/' + encodeURIComponent(this.contentId_) + '/' +
-        encodeURIComponent(playerId) + '/' +
+        encodeURIComponent(this.playerId_) + '/' +
         encodeURIComponent(this.domain_) +
         '/' + encodeURIComponent(items);
     this.applyFillContent(iframe);

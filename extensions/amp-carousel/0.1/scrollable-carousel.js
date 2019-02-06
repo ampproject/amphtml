@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
@@ -81,7 +81,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
         'scroll', this.scrollHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         const index = parseInt(args['index'], 10);
         this.goToSlide_(index);
@@ -205,13 +205,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'slow scrolling: %s - %s',
+            startingScrollLeft, this.pos_);
         this.scrollTimerId_ = null;
         this.commitSwitch_(this.pos_);
       } else {
-        dev().fine(TAG, 'fast scrolling: ' + startingScrollLeft + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'fast scrolling: %s - %s',
+            startingScrollLeft, this.pos_);
         this.waitForScroll_(this.pos_);
       }
     }, 100);

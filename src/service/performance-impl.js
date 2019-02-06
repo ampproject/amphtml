@@ -120,8 +120,9 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = Services.viewerForDoc(this.win.document);
-    this.resources_ = Services.resourcesForDoc(this.win.document);
+    const {documentElement} = this.win.document;
+    this.viewer_ = Services.viewerForDoc(documentElement);
+    this.resources_ = Services.resourcesForDoc(documentElement);
 
     this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
         this.viewer_.getParam('csi') === '1';
@@ -165,6 +166,9 @@ export class Performance {
     });
   }
 
+  /**
+   * Callback for onload.
+   */
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
@@ -222,8 +226,8 @@ export class Performance {
     if (!this.win.PerformancePaintTiming
         && this.win.chrome
         && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = this.win.chrome.loadTimes().firstPaintTime
-          * 1000 - this.win.performance.timing.navigationStart;
+      const fpTime = (this.win.chrome.loadTimes()['firstPaintTime'] * 1000)
+          - this.win.performance.timing.navigationStart;
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
@@ -247,6 +251,8 @@ export class Performance {
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
         docVisibleTime = this.win.Date.now();
+        // Mark this first visible instance in the browser timeline.
+        this.mark('visible');
       });
     }
 
@@ -286,7 +292,8 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const size = Services.viewportForDoc(this.win.document).getSize();
+    const {documentElement} = this.win.document;
+    const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
         this.win, rect, /* isInPrerender */ true)
@@ -322,7 +329,8 @@ export class Performance {
       this.mark(label);
     }
 
-    // Store certain page visibility metrics to be exposed as analytics variables.
+    // Store certain page visibility metrics to be exposed as analytics
+    // variables.
     const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
 				 : value - this.initTime_);
     switch (label) {
@@ -453,23 +461,32 @@ export class Performance {
   }
 
   /**
-   * Identifies if the viewer is able to track performance.
-   * If the document is not embedded, there is no messaging channel,
-   * so no performance tracking is needed since there is nobody to forward the events.
+   * Identifies if the viewer is able to track performance. If the document is
+   * not embedded, there is no messaging channel, so no performance tracking is
+   * needed since there is nobody to forward the events.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
     return this.isPerformanceTrackingOn_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getFirstContentfulPaint() {
     return this.firstContentfulPaint_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getMakeBodyVisible() {
     return this.makeBodyVisible_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getFirstViewportReady() {
     return this.firstViewportReady_;
   }

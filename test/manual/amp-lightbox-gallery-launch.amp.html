@@ -1,310 +1,158 @@
+<!--
+  ## Introduction
+
+The amp-lightbox-gallery component provides a "lightbox” experience for AMP components (e.g., amp-img, amp-carousel). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.
+-->
+<!-- -->
 <!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>Lightbox Gallery Launch Tests</title>
-  <link rel="canonical" href="amps.html" >
+  <link rel="canonical" href="/components/amp-lightbox-gallery/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>amp-lightbox-gallery</title>
+  <!-- ## Setup -->
+  <!-- Import the amp-lightbox-gallery component in the header.  -->
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <!-- Optionally import the amp-carousel component in the header if you are using lightbox with carousel. -->
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
-    body {
-      font-family: sans-serif;
+    .overlay-text {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      z-index: 1;
+      pointer-events: none;
+      background-color: #494A4D;
+      color: white;
+      padding: 2px 6px 2px 6px;
+      border-radius: 2px;
+      opacity: 0.7;
+      font-family: Roboto, sans-serif;
+      font-size: 1em;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    amp-img[lightbox] {
+      cursor: pointer;
+    }
+
+    .container {
+      margin: 0 6% 0 6%;
+    }
+
+    .paragraph {
+      padding: 10px 0 10px 0;
     }
 
   </style>
 </head>
 <body>
-  <script>
-    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
-    // Disable amp-lightbox-viewer-auto experiment if it is enabled.
-    setTimeout(function() {
-        if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
-          AMP.toggleExperiment('amp-lightbox-gallery');
-          location.reload();
-        }
-    }, 1000);
-  </script>
 
-  <h1>Lightbox Carousel Description Test</h1>
-  <p>The following images belong to the default lightbox group. </p>
-  <amp-img src="https://picsum.photos/1600/900?image=107"
-    aria-describedby="longest-description"
-    lightbox
-    width="400"
-    height="225"
-    alt="a beautiful cat"></amp-img>
 
-  <amp-img src="https://picsum.photos/1600/900?image=108"
-    aria-describedby="medium-description"
-    lightbox
-    width="400"
-    height="225"
-    alt="a beautiful cat"></amp-img>
+  <!-- ## Basic Usage -->
+  <!--
+  This is a basic example that demonstrates lightboxed `<amp-img>`s. You have one or more `<amp-img>` elements on the page. Just add the "lightbox" attribute to each image that you wish to view in a lightbox.
+  -->
+  <div class="container">
+    <amp-img lightbox src="https://picsum.photos/300/200" width="300" height="200" layout="responsive"></amp-img>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <amp-img lightbox src="https://picsum.photos/300/200" width="300" height="200" layout="responsive"></amp-img>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <amp-img lightbox src="https://picsum.photos/300/200" width="300" height="200" layout="responsive"></amp-img>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  </div>
 
-  <amp-img src="https://picsum.photos/1600/900?image=109"
-    alt="short description short description short description short description three lines worth of stuff coming up on 4 lines what if we actually have four"
-    lightbox
-    width="400"
-    height="225"></amp-img>
+  <!-- ## Usage with Carousel-->
+  <!--
+  You can also use `<amp-lightbox-gallery>` with `<amp-carousel>` to view the contents of the carousel in a lightbox. Just simply include a `<amp-carousel>` with `<amp-img>`s, and add the "lightbox" attribute to the `<amp-carousel>`. The lightbox images will be sync-ed with the carousel slides.
+  -->
+  <div>
+    <amp-carousel lightbox width="400" height="300" layout="responsive" type="slides">
+      <amp-img src="https://picsum.photos/400/300" width="400" height="300" layout="responsive"></amp-img>
+      <amp-img src="https://picsum.photos/400/300" width="400" height="300" layout="responsive"></amp-img>
+      <amp-img src="https://picsum.photos/400/300" width="400" height="300" layout="responsive"></amp-img>
+    </amp-carousel>
+  </div>
 
-  <amp-carousel
-    width="400"
-    height="300"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://picsum.photos/1600/900?image=110"
-      width="400"
-      height="225"
-      alt="a beautiful cat"></amp-img>
-    <figure>
-        <amp-img src="https://picsum.photos/1600/900?image=111"
+    <!-- ## Lightbox Groups -->
+    <!-- By default, all lightboxed elements will be grouped into the same lightbox unless they belong to a carousel. All elements in the same lightboxed carousel belong to the same lightbox. You can override this behavior by setting the lightbox attribute to a unique string. One common pattern is to have one hero image that opens up into a lightbox gallery of several images. -->
+
+    <div>
+      <amp-img lightbox="hero"
+        src="https://picsum.photos/400/300"
         width="400"
-        height="225"
-        alt="another beautiful cat"></amp-img>
-        <figcaption>This is a figure with a figcaption.</figcaption>
-    </figure>
-    <amp-img src="https://picsum.photos/1600/900?image=110"
-      width="400"
-      height="225"
-      aria-label="Aria labels are cool."></amp-img>
-    <amp-img src="https://picsum.photos/1600/900?image=112"
-      width="400"
-      height="225"
-      aria-describedby="my-aria-describe"></amp-img>
-    <amp-img src="https://picsum.photos/1600/900?image=113"
-      width="400"
-      height="225"
-      aria-labelledby="my-aria-label"></amp-img>
-  </amp-carousel>
+        height="300"
+        layout="responsive">
+        <span class="overlay-text">See photo gallery</span>
+      </amp-img>
+    <div hidden>
+      <amp-img lightbox="hero"
+        src="https://picsum.photos/400/300"
+        layout="responsive"
+        width="400"
+        height="300"></amp-img>
+      <amp-img lightbox="hero"
+        src="https://picsum.photos/400/300"
+        width="400"
+        height="300"
+        layout="responsive" ></amp-img>
+    </div>
+  </div>
 
-  <h1>Lightbox Carousel with Video Test</h1>
-  <h2>AMP-VIDEO Layout Test</h2>
-  <p>This carousel includes amp-video with the following layouts: </p>
-  <ul>
-    <li>Responsive</li>
-    <li>Responsive with autoplay</li>
-    <li>Fill</li>
-    <li>Fixed Height</li>
-    <li>Fixed</li>
-  </ul>
-  <amp-carousel
-    width="800"
-    height="450"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://picsum.photos/1600/900?image=114"
-      width="800"
-      height="450"
-      alt="a beautiful cat"></amp-img>
-    <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="responsive"
-      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-      controls>
-    </amp-video>
-    <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="responsive"
-      autoplay
-      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-      controls>
-    </amp-video>
-    <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="fill"
-      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-      controls>
-    </amp-video>
-    <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      height="204"
-      layout="fixed-height"
-      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-      controls>
-    </amp-video>
-    <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="fixed"
-      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-      controls>
-    </amp-video>
-  </amp-carousel>
+  <!-- ## Captions -->
+  <!--
+  Optionally, you can specify a caption for each element in the lightbox. These fields are automatically read and displayed by the `<amp-lightbox-gallery>` in the following order of priority:
+  - figcaption (if the lightboxed element is the child of a figure)
+  - aria-describedby
+  The following examples demonstrate how to use captions. The first image does not have a caption. The second image uses `<figcaption>`. The third image uses `aria-describedby`.
+  -->
+  <div class="container">
 
-  <h2>AMP-YOUTUBE Layout Test</h2>
-  <p>This carousel includes amp-video with the following layouts: </p>
-  <ul>
-    <li>Responsive</li>
-    <li>Responsive with autoplay</li>
-    <li>Fill</li>
-    <li>Fixed Height</li>
-    <li>Fixed</li>
-  </ul>
-  <amp-carousel
-    width="800"
-    height="600"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://picsum.photos/1600/900?image=115"
-      width="800"
-      height="450"
-      alt="a beautiful cat"></amp-img>
-    <amp-youtube width="480"
-      height="270"
-      layout="responsive"
-      data-videoid="lBTCB7yLs8Y"
-      lightbox-thumbnail-id="non-existent-thumbnail-img">
-    </amp-youtube>
-    <amp-youtube width="480"
-      height="270"
-      layout="responsive"
-      data-videoid="lBTCB7yLs8Y"
-      autoplay>
+    <amp-img
+      lightbox="caption"
+      src="https://picsum.photos/300/200"
+      width="300"
+      height="200"
+      layout="responsive"></amp-img>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+    <figure>
       <amp-img
-        src="https://i.ytimg.com/vi/OO9oKhs80aI/mqdefault.jpg"
-        placeholder
-        layout="fill"
-        />
-    </amp-youtube>
-    <amp-youtube width="480"
-      height="270"
-      layout="fill"
-      data-videoid="lBTCB7yLs8Y">
-    </amp-youtube>
-    <amp-youtube
-      height="270"
-      layout="fixed-height"
-      data-videoid="lBTCB7yLs8Y">
-    </amp-youtube>
-    <amp-youtube width="480"
-      height="270"
-      layout="fixed"
-      data-videoid="lBTCB7yLs8Y">
-    </amp-youtube>
-  </amp-carousel>
+        lightbox="caption"
+        src="https://picsum.photos/300/200"
+        width="300"
+        height="200"
+        layout="responsive"></amp-img>
+      <figcaption class="image">
+        This is a long road. We don't know where it leads.
+      </figcaption>
+    </figure>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-  <h1>Lightbox Carousel Ads Support Test</h1>
-  <amp-carousel
-    width="800"
-    height="600"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://picsum.photos/1600/900?image=300"
-      width="800"
-      height="450"
-      alt="a beautiful cat"></amp-img>
-    <amp-ad width="300"
-      height="250"
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="test123"
-      data-aax_src="302">
-    </amp-ad>
-    <amp-ad data-slot="/30497360/a4a/a4a_native"
-      height="250"
-      type="doubleclick"
-      width="300">
-    </amp-ad>
-  </amp-carousel>
+    <amp-img
+      lightbox="caption"
+      src="https://picsum.photos/300/200"
+      layout="responsive"
+      width="300"
+      height="200"
+      aria-describedby="desc">
+    </amp-img>
+    <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-  <h1>Lightbox API Tests</h1>
-  <h2>Lightbox Group Test</h2>
-  <h3>Test 1</h3>
-  <p>The following image and youtube video should belong to the same lightbox group. The lightbox group should include a third image from the carousel in Test 3 below. </p>
-  <amp-img src="https://picsum.photos/1600/900?image=118"
-    width="400"
-    height="225"
-    lightbox="group-1"
-    alt="a beautiful cat"></amp-img>
-  <amp-youtube lightbox="group-1"
-    width="480"
-    height="270"
-    layout="fixed"
-    data-videoid="lBTCB7yLs8Y">
-  </amp-youtube>
-  <h3>Test 2</h3>
-  <p>The following image should belong to the default lightbox group. </p>
-  <amp-img src="https://picsum.photos/1600/900?image=119"
-    width="400"
-    height="225"
-    lightbox
-    aria-label="Aria labels are cool."></amp-img>
-  <h3>Test 3</h3>
-  <p>In the following carousel, images 2 and 4 should be excluded from the lightbox. Image 4 should belong to the lightbox group in Test 1.</p>
-  <amp-carousel
-    width="400"
-    height="300"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://picsum.photos/1600/900?image=120"
-      width="400"
-      height="225"
-      alt="a beautiful cat"></amp-img>
-    <amp-img src="https://picsum.photos/1600/900?image=121"
-      width="400"
-      height="225"
-      lightbox-exclude
-      aria-label="Aria labels are cool."></amp-img>
-    <amp-img src="https://picsum.photos/1600/900?image=122"
-      width="400"
-      height="225"
-      aria-describedby="my-aria-describe"></amp-img>
-    <amp-img src="https://picsum.photos/1600/900?image=123"
-      width="400"
-      height="225"
-      lightbox="group-1"
-      aria-labelledby="my-aria-label"></amp-img>
-  </amp-carousel>
-
-  <amp-img id="fb-thumbnail-img"
-    width="200"
-    height="200"
-    layout="nodisplay"
-    src="https://picsum.photos/200/200?image=1074">
-  </amp-img>
-
-  <amp-img id="yt-thumbnail-img"
-    width="200"
-    height="200"
-    layout="nodisplay"
-    src="https://picsum.photos/200/200?image=1074">
-  </amp-img>
-
-  <div id='my-aria-describe' layout="nodisplay">
-    This is an aria described by a div. <br/>
-    I have a linebreak.
+    <div hidden id="desc">
+      I'm not too sure where this road leads either.
+    </div>
   </div>
-  <div id='my-aria-label' layout="nodisplay">
-    This is an aria labelled by a div. <br/>
-    I also have a newline.
-  </div>
-  <div id='longest-description' layout="nodisplay">
-    Guess what the actual text of lorem ipsum is?
-    But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?
-    On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.
-  </div>
-  <div id='medium-description' layout="nodisplay">
-    But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?
-  </div>
+
 </body>
 </html>

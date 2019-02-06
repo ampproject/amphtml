@@ -17,8 +17,11 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {makeBodyVisible} from './style-installer';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from './service';
+import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
 /**
@@ -37,13 +40,13 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Chunks}
  * @private
  */
-function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+function chunkServiceForDoc(elementOrAmpDoc) {
+  registerServiceBuilderForDoc(elementOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(elementOrAmpDoc, 'chunk');
 }
 
 /**
@@ -53,15 +56,15 @@ function getChunkServiceForDoc_(nodeOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Document} document
  * @param {function(?IdleDeadline)} fn
  */
-export function startupChunk(nodeOrAmpDoc, fn) {
+export function startupChunk(document, fn) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = chunkServiceForDoc(document.documentElement);
   service.runForStartup(fn);
 }
 
@@ -75,25 +78,25 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * object to the function, which can be used to perform a variable amount
  * of work depending on the remaining amount of idle time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {function(?IdleDeadline)} fn
  * @param {ChunkPriority} priority
  */
-export function chunk(nodeOrAmpDoc, fn, priority) {
+export function chunk(elementOrAmpDoc, fn, priority) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = chunkServiceForDoc(elementOrAmpDoc);
   service.run(fn, priority);
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Chunks}
  */
-export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return getChunkServiceForDoc_(nodeOrAmpDoc);
+export function chunkInstanceForTesting(elementOrAmpDoc) {
+  return chunkServiceForDoc(elementOrAmpDoc);
 }
 
 /**
@@ -106,6 +109,9 @@ export function deactivateChunking() {
   deactivated = true;
 }
 
+/**
+ * @visibleForTesting
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
 }
@@ -114,10 +120,10 @@ export function activateChunkingForTesting() {
  * Runs all currently scheduled chunks.
  * Independent of errors it will unwind the queue. Will afterwards
  * throw the first encountered error.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  */
-export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = chunkInstanceForTesting(nodeOrAmpDoc);
+export function runChunksForTesting(elementOrAmpDoc) {
+  const service = chunkInstanceForTesting(elementOrAmpDoc);
   const errors = [];
   while (true) {
     try {
@@ -259,7 +265,7 @@ class StartupTask extends Task {
   /** @override */
   onTaskError_(unusedError) {
     // Startup tasks run early in init. All errors should show the doc.
-    makeBodyVisible(self.document);
+    makeBodyVisibleRecovery(self.document);
   }
 
   /** @override */
@@ -452,6 +458,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);

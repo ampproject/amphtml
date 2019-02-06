@@ -16,6 +16,9 @@
       body {
         font-family: 'Roboto', sans-serif;
       }
+      amp-story {
+        --primary-color: #0379c4;
+      }
       amp-story-page {
         background-color: white;
       }
@@ -54,27 +57,34 @@
       <amp-consent id='ABC' layout='nodisplay'>
         <script type="application/json">{
           "consents": {
-            "ABC": {
+            "DEF": {
               "checkConsentHref": "http://localhost:8000/get-consent-v1",
               "promptUI": "ui0"
             }
-          },
-          "story-consent": {
-            "color": "#0379c4",
+          }
+        }</script>
+
+        <amp-story-consent id="ui0" layout="nodisplay">
+          <script type="application/json">{
             "title": "Headline.",
             "message": "This is some more information about this choice. Here's a list of items related to this choice.",
-            "vendors": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
-          },
-          "postPromptUI": "postPromptUI"
-        }</script>
-        <amp-story-consent id="ui0" layout="nodisplay"></amp-story-consent>
+            "vendors": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"],
+            "externalLink": {
+              "title": "Data Privacy Settings",
+              "href": "https://example.com"
+            }
+          }</script>
+        </amp-story-consent>
       </amp-consent>
 
-      <amp-story-page id="cover">
+      <amp-story-page id="cover" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">
           <h1>You just accepted or rejected the consent!</h1>
         </amp-story-grid-layer>
       </amp-story-page>
+
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

@@ -14,25 +14,42 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
-import {parseUrl, removeFragment} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {handleAutoscroll} from './autoscroll';
+import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-/** @const */
+
+/** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
-/** @const */
+
+/** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
-/** @const */
-const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
+
+/**
+  * For browsers with bottom nav bars the content towards the bottom
+  * end of the sidebar is cut off.
+  * Currently Safari is the only browser with a nav bar on the bottom
+  * so we set the width of this block to the width of Safari's nav bar.
+  * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
+ */
+/** @private @const {string} */
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '29px';
 
 /**  @enum {string} */
 const SidebarEvents = {
@@ -40,6 +57,9 @@ const SidebarEvents = {
   CLOSE: 'sidebarClose',
 };
 
+/**
+ * @extends {AMP.BaseElement}
+ */
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -48,11 +68,11 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
-
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?function()} */
+    this.updateFn_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -83,10 +103,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
-    /** @const {function()} */
-    this.boundOnAnimationEnd_ =
-        debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
-
     /** @private {?Element} */
     this.openerElement_ = null;
 
@@ -96,33 +112,33 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-overlay');
+    const {element} = this;
 
-    this.side_ = this.element.getAttribute('side');
+    element.classList.add('i-amphtml-overlay');
+    element.classList.add('i-amphtml-scrollable');
+
+    this.side_ = element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
 
-    this.action_ = Services.actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(element);
 
-    if (this.side_ != 'left' && this.side_ != 'right') {
-      this.side_ = isRTL(this.document_) ? 'right' : 'left';
-      this.element.setAttribute('side', this.side_);
+    if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
+      this.side_ = this.setSideAttribute_(
+          isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
+      element.setAttribute('side', this.side_);
     }
 
-    const ampdoc = this.getAmpDoc();
     // Get the toolbar attribute from the child navs.
-    const toolbarElements =
-      toArray(this.element.querySelectorAll('nav[toolbar]'));
+    const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-            ampdoc));
+        this.toolbars_.push(new Toolbar(toolbarElement, this));
       } catch (e) {
         this.user().error(TAG, 'Failed to instantiate toolbar', e);
       }
     });
-
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
@@ -131,24 +147,26 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       this.open_();
     } else {
-      this.element.setAttribute('aria-hidden', 'true');
+      element.setAttribute('aria-hidden', 'true');
     }
 
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'menu');
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'menu');
     }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
-    this.element.tabIndex = -1;
+    element.tabIndex = -1;
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
-      if (event.keyCode == KeyCodes.ESCAPE) {
-        this.close_();
+      if (event.key == Keys.ESCAPE) {
+        if (this.close_()) {
+          event.preventDefault();
+        }
       }
     });
 
     // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    const ariaLabel = element.getAttribute('data-close-button-aria-label')
     || 'Close the sidebar';
 
     // Invisible close button at the end of sidebar for screen-readers.
@@ -161,16 +179,15 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.addEventListener('click', () => {
       this.close_();
     });
-    this.element.appendChild(screenReaderCloseButton);
-
+    element.appendChild(screenReaderCloseButton);
+    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
     this.registerAction('toggle', this.toggle_.bind(this));
-    this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    this.element.addEventListener('click', e => {
+    element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        const tgtLoc = parseUrl(target.href);
+        const tgtLoc = Services.urlForDoc(element).parse(target.href);
         const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
@@ -190,31 +207,18 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
-  activate(invocation) {
-    this.open_(invocation);
-  }
-
-  /** @override */
   onLayoutMeasure() {
     this.getAmpDoc().whenReady().then(() => {
       // Check our toolbars for changes
       this.toolbars_.forEach(toolbar => {
-        toolbar.onLayoutChange(() => this.onToolbarOpen_());
+        toolbar.onLayoutChange();
       });
     });
   }
 
   /**
-   * Function called whenever a tollbar is opened.
-   * @private
-   */
-  onToolbarOpen_() {
-    this.close_();
-  }
-
-  /**
    * Returns true if the sidebar is opened.
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   isOpen_() {
@@ -235,6 +239,88 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
+   * Sets a function to update the state of the sidebar. If another one has
+   * been set before the function takes effect, it is ignored.
+   * @param {function()} updateFn A function to update the sidebar.
+   * @param {number=} delay An optional delay to wait before calling the update
+   *    function.
+   */
+  setUpdateFn_(updateFn, delay) {
+    this.updateFn_ = updateFn;
+
+    const runUpdate = () => {
+      // Make sure we haven't been replaced by another update function.
+      if (this.updateFn_ === updateFn) {
+        this.mutateElement(updateFn);
+      }
+    };
+
+    if (delay) {
+      Services.timerFor(this.win).delay(runUpdate, delay);
+    } else {
+      runUpdate();
+    }
+  }
+
+  /**
+   * Updates the sidebar before it opens. This needs to be done as a separate
+   * step from opening so that we can animate, as the sidebar is initially
+   * display: none.
+   */
+  updateForPreOpening_() {
+    toggle(this.element, /* display */true);
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+
+    if (this.isIos_ && this.isSafari_) {
+      this.compensateIosBottombar_();
+    }
+    this.element./*OK*/scrollTop = 1;
+    this.setUpdateFn_(() => this.updateForOpening_());
+  }
+
+  /**
+   * Updates the sidebar while it is animating to the opened state.
+   */
+  updateForOpening_() {
+    this.openMask_();
+    this.element.setAttribute('open', '');
+    this.element.setAttribute('aria-hidden', 'false');
+    this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
+    handleAutoscroll(this.getAmpDoc(), this.element);
+  }
+
+  /**
+   * Updates the sidebar for when it has finished opening.
+   */
+  updateForOpened_() {
+    // On open sidebar
+    const children = this.getRealChildren();
+    this.scheduleLayout(children);
+    this.scheduleResume(children);
+    tryFocus(this.element);
+    this.triggerEvent_(SidebarEvents.OPEN);
+  }
+
+  /**
+   * Updates the sidebar for when it is animating to the closed state.
+   */
+  updateForClosing_() {
+    this.closeMask_();
+    this.element.removeAttribute('open');
+    this.element.setAttribute('aria-hidden', 'true');
+    this.setUpdateFn_(() => this.updateForClosed_(), ANIMATION_TIMEOUT);
+  }
+
+  /**
+   * Updates the sidebar for when it has finished closing.
+   */
+  updateForClosed_() {
+    toggle(this.element, /* display */false);
+    this.schedulePause(this.getRealChildren());
+    this.triggerEvent_(SidebarEvents.CLOSE);
+  }
+
+  /**
    * Reveals the sidebar.
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
@@ -244,22 +330,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.vsync_.mutate(() => {
-      toggle(this.element, /* display */true);
-      this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
-
-      if (this.isIos_ && this.isSafari_) {
-        this.compensateIosBottombar_();
-      }
-      this.element./*OK*/scrollTop = 1;
-      // Start animation in a separate vsync due to display:block; set above.
-      this.vsync_.mutate(() => {
-        this.openMask_();
-        this.element.setAttribute('open', '');
-        this.boundOnAnimationEnd_();
-        this.element.setAttribute('aria-hidden', 'false');
-      });
-    });
+    this.setUpdateFn_(() => this.updateForPreOpening_());
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
@@ -271,23 +342,20 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
+   * @return {boolean} Whether the sidebar actually transitioned from "visible"
+   *     to "hidden".
    * @private
    */
   close_() {
     if (!this.isOpen_()) {
-      return;
+      return false;
     }
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
       (this.initialScrollTop_ == this.viewport_.getScrollTop());
     const sidebarIsActive =
         this.element.contains(this.document_.activeElement);
-    this.vsync_.mutate(() => {
-      this.closeMask_();
-      this.element.removeAttribute('open');
-      this.boundOnAnimationEnd_();
-      this.element.setAttribute('aria-hidden', 'true');
-    });
+    this.setUpdateFn_(() => this.updateForClosing_());
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
@@ -295,8 +363,21 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       tryFocus(this.openerElement_);
     }
+    return true;
   }
-
+  /**
+   * Sidebars within <amp-story> should be 'flipped'.
+   * @param {!Side} side
+   * @return {Side}
+   * @private
+   */
+  setSideAttribute_(side) {
+    if (!descendsFromStory(this.element)) {
+      return side;
+    } else {
+      return side == Side.LEFT ? Side.RIGHT : Side.LEFT;
+    }
+  }
   /**
    * @private
    */
@@ -313,7 +394,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.maskElement_ = mask;
     }
-    toggle(this.maskElement_, /* display */true);
+    this.maskElement_.classList.toggle('i-amphtml-ghost', false);
   }
 
   /**
@@ -321,7 +402,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   closeMask_() {
     if (this.maskElement_) {
-      toggle(this.maskElement_, /* display */false);
+      this.maskElement_.classList.toggle('i-amphtml-ghost', true);
     }
   }
 
@@ -370,32 +451,11 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Get called when animation/transition end when open/close sidebar
-   * @private
-   */
-  onAnimationEnd_() {
-    if (this.isOpen_()) {
-      // On open sidebar
-      const children = this.getRealChildren();
-      this.scheduleLayout(children);
-      this.scheduleResume(children);
-      tryFocus(this.element);
-      this.triggerEvent_(SidebarEvents.OPEN);
-    } else {
-      // On close sidebar
-      this.vsync_.mutate(() => {
-        toggle(this.element, /* display */false);
-        this.schedulePause(this.getRealChildren());
-        this.triggerEvent_(SidebarEvents.CLOSE);
-      });
-    }
-  }
-
-  /**
+   * @param {string} name
    * @private
    */
   triggerEvent_(name) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

@@ -17,14 +17,18 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
-import * as consent from '../../../../src/consent-state';
+import * as consent from '../../../../src/consent';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {LayoutPriority} from '../../../../src/layout';
+import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
+
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -47,6 +51,7 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
 
 describes.realWin('amp-ad-3p-impl', {
   amp: {
+    runtimeOn: false,
     canonicalUrl: 'https://canonical.url',
   },
   allowExternalResources: true,
@@ -89,7 +94,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
-        expect(iframe.style.display).to.equal('');
+        expect(iframe).to.not.have.attribute('hidden');
 
         expect(url).to.match(/frame(.max)?.html/);
         const data = JSON.parse(iframe.name).attributes;
@@ -140,7 +145,7 @@ describes.realWin('amp-ad-3p-impl', {
     it('should propagate consent state to ad iframe', () => {
       ad3p.element.setAttribute('data-block-on-consent', '');
       sandbox.stub(consent, 'getConsentPolicyState')
-          .resolves(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+          .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
       sandbox.stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
 
@@ -151,7 +156,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
         expect(data._context.initialConsentState)
-            .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+            .to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
         expect(data._context.consentSharedData)
             .to.deep.equal({a: 1, b: 2});
       });
@@ -237,24 +242,12 @@ describes.realWin('amp-ad-3p-impl', {
       win.document.head.appendChild(meta);
       ad3p.config.remoteHTMLDisabled = true;
       ad3p.onLayoutMeasure();
+      sandbox.stub(user(), 'error');
       return ad3p.layoutCallback().then(() => {
         expect(win.document.querySelector('iframe[src="' +
             'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
             .to.be.ok;
       });
-    });
-  });
-
-  describe('buildCallback', () => {
-    it('should emitLifecycleEvent for upgrade delay', () => {
-      const emitLifecycleEventSpy = sandbox.spy(ad3p, 'emitLifecycleEvent');
-      sandbox.stub(ad3p, 'getResource').returns({
-        getUpgradeDelayMs: () => 12345,
-      });
-      ad3p.buildCallback();
-      expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
-        'forced_delta': 12345,
-      })).to.be.calledOnce;
     });
   });
 
@@ -300,7 +293,9 @@ describes.realWin('amp-ad-3p-impl', {
       win.document.head.appendChild(meta);
       ad3p.config.remoteHTMLDisabled = true;
       ad3p.buildCallback();
-      ad3p.preconnectCallback();
+      allowConsoleError(() => {
+        ad3p.preconnectCallback();
+      });
       return whenFirstVisible.then(() => {
         expect(Array.from(win.document.querySelectorAll('link[rel=preload]'))
             .some(link => link.href ==
@@ -325,8 +320,10 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should only allow rendering one ad per second', function* () {
-      const clock = lolex.install({target: win});
+      const clock = lolex.install({
+        target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
       const ad3p2 = createAmpAd(win);
+      const oneSecPromise = Services.timerFor(win).promise(1001);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
 
@@ -337,8 +334,8 @@ describes.realWin('amp-ad-3p-impl', {
       clock.tick(999);
       yield macroTask();
       expect(ad3p2.renderOutsideViewport()).to.equal(false);
-      clock.tick(1);
-      yield macroTask();
+      clock.tick(2);
+      yield oneSecPromise;
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
     });
 
@@ -454,6 +451,26 @@ describes.realWin('amp-ad-3p-impl', {
         expect(callback).to.exist;
         expect(attemptChangeSizeSpy).to.be.calledOnce;
       });
+
+      it('should schedule a resize for matched content responsive', () => {
+        constructImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'mcrspv',
+          'data-full-width': '',
+        });
+        const attemptChangeSizeSpy =
+            sandbox.stub(impl, 'attemptChangeSize').callsFake(
+                (height, width) => {
+                  expect(width).to.equal(VIEWPORT_WIDTH);
+                  expect(height).to.equal(1032);
+                  return Promise.resolve();
+                });
+
+        const callback = impl.buildCallback();
+        expect(callback).to.exist;
+        expect(attemptChangeSizeSpy).to.be.calledOnce;
+      });
     });
 
     describe('should align correctly', () => {
@@ -551,7 +568,7 @@ describes.realWin('amp-ad-3p-impl', {
           // Right margin is 9px from containerContainer and 25px from
           // container.
           expect(element.style.marginLeft).to.be.equal('');
-          expect(element.style.marginRight).to.be.equal('-49px');
+          expect(element.style.marginRight).to.be.equal('-34px');
         });
       });
     });

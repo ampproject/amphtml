@@ -19,7 +19,7 @@ module.exports = function(context) {
   return {
     ExportNamedDeclaration: function(node) {
       if (node.declaration) {
-        const declaration = node.declaration;
+        const {declaration} = node;
         if (declaration.type === 'VariableDeclaration') {
           declaration.declarations
               .map(function(declarator) {
@@ -27,11 +27,17 @@ module.exports = function(context) {
               }).filter(function(init) {
                 return init && /(?:Call|New)Expression/.test(init.type);
               }).forEach(function(init) {
-                context.report(init, 'Cannot export side-effect');
+                context.report({
+                  node: init,
+                  message: 'Cannot export side-effect',
+                });
               });
         }
       } else if (node.specifiers) {
-        context.report(node, 'Side-effect linting not implemented');
+        context.report({
+          node,
+          message: 'Side-effect linting not implemented',
+        });
       }
     },
   };

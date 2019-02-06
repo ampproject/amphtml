@@ -74,9 +74,9 @@ Currently only supports `fixed-height`.
 
 ##### height (required)
 
-The height of the gist or gist file in pixels.
+The initial height of the gist or gist file in pixels.
 
-**Note**: You must find the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools).
+**Note**: You should obtain the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will resize to fit so that its contents will fit.
 
 ##### data-file (optional)
 

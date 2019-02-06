@@ -18,6 +18,7 @@ import {dict} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
+import {setStyles} from '../src/style';
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -27,12 +28,23 @@ import {parseJson} from '../src/json';
 
 let animationHandler;
 
-function getBodymovinAnimationSdk(global, cb) {
-  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
+/**
+ * @param {!Window} global
+ * @param {string} renderer
+ * @param {!Function} cb
+ */
+function getBodymovinAnimationSdk(global, renderer, cb) {
+  const scriptToLoad = renderer === 'svg' ?
+    'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js' :
+    'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+  loadScript(global, scriptToLoad, function() {
     cb(global.bodymovin);
   });
 }
 
+/**
+ * @param {!Event} event
+ */
 function parseMessage(event) {
   const eventMessage = parseJson(getData(event));
   const action = eventMessage['action'];
@@ -43,23 +55,36 @@ function parseMessage(event) {
   } else if (action == 'stop') {
     animationHandler.stop();
   } else if (action == 'seekTo') {
-    animationHandler.goToAndStop(eventMessage['value'],
-        eventMessage['valueType'] !== 'time');
+    if (eventMessage['valueType'] === 'time') {
+      animationHandler.goToAndStop(eventMessage['value']);
+    } else {
+      const frameNumber =
+        Math.round(eventMessage['value'] * animationHandler.totalFrames);
+      animationHandler.goToAndStop(frameNumber, true);
+    }
   }
 }
 
+/**
+ * @param {!Window} global
+ */
 export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
   const animatingContainer = global.document.createElement('div');
+  setStyles(animatingContainer, {
+    width: '100%',
+    height: '100%',
+  });
 
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
-  getBodymovinAnimationSdk(global, function(bodymovin) {
+  const renderer = dataReceived['renderer'];
+  getBodymovinAnimationSdk(global, renderer, function(bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
-      renderer: 'svg',
+      renderer,
       loop,
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],

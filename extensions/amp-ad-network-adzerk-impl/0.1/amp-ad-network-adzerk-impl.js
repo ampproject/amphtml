@@ -19,8 +19,9 @@ import {
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
-import {dev} from '../../../src/log';
+import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
+import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
+import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
 import {tryResolve} from '../../../src/utils/promise';
@@ -32,14 +33,8 @@ const TAG = 'amp-ad-network-adzerk-impl';
 /** @visibleForTesting @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-    }} */
-let AmpTemplateCreativeDef;
-
-/** @private {?AmpAdTemplates} */
-let ampAdTemplates;
+/** @private {?AmpAdTemplateHelper} */
+let ampAdTemplateHelper;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -70,10 +65,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     /** @private {?CreativeMetaDataDef} */
     this.creativeMetadata_ = null;
 
-    /** @private {?AmpTemplateCreativeDef} */
+    /** @private {?../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
 
-    ampAdTemplates = ampAdTemplates || new AmpAdTemplates(this.win);
+    ampAdTemplateHelper = ampAdTemplateHelper ||
+        new AmpAdTemplateHelper(this.win);
   }
 
   /**
@@ -95,7 +91,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const data = this.element.getAttribute('data-r');
-    dev().assert(data, 'Expected data-r attribte on amp-ad tag');
+    devAssert(data, 'Expected data-r attribte on amp-ad tag');
     if (getMode(this.win).localDev) {
       return `http://ads.localhost:${this.win.location.port}` +
           '/adzerk/' + data;
@@ -112,10 +108,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     const checkStillCurrent = this.verifyStillCurrent();
     return tryResolve(() => utf8Decode(bytes)).then(body => {
       checkStillCurrent();
-      this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
+      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
-      return ampAdTemplates
+      return ampAdTemplateHelper
           .fetch(this.ampCreativeJson_.templateUrl)
           .then(parsedTemplate => {
             return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
@@ -170,12 +166,12 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.data) {
-      ampAdTemplates.render(
+      ampAdTemplateHelper.render(
           this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body)
           .then(renderedElement => {
             if (this.ampCreativeJson_.analytics) {
-              ampAdTemplates.insertAnalytics(
+              ampAdTemplateHelper.insertAnalytics(
                   renderedElement, this.ampCreativeJson_.analytics);
             }
             this.iframe.contentWindow.document.body./*OK*/innerHTML =
@@ -185,6 +181,12 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   }
 }
 
+/**
+ * Pushes item into array if it does not exist.
+ *
+ * @param {!Array} array
+ * @param {*} item
+ */
 function pushIfNotExist(array, item) {
   if (array.indexOf(item) < 0) {
     array.push(item);

@@ -68,7 +68,7 @@ function setupPreview(global, data) {
 
 /**
  * @param {string} str
- * @returns (Object|undefined}
+ * @return {Object|undefined}
  * @throws {SyntaxError}
  */
 function parseJSONObj(str) {

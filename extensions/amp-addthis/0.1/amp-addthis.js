@@ -16,7 +16,10 @@
 
 /**
  * @fileoverview Embeds an AddThis widget.
- * The data-pub-id and data-widget-id can be found easily in the AddThis dashboard at addthis.com.
+ * The data-pub-id and data-widget-id can be found easily in the AddThis
+ * dashboard at addthis.com.
+ * For floating tool, pickup floating widget-id from dashboard
+ * and add an attribute: data-widget-type="floating"
  * Example:
  * <code>
  * <amp-addthis
@@ -58,23 +61,28 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
 
-// The following items will be shared by all AmpAddThis elements on a page, to prevent unnecessary
-// HTTP requests, get accurate analytics, etc., and hence are defined outside of the class.
+import {userAssert} from '../../../src/log';
+
+// The following items will be shared by all AmpAddThis elements on a page, to
+// prevent unnecessary HTTP requests, get accurate analytics, etc., and hence
+// are defined outside of the class.
 const configManager = new ConfigManager();
 const scrollMonitor = new ScrollMonitor();
 const dwellMonitor = new DwellMonitor();
 const clickMonitor = new ClickMonitor();
 const activeToolsMonitor = new ActiveToolsMonitor();
 
-// `shouldRegisterView` is a shared flag that should be true only for the first built element on the
-// page, to prevent registering more than one view per page.
+// `shouldRegisterView` is a shared flag that should be true only for the first
+// built element on the page, to prevent registering more than one view per
+// page.
 let shouldRegisterView = true;
 
-// Redirection to prevent eslint issues.
+/**
+ * Redirection to prevent eslint issues.
+ */
 export function getConfigManager() {
   return configManager;
 }
@@ -108,6 +116,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {(?Object<string, string>|null)} */
     this.atConfig_ = null;
+
+    /** @private {string} */
+    this.widgetType_ = '';
   }
 
   /**
@@ -118,12 +129,12 @@ class AmpAddThis extends AMP.BaseElement {
     const widgetId = this.element.getAttribute('data-widget-id');
 
     // Required attributes
-    this.pubId_ = user().assert(
+    this.pubId_ = userAssert(
         pubId,
         'The data-pub-id attribute is required for <amp-addthis> %s',
         this.element
     );
-    this.widgetId_ = user().assert(
+    this.widgetId_ = userAssert(
         widgetId,
         'The data-widget-id attribute is required for <amp-addthis> %s',
         this.element
@@ -135,6 +146,7 @@ class AmpAddThis extends AMP.BaseElement {
         ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
+    this.widgetType_ = this.element.getAttribute('data-widget-type');
     this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
@@ -144,7 +156,7 @@ class AmpAddThis extends AMP.BaseElement {
       shouldRegisterView = false;
 
       const viewer = Services.viewerForDoc(ampDoc);
-      const loc = parseUrl(this.canonicalUrl_);
+      const loc = parseUrlDeprecated(this.canonicalUrl_);
 
       viewer.whenFirstVisible()
           .then(() => viewer.getReferrerUrl())
@@ -165,7 +177,8 @@ class AmpAddThis extends AMP.BaseElement {
             clickMonitor.startForDoc(ampDoc);
           });
 
-      // Only the component that registers the page view listens for x-frame events.
+      // Only the component that registers the page view listens for x-frame
+      // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
   }
@@ -185,8 +198,13 @@ class AmpAddThis extends AMP.BaseElement {
     this.preconnect.url('https://su.addthis.com', opt_onLayout);
   }
 
+  /** @override */
+  isAlwaysFixed() {
+    return this.widgetType_ === 'floating';
+  }
+
   /**
-   * @returns {Element}
+   * @return {Element}
    */
   createPlaceholderCallback() {
     const placeholder = createElementWithAttributes(
@@ -196,7 +214,7 @@ class AmpAddThis extends AMP.BaseElement {
           'placeholder': '',
         })
     );
-    setStyle(placeholder, 'background-color', '#eee');
+    setStyle(placeholder, 'background-color', '#fff');
 
     const image = createElementWithAttributes(
         this.win.document,
@@ -224,10 +242,12 @@ class AmpAddThis extends AMP.BaseElement {
           'frameborder': 0,
           'title': ALT_TEXT,
           'src': `${ORIGIN}/dc/amp-addthis.html`,
+          'id': this.widgetId_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
     setStyle(iframe, 'margin-bottom', '-5px');
+
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -272,7 +292,7 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {JsonObject<string, string>}
+   * @return {!JsonObject}
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
@@ -294,7 +314,8 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {Object<string, string>}
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+   * @return {!JsonObject}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {
@@ -315,6 +336,15 @@ class AmpAddThis extends AMP.BaseElement {
     }, {});
   }
 
+  /**
+   * Sets up listeners.
+   *
+   * @param {!Object} input
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
+   * @param {*} [input.loc]
+   * @param {*} [input.pubId]
+   * @memberof AmpAddThis
+   */
   setupListeners_({ampDoc, loc, pubId}) {
     // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () => callEng({

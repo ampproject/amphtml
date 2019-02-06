@@ -15,22 +15,22 @@
  */
 
 import {BaseElement} from './base-element';
-import {dev} from './log';
-import {stubbedElementNames} from './element-stub-data';
+import {devAssert} from './log';
 
 /** @type {!Array} */
 export const stubbedElements = [];
 
+
 export class ElementStub extends BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
     stubbedElements.push(this);
-    stubbedElementNames.push(element.nodeName.toLowerCase());
   }
 
   /** @override */
   getLayoutPriority() {
-    return dev().assert(0, 'Cannot get priority of stubbed element');
+    return devAssert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
@@ -27,7 +26,7 @@ describe('Amp custom ad', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -38,7 +37,8 @@ describe('Amp custom ad', () => {
    * Get a custom amp-ad element
    * @param {string} url The url of the ad server
    * @param {string} slot The alphanumeric slot Id (optional)
-   * @returns {Element} The completed amp-ad element, which has been added to
+   * @param {HTMLElement} body
+   * @return {Element} The completed amp-ad element, which has been added to
    *    the current document body.
    */
   function getCustomAd(url, slot, body = document.body) {

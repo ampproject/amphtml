@@ -16,7 +16,7 @@
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
-import {isSecureUrl} from '../../../src/url';
+import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-util';
@@ -25,7 +25,7 @@ const TAG = 'amp-ad-util';
  * Sends a CORS XHR request to the given URL.
  * @param {!Window} win
  * @param {string} url Request URL to send XHR to.
- * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+ * @return {!Promise<!Response>}
  */
 export function sendXhrRequest(win, url) {
   return Services.xhrFor(win).fetch(url, {
@@ -108,7 +108,7 @@ export function getAmpAdMetadata(creative) {
       metaData.customStylesheets.forEach(stylesheet => {
         if (!isObject(stylesheet) || !stylesheet['href'] ||
             typeof stylesheet['href'] !== 'string' ||
-            !isSecureUrl(stylesheet['href'])) {
+            !isSecureUrlDeprecated(stylesheet['href'])) {
           throw new Error(errorMsg);
         }
       });

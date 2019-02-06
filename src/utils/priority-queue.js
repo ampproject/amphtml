@@ -19,6 +19,9 @@
  * @template T
  */
 export default class PriorityQueue {
+  /**
+   * Creates an instance of PriorityQueue.
+   */
   constructor() {
     /** @private @const {Array<{item: T, priority: number}>} */
     this.queue_ = [];
@@ -77,6 +80,16 @@ export default class PriorityQueue {
       }
     }
     return i;
+  }
+
+  /**
+   * @param {function(T)} callback
+   */
+  forEach(callback) {
+    let index = this.queue_.length;
+    while (index--) {
+      callback(this.queue_[index].item);
+    }
   }
 
   /**

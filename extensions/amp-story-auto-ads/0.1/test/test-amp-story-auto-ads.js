@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as analytics from '../../../../src/analytics';
-import * as sinon from 'sinon';
 import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 import {macroTask} from '../../../../testing/yield';
 
@@ -69,9 +68,10 @@ describes.realWin('amp-story-auto-ads', {
   });
 
   describe('analytics triggers', () => {
-    it('should fire upon insertion', () => {
+    it('should fire "story-ad-insert" upon insertion', () => {
       autoAds.uniquePagesCount_ = 10;
-      sandbox.stub(autoAds, 'startNextPage_');
+      autoAds.adPagesCreated_ = 1;
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
@@ -80,9 +80,10 @@ describes.realWin('amp-story-auto-ads', {
           {'insertTime': sinon.match.number});
     });
 
-    it('should fire upon discarded ad', () => {
+    it('should fire "story-ad-discard" upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
-      sandbox.stub(autoAds, 'startNextPage_');
+      autoAds.adPagesCreated_ = 1;
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
@@ -91,12 +92,17 @@ describes.realWin('amp-story-auto-ads', {
           {'discardTime': sinon.match.number});
     });
 
-    it('should fire upon ad load', function* () {
+    it('should fire "story-ad-load" upon ad load', function* () {
       const signals = {whenSignal: () => Promise.resolve()};
       const fakeImpl = {signals: () => signals};
       const ad = win.document.createElement('amp-ad');
       ad.getImpl = () => Promise.resolve(fakeImpl);
       sandbox.stub(autoAds, 'createAdElement_').returns(ad);
+      autoAds.adPageEls_ = [ad];
+
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createPageElement_').returns(page);
+      page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
 
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.createAdPage_();
@@ -107,7 +113,7 @@ describes.realWin('amp-story-auto-ads', {
           {'loadTime': sinon.match.number});
     });
 
-    it('should fire upon ad request', () => {
+    it('should fire "story-ad-request" upon ad request', () => {
       autoAds.ampStory_ = {
         element: storyElement,
         addPage: NOOP,
@@ -123,6 +129,44 @@ describes.realWin('amp-story-auto-ads', {
       expect(analyticsStub).to.have.been.calledWithMatch('story-ad-request',
           {'requestTime': sinon.match.number});
     });
+
+    it('should fire "story-ad-view" upon ad visible', () => {
+      autoAds.ampStory_ = {
+        element: storyElement,
+        addPage: NOOP,
+      };
+      autoAds.adPagesCreated_ = 1;
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createAdPage_').returns(page);
+      page.getImpl = () => Promise.resolve();
+
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.adPageIds_ = {'ad-page-1': 1};
+      autoAds.handleActivePageChange_(1, 'ad-page-1');
+
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-view',
+          {'viewTime': sinon.match.number});
+    });
+
+    it('should fire "story-ad-exit" upon ad exit', () => {
+      autoAds.ampStory_ = {
+        element: storyElement,
+        addPage: NOOP,
+      };
+      autoAds.adPagesCreated_ = 1;
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createAdPage_').returns(page);
+      page.getImpl = () => Promise.resolve();
+
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.idOfAdShowing_ = 'ad-page-1';
+      autoAds.handleActivePageChange_(1, 'page-3');
+
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('story-ad-exit',
+          {'exitTime': sinon.match.number});
+    });
   });
 
   describe('analyticsEvent_', () => {
@@ -130,30 +174,75 @@ describes.realWin('amp-story-auto-ads', {
 
     beforeEach(() => {
       triggerStub = sandbox.stub(analytics, 'triggerAnalyticsEvent');
+      autoAds.analyticsData_ = {1: {}};
     });
 
     it('should trigger the appropriate event', () => {
       const vars = {
-        adIndex: 0,
+        adIndex: 1,
         foo: 1,
       };
+
       autoAds.analyticsEvent_('my-event', vars);
       expect(triggerStub).calledWith(sinon.match.any, 'my-event',
           sinon.match(vars));
     });
 
     it('should aggregate data from previous events', () => {
-      autoAds.analyticsEvent_('event-1', {foo: 1});
-      autoAds.analyticsEvent_('event-2', {bar: 2});
-      autoAds.analyticsEvent_('event-3', {baz: 3});
+      autoAds.analyticsEvent_('event-1', {adIndex: 1, foo: 1});
+      autoAds.analyticsEvent_('event-2', {adIndex: 1, bar: 2});
+      autoAds.analyticsEvent_('event-3', {adIndex: 1, baz: 3});
       expect(triggerStub).calledThrice;
       expect(triggerStub).calledWith(sinon.match.any, 'event-3',
           sinon.match({
-            adIndex: 0,
+            adIndex: 1,
             foo: 1,
             bar: 2,
             baz: 3,
           }));
+    });
+  });
+
+  describe('analyticsEventWithCurrentAd_', () => {
+    it('should add the current ad index and call #analyticsEvent_', () => {
+      const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+      autoAds.analyticsEventWithCurrentAd_('cool-event', {foo: 1});
+      expect(analyticsStub).to.be.called;
+      expect(analyticsStub).to.have.been.calledWithMatch('cool-event',
+          {foo: 1});
+    });
+  });
+
+  describe('creation of attributes', () => {
+    it('should not allow blacklisted attributes', () => {
+      Object.assign(autoAds.config_['ad-attributes'], {
+        height: 100,
+        width: 100,
+        layout: 'responsive',
+      });
+
+      const adElement = autoAds.createAdElement_();
+      expect(adElement.hasAttribute('type')).to.be.true;
+      expect(adElement.hasAttribute('data-slot')).to.be.true;
+      expect(adElement.hasAttribute('width')).to.be.false;
+      expect(adElement.hasAttribute('height')).to.be.false;
+      expect(adElement.getAttribute('layout')).to.equal('fill');
+    });
+
+    it('should stringify attributes given as objects', () => {
+      Object.assign(autoAds.config_['ad-attributes'], {
+        'rtc-config': {
+          vendors: {
+            vendor1: {'SLOT_ID': 1},
+            vendor2: {'PAGE_ID': 'abc'},
+          },
+        },
+      });
+
+      const adElement = autoAds.createAdElement_();
+      expect(adElement.getAttribute('rtc-config'))
+          .to.equal('{"vendors":{"vendor1":{"SLOT_ID":1},' +
+          '"vendor2":{"PAGE_ID":"abc"}}}');
     });
   });
 });

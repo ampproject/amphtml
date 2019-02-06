@@ -28,7 +28,6 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 
 See the table below for descriptions of each part of the syntax.
 
-
 <table>
   <tr>
     <th width="30%">Syntax</th>
@@ -206,6 +205,24 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-selector
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>select</code></td>
+    <td>Fired when an option is selected or deselected.</td>
+    <td><pre>// Target element's "option" attribute value.
+event.targetOption
+
+// Array of "option" attribute values of all selected elements.
+event.selectedOptions</pre></td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>
@@ -295,11 +312,19 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>show</code></td>
-    <td>Shows the target element.</td>
+    <td>Shows the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleVisibility</code></td>
-    <td>Toggles the visibility of the target element.</td>
+    <td>Toggles the visibility of the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
+  </tr>
+  <tr>
+    <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
+    <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
   </tr>
   <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
@@ -316,6 +341,22 @@ event.response</pre></td>
     on another element (usually parent element). We strongly advise against
     losing focus by focusing on <code>body</code>/<code>documentElement</code>
     for accessibility reasons.</td>
+  </tr>
+</table>
+
+### amp-audio
+<table>
+  <tr>
+    <th width="20%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
 </table>
 
@@ -451,6 +492,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refetches data at the `src` attribute while ignoring browser cache.</td>
+  </tr>
+</table>
+
 ### amp-user-notification
 <table>
   <tr>
@@ -465,7 +518,7 @@ event.response</pre></td>
 
 ### Video elements
 
-The actions below are supported in the following AMP video elements: `amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`, `amp-dailymotion`, `amp-ima-video`.
+The actions below are supported in the following AMP video elements: `amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`.
 
 <table>
   <tr>
@@ -525,8 +578,12 @@ actions that apply to the whole document.
     <th>Description</th>
   </tr>
   <tr>
-    <td><code>navigateTo(url=STRING)</code></td>
-    <td>Navigates current window to given URL. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
+    <td><code>navigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
+    <td>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener<code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
+  </tr>
+  <tr>
+    <td><code>closeOrNavigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
+    <td>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</td>
   </tr>
   <tr>
     <td><code>goBack</code></td>
@@ -535,6 +592,10 @@ actions that apply to the whole document.
   <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
+  <tr>
+    <td>scrollTo(id=STRING, duration=INTEGER, position=STRING)</td>
+    <td>Scrolls to the provided element ID on the current page.</td>
   </tr>
   <tr>
     <td>optoutOfCid</td>

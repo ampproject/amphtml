@@ -27,10 +27,27 @@ export class ServiceAdapter {
 
   /**
    * Returns the page config.
-   * @returns {!PageConfig}
+   * @return {!PageConfig}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
+  }
+
+  /**
+   * Returns the reader ID for the specified service.
+   * @param {string} serviceId
+   * @return {!Promise<string>}
+   */
+  getReaderId(serviceId) {
+    return this.subscriptionService_.getReaderId(serviceId);
+  }
+
+  /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
   }
 
   /**
@@ -66,18 +83,26 @@ export class ServiceAdapter {
 
   /**
    * Reauthorize platforms
-   * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
-  reAuthorizePlatform(subscriptionPlatform) {
-    this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
+  resetPlatforms() {
+    this.subscriptionService_.resetPlatforms();
   }
 
   /**
    * Returns the singleton Dialog instance
-   * @returns {!./dialog.Dialog}
+   * @return {!./dialog.Dialog}
    */
   getDialog() {
     return this.subscriptionService_.getDialog();
+  }
+
+  /**
+   * Returns login platform based on platform selection
+   *
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   */
+  selectPlatformForLogin() {
+    return this.subscriptionService_.selectPlatformForLogin();
   }
 }
 

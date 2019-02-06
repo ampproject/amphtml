@@ -16,37 +16,75 @@
 
 tags: {  # amp-lightbox
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-lightbox"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-lightbox
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-element=amp-lightbox] (AMP4EMAIL)"
+  spec_name: "SCRIPT[custom-element=amp-lightbox] (AMP4EMAIL/AMP4ADS)"
   extension_spec: {
     name: "amp-lightbox"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-lightbox>
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-LIGHTBOX"
   requires_extension: "amp-lightbox"
+  attrs: {
+    name: "animate-in"
+    value_casei: "fade-in"
+    value_casei: "fly-in-bottom"
+    value_casei: "fly-in-top"
+  }
   attrs: { name: "controls" }
   attrs: { name: "from" }
   attrs: { name: "scrollable" }
+  # <amp-bind>
+  attrs: { name: "[open]" }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {   # <amp-lightbox close-button> in AMP4ADS.
+  html_format: AMP4ADS
+  tag_name: "AMP-LIGHTBOX"
+  spec_name: "amp-lightbox [AMP4ADS]"
+  requires_extension: "amp-lightbox"
+  attrs: {
+    name: "animate-in"
+    value_casei: "fade-in"
+    value_casei: "fly-in-bottom"
+    value_casei: "fly-in-top"
+  }
+  attrs: {
+    name: "close-button"
+    # Require `close-button` since we can't rely on the lightbox content
+    # containing a UI affordance to close it, effectively hijacking the
+    # document otherwise.
+    mandatory: true
+  }
+  attrs: { name: "controls" }
+  attrs: { name: "from" }
+
+  # Never allow `scrollable` as it would break layout with close button and
+  # async iframe interaction.
+
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY

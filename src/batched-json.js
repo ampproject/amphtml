@@ -38,7 +38,8 @@ export const UrlReplacementPolicy = {
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
  * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand..
+ * @param {boolean=} opt_refresh Forces refresh of browser cache.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
@@ -46,39 +47,62 @@ export function batchFetchJsonFor(
   ampdoc,
   element,
   opt_expr = '.',
-  opt_urlReplacement = UrlReplacementPolicy.NONE)
+  opt_urlReplacement = UrlReplacementPolicy.NONE,
+  opt_refresh = false)
 {
-  const url = assertHttpsUrl(element.getAttribute('src'), element);
+  assertHttpsUrl(element.getAttribute('src'), element);
+  const xhr = Services.batchedXhrFor(ampdoc.win);
+  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
+      .then(data => xhr.fetchJson(data.xhrUrl, data.fetchOpt))
+      .then(res => res.json())
+      .then(data => {
+        if (data == null) {
+          throw new Error('Response is undefined.');
+        }
+        return getValueForExpr(data, opt_expr || '.');
+      });
+}
+
+/**
+ * Handles url replacement and constructs the FetchInitJsonDef required for a
+ * fetch.
+ * @param {!Element} element
+ * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ * @param {boolean} refresh Forces refresh of browser cache.
+ * @return {!Promise<!FetchRequestDef>}
+ */
+export function requestForBatchFetch(element, replacement, refresh) {
+  const url = element.getAttribute('src');
 
   // Replace vars in URL if desired.
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-  const srcPromise = (opt_urlReplacement >= UrlReplacementPolicy.OPT_IN)
+  const urlReplacements = Services.urlReplacementsForDoc(element);
+  const promise = (replacement >= UrlReplacementPolicy.OPT_IN)
     ? urlReplacements.expandUrlAsync(url)
     : Promise.resolve(url);
 
-  return srcPromise.then(src => {
+  return promise.then(xhrUrl => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
-    if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
+    if (replacement == UrlReplacementPolicy.OPT_IN) {
       const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError('URL variable substitutions in CORS ' +
             'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
             `Please add data-amp-replace="${invalid.join(' ')}" to the ` +
-            `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
+           `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
       }
     }
-    const opts = {};
+    const fetchOpt = {};
     if (element.hasAttribute('credentials')) {
-      opts.credentials = element.getAttribute('credentials');
+      fetchOpt.credentials = element.getAttribute('credentials');
     } else {
-      opts.requireAmpResponseSourceOrigin = false;
+      fetchOpt.requireAmpResponseSourceOrigin = false;
     }
-    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-  }).then(res => res.json()).then(data => {
-    if (data == null) {
-      throw new Error('Response is undefined.');
+    // https://hacks.mozilla.org/2016/03/referrer-and-cache-control-apis-for-fetch/
+    if (refresh) {
+      fetchOpt.cache = 'reload';
     }
-    return getValueForExpr(data, opt_expr || '.');
+    return {'xhrUrl': xhrUrl, 'fetchOpt': fetchOpt};
   });
 }

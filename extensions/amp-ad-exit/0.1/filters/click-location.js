@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {user} from '../../../../src/log';
+import {userAssert} from '../../../../src/log';
 
 export class ClickLocationFilter extends Filter {
   /**
@@ -24,8 +24,8 @@ export class ClickLocationFilter extends Filter {
    * @param {!../amp-ad-exit.AmpAdExit} adExitElement
    */
   constructor(name, spec, adExitElement) {
-    super(name);
-    user().assert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
+    super(name, spec.type);
+    userAssert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
 
     /** @private {number} */
     this.leftBorder_ = spec.left || 0;
@@ -80,11 +80,11 @@ export class ClickLocationFilter extends Filter {
     // viewport function is to get the coordinate based on current viewport.
     // However, the coordinate in click event is based on the iframe.
     this.adExitElement_.getVsync().measure(() => {
-      const win = this.adExitElement_.win;
+      const {win} = this.adExitElement_;
       if (this.relativeTo_) {
         const relativeElement = win.document.querySelector(
             this.relativeTo_);
-        user().assert(relativeElement,
+        userAssert(relativeElement,
             `relativeTo element ${this.relativeTo_} not found.`);
         const rect = relativeElement./*OK*/getBoundingClientRect();
         this.allowedRect_.left = rect.left;
@@ -118,4 +118,3 @@ function isValidClickLocationSpec(spec) {
       (typeof spec.relativeTo === 'undefined' ||
        typeof spec.relativeTo === 'string') ;
 }
-

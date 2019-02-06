@@ -15,13 +15,17 @@
  */
 
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 
 class AmpIzlesene extends AMP.BaseElement {
+  /**
+   *Creates an instance of AmpIzlesene.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
     /** @private {?string}  */
@@ -49,7 +53,7 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
+    this.videoid_ = userAssert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-izlesene> %s',
         this.element);
@@ -61,7 +65,7 @@ class AmpIzlesene extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
     let src = 'https://www.izlesene.com/embedplayer/' + encodeURIComponent(this.videoid_ || '') + '/?';
 
     const params = getDataParamsFromAttributes(this.element);

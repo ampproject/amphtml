@@ -20,7 +20,7 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from '../../messaging/messaging';
-import {ViewerForTesting} from '../viewer-for-testing';
+import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
 
@@ -112,7 +112,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           expect(sendRequestSpy.lastCall.args[2]).to.equal(true);
         });
 
-        it('should not initiate the Touch Handler', () => {
+        it('should not initiate touch handler without capability', () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
@@ -124,11 +124,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           expect(initTouchHandlerStub).to.not.be.called;
         });
 
-        it('should initiate the Touch Handler', () => {
+        it('should initiate touch handler with capability', () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
-          sandbox.stub(viewer, 'hasCapability').returns(true);
+          sandbox.stub(viewer, 'hasCapability').withArgs('swipe').returns(true);
           const initTouchHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
@@ -137,12 +137,55 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             expect(initTouchHandlerStub).to.be.called;
           });
         });
+
+        it('should not initiate keyboard handler without capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          const initKeyboardHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initKeyboardHandler_');
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging);
+
+          expect(initKeyboardHandlerStub).to.not.be.called;
+        });
+
+        it('should initiate keyboard handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('keyboard')
+              .returns(true);
+          const initKeyboardHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initKeyboardHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initKeyboardHandlerStub).to.be.called;
+          });
+        });
+
+        it('should initiate focus handler with capability', () => {
+          sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').withArgs('focus-rect')
+              .returns(true);
+          const initFocusHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initFocusHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+            expect(initFocusHandlerStub).to.be.called;
+          });
+        });
       });
     });
   });
 
-  describe.configure().ifNewChrome().run('Unit Tests for messaging.js', () => {
+  describe.configure().ifChrome().run('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
+    const messagingToken = '32q4pAwei09W845V3j24o8OJIO3fE9l3q49p';
     const requestProcessor = function() {
       return Promise.resolve({});
     };
@@ -165,7 +208,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         postMessageResolve();
       });
 
-      messaging = new Messaging(window, port);
+      messaging = new Messaging(
+          window, port, /* opt_isWebview= */ false, messagingToken);
       messaging.setDefaultHandler(requestProcessor);
     });
 
@@ -189,6 +233,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: 'message',
           requestid: 1,
           type: 's',
@@ -310,6 +355,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: message,
           requestid: 1,
           rsvp: awaitResponse,
@@ -329,6 +375,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         expect(postMessageSpy).to.have.been.calledWith({
           app: '__AMPHTML__',
           data: {},
+          messagingToken,
           name: mName,
           requestid: 1,
           type: 's',
@@ -350,6 +397,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           app: '__AMPHTML__',
           data: null,
           error: errString,
+          messagingToken,
           name: mName,
           requestid: 1,
           type: 's',

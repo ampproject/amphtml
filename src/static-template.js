@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {devAssert} from './log';
 import {map} from './utils/object.js';
 
 let container;
@@ -49,15 +49,15 @@ export function htmlFor(nodeOrDoc) {
  * @return {!Element}
  */
 function html(strings) {
-  dev().assert(strings.length === 1, 'Improper html template tag usage.');
+  devAssert(strings.length === 1, 'Improper html template tag usage.');
   container./*OK*/innerHTML = strings[0];
 
   const el = container.firstElementChild;
-  dev().assert(el, 'No elements in template');
-  dev().assert(!el.nextElementSibling, 'Too many root elements in template');
+  devAssert(el, 'No elements in template');
+  devAssert(!el.nextElementSibling, 'Too many root elements in template');
 
   // Clear to free memory.
-  container./*OK*/innerHTML = '';
+  container.removeChild(el);
 
   return el;
 }
@@ -76,9 +76,9 @@ export function htmlRefs(root) {
 
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
-    const ref = dev().assert(element.getAttribute('ref'), 'Empty ref attr');
+    const ref = devAssert(element.getAttribute('ref'), 'Empty ref attr');
     element.removeAttribute('ref');
-    dev().assert(refs[ref] === undefined, 'Duplicate ref');
+    devAssert(refs[ref] === undefined, 'Duplicate ref');
     refs[ref] = element;
   }
 

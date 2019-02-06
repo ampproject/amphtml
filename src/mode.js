@@ -27,6 +27,9 @@ import {parseQueryString_} from './url-parse-query-string';
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
+ *   runtime: (null|string|undefined),
+ *   a4aId: (null|string|undefined),
+ *   singlePassType: (string|undefined)
  * }}
  */
 export let ModeDef;
@@ -60,6 +63,9 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
+  // TODO(erwinmombay): simplify the logic here
+  const AMP_CONFIG = self.AMP_CONFIG || {};
+
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
   // while IS_DEV is only replaced when `gulp dist` is called without the
@@ -67,13 +73,15 @@ function getMode_(win) {
   const IS_DEV = true;
   const IS_MINIFIED = false;
 
-  const localDevEnabled = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
-  const runningTests = IS_DEV && !!(win.AMP_TEST || win.__karma__);
+  const localDevEnabled = !!AMP_CONFIG.localDev;
+  const runningTests = (!!AMP_CONFIG.test) || (
+    IS_DEV && !!(win.AMP_TEST || win.__karma__));
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
       win.location.originalHash || win.location.hash);
+  const singlePassType = AMP_CONFIG.spt;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -87,7 +95,9 @@ function getMode_(win) {
   // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
-    // Triggers validation
+    // Triggers validation or enable pub level logging. Validation can be
+    // bypassed via #validate=0.
+    // Note that AMP_DEV_MODE flag is used for testing purposes.
     development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
@@ -103,6 +113,7 @@ function getMode_(win) {
     log: hashQuery['log'],
     version,
     rtvVersion,
+    singlePassType,
   };
 }
 

@@ -22,12 +22,12 @@ limitations under the License.
     <td>Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-experiment/">Annotated code example for A/B tests with amp-experiment</a></td>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-experiment/">amp-experiment example</a>.</td>
   </tr>
 </table>
 
@@ -47,16 +47,16 @@ The configuration of the experiments is specified in a JSON object.
 <amp-experiment>
   <script type="application/json">
     {
-      aExperiment: {
-        sticky: true,
-        consentNotificationId: "consent-notif",
-        variants: {
-          treatment1: 12.5,
-          treatment2: 12.5,
-          treatment3: 25.0,
-        },
+      "aExperiment": {
+        "sticky": true,
+        "consentNotificationId": "consent-notif",
+        "variants": {
+          "treatment1": 12.5,
+          "treatment2": 12.5,
+          "treatment3": 25.0
+        }
       },
-      bExperiment: {...}
+      "bExperiment": {...}
     }
   </script>
 </amp-experiment>
@@ -65,13 +65,39 @@ The configuration of the experiments is specified in a JSON object.
 At top level, the JSON is a map of experiment configurations keyed by experiment names. In each experiment, available settings are described in the table below:
 
 <table>
-<tr><th>Name                                                 </th><th>Is required field?                                          </th><th>Description </th></tr>
-<tr><td class="col-thirty"><code>sticky</code>               </td><td class="col-thirty">No, default=<code>true</code>            </td><td>Whether the experiment assignment is sticky for a user or not. </td></tr>
-<tr><td class="col-thirty"><code>consentNotificationId</code></td><td class="col-thirty">No, default=<code>undefined</code>       </td><td>The element ID of the <code>amp-user-notification</code> to be dismissed before a sticky experiment can be conducted. To not block the page rendering, an experiment with this field specified will be skipped if the consent is not provided prior to the current visit. That’s to say, only returning visits with user consent can trigger such an experiment. This setting is only relevant when <code>sticky=true</code>. </td></tr>
-<tr><td class="col-thirty"><code>variants</code>             </td><td class="col-thirty">Yes                                      </td><td>A name-to-percentage map where percentage is a float number in range (0, 100) that indicates the amount of traffic will be allocated to the variant. Variants don’t have to sum up to 100%. In that case, there’ll be a portion of the traffic allocated to a variant named <code>none</code>, which is a reserved keyword that indicates no variant was allocated. </td></tr>
-<tr><td colspan=3><strong>Advanced settings</strong></td></tr>
-<tr><td class="col-thirty"><code>cidScope</code>             </td><td class="col-thirty">No, default=<code>amp-experiment</code>  </td><td>The <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client-id">CID scope</a> for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when <code>sticky=true</code>. </td></tr>
-<tr><td class="col-thirty"><code>group</code>                </td><td class="col-thirty">No, default=<code>{experimentName}</code></td><td>Experiments with the same group name will share the same CID space. Only useful when multiple experiments want to have correlated user grouping. This setting is only relevant when <code>sticky=true</code>. </td></tr>
+  <tr>
+    <th>Name</th>
+    <th>Is required field?</th>
+    <th>Description </th>
+  </tr>
+  <tr>
+    <td><code>sticky</code></td>
+    <td>No, default=<code>true</code></td>
+    <td>Whether the experiment assignment is sticky for a user or not.</td>
+  </tr>
+  <tr>
+    <td><code>consentNotificationId</code></td>
+    <td>No, default=<code>undefined</code></td>
+    <td>The element ID of the <code>amp-user-notification</code> to be dismissed before a sticky experiment can be conducted. To not block the page rendering, an experiment with this field specified will be skipped if the consent is not provided prior to the current visit. That’s to say, only returning visits with user consent can trigger such an experiment. This setting is only relevant when <code>sticky=true</code>.</td>
+  </tr>
+  <tr>
+    <td><code>variants</code></td>
+    <td>Yes</td>
+    <td>A name-to-percentage map where percentage is a float number that is greater than 0 and less than 100 that indicates the amount of traffic will be allocated to the variant. Variants don’t have to sum up to 100%. In that case, there will be a portion of the traffic allocated to a variant named <code>none</code>, which is a reserved keyword that indicates no variant was allocated.</td>
+  </tr>
+  <tr>
+    <td colspan=3><strong>Advanced settings</strong></td>
+  </tr>
+  <tr>
+    <td><code>cidScope</code></td>
+    <td>No, default=<code>amp-experiment</code>
+    </td><td>The <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client-id">CID scope</a> for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when <code>sticky=true</code>.</td>
+  </tr>
+  <tr>
+    <td><code>group</code></td>
+    <td>No, default=<code>{experimentName}</code></td>
+    <td>Experiments with the same group name will share the same CID space. Only useful when multiple experiments want to have correlated user grouping. This setting is only relevant when <code>sticky=true</code>.</td>
+  </tr>
 </table>
 
 Characters used in the experiment name and variant name are restricted to `[a-z,A-Z,0-9,-,_].`  `none` is a reserved keyword and cannot be used.

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-trust';
+import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
-import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Services} from '../services';
-import {computedStyle, getStyle, toggle} from '../style';
-import {dev, user} from '../log';
-import {dict} from '../utils/object';
-import {registerServiceBuilderForDoc} from '../service';
+import {computedStyle, toggle} from '../style';
+import {dev, user, userAssert} from '../log';
+import {
+  getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
+} from '../service';
+import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
@@ -30,8 +31,19 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return getStyle(element, 'display') == 'none'
-      || element.hasAttribute('hidden');
+  return element.hasAttribute('hidden');
+}
+
+/**
+ * @param {!Element} element
+ * @return {?Element}
+ * @visibleForTesting
+ */
+export function getAutofocusElementForShowAction(element) {
+  if (element.hasAttribute('autofocus')) {
+    return element;
+  }
+  return element.querySelector('[autofocus]');
 }
 
 /** @const {string} */
@@ -50,13 +62,18 @@ const PERMITTED_POSITIONS = ['top','bottom','center'];
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    const context = (opt_win)
+      ? opt_win.document.documentElement
+      : ampdoc.getHeadNode();
+
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(context);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -67,9 +84,10 @@ export class StandardActions {
     this.installActions_(this.actions_);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
+    installServiceInEmbedScope(embedWin, 'standard-actions',
+        new StandardActions(ampdoc, embedWin));
   }
 
   /**
@@ -78,6 +96,7 @@ export class StandardActions {
    */
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
+
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
@@ -86,141 +105,128 @@ export class StandardActions {
         'scrollTo', this.handleScrollTo.bind(this));
     actionService.addGlobalMethodHandler(
         'focus', this.handleFocus.bind(this));
+    actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass.bind(this));
   }
 
   /**
    * Handles global `AMP` actions.
-   *
-   * See `amp-actions-and-events.md` for documentation.
-   *
+   * See `amp-actions-and-events.md` for details.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @param {number=} opt_actionIndex
-   * @param {!Array<!./action-impl.ActionInfoDef>=} opt_actionInfos
    * @return {?Promise}
+   * @throws If the invocation method is unrecognized.
    */
-  handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
-    const method = invocation.method;
+  handleAmpTarget(invocation) {
+    // All global `AMP` actions require high trust.
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+    const {node, method, args} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
     switch (method) {
       case 'pushState':
       case 'setState':
-        const actions = /** @type {!Array} */ (dev().assert(opt_actionInfos));
-        const index = dev().assertNumber(opt_actionIndex);
-        // Allow one amp-bind state action per event.
-        for (let i = 0; i < index; i++) {
-          const action = actions[i];
-          if (action.target == 'AMP' && action.method.indexOf('State') >= 0) {
-            user().error('AMP-BIND', 'One state action allowed per event.');
-            return null;
-          }
-        }
-        return this.handleAmpBindAction_(invocation, method == 'pushState');
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
+          userAssert(bind, 'AMP-BIND is not installed.');
+          return bind.invoke(invocation);
+        });
 
       case 'navigateTo':
-        return this.handleAmpNavigateTo_(invocation);
+        return this.handleNavigateTo(invocation);
+
+      case 'closeOrNavigateTo':
+        return this.handleCloseOrNavigateTo(invocation);
+
+      case 'scrollTo':
+        userAssert(args['id'],
+            'AMP.scrollTo must provide element ID');
+        invocation.node = dev().assertElement(
+            getAmpdoc(node).getElementById(args['id']),
+            'scrollTo element ID must exist on page'
+        );
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
-        return this.handleAmpGoBack_(invocation);
+        Services.historyForDoc(this.ampdoc).goBack();
+        return null;
 
       case 'print':
-        return this.handleAmpPrint_(invocation);
+        win.print();
+        return null;
 
       case 'optoutOfCid':
-        return this.handleOptoutOfCid_(invocation);
+        return Services.cidForDoc(this.ampdoc)
+            .then(cid => cid.optOut())
+            .catch(reason => {
+              dev().error(TAG, 'Failed to opt out of CID', reason);
+            });
     }
     throw user().createError('Unknown AMP action ', method);
   }
 
   /**
+   * Handles the `navigateTo` action.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @param {boolean} isPushState
-   * @private
+   * @return {!Promise}
    */
-  handleAmpBindAction_(invocation, isPushState) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
+  handleNavigateTo(invocation) {
+    const {node, caller, method, args} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
+    // Some components have additional constraints on allowing navigation.
+    let permission = Promise.resolve();
+    if (startsWith(caller.tagName, 'AMP-')) {
+      permission = caller.getImpl().then(impl => {
+        if (typeof impl.throwIfCannotNavigate == 'function') {
+          impl.throwIfCannotNavigate();
+        }
+      });
     }
-    return Services.bindForDocOrNull(invocation.target).then(bind => {
-      user().assert(bind, 'AMP-BIND is not installed.');
-
-      const objectString = invocation.args[OBJECT_STRING_ARGS_KEY];
-      if (objectString) {
-        const scope = dict();
-        const event = invocation.event;
-        if (event && event.detail) {
-          scope['event'] = event.detail;
-        }
-        if (isPushState) {
-          return bind.pushStateWithExpression(objectString, scope);
-        } else {
-          return bind.setStateWithExpression(objectString, scope);
-        }
-      } else {
-        user().error('AMP-BIND', 'Please use the object-literal syntax, '
-            + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
-            + '"AMP.setState(foo=\'bar\')".');
-      }
+    return permission.then(() => {
+      Services.navigationForDoc(this.ampdoc).navigateTo(
+          win, args['url'], `AMP.${method}`,
+          {target: args['target'], opener: args['opener']});
+    }, /* onrejected */ e => {
+      user().error(TAG, e.message);
     });
   }
 
   /**
+   * Handles the `handleCloseOrNavigateTo` action.
+   * This action tries to close the requesting window if allowed, otherwise
+   * navigates the window.
+   *
+   * Window can be closed only from top-level documents that have an opener.
+   * Without an opener or if embedded, it will deny the close method.
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
+   * @return {!Promise}
    */
-  handleAmpNavigateTo_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    const node = invocation.target;
+  handleCloseOrNavigateTo(invocation) {
+    const {node} = invocation;
     const win = (node.ownerDocument || node).defaultView;
-    const url = invocation.args['url'];
-    const requestedBy = `AMP.${invocation.method}`;
-    Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
-    return null;
-  }
 
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @private
-   */
-  handleAmpGoBack_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
+    // Don't allow closing if embedded in iframe or does not have an opener or
+    // embedded in a multi-doc shadowDOM case.
+    // Note that browser denies win.close in some of these cases already anyway,
+    // so not every check here is strictly needed but works as a short-circuit.
+    const hasParent = win.parent != win;
+    const canBeClosed = win.opener && this.ampdoc.isSingleDoc() && !hasParent;
+
+    let wasClosed = false;
+    if (canBeClosed) {
+      // Browser may still deny win.close() call, that would be reflected
+      // synchronously in win.closed
+      win.close();
+      wasClosed = win.closed;
     }
-    Services.historyForDoc(this.ampdoc).goBack();
-    return null;
-  }
 
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
-   */
-  handleAmpPrint_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
+    if (!wasClosed) {
+      return this.handleNavigateTo(invocation);
     }
-    const node = invocation.target;
-    const win = (node.ownerDocument || node).defaultView;
-    win.print();
-    return null;
-  }
 
-  /**
-   * Opts the user out of cid issuance.
-   * @private
-   */
-  handleOptoutOfCid_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-    return Services.cidForDoc(this.ampdoc)
-        .then(cid => cid.optOut())
-        .catch(reason => {
-          dev().error(TAG, 'Failed to opt out of Cid', reason);
-        });
+    return Promise.resolve();
   }
-
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to
    * it with the given animation duraiton
@@ -231,7 +237,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const node = dev().assertElement(invocation.target);
+    const node = dev().assertElement(invocation.node);
 
     // Duration for scroll animation
     const duration = invocation.args
@@ -246,9 +252,8 @@ export class StandardActions {
       invocation.args['position'] : 'top';
 
     // Animate the scroll
-    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
-
-    return null;
+    // Should return a promise instead of null
+    return this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
   }
 
   /**
@@ -260,7 +265,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const node = dev().assertElement(invocation.target);
+    const node = dev().assertElement(invocation.node);
 
     // Set focus
     tryFocus(node);
@@ -275,7 +280,7 @@ export class StandardActions {
    * @return {?Promise}
    */
   handleHide(invocation) {
-    const target = dev().assertElement(invocation.target);
+    const target = dev().assertElement(invocation.node);
 
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('i-amphtml-element')) {
@@ -294,8 +299,8 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    */
-  handleShow(invocation) {
-    const target = dev().assertElement(invocation.target);
+  handleShow({node}) {
+    const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
@@ -318,16 +323,34 @@ export class StandardActions {
       }
     });
 
-    this.resources_.mutateElement(target, () => {
-      if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/expand();
-      } else {
-        toggle(target, true);
-        target.removeAttribute('hidden');
-      }
-    });
+    const autofocusElOrNull = getAutofocusElementForShowAction(target);
+
+    // iOS only honors focus in sync operations.
+    if (autofocusElOrNull && Services.platformFor(ownerWindow).isIos()) {
+      this.handleShowSync_(target, autofocusElOrNull);
+    } else {
+      this.resources_.mutateElement(target, () => {
+        this.handleShowSync_(target, autofocusElOrNull);
+      });
+    }
 
     return null;
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {?Element} autofocusElOrNull
+   * @private
+   */
+  handleShowSync_(target, autofocusElOrNull) {
+    if (target.classList.contains('i-amphtml-element')) {
+      target./*OK*/expand();
+    } else {
+      toggle(target, true);
+    }
+    if (autofocusElOrNull) {
+      tryFocus(autofocusElOrNull);
+    }
   }
 
   /**
@@ -336,11 +359,40 @@ export class StandardActions {
    * @return {?Promise}
    */
   handleToggle(invocation) {
-    if (isShowable(dev().assertElement(invocation.target))) {
+    if (isShowable(dev().assertElement(invocation.node))) {
       return this.handleShow(invocation);
     } else {
       return this.handleHide(invocation);
     }
+  }
+
+  /**
+   * Handles "toggleClass" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   */
+  handleToggleClass(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+    const className = user().assertString(args['class'],
+        "Argument 'class' must be a string.");
+
+    this.resources_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(args['force'],
+            "Optional argument 'force' must be a boolean.");
+        target.classList.toggle(className, shouldForce);
+      } else {
+        target.classList.toggle(className);
+      }
+    });
+
+    return null;
   }
 }
 

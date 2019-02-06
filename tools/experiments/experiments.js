@@ -16,7 +16,8 @@
 
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {Deferred} from '../../src/utils/promise';
+import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -29,7 +30,8 @@ initLogConstructor();
 setReportError(reportError);
 
 const COOKIE_MAX_AGE_DAYS = 180; // 6 month
-
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
 /**
  * @typedef {{
  *   id: string,
@@ -40,12 +42,21 @@ const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 let ExperimentDef;
 
 /**
- * This experiment is special because it uses a different mechanism that is
+ * These experiments are special because they use a different mechanism that is
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
+const RC_EXPERIMENT_ID = 'rc-channel';
 
+/**
+ * The different states of the AMP_CANARY cookie.
+ */
+const AMP_CANARY_COOKIE = {
+  DISABLED: '0',
+  CANARY: '1',
+  RC: '2',
+};
 
 /** @const {!Array<!ExperimentDef>} */
 const EXPERIMENTS = [
@@ -54,7 +65,14 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+        'contributing/release-schedule.md#amp-dev-channel',
+  },
+  // Release Candidate (RC Channel)
+  {
+    id: RC_EXPERIMENT_ID,
+    name: 'AMP RC Channel (more info)',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
   {
     id: 'alp',
@@ -64,7 +82,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype',
+    name: 'AMP Access iframe prototype (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13287',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
@@ -81,12 +99,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
     id: 'amp-auto-ads',
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
@@ -97,6 +109,12 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads AdSense Holdout',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
+  },
+  {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
   },
   {
     id: 'amp-google-vrview-image',
@@ -135,11 +153,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-gallery',
-    name: 'Enables a new lightbox experience via the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
@@ -151,11 +164,25 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'ios-embed-wrapper',
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
+    id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root (launched)',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+      ' shadow root',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
+  },
+  {
+    id: 'ios-embed-sd-notransfer',
+    name: 'Disables transfer mode for the new iOS embedded viewport model',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
     id: 'chunked-amp',
@@ -168,16 +195,9 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
@@ -222,42 +242,32 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-story',
-    name: 'Visual storytelling in AMP',
+    name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'amp-story-scaling',
-    name: 'Scale pages dynamically in amp-story by default',
-    spec: 'https://github.com/ampproject/amphtml/issues/12902',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
-    id: 'amp-date-picker',
-    name: 'Enables the amp-date-picker extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/6469',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
-  },
-  {
-    id: 'url-replacement-v2',
-    name: 'new parsing engine for url variables',
-    spec: 'https://github.com/ampproject/amphtml/issues/12119',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+    id: 'amp-story-responsive-units',
+    name: 'Scale pages in amp-story by rewriting responsive units',
+    spec: 'https://github.com/ampproject/amphtml/issues/15955',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
-  },
-  {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
   },
   {
     id: 'amp-live-list-sorting',
@@ -271,9 +281,21 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
+  },
+  {
     id: 'no-sync-xhr-in-ads',
     name: 'Disables syncronous XHR requests in 3p iframes.',
     spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
     cleanupIssue: 'TODO',
   },
   {
@@ -286,30 +308,127 @@ const EXPERIMENTS = [
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-fx-fade-in',
-    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    id: 'layers',
+    name: 'Enables the new Layers position/measurement system',
+    spec: 'https://github.com/ampproject/amphtml/issues/3434',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'amp-fx-fade-in-scroll',
-    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/14150',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/11575',
+    id: 'amp-list-diffing',
+    name: 'Enables DOM diffing of amp-list renders via set-dom',
+    spec: 'https://github.com/ampproject/amphtml/pull/17000',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
+  },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-chrome-scroll-snap',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
+  {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
+  },
+  {
+    id: 'linker-form',
+    name: 'Enables form support in linker',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
+  },
+  {
+    id: 'fie-metadata-extension',
+    name: 'Use version supporting extension field in amp-ad-metadata.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
+  {
+    id: 'amp-script',
+    name: 'Enables <amp-script>.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
+  },
+  {
+    id: 'amp-list-resizable-children',
+    name: 'Experiment for allowing amp-list to resize when its children resize',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'scroll-height-minheight',
+    name: 'Forces min-height on body (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-list-viewport-resize',
+    name: 'Enables amp-list to resize on viewport resize',
+    spec: 'https://github.com/ampproject/amphtml/issues/19945',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
+  },
+  {
+    id: 'amp-auto-lightbox',
+    name: 'Automatically detects images to place in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
 ];
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+    devAssert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
         ' have a `cleanupIssue` field.');
   });
 }
@@ -426,15 +545,35 @@ function updateExperimentRow(experiment) {
  */
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '1';
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
+  } else if (id == RC_EXPERIMENT_ID) {
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
   }
-  return isExperimentOn(window, id);
+  return isExperimentOn(window, /*OK*/id);
 }
 
+/**
+ * Opts in to / out of the "canary" or "rc" runtime types by setting the
+ * AMP_CANARY cookie.
+ * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC}
+ */
+function setAmpCanaryCookie_(cookieState) {
+  const validUntil = (cookieState != AMP_CANARY_COOKIE.DISABLED) ?
+    (Date.now() + COOKIE_MAX_AGE_MS) : 0;
+  const cookieOptions = {
+    // Set explicit domain, so the cookie gets sent to sub domains.
+    domain: location.hostname,
+    allowOnProxyOrigin: true,
+  };
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
+  // Reflect default experiment state.
+  self.location.reload();
+}
 
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
@@ -447,16 +586,11 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = Date.now() +
-          COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY',
-          (on ? '1' : '0'), (on ? validUntil : 0), {
-            // Set explicit domain, so the cookie gets send to sub domains.
-            domain: location.hostname,
-            allowOnProxyOrigin: true,
-          });
-      // Reflect default experiment state.
-      self.location.reload();
+      setAmpCanaryCookie_(
+          on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED);
+    } else if (id == RC_EXPERIMENT_ID) {
+      setAmpCanaryCookie_(
+          on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED);
     } else {
       toggleExperiment(window, id, on);
     }
@@ -471,11 +605,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
-  const confirmButton = dev().assert(
+  const container = devAssert(document.getElementById('popup-container'));
+  const messageElement = devAssert(document.getElementById('popup-message'));
+  const confirmButton = devAssert(
       document.getElementById('popup-button-ok'));
-  const cancelButton = dev().assert(
+  const cancelButton = devAssert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
@@ -496,22 +630,23 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
- * user has (depends on whether they opted into canary), so that
+ * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
  */
 function getAmpConfig() {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', () => {
-      resolve(xhr.responseText);
-    });
-    xhr.addEventListener('error', () => {
-      reject(new Error(xhr.statusText));
-    });
-    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
-    xhr.open('GET', '/v0.js?' + Math.random(), true);
-    xhr.send(null);
-  }).then(text => {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+  return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
     if (!match) {
       throw new Error('Can\'t find AMP_CONFIG in: ' + text);

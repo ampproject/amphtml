@@ -119,6 +119,70 @@ Example:
 { "showNotification": true }
 ```
 
+##### data-show-if-geo
+
+When specified `amp-user-notification` will only trigger if an `amp-geo` country group for matches one of the comma delimited list of country groups.
+
+Example:
+
+In this example if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group.  `nafta` is in the `data-show-if-geo` attribute so the notification will display.
+
+```html
+<amp-geo layout=nodisplay>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+      "nafta": [ "ca", "mx", "us" ],
+      "waldo": [ "unknown" ],
+      "anz": [ "au", "nz" ]
+      }
+    }
+  </script>
+</amp-geo>
+
+<amp-user-notification
+    layout=nodisplay
+    id="amp-user-notification1"
+    data-show-if-geo="nafta, anz"
+    data-dismiss-href="https://example.com/api/echo/post">
+    This notice is only shown in Canada, Mexico and USA.
+    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+</amp-user-notification>
+```
+
+##### data-show-if-not-geo
+
+This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
+
+Example: 
+
+In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the  `whereIsWaldo` group) would trigger the notifcation.
+
+```html
+<amp-geo layout=nodisplay>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+      "nafta": [ "ca", "mx", "us" ],
+      "whereIsWaldo": [ "unknown" ],
+      "anz": [ "au", "nz" ]
+      }
+    }
+  </script>
+</amp-geo>
+
+<amp-user-notification
+    layout=nodisplay
+    id="amp-user-notification1"
+    data-show-if-not-geo="anz, nafta"
+    data-dismiss-href="https://example.com/api/echo/post">
+    This notice is only shown in Canada, Mexico and USA.
+    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+</amp-user-notification>
+```
+
+Only one `data-show-if-*` attribute may be set.
+
 ##### data-dismiss-href (optional)
 
 When specified, AMP will make a CORS POST request to the specified URL transmitting the `elementId` and `ampUserId` only when the user has explicitly agreed.
