@@ -847,6 +847,10 @@ export const adConfig = {
 
   tracdelight: {
     prefetch: 'https://scripts.tracdelight.com/amp.js',
+    preconnect: [
+      'https://scripts.tracdelight.com',
+    ],
+    renderStartImplemented: true,
   },
 
   triplelift: {},

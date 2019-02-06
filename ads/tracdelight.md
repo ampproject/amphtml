@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <amp-ad height="232" width="640"
         type="tracdelight"
-        data-mode="inline"
+        data-mode="iframe"
         data-widget_id="[widget-id]"
         data-access_key="[access-key]">
 </amp-ad>
@@ -29,10 +29,16 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see [ad network documentation](http://docs.tracdelight.com/).
 
-Supported parameters:
+Required parameters:
+- data-widget_id: the id of the widget
+- data-access_key: the access key
 
-- data-widget_id — the id of the widget
-- data-access_key — the access key
-- data-mode — how to embed the widget. Possible values are "iframe" or "inline"
+Optional parameters
+- data-mode: how to embed the widget. Possible values are "iframe" or "inline" (default: "iframe")
+
+
+## Support
+
+If you have any questions, please refer to your contact at tracdelight or contact support@tracdelight.com.

@@ -21,10 +21,18 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function tracdelight(global, data) {
-  validateData(data, [], ['widget_id', 'access_key']);
-  /*eslint "google-camelcase/google-camelcase": 0*/
-  global.widget_id = data.widget_id;
-  global.access_key = data.access_key;
-  global.mode = data.mode;
+
+  const mandatoryFields = [
+    'widget_id',
+    'access_key',
+  ];
+
+  const optionalFields = [
+    'mode',
+  ];
+
+  validateData(data, mandatoryFields, optionalFields);
+
+  global.td_data = data;
   writeScript(global, 'https://scripts.tracdelight.com/amp.js');
 }
