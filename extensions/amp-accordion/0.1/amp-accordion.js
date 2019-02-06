@@ -328,7 +328,7 @@ class AmpAccordion extends AMP.BaseElement {
     const sectionChild = section.children[1];
 
     return this.measureMutateElement(() => {
-      sectionWidth = section.offsetWidth;
+      sectionWidth = section./*OK*/offsetWidth;
     }, () => {
       // We set position and opacity to avoid a FOUC while measuring height.
       // We set the width for layouts where the height depends on the width.
@@ -394,7 +394,7 @@ class AmpAccordion extends AMP.BaseElement {
     let sectionHeight;
     let headerHeight;
     let duration;
-    const sectionHeader = section.children[0];
+    const sectionHeader = section.firstElementChild;
 
     return this.measureMutateElement(() => {
       sectionHeight = section./*OK*/offsetHeight;
