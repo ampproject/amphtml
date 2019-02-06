@@ -143,6 +143,12 @@ describes.fakeWin('ssr-template-helper', {
             .to.have.been.calledWith({}, '<div>some template</div>');
       });
 
+      it('should throw error if html template is not defined', () => {
+        allowConsoleError(() => { expect(() => {
+          ssrTemplateHelper.renderTemplate({}, {html: null});
+        }).to.throw(/Server side html response must be defined/); });
+      });
+
       it('should render template ', () => {
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
         ssrTemplateHelper.renderTemplate(

@@ -21,6 +21,7 @@ import {
   verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
 import {isArray} from './types';
+import {userAssert} from './log';
 
 /**
  * @typedef {{
@@ -102,10 +103,11 @@ export class SsrTemplateHelper {
    */
   renderTemplate(element, data) {
     let renderTemplatePromise;
-    if (this.isSupported()
-        && data['html'] && typeof data['html'] === 'string') {
-      renderTemplatePromise = this.templates_
-          .findAndSetHtmlForTemplate(element, /** @type {string} */ (data['html']));
+    if (this.isSupported()) {
+      userAssert(typeof data['html'] === 'string',
+          'Server side html response must be defined');
+      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
+          element, /** @type {string} */ (data['html']));
     } else if (isArray(data)) {
       renderTemplatePromise = this.templates_
           .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
