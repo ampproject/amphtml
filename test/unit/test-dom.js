@@ -34,6 +34,27 @@ describes.sandboxed('DOM', {}, env => {
     sandbox.restore();
   });
 
+  describe('scopeSelector', () => {
+
+    const {scopeSelectorForTesting: scopeSelector} = dom;
+
+    it('concats simple', () => {
+      expect(scopeSelector('.i-amphtml-scoped', 'div'))
+          .to.equal('.i-amphtml-scoped div');
+    });
+
+    it('concats multiple selectors (2)', () => {
+      expect(scopeSelector(':scope', 'div,ul'))
+          .to.equal(':scope div,:scope ul');
+    });
+
+    it('concats multiple selectors (4)', () => {
+      expect(scopeSelector('div >', 'div,ul,ol,section'))
+          .to.equal('div > div,div > ul,div > ol,div > section');
+    });
+
+  });
+
   it('should remove all children', () => {
     const element = document.createElement('div');
     element.appendChild(document.createElement('div'));
