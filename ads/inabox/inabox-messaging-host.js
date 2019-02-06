@@ -24,7 +24,6 @@ import {PositionObserver} from './position-observer';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
-import {layoutRectFromDomRect} from '../../src/layout-rect';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -155,8 +154,7 @@ export class InaboxMessagingHost {
    */
   handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
-    const targetRect =
-        layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+    const targetRect = this.positionObserver_.getTargetRect(iframe);
     this.sendPosition_(request, source, origin, dict({
       'viewportRect': viewportRect,
       'targetRect': targetRect,
