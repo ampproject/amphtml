@@ -34,6 +34,18 @@ function isShowable(element) {
   return element.hasAttribute('hidden');
 }
 
+/**
+ * @param {!Element} element
+ * @return {?Element}
+ * @visibleForTesting
+ */
+export function getAutofocusElementForShowAction(element) {
+  if (element.hasAttribute('autofocus')) {
+    return element;
+  }
+  return element.querySelector('[autofocus]');
+}
+
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
 
@@ -287,8 +299,8 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    */
-  handleShow(invocation) {
-    const target = dev().assertElement(invocation.node);
+  handleShow({node}) {
+    const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
@@ -311,15 +323,34 @@ export class StandardActions {
       }
     });
 
-    this.resources_.mutateElement(target, () => {
-      if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/expand();
-      } else {
-        toggle(target, true);
-      }
-    });
+    const autofocusElOrNull = getAutofocusElementForShowAction(target);
+
+    // iOS only honors focus in sync operations.
+    if (autofocusElOrNull && Services.platformFor(ownerWindow).isIos()) {
+      this.handleShowSync_(target, autofocusElOrNull);
+    } else {
+      this.resources_.mutateElement(target, () => {
+        this.handleShowSync_(target, autofocusElOrNull);
+      });
+    }
 
     return null;
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {?Element} autofocusElOrNull
+   * @private
+   */
+  handleShowSync_(target, autofocusElOrNull) {
+    if (target.classList.contains('i-amphtml-element')) {
+      target./*OK*/expand();
+    } else {
+      toggle(target, true);
+    }
+    if (autofocusElOrNull) {
+      tryFocus(autofocusElOrNull);
+    }
   }
 
   /**
