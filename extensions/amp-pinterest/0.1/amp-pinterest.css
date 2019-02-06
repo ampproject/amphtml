@@ -145,7 +145,6 @@
   border-left: 7px solid transparent;
   bottom: -4px;
   left: 4px;
-  content: "";
   position: absolute;
 }
 
@@ -171,7 +170,6 @@
   border-left: 7px solid transparent;
   bottom: -4px;
   left: 7px;
-  content: "";
   position: absolute;
 }
 
