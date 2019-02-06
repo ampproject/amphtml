@@ -141,7 +141,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         topWindowObservable.fire();
       };
 
-      return binding.setUpNativeListener().then(() => {
+      return binding.listenForPositionSameDomain().then(() => {
         testPositionCallback();
       });
 

@@ -161,7 +161,7 @@ export class ViewportBindingInabox {
   connect() {
     if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
         canInspectWindow(this.win.top)) {
-      this.listenForPositionSameDomain_();
+      this.listenForPositionSameDomain();
     } else {
       this.listenForPosition_();
     }
@@ -177,13 +177,8 @@ export class ViewportBindingInabox {
         });
   }
 
-  /** @private */
-  listenForPositionSameDomain_() {
-    this.setUpNativeListener();
-  }
-
   /** @visibleForTesting */
-  setUpNativeListener() {
+  listenForPositionSameDomain() {
     // Set up listener but only after the resources service is properly
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
@@ -328,7 +323,7 @@ export class ViewportBindingInabox {
     if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
         canInspectWindow(this.win.top)) {
       // Set up the listener if we haven't already.
-      return this.setUpNativeListener().then(() =>
+      return this.listenForPositionSameDomain().then(() =>
         this.topWindowPositionObserver_
             .getTargetRect(this.win.frameElement));
     }
