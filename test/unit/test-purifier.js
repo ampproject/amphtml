@@ -234,6 +234,11 @@ function runSanitizerTests() {
       expectEqualNodeLists(actual, expected);
     });
 
+    it('should allow arbitrary protocols', () => {
+      expect(purify('<a href="whatsapp://send?example></a>"')).to.be.equal(
+        '<a href="whatsapp://send?example></a>"');
+    });
+
     it('should output "rel" attribute', () => {
       // Can't use string equality since DOMPurify will reorder attributes.
       const actual = serialize(
