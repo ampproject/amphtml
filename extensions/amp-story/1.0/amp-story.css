@@ -321,6 +321,12 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
+/** Ensure clicks inside anchor tags are handled by the tooltip. */
+amp-story-grid-layer a * {
+  pointer-events: none;
+  cursor: default;
+}
+
 /** Apply click shield on embedded components on initial load. */
 amp-story-grid-layer amp-twitter::after {
   content: "" !important;
