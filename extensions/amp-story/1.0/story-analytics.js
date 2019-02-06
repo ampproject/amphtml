@@ -16,11 +16,12 @@
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
+import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
 /** @enum {string} */
-const Events = {
+export const StoryEventType = {
   PAGE_VISIBLE: 'story-page-visible',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
@@ -38,9 +39,28 @@ export const AdvancementMode = {
 };
 
 /**
+ * Util function to retrieve the analytics service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {!StoryAnalyticsService}
+ */
+export const getAnalyticsService = (win, el) => {
+  let service = Services.storyAnalyticsService(win);
+
+  if (!service) {
+    service = new StoryAnalyticsService(win, el);
+    registerServiceBuilder(win, 'story-analytics', () => service);
+  }
+
+  return service;
+};
+
+/**
  * Intermediate handler for amp-story specific analytics.
  */
-export class AmpStoryAnalytics {
+export class StoryAnalyticsService {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -59,13 +79,13 @@ export class AmpStoryAnalytics {
   onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        this.triggerEvent_(Events.PAGE_VISIBLE);
+        this.triggerEvent_(StoryEventType.PAGE_VISIBLE);
         break;
       case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent_(Events.BOOKEND_ENTER);
+        this.triggerEvent_(StoryEventType.BOOKEND_ENTER);
         break;
       case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent_(Events.BOOKEND_EXIT);
+        this.triggerEvent_(StoryEventType.BOOKEND_EXIT);
         break;
     }
   }
@@ -74,12 +94,13 @@ export class AmpStoryAnalytics {
    * @param {boolean} isMuted
    */
   onMutedStateChange(isMuted) {
-    const event = isMuted ? Events.STORY_MUTED : Events.STORY_UNMUTED;
+    const event = isMuted ? StoryEventType.STORY_MUTED :
+      StoryEventType.STORY_UNMUTED;
     this.triggerEvent_(event);
   }
 
   /**
-   * @param {string} eventType
+   * @param {!StoryEventType} eventType
    * @private
    */
   triggerEvent_(eventType) {
