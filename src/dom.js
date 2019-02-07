@@ -293,6 +293,37 @@ export function closestBySelector(element, selector) {
 }
 
 /**
+ * Finds all ancestor elements that satisfy predicate.
+ * @param {!Element} child
+ * @param {function(!Element):boolean} predicate
+ * @return {!Array<!Element>}
+ */
+export function ancestorElements(child, predicate) {
+  const ancestors = [];
+  for (let ancestor = child.parentElement; ancestor;
+    ancestor = ancestor.parentElement) {
+    if (predicate(ancestor)) {
+      ancestors.push(ancestor);
+    }
+  }
+  return ancestors;
+}
+
+
+/**
+ * Finds all ancestor elements that has the specified tag name.
+ * @param {!Element} child
+ * @param {string} tagName
+ * @return {!Array<!Element>}
+ */
+export function ancestorElementsByTag(child, tagName) {
+  tagName = tagName.toUpperCase();
+  return ancestorElements(child, el => {
+    return el.tagName == tagName;
+  });
+}
+
+/**
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
  * @param  {string} selector The selector to check against
@@ -612,38 +643,6 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
   } while ((currentElement = currentElement.parentNode) &&
             currentElement != opt_stopNode);
   return false;
-}
-
-
-/**
- * Finds all ancestor elements that satisfy predicate.
- * @param {!Element} child
- * @param {function(!Element):boolean} predicate
- * @return {!Array<!Element>}
- */
-export function ancestorElements(child, predicate) {
-  const ancestors = [];
-  for (let ancestor = child.parentElement; ancestor;
-    ancestor = ancestor.parentElement) {
-    if (predicate(ancestor)) {
-      ancestors.push(ancestor);
-    }
-  }
-  return ancestors;
-}
-
-
-/**
- * Finds all ancestor elements that has the specified tag name.
- * @param {!Element} child
- * @param {string} tagName
- * @return {!Array<!Element>}
- */
-export function ancestorElementsByTag(child, tagName) {
-  tagName = tagName.toUpperCase();
-  return ancestorElements(child, el => {
-    return el.tagName == tagName;
-  });
 }
 
 /**
