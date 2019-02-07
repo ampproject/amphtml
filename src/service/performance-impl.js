@@ -113,6 +113,7 @@ export class Performance {
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPaintTimingObserver_();
+    this.registerEventTimingObserver_();
   }
 
   /**
@@ -211,6 +212,38 @@ export class Performance {
     this.win.performance.getEntriesByType('paint').forEach(processEntry);
 
     observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Reports first input delay.
+   * See https://wicg.github.io/event-timing/
+   */
+  registerEventTimingObserver_() {
+    if (!this.win.PerformanceEventTiming) {
+      return;
+    }
+    // Chrome doesn't implement the buffered flag for PerformanceObserver.
+    // That means we need to read existing entries and maintain state
+    // as to whether we have reported a value yet, since in the future it may
+    // be reported twice.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    let recordedFirstInput = false;
+    const processEntry = entry => {
+      if (recordedFirstInput) {
+        return;
+      }
+      this.tick('fid', entry.processingStart - entry.startTime);
+      recordedFirstInput = true;
+    };
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(processEntry);
+      this.flush();
+    });
+    // Programmatically read once as currently PerformanceObserver does not
+    // report past entries as of Chrome 61.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
+    observer.observe({entryTypes: ['firstInput']});
   }
 
   /**
