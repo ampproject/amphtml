@@ -85,7 +85,8 @@ export class AmpActionMacro extends AMP.BaseElement {
   validateDefinedArgs_(args) {
     for (const arg in args) {
       userAssert(this.arguments_.includes(arg),
-          'Variable argument name %s is not used', arg);
+          'Variable argument name "%s" is not defined in %s',
+          arg, this.element);
     }
   }
 

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import '../amp-action-macro';
+import {
+  ActionInvocation,
+} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
+import {AmpActionMacro} from '../amp-action-macro';
+import {Services} from '../../../../src/services';
 import {
   toggleExperiment,
 } from '../../../../src/experiments';
 
 describes.realWin('amp-action-macro', {
   amp: {
-    runtimeOn: true,
+    ampdoc: 'single',
     extensions: ['amp-action-macro'],
   },
 }, env => {
@@ -58,6 +63,50 @@ describes.realWin('amp-action-macro', {
       return newActionMacro().catch(err => {
         expect(err.message).to.include('Experiment is off');
       });
+    });
+  });
+
+  describe('registered action', () => {
+    let macro;
+    beforeEach(() => {
+      toggleExperiment(win, 'amp-action-macro', true);
+      const macroElement = doc.createElement('amp-action-macro');
+      macroElement.setAttribute('action', 'target.execute(index=x,index=y)');
+      macroElement.setAttribute('arguments', 'x,y');
+      macroElement.setAttribute('id', 'amp-action-id');
+      doc.body.appendChild(macroElement);
+      macro = new AmpActionMacro(macroElement);
+    });
+
+    it('should register execute action', () => {
+      const registerAction = sandbox.stub(macro, 'registerAction');
+      macro.buildCallback();
+      expect(registerAction).to.have.been.called;
+    });
+
+    it('should validate caller argument vars against defined arguments',
+        () => {
+          const button = doc.createElement('button');
+          // Given the caller is called with a invalid argument alias 'z'.
+          const callerAction = new ActionInvocation(macro, 'execute',
+              {z: 1}, button, button, {}, ActionTrust.HIGH, 'tap',
+              'AMP-ACTION-MACRO');
+          expect(() => macro.execute_(callerAction)).to.throw(
+              /Variable argument name "z" is not defined/
+          );
+        });
+
+    it('should trigger macro action', () => {
+      const actions = {trigger: sandbox.spy()};
+      sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+      const button = doc.createElement('button');
+      // Given the caller was called with a valid defined argument alias
+      // 'x'.
+      const callerAction = new ActionInvocation(macro, 'execute', {x: 1},
+          button, button, {}, ActionTrust.HIGH, 'tap', 'AMP-ACTION-MACRO');
+      macro.buildCallback();
+      macro.execute_(callerAction);
+      expect(actions.trigger).to.have.been.called;
     });
   });
 
