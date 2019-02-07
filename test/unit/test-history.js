@@ -691,19 +691,23 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
       capabilityStub.withArgs('fullReplaceHistory').returns(true);
       viewer.sendMessageAwaitResponse
           .withArgs('replaceHistory',
-              {stackIndex: 123, title: 'title', url: '/page'})
+              {stackIndex: 123, title: 'title', url: '/page', fragment: 'fr2'})
           .returns(Promise.resolve(
-              {stackIndex: 123, title: 'different', url: '/otherpage'}));
+              {stackIndex: 123, title: 'different',
+                url: '/otherpage', fragment: 'fr2'}));
 
       return history.replace(
-          {stackIndex: 123, title: 'title', url: '/page'}).then(state => {
-        expect(state).to.deep.equal(
-            {stackIndex: 123, title: 'different', url: '/otherpage'});
+          {stackIndex: 123, title: 'title', url: '/page#fr1', fragment: 'fr2'})
+          .then(state => {
+            expect(state).to.deep.equal(
+                {fragment: 'fr2', stackIndex: 123, title: 'different',
+                  url: '/otherpage'});
 
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch(
-            {stackIndex: 123, title: 'different', url: '/otherpage'});
-      });
+            expect(onStateUpdated).to.be.calledOnce;
+            expect(onStateUpdated).to.be.calledWithMatch(
+                {fragment: 'fr2', stackIndex: 123, title: 'different',
+                  url: '/otherpage'});
+          });
     });
 
     it('does not support full URL replacement', () => {
