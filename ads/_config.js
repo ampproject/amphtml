@@ -297,6 +297,10 @@ export const adConfig = {
     ],
   },
 
+  'aniview': {
+    renderStartImplemented: true,
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
