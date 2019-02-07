@@ -236,7 +236,7 @@ function runSanitizerTests() {
 
     it('should allow arbitrary protocols', () => {
       expect(purify('<a href="foo://bar">link</a>')).to.be.equal(
-        '<a target="_top" href="foo://bar">link</a>');
+          '<a target="_top" href="foo://bar">link</a>');
     });
 
     it('should output "rel" attribute', () => {
