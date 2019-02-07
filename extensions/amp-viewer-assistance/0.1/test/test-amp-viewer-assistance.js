@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {AmpViewerAssistance} from '../amp-viewer-assistance';
 import {mockServiceForDoc} from '../../../../testing/test-helper';
