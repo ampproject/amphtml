@@ -310,7 +310,8 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const target = closestAncestorElementByTag(dev().assertElement(e.target), 'A');
+    const target =
+    closestAncestorElementByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       return;
     }
@@ -599,7 +600,8 @@ export class Navigation {
  * @param {!Event} e
  */
 function maybeExpandUrlParams(ampdoc, e) {
-  const target = closestAncestorElementByTag(dev().assertElement(e.target), 'A');
+  const target =
+    closestAncestorElementByTag(dev().assertElement(e.target), 'A');
   if (!target || !target.href) {
     // Not a click on a link.
     return;

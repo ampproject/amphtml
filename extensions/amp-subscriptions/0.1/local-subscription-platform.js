@@ -119,8 +119,9 @@ export class LocalSubscriptionPlatform {
    */
   initializeListeners_() {
     this.rootNode_.addEventListener('click', e => {
-      const element = closestAncestorElementBySelector(dev().assertElement(e.target),
-          '[subscriptions-action]');
+      const element =
+        closestAncestorElementBySelector(dev().assertElement(e.target),
+            '[subscriptions-action]');
       this.handleClick_(element);
     });
   }

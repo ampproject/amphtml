@@ -264,17 +264,26 @@ describes.sandboxed('DOM', {}, env => {
     child.className = 'child';
     element.appendChild(child);
 
-    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(child);
-    expect(dom.closestAncestorElementBySelector(child, '.child')).to.equal(child);
-    expect(dom.closestAncestorElementBySelector(child, '#child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '.child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '#child'))
+        .to.equal(child);
 
-    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(element);
-    expect(dom.closestAncestorElementBySelector(child, '.element')).to.equal(element);
-    expect(dom.closestAncestorElementBySelector(child, '#element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '.element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '#element'))
+        .to.equal(element);
 
-    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(parent);
-    expect(dom.closestAncestorElementBySelector(child, '.parent')).to.equal(parent);
-    expect(dom.closestAncestorElementBySelector(child, '#parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '.parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '#parent'))
+        .to.equal(parent);
   });
 
   it('elementByTag should find first match', () => {

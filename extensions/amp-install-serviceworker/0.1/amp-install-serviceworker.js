@@ -267,7 +267,8 @@ class UrlRewriter_ {
     if (event.defaultPrevented) {
       return;
     }
-    const target = closestAncestorElementByTag(dev().assertElement(event.target), 'A');
+    const target =
+      closestAncestorElementByTag(dev().assertElement(event.target), 'A');
     if (!target || !target.href) {
       return;
     }

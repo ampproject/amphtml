@@ -277,7 +277,8 @@ export function closestAncestorElementByTag(element, tagName) {
 }
 
 /**
- * Finds the closest ancestor element with the specified selector from this element
+ * Finds the closest ancestor element with the specified selector from this
+ * element.
  * @param {!Element} element
  * @param {string} selector
  * @return {?Element} closest ancestor if found.

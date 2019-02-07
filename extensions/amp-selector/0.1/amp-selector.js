@@ -20,7 +20,8 @@ import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
-import {closestAncestorElementBySelector, isRTL, tryFocus} from '../../../src/dom';
+import {closestAncestorElementBySelector, isRTL, tryFocus}
+  from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';

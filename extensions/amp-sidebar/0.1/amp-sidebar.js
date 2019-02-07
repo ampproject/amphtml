@@ -185,7 +185,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('close', this.close_.bind(this));
 
     element.addEventListener('click', e => {
-      const target = closestAncestorElementByTag(dev().assertElement(e.target), 'A');
+      const target =
+        closestAncestorElementByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
         const tgtLoc = Services.urlForDoc(element).parse(target.href);
         const currentHref = this.getAmpDoc().win.location.href;

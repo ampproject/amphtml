@@ -1632,7 +1632,8 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestAncestorElementBySelector(this.requireTarget_(), selector);
+        element =
+          closestAncestorElementBySelector(this.requireTarget_(), selector);
       } else {
         element = this.rootNode_./*OK*/querySelector(selector);
       }
