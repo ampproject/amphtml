@@ -93,6 +93,7 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {modifyIfHeightNotExpandable} from './flexible-slot-utils';
 import {parseQueryString} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
@@ -116,6 +117,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlotsExp';
+
+/** @const @enum{string} */
+const FLEXIBLE_AD_SLOTS_BRANCHES = {
+  EXPERIMENT: '21063174',
+  CONTROL: '21063173',
 };
 
 /**
@@ -362,10 +372,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
+        [FLEXIBLE_AD_SLOTS_EXP]: {
+          isTrafficEligible: () => true,
+          branches FLEXIBLE_AD_SLOTS_BRANCHES).map(key => FLEXIBLE_AD_SLOTS_BRANCHES[key])
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
+    if (isExperimentOn(this.win, 'flexAdSlots')) {
+      this.sendFlexibleAdSlotParams_ = true;
+    }
   }
 
   /**
@@ -471,6 +487,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
+    // TODO: Set up actual experiment
+    const sendFlexibleAdSlotParams = true;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -486,6 +504,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
+      'msz': this.sendFlexibleAdSlotParams ?
+          this.getContainerSizeParameter(this.element) : null,
+      'psz': this.sendFlexibleAdSlotParams ?
+          this.getContainerSizeParameter(this.element.parentElement) : null,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting &&
@@ -1388,12 +1410,50 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   isFluidRequest() {
     return this.isFluidRequest_;
   }
+
+  getContainerSizeParameter(element) {
+    let parent = element;
+    let maxDepth = 100;
+    // Find the first ancestor with a fixed size
+    while (parent && maxDepth--) {
+      const layout = parent.getAttribute('layout');
+      switch (layout) {
+        case Layout.NODISPLAY:
+          return null;
+        case Layout.FIXED:
+          const width = Number(parent.getAttribute('width'));
+          return `${parentWidth}x-1`;
+        case Layout.RESPONSIVE:
+        case Layout.FILL:
+        case Layout.FIXED_HEIGHT:
+        case Layout.FLUID:
+          // The above layouts determine the width of the element by the
+          // containing element, or by CSS max-width property.
+          if (parent.style.maxWdith) {
+            return `${parent.style.maxWidth}x-1`;
+          }
+          parent = parent.parentElement;
+        case Layout.CONTAINER:
+          // Container layout allows the container's size to be determined by
+          // the children within it, so in principle we can grow as large as the
+          // viewport.
+          const viewport = Services.viewportForDoc(this.getAmpDoc());
+          const width = viewport.getSize().width;
+          return `${width}x-1`;
+        case Layout.FLEX_ITEM:
+          // Width is determined in part by sibling elements. This is usually
+          // used for carousel-type constructs, and is unreasonably difficult to
+          // compute the actual available width.
+        default:
+          return null;
+    }
+    return null;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
 });
-
 
 /** @visibleForTesting */
 export function resetSraStateForTesting() {
