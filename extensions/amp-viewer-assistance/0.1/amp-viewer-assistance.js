@@ -19,7 +19,7 @@ export class AmpViewerAssistance {
   constructor(ampdoc) {
     const assistanceElement = ampdoc.getElementById('amp-viewer-assistance');
 
-    /** @const @private {boolean} */
+    /** @private {boolean} */
     this.enabled_ = !!assistanceElement;
     if (!this.enabled_) {
       return;
@@ -31,7 +31,7 @@ export class AmpViewerAssistance {
     /** @const @private {!Element} */
     this.assistanceElement_ = dev().assertElement(assistanceElement);
 
-    /** @const @private {!JsonObject} */
+    /** @const @private {JsonObject|null|undefined} */
     this.configJson_ = tryParseJson(this.assistanceElement_.textContent, e => {
       throw user().createError(
           'Failed to parse "amp-viewer-assistance" JSON: ' + e);
@@ -41,7 +41,7 @@ export class AmpViewerAssistance {
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/action-impl.ActionService} */
-    this.action_ = Services.actionServiceForDoc(assistanceElement);
+    this.action_ = Services.actionServiceForDoc(this.assistanceElement_);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
@@ -96,7 +96,7 @@ export class AmpViewerAssistance {
   }
 
   /**
-   * @return {!Promise<string>}
+   * @return {!Promise<undefined>}
    */
   getIdTokenPromise() {
     return this.viewer_.sendMessageAwaitResponse('getAccessTokenPassive', dict({
