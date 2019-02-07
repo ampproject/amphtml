@@ -70,8 +70,8 @@ export class SaveButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, dev().assertString(this.href), '_save', POP);
-    Util.log('&type=button_save');
+    openWindowDialog(window, dev().assertString(this.href), '_pinit', POP);
+    Util.log('&type=button_pinit');
   }
 
   /**
