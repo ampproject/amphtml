@@ -27,7 +27,7 @@
   <p [text]="myState.myStateKey1">This will read 'myStateValue1'<p>
   <button [disabled]="isButtonDisabled">This button will be disabled</button>
   <p [class]="textClass">This text will have have a red background color</p>
-  <amp-img src="https://ampbyexample.com/img/Border_Collie.jpg" [src]="imgSrc" width=100 [width]="imgSize" height=100 [height]="imgSize" alt="asdf" [alt]="imgAlt" [aria-label]="'Image of a ' + imgAlt"></amp-img>
+  <amp-img src="https://ampbyexample.com/img/Border_Collie.jpg" [src]="imgSrc" width=100 [width]="imgSize || 100" height=100 [height]="imgSize || 100" alt="asdf" [alt]="imgAlt" [aria-label]="'Image of a ' + imgAlt"></amp-img>
   <p>The image above will increase in size and change its src</p>
   <div>
     <button on="tap:AMP.setState({'foo': 'foo', 'isButtonDisabled': true, 'textClass': 'redBackground', 'imgSrc': 'https://ampbyexample.com/img/Shetland_Sheepdog.jpg', 'imgSize': 200, 'imgAlt': 'Sheepdog'})">Click me</button>

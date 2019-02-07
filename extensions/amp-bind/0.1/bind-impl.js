@@ -1281,6 +1281,8 @@ export class Bind {
           match = (initialValue === '');
         } else if (expectedValue === false) {
           match = (initialValue === null);
+        } else if (typeof expectedValue === 'number') {
+          match = (Number(initialValue) === expectedValue);
         } else {
           match = (initialValue === expectedValue);
         }
