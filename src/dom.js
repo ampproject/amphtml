@@ -260,13 +260,13 @@ export function closestNode(node, callback) {
 
 
 /**
- * Finds the closest element with the specified name from this element
+ * Finds the closest ancestor element with the specified name from this element
  * up the DOM subtree.
  * @param {!Element} element
  * @param {string} tagName
  * @return {?Element}
  */
-export function closestByTag(element, tagName) {
+export function closestAncestorElementByTag(element, tagName) {
   if (element.closest) {
     return element.closest(tagName);
   }
@@ -277,12 +277,12 @@ export function closestByTag(element, tagName) {
 }
 
 /**
- * Finds the closest element with the specified selector from this element
+ * Finds the closest ancestor element with the specified selector from this element
  * @param {!Element} element
  * @param {string} selector
  * @return {?Element} closest ancestor if found.
  */
-export function closestBySelector(element, selector) {
+export function closestAncestorElementBySelector(element, selector) {
   if (element.closest) {
     return element.closest(selector);
   }
