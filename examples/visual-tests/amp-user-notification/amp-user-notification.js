@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-const thru = a => a;
-
-
-/**
- * Takes a set of HTML fragments and concatenates them.
- * @param {!Array<T>} fragments
- * @param {function(T):string=} opt_renderer
- * @return {string}
- * @template T
- */
-const joinFragments = (fragments, opt_renderer) =>
-  fragments.map(opt_renderer || thru).join('');
-
-
-module.exports = {joinFragments};
+module.exports = {
+  'dismiss user notification': async (page, name) => {
+    await page.tap('amp-user-notification>button');
+    await page.waitFor(500);
+  },
+ };
