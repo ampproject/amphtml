@@ -603,8 +603,9 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
-    console.log(fileLogPrefix, 'Running all commands on push build.');
+  if (process.env.TRAVIS_EVENT_TYPE !== 'pull_request') {
+    console.log(fileLogPrefix,
+        'Running all commands, since this isn\'t a PR build...');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
