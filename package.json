@@ -26,7 +26,8 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.1.1",
-    "@ampproject/worker-dom": "0.2.10",
+    "@ampproject/worker-dom": "0.2.17",
+    "amphtml-validator": "^1.0.23",
     "document-register-element": "1.5.0",
     "dompurify": "1.0.8",
     "moment": "2.22.2",

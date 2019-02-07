@@ -20,6 +20,8 @@ import {
   toStructuredCloneable,
   verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
+import {isArray} from './types';
+import {userAssert} from './log';
 
 /**
  * @typedef {{
@@ -96,17 +98,22 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!Element} element
-   * @param {!JsonObject} data
+   * @param {!Array|!JsonObject} data
    * @return {!Promise}
    */
   renderTemplate(element, data) {
     let renderTemplatePromise;
     if (this.isSupported()) {
+      userAssert(typeof data['html'] === 'string',
+          'Server side html response must be defined');
+      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
+          element, /** @type {string} */ (data['html']));
+    } else if (isArray(data)) {
       renderTemplatePromise = this.templates_
-          .findAndSetHtmlForTemplate(element, data['html']);
+          .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
     } else {
       renderTemplatePromise =
-          this.templates_.findAndRenderTemplate(element, data);
+          this.templates_.findAndRenderTemplate(element, /** @type {!JsonObject} */ (data));
     }
 
     return renderTemplatePromise;

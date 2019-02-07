@@ -30,6 +30,9 @@ tags: {  # <amp-skimlinks>
   tag_name: "AMP-SKIMLINKS"
   requires_extension: "amp-skimlinks"
   attrs: {
+    name: "custom-redirect-domain"
+  }
+  attrs: {
     name: "custom-tracking-id"
     value_regex_casei: "^.{0,50}$"
   }
@@ -54,3 +57,4 @@ tags: {  # <amp-skimlinks>
     supported_layouts: NODISPLAY
   }
 }
+

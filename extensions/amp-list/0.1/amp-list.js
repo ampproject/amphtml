@@ -490,17 +490,20 @@ export class AmpList extends AMP.BaseElement {
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, request, /* opt_templates */ null, attributes);
     }).then(response => {
+      userAssert(response && !!response['html'],
+          'Expected response with format {html: <string>}. Received: ',
+          response);
       request.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
-      return response['html'];
+      return response;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(html => this.scheduleRender_(html, /*append*/ false));
+    }).then(data => this.scheduleRender_(data, /*append*/ false));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array|?JsonObject|string|undefined} data
+   * @param {!Array|!JsonObject|undefined} data
    * @param {boolean} append
    * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
@@ -552,22 +555,18 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    if (this.ssrTemplateHelper_.isSupported()) {
-      const html = /** @type {string} */ (current.data);
-      this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(result => this.updateBindings_([result]))
-          .then(element => this.render_(element, current.append))
-          .then(onFulfilledCallback, onRejectedCallback);
-    } else {
-      const array = /** @type {!Array} */ (current.data);
+    const isSSR = this.ssrTemplateHelper_.isSupported();
+    let renderPromise = this.ssrTemplateHelper_.renderTemplate(
+        this.element, current.data)
+        .then(result => this.updateBindings_(result))
+        .then(element => this.render_(element, current.append));
+    if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      this.templates_.findAndRenderTemplateArray(this.element, array)
-          .then(results => this.updateBindings_(results))
-          .then(elements => this.render_(elements, current.append))
+      renderPromise = renderPromise
           .then(() => this.maybeRenderLoadMoreTemplates_(payload))
-          .then(() => this.maybeSetLoadMore_())
-          .then(onFulfilledCallback, onRejectedCallback);
+          .then(() => this.maybeSetLoadMore_());
     }
+    renderPromise.then(onFulfilledCallback, onRejectedCallback);
   }
 
   /**
@@ -611,11 +610,14 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!Element>|!Element} elementOrElements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elements) {
+  updateBindings_(elementOrElements) {
+    const elements = /** @type {!Array<!Element>} */
+      (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
+
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
@@ -855,13 +857,16 @@ export class AmpList extends AMP.BaseElement {
    * Called when 3 viewports above bottom of automatic load-more list, or
    * manually on clicking the load-more-button element. Sets the amp-list
    * src to the bookmarked src and fetches data from it.
+   * @param {boolean=} opt_reload
    * @return {!Promise}
    * @private
    */
-  loadMoreCallback_() {
-    if (this.loadMoreSrc_) {
+  loadMoreCallback_(opt_reload = false) {
+    if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
-      this.loadMoreSrc_ = null;
+    } else if (!opt_reload) {
+      // Nothing more to load
+      return Promise.resolve();
     }
     this.mutateElement(() => {
       this.loadMoreService_.toggleLoadMoreLoading(true);
@@ -869,7 +874,8 @@ export class AmpList extends AMP.BaseElement {
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
           if (this.loadMoreSrc_) {
-            this.loadMoreService_.toggleLoadMoreLoading(false);
+            this.mutateElement(() =>
+              this.loadMoreService_.toggleLoadMoreLoading(false));
           } else {
             this.mutateElement(() =>
               this.loadMoreService_.setLoadMoreEnded());
@@ -886,7 +892,7 @@ export class AmpList extends AMP.BaseElement {
               .getLoadMoreFailedClickable();
           this.unlistenLoadMore_ = listen(
               loadMoreFailedClickable,
-              'click', () => this.loadMoreCallback_());
+              'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
         });
   }
 
