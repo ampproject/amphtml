@@ -332,7 +332,7 @@ Content-Type: text/html; charset="UTF-8"
 
 ## Replying/forwarding semantics
 
-To start, the email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
+The email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
 
 ## Feedback & Support
 
