@@ -267,7 +267,7 @@ describes.repeated('amp-list', {
         list.layoutCallback().then(() => {
           list.viewport_.resize_();
           expect(resize).to.have.been.called;
-        })
+        });
       });
 
       // TODO(choumx, #14772): Flaky.
