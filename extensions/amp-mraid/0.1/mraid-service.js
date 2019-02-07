@@ -81,14 +81,22 @@ export class MraidService {
     //    concept than visibleRectangle represents.  visibleRectangle is a
     //    subset of LayoutRectDef, though, with x/y position and width/height,
     //    and we can pass it through to the callback directly.
+    console.log('call fake addEventListener');
+    console.log('the callback is mraid-service', callback);
     this.mraid_.addEventListener(
         'exposureChange',
         (exposedPercentage,
           visibleRectangle,
           unusedOcclusionRectangles) => {
-          callback({visibleRect: visibleRectangle,
-            visibleRatio: exposedPercentage});
+          console.log('call callback function');
+          // AMP handles intersectionRatio from 0.0 to 1.0
+          callback({
+            visibleRect: visibleRectangle,
+            // AMP handles intersectionRatio from 0.0 to 1.0
+            visibleRatio: exposedPercentage / 100,
+          });
         });
+    // TODO: Return unlistener
   }
 
   /**

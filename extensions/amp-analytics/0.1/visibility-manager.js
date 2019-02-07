@@ -196,6 +196,7 @@ export class VisibilityManager {
    * @param {number} visibility
    */
   setRootVisibility(visibility) {
+    console.log('root visbility is ', visibility);
     this.rootVisibility_ = visibility;
     this.updateModels_();
     if (this.children_) {
@@ -208,6 +209,7 @@ export class VisibilityManager {
   /** @private */
   updateModels_() {
     for (let i = 0; i < this.models_.length; i++) {
+      console.log('update model');
       this.models_[i].update();
     }
   }
@@ -304,7 +306,7 @@ export class VisibilityManager {
         unlisteners.forEach(unlistener => unlistener());
       };
     }
-
+    console.log('create visiblity model');
     const model = new VisibilityModel(spec, calcVisibility);
     return this.listen_(model, spec, readyPromise,
         createReportPromiseFunc, callback, opt_element);
@@ -336,8 +338,10 @@ export class VisibilityManager {
 
     // Process the event.
     model.onTriggerEvent(() => {
+      console.log('visibility on trigger event');
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
+      console.log('trigger state is ', state);
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -376,6 +380,7 @@ export class VisibilityManager {
           'elementHeight': layoutBox.height,
         }));
       }
+      console.log('visiblity trigger state is ', state);
       callback(state);
     });
 

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
+import {
+  HostServiceError,
+  HostServices,
+} from '../../../src/inabox/host-services';
 import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from './visibility-manager';
+import {
+  VisibilityManagerForMApp,
+} from './visibility-manager-host';
 import {
   closestAncestorElementBySelector,
   matches,
@@ -62,8 +69,43 @@ export class AnalyticsRoot {
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
 
+    this.visibilityMangerPromise_ = null;
+
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
+
+    this.usingHostAPIPromise_ = null;
+
+    this.hostVisibilityService_ = null;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  isUsingHostAPI() {
+    if (this.usingHostAPIPromise_) {
+      return this.usingHostAPIPromise_;
+    }
+    if (!HostServices.isAvailable(this.ampdoc)) {
+      this.usingHostAPIPromise_ = Promise.resolve(false);
+    }
+
+    // TODO: Using the visibility service and apply it for all tracking types
+    const promise = HostServices.visibilityForDoc(this.ampdoc);
+    this.usingHostAPIPromise_ = promise.then(visibilityService => {
+      console.log('visibilityService is ', visibilityService);
+      this.hostVisibilityService_ = visibilityService;
+      return true;
+    }).catch(errorCode => {
+      console.log('error Code is !!!', errorCode);
+      dev().fine(TAG, 'HostServiceError: ' + errorCode);
+      if (errorCode == HostServiceError.MISMATCH) {
+        return false;
+      }
+      // TODO: What to do in this case.
+      throw user().createError('Host API invalid');
+    });
+    return this.usingHostAPIPromise_;
   }
 
   /** @override */
@@ -330,6 +372,9 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
+   *
+   * The caller needs to make sure to call getVisibilityManager after
+   * usingHostAPIPromise has resolved
    * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
@@ -420,6 +465,11 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
 
   /** @override */
   createVisibilityManager() {
+    if (this.hostVisibilityService_) {
+      // If there is hostAPI (hostAPI never exist with the FIE case)
+      return new VisibilityManagerForMApp(
+          this.ampdoc, this.hostVisibilityService_);
+    }
     return new VisibilityManagerForDoc(this.ampdoc);
   }
 }

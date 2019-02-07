@@ -1185,7 +1185,9 @@ export class VisibilityTracker extends EventTracker {
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
-    const visibilityManager = this.root.getVisibilityManager();
+    const visibilityManagerPromise = this.assertMeasurable_().then(() => {
+      return this.root.getVisibilityManager();
+    });
     let createReportReadyPromiseFunc = null;
 
     if (reportWhenSpec) {
@@ -1213,39 +1215,66 @@ export class VisibilityTracker extends EventTracker {
           reportWhenSpec);
     }
 
+    let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      return visibilityManager.listenRoot(
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector),
-          createReportReadyPromiseFunc,
-          this.onEvent_.bind(
-              this, eventType, listener, this.root.getRootElement()));
+      unlistenPromise = visibilityManagerPromise.then(visibilityManager => {
+        return visibilityManager.listenRoot(
+            visibilitySpec,
+            this.getReadyPromise(waitForSpec, selector),
+            createReportReadyPromiseFunc,
+            this.onEvent_.bind(
+                this, eventType, listener, this.root.getRootElement()));
+      });
+    } else {
+      // An AMP-element. Wait for DOM to be fully parsed to avoid
+      // false missed searches.
+      const selectionMethod = config['selectionMethod'] ||
+          visibilitySpec['selectionMethod'];
+      unlistenPromise = this.root.getAmpElement(
+          (context.parentElement || context),
+          selector,
+          selectionMethod
+      ).then(element => {
+        return visibilityManagerPromise.then(visibilityManager => {
+          return visibilityManager.listenElement(
+              element,
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector, element),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, element));
+        });
+      });
     }
 
-    // An AMP-element. Wait for DOM to be fully parsed to avoid
-    // false missed searches.
-    const selectionMethod = config['selectionMethod'] ||
-          visibilitySpec['selectionMethod'];
-    const unlistenPromise = this.root.getAmpElement(
-        (context.parentElement || context),
-        selector,
-        selectionMethod
-    ).then(element => {
-      return visibilityManager.listenElement(
-          element,
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector, element),
-          createReportReadyPromiseFunc,
-          this.onEvent_.bind(this, eventType, listener, element));
-    });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
       });
     };
+  }
+
+  /**
+   * Assert that the setting is measurable in mApp environment
+   * @param {string=} selector
+   * @param {string=} reportWhenSpec
+   */
+  assertMeasurable_(selector, reportWhenSpec) {
+    console.log('assert measurable');
+    return this.root.isUsingHostAPI().then(hasHostAPI => {
+      console.log('using host API is ', hasHostAPI);
+      if (!hasHostAPI) {
+        return;
+      }
+      userAssert(!selector || selector == ':root' || selector == ':host',
+          'Element %s that is not root is not supported with host API',
+          selector);
+      // TODO(@zhouyx): Handle pageHidden and pageExit spec
+      userAssert(!reportWhenSpec,
+          'waitFor spec & hidden trigger are not supported with host API');
+    });
   }
 
   /**

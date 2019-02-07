@@ -40,29 +40,15 @@
           "visibility": "/${type}?cid=CLIENT_ID(a)&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&intersectionRatio=${intersectionRatio}"
         },
         "triggers": {
-          "visible": {
-            "on": "visible",
-            "request": "visibility",
-            "vars": { "type": "visible" }
-          },
           "rootVisible": {
             "on": "visible",
             "request": "visibility",
             "visibilitySpec": {
               "selector": ":root",
-              "visiblePercentageMin": 0
+              "visiblePercentageMin": 70,
+              "totalTimeMin": 1000
             },
             "vars": { "type": "rootVisible" }
-          },
-          "imgVisible": {
-            "on": "visible",
-            "request": "visibility",
-            "visibilitySpec": {
-              "selector": "#img-2",
-              "selectionMethod": "scope",
-              "visiblePercentageMin": 0
-            },
-            "vars": { "type": "img2Visible" }
           }
         }
       }
