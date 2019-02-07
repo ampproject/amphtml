@@ -55,6 +55,25 @@ export const UIType = {
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
+/**
+ * States in which an embedded component could be found in.
+ * @enum {number}
+ */
+export const EmbeddedComponentState = {
+  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
+  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
+  EXPANDED: 2, // Component is in expanded mode.
+};
+
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    state: !EmbeddedComponentState,
+ *    clientX: number,
+ *    clientY: number,
+ * }}
+ */
+export let InteractiveComponentDef;
 
 /**
  * @typedef {{
@@ -70,6 +89,7 @@ export const UIType = {
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
+ *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    landscapeState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
@@ -81,7 +101,6 @@ export const UIType = {
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    tooltipElement: ?Element,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -110,6 +129,7 @@ export const StateProperty = {
   DESKTOP_STATE: 'desktopState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
+  INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   LANDSCAPE_STATE: 'landscapeState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
@@ -123,7 +143,6 @@ export const StateProperty = {
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
-  TOOLTIP_ELEMENT: 'tooltipElement',
   UI_STATE: 'uiState',
 
   // App data.
@@ -132,6 +151,7 @@ export const StateProperty = {
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   PAGES_COUNT: 'pagesCount',
+  ADVANCEMENT_MODE: 'advancementMode',
 };
 
 
@@ -141,10 +161,12 @@ export const Action = {
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
+  SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
+  TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_LANDSCAPE: 'toggleLandscape',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
@@ -157,7 +179,6 @@ export const Action = {
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
-  TOGGLE_TOOLTIP: 'toggleTooltip',
   TOGGLE_UI: 'toggleUi',
 };
 
@@ -169,6 +190,12 @@ export const Action = {
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+  [StateProperty.INTERACTIVE_COMPONENT_STATE]:
+      /**
+       * @param {InteractiveComponentDef} old
+       * @param {InteractiveComponentDef} curr
+       */
+      (old, curr) => old.element !== curr.element || old.state !== curr.state,
 };
 
 
@@ -211,6 +238,18 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.BOOKEND_STATE]: !!data,
             [StateProperty.PAUSED_STATE]: !!data,
+          }));
+    case Action.TOGGLE_INTERACTIVE_COMPONENT:
+      data = /** @type {InteractiveComponentDef} */ (data);
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAUSED_STATE]:
+              data.state === EmbeddedComponentState.EXPANDED ||
+              data.state === EmbeddedComponentState.FOCUSED,
+            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
+              data.state !== EmbeddedComponentState.EXPANDED ||
+              state.uiState === UIType.DESKTOP_PANELS,
+            [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
           }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
@@ -267,12 +306,6 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
-    case Action.TOGGLE_TOOLTIP:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.TOOLTIP_ELEMENT]: data,
-          }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -292,6 +325,9 @@ const actions = (state, action, data) => {
     case Action.SET_PAGES_COUNT:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAGES_COUNT]: data}));
+    case Action.SET_ADVANCEMENT_MODE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.ADVANCEMENT_MODE]: data}));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -395,6 +431,9 @@ export class AmpStoryStoreService {
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
+      [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
+        state: EmbeddedComponentState.HIDDEN,
+      },
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
@@ -406,7 +445,6 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.TOOLTIP_ELEMENT]: null,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
@@ -415,6 +453,7 @@ export class AmpStoryStoreService {
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
       [StateProperty.PAGES_COUNT]: 0,
+      [StateProperty.ADVANCEMENT_MODE]: '',
     });
   }
 

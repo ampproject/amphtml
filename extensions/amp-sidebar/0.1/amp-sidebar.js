@@ -24,6 +24,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {handleAutoscroll} from './autoscroll';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -158,7 +159,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
-        this.close_();
+        if (this.close_()) {
+          event.preventDefault();
+        }
       }
     });
 
@@ -283,6 +286,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
+    handleAutoscroll(this.getAmpDoc(), this.element);
   }
 
   /**
@@ -338,11 +342,13 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
+   * @return {boolean} Whether the sidebar actually transitioned from "visible"
+   *     to "hidden".
    * @private
    */
   close_() {
     if (!this.isOpen_()) {
-      return;
+      return false;
     }
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
@@ -357,6 +363,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       tryFocus(this.openerElement_);
     }
+    return true;
   }
   /**
    * Sidebars within <amp-story> should be 'flipped'.

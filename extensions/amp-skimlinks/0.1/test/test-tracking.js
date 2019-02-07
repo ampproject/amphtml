@@ -19,12 +19,17 @@ import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
 import {
-  LINKS_IMPRESSIONS_TRACKING_URL,
-  NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
+  DEFAULT_CONFIG,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from '../constants';
+
+
+const {
+  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
+  linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
+  nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
+} = DEFAULT_CONFIG;
 
 describes.fakeWin(
     'test-tracking',
@@ -35,8 +40,20 @@ describes.fakeWin(
     },
     env => {
       let helpers;
+      let createAnchorReplacementObj;
+
       beforeEach(() => {
         helpers = helpersFactory(env);
+
+        createAnchorReplacementObj = (initialUrl, setNull) => {
+          const anchor = helpers.createAnchor(initialUrl);
+          const replacementUrl = setNull
+            ? null
+            : `https://go.redirectingat.com/?url=${initialUrl}`;
+
+          return {anchor, replacementUrl};
+        };
+
       });
 
       function setupTrackingService(skimOptions, trackingInfo) {
@@ -53,20 +70,10 @@ describes.fakeWin(
       }
 
       function createFakeAnchorReplacementList() {
-        const createObj = (initialUrl, setNull) => {
-          const anchor = helpers.createAnchor(initialUrl);
-          const replacementUrl = setNull
-            ? null
-            : `https://goredirectingat.com/url=${initialUrl}`;
-
-          return {anchor, replacementUrl};
-        };
-
         return [
-          createObj('http://merchant1.com/', false),
-          createObj('http://merchant2.com/', false),
-          createObj('http://non-merchant.com/', true),
-          createObj('http://merchant1.com/', false),
+          createAnchorReplacementObj('http://merchant1.com/', false),
+          createAnchorReplacementObj('http://merchant2.com/', false),
+          createAnchorReplacementObj('http://merchant1.com/', false),
         ];
       }
 
@@ -124,7 +131,24 @@ describes.fakeWin(
           });
         });
 
-        it('Should call both page and link impressions analytics', () => {
+        it('Should call both page and link impressions analytics ' +
+        'if AE links', () => {
+          const urls = {
+            'https://merchants.com/product': {'ae': 1, 'count': 1},
+          };
+          trackingService = helpers.createTrackingWithStubAnalytics();
+          env.sandbox
+              .stub(trackingService, 'extractAnchorTrackingInfo_')
+              .returns({numberAffiliateLinks: 1, urls});
+
+          trackingService.sendImpressionTracking([]);
+          const stub = trackingService.analytics_.trigger;
+          expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
+          expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
+        });
+
+        it('Should only call page impressions analytics ' +
+        'if no AE links', () => {
           trackingService = helpers.createTrackingWithStubAnalytics();
           env.sandbox
               .stub(trackingService, 'extractAnchorTrackingInfo_')
@@ -133,7 +157,7 @@ describes.fakeWin(
           trackingService.sendImpressionTracking([]);
           const stub = trackingService.analytics_.trigger;
           expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
-          expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
+          expect(stub.withArgs('link-impressions').called).to.be.false;
         });
 
         it('Should not call page nor link impressions if skimOptions ' +
@@ -240,8 +264,10 @@ describes.fakeWin(
               tz: 'TIMEZONE',
               uuid: 'page-impressions-id',
               guid: 'user-guid',
-              dl: {},
-              hae: 0,
+              dl: {
+                'http://merchant1.com/': {ae: 1, count: 1},
+              },
+              hae: 1,
               typ: 'l',
               jv: PLATFORM_NAME,
             };
@@ -249,7 +275,9 @@ describes.fakeWin(
               pageImpressionId: expectedData.uuid,
               guid: expectedData.guid,
             });
-            trackingService.sendImpressionTracking([]);
+            trackingService.sendImpressionTracking([
+              createAnchorReplacementObj('http://merchant1.com/', false),
+            ]);
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
                 'link-impressions'
@@ -276,7 +304,6 @@ describes.fakeWin(
           expect(trackingData.dl).to.deep.equal({
             'http://merchant1.com/': {count: 2, ae: 1},
             'http://merchant2.com/': {count: 1, ae: 1},
-            'http://non-merchant.com/': {count: 1, ae: 0},
           });
 
           expect(trackingData.hae).to.equal(1);
@@ -306,8 +333,29 @@ describes.fakeWin(
           expect(trackingData.dl).to.deep.equal({
             'http://merchant1.com/': {count: 2, ae: 1},
             'http://merchant2.com/': {count: 1, ae: 1},
-            'http://non-merchant.com/': {count: 1, ae: 0},
           });
+        });
+
+        it('Should not send NA links', () => {
+          const trackingService = helpers.createTrackingWithStubAnalytics({});
+          trackingService.sendImpressionTracking(
+              createFakeAnchorReplacementList().concat([
+                createAnchorReplacementObj('http://non-merchant.com/', true),
+              ])
+          );
+          const urlVars = helpers.getAnalyticsUrlVars(
+              trackingService,
+              'link-impressions'
+          );
+
+          expect(urlVars.data).to.be.a.string;
+          const trackingData = JSON.parse(urlVars.data);
+          expect(trackingData.dl).to.deep.equal({
+            'http://merchant1.com/': {count: 2, ae: 1},
+            'http://merchant2.com/': {count: 1, ae: 1},
+          });
+
+          expect(trackingData.hae).to.equal(1);
         });
       });
 

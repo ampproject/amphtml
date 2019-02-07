@@ -76,6 +76,11 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
   },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Swipe up',
+    description: 'Label for a button to open a drawer containing additional ' +
+        'content via a "swipe up" user gesture.',
+  },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
@@ -159,6 +164,11 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Share',
     description: 'Label for the expandable share widget shown in the ' +
         'desktop UI.',
+  },
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
+    string: 'Expand Tweet',
+    description: 'Label in the tooltip text for when a Twitter embed is ' +
+        'expandable.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string: 'Expand your window to view this experience',

@@ -27,8 +27,9 @@ const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {
   gitBranchName,
-  gitBranchPointFromMaster,
   gitCommitterEmail,
+  gitTravisMasterBaseline,
+  shortSha,
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {log, verifyCssElements} = require('./helpers');
@@ -45,7 +46,6 @@ const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
-const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
 const MAX_PARALLEL_TABS = 10;
@@ -100,7 +100,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPointFromMaster();
+    process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
   }
 }
 
@@ -291,7 +291,7 @@ async function runVisualTests(assetGlobs, webpages) {
   log('info', 'Started Percy build', colors.cyan(buildId));
   if (process.env['PERCY_TARGET_COMMIT']) {
     log('info', 'The Percy build is baselined on top of commit',
-        colors.cyan(process.env['PERCY_TARGET_COMMIT']));
+        colors.cyan(shortSha(process.env['PERCY_TARGET_COMMIT'])));
   }
 
   try {
@@ -381,7 +381,7 @@ async function generateSnapshots(percy, webpages) {
   if (argv.master) {
     const page = await newPage(browser);
     await page.goto(
-        `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
+        `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
 
@@ -404,10 +404,16 @@ async function generateSnapshots(percy, webpages) {
 async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   const testErrors = [];
+  let testNumber = 0;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
-    const fullUrl = `${BASE_URL}/${webpage.url}`;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
+      // Chrome supports redirecting <anything>.localhost to localhost, while
+      // respecting domain name boundaries. This allows each test to be
+      // sandboxed from other tests, with respect to things like cookies and
+      // localStorage. Since Puppeteer only ever executes on Chrome, this is
+      // fine.
+      const fullUrl = `http://${testNumber++}.${HOST}:${PORT}/${webpage.url}`;
       while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
         await sleep(WAIT_FOR_TABS_MS);
       }
@@ -424,7 +430,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           height: viewport.height,
         });
       }
-      log('verbose', 'Navigating to page', colors.yellow(fullUrl));
+      log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Navigate to an empty page first to support different webpages that only
       // modify the #anchor name.
@@ -545,7 +551,8 @@ async function createEmptyBuild() {
     ],
   });
   await percy.startBuild();
-  await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`)
+  await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
   await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   await percy.finalizeBuild();

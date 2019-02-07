@@ -156,6 +156,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adpon': {
+    prefetch: 'https://ad.adpon.jp/amp.js',
+    clientIdScope: 'AMP_ECID_ADPON',
+  },
+
   'adreactor': {},
 
   'adsense': {
@@ -167,6 +172,12 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+  },
+
+  'adsensor': {
+    prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
+    clientIdScope: 'amp_ecid_adensor',
+    renderStartImplemented: true,
   },
 
   'adsnative': {
@@ -642,6 +653,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mox': {
+    prefetch: [
+      'https://ad.mox.tv/js/amp.min.js',
+      'https://ad.mox.tv/mox/mwayss_invocation.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -778,6 +797,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rbinfox': {
+	    renderStartImplemented: true,
+  },
+
   'realclick': {
     renderStartImplemented: true,
   },
@@ -875,6 +898,10 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  'speakol': {
+    renderStartImplemented: true,
+  },
+
   'spotx': {
     preconnect: 'https://js.spotx.tv',
     renderStartImplemented: true,
@@ -896,6 +923,11 @@ export const adConfig = {
   },
 
   'taboola': {},
+
+  'tcsemotion': {
+    prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',
+    renderStartImplemented: true,
+  },
 
   'teads': {
     prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',

@@ -16,9 +16,10 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
+import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
-import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
+import {stubService} from '../../../../testing/test-helper';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
@@ -148,7 +149,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'config': '//config-rv2',
       });
 
-      stubXhr(element).returns(Promise.resolve({
+      stubXhr().returns(Promise.resolve({
         json() {
           return Promise.resolve({
             requests: {
@@ -343,7 +344,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'config': '//config1',
       });
 
-      const xhrStub = stubXhr(element);
+      const xhrStub = stubXhr();
       xhrStub.returns(Promise.resolve({
         json: () => {
           return {
@@ -391,7 +392,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'data-credentials': 'include',
       });
 
-      const xhrStub = stubXhr(element);
+      const xhrStub = stubXhr();
       xhrStub.returns(Promise.resolve({
         json: () => {
           return {
@@ -424,7 +425,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': '-test-venfor'});
 
-      const xhrStub = stubXhr(element);
+      const xhrStub = stubXhr();
       xhrStub.callsFake(url => {
         const result = {
           'requests': {'foo': url},
@@ -451,6 +452,166 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       });
     });
 
+    it('should resolve and send publisher enabled varGroups', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'key': 'cats',
+              'cid': 'CLIENT_ID(foo)',
+            },
+            'feature2': {
+              'bad': 'dontsendme',
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'varGroups': {
+            'feature1': {'enabled': true},
+          },
+        },
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}] ,
+            configRewriter: {
+              vars: {
+                cid: 'amp12345',
+                key: 'cats',
+              },
+            },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+    it('should resolve and send vendor enabled varGroups', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'key': 'cats',
+              'cid': 'CLIENT_ID(foo)',
+              'enabled': true,
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}] ,
+            configRewriter: {
+              vars: {
+                cid: 'amp12345',
+                key: 'cats',
+              },
+            },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+    it('should not send configRewriter object if no vars are enabled', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'key': 'cats',
+              'cid': 'CLIENT_ID(foo)',
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}] ,
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+
+    it('should support amp-analytics-variables macros in varGroups', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requests': {'foo': '//vendor'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'configRewriter': {
+          'url': '//rewriter',
+          'varGroups': {
+            'feature1': {
+              'hasValue': '$NOT(foo)',
+              'enabled': true,
+            },
+          },
+        },
+      };
+      const element = getAnalyticsTag({
+        'requests': {'foo': '//inlined'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': '-test-venfor'});
+
+      const xhrStub = stubXhr();
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(xhrStub).to.be.calledWith('//rewriter', {
+          body: {
+            requests: {foo: '//inlined'},
+            triggers: [{on: 'visible', request: 'foo'}],
+            configRewriter: {
+              vars: {
+                hasValue: 'false',
+              },
+            },
+          },
+          method: 'POST',
+          requireAmpResponseSourceOrigin: false,
+        });
+      });
+    });
+
+
     it('should merge rewritten configuration and use vendor', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
@@ -464,7 +625,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': '-test-venfor', 'config': '//remote'});
 
-      const xhrStub = stubXhr(element);
+      const xhrStub = stubXhr();
       xhrStub.callsFake(url => {
         const result = {
           'requests': {'foo': url},
@@ -571,13 +732,26 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     return el;
   }
 
-  function stubXhr(element) {
+  function stubXhr() {
     installDocService(win, true);
-    stubServiceForDoc(sandbox, element, 'url-replace', 'expandUrlAsync')
-        .callsFake(url => Promise.resolve(url));
+
+    const expandStringStub = sandbox.stub();
+    expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
+    expandStringStub.resolvesArg(0);
+
+    const macros = {
+      a: 'b',
+    };
+    expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
+    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
+        macros);
+
+    sandbox.stub(Services, 'urlReplacementsForDoc')
+        .returns({
+          'expandUrlAsync': url => Promise.resolve(url),
+          'expandStringAsync': expandStringStub,
+        });
 
     return stubService(sandbox, win, 'xhr', 'fetchJson');
   }
 });
-
-

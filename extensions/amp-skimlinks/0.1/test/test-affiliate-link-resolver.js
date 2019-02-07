@@ -18,11 +18,13 @@ import {
   AFFILIATE_STATUS,
   AffiliateLinkResolver,
 } from '../affiliate-link-resolver';
-import {DOMAIN_RESOLVER_API_URL} from '../constants';
+import {DEFAULT_CONFIG} from '../constants';
+import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
-import {pubcode} from './constants';
 import helpersFactory from './helpers';
+
+const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 
 describes.fakeWin(
     'AffiliateLinkResolver',
@@ -46,7 +48,12 @@ describes.fakeWin(
 
       beforeEach(() => {
         trackingService = helpers.createTrackingWithStubAnalytics();
-        waypoint = new Waypoint(env.ampdoc, trackingService, 'referrer');
+        waypoint = new Waypoint(
+            env.ampdoc,
+            DEFAULT_SKIM_OPTIONS,
+            trackingService,
+            'referrer'
+        );
       });
 
       afterEach(() => {
@@ -199,7 +206,11 @@ describes.fakeWin(
         describe('Does correct request to domain resolver API', () => {
           beforeEach(() => {
             mock = env.sandbox.mock(xhr);
-            resolver = new AffiliateLinkResolver(xhr, {pubcode}, waypoint);
+            resolver = new AffiliateLinkResolver(
+                xhr,
+                DEFAULT_SKIM_OPTIONS,
+                waypoint
+            );
           });
 
           afterEach(() => {
@@ -273,9 +284,14 @@ describes.fakeWin(
             const stubXhr = helpers.createStubXhr({
               'merchant_domains': ['merchant1.com', 'merchant2.com'],
             });
+            const skimOptions = Object.assign({},
+                DEFAULT_SKIM_OPTIONS,
+                {excludedDomains: ['excluded-merchant.com']}
+            );
+
             resolver = new AffiliateLinkResolver(
                 stubXhr,
-                {excludedDomains: ['excluded-merchant.com']},
+                skimOptions,
                 waypoint
             );
           });
@@ -406,7 +422,11 @@ describes.fakeWin(
         });
 
         describe('getAnchorDomain_', () => {
-          const resolver = new AffiliateLinkResolver({}, {}, waypoint);
+          const resolver = new AffiliateLinkResolver(
+              {},
+              DEFAULT_SKIM_OPTIONS,
+              waypoint
+          );
 
           it('Removes  http protocol', () => {
             const anchor = helpers.createAnchor('http://test.com');

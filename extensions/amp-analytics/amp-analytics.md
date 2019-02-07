@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -171,6 +171,90 @@ In this example, we specify the `config` attribute to load the configuration dat
 
 ```html
 <amp-analytics config="https://example.com/analytics.account.config.json">
+```
+
+#### Configuration Rewriter
+
+The configuration rewriter feature is designed to allow analytics providers to dynamically rewrite a provided configuration. This is similar to the remote configuration feature but additionally includes any user-provided configuration in the request made to the sever. This currently can only be enabled by an analytics vendor.
+
+An analytics vendor specifies a configRewriter property with a server url.
+```js
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+    },
+    ...
+}
+```
+
+The runtime sends a request containing the inlined configuration, merged with the provided remote configuration, to the configRewriter endpoint given by the vendor. The vendor uses this data server side to construction and return a new rewritten configuration.
+
+The runtime then merges all the provided configuration to determine the final configuration in order of highest to lowest precedence:
+1. Rewritten Configuration
+1. Inlined Configuration
+1. Vendor defined configuration
+
+##### Variable Groups
+
+Variable Groups is a feature that allows analytics providers to group a predefined set of variables that can easily be enabled by a user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
+
+Analytics providers need to create a new `varGroups` object inside of the `configRewriter` configuration to enable this feature. Publishers can then include any named analytic provider created `varGroups` they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
+
+For example we may have a vendor whose configuration looks like this:
+```js
+// This is predefined by vendor.
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+      'varGroups' : {
+        'group1': {
+          'referrer': 'DOCUMENT_REFERRER',
+          'source': 'SOURCE_URL',
+        'group2': {
+          'title': 'TITLE',
+        },
+      },
+    },
+    ...
+}
+```
+
+You can specify which variable groups are enabled by including `{enabled: true}` for the specified `varGroups` within the provider's `<amp-analytics>` configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
+
+In the example below, both `group1` and `group2` have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
+
+```html
+/* Included on publisher page */
+<amp-analytics type="myVendor" id="myVendor" data-credentials="include">
+  <script type="application/json">
+  {
+    "configRewriter": {
+      "varGroups": {
+        "group1": {
+          "enabled": true
+        },
+        "group2": {
+          "enabled": true
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+```
+
+In this example the request body would look something like this:
+```json
+/* Sent to configuration rewriter server. */
+"configRewriter": {
+  "vars": {
+    "referrer": "https://www.example.com",
+    "source": "https://www.amp.dev",
+    "title": "Cool Amp Tips"
+  }
+}
 ```
 
 ###  Configuration data objects
@@ -661,7 +745,7 @@ indicate which transport methods are acceptable.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
 
-MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration.
+MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. Furthermore, the vendor frame may send a response, to be used by amp-ad-exit. See [analytics-iframe-transport-remote-frame.html](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [fake_amp_ad_with_iframe_transport.html](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html): the former file sends a response JSON object of {'collected-data': 'abc'}, and the latter file uses that object to substitute 'abc' for 'bar_' in finalUrl.
 
 If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 

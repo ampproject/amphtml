@@ -15,11 +15,13 @@
  */
 
 import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
+import {_FAKE_} from './vendors/_fake_.js';
 import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
 import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics';
 import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics';
@@ -93,6 +95,7 @@ import {
 } from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
+import {UPSCORE_CONFIG} from './vendors/upscore';
 
 /**
  * @const {!JsonObject}
@@ -236,9 +239,14 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'topmailru': TOPMAILRU_CONFIG,
   'treasuredata': TREASUREDATA_CONFIG,
   'umenganalytics': UMENGANALYTICS_CONFIG,
+  'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
 });
+
+if (getMode().test || getMode().localDev) {
+  ANALYTICS_CONFIG['_fake_'] = _FAKE_;
+}
 
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

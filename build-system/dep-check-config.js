@@ -69,6 +69,7 @@ exports.rules = [
     mustNotDependOn: 'src/module.js',
     whitelist: [
       'extensions/amp-date-picker/0.1/**->src/module.js',
+      'extensions/amp-inputmask/0.1/**->src/module.js',
     ],
   },
   {
@@ -93,9 +94,6 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
-      'extensions/amp-inputmask/**->third_party/inputmask/inputmask.js',
-      'extensions/amp-inputmask/**->' +
-          'third_party/inputmask/inputmask.dependencyLib.js',
       'extensions/amp-subscriptions/**/*.js->' +
           'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
@@ -150,6 +148,7 @@ exports.rules = [
       'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
+      'ads/**->src/utils/rate-limit.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
@@ -203,6 +202,67 @@ exports.rules = [
   },
 
   // Rules for extensions.
+  {
+    // Extensions can't depend on other extensions.
+    filesMatching: 'extensions/**/*.js',
+    mustNotDependOn: 'extensions/**/*.js',
+    whitelist: [
+      // a4a ads depend on a4a.
+      'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-triplelift-impl/0.1/amp-ad-network-triplelift-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-cloudflare-impl/0.1/amp-ad-network-cloudflare-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+
+      // And a few mrore things depend on a4a.
+      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
+      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
+      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
+      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-renderer.js',
+      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-validator.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-template-helper.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/callout-vendors.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/real-time-config-manager.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
+
+      // AMP access depends on AMP access
+      'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',
+
+      // Ads depends on a4a?
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
+
+      // Ads needs concurrent loading
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/concurrent-load.js',
+
+      // Ads needs iframe transports
+      'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
+
+      // Amp geo in group enum
+      'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
+
+      // AMP Story
+      'extensions/amp-story/0.1/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
+      'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
+      // Story ads
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/navigation-state.js',
+
+      // Subscriptions.
+      'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js->extensions/amp-access/0.1/jwt.js',
+      'extensions/amp-subscriptions/0.1/actions.js->extensions/amp-access/0.1/login-dialog.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/analytics.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/doc-impl.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/entitlement.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/score-factors.js',
+    ],
+  },
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
@@ -307,6 +367,8 @@ exports.rules = [
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
     ],
   },
   {

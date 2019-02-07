@@ -18,16 +18,17 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from './consent-state';
 import {Services} from './services';
+import {user} from './log';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
  * for resolve. Or if consent service is not available.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyState(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+export function getConsentPolicyState(element, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(element)
       .then(consentPolicy => {
         if (!consentPolicy) {
           return null;
@@ -40,12 +41,12 @@ export function getConsentPolicyState(ampdoc, policyId) {
 /**
  * Returns a promise that resolves to a sharedData retrieved from consent
  * remote endpoint.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<?Object>}
  */
-export function getConsentPolicySharedData(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+export function getConsentPolicySharedData(element, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(element)
       .then(consentPolicy => {
         if (!consentPolicy) {
           return null;
@@ -56,15 +57,15 @@ export function getConsentPolicySharedData(ampdoc, policyId) {
 }
 
 /**
- * TODO (zhouyx@)
- * Combine with getConsentPolicyState and return a consentInfo object.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * TODO(zhouyx): Combine with getConsentPolicyState and return a consentInfo
+ * object.
+ * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(ampdoc, policyId) {
+export function getConsentPolicyInfo(element, policyId) {
   // Return the stored consent string.
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+  return Services.consentPolicyServiceForDocOrNull(element)
       .then(consentPolicy => {
         if (!consentPolicy) {
           return null;
@@ -72,4 +73,35 @@ export function getConsentPolicyInfo(ampdoc, policyId) {
         return consentPolicy.getConsentStringInfo(
             /** @type {string} */ (policyId));
       });
+}
+
+/**
+ * Determine if an element needs to be blocked by consent based on metaTags.
+ * @param {*} element
+ * @return {boolean}
+ */
+export function shouldBlockOnConsentByMeta(element) {
+  const ampdoc = element.getAmpDoc();
+  let content =
+      Services.documentInfoForDoc(ampdoc).metaTags['amp-consent-blocking'];
+
+  if (!content) {
+    return false;
+  }
+
+  // validator enforce uniqueness of <meta name='amp-consent-blocking'>
+  // content will not be an array.
+  if (typeof content !== 'string') {
+    user().error('CONSENT',
+        'Invalid amp-consent-blocking value, ignore meta tag');
+    return false;
+  }
+
+  // Handles whitespace
+  content = content.toUpperCase().replace(/\s/g, '').split(',');
+
+  if (content.includes(element.tagName)) {
+    return true;
+  }
+  return false;
 }

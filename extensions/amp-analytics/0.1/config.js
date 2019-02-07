@@ -17,11 +17,12 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {variableServiceFor} from './variables';
 
 const TAG = 'amp-analytics/config';
 
@@ -71,56 +72,6 @@ export class AnalyticsConfig {
   }
 
   /**
-   * Returns a promise that resolves when configuration is re-written if
-   * configRewriter is configured by a vendor.
-   *
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_()['url'];
-
-    const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
-    this.validateTransport_(inlineConfig);
-    mergeObjects(inlineConfig, config);
-    mergeObjects(this.remoteConfig_, config);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
-      // use default configuration merge.
-      return Promise.resolve();
-    }
-
-    assertHttpsUrl(configRewriterUrl, this.element_);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
-
-    const fetchConfig = {
-      method: 'POST',
-      body: config,
-      requireAmpResponseSourceOrigin: false,
-    };
-    if (this.element_.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element_.getAttribute('data-credentials');
-    }
-    return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(configRewriterUrl)
-        .then(expandedUrl => {
-          return Services.xhrFor(toWin(this.win_)).fetchJson(
-              expandedUrl, fetchConfig);
-        })
-        .then(res => res.json())
-        .then(jsonValue => {
-          this.config_ = this.mergeConfigs_(jsonValue);
-          dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-        }, err => {
-          user().error(TAG,
-              'Error rewriting configuration: ', configRewriterUrl, err);
-        });
-  }
-
-  /**
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
@@ -158,6 +109,127 @@ export class AnalyticsConfig {
   }
 
   /**
+   * Returns a promise that resolves when configuration is re-written if
+   * configRewriter is configured by a vendor.
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  processConfigs_() {
+    const configRewriterUrl = this.getConfigRewriter_()['url'];
+
+    const config = dict({});
+    const inlineConfig = this.getInlineConfigNoInline();
+    this.validateTransport_(inlineConfig);
+    mergeObjects(inlineConfig, config);
+    mergeObjects(this.remoteConfig_, config);
+
+    if (!configRewriterUrl || this.isSandbox_) {
+      this.config_ = this.mergeConfigs_(config);
+      // use default configuration merge.
+      return Promise.resolve();
+    }
+
+    return this.handleConfigRewriter_(config, configRewriterUrl);
+  }
+
+  /**
+   * Handles logic if configRewriter is enabled.
+   * @param {!JsonObject} config
+   * @param {string} configRewriterUrl
+   */
+  handleConfigRewriter_(config, configRewriterUrl) {
+    assertHttpsUrl(configRewriterUrl, this.element_);
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
+
+    return this.handleVarGroups_(config).then(() => {
+      const fetchConfig = {
+        method: 'POST',
+        body: config,
+        requireAmpResponseSourceOrigin: false,
+      };
+      if (this.element_.hasAttribute('data-credentials')) {
+        fetchConfig.credentials = this.element_
+            .getAttribute('data-credentials');
+      }
+      return Services.urlReplacementsForDoc(this.element_)
+          .expandUrlAsync(configRewriterUrl)
+          .then(expandedUrl => {
+            return Services.xhrFor(toWin(this.win_)).fetchJson(
+                expandedUrl, fetchConfig);
+          })
+          .then(res => res.json())
+          .then(jsonValue => {
+            this.config_ = this.mergeConfigs_(jsonValue);
+            dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
+          }, err => {
+            user().error(TAG,
+                'Error rewriting configuration: ', configRewriterUrl, err);
+          });
+    });
+  }
+
+  /**
+   * Check to see which varGroups are enabled, resolve and merge them into
+   * vars object.
+   * @param {!JsonObject} pubConfig
+   * @return {!Promise}
+   */
+  handleVarGroups_(pubConfig) {
+    const pubRewriterConfig = pubConfig['configRewriter'];
+    const pubVarGroups = pubRewriterConfig && pubRewriterConfig['varGroups'];
+    const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
+
+    if (!pubVarGroups && !vendorVarGroups) {
+      return Promise.resolve();
+    }
+
+    if (pubVarGroups && !vendorVarGroups) {
+      const TAG = this.getName_();
+      user().warn(TAG, 'This analytics provider does not currently ' +
+          'support varGroups');
+      return Promise.resolve();
+    }
+
+    // Create object that will later hold all the resolved variables, and any
+    // intermediary objects as necessary.
+    pubConfig['configRewriter'] = pubConfig['configRewriter'] || dict();
+    const rewriterConfig = pubConfig['configRewriter'];
+    rewriterConfig['vars'] = dict({});
+
+    const allPromises = [];
+    // Merge publisher && vendor varGroups to see what has been enabled.
+    const mergedConfig = pubVarGroups || dict();
+    deepMerge(mergedConfig, vendorVarGroups);
+
+    Object.keys(mergedConfig).forEach(groupName => {
+      const group = mergedConfig[groupName];
+      if (!group['enabled']) {
+        // Any varGroups must be explicitly enabled.
+        return;
+      }
+
+      const groupPromise = this.shallowExpandObject(this.element_, group)
+          .then(expandedGroup => {
+            // This is part of the user config and should not be sent.
+            delete expandedGroup['enabled'];
+            // Merge all groups into single `vars` object.
+            Object.assign(rewriterConfig['vars'], expandedGroup);
+          });
+      allPromises.push(groupPromise);
+    });
+
+    return Promise.all(allPromises).then(() => {
+      // Don't send an empty vars payload.
+      if (!Object.keys(rewriterConfig['vars']).length) {
+        return delete pubConfig['configRewriter'];
+      }
+      // Don't send varGroups in payload to configRewriter endpoint.
+      pubVarGroups && delete rewriterConfig['varGroups'];
+    });
+  }
+
+  /**
    * Merges various sources of configs and stores them in a member variable.
    *
    * Order of precedence for configs from highest to lowest:
@@ -181,7 +253,8 @@ export class AnalyticsConfig {
     mergeObjects(expandConfigRequest(defaultConfig), config);
     mergeObjects(expandConfigRequest(this.getTypeConfig_()), config,
         /* predefined */ true);
-    mergeObjects(expandConfigRequest(rewrittenConfig), config);
+    mergeObjects(expandConfigRequest(rewrittenConfig), config,
+        /* predefined */ true);
     return config;
   }
 
@@ -268,6 +341,34 @@ export class AnalyticsConfig {
   getName_() {
     return 'AmpAnalytics ' +
         (this.element_.getAttribute('id') || '<unknown id>');
+  }
+
+  /**
+   * Expands all key value pairs asynchronously and returns a promise that will
+   * resolve with the expanded object.
+   * @param {!Element|!ShadowRoot} element
+   * @param {!Object} obj
+   * @return {!Promise<!Object>}
+   */
+  shallowExpandObject(element, obj) {
+    const expandedObj = dict();
+    const keys = [];
+    const expansionPromises = [];
+
+    Object.keys(obj).forEach(key => {
+      keys.push(key);
+      const expanded = Services.urlReplacementsForDoc(element)
+          .expandStringAsync(obj[key],
+              variableServiceFor(/** @type {!Window} */
+                  (this.win_)).getMacros());
+      expansionPromises.push(expanded);
+    });
+
+    return Promise.all(expansionPromises).then(expandedValues => {
+      keys.forEach((key, i) =>
+        expandedObj[key] = expandedValues[i]);
+      return expandedObj;
+    });
   }
 }
 
