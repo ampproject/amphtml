@@ -26,7 +26,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
@@ -149,7 +149,7 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsTreeShapeCriteria(element) {
-    if (closestBySelector(element, DISABLED_ANCESTORS)) {
+    if (closestAncestorElementBySelector(element, DISABLED_ANCESTORS)) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
