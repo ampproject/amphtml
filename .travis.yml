@@ -36,6 +36,9 @@ addons:
   hosts:
     - ads.localhost
     - iframe.localhost
+    # CURLs amp subdomain for amp-recaptcha-input,
+    # integration tests.
+    - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com

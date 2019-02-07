@@ -14,70 +14,123 @@
  * limitations under the License.
  */
 
+import {BrowserController} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
-import {
-  createFixtureIframe,
-  poll,
-} from '../../testing/iframe';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {poll} from '../../testing/iframe';
 import {toggleExperiment} from '../../src/experiments';
 
+describes.integration('amp-recaptcha-input', {
+  /* eslint-disable max-len */
+  body: `
+    <div class="form-container">
+      <h2>amp-recaptcha-input Example</h2>
 
-function createFixture() {
-  return createFixtureIframe(
-      'test/fixtures/amp-recaptcha-input.html',
-      3000,
-      () => {}
-  );
-}
+      <form
+        method="post"
+        action-xhr="/recaptcha/submit"
+        target="_top">
 
-function waitForBootstrapFrameOnLoad(fixture) {
-  let bootstrapFrame = undefined;
-  return poll('create bootstrap frame', () => {
-    return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
-  }, undefined, 5000).then(frame => {
-    bootstrapFrame = frame;
-    const onLoadDeferred = new Deferred();
-    frame.onload = onLoadDeferred.resolve;
-    return onLoadDeferred.promise;
-  }).then(() => {
-    return bootstrapFrame;
-  });
-}
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay"
+            name="recaptcha-token"
+            data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
+            data-action="recaptcha-example">
+          </amp-recaptcha-input>
+        </fieldset>
 
-function submitForm(fixture) {
-  return waitForBootstrapFrameOnLoad(fixture).then(() => {
-    const searchInputElement =
-      fixture.doc.querySelector('input[type="search"]');
-    const submitElement =
-      fixture.doc.querySelector('input[type="submit"]');
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
 
-    searchInputElement.value = 'recaptcha-search';
-    submitElement.click();
+        <div submit-success>
+          <template type="amp-mustache">
+            <div id="submit-success"></div>
+            <h1>You searched for: {{term}}</h1>
+            <p>message: {{message}}</p>
+            <p>recaptcha-token: {{recaptcha-token}}</p>
+          </template>
+        </div>
 
-    return poll('Polling for hidden input', () => {
-      return fixture.doc.querySelector('input[hidden]');
-    }, undefined, 5000);
-  }).then(() => {
-    return fixture.doc.querySelector('input[hidden]');
-  });
-}
+        <div submit-error>
+          <template type="amp-mustache">
+            <div id="submit-error"></div>
+            <h1>Error! Please check the JS Console in your dev tools.</h1>
+            <p>{{error}}</p>
+          </template>
+        </div>
 
-describe.configure().run('amp-recaptcha-input', () => {
-  let fixture;
+      </form>
+    </div>
+    `,
+  css: `
+      form.amp-form-submit-success [submit-success] {
+        color: green;
+      }
+      form.amp-form-submit-error [submit-error] {
+        color: red;
+      }
+      form.amp-form-submit-success.hide-inputs > input {
+        display: none;
+      }
+
+      @keyframes donut-spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .donut {
+        display: inline-block;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #7983ff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: donut-spin 1.2s linear infinite;
+      }
+
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        margin: 5px;
+      }
+
+      form.amp-form-submitting > .loading-spinner {
+        display: block;
+      }
+    `,
+  /* eslint-enable max-len */
+  extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache'],
+  timeout: 3000,
+}, env => {
+  let doc;
 
   beforeEach(() => {
-    return createFixture().then(f => {
-      fixture = f;
-      toggleExperiment(fixture.win, 'amp-recaptcha-input', true);
-      installPlatformService(fixture.win);
-    });
+    toggleExperiment(env.win, 'amp-recaptcha-input', true);
+    installPlatformService(env.win);
+
+    doc = env.win.document;
+
+    const browserController = new BrowserController(env.win);
+    return browserController.waitForElementBuid('amp-recaptcha-input');
   });
 
   it('should be able to create the bootstrap frame', function() {
     this.timeout(7000);
+
     return poll('create bootstrap frame', () => {
-      return fixture.doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
+      return doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
     }, undefined, 5000).then(frame => {
       expect(frame.src.includes('recaptcha')).to.be.true;
       expect(frame.getAttribute('data-amp-3p-sentinel'))
@@ -91,7 +144,7 @@ describe.configure().run('amp-recaptcha-input', () => {
 
   it('should load the 3p recaptcha frame', function() {
     this.timeout(7000);
-    return waitForBootstrapFrameOnLoad(fixture).then(frame => {
+    return waitForBootstrapFrameOnLoad(doc).then(frame => {
       expect(frame).to.be.ok;
     });
   });
@@ -100,7 +153,7 @@ describe.configure().run('amp-recaptcha-input', () => {
     'with the value resolved from the recaptcha mock, ' +
     ' on submit', function() {
     this.timeout(7000);
-    return submitForm(fixture).then(hiddenInput => {
+    return submitForm(doc).then(hiddenInput => {
       expect(hiddenInput).to.be.ok;
       expect(hiddenInput.name).to.be.equal('recaptcha-token');
       expect(hiddenInput.value).to.be.equal('recaptcha-mock');
@@ -109,12 +162,45 @@ describe.configure().run('amp-recaptcha-input', () => {
 
   it('should show submit-success on successful submit', function() {
     this.timeout(7000);
-    return submitForm(fixture).then(() => {
+    return submitForm(doc).then(() => {
       return poll('submit-success', () => {
-        return fixture.doc.querySelector('div[id="submit-success"]');
+        return doc.querySelector('div[id="submit-success"]');
       }, undefined, 5000);
     });
   });
 });
+
+function waitForBootstrapFrameOnLoad(doc) {
+  let bootstrapFrame = undefined;
+  return poll('create bootstrap frame', () => {
+    return doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
+  }, undefined, 5000).then(frame => {
+    bootstrapFrame = frame;
+    const onLoadDeferred = new Deferred();
+    frame.onload = onLoadDeferred.resolve;
+    return onLoadDeferred.promise;
+  }).then(() => {
+    return bootstrapFrame;
+  });
+}
+
+function submitForm(doc) {
+  return waitForBootstrapFrameOnLoad(doc).then(() => {
+    const searchInputElement =
+      doc.querySelector('input[type="search"]');
+    const submitElement =
+      doc.querySelector('input[type="submit"]');
+
+    searchInputElement.value = 'recaptcha-search';
+    submitElement.click();
+
+    return poll('Polling for hidden input', () => {
+      return doc.querySelector('input[hidden]');
+    }, undefined, 5000);
+  }).then(() => {
+    return doc.querySelector('input[hidden]');
+  });
+}
+
 
 
