@@ -26,6 +26,7 @@ describes.fakeWin('ssr-template-helper', {
   let ssrTemplateHelper;
   const sourceComponent = 'amp-list';
   let maybeFindTemplateStub;
+  let templates;
   let viewer;
   let win;
 
@@ -33,7 +34,7 @@ describes.fakeWin('ssr-template-helper', {
     ampdoc = env.ampdoc;
     sandbox = sinon.sandbox;
     win = env.win;
-    const templates = Services.templatesFor(win);
+    templates = Services.templatesFor(win);
     viewer = Services.viewerForDoc(ampdoc);
     hasCapabilityStub = sandbox.stub(viewer, 'hasCapability');
     maybeFindTemplateStub = sandbox.stub(templates, 'maybeFindTemplate');
@@ -114,6 +115,54 @@ describes.fakeWin('ssr-template-helper', {
           },
           'input': 'https://www.abracadabra.org/some-json',
         },
+      });
+    });
+  });
+
+  describe('rendering templates', () => {
+    let findAndSetHtmlForTemplate;
+    let findAndRenderTemplate;
+    let findAndRenderTemplateArray;
+    beforeEach(() => {
+      win.document.documentElement.setAttribute(
+          'allow-viewer-render-template', true);
+      hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
+      findAndSetHtmlForTemplate =
+        sandbox.stub(templates, 'findAndSetHtmlForTemplate');
+      findAndRenderTemplate =
+          sandbox.stub(templates, 'findAndRenderTemplate');
+      findAndRenderTemplateArray =
+          sandbox.stub(templates, 'findAndRenderTemplateArray');
+    });
+
+    describe('renderTemplate', () => {
+      it('should set html template', () => {
+        ssrTemplateHelper.renderTemplate(
+            {}, {html: '<div>some template</div>'});
+        expect(findAndSetHtmlForTemplate)
+            .to.have.been.calledWith({}, '<div>some template</div>');
+      });
+
+      it('should throw error if html template is not defined', () => {
+        allowConsoleError(() => { expect(() => {
+          ssrTemplateHelper.renderTemplate({}, {html: null});
+        }).to.throw(/Server side html response must be defined/); });
+      });
+
+      it('should render template ', () => {
+        hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
+        ssrTemplateHelper.renderTemplate(
+            {}, {data: '<div>some template</div>'});
+        expect(findAndRenderTemplate)
+            .to.have.been.calledWith({}, {data: '<div>some template</div>'});
+      });
+
+      it('should set template array ', () => {
+        hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
+        ssrTemplateHelper.renderTemplate(
+            {}, [{data: '<div>some template</div>'}]);
+        expect(findAndRenderTemplateArray)
+            .to.have.been.calledWith({}, [{data: '<div>some template</div>'}]);
       });
     });
   });

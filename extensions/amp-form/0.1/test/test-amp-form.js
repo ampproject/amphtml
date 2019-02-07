@@ -254,7 +254,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
-                    data: '<div>much success</div>',
+                    data: {html: '<div>much success</div>'},
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';
@@ -264,8 +264,10 @@ describes.repeated('', {
           const fetchAndRenderTemplate = sandbox.stub(
               ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
           fetchAndRenderTemplate
-              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
-              .onSecondCall().returns(Promise.resolve({html: template}));
+              .onFirstCall().returns(
+                  Promise.resolve({html: '<div>much success</div>'}))
+              .onSecondCall().returns(
+                  Promise.resolve({html: '<div>mushc success</div>'}));
 
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
