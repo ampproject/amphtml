@@ -129,7 +129,7 @@ export class SaveButton {
       shape: this.round ? '-round' : '',
       height: this.tall ? '-tall' : '',
       lang: this.lang === 'ja' ? '-ja' : '-en',
-      color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
+      color: ['gray', 'white'].indexOf(this.color) !== -1 ? this.color : 'red',
     };
 
     const clazz = [
