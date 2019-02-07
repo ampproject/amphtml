@@ -324,42 +324,6 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
- * Checks if the given element matches the selector
- * @param  {!Element} el The element to verify
- * @param  {string} selector The selector to check against
- * @return {boolean} True if the element matched the selector. False otherwise.
- */
-export function matches(el, selector) {
-  const matcher = el.matches ||
-      el.webkitMatchesSelector ||
-      el.mozMatchesSelector ||
-      el.msMatchesSelector ||
-      el.oMatchesSelector;
-  if (matcher) {
-    return matcher.call(el, selector);
-  }
-  return false; // IE8 always returns false.
-}
-
-/**
- * Finds the first descendant element with the specified name.
- * @param {!Element|!Document|!ShadowRoot} element
- * @param {string} tagName
- * @return {?Element}
- */
-export function elementByTag(element, tagName) {
-  let elements;
-  // getElementsByTagName() is not supported on ShadowRoot.
-  if (typeof element.getElementsByTagName === 'function') {
-    elements = element.getElementsByTagName(tagName);
-  } else {
-    elements = element./*OK*/querySelectorAll(tagName);
-  }
-  return (elements && elements[0]) || null;
-}
-
-
-/**
  * Finds the first child element that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
@@ -429,39 +393,6 @@ export function childNodes(parent, callback) {
 }
 
 /**
- * @type {boolean|undefined}
- * @visibleForTesting
- */
-let scopeSelectorSupported;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setScopeSelectorSupportedForTesting(val) {
-  scopeSelectorSupported = val;
-}
-
-/**
- * Test that the :scope selector is supported and behaves correctly.
- * @param {!Element} parent
- * @return {boolean}
- */
-function isScopeSelectorSupported(parent) {
-  const doc = parent.ownerDocument;
-  try {
-    const testElement = doc.createElement('div');
-    const testChild = doc.createElement('div');
-    testElement.appendChild(testChild);
-    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
-    // therefore we test actual functionality of`:scope` as well.
-    return testElement./*OK*/querySelector(':scope div') === testChild;
-  } catch (e) {
-    return false;
-  }
-}
-
-/**
  * Finds the first child element that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
@@ -515,6 +446,74 @@ export function childElementByTag(parent, tagName) {
  */
 export function childElementsByTag(parent, tagName) {
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
+}
+
+/**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {string} selector The selector to check against
+ * @return {boolean} True if the element matched the selector. False otherwise.
+ */
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false; // IE8 always returns false.
+}
+
+/**
+ * Finds the first descendant element with the specified name.
+ * @param {!Element|!Document|!ShadowRoot} element
+ * @param {string} tagName
+ * @return {?Element}
+ */
+export function elementByTag(element, tagName) {
+  let elements;
+  // getElementsByTagName() is not supported on ShadowRoot.
+  if (typeof element.getElementsByTagName === 'function') {
+    elements = element.getElementsByTagName(tagName);
+  } else {
+    elements = element./*OK*/querySelectorAll(tagName);
+  }
+  return (elements && elements[0]) || null;
+}
+
+/**
+ * @type {boolean|undefined}
+ * @visibleForTesting
+ */
+let scopeSelectorSupported;
+
+/**
+ * @param {boolean|undefined} val
+ * @visibleForTesting
+ */
+export function setScopeSelectorSupportedForTesting(val) {
+  scopeSelectorSupported = val;
+}
+
+/**
+ * Test that the :scope selector is supported and behaves correctly.
+ * @param {!Element} parent
+ * @return {boolean}
+ */
+function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
+  try {
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
