@@ -222,7 +222,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
+    let b;
+
+    if (el != undefined && el != null) {
+      b = el./*OK*/getBoundingClientRect();
+    } else {
+      b = 0;
+    }
+
     if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
