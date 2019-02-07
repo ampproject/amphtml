@@ -59,7 +59,7 @@ export class PinWidget {
     if (href) {
       assertAbsoluteHttpOrHttpsUrl(href);
       if (shouldPop) {
-        openWindowDialog(window, href, '_save', POP);
+        openWindowDialog(window, href, '_pinit', POP);
       } else {
         openWindowDialog(window, `${href}?amp=1&guid=${Util.guid}`, '_blank');
       }
