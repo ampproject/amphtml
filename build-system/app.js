@@ -315,6 +315,7 @@ app.use('/form/search-json/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     term: req.query.term,
+    additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
 });
