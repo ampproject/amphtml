@@ -37,7 +37,7 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, AmpStoryAnalytics} from './analytics';
+import {AdvancementMode, getAnalyticsService} from './story-analytics';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -72,7 +72,10 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {
+  SwipeXYRecognizer,
+  SwipeYRecognizer,
+} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
@@ -181,6 +184,12 @@ const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
  */
 const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
 
+/**
+ * CSS class for sidebars in stories.
+ * @const {string}
+ */
+const SIDEBAR_CLASS_NAME = 'i-amphtml-story-sidebar';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -225,8 +234,8 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
 
-    /** @private {!AmpStoryAnalytics} */
-    this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forElement(this);
@@ -386,7 +395,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.navigationState_.observe(stateChangeEvent => {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analytics_.onNavigationStateChange(stateChangeEvent);
+      this.analyticsService_.onNavigationStateChange(stateChangeEvent);
     });
 
     // Removes title in order to prevent incorrect titles appearing on link
@@ -537,7 +546,7 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       // We do not want to trigger an analytics event for the initialization of
       // the muted state.
-      this.analytics_.onMutedStateChange(isMuted);
+      this.analyticsService_.onMutedStateChange(isMuted);
     }, false /** callToInitialize */);
 
     this.storeService_.subscribe(
@@ -657,8 +666,16 @@ export class AmpStory extends AMP.BaseElement {
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
 
+    // If the story is within a viewer that enabled the swipe capability, this
+    // disables the navigation education overlay on the X axis to enable the
+    // swipe to the next story feature.
+    const viewerService = Services.viewerForDoc(this.element);
+    const swipeRecognizer =
+        (viewerService && viewerService.hasCapability('swipe')) ?
+          SwipeYRecognizer : SwipeXYRecognizer;
+
     // Shows "tap to navigate" hint when swiping.
-    gestures.onGesture(SwipeXYRecognizer, gesture => {
+    gestures.onGesture(swipeRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       const embedComponent = /** @type {InteractiveComponentDef} */
         (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
@@ -672,11 +689,13 @@ export class AmpStory extends AMP.BaseElement {
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
         // Cancels the event for this gesture entirely, ensuring the hint won't
         // show even if the user keeps swiping without releasing the touch.
-        gesture.event && gesture.event.preventDefault();
+        if (gesture.event && gesture.event.cancelable !== false) {
+          gesture.event.preventDefault();
+        }
         return;
       }
-      if (gesture.event.defaultPrevented ||
-          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
+      if (gesture.event && (gesture.event.defaultPrevented ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY))) {
         return;
       }
 
@@ -1635,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @private
    */
-  openOpacityMask_() {
+  initializeOpacityMask_() {
     if (!this.maskElement_) {
       const maskEl = this.win.document.createElement('div');
       maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
@@ -1651,8 +1670,15 @@ export class AmpStory extends AMP.BaseElement {
       this.maskElement_ = maskEl;
       this.mutateElement(() => {
         this.element.appendChild(this.maskElement_);
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
       });
     }
+  }
+
+  /**
+   * @private
+   */
+  openOpacityMask_() {
     this.mutateElement(() => {
       toggle(dev().assertElement(this.maskElement_), /* display */true);
     });
@@ -2172,6 +2198,12 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.sidebar_) {
       return;
     }
+
+    this.mutateElement(() => {
+      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
+    });
+
+    this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
 
