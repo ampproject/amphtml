@@ -279,7 +279,7 @@ export class AmpSlideScroll extends BaseSlides {
   layoutCallback() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[amp-scale-animation]')) {
+    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
       return Promise.resolve();
     }
 

@@ -147,7 +147,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   onMeasureChanged() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[amp-scale-animation]')) {
+    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
       return;
     }
 
@@ -160,6 +160,11 @@ export class AmpImageViewer extends AMP.BaseElement {
   layoutCallback() {
     if (this.loadPromise_) {
       return this.loadPromise_;
+    }
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+      return Promise.resolve();
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
     const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||

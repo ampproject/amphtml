@@ -927,7 +927,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.carousel_, 'scroll', event => event.stopPropagation(), true);
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    this.element.setAttribute('amp-scale-animation', '');
+    this.element.setAttribute('i-amp-scale-animation', '');
     // Need to clear this so that we can control the opacity as the user drags.
     setStyle(this.controlsContainer_, 'animationFillMode', 'none');
   }
@@ -943,7 +943,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const hiddenElement = parentCarousel || sourceElement;
     hiddenElement.classList.remove('i-amphtml-ghost');
     this.preventCarouselScrollUnlistener_();
-    this.element.removeAttribute('amp-scale-animation');
+    this.element.removeAttribute('i-amp-scale-animation');
     setStyle(this.controlsContainer_, 'animationFillMode', '');
   }
 

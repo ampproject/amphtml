@@ -18,6 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
 import {ResponsiveAttributes} from './responsive-attributes';
+import {closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDetail} from '../../../src/event-helper';
@@ -144,6 +145,12 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+      return Promise.resolve();
+    }
+
     this.carousel_.updateUi();
     return Promise.resolve();
   }
