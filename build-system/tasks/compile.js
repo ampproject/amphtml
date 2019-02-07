@@ -239,6 +239,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-consent/**/*.js',
       // Needed to access AmpGeo type for service locator
       'extensions/amp-geo/**/*.js',
+      // Needed for AmpViewerAssistanceService
+      'extensions/amp-viewer-assistance/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',

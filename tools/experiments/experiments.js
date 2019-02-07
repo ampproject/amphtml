@@ -347,6 +347,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
+    id: 'amp-viewer-assistance-untrusted',
+    name: 'Enable amp-viewer-assistance in untrusted viewers',
+  },
+  {
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',
