@@ -39,7 +39,7 @@ import {
   setStyles,
 } from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
+import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
@@ -1632,7 +1632,7 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestBySelector(this.requireTarget_(), selector);
+        element = closestAncestorElementBySelector(this.requireTarget_(), selector);
       } else {
         element = this.rootNode_./*OK*/querySelector(selector);
       }
