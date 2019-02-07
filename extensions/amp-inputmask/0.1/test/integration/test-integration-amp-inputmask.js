@@ -18,7 +18,7 @@ import {poll} from '../../../../../testing/iframe';
 import {simulateKeyboardInteraction} from './utils';
 
 const config = describe.configure().retryOnSaucelabs().ifChrome();
-config.run('amp-inputmask', () => {
+config.skip('amp-inputmask', () => {
   describes.integration('attributes', {
     body: `
     <form method="post" action-xhr="http://localhost:8081/form/post" target="_blank">
@@ -28,7 +28,6 @@ config.run('amp-inputmask', () => {
     </form>
   `,
     extensions: ['amp-form', 'amp-inputmask'],
-    experiments: ['amp-inputmask'],
   }, env => {
     let win, doc;
 
