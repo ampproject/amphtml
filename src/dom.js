@@ -127,7 +127,6 @@ export function waitForBody(doc, callback) {
  */
 export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
-    console.log(waitForBody);
     waitForBody(doc, resolve);
   });
 }
