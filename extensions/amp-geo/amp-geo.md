@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides an approximate country-level geolocation interface.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-geo"></a> `amp-geo`
+# amp-geo
+
+Provides an approximate country-level geolocation interface.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides an approximate country-level geolocation interface.</td>
-  </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
@@ -60,16 +65,16 @@ If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-c
 
 ## Operation
 
-The `amp-geo` component uses the country from which the request originated in the form of an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code. The `amp-geo` component determines this code from the client's IP address. 
+The `amp-geo` component uses the country from which the request originated in the form of an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code. The `amp-geo` component determines this code from the client's IP address.
 
 If the country cannot be determined, the value is set to 'unknown'.  If the grouping feature is used at least one group must contain 'unknown'.
 
-Notes: 
+Notes:
 
-1. It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
-1. The ISO country code may not be the same as the top-level domain.  For example, the code for the United Kingdom is "gb" not "uk". 
+1. It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo.
+1. The ISO country code may not be the same as the top-level domain.  For example, the code for the United Kingdom is "gb" not "uk".
 
-The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces. 
+The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces.
 
 ### Generated CSS classes
 If the `amp-iso-country-XX` class is applied to the `body` element, where 'XX' is replaced by the ISO country code or with the value 'unknown'.
@@ -100,7 +105,7 @@ If country groups are specified, `amp-geo` iterates through the groups. For any 
 <body class="amp-geo-group-football amp-iso-country-gb …" >
 ```
 
-##### Example: Using CSS classes and country groups to change "soccer" to "football" 
+##### Example: Using CSS classes and country groups to change "soccer" to "football"
 
 In the following example, we determine if the user is in a "soccer" country and display a "football" message for those users.
 
@@ -117,7 +122,7 @@ In the following example, we determine if the user is in a "soccer" country and 
 </amp-geo>
 ```
 
-If the user is in one of the "soccer" countries, the `amp-geo-group-soccer` CSS class is applied to the `body` tag.  
+If the user is in one of the "soccer" countries, the `amp-geo-group-soccer` CSS class is applied to the `body` tag.
 
 ```css
 /* defaults */
@@ -172,7 +177,7 @@ By default, the `amp-geo` component is not render blocking. That is, the page wi
 }
 ```
 
-This CSS hides the element that has the `foo` class until `amp-geo` has loaded and continues to hide it if the country is `us`. 
+This CSS hides the element that has the `foo` class until `amp-geo` has loaded and continues to hide it if the country is `us`.
 
 **Note**: Elements such as `amp-ad` and `amp-iframe` do not make external network requests when set to `display: none`.
 
@@ -218,7 +223,7 @@ The country code is also available via AMP variable substitution:
 
 The `amp-geo` JavaScript file is served with a 30-minute cache lifetime (`Cache-control: private, max-age=1800`) to prevent use of stale geolocation data and to ensure that the geolocation is accurate when a user moves location.
 
-### Pre-rendering 
+### Pre-rendering
 
 The `amp-geo` component supports pre-rendering. If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` `amp-geo` respects that value. `amp-geo` will use the supplied country and configuration to supply data to cooperating AMP extensions (e.g., `amp-consent`). If a pre-rendered country code is detected, the document will not be modified by  `amp-geo` to add classes for country group or `amp-state`.
 
@@ -228,7 +233,7 @@ Caches that wish to pre-render `amp-geo` should [open an issue](https://github.c
 
 ### Self Hosting
 
-Publishers and caches that re-host AMP JavaScript files must implement server-side patching of the `amp-geo-0.1.js` file or pre-rendering (see above). 
+Publishers and caches that re-host AMP JavaScript files must implement server-side patching of the `amp-geo-0.1.js` file or pre-rendering (see above).
 
 The file served from `cdn.ampproject.org` should not be used as a base for patching because it will have already been patched when downloaded. Instead the base `./dist/v0/amp-geo-0.1.js` file should be used.
 
@@ -236,7 +241,7 @@ The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with 
 
 ### Debugging
 
-Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)). 
+Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
 
 **Note:** Debugging in DevChannel may not work in Safari due to [ITP](https://webkit.org/blog/8311/intelligent-tracking-prevention-2-0/).
 

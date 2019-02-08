@@ -1,3 +1,13 @@
+---
+$category: media
+formats:
+  - websites
+  - email
+  - ads
+  - stories
+teaser:
+  text: Replaces the HTML5 img tag.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 

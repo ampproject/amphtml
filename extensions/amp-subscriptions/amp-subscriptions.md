@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Implements subscription-style access protocol.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-subscriptions"></a> `amp-subscriptions`
+# amp-subscriptions
+
+Implements subscription-style access protocol.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Implements subscription-style access protocol.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
