@@ -56,7 +56,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
-      'extensions/amp-pinterest/0.1/pinit-button.js',
+      'extensions/amp-pinterest/0.1/save-button.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {

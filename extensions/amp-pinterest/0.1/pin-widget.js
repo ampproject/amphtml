@@ -130,11 +130,12 @@ export class PinWidget {
     // repin button
     const repin = Util.make(this.element.ownerDocument, {'span': {
       'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
-        ' -amp-pinterest-embed-pin-repin',
+        ' -amp-pinterest-embed-pin-repin -amp-pinterest-save-button-tall',
       'data-pin-log': 'embed_pin_repin',
       'data-pin-pop': '1',
       'data-pin-href': 'https://www.pinterest.com/pin/' + pin['id'] +
         '/repin/x/?amp=1&guid=' + Util.guid,
+      'textContent': 'Save',
     }});
     container.appendChild(repin);
 
