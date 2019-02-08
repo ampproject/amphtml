@@ -45,22 +45,34 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 ```
 
 ```html
- <button on="tap:closeNavigations">Close all</button>
- <div on="tap:closeNavigations">Close all</div>
+ <button on="tap:closeNavigations.execute()">Close all</button>
+ <div on="tap:closeNavigations.execute()">Close all</div>
 ```
 
 ```html
 <!--
-  You can provide arguments in the caller, overriding the default arguments in the action macro. The action macro defaults apply for the omitted arguments.
+  You can provide arguments in the macro.
 -->
- <button on="tap:closeNavigations({nav3: 'close'})">Close all three</button>
+<amp-carousel id="carousel" ...>...</amp-carousel>
+
+<amp-action-macro
+    id="carousel-macro"
+    action="carousel.goToSlide(index=arg1), carousel.goToSlide(index=arg2)"
+    arguments="arg1, arg2"></amp-action-macro>
+
+```
+
+```html
+ <button on="tap:carousel-macro.execute(arg1=1, arg2=2)">
+   Go to slide 1 then 2
+ </button>
 ```
 
 ## Attributes
 
 ##### id
 
-Used to uniquely identify the action. This is referenced in an action invokation.
+Used to uniquely identify the action. This is referenced in an action invocation.
 
 ##### action
 
@@ -82,3 +94,8 @@ e.g.
 
  <button on="tap:refresh-amp-list"></button>
  ```
+
+##### arguments
+
+Used to define arguments that can be used in the called invocation and substituted
+in the amp action macro call.

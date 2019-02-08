@@ -18,7 +18,7 @@ import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  dereferenceExprsInArgs,
+  dereferenceArgsVariables,
   parseActionMap,
 } from '../../src/service/action-impl';
 import {
@@ -31,6 +31,7 @@ import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
+import {whenCalled} from '../../testing/test-helper.js';
 
 
 /**
@@ -320,45 +321,43 @@ describe('ActionService parseAction', () => {
 
   it('should return null for undefined references in dereferenced arg', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceExprsInArgs(a.args, null)).to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {})).to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: null}))
+    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {})).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: null}))
         .to.deep.equal({key1: null});
   });
 
-  it('should return null for non-primitives in dereferenced args', () => {
-    const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: undefined}}))
-        .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: {}}}))
-        .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: []}}))
-        .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: () => {}}}))
-        .to.deep.equal({key1: null});
+  it('should support event data and opt_args', () => {
+    const a = parseAction('e:t.m(key1=foo,key2=x)');
+    const event = createCustomEvent(window, 'MyEvent');
+    expect(dereferenceArgsVariables(a.args, {x: 'bar', event}, 'event'))
+        .to.deep.equal({key1: 'foo', key2: 'bar'});
   });
 
   it('evaluated args should be proto-less objects', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceExprsInArgs(a.args, null).__proto__).to.be.undefined;
-    expect(dereferenceExprsInArgs(a.args, null).constructor).to.be.undefined;
+    expect(dereferenceArgsVariables(a.args, null).__proto__).to.be.undefined;
+    expect(dereferenceArgsVariables(a.args, null).constructor).to.be.undefined;
   });
 
   it('should dereference arg expressions', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceExprsInArgs(a.args, null)).to.deep.equal({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, null))
+        .to.deep.equal({key1: 'foo'});
   });
 
   it('should dereference arg expressions with an event without data', () => {
     const a = parseAction('e:t.m(key1=foo)');
     const event = createCustomEvent(window, 'MyEvent');
-    expect(dereferenceExprsInArgs(a.args, event)).to.deep.equal({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, event))
+        .to.deep.equal({key1: 'foo'});
   });
 
   it('should dereference arg expressions with an event with data', () => {
     const a = parseAction('e:t.m(key1=event.foo)');
     const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
-    expect(dereferenceExprsInArgs(a.args, event)).to.deep.equal({key1: 'bar'});
+    expect(dereferenceArgsVariables(a.args, event.detail, 'event'))
+        .to.deep.equal({key1: 'bar'});
   });
 
   it('should parse empty to null', () => {
@@ -737,55 +736,45 @@ describe('Action method', () => {
   });
 
   describe('macros', () => {
-    let actionMacroDef;
-    let expectedActionMap;
+    let ampActionMacro;
+    let expectedActionInvocation;
 
     beforeEach(() => {
-      actionMacroDef = {
-        args: {arg0: 0, arg1: 1},
-        event: 'amp-action-event',
-        method: 'method1',
-        str: 'action-macro-id.method1',
-        target: id,
-      };
-      action.addActionMacroDef('action-macro-id', id + '.method1');
-      // The expected action map used when generating the action invocation.
-      expectedActionMap = {
-        args: {'arg1': 2},
-        event: 'tap',
-        method: 'method1',
-        str: 'tap:' + id + '.method1(arg1=2)',
-        target: id,
-      };
-      // A caller that references an action macro, providing only one
-      // argument.
-      targetElement.setAttribute('on', 'tap:action-macro-id(arg1=2)');
-      const ampActionMacro = document.createElement('amp-action-macro');
+      // The expected action invocation for the action macro.
+      expectedActionInvocation = new ActionInvocation(
+          ampActionMacro,
+          'method',
+          {realArgName: 'realArgValue'},
+          ampActionMacro,
+          ampActionMacro,
+          ActionTrust.HIGH,
+          'tap',
+          'AMP-ACTION-MACRO',
+          sinon.match.number
+      );
+      // A caller that references an action macro.
+      targetElement.setAttribute('on', 'tap:action-macro-id.execute(arg1=2)');
+      ampActionMacro = document.createElement('amp-action-macro');
       ampActionMacro.setAttribute('id', id);
-      ampActionMacro.setAttribute('action', 'action-macro-id.method1');
-      const rootNode = action.ampdoc.getRootNode();
-      rootNode.querySelector = unused => ampActionMacro;
+      ampActionMacro.setAttribute(
+          'action', 'action-macro-id.method(realArgName=arg1)');
+      ampActionMacro.setAttribute('arguments', 'arg1');
+      document.body.appendChild(ampActionMacro);
     });
 
-    it('should define the correct action map on invocation', () => {
-      action.trigger(targetElement, 'tap', null);
-      expect(action.getActionMap_(targetElement)['tap'][0])
-          .eql(expectedActionMap);
-    });
+    it('should invoke proper action', () => {
+      // Given that an amp action macro is triggered.
+      const invoke_ = sandbox.stub(action, 'invoke_');
+      sandbox.stub(action.root_, 'getElementById')
+          .withArgs('action-macro-id').returns(ampActionMacro);
+      action.trigger(ampActionMacro, 'tap', null, ActionTrust.HIGH,
+          /* opt_args */ {arg1: 'realArgValue'});
 
-    it('should throw an error if action macro is already registered', () => {
-      const actionMacroDef = {};
-      expect(() => {
-        action.addActionMacroDef('action-macro-id', actionMacroDef);
-      }).to.throw(/is already defined/);
+      whenCalled(invoke_).then(() => {
+        expect(action.invoke_).to.have.been
+            .calledWith(expectedActionInvocation);
+      });
     });
-
-    it('should allow registering action macros', () => {
-      const actionMacroDef = {};
-      action.addActionMacroDef('action-macro-id-1', actionMacroDef);
-      expect(action.actionMacros_['action-macro-id-1']).to.eql({});
-    });
-
   });
 });
 

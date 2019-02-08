@@ -91,6 +91,7 @@ describes.realWin('amp-action-macro', {
           const callerAction = new ActionInvocation(macro, 'execute',
               {z: 1}, button, button, {}, ActionTrust.HIGH, 'tap',
               'AMP-ACTION-MACRO');
+          macro.buildCallback();
           expect(() => macro.execute_(callerAction)).to.throw(
               /Variable argument name "z" is not defined/
           );

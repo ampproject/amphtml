@@ -490,8 +490,17 @@ export class ActionService {
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
       const args = this.initializeArgs_(actionInfo, event, opt_args);
-      // Replace the unevaluated args with the initialized args.
+      // Replace the unevaluated args with the initialized args. This is
+      // for the case where opt_args is provided because otherwise the action
+      // that is cached on the node for future invocations will refer to the
+      // unevaluated argument variables.
+      //
+      // e.g. {x: 1} is the args called by the caller where x is an argument
+      // variable defined on the macro that will to be dereferenced to the
+      // actual argument key 'index'; that is set on the macro. In this case we
+      // need to save the args as {index: 1}.
       actionInfo.args = args;
+
       const invokeAction = () => {
         // For global targets e.g. "AMP, `node` is the document root. Otherwise,
         // `target` is an element id and `node` is the corresponding element.
@@ -523,10 +532,16 @@ export class ActionService {
    * @return {?JsonObject}
    */
   initializeArgs_(actionInfo, event, opt_args) {
-    const data = opt_args ? opt_args : getDetail(/** @type {!Event} */ (event));
     const key = opt_args ? undefined : 'event';
+    const data = dict(opt_args);
+    if (event) {
+      const detail = getDetail(/** @type {!Event} */ (event));
+      if (detail) {
+        data[`${key}`] = detail;
+      }
+    }
     // Replace any variables in args with values provided in data.
-    return dereferenceExprsInArgs(actionInfo.args, data, key);
+    return dereferenceArgsVariables(actionInfo.args, data, key);
   }
 
   /**
@@ -665,10 +680,6 @@ export class ActionService {
         const action = node.getAttribute('on');
         actionMap = parseActionMap(action, node);
         node[ACTION_MAP_] = actionMap;
-        // We need to save a reference to the dynamic attribute value used
-        // to reference the action map as it needs to be referenced if
-        // action metadata is defined to override it.
-        node['action-map'] = ACTION_MAP_;
       } else if (hasAction) {
         const action = node.getAttribute('action');
         actionMap = parseActionMap(`${actionEventType}:${action}`, node);
@@ -1014,23 +1025,27 @@ function argValueForTokens(tokens) {
 /**
  * Dereferences expression args in `args` using values in data.
  * @param {?ActionInfoArgsDef} args
- * @param {!JsonObject|string|null|undefined} data
+ * @param {!JsonObject|null|undefined} data
  * @param {string=} opt_key The value to use in evaluating the argument expression.
  *    This will be parent property of provided data and the root property
  *    in the expression to evaluate against.
  * @return {?JsonObject}
  * @private
  */
-export function dereferenceExprsInArgs(args, data, opt_key) {
+export function dereferenceArgsVariables(args, data, opt_key) {
   if (!args) {
     return args;
   }
-  let dataStore = data;
-  if (dataStore) {
-    if (opt_key) {
-      dataStore = dict({});
-      dataStore[`${opt_key}`] = data;
+  let dataStore = dict({});
+
+  if (opt_key) {
+    if (data && data[opt_key]) {
+      dataStore = data;
+    } else {
+      dataStore[opt_key] = data;
     }
+  } else if (data) {
+    dataStore = data;
   }
   const applied = map();
   Object.keys(args).forEach(key => {
@@ -1038,11 +1053,16 @@ export function dereferenceExprsInArgs(args, data, opt_key) {
     if (typeof value == 'object' && value.expression) {
       const expr =
         /** @type {ActionInfoArgExpressionDef} */ (value).expression;
-      const exprValue = getValueForExpr(devAssert(dataStore), expr);
+      const exprValue = getValueForExpr(dataStore, expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;
     }
-    applied[key] = !opt_key ? dataStore[value] : value;
+    if (!!value
+        && Object.values(dataStore).length > 0 && !!dataStore[value]) {
+      applied[key] = dataStore[value];
+    } else {
+      applied[key] = value;
+    }
   });
   return applied;
 }
