@@ -60,7 +60,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
-    '.amp-carousel-slide-item, .i-amphtml-carousel-slotted';
+    '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -959,6 +959,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       // Prepare the actual image animation.
       imageAnimation = prepareImageAnimation({
         styleContainer: this.getAmpDoc().getHeadNode(),
+        transitionContainer: this.getAmpDoc().getBody(),
         srcImg,
         targetImg,
         srcImgRect: undefined,
@@ -1479,5 +1480,5 @@ function lightboxManagerForDoc(element) {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
   AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
-  Services.extensionsFor(global).addDocFactory(installLightboxGallery);
+  Services.extensionsFor(AMP.win).addDocFactory(installLightboxGallery);
 });
