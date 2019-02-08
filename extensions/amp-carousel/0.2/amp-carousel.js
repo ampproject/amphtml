@@ -18,9 +18,11 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
 import {ResponsiveAttributes} from './responsive-attributes';
+import {Services} from '../../../src/services';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getDetail} from '../../../src/event-helper';
+
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -47,6 +49,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.slides_ = [];
+
+    /** @private {boolean} */
+    this.hadTouch_ = false;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private @const */
     this.responsiveAttributes_ = new ResponsiveAttributes({
@@ -100,9 +108,23 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.action_ = Services.actionServiceForDoc(this.element);
+
     const {element, win} = this;
-    // Grab the slides up front so we can place them later.
-    this.slides_ = toArray(element.children).filter(c => !isSizer(c));
+    const children = toArray(element.children);
+    let prevArrow;
+    let nextArrow;
+    // Figure out which slot the children go into.
+    children.forEach(c => {
+      const slot = c.getAttribute('slot');
+      if (slot == 'prev-arrow') {
+        prevArrow = c;
+      } else if (slot == 'next-arrow') {
+        nextArrow = c;
+      } else if (!isSizer(c)) {
+        this.slides_.push(c);
+      }
+    });
     // Create the carousel's inner DOM.
     element.appendChild(this.renderContainerDom_());
 
@@ -116,23 +138,38 @@ class AmpCarousel extends AMP.BaseElement {
       runMutate: cb => this.mutateElement(cb),
     });
 
-    // Handle the initial set of attributes
-    toArray(this.element.attributes).forEach(attr => {
-      this.attributeMutated_(attr.name, attr.value);
-    });
-
-    this.setupActions_();
-    this.element.addEventListener('indexchange', event => {
-      this.onIndexChanged_(event);
-    });
-
     // Do some manual "slot" distribution
     this.slides_.forEach(slide => {
       slide.classList.add('i-amphtml-carousel-slotted');
       scrollContainer.appendChild(slide);
     });
+    const prevArrowSlot = this.element.querySelector(
+        '.i-amphtml-carousel-arrow-prev-slot');
+    const nextArrowSlot = this.element.querySelector(
+        '.i-amphtml-carousel-arrow-next-slot');
+    // Slot the arrows, with defaults
+    prevArrowSlot.appendChild(prevArrow || this.createPrevArrow_());
+    nextArrowSlot.appendChild(nextArrow || this.createNextArrow_());
+
+    // Handle the initial set of attributes
+    toArray(this.element.attributes).forEach(attr => {
+      this.attributeMutated_(attr.name, attr.value);
+    });
+
+    // Setup actions and listeners
+    this.setupActions_();
+    this.element.addEventListener('indexchange', event => {
+      this.onIndexChanged_(event);
+    });
+    prevArrowSlot.addEventListener('click', () => {
+      this.carousel_.prev('button');
+    });
+    nextArrowSlot.addEventListener('click', () => {
+      this.carousel_.next('button');
+    });
 
     this.carousel_.updateSlides(this.slides_);
+    this.updateUi_();
     // Signal for runtime to check children for layout.
     return this.mutateElement(() => {});
   }
@@ -164,12 +201,43 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element}
    * @private
    */
   renderContainerDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div class="i-amphtml-carousel-scroll"></div>
+      <div>
+        <div class="i-amphtml-carousel-scroll"></div>
+        <div class="i-amphtml-carousel-arrow-next-slot"></div>
+        <div class="i-amphtml-carousel-arrow-prev-slot"></div>
+      </div>
+    `;
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createNextArrow_() {
+    const html = htmlFor(this.element);
+    return html`
+      <button class="i-amphtml-carousel-next"
+          aria-label="Next item in carousel">
+      </button>
+    `;
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createPrevArrow_() {
+    const html = htmlFor(this.element);
+    return html`
+      <button class="i-amphtml-carousel-prev"
+          aria-label="Previous item in carousel">
+      </button>
     `;
   }
 
@@ -185,15 +253,50 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Updates the UI of the <amp-carousel> itself, but not the internal
+   * implementation.
+   * @private
+   */
+  updateUi_() {
+    const index = this.carousel_.getCurrentIndex();
+    this.element.setAttribute('i-amphtml-carousel-at-start', index == 0);
+    this.element.setAttribute(
+        'i-amphtml-carousel-at-end', index == this.slides_.length - 1);
+    this.element.setAttribute(
+        'i-amphtml-carousel-hide-buttons', this.hadTouch_);
+  }
+
+  /**
+   * @param {string=} actionSource
+   * @return {boolean} Whether or not the action is a high trust action.
+   * @private
+   */
+  isHighTrustActionSource_(actionSource) {
+    // TODO(sparhami) If this came from prev/next/goToSlide actions and they
+    // had high trust, we should keep that high trust.
+    return actionSource == 'wheel' ||
+        actionSource == 'touch' ||
+        actionSource == 'button';
+  }
+
+  /**
    * @private
    * @param {!Event} event
    */
   onIndexChanged_(event) {
     const detail = getDetail(event);
-    const data = dict({'index': detail['index']});
+    const index = detail['index'];
+    const actionSource = detail['actionSource'];
+    const data = dict({'index': index});
     const name = 'slideChange';
-    // TODO(sparhami) trigger an action, but not from autoadvance.
+    const isHighTrust = this.isHighTrustActionSource_(actionSource);
+    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+
+    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
+    this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
+    this.hadTouch_ = this.hadTouch_ || actionSource == 'touch';
+    this.updateUi_();
   }
 
   /**

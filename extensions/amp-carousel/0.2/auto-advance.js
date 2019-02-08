@@ -21,7 +21,7 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
- *   advance: function(number),
+ *   advance: function(number, string),
  * }}
  */
 let AdvanceDef;
@@ -146,7 +146,7 @@ export class AutoAdvance {
       return;
     }
 
-    this.advanceable_.advance(this.autoAdvanceCount_);
+    this.advanceable_.advance(this.autoAdvanceCount_, 'autoadvance');
   }
 
   /**
