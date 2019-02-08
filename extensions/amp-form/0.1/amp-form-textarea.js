@@ -103,24 +103,24 @@ export function maybeRemoveResizeBehavior(element) {
 }
 
 /**
- * Expand the textarea to fit its current text, if needed.
+ * Resize the textarea to fit its current text, by expanding or shrinking if
+ * needed.
  * @param {!Element} element
  * @return {!Promise}
  */
-export function maybeExpandTextarea(element) {
+export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
   const win = devAssert(element.ownerDocument.defaultView);
 
   let offset = 0;
   let scrollHeightPromise = null;
 
-  if (element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_ATTR)) {
+  if (!element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR)) {
     scrollHeightPromise = getShrinkHeight(element);
   }
 
   return resources.measureMutateElement(element, () => {
     const computed = computedStyle(win, element);
-
     if (scrollHeightPromise == null) {
       scrollHeightPromise = Promise.resolve(element.scrollHeight);
     }
