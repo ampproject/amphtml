@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionSource} from './action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
@@ -22,7 +23,6 @@ import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -50,7 +50,11 @@ class AmpCarousel extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.slides_ = [];
 
-    /** @private {boolean} */
+    /**
+     * Whether or not the user has interacted with the carousel using touch in
+     * the past at any point.
+     * @private {boolean}
+     */
     this.hadTouch_ = false;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -162,10 +166,10 @@ class AmpCarousel extends AMP.BaseElement {
       this.onIndexChanged_(event);
     });
     prevArrowSlot.addEventListener('click', () => {
-      this.carousel_.prev('button');
+      this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
     });
     nextArrowSlot.addEventListener('click', () => {
-      this.carousel_.next('button');
+      this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
     });
 
     this.carousel_.updateSlides(this.slides_);
@@ -242,13 +246,30 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Gets the ActionSource to use for a given ActionTrust.
+   * @param {!ActionTrust} trust
+   * @return {!ActionSource}
+   */
+  getActionSource_(trust) {
+    return trust == ActionTrust.HIGH ?
+      ActionSource.GENERIC_HIGH_TRUST :
+      ActionSource.GENERIC_LOW_TRUST ;
+  }
+
+  /**
    * @private
    */
   setupActions_() {
-    this.registerAction('prev', () => this.carousel_.prev(), ActionTrust.LOW);
-    this.registerAction('next', () => this.carousel_.next(), ActionTrust.LOW);
-    this.registerAction('goToSlide', ({args}) => {
-      this.carousel_.goToSlide(args['index'] || -1);
+    this.registerAction('prev', ({trust}) => {
+      this.carousel_.prev(this.getActionSource_(trust));
+    }, ActionTrust.LOW);
+    this.registerAction('next', ({trust}) => {
+      this.carousel_.next(this.getActionSource_(trust));
+    }, ActionTrust.LOW);
+    this.registerAction('goToSlide', ({args, trust}) => {
+      this.carousel_.goToSlide(args['index'] || -1, {
+        actionSource: this.getActionSource_(trust),
+      });
     }, ActionTrust.LOW);
   }
 
@@ -267,16 +288,14 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * @param {string=} actionSource
+   * @param {!ActionSource|undefined} actionSource
    * @return {boolean} Whether or not the action is a high trust action.
    * @private
    */
   isHighTrustActionSource_(actionSource) {
-    // TODO(sparhami) If this came from prev/next/goToSlide actions and they
-    // had high trust, we should keep that high trust.
-    return actionSource == 'wheel' ||
-        actionSource == 'touch' ||
-        actionSource == 'button';
+    return actionSource == ActionSource.WHEEL ||
+        actionSource == ActionSource.TOUCH ||
+        actionSource == ActionSource.GENERIC_HIGH_TRUST;
   }
 
   /**
@@ -295,7 +314,7 @@ class AmpCarousel extends AMP.BaseElement {
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
-    this.hadTouch_ = this.hadTouch_ || actionSource == 'touch';
+    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
     this.updateUi_();
   }
 

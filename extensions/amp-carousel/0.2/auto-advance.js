@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionSource} from './action-source';
 import {debounce} from '../../../src/utils/rate-limit';
 import {listenOnce} from '../../../src/event-helper';
 
@@ -146,7 +147,7 @@ export class AutoAdvance {
       return;
     }
 
-    this.advanceable_.advance(this.autoAdvanceCount_, 'autoadvance');
+    this.advanceable_.advance(this.autoAdvanceCount_, ActionSource.AUTOPLAY);
   }
 
   /**

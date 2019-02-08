@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionSource} from './action-source';
 import {
   Alignment,
   Axis,
@@ -245,7 +246,7 @@ export class Carousel {
      * Tracks the source of what cause the carousel to change index. This can
      * be provided when moving the carousel programmatically, and the value
      * will be propagated.
-     * @private {string|undefined}
+     * @private {!ActionSource|undefined}
      */
     this.actionSource_ = undefined;
 
@@ -578,7 +579,7 @@ export class Carousel {
    */
   handleTouchStart_() {
     this.touching_ = true;
-    this.actionSource_ = 'touch';
+    this.actionSource_ = ActionSource.TOUCH;
 
     listenOnce(window, 'touchend', () => {
       this.touching_ = false;
@@ -593,7 +594,7 @@ export class Carousel {
    * @private
    */
   handleWheel_() {
-    this.actionSource_ = 'wheel';
+    this.actionSource_ = ActionSource.WHEEL;
   }
 
   /**
