@@ -695,7 +695,7 @@ describes.realWin('performance with firstInput events', {amp: true}, env => {
       env.win.PerformanceEventTiming = true;
 
       //
-      const earlyEntries = [{
+      const entries = [{
         cancelable: true,
         duration: 8,
         entryType: 'firstInput',
@@ -705,7 +705,7 @@ describes.realWin('performance with firstInput events', {amp: true}, env => {
         startTime: 100,
       }];
       const getEntriesByType = sinon.stub();
-      getEntriesByType.withArgs('firstInput').returns(earlyEntries);
+      getEntriesByType.withArgs('firstInput').returns(entries);
       getEntriesByType.returns([]);
       sinon.replace(env.win.performance, 'getEntriesByType', getEntriesByType);
 
