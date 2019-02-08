@@ -18,6 +18,7 @@ import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
+import {isDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -33,11 +34,11 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
-    '__AMP_UPG_PRM';
+  '__AMP_UPG_PRM';
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
-    '__AMP_UPG_RES';
+  '__AMP_UPG_RES';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -87,16 +88,37 @@ export function waitForChildPromise(parent, checkFunc) {
 }
 
 /**
- * Waits for document's body to be available.
+ * Waits for document's head to be available.
+ * @param {!Document} doc
+ * @param {function()} callback
+ */
+export function waitForHead(doc, callback) {
+  waitForChild(doc.documentElement, () => !!doc.head, callback);
+}
+
+/**
+ * Waits for the document's head to be available.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function waitForHeadPromise(doc) {
+  return new Promise(resolve => {
+    waitForHead(doc, resolve);
+  });
+}
+
+/**
+ * Waits for document's body to be available and ready.
  * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
  * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  waitForChild(doc.documentElement, () => !!doc.body, callback);
+  waitForChild(doc.documentElement, () => (
+    isDocumentReady(doc) && !!doc.body
+  ), callback);
 }
-
 
 /**
  * Waits for document's body to be available.
@@ -105,10 +127,10 @@ export function waitForBody(doc, callback) {
  */
 export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
+    console.log(waitForBody);
     waitForBody(doc, resolve);
   });
 }
-
 
 /**
  * Removes the element.
@@ -119,7 +141,6 @@ export function removeElement(element) {
     element.parentElement.removeChild(element);
   }
 }
-
 
 /**
  * Removes all child nodes of the specified element.
@@ -300,10 +321,10 @@ export function closestBySelector(element, selector) {
  */
 export function matches(el, selector) {
   const matcher = el.matches ||
-      el.webkitMatchesSelector ||
-      el.mozMatchesSelector ||
-      el.msMatchesSelector ||
-      el.oMatchesSelector;
+    el.webkitMatchesSelector ||
+    el.mozMatchesSelector ||
+    el.msMatchesSelector ||
+    el.oMatchesSelector;
   if (matcher) {
     return matcher.call(el, selector);
   }
@@ -585,7 +606,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
       return true;
     }
   } while ((currentElement = currentElement.parentNode) &&
-            currentElement != opt_stopNode);
+    currentElement != opt_stopNode);
   return false;
 }
 
@@ -692,8 +713,8 @@ export function openWindowDialog(win, url, target, opt_features) {
  */
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
-            element.hasAttribute('type') &&
-            element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+    element.hasAttribute('type') &&
+    element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
 
 /**
@@ -703,7 +724,7 @@ export function isJsonScriptTag(element) {
  */
 export function isJsonLdScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
-      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
+    element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
 }
 
 /**
@@ -713,8 +734,8 @@ export function isJsonLdScriptTag(element) {
  */
 export function isRTL(doc) {
   const dir = doc.body.getAttribute('dir')
-                 || doc.documentElement.getAttribute('dir')
-                 || 'ltr';
+    || doc.documentElement.getAttribute('dir')
+    || 'ltr';
   return dir == 'rtl';
 }
 
@@ -798,8 +819,8 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return startsWith(tag, 'AMP-') &&
-      // Some "amp-*" elements are not really AMP elements. :smh:
-      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+    // Some "amp-*" elements are not really AMP elements. :smh:
+    !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
 }
 
 /**
@@ -833,15 +854,15 @@ export function whenUpgradedToCustomElement(element) {
  */
 export function fullscreenEnter(element) {
   const requestFs = element.requestFullscreen
-   || element.requestFullScreen
-   || element.webkitRequestFullscreen
-   || element.webkitRequestFullScreen
-   || element.webkitEnterFullscreen
-   || element.webkitEnterFullScreen
-   || element.msRequestFullscreen
-   || element.msRequestFullScreen
-   || element.mozRequestFullscreen
-   || element.mozRequestFullScreen;
+    || element.requestFullScreen
+    || element.webkitRequestFullscreen
+    || element.webkitRequestFullScreen
+    || element.webkitEnterFullscreen
+    || element.webkitEnterFullScreen
+    || element.msRequestFullscreen
+    || element.msRequestFullScreen
+    || element.mozRequestFullscreen
+    || element.mozRequestFullScreen;
   if (requestFs) {
     requestFs.call(element);
   }
@@ -854,26 +875,26 @@ export function fullscreenEnter(element) {
  */
 export function fullscreenExit(element) {
   let exitFs = element.cancelFullScreen
-               || element.exitFullscreen
-               || element.exitFullScreen
-               || element.webkitExitFullscreen
-               || element.webkitExitFullScreen
-               || element.webkitCancelFullScreen
-               || element.mozCancelFullScreen
-               || element.msExitFullscreen;
+               || element.exitFullscreen
+               || element.exitFullScreen
+               || element.webkitExitFullscreen
+               || element.webkitExitFullScreen
+               || element.webkitCancelFullScreen
+               || element.mozCancelFullScreen
+               || element.msExitFullscreen;
   if (exitFs) {
     exitFs.call(element);
     return;
   }
   if (element.ownerDocument) {
     exitFs = element.ownerDocument.cancelFullScreen
-             || element.ownerDocument.exitFullscreen
-             || element.ownerDocument.exitFullScreen
-             || element.ownerDocument.webkitExitFullscreen
-             || element.ownerDocument.webkitExitFullScreen
-             || element.ownerDocument.webkitCancelFullScreen
-             || element.ownerDocument.mozCancelFullScreen
-             || element.ownerDocument.msExitFullscreen;
+      || element.ownerDocument.exitFullscreen
+      || element.ownerDocument.exitFullScreen
+      || element.ownerDocument.webkitExitFullscreen
+      || element.ownerDocument.webkitExitFullScreen
+      || element.ownerDocument.webkitCancelFullScreen
+      || element.ownerDocument.mozCancelFullScreen
+      || element.ownerDocument.msExitFullscreen;
   }
   if (exitFs) {
     exitFs.call(element.ownerDocument);
@@ -895,9 +916,9 @@ export function isFullscreenElement(element) {
   }
   if (element.ownerDocument) {
     const fullscreenElement = element.ownerDocument.fullscreenElement
-             || element.ownerDocument.webkitFullscreenElement
-             || element.ownerDocument.mozFullScreenElement
-             || element.webkitCurrentFullScreenElement;
+      || element.ownerDocument.webkitFullscreenElement
+      || element.ownerDocument.mozFullScreenElement
+      || element.webkitCurrentFullScreenElement;
     if (fullscreenElement == element) {
       return true;
     }
@@ -918,7 +939,7 @@ export function isEnabled(element) {
 }
 
 const PRECEDING_OR_CONTAINS =
-    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
+  Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
 /**
  * A sorting comparator that sorts elements in DOM tree order.
