@@ -229,25 +229,32 @@ class SeleniumWebDriverController {
       height,
     } = rect;
 
-    // Calculate the window borders, so we can set the correct size to get the
-    // desired content size.
-    const results = await Promise.all([
-      this.driver.manage().window().getRect(),
-      this.driver.findElement(By.tagName('html')),
-    ]);
-    // No Array destructuring allowed?
-    const winRect = results[0];
-    const htmlElement = results[1];
+
+    await this.driver.manage().window().setRect({
+      width,
+      height,
+    });
+
+    // Check to make sure we resized the content to the correct size.
+    const htmlElement = this.driver.findElement(By.tagName('html'));
     const htmlElementSizes = await Promise.all([
       htmlElement.getAttribute('clientWidth'),
       htmlElement.getAttribute('clientHeight'),
     ]);
     // No Array destructuring allowed?
-    const clientWidth = htmlElementSizes[0];
-    const clientHeight = htmlElementSizes[1];
+    const clientWidth = Number(htmlElementSizes[0]);
+    const clientHeight = Number(htmlElementSizes[1]);
 
-    const horizBorder = winRect.width - clientWidth;
-    const vertBorder = winRect.height - clientHeight;
+    // If we resized correctly, can just stop here. If the test is not run in
+    // headless mode, we need to do more work to size correctly.
+    if (clientWidth == width && clientHeight == height) {
+      return;
+    }
+
+    // Calculate the window borders, so we can set the correct size to get the
+    // desired content size.
+    const horizBorder = width - clientWidth;
+    const vertBorder = height - clientHeight;
 
     await this.driver.manage().window().setRect({
       width: width + horizBorder,
@@ -257,25 +264,22 @@ class SeleniumWebDriverController {
     // Verify the size. The browser may refuse to resize smaller than some
     // size when not running headless. It is better to fail here rather than
     // have the developer wonder why their test is failing on an unrelated
-    // expect. TODO: support running browsers in a headless mode, otherwise
-    // mobile resolutions cannot be tested due to the minimum width/height
-    // browsers impose. If non headless mode is supported, these asserts are
-    // still necessary, because the test may fail if the user is debugging them
-    // due to the min size and we want to make sure it fails fast.
-    const updatedWinRect = await this.driver.manage().window().getRect();
-    const resultWidth = updatedWinRect.width - horizBorder;
-    const resultHeight = updatedWinRect.height - vertBorder;
+    // expect.
+    const updatedHtmlElementSizes = await Promise.all([
+      htmlElement.getAttribute('clientWidth'),
+      htmlElement.getAttribute('clientHeight'),
+    ]);
+    const resultWidth = Number(updatedHtmlElementSizes[0]);
+    const resultHeight = Number(updatedHtmlElementSizes[1]);
     // TODO(sparhami) These are throwing errors, but are not causing the test
     // to fail immediately,.Figure out why, we want the test to fail here
     // instead of continuing.
     expect(resultWidth).to.equal(
         width,
-        'Failed to resize the window to the requested width. Expected: ' +
-        `${width}, actual: ${resultWidth}.`);
+        'Failed to resize the window to the requested width.');
     expect(resultHeight).to.equal(
         height,
-        'Failed to resize the window to the requested height. Expected: ' +
-        `${height}, actual: ${resultHeight}.`);
+        'Failed to resize the window to the requested height.');
   }
 
   /**
