@@ -310,8 +310,8 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const target =
-    closestAncestorElementByTag(dev().assertElement(e.target), 'A');
+    const element = dev().assertElement(e.target);
+    const target = closestAncestorElementByTag(element, 'A');
     if (!target || !target.href) {
       return;
     }
