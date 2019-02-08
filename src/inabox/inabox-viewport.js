@@ -324,8 +324,8 @@ export class ViewportBindingInabox {
         canInspectWindow(this.win.top)) {
       // Set up the listener if we haven't already.
       return this.listenForPositionSameDomain().then(() =>
-        this.topWindowPositionObserver_
-            .getTargetRect(this.win.frameElement));
+        this.topWindowPositionObserver_.getTargetRect(
+            /** @type {!HTMLIFrameElement} */(this.win.frameElement)));
     }
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
