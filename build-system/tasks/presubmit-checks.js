@@ -802,6 +802,12 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
+  'scopeSelectorForTesting': {
+    message: 'scopeSelector is not intended to be used outside of dom.js',
+    whitelist: [
+      'src/dom.js',
+    ],
+  },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',
     whitelist: [
@@ -871,7 +877,6 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
-      'build-system/app-index/template.js',
       'build-system/app-index/amphtml-helpers.js',
       'build-system/amp4test.js',
       'dist.3p/current/integration.js',
