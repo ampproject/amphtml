@@ -39,7 +39,7 @@ limitations under the License.
 
 ## Examples
 
-Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Follow button.
+Use the `amp-pinterest` component to display a Save button, Pin widget, or Follow button.
 
 **Example: Save button**
 
@@ -85,11 +85,11 @@ Must be set to `buttonPin`.
 
 ##### data-url (required)
 
-Contains the fully-qualified URL intended to be pinned or re-made into a widget.
+Contains the fully-qualified URL intended to be saved as a pin or re-made into a widget.
 
 ##### data-media (required)
 
-Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
+Contains the fully-qualified URL of the image intended to be saved as a pin. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
 
 ##### data-description (required)
 
