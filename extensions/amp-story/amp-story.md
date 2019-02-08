@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: A rich, visual storytelling format.
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 

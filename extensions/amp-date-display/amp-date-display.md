@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text:
+---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 

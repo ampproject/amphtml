@@ -1,4 +1,15 @@
-# <a name="amp-bind"></a> `amp-bind`
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - ads
+teaser:
+  text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
+---
+# amp-bind
+
+Adds custom interactivity with data binding and expressions.
 
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -19,10 +30,6 @@ limitations under the License.
 [TOC]
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Adds custom interactivity with data binding and expressions.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
@@ -79,7 +86,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
 There is a limit of 100 operands what can be used in an expression.
-3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes. 
+3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
 `amp-bind` takes special care to ensure speed, security and performance on AMP pages.
 
@@ -644,25 +651,29 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
 
 #### Attributes
 
-**src**
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td>The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service.
 
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service.
+    The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
-The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
-
-{% call callout('Important', type='caution') %}
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
-{% endcall %}
-
-
-**credentials** (optional)
-
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-
-* Supported values: `omit`, `include`
-* Default: `omit`
-
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+    {% call callout('Important', type='caution') %}
+    The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
+    {% endcall %}</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>credentials (optional)</strong></td>
+    <td>
+      Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+      <ul>
+          <li>Supported values: `omit`, `include`</li>
+          <li>Default: `omit`</li>
+      </ul>
+      To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+    </td>
+  </tr>
+</table>
 
 ### Deep-merge with `AMP.setState()`
 

@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - ads
+teaser:
+  text: Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,14 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-lightbox-gallery"></a> `amp-lightbox-gallery`
-[TOC]
+# amp-lightbox-gallery
+
+Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>

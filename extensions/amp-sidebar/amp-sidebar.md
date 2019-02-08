@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 

@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Embeds a VK post or poll widget.
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-vk`"></a> `amp-vk`
+# amp-vk
+
+Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-        <td>Embeds a <a href="https://vk.com/">VK</a> post or poll widget.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
@@ -62,35 +67,38 @@ Example of a poll widget:
 
 ## Attributes
 
-For additional information about widgets attributes, please see [VK post widget documentation](https://vk.com/dev/widget_post) and [VK poll widget documentation](https://vk.com/dev/widget_poll).  
+For additional information about widgets attributes, please see [VK post widget documentation](https://vk.com/dev/widget_post) and [VK poll widget documentation](https://vk.com/dev/widget_poll).
 
-##### data-embedtype (required)
-
-The type of embed, either `post` or `poll`.
-
-##### data-owner-id
-
-Owner id of a vk.com post. Supported when `data-embedtype` is `post`.
-
-##### data-post-id
-
-Post id of a post. Supported when `data-embedtype` is `post`.
-
-##### data-hash
-
-Security hash for the widget connection. Supported when `data-embedtype` is `post`.
-
-##### data-api-id
-
-API id of a poll. Supported when `data-embedtype` is `poll`.
-
-##### data-poll-id
-
-Id of a poll. Supported when `data-embedtype` is `poll`.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-embedtype (required)</strong></td>
+    <td>The type of embed, either `post` or `poll`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-owner-id</strong></td>
+    <td>Owner id of a vk.com post. Supported when `data-embedtype` is `post`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-post-id</strong></td>
+    <td>Post id of a post. Supported when `data-embedtype` is `post`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-hash</strong></td>
+    <td>Security hash for the widget connection. Supported when `data-embedtype` is `post`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-api-id</strong></td>
+    <td>API id of a poll. Supported when `data-embedtype` is `poll`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-poll-id</strong></td>
+    <td>Id of a poll. Supported when `data-embedtype` is `poll`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 See [amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.

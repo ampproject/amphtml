@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides the ability to collect and store a user's consent through a UI control.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-consent"></a> `amp-consent`
+# amp-consent
 
-[TOC]
+Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td>Stable</td>
