@@ -151,6 +151,7 @@ export function maybeResizeTextarea(element) {
  */
 function getShrinkHeight(textarea) {
   const doc = devAssert(textarea.ownerDocument);
+  const win = devAssert(doc.defaultView);
   const body = devAssert(doc.body);
   const resources = Services.resourcesForDoc(textarea);
 
@@ -158,10 +159,16 @@ function getShrinkHeight(textarea) {
   clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
 
   let height = 0;
-  return resources.mutateElement(body, () => {
+  let shouldKeepTop = false;
+  return resources.measureMutateElement(body, () => {
+    const computed = computedStyle(win, textarea);
+    const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10);
+    shouldKeepTop = (isNaN(maxHeight) || textarea.scrollHeight < maxHeight);
+  }, () => {
     // Prevent a jump from the textarea element scrolling
-    textarea.scrollTop = 0; // TODO(cvializ): not if max height/scrollbar
-
+    if (shouldKeepTop) {
+      textarea.scrollTop = 0;
+    }
     doc.body.appendChild(clone);
   }).then(() => {
     return resources.measureMutateElement(body, () => {
