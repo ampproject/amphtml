@@ -740,7 +740,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 #### Clickable elements and embeds in amp-story-grid-layer
 
-To keep navigation smooth and avoid accidental clicks, a tooltip will be shown whenever an embed is clicked before it is expanded to a full-screen view.
+Whenever an embed is clicked, a tooltip will be shown before the element is expanded to a full-screen view. This is because we want to keep navigation smooth and avoid accidental clicks.
 
 #### Customizing tooltip for clickable elements
 
@@ -748,8 +748,8 @@ You can customize the contents of the tooltip displayed on top of a clickable it
 
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
-  <amp-anim alt="Embedded component example" layout="flex-item" src="" width="300" height="553">
-  <noscript><img width="300" src="" /></noscript>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
+  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
 
