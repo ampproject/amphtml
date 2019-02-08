@@ -1,3 +1,12 @@
+---
+$category: ads-analytics
+formats:
+  - websites
+  - ads
+  - stories
+teaser:
+  text: A tracking pixel to count page views.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
