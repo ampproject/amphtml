@@ -30,6 +30,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
+import {AmpEvents} from '../../../src/amp-events';
 import {
   AmpStoryEmbeddedComponent,
   EXPANDABLE_COMPONENTS,
@@ -56,6 +57,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -94,7 +96,15 @@ const Selectors = {
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
 
-const EMBEDDED_COMPONENTS_SELECTORS = Object.keys(EXPANDABLE_COMPONENTS);
+/** @private @const {string} */
+const EMBEDDED_COMPONENTS_SELECTORS =
+  Object.keys(EXPANDABLE_COMPONENTS).join(', ');
+
+/** @private @const {number} */
+const RESIZE_TIMEOUT_MS = 350;
+
+/** @private @const {number} */
+const RESIZE_TIMEOUT_PRELOAD_MS = 500;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -210,6 +220,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -357,9 +370,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
-      this.findAndPrepareEmbeddedComponents();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
+      this.findAndPrepareEmbeddedComponents_(RESIZE_TIMEOUT_MS);
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -428,13 +441,30 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Finds embedded components in page and prepares them for their expanded view
    * animation.
+   * @param {number} timeout
+   * @private
    */
-  findAndPrepareEmbeddedComponents() {
-    EMBEDDED_COMPONENTS_SELECTORS.forEach(selector => {
-      scopedQuerySelectorAll(this.element, selector).forEach(el => {
-        AmpStoryEmbeddedComponent.prepareForAnimation(this.element, el);
-      });
-    });
+  findAndPrepareEmbeddedComponents_(timeout) {
+    scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+        .forEach(el => {
+          if (!el.classList.contains('i-amphtml-embedded-component')) {
+            let readyForResize = true;
+            listen(el, AmpEvents.SIZE_CHANGED, () => {
+              readyForResize = false;
+            });
+
+            this.timer_.poll(timeout, () => {
+              if (!readyForResize) {
+                readyForResize = true;
+                return false;
+              }
+              return true;
+            }).then(() => {
+              AmpStoryEmbeddedComponent.prepareForAnimation(this.element, el,
+                  this.resources_);
+            });
+          }
+        });
   }
 
   /** @return {!Promise} */
@@ -677,6 +707,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('distance', distance);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
+      this.findAndPrepareEmbeddedComponents_(RESIZE_TIMEOUT_PRELOAD_MS);
       this.preloadAllMedia_();
     }
   }

@@ -34,6 +34,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {
   getStyle,
+  px,
   resetStyles,
   setImportantStyles,
   toggle,
@@ -150,11 +151,11 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 const MIN_VERTICAL_SPACE = 48;
 
 /**
- * Buffer that prevents expanded component from covering close button in
- * expanded view.
+ * Limits the amount of vertical space a component can take in a page.
  * @const {number}
+ * @private
  */
-const VERTICAL_BUFFER = 100;
+const VERTICAL_MAX_HEIGHT_PERCENTAGE = 0.8;
 
 /**
  * Padding between tooltip and vertical edges of screen.
@@ -346,6 +347,8 @@ export class AmpStoryEmbeddedComponent {
 
     this.animateExpanded_(devAssert(targetToExpand));
 
+    this.expandedViewOverlay_ = this.componentPage_
+        .querySelector('.i-amphtml-story-expanded-view-overflow');
     if (!this.expandedViewOverlay_) {
       this.buildAndAppendExpandedViewOverlay_();
     }
@@ -600,34 +603,43 @@ export class AmpStoryEmbeddedComponent {
    * by publisher, adding negative margins so that content around stays put.
    * @param {!Element} page
    * @param {!Element} element
+   * @param {!../../../src/service/resources-impl.Resources} resources
    */
-  static prepareForAnimation(page, element) {
-    element.whenBuilt().then(() => {
-      element.classList.add('i-amphtml-embedded-component');
-      const pageRect = page./*OK*/getBoundingClientRect();
-      const elRect = element./*OK*/getBoundingClientRect();
+  static prepareForAnimation(page, element, resources) {
+    const state = {};
+    resources.measureMutateElement(element,
+        /** measure */
+        () => {
+          const pageRect = page./*OK*/getBoundingClientRect();
+          const elRect = element./*OK*/getBoundingClientRect();
 
-      let scaleFactor, newHeight, newWidth;
-      if (elRect.width >= elRect.height) {
-        newWidth = pageRect.width;
-        scaleFactor = elRect.width / newWidth;
-        newHeight = elRect.height / elRect.width * newWidth;
-      } else {
-        newHeight = pageRect.height - VERTICAL_BUFFER;
-        scaleFactor = elRect.height / newHeight;
-        newWidth = elRect.width / elRect.height * newHeight;
-      }
+          if (elRect.width >= elRect.height) {
+            state.newWidth = pageRect.width;
+            state.scaleFactor = elRect.width / state.newWidth;
+            state.newHeight = elRect.height / elRect.width * state.newWidth;
+          } else {
+            const maxHeight = pageRect.height * VERTICAL_MAX_HEIGHT_PERCENTAGE;
+            state.newWidth = Math.min(
+                elRect.width / elRect.height * maxHeight, pageRect.width);
+            state.newHeight = elRect.height / elRect.width * state.newWidth;
+            state.scaleFactor = elRect.height / state.newHeight;
+          }
 
-      const verticalMargin = (-1 * ((newHeight - elRect.height) / 2));
-      const horizontalMargin = (-1 * ((newWidth - elRect.width) / 2));
-
-      setImportantStyles(devAssert(element), {
-        width: `${newWidth}px`,
-        height: `${newHeight}px`,
-        transform: `scale(${scaleFactor})`,
-        margin: `${verticalMargin}px ${horizontalMargin}px`,
-      });
-    });
+          state.verticalMargin =
+            (-1 * ((state.newHeight - elRect.height) / 2));
+          state.horizontalMargin =
+            (-1 * ((state.newWidth - elRect.width) / 2));
+        },
+        /** mutate */
+        () => {
+          element.classList.add('i-amphtml-embedded-component');
+          setImportantStyles(devAssert(element), {
+            width: px(state.newWidth),
+            height: px(state.newHeight),
+            transform: `scale(${state.scaleFactor})`,
+            margin: px(state.verticalMargin) + ' ' + px(state.horizontalMargin),
+          });
+        });
   }
 
   /**
