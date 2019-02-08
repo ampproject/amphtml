@@ -23,11 +23,13 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
-const AMP_FORM_TEXTAREA_SHRINK_ATTR = 'autoshrink';
+const AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR = 'autoshrink-disabled';
 
 const MIN_EVENT_INTERVAL_MS = 100;
 
 const AMP_FORM_TEXTAREA_CLONE_CSS = 'i-amphtml-textarea-clone';
+
+const AMP_FORM_TEXTAREA_CALCULATING_CSS = 'i-amphtml-textarea-calculating';
 
 /**
  * This behavior can be removed when browsers implement `height: max-content`
@@ -43,7 +45,7 @@ export function installAmpFormTextarea(form) {
       return;
     }
 
-    maybeExpandTextarea(element);
+    maybeResizeTextarea(element);
   });
 
   form.addEventListener('mousedown', e => {
@@ -57,7 +59,7 @@ export function installAmpFormTextarea(form) {
       return;
     }
 
-    maybeRemoveExpandBehavior(element);
+    maybeRemoveResizeBehavior(element);
   });
 
   const win = devAssert(form.ownerDocument.defaultView);
@@ -70,17 +72,17 @@ export function installAmpFormTextarea(form) {
         continue;
       }
 
-      maybeExpandTextarea(element);
+      maybeResizeTextarea(element);
     }
   }, MIN_EVENT_INTERVAL_MS));
 }
 
 /**
- * Remove the expand behavior if a user drags the resize handle and changes
+ * Remove the resize behavior if a user drags the resize handle and changes
  * the height of the textarea.
  * @param {!Element} element
  */
-export function maybeRemoveExpandBehavior(element) {
+export function maybeRemoveResizeBehavior(element) {
   const resources = Services.resourcesForDoc(element);
 
   Promise.all([
@@ -157,7 +159,9 @@ function getShrinkHeight(textarea) {
 
   let height = 0;
   return resources.mutateElement(body, () => {
-    textarea.scrollTop = 0; // prevent flash from textarea element scrolling
+    // Prevent a jump from the textarea element scrolling
+    textarea.scrollTop = 0; // TODO(cvializ): not if max height/scrollbar
+
     doc.body.appendChild(clone);
   }).then(() => {
     return resources.measureMutateElement(body, () => {

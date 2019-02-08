@@ -20,7 +20,7 @@ form.amp-form-submit-error [submit-error] {
   display: block;
 }
 
-textarea[autoexpand] {
+.i-amphtml-textarea-calculating {
   overflow: hidden;
 }
 
