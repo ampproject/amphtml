@@ -123,7 +123,7 @@ describes.integration('amp-recaptcha-input', {
     doc = env.win.document;
 
     const browserController = new BrowserController(env.win);
-    return browserController.waitForElementBuid('amp-recaptcha-input');
+    return browserController.waitForElementBuild('amp-recaptcha-input');
   });
 
   it('should be able to create the bootstrap frame', function() {
