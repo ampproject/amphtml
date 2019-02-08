@@ -687,3 +687,119 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     });
   });
 });
+
+describes.realWin('performance with firstInput events', {amp: true}, env => {
+  describe('should forward firstInput events as a fid tick event', () => {
+    it('before performance service registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      //
+      const earlyEntries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const getEntriesByType = sinon.stub();
+      getEntriesByType.withArgs('firstInput').returns(earlyEntries);
+      getEntriesByType.returns([]);
+      sinon.replace(env.win.performance, 'getEntriesByType', getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+
+      delete env.win.PerformanceEventTiming;
+    });
+
+    // A fake implementation of PerformanceObserver.
+    class PerformanceObserverImpl {
+      constructor(callback) {
+        this.options = {};
+        this.callback_ = callback;
+        this.isObserving = false;
+
+      }
+
+      observe(options) {
+        this.options = options;
+        this.isObserving = true;
+
+      }
+
+      disconnect() {
+        this.isObserving = false;
+      }
+
+      /**
+       * Trigger the Observer's callback.
+        * @param {!Array} entries
+        */
+      triggerCallback(entries) {
+        this.callback_(entries, this);
+      }
+    }
+
+    it('after performance service registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = sinon.stub();
+
+      // First registerPaintTimingObserver_ will request an instance
+      PerformanceObserverStub.onCall(0).callsFake(callback => {
+        return new PerformanceObserverImpl(callback);
+      });
+
+      // Then registerEventTimingObserver_ will, which is the one we want to
+      // interact with.
+      let performanceObserver;
+      PerformanceObserverStub.onCall(1).callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      sinon.replace(env.win, 'PerformanceObserver', PerformanceObserverStub);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      const entries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const list = {
+        getEntries() {
+          return entries;
+        },
+      };
+      // Fake a triggering of the firstInput event.
+      performanceObserver.triggerCallback(list);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+      delete env.win.PerformanceEventTiming;
+
+    });
+  });
+});

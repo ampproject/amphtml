@@ -227,13 +227,13 @@ export class Performance {
     // as to whether we have reported a value yet, since in the future it may
     // be reported twice.
     // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-    let recordedFirstInput = false;
+    let recordedFirstInputDelay = false;
     const processEntry = entry => {
-      if (recordedFirstInput) {
+      if (recordedFirstInputDelay) {
         return;
       }
       this.tick('fid', entry.processingStart - entry.startTime);
-      recordedFirstInput = true;
+      recordedFirstInputDelay = true;
     };
     const observer = new this.win.PerformanceObserver(list => {
       list.getEntries().forEach(processEntry);
