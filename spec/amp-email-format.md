@@ -166,7 +166,7 @@ amp_email.html
 ## Privacy and Security
 
 ### Tracking email opens and interaction
-AMPHTML Emails track email opens with pixel tracking techniques, same as regular emails. Any user-initiated requests for data from external services will also indicate the user is interacting with the message. Email clients may offer their users the ability to disable loading remote images, and other external requests.
+AMPHTML allows tracking email opens with pixel tracking techniques, same as regular emails. Any user-initiated requests for data from external services will also indicate the user is interacting with the message. Email clients may offer their users the ability to disable loading remote images, and other external requests.
 
 
 ### AMP-specific analytics
