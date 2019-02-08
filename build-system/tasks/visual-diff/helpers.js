@@ -53,7 +53,7 @@ function log(mode, ...messages) {
       fancyLog.error(colors.red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
     case 'travis':
-      if (process.env['TRAVIS']) {
+      if (isTravisBuild()) {
         messages.forEach(message => process.stdout.write(message));
       }
       break;

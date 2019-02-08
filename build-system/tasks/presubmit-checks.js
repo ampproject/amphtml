@@ -921,7 +921,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
-  'process\\.env\\.TRAVIS': {
+  'process\\.env(\\.TRAVIS|\\[\\\'TRAVIS)': {
     message: 'Do not directly use process.env.TRAVIS. Instead, add a ' +
         'function to build-system/travis.js',
     whitelist: [
