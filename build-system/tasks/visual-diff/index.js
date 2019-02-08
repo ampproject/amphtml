@@ -32,6 +32,7 @@ const {
   shortSha,
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -95,7 +96,7 @@ function setPercyBranch() {
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (process.env.TRAVIS && !argv.master) {
+  if (isTravisBuild() && !argv.master) {
     process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
   }
 }

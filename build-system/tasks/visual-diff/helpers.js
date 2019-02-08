@@ -18,6 +18,7 @@
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
+const {isTravisBuild} = require('../../travis');
 
 const CSS_SELECTOR_RETRY_MS = 100;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -33,7 +34,7 @@ const CSS_SELECTOR_TIMEOUT_MS =
 function log(mode, ...messages) {
   switch (mode) {
     case 'verbose':
-      if (process.env.TRAVIS) {
+      if (isTravisBuild()) {
         return;
       }
       fancyLog.info(colors.green('VERBOSE:'), ...messages);
