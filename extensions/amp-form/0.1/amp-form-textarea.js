@@ -29,7 +29,7 @@ const MIN_EVENT_INTERVAL_MS = 100;
 
 const AMP_FORM_TEXTAREA_CLONE_CSS = 'i-amphtml-textarea-clone';
 
-const AMP_FORM_TEXTAREA_CALCULATING_CSS = 'i-amphtml-textarea-calculating';
+const AMP_FORM_TEXTAREA_MAX_CSS = 'i-amphtml-textarea-max';
 
 /**
  * This behavior can be removed when browsers implement `height: max-content`
@@ -114,6 +114,7 @@ export function maybeResizeTextarea(element) {
 
   let offset = 0;
   let scrollHeightPromise = null;
+  let maxHeight = 0;
 
   if (!element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR)) {
     scrollHeightPromise = getShrinkHeight(element);
@@ -124,6 +125,10 @@ export function maybeResizeTextarea(element) {
     if (scrollHeightPromise == null) {
       scrollHeightPromise = Promise.resolve(element.scrollHeight);
     }
+
+    const maybeMaxHeight =
+        parseInt(computed.getPropertyValue('max-height'), 10);
+    maxHeight = isNaN(maybeMaxHeight) ? Infinity : maybeMaxHeight;
 
     if (computed.getPropertyValue('box-sizing') == 'content-box') {
       offset =
@@ -136,6 +141,11 @@ export function maybeResizeTextarea(element) {
     }
   }, () => {
     scrollHeightPromise.then(scrollHeight => {
+      const height = scrollHeight + offset;
+      // Prevent the scrollbar from appearing
+      // unless the text is beyond the max-height
+      element.classList.toggle(AMP_FORM_TEXTAREA_MAX_CSS, height > maxHeight);
+      // Set the height to the height of the text
       setStyle(element, 'height', px(scrollHeight + offset));
     });
   });
@@ -160,15 +170,18 @@ function getShrinkHeight(textarea) {
 
   let height = 0;
   let shouldKeepTop = false;
+
   return resources.measureMutateElement(body, () => {
     const computed = computedStyle(win, textarea);
     const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10);
+
     shouldKeepTop = (isNaN(maxHeight) || textarea.scrollHeight < maxHeight);
   }, () => {
     // Prevent a jump from the textarea element scrolling
     if (shouldKeepTop) {
       textarea.scrollTop = 0;
     }
+    // Append the clone to the DOM so its scrollHeight can be read
     doc.body.appendChild(clone);
   }).then(() => {
     return resources.measureMutateElement(body, () => {
