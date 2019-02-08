@@ -64,19 +64,59 @@ Example:
 </amp-jwplayer>
 ```
 
+Contextual Article Matching
+
+Example:
+
+```html
+  <amp-jwplayer
+      data-player-id="BjcwyK37"
+      data-media-id="BZ6tc0gy"
+      data-content-search="__CONTEXTUAL__"
+      data-content-contextual=true
+      data-content-recency="9D"
+      data-content-backfill=true
+      layout="responsive" width="160" height="90">
+  </amp-jwplayer>
+```
+
 ## Attributes
 
 ##### data-player-id
 
 JW Platform player id. This is an 8-digit alphanumeric sequence that can be found in the [Players](https://dashboard.jwplayer.com/#/players) section in your JW Player Dashboard. (**Required**)
 
+
 ##### data-media-id
 
 The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the [Content](https://dashboard.jwplayer.com/#/content) section in your JW Player Dashboard. (**Required if `data-playlist-id` is not defined.**)
 
+
 ##### data-playlist-id
 
-The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes precedence.  (**Required if `data-media-id` is not defined.**)
+The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes 
+precedence.  (**Required if `data-media-id` is not defined.**)
+
+
+##### data-content-search
+
+Denotes the type of the playlist. This is a search playlist that takes in a keyword or phrase as the search query and generates a playlist based on that search query. If contextual article matching is desired, use the value `__CONTEXTUAL__` (data-content-contextual must also be 'true').
+
+
+##### data-content-contextual
+
+Enables the Player to grab the OG title (or HTML title if there is no OG title) of a given webpage and use that as the search query (required to do Contextual Article Matching). (**'true' or 'false'**)
+
+
+##### data-content-recency
+
+Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). Specified in the format `xD`, where x is a numerical value (i.e. '9D').
+
+
+##### data-content-backfill
+
+Ensures that there is always a search result. If there are no search results for the given query, this parameter ensures that a list of trending videos are served. (**'true' or 'false'**)
+
 
 ##### common attributes
 
