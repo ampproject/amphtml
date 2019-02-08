@@ -345,10 +345,6 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
-### Children (of amp-story)
-
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
-
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
@@ -368,6 +364,10 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
   <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
+
+### Children (of amp-story)
+
+The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
 ## Pages: `amp-story-page`
 
@@ -710,6 +710,24 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
+    <td>Clickable elements</td>
+    <td>
+      <ul>
+        <li><code>&lt;a></code></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>Embeds</td>
+    <td>
+      <ul>
+        <li><code>&lt;amp-twitter></code></li>
+        <li><code>&lt;amp-youtube></code></li>
+        <li><code>&lt;amp-instagram></code></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Other</td>
     <td>
       <ul>
@@ -719,6 +737,38 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
 </table>
+
+#### Clickable elements and embeds in amp-story-grid-layer
+
+To keep navigation smooth and avoid accidental clicks, a tooltip will be shown whenever an embed is clicked before it is expanded to a full-screen view.
+
+#### Customizing tooltip for clickable elements
+
+You can customize the contents of the tooltip displayed on top of a clickable item by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+
+<figure class="centered-fig">
+  <span class="special-char">Example:</span>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="" width="300" height="553">
+  <noscript><img width="300" src="" /></noscript>
+  </amp-anim>
+</figure>
+
+
+##### `data-tooltip-icon`
+
+Takes in a `src` where the icon image is located.
+
+##### `data-tooltip-text`
+
+A string that will be shown when the tooltip appears.
+
+Example:
+
+```html
+<a href="https://www.google.com" role="link" data-tooltip-icon="./assets/ic_amp_googblue_1x_web_24dp.png" data-tooltip-text="Go to page">
+  Click me!
+</a>
+```
 
 ### `amp-story-cta-layer`
 
