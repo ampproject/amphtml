@@ -16,6 +16,7 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -153,17 +154,24 @@ export class ScrollAccessVendor extends AccessClientAdapter {
         .then(response => {
           const isStory = this.ampdoc.getRootNode().querySelector(
               'amp-story[standalone]');
-          if (response && response.scroll) {
+          if (response && response['scroll']) {
             if (!isStory) {
               const config = this.accessSource_.getAdapterConfig();
               new ScrollElement(this.ampdoc).handleScrollUser(
                   this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
+              if (response['features'] && response['features']['readDepth']) {
+                new ReadDepthTracker(
+                    this.ampdoc,
+                    this.accessSource_,
+                    connectHostname(config)
+                );
+              }
             }
           } else {
             if (
               response &&
-              response.blocker &&
+              response['blocker'] &&
               ScrollContentBlocker.shouldCheck(this.ampdoc)
             ) {
               new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();

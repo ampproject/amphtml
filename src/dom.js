@@ -508,6 +508,30 @@ export function childElementsByTag(parent, tagName) {
 }
 
 /**
+ * Prefixes a selector for ancestor selection. Splits in subselectors and
+ * applies prefix to each.
+ *
+ * e.g.
+ * ```
+ *   scopeSelector('.i-amphtml-scoped', 'div'); // .i-amphtml-scoped div
+ *   scopeSelector(':scope', 'div, ul');        // :scope div, :scope ul
+ *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
+ * ```
+ *
+ * @param {string} ancestorSelector
+ * @param {string} descendantSelector
+ * @return {string}
+ */
+function scopeSelector(ancestorSelector, descendantSelector) {
+  return descendantSelector
+      .split(',')
+      .map(subSelector => `${ancestorSelector} ${subSelector}`)
+      .join(',');
+}
+
+export const scopeSelectorForTesting = scopeSelector;
+
+/**
  * Finds all elements that matche `selector`, scoped inside `root`
  * for user-agents that do not support native scoping.
  *
@@ -520,9 +544,10 @@ export function childElementsByTag(parent, tagName) {
 function scopedQuerySelectionFallback(root, selector) {
   const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
-  const element = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
+  const scopedSelector = scopeSelector(`.${unique}`, selector);
+  const elements = root./*OK*/querySelectorAll(scopedSelector);
   root.classList.remove(unique);
-  return element;
+  return elements;
 }
 
 /**
@@ -537,7 +562,7 @@ export function scopedQuerySelector(root, selector) {
     scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return root./*OK*/querySelector(`:scope ${selector}`);
+    return root./*OK*/querySelector(scopeSelector(':scope', selector));
   }
 
   // Only IE.
@@ -557,7 +582,7 @@ export function scopedQuerySelectorAll(root, selector) {
     scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return root./*OK*/querySelectorAll(`:scope ${selector}`);
+    return root./*OK*/querySelectorAll(scopeSelector(':scope', selector));
   }
 
   // Only IE.
@@ -856,12 +881,8 @@ export function fullscreenEnter(element) {
   const requestFs = element.requestFullscreen
     || element.requestFullScreen
     || element.webkitRequestFullscreen
-    || element.webkitRequestFullScreen
     || element.webkitEnterFullscreen
-    || element.webkitEnterFullScreen
     || element.msRequestFullscreen
-    || element.msRequestFullScreen
-    || element.mozRequestFullscreen
     || element.mozRequestFullScreen;
   if (requestFs) {
     requestFs.call(element);
@@ -874,31 +895,30 @@ export function fullscreenEnter(element) {
  * @param {!Element} element
  */
 export function fullscreenExit(element) {
-  let exitFs = element.cancelFullScreen
-               || element.exitFullscreen
-               || element.exitFullScreen
-               || element.webkitExitFullscreen
-               || element.webkitExitFullScreen
-               || element.webkitCancelFullScreen
-               || element.mozCancelFullScreen
-               || element.msExitFullscreen;
-  if (exitFs) {
-    exitFs.call(element);
+  const elementBoundExit =
+      element.cancelFullScreen
+      || element.exitFullscreen
+      || element.webkitExitFullscreen
+      || element.webkitCancelFullScreen
+      || element.mozCancelFullScreen
+      || element.msExitFullscreen;
+  if (elementBoundExit) {
+    elementBoundExit.call(element);
     return;
   }
-  if (element.ownerDocument) {
-    exitFs = element.ownerDocument.cancelFullScreen
-      || element.ownerDocument.exitFullscreen
-      || element.ownerDocument.exitFullScreen
-      || element.ownerDocument.webkitExitFullscreen
-      || element.ownerDocument.webkitExitFullScreen
-      || element.ownerDocument.webkitCancelFullScreen
-      || element.ownerDocument.mozCancelFullScreen
-      || element.ownerDocument.msExitFullscreen;
-  }
-  if (exitFs) {
-    exitFs.call(element.ownerDocument);
+  const {ownerDocument} = element;
+  if (!ownerDocument) {
     return;
+  }
+  const docBoundExit =
+      ownerDocument.cancelFullScreen
+      || ownerDocument.exitFullscreencancelFullScreen
+      || ownerDocument.webkitExitFullscreencancelFullScreen
+      || ownerDocument.webkitCancelFullScreencancelFullScreen
+      || ownerDocument.mozCancelFullScreencancelFullScreen
+      || ownerDocument.msExitFullscreen;
+  if (docBoundExit) {
+    docBoundExit.call(ownerDocument);
   }
 }
 
@@ -910,20 +930,20 @@ export function fullscreenExit(element) {
  * @return {boolean}
  */
 export function isFullscreenElement(element) {
-  const isFullscreen = element.webkitDisplayingFullscreen;
-  if (isFullscreen) {
-    return true;
+  const {webkitDisplayingFullscreen} = element;
+  if (webkitDisplayingFullscreen !== undefined) {
+    return webkitDisplayingFullscreen;
   }
-  if (element.ownerDocument) {
-    const fullscreenElement = element.ownerDocument.fullscreenElement
-      || element.ownerDocument.webkitFullscreenElement
-      || element.ownerDocument.mozFullScreenElement
-      || element.webkitCurrentFullScreenElement;
-    if (fullscreenElement == element) {
-      return true;
-    }
+  const {ownerDocument} = element;
+  if (!ownerDocument) {
+    return false;
   }
-  return false;
+  const fullscreenElement =
+      ownerDocument.fullscreenElement
+      || ownerDocument.webkitFullscreenElement
+      || ownerDocument.mozFullScreenElement
+      || ownerDocument.webkitCurrentFullScreenElement;
+  return fullscreenElement == element;
 }
 
 /**
