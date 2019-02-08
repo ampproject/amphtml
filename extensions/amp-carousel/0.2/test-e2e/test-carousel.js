@@ -113,7 +113,7 @@ describes.endtoend('AMP carousel', {
 
   it('should have the correct scroll position when resizing', async() => {
     // Note: 513 seems to be the smallest settable width.
-    controller.setWindowRect({
+    await controller.setWindowRect({
       width: 600,
       height: 600,
     });
@@ -128,7 +128,7 @@ describes.endtoend('AMP carousel', {
       'width': 600,
     });
 
-    controller.setWindowRect({
+    await controller.setWindowRect({
       width: 700,
       height: 600,
     });

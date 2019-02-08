@@ -56,13 +56,17 @@ describes.endtoend('AMP carousel grouping', {
       await expect(rect(slides[2])).to.include({x: 0});
     });
 
-    it('should snap on current group when before the midpoint', async() => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
+    // TODO(sparhami) It seems like scrolling by even 1 pixel using scrollBy
+    // causes snap now. Need touch event support to actually simulate the  user
+    // scrolling.
+    it.skip('should snap on current group when before the midpoint',
+        async() => {
+          const el = await getScrollingElement(controller);
+          const slides = await getSlides(controller);
 
-      await controller.scrollBy(el, {left: slideWidth - 1});
-      await expect(rect(slides[0])).to.include({x: 0});
-    });
+          await controller.scrollBy(el, {left: slideWidth - 1});
+          await expect(rect(slides[0])).to.include({x: 0});
+        });
   });
 
   describe('advancing', () => {
