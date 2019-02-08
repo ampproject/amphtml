@@ -188,17 +188,21 @@ amp_email.html
 
 ## Privacy and Security
 
+### Tracking email opens and interaction
 AMPHTML Emails track email opens with pixel tracking techniques, same as regular emails. Any user-initiated requests for data from external services will also indicate the user is interacting with the message. Email clients may offer their users the ability to disable loading remote images, and other external requests.
 
 
+### AMP-specific analytics
 The following AMP-specific analytic techniques are not supported:
-
-
 
 *   [AMP `CLIENT_ID`](https://www.ampproject.org/docs/analytics/analytics_basics#user-identification)
 *   [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
 *   [`amp-pixel`](https://www.ampproject.org/docs/reference/components/amp-pixel) 
 *   [AMP Variable Substitution](https://www.ampproject.org/docs/analytics/analytics_basics#variable-substitution) 
+
+### Replying/forwarding semantics
+
+The email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
 
 
 ### The amp-carousel
@@ -330,14 +334,7 @@ Content-Type: text/html; charset="UTF-8"
 --001a114634ac3555ae05525685ae
 ```
 
-## Replying/forwarding semantics
-
-The email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
-
 ## Feedback & Support
 
 For support and feedback on AMPHTML Email, please use the following channel: [ongoing-participation](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#ongoing-participation)
 
-## Current Email Providers 
-
-Gmail is the first adopter with their [Gmail Developer Preview](https://gsuite.google.com/campaigns/index__amp-for-email.html) starting with the Web developer preview. We're looking forward to working with other mail providers and clients to have their web and mobile apps support this as well.
