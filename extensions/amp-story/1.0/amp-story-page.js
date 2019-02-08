@@ -701,7 +701,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Array<string>}
    */
   getAdjacentPageIds() {
-    const adjacentPageIds = [];
+    const adjacentPageIds =
+      isExperimentOn(this.win, 'amp-story-branching') ?
+        this.actions_() :
+        [];
 
     const autoAdvanceNext =
         this.getNextPageId(true /* opt_isAutomaticAdvance */);
@@ -768,6 +771,32 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     return null;
+  }
+
+  /**
+   * Finds any elements in the page that has a goToPage action.
+   * @return {!Array<string>} The IDs of the potential next pages in the story
+   * or null if there aren't any.
+   * @private
+   */
+  actions_() {
+    const actionElements =
+      Array.prototype.slice.call(
+          this.element.querySelectorAll('[on*=goToPage]'));
+
+    const actionAttrs = actionElements.map(action => action.getAttribute('on'));
+
+    return actionAttrs.reduce((res, actions) => {
+      // Handling for multiple actions on one event or multiple events.
+      const actionList = actions.split(/[;,]+/);
+      actionList.forEach(action => {
+        if (action.indexOf('goToPage') >= 0) {
+          // The pageId is in between the equals sign & closing parenthesis.
+          res.push(action.slice(action.search('\=(.*)') + 1,-1));
+        }
+      });
+      return res;
+    }, []);
   }
 
   /**
