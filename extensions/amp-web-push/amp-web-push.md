@@ -83,7 +83,7 @@ The `amp-web-push` component requires extra integration on your site. You will n
 ></amp-web-push>
 ```
 
-All properties are <strong>required</strong>, and all URLs must begin with the same origin (e.g. https://example.com).
+All properties are <strong>required</strong>, and all URLs must begin with the same origin (e.g. `https://example.com`).
 
 <table>
   <tr>
