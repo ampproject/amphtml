@@ -15,6 +15,11 @@
  */
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
@@ -23,6 +28,7 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
+import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -90,6 +96,30 @@ const TEMPLATE = {
   }],
 };
 
+/** @private @const {!./simple-template.ElementDef} */
+const SHARE_PAGE_TEMPLATE = {
+  tag: 'span',
+  children: [
+    {
+      tag: 'input',
+      attrs: dict(
+          {'class': 'i-amphtml-page-share',
+            'type': 'checkbox',
+            'id': 'page-share',
+            'name': 'pageId',
+            'value': 'id',
+          }),
+    },
+    {
+      tag: 'label',
+      attrs: dict({
+        'class': 'i-amphtml-story-share-label',
+        'for': 'page-share',
+        'id': 'page-share-label',
+      }),
+    },
+  ],
+};
 
 /** @private @const {!./simple-template.ElementDef} */
 const SHARE_ITEM_TEMPLATE = {
@@ -223,6 +253,15 @@ export class ShareWidget {
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
+
+    /** @private @const {!string} */
+    this.currentPageId_ = '';
+
+    /** @private @const {!boolean} */
+    this.isDesktopUi_ = false;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -247,6 +286,7 @@ export class ShareWidget {
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
+    this.initializeListeners_();
     this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
@@ -274,16 +314,32 @@ export class ShareWidget {
 
     this.add_(linkShareButton);
 
+    if (isExperimentOn(this.win, 'amp-story-branching') && this.isDesktopUi_) {
+
+      const sharePageCheck =
+        renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
+      sharePageCheck.querySelector(
+          '#page-share-label').innerHTML = 'Share this page';
+      this.add_(sharePageCheck);
+    }
+
     // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
     listen(linkShareButton, 'click', e => {
       e.preventDefault();
-      this.copyUrlToClipboard_();
+      this.copyUrlToClipboard_(this.root.querySelector('#page-share').checked);
     });
   }
 
-  /** @private */
-  copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
+  /**
+   * @param {boolean} opt_sharePage
+   * @private
+   */
+  copyUrlToClipboard_(opt_sharePage) {
+    const url =
+      (isExperimentOn(this.win, 'amp-story-branching') && opt_sharePage) ?
+        Services.documentInfoForDoc(
+            this.getAmpDoc_()).canonicalUrl + '#page=' + this.currentPageId_ :
+        Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
@@ -331,6 +387,19 @@ export class ShareWidget {
     const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
 
     return ('share' in navigator) && !isChromeWebview;
+  }
+
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      this.currentPageId_ = pageId;
+    });
+
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.isDesktopUi_ = (uiState === UIType.DESKTOP_FULLBLEED);
+    }, true /** callToInitialize */);
   }
 
   /**
