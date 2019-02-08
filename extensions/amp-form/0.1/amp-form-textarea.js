@@ -16,8 +16,18 @@
 
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
+import {dev, devAssert} from '../../../src/log';
+import {listenOncePromise} from '../../../src/event-helper';
+import {removeElement} from '../../../src/dom';
+import {throttle} from '../../../src/utils/rate-limit';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
+
+const AMP_FORM_TEXTAREA_SHRINK_ATTR = 'autoshrink';
+
+const MIN_EVENT_INTERVAL_MS = 100;
+
+const AMP_FORM_TEXTAREA_CLONE_CSS = 'i-amphtml-textarea-clone';
 
 /**
  * This behavior can be removed when browsers implement `height: max-content`
@@ -27,12 +37,66 @@ const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
  */
 export function installAmpFormTextarea(form) {
   form.addEventListener('input', e => {
-    const element = e.target;
+    const element = dev().assertElement(e.target);
     if (element.tagName != 'TEXTAREA' ||
         !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
       return;
     }
+
     maybeExpandTextarea(element);
+  });
+
+  form.addEventListener('mousedown', e => {
+    if (e.which != 1) {
+      return;
+    }
+
+    const element = dev().assertElement(e.target);
+    if (element.tagName != 'TEXTAREA' ||
+        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      return;
+    }
+
+    maybeRemoveExpandBehavior(element);
+  });
+
+  const win = devAssert(form.ownerDocument.defaultView);
+  win.addEventListener('resize', throttle(win, () => {
+    const {length} = form.elements;
+    for (let i = 0; i < length; i++) {
+      const element = form.elements[i];
+      if (element.tagName != 'TEXTAREA' ||
+          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+        continue;
+      }
+
+      maybeExpandTextarea(element);
+    }
+  }, MIN_EVENT_INTERVAL_MS));
+}
+
+/**
+ * Remove the expand behavior if a user drags the resize handle and changes
+ * the height of the textarea.
+ * @param {!Element} element
+ */
+export function maybeRemoveExpandBehavior(element) {
+  const resources = Services.resourcesForDoc(element);
+
+  Promise.all([
+    resources.measureElement(() => element.scrollHeight),
+    listenOncePromise(element, 'mouseup'),
+  ]).then(results => {
+    const heightMouseDown = results[0];
+    let heightMouseUp = 0;
+
+    return resources.measureMutateElement(element, () => {
+      heightMouseUp = element.scrollHeight;
+    }, () => {
+      if (heightMouseDown != heightMouseUp) {
+        element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
+      }
+    });
   });
 }
 
@@ -43,19 +107,63 @@ export function installAmpFormTextarea(form) {
  */
 export function maybeExpandTextarea(element) {
   const resources = Services.resourcesForDoc(element);
-  const win = element.ownerDocument.defaultView;
+  const win = devAssert(element.ownerDocument.defaultView);
 
-  let padding = 0;
-  let scrollHeight = 0;
+  let offset = 0;
+  let scrollHeightPromise = null;
+
+  if (element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_ATTR)) {
+    scrollHeightPromise = getShrinkHeight(element);
+  }
 
   return resources.measureMutateElement(element, () => {
     const computed = computedStyle(win, element);
 
-    scrollHeight = element.scrollHeight;
-    padding =
-        parseInt(computed.getPropertyValue('padding-top'), 10) +
-        parseInt(computed.getPropertyValue('padding-bottom'), 10);
+    if (scrollHeightPromise == null) {
+      scrollHeightPromise = Promise.resolve(element.scrollHeight);
+    }
+
+    if (computed.getPropertyValue('box-sizing') == 'content-box') {
+      offset =
+          -parseInt(computed.getPropertyValue('padding-top'), 10) +
+          -parseInt(computed.getPropertyValue('padding-bottom'), 10);
+    } else {
+      offset =
+          parseInt(computed.getPropertyValue('border-top-width'), 10) +
+          parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+    }
   }, () => {
-    setStyle(element, 'height', px(scrollHeight - padding));
+    scrollHeightPromise.then(scrollHeight => {
+      setStyle(element, 'height', px(scrollHeight + offset));
+    });
   });
+}
+
+/**
+ * If shrink behavior is enabled, get the amount to shrink or expand. This
+ * uses a more expensive method to calculate the new height creating a temporary
+ * clone of the node and setting its height to 0 to get the minimum scrollHeight
+ * of the element's contents.
+ * @param {!Element} textarea
+ * @return {!Promise<number>}
+ */
+function getShrinkHeight(textarea) {
+  const doc = devAssert(textarea.ownerDocument);
+  const body = devAssert(doc.body);
+  const resources = Services.resourcesForDoc(textarea);
+
+  const clone = textarea.cloneNode(/*deep*/ false);
+  clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
+
+  let height = 0;
+  return resources.mutateElement(body, () => {
+    textarea.scrollTop = 0; // prevent flash from textarea element scrolling
+    doc.body.appendChild(clone);
+  }).then(() => {
+    return resources.measureMutateElement(body, () => {
+      height = clone.scrollHeight;
+    }, () => {
+      removeElement(clone);
+    });
+  }).then(() => height);
 }

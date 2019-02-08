@@ -4628,6 +4628,13 @@ tags: {
     name: "autoexpand"
     requires_extension: "amp-form"
   }
+  attrs: {
+    name: "autoshrink"
+    requires_extension: "amp-form"
+    trigger: {
+      also_requires_attr: "autoexpand"
+    }
+  }
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
