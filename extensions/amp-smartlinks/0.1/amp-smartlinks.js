@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
@@ -133,14 +135,25 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   postPageImpression_() {
+    // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
+    this.signals().signal(CommonSignals.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
-    this.xhr_.fetchJson(ENDPOINTS.PAGE_IMPRESSION_ENDPOINT, {
-      method: 'POST',
-      ampCors: false,
-      headers: dict({'Content-Type': 'application/json'}),
-      body: payload,
-    });
+    const builder = new CustomEventReporterBuilder(this.element);
+
+    builder.track('page-impression', ENDPOINTS.PAGE_IMPRESSION_ENDPOINT);
+
+    builder.setTransportConfig(dict({
+      'beacon': true,
+      'image': false,
+      'xhrpost': true,
+      'useBody': true,
+    }));
+
+    builder.setExtraUrlParams(payload);
+    const reporter = builder.build();
+
+    reporter.trigger('page-impression', dict());
   }
 
   /**
