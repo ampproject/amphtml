@@ -20,29 +20,6 @@ AMP is a technology known for developing super fast web pages on mobile clients.
 
 The AMPHTML Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email.
 
-<div class="noshowtoc">
-
-**Contents**
-
-* [The AMPHTML Email Format](#the-amphtml-email-format)
-  + [Required markup](#required-markup)
-* [AMP Components](#amp-components)
-  * [Dynamic Content](#dynamic-content)
-  * [Layout](#layout)
-  * [Media](#media)
-* [CSS requirements](#css-requirements)
-   * [Specifying CSS in an AMP document](#specifying-css-in-an-amp-document)
-* [Document dimensions](#document-dimensions)
-* [Validation tools](#validation-tools)
-  * [Web-based validator](#web-based-validator)
-  * [Command-line validator](#command-line-validator)
-* [Examples](#examples)
-* [Adding AMP to existing emails](#adding-amp-to-existing-emails)
-* [Replying/forwarding semantics](#replyingforwarding-semantics)
-* [FAQ](#faq)
-* [Feedback & Support](#feedback--support)
-
-</div>
 
 ## The AMPHTML Email Format
 
