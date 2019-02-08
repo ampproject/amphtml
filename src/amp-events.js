@@ -29,4 +29,5 @@ export const AmpEvents = {
   LOAD_START: 'amp:load:start',
   LOAD_END: 'amp:load:end',
   ERROR: 'amp:error',
+  SIZE_CHANGED: 'amp:size-changed',
 };
