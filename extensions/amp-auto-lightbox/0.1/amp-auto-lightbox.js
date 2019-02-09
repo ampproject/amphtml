@@ -326,7 +326,7 @@ function usesLightboxExplicitly(ampdoc) {
  * @param {!Array<!Element>} candidates
  * @return {boolean}
  */
-function isProxyOrigin(ampdoc, candidates) {
+function isProxyOriginOrLocalDev(ampdoc, candidates) {
   // Allow `localDev` in lieu of proxy origin for manual testing, except in
   // tests where we need to actually perform the check.
   const {win} = ampdoc;
@@ -359,7 +359,7 @@ export function isEnabledForDoc(ampdoc, candidates) {
       !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
     return false;
   }
-  return isProxyOrigin(ampdoc, candidates);
+  return isProxyOriginOrLocalDev(ampdoc, candidates);
 }
 
 
