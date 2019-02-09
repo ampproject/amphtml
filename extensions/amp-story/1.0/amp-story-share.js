@@ -98,24 +98,26 @@ const TEMPLATE = {
 
 /** @private @const {!./simple-template.ElementDef} */
 const SHARE_PAGE_TEMPLATE = {
-  tag: 'span',
+  tag: 'label',
+  attrs: dict({
+    'class': 'i-amphtml-page-share-label',
+    'for': 'page-share',
+  }),
   children: [
     {
       tag: 'input',
       attrs: dict(
-          {'class': 'i-amphtml-page-share',
+          {'class': 'i-amphtml-page-share-check',
             'type': 'checkbox',
             'id': 'page-share',
-            'name': 'pageId',
-            'value': 'id',
           }),
     },
     {
-      tag: 'label',
+      tag: 'span',
       attrs: dict({
-        'class': 'i-amphtml-story-share-label',
+        'id': 'page-share-span',
+        'class': 'i-amphtml-page-share-span',
         'for': 'page-share',
-        'id': 'page-share-label',
       }),
     },
   ],
@@ -290,6 +292,7 @@ export class ShareWidget {
     this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
+    this.maybeAddPageShareButton_();
 
     return this.root;
   }
@@ -314,20 +317,26 @@ export class ShareWidget {
 
     this.add_(linkShareButton);
 
-    if (isExperimentOn(this.win, 'amp-story-branching') && this.isDesktopUi_) {
-
-      const sharePageCheck =
-        renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
-      sharePageCheck.querySelector(
-          '#page-share-label').innerHTML = 'Share this page';
-      this.add_(sharePageCheck);
-    }
-
     // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
     listen(linkShareButton, 'click', e => {
       e.preventDefault();
       this.copyUrlToClipboard_(this.root.querySelector('#page-share').checked);
     });
+  }
+
+  /** On desktop mode, with branching, users should be able to share a story
+   * starting from a specific page.
+   * @private */
+  maybeAddPageShareButton_() {
+    if (isExperimentOn(this.win, 'amp-story-branching') && this.isDesktopUi_) {
+
+      const sharePageCheck =
+        renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
+      sharePageCheck.querySelector(
+          '#page-share-span').innerHTML = 'Share this page';
+
+      this.root.appendChild(sharePageCheck);
+    }
   }
 
   /**

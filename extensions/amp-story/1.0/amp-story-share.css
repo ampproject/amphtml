@@ -168,7 +168,27 @@
   text-align: center !important;
 }
 
-.i-amphtml-page-share {
+.i-amphtml-page-share-check {
   width: 24px !important;
   height: 24px !important;
+  vertical-align: middle;
+}
+
+.i-amphtml-page-share-span {
+  vertical-align: middle !important;
+
+}
+
+.i-amphtml-page-share-label {
+  display: block !important;
+  position: absolute !important;
+  bottom: -2px !important;
+  white-space: nowrap;
+  color: #333 !important;
+  text-transform: capitalize !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: 400 !important;
+  line-height: 11px !important;
+  font-size: 11px !important;
+  text-align: center !important;
 }
