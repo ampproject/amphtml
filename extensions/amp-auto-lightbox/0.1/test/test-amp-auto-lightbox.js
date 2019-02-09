@@ -28,8 +28,8 @@ import {
   Scanner,
   VIEWPORT_AREA_RATIO,
   apply,
+  isEnabledForDoc,
   meetsSizingCriteria,
-  resolveIsEnabledForDoc,
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
@@ -38,7 +38,6 @@ import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {isArray} from '../../../../src/types';
-import {parseUrlDeprecated} from '../../../../src/url';
 import {tryResolve} from '../../../../src/utils/promise';
 
 
@@ -91,16 +90,10 @@ describes.realWin(TAG, {
     }
   });
 
-  function mockIsEmbeddedAndTrustedViewer(isEmbedded, opt_isTrusted) {
-    const isTrusted = opt_isTrusted === undefined ? isEmbedded : opt_isTrusted;
-    const viewerHostname = isTrusted ? 'google.com' : 'tacos.al.pastor';
-
-    env.sandbox.stub(Services, 'viewerForDoc').returns({
-      isEmbedded() {
-        return isEmbedded;
-      },
-      getViewerOrigin() {
-        return tryResolve(() => `https://${viewerHostname}`);
+  function mockIsProxyOrigin(isProxyOrigin) {
+    env.sandbox.stub(Services, 'urlForDoc').returns({
+      isProxyOrigin() {
+        return isProxyOrigin;
       },
     });
   }
@@ -135,12 +128,6 @@ describes.realWin(TAG, {
 
     env.sandbox.stub(Mutation, 'mutate').callsFake((_, mutator) =>
       tryResolve(mutator));
-
-    env.sandbox.stub(Services, 'urlForDoc').returns({
-      parse(url) {
-        return parseUrlDeprecated(url);
-      },
-    });
   });
 
   describe('meetsTreeShapeCriteria', () => {
@@ -377,55 +364,59 @@ describes.realWin(TAG, {
 
   describe('scan', () => {
 
-    const waitForAllScannedToBeResolved = () =>
-      scan(env.ampdoc).then(scanned => scanned && Promise.all(scanned));
+    const waitForAllScannedToBeResolved = () => {
+      const scanned = scan(env.ampdoc);
+      if (scanned) {
+        return Promise.all(scanned);
+      }
+    };
 
     beforeEach(() => {
       // mock valid type
       mockLdJsonSchemaTypes(ldJsonSchemaTypes[0]);
     });
 
-    it('does not load extension if no candidates found', function* () {
+    it('does not load extension if no candidates found', async() => {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockIsEmbeddedAndTrustedViewer(true);
+      mockIsProxyOrigin(true);
       mockCandidates([]);
 
-      yield waitForAllScannedToBeResolved();
+      await waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
     });
 
-    it('loads extension if >= 1 candidates meet criteria', function* () {
+    it('loads extension if >= 1 candidates meet criteria', async() => {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-      mockIsEmbeddedAndTrustedViewer(true);
+      mockIsProxyOrigin(true);
       mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(true);
 
-      yield waitForAllScannedToBeResolved();
+      await waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.have.been.calledOnce;
     });
 
-    it('does not load extension if no candidates meet criteria', function* () {
+    it('does not load extension if no candidates meet criteria', async() => {
       const installExtensionForDoc = spyInstallExtensionsForDoc();
 
       mockCandidates([mockLoadedSignal(html`<amp-img></amp-img>`, true)]);
 
       mockAllCriteriaMet(false);
-      mockIsEmbeddedAndTrustedViewer(true);
+      mockIsProxyOrigin(true);
 
-      yield waitForAllScannedToBeResolved();
+      await waitForAllScannedToBeResolved();
 
       expect(installExtensionForDoc.withArgs(any, REQUIRED_EXTENSION))
           .to.not.have.been.called;
     });
 
-    it('sets attribute only for candidates that meet criteria', function* () {
+    it('sets attribute only for candidates that meet criteria', async() => {
       const a = mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true);
       const b = mockLoadedSignal(html`<amp-img src="b.png"></amp-img>`, true);
       const c = mockLoadedSignal(html`<amp-img src="c.png"></amp-img>`, true);
@@ -437,23 +428,23 @@ describes.realWin(TAG, {
       allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
       mockCandidates([a, b, c]);
-      mockIsEmbeddedAndTrustedViewer(true);
+      mockIsProxyOrigin(true);
 
-      yield waitForAllScannedToBeResolved();
+      await waitForAllScannedToBeResolved();
 
       expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
       expect(b.getAttribute(LIGHTBOXABLE_ATTR)).to.not.be.ok;
       expect(c.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
     });
 
-    it('sets unique group for candidates that meet criteria', function* () {
+    it('sets unique group for candidates that meet criteria', async() => {
       const candidates = mockCandidates([1, 2, 3].map(() =>
         mockLoadedSignal(html`<amp-img src="a.png"></amp-img>`, true)));
 
       mockAllCriteriaMet(true);
-      mockIsEmbeddedAndTrustedViewer(true);
+      mockIsProxyOrigin(true);
 
-      yield waitForAllScannedToBeResolved();
+      await waitForAllScannedToBeResolved();
 
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
@@ -465,7 +456,7 @@ describes.realWin(TAG, {
 
   describe('runCandidates', () => {
 
-    it('filters out candidates that fail to load', () => {
+    it('filters out candidates that fail to load', async() => {
       const shouldNotLoad = mockLoadedSignal(
           html`<amp-img src="bla.png"></amp-img>`,
           false);
@@ -478,26 +469,24 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      return Promise.all(runCandidates(env.ampdoc, candidates))
-          .then(candidates => {
-            expect(candidates.length).to.equal(2);
-            expect(candidates[0]).to.not.be.ok;
-            expect(candidates[1]).to.equal(shouldLoad);
-          });
+      const honoredCandidates =
+          await Promise.all(runCandidates(env.ampdoc, candidates));
+
+      expect(honoredCandidates.length).to.equal(2);
+      expect(honoredCandidates[0]).to.not.be.ok;
+      expect(honoredCandidates[1]).to.equal(shouldLoad);
     });
 
   });
 
-  describe('resolveIsEnabledForDoc', () => {
+  describe('isEnabledForDoc', () => {
 
     const expectIsEnabled = shouldBeEnabled =>
-      resolveIsEnabledForDoc(env.ampdoc, ['foo']).then(actuallyEnabled => {
-        expect(actuallyEnabled).to.equal(shouldBeEnabled);
-      });
+      expect(isEnabledForDoc(env.ampdoc, ['foo'])).to.equal(shouldBeEnabled);
 
     it('rejects documents without any type annotation', () => {
-      mockIsEmbeddedAndTrustedViewer(true);
-      return expectIsEnabled(false);
+      mockIsProxyOrigin(true);
+      expectIsEnabled(false);
     });
 
     describe('DOM selection', () => {
@@ -574,17 +563,17 @@ describes.realWin(TAG, {
     describe('by LD+JSON @type', () => {
 
       it('rejects doc with invalid LD+JSON @type', () => {
-        mockIsEmbeddedAndTrustedViewer(true);
+        mockIsProxyOrigin(true);
         mockLdJsonSchemaTypes('hamberder');
-        return expectIsEnabled(false);
+        expectIsEnabled(false);
       });
 
       ldJsonSchemaTypes.forEach(type => {
 
-        it(`accepts schema with @type=${type}`, () => {
+        it(`accepts schema with @type=${type} and proxy origin`, () => {
           mockLdJsonSchemaTypes(type);
-          mockIsEmbeddedAndTrustedViewer(true);
-          return expectIsEnabled(true);
+          mockIsProxyOrigin(true);
+          expectIsEnabled(true);
         });
 
         it(`rejects schema with @type=${type} but lightbox explicit`, () => {
@@ -602,24 +591,14 @@ describes.realWin(TAG, {
           doc.body.appendChild(lightboxable);
 
           mockLdJsonSchemaTypes(type);
-          mockIsEmbeddedAndTrustedViewer(true);
-          return expectIsEnabled(false);
+          mockIsProxyOrigin(true);
+          expectIsEnabled(false);
         });
 
-        it(`rejects schema with @type=${type} for non-embedded docs`, () => {
+        it(`rejects schema with @type=${type} for non-proxy origin`, () => {
           mockLdJsonSchemaTypes(type);
-          mockIsEmbeddedAndTrustedViewer(
-              /* isEmbedded */ false,
-              /* isTrusted */ true);
-          return expectIsEnabled(false);
-        });
-
-        it(`rejects schema with @type=${type} for untrusted viewer`, () => {
-          mockLdJsonSchemaTypes(type);
-          mockIsEmbeddedAndTrustedViewer(
-              /* isEmbedded */ true,
-              /* isTrusted */ false);
-          return expectIsEnabled(false);
+          mockIsProxyOrigin(false);
+          expectIsEnabled(false);
         });
 
       });
@@ -628,9 +607,9 @@ describes.realWin(TAG, {
     describe('by og:type', () => {
 
       it('rejects doc with invalid <meta property="og:type">', () => {
-        mockIsEmbeddedAndTrustedViewer(true);
+        mockIsProxyOrigin(true);
         mockOgType('cinnamonroll');
-        return expectIsEnabled(false);
+        expectIsEnabled(false);
       });
 
       ogTypes.forEach(type => {
@@ -638,10 +617,10 @@ describes.realWin(TAG, {
         const ogTypeMeta = type =>
           `<meta property="og:type" content="${type}">`;
 
-        it(`accepts docs with ${ogTypeMeta(type)}`, () => {
+        it(`accepts docs with ${ogTypeMeta(type)} and proxy origin`, () => {
           mockOgType(type);
-          mockIsEmbeddedAndTrustedViewer(true);
-          return expectIsEnabled(true);
+          mockIsProxyOrigin(true);
+          expectIsEnabled(true);
         });
 
         it(`rejects docs with ${ogTypeMeta(type)}, lightbox explicit`, () => {
@@ -659,24 +638,14 @@ describes.realWin(TAG, {
           doc.body.appendChild(lightboxable);
 
           mockOgType(type);
-          mockIsEmbeddedAndTrustedViewer(true);
-          return expectIsEnabled(false);
+          mockIsProxyOrigin(true);
+          expectIsEnabled(false);
         });
 
-        it(`rejects non-embedded docs with ${ogTypeMeta(type)}`, () => {
+        it(`rejects docs with ${ogTypeMeta(type)} for non-proxy origin`, () => {
           mockOgType(type);
-          mockIsEmbeddedAndTrustedViewer(
-              /* isEmbedded */ false,
-              /* isTrusted */ true);
-          return expectIsEnabled(false);
-        });
-
-        it(`rejects docs with ${ogTypeMeta(type)} for untrusted viewer`, () => {
-          mockOgType(type);
-          mockIsEmbeddedAndTrustedViewer(
-              /* isEmbedded */ true,
-              /* isTrusted */ false);
-          return expectIsEnabled(false);
+          mockIsProxyOrigin(false);
+          expectIsEnabled(false);
         });
 
       });
@@ -686,18 +655,18 @@ describes.realWin(TAG, {
 
   describe('apply', () => {
 
-    it('sets attribute', function* () {
+    it('sets attribute', async() => {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
 
-      yield apply(env.ampdoc, element);
+      await apply(env.ampdoc, element);
 
       expect(element.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
     });
 
-    it('sets unique group for each element', function* () {
+    it('sets unique group for each element', async() => {
       const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
 
-      yield Promise.all(candidates.map(c => apply(env.ampdoc, c)));
+      await Promise.all(candidates.map(c => apply(env.ampdoc, c)));
 
       squaredCompare(candidates, (a, b) => {
         expect(a.getAttribute(LIGHTBOXABLE_ATTR))
@@ -705,12 +674,12 @@ describes.realWin(TAG, {
       });
     });
 
-    it('dispatches event', function* () {
+    it('dispatches event', async() => {
       const element = html`<amp-img src="chabuddy.g"></amp-img>`;
 
       element.dispatchCustomEvent = env.sandbox.spy();
 
-      yield apply(env.ampdoc, element);
+      await apply(env.ampdoc, element);
 
       expect(element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET))
           .to.have.been.calledOnce;

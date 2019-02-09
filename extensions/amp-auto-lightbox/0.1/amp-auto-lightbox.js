@@ -31,7 +31,6 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -94,8 +93,6 @@ const DISABLED_ANCESTORS =
     // only content.
     'amp-carousel';
 
-
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
 const META_OG_TYPE = 'meta[property="og:type"]';
@@ -324,38 +321,26 @@ function usesLightboxExplicitly(ampdoc) {
 }
 
 
-const resolveFalse = () => tryResolve(() => false);
-const resolveTrue = () => tryResolve(() => true);
-
-
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  */
-function isEmbeddedAndTrusted(ampdoc, candidates) {
-  // Allow `localDev` in lieu of viewer for manual testing, except in tests
-  // where we need all checks.
+function isProxyOrigin(ampdoc, candidates) {
+  // Allow `localDev` in lieu of proxy origin for manual testing, except in
+  // tests where we need to actually perform the check.
   const {win} = ampdoc;
   if (getMode(win).localDev && !getMode(win).test) {
-    return resolveTrue();
+    return true;
   }
 
-  const viewer = Services.viewerForDoc(ampdoc);
-  if (!viewer.isEmbedded()) {
-    return resolveFalse();
-  }
-
-  // An attached node is required for viewer origin check. If no candidates are
+  // An attached node is required for proxy origin check. If no candidates are
   // present, short-circuit.
   if (candidates.length <= 0) {
-    return resolveFalse();
+    return false;
   }
 
-  return viewer.getViewerOrigin().then(origin => {
-    const {hostname} = Services.urlForDoc(candidates[0]).parse(origin);
-    return GOOGLE_DOMAIN_RE.test(hostname);
-  });
+  return Services.urlForDoc(candidates[0]).isProxyOrigin(win.document.location);
 }
 
 
@@ -363,18 +348,18 @@ function isEmbeddedAndTrusted(ampdoc, candidates) {
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  * @visibleForTesting
  */
-export function resolveIsEnabledForDoc(ampdoc, candidates) {
+export function isEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
-    return resolveFalse();
+    return false;
   }
   if (!DocMetaAnnotations.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
       !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
-    return resolveFalse();
+    return false;
   }
-  return isEmbeddedAndTrusted(ampdoc, candidates);
+  return isProxyOrigin(ampdoc, candidates);
 }
 
 
@@ -434,18 +419,15 @@ export function runCandidates(ampdoc, candidates) {
  * Scans a document on initialization to lightbox elements that meet criteria.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element=} opt_root
- * @return {!Promise<!Array<!Promise>|undefined>}
+ * @return {!Array<!Promise>|undefined}
  */
 export function scan(ampdoc, opt_root) {
   const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
-
-  return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
-    if (!isEnabled) {
-      dev().info(TAG, 'disabled');
-      return;
-    }
-    return runCandidates(ampdoc, candidates);
-  });
+  if (!isEnabledForDoc(ampdoc, candidates)) {
+    dev().info(TAG, 'disabled');
+    return;
+  }
+  return runCandidates(ampdoc, candidates);
 }
 
 
