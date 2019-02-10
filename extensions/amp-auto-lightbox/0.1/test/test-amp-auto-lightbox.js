@@ -432,9 +432,9 @@ describes.realWin(TAG, {
 
       await waitForAllScannedToBeResolved();
 
-      expect(a.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
-      expect(b.getAttribute(LIGHTBOXABLE_ATTR)).to.not.be.ok;
-      expect(c.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
+      expect(a).to.have.attribute(LIGHTBOXABLE_ATTR);
+      expect(b).to.not.have.attribute(LIGHTBOXABLE_ATTR);
+      expect(c).to.have.attribute(LIGHTBOXABLE_ATTR);
     });
 
     it('sets unique group for candidates that meet criteria', async() => {
@@ -472,8 +472,8 @@ describes.realWin(TAG, {
       const honoredCandidates =
           await Promise.all(runCandidates(env.ampdoc, candidates));
 
-      expect(honoredCandidates.length).to.equal(2);
-      expect(honoredCandidates[0]).to.not.be.ok;
+      expect(honoredCandidates).to.have.length(2);
+      expect(honoredCandidates[0]).to.be.undefined;
       expect(honoredCandidates[1]).to.equal(shouldLoad);
     });
 
@@ -660,7 +660,7 @@ describes.realWin(TAG, {
 
       await apply(env.ampdoc, element);
 
-      expect(element.getAttribute(LIGHTBOXABLE_ATTR)).to.be.ok;
+      expect(element).to.have.attribute(LIGHTBOXABLE_ATTR);
     });
 
     it('sets unique group for each element', async() => {
