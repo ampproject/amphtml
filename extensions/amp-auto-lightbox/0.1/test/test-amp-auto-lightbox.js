@@ -480,8 +480,13 @@ describes.realWin(TAG, {
 
   describe('isEnabledForDoc', () => {
 
-    const expectIsEnabled = shouldBeEnabled =>
-      expect(isEnabledForDoc(env.ampdoc, ['foo'])).to.equal(shouldBeEnabled);
+    const expectIsEnabled = shouldBeEnabled => {
+      env.sandbox.stub(env.ampdoc, 'getBody').returns({
+        // only needs to be truthy since its ref req is mocked
+        firstElementChild: true,
+      });
+      expect(isEnabledForDoc(env.ampdoc)).to.equal(shouldBeEnabled);
+    };
 
     it('rejects documents without any type annotation', () => {
       mockIsProxyOrigin(true);

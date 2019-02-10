@@ -323,10 +323,9 @@ function usesLightboxExplicitly(ampdoc) {
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
  * @return {boolean}
  */
-function isProxyOriginOrLocalDev(ampdoc, candidates) {
+function isProxyOriginOrLocalDev(ampdoc) {
   // Allow `localDev` in lieu of proxy origin for manual testing, except in
   // tests where we need to actually perform the check.
   const {win} = ampdoc;
@@ -334,25 +333,25 @@ function isProxyOriginOrLocalDev(ampdoc, candidates) {
     return true;
   }
 
-  // An attached node is required for proxy origin check. If no candidates are
+  // An attached node is required for proxy origin check. If no elements are
   // present, short-circuit.
-  if (candidates.length <= 0) {
+  const {firstElementChild} = ampdoc.getBody();
+  if (!firstElementChild) {
     return false;
   }
 
   // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  return Services.urlForDoc(candidates[0]).isProxyOrigin(win.document.location);
+  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
 }
 
 
 /**
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
  * @return {boolean}
  * @visibleForTesting
  */
-export function isEnabledForDoc(ampdoc, candidates) {
+export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
     return false;
   }
@@ -360,7 +359,7 @@ export function isEnabledForDoc(ampdoc, candidates) {
       !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
     return false;
   }
-  return isProxyOriginOrLocalDev(ampdoc, candidates);
+  return isProxyOriginOrLocalDev(ampdoc);
 }
 
 
@@ -423,17 +422,17 @@ export function runCandidates(ampdoc, candidates) {
  * @return {!Array<!Promise>|undefined}
  */
 export function scan(ampdoc, opt_root) {
-  const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
-  if (!isEnabledForDoc(ampdoc, candidates)) {
+  if (!isEnabledForDoc(ampdoc)) {
     dev().info(TAG, 'disabled');
     return;
   }
-  return runCandidates(ampdoc, candidates);
+  const root = opt_root || ampdoc.win.document;
+  return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
-  ampdoc.whenReady().then(() => {
+  ampdoc.whenBodyAvailable().then(() => {
     getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
       scan(ampdoc, dev().assertElement(target));
     });
