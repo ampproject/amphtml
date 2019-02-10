@@ -135,12 +135,12 @@ describes.realWin(TAG, {
     const meetsTreeShapeCriteriaMsg = outerHtml =>
       `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
-    function itAccepts(shouldAccept, scenarios) {
-      scenarios.forEach(({kind, mutate, wrapWith}) => {
+    function itAcceptsOrRejects(scenarios) {
+      scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
         const maybeWrap = root => wrapWith ? wrap(root, wrapWith()) : root;
         const maybeMutate = root => mutate && mutate(root);
 
-        it(`${shouldAccept ? 'accepts' : 'rejects'} ${kind}`, () => {
+        it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
           [
             html`<amp-img src="asada.png"></amp-img>`,
             html`<div><amp-img src="adobada.png"></amp-img></div>`,
@@ -159,72 +159,71 @@ describes.realWin(TAG, {
             expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
                 meetsTreeShapeCriteriaMsg(scenario.outerHTML))
-                .to.equal(shouldAccept);
+                .to.equal(accepts ? true : false);
           });
         });
       });
     }
 
-    [true, false].forEach(accepts => {
-      describe('self-test', () => {
-        beforeEach(() => {
-          env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(accepts);
-        });
-        itAccepts(accepts, [{kind: 'any'}]);
+    describe('self-test', () => {
+      it('accepts', () => {
+        env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(true);
+        itAcceptsOrRejects([{accepts: 'any'}]);
+      });
+      it('rejects', () => {
+        env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(false);
+        itAcceptsOrRejects([{rejects: 'any'}]);
       });
     });
 
-    itAccepts(true, [
+    itAcceptsOrRejects([
       {
-        kind: 'elements by default',
+        accepts: 'elements by default',
       },
       {
-        kind: 'elements with a non-tap action',
+        accepts: 'elements with a non-tap action',
         mutate: el => el.setAttribute('on', 'nottap:doSomething'),
       },
       {
-        kind: 'elements inside non-clickable anchor',
+        accepts: 'elements inside non-clickable anchor',
         wrapWith: () => html`<a id=my-anchor></a>`,
       },
-    ]);
-
-    itAccepts(false, [
       {
-        kind: 'explicitly opted-out subnodes',
+        rejects: 'explicitly opted-out subnodes',
         mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
       },
       {
-        kind: 'placeholder subnodes',
+        rejects: 'placeholder subnodes',
         mutate: el => el.setAttribute('placeholder', ''),
       },
       {
-        kind: 'items actionable by tap with a single action',
+        rejects: 'items actionable by tap with a single action',
         mutate: el => el.setAttribute('on', 'tap:doSomething'),
       },
       {
-        kind: 'items actionable by tap with multiple actions',
+        rejects: 'items actionable by tap with multiple actions',
         mutate: el =>
           el.setAttribute('on', 'whatever:doSomething;tap:doSomethingElse'),
       },
       {
-        kind: 'items inside an amp-selector',
+        rejects: 'items inside an amp-selector',
         mutate: el => el.setAttribute('option', ''),
         wrapWith: () => html`<amp-selector></amp-selector>`,
       },
       {
-        kind: 'items inside a button',
+        rejects: 'items inside a button',
         wrapWith: () => html`<button></button>`,
       },
       {
-        kind: 'items inside amp-script',
+        rejects: 'items inside amp-script',
         wrapWith: () => html`<amp-script></amp-script>`,
       },
       {
-        kind: 'items inside amp-story',
+        rejects: 'items inside amp-story',
         wrapWith: () => html`<amp-story></amp-story>`,
       },
       {
-        kind: 'items inside a clickable link',
+        rejects: 'items inside a clickable link',
         wrapWith: () => html`<a href="http://hamberders.com"></a>`,
       },
     ]);
