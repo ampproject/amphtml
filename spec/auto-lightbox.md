@@ -46,14 +46,14 @@ the `data-amp-auto-lightbox-disable` attribute.
 For example, if you'd like to disable it on a particular image, you can do:
 
 ```html
-<amp-img src="my-image.png" data-amp-auto-lightbox-disable ...>
+<amp-img src="my-image.png" ... data-amp-auto-lightbox-disable>
 </amp-img>
 ```
 
 To disable it on a particular document section:
 
 ```html
-<section data-amp-auto-lightbox-disable ...>
+<section data-amp-auto-lightbox-disable>
   <!-- No elements inside this tree will be automatically lightboxed -->
 </section>
 ```
@@ -61,7 +61,7 @@ To disable it on a particular document section:
 Or to disable it for your entire document altogether:
 
 ```html
-<body data-amp-auto-lightbox-disable ...>
+<body data-amp-auto-lightbox-disable>
   <!-- No elements in the document be automatically lightboxed -->
 </body>
 ```
