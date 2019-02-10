@@ -164,7 +164,7 @@ describes.realWin(TAG, {
     }
 
     describe('self-test', () => {
-      const describeCriteriaMet = (isMet, scenarios) => {
+      const criteriaIsMetThereforeAcceptsOrRejects = (isMet, scenarios) => {
         describe(`Criteria ${isMet ? 'met' : 'unmet'}`, () => {
           beforeEach(() => {
             env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(isMet);
@@ -172,8 +172,8 @@ describes.realWin(TAG, {
           itAcceptsOrRejects(scenarios);
         });
       };
-      describeCriteriaMet(true, [{accepts: 'any'}]);
-      describeCriteriaMet(false, [{rejects: 'any'}]);
+      criteriaIsMetThereforeAcceptsOrRejects(true, [{accepts: 'any'}]);
+      criteriaIsMetThereforeAcceptsOrRejects(false, [{rejects: 'any'}]);
     });
 
     itAcceptsOrRejects([
