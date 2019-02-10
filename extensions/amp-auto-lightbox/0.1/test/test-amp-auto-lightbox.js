@@ -529,8 +529,7 @@ describes.realWin(TAG, {
         };
 
         it('returns empty', () => {
-          expect(DocMetaAnnotations.getAllLdJsonTypes(env.ampdoc).length)
-              .to.equal(0);
+          expect(DocMetaAnnotations.getAllLdJsonTypes(env.ampdoc)).to.be.empty;
         });
 
         it('returns all found @types', () => {
