@@ -21,6 +21,20 @@ effectively only for those that come from Google Search results. They also need 
   
 Documents that explicitly use `amp-lightbox-gallery` are excluded from this treatment.
 
+## Excluded images
+
+Images are clickable by default and should not be autolightboxed in any of the following cases:
+
+- the image or any of its ancestors has an [`on="tap: ..."` action](./amp-actions-and-events.md)
+- any of its ancestors is `a[href]`, `amp-selector [option]` or `button`
+
+They're also excluded when they're inside any of the following:
+
+- `amp-script`
+- `amp-story`
+- `amp-lightbox`
+- `amp-carousel` will likely in the future fulfill a special case where the feature is triggered with special treatment, but as of now, it's excluded.
+
 ## Disabling treatment explicitly
 
 The runtime uses certain criteria to determine whether an `amp-img` can be lightboxed. By default, some
