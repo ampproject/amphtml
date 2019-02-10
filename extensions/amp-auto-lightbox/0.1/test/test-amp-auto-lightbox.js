@@ -469,12 +469,11 @@ describes.realWin(TAG, {
 
       mockAllCriteriaMet(true);
 
-      const honoredCandidates =
-          await Promise.all(runCandidates(env.ampdoc, candidates));
+      const elected = await Promise.all(runCandidates(env.ampdoc, candidates));
 
-      expect(honoredCandidates).to.have.length(2);
-      expect(honoredCandidates[0]).to.be.undefined;
-      expect(honoredCandidates[1]).to.equal(shouldLoad);
+      expect(elected).to.have.length(2);
+      expect(elected[0]).to.be.undefined;
+      expect(elected[1]).to.equal(shouldLoad);
     });
 
   });
