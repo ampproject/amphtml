@@ -65,3 +65,7 @@ Or to disable it for your entire document altogether:
   <!-- No elements in the document be automatically lightboxed -->
 </body>
 ```
+
+If you'd like manual tuning of disabled/enabled images and/or grouping, please use
+[`amp-lightbox-gallery`](https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery)
+directly.
