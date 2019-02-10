@@ -340,6 +340,7 @@ function isProxyOriginOrLocalDev(ampdoc, candidates) {
     return false;
   }
 
+  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
   return Services.urlForDoc(candidates[0]).isProxyOrigin(win.document.location);
 }
 
