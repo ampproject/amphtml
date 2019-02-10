@@ -164,14 +164,16 @@ describes.realWin(TAG, {
     }
 
     describe('self-test', () => {
-      it('accepts', () => {
-        env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(true);
-        itAcceptsOrRejects([{accepts: 'any'}]);
-      });
-      it('rejects', () => {
-        env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(false);
-        itAcceptsOrRejects([{rejects: 'any'}]);
-      });
+      const describeCriteriaMet = (isMet, scenarios) => {
+        describe(`Criteria ${isMet ? 'met' : 'unmet'}`, () => {
+          beforeEach(() => {
+            env.sandbox.stub(Criteria, 'meetsTreeShapeCriteria').returns(isMet);
+          });
+          itAcceptsOrRejects(scenarios);
+        });
+      };
+      describeCriteriaMet(true, [{accepts: 'any'}]);
+      describeCriteriaMet(false, [{rejects: 'any'}]);
     });
 
     itAcceptsOrRejects([
