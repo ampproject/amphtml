@@ -237,6 +237,10 @@ describes.realWin(TAG, {
         wrapWith: () => html`<amp-story></amp-story>`,
       },
       {
+        kind: 'items inside amp-lightbox',
+        wrapWith: () => html`<amp-lightbox></amp-lightbox>`,
+      },
+      {
         kind: 'items inside a clickable link',
         wrapWith: () => html`<a href="http://hamberders.com"></a>`,
       },
