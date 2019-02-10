@@ -89,6 +89,9 @@ const DISABLED_ANCESTORS = [
   'amp-story',
   'button',
 
+  // No nested lightboxes.
+  'amp-lightbox',
+
   // Special treatment.
   // TODO(alanorozco): Allow and possibly group carousels where images are the
   // only content.
