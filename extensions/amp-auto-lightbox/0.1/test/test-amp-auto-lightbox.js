@@ -571,14 +571,15 @@ describes.realWin(TAG, {
       });
 
       ldJsonSchemaTypes.forEach(type => {
+        const typeSubObj = `{..."@type": "${type}"}`;
 
-        it(`accepts schema with @type=${type} and proxy origin`, () => {
+        it(`accepts docs with ${typeSubObj} schema and proxy origin`, () => {
           mockLdJsonSchemaTypes(type);
           mockIsProxyOrigin(true);
           expectIsEnabled(true);
         });
 
-        it(`rejects schema with @type=${type} but lightbox explicit`, () => {
+        it(`rejects docs with ${typeSubObj} schema, lightbox explicit`, () => {
           const doc = env.win.document;
 
           const extensionScript = createElementWithAttributes(doc, 'script', {
@@ -597,7 +598,7 @@ describes.realWin(TAG, {
           expectIsEnabled(false);
         });
 
-        it(`rejects schema with @type=${type} for non-proxy origin`, () => {
+        it(`rejects docs with ${typeSubObj} schema, non-proxy origin`, () => {
           mockLdJsonSchemaTypes(type);
           mockIsProxyOrigin(false);
           expectIsEnabled(false);
@@ -615,17 +616,15 @@ describes.realWin(TAG, {
       });
 
       ogTypes.forEach(type => {
+        const ogTypeMeta = `<meta property="og:type" content="${type}">`;
 
-        const ogTypeMeta = type =>
-          `<meta property="og:type" content="${type}">`;
-
-        it(`accepts docs with ${ogTypeMeta(type)} and proxy origin`, () => {
+        it(`accepts docs with ${ogTypeMeta} and proxy origin`, () => {
           mockOgType(type);
           mockIsProxyOrigin(true);
           expectIsEnabled(true);
         });
 
-        it(`rejects docs with ${ogTypeMeta(type)}, lightbox explicit`, () => {
+        it(`rejects docs with ${ogTypeMeta}, but lightbox explicit`, () => {
           const doc = env.win.document;
 
           const extensionScript = createElementWithAttributes(doc, 'script', {
@@ -644,7 +643,7 @@ describes.realWin(TAG, {
           expectIsEnabled(false);
         });
 
-        it(`rejects docs with ${ogTypeMeta(type)} for non-proxy origin`, () => {
+        it(`rejects docs with ${ogTypeMeta} for non-proxy origin`, () => {
           mockOgType(type);
           mockIsProxyOrigin(false);
           expectIsEnabled(false);
