@@ -132,7 +132,7 @@ describes.realWin(TAG, {
 
   describe('meetsTreeShapeCriteria', () => {
 
-    const meetsTreeShapeCriteriaMsg = outerHtml =>
+    const meetsTreeShapeCriteriaMsg = ({outerHtml}) =>
       `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
     function itAcceptsOrRejects(scenarios) {
@@ -156,10 +156,8 @@ describes.realWin(TAG, {
             expect(candidate).to.be.ok;
             expect(candidate.tagName).to.equal('AMP-IMG');
 
-            expect(
-                Criteria.meetsTreeShapeCriteria(candidate),
-                meetsTreeShapeCriteriaMsg(scenario.outerHTML))
-                .to.equal(accepts ? true : false);
+            expect(Criteria.meetsTreeShapeCriteria(candidate),
+                meetsTreeShapeCriteriaMsg(scenario)).to.equal(!!accepts);
           });
         });
       });
