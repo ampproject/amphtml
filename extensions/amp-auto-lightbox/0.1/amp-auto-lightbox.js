@@ -73,26 +73,27 @@ export const VIEWPORT_AREA_RATIO = 0.25;
 /**
  * Selector for subnodes for which the auto-lightbox treatment does not apply.
  */
-const DISABLED_ANCESTORS =
-    // Runtime-specific.
-    '[placeholder],' +
+const DISABLED_ANCESTORS = [
+  // Runtime-specific.
+  '[placeholder]',
 
-    // Explicitly opted out.
-    '[data-amp-auto-lightbox-disable],' +
+  // Explicitly opted out.
+  '[data-amp-auto-lightbox-disable]',
 
-    // Ancestors considered "actionable", i.e. that are bound to a default
-    // onclick action(e.g. `button`) or where it cannot be determined whether
-    // they're actionable or not (e.g. `amp-script`).
-    'a[href],' +
-    'amp-selector [option],' +
-    'amp-script,' +
-    'amp-story,' +
-    'button,' +
+  // Ancestors considered "actionable", i.e. that are bound to a default
+  // onclick action(e.g. `button`) or where it cannot be determined whether
+  // they're actionable or not (e.g. `amp-script`).
+  'a[href]',
+  'amp-selector [option]',
+  'amp-script',
+  'amp-story',
+  'button',
 
-    // Special treatment.
-    // TODO(alanorozco): Allow and possibly group carousels where images are the
-    // only content.
-    'amp-carousel';
+  // Special treatment.
+  // TODO(alanorozco): Allow and possibly group carousels where images are the
+  // only content.
+  'amp-carousel',
+].join(',');
 
 
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
