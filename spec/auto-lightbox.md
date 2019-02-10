@@ -8,10 +8,12 @@ elements and automatically makes them clickable in order to open an [`amp-lightb
 for enhanced user experience that includes panning and pinch-to-zoom.
 
 Please note that this treatment is only applied on documents loaded from `http://*.cdn.ampproject.org`,
-effectively only for those that come from Google Search results. They also need to contain either of the following
+effectively only for those that come from Google Search results. 
 
-- an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag, or
-- a `@type` field declared in [JSON+LD schema](https://www.ampproject.org/docs/fundamentals/discovery#use-schema.org-for-most-search-engines)
+Documents also need to contain either of the following:
+
+- an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
+- or a `@type` field declared in [JSON+LD schema](https://www.ampproject.org/docs/fundamentals/discovery#use-schema.org-for-most-search-engines)
   that's any of the following:
   - `Article`
   - `NewsArticle`
