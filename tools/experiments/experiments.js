@@ -226,11 +226,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'user-error-reporting',
-    name: 'Report error to publishers',
-    spec: 'https://github.com/ampproject/amphtml/issues/6415',
-  },
-  {
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
