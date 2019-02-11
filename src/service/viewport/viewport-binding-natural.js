@@ -222,9 +222,16 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+
+    const documentElement = this.win.document.documentElement;
+    const childMatch = childElement(documentElement /* parent */, (child) => {
+      child.equals(el);
+    });
+    const isElementInDoc = (childMatch != null);
+
     // Default value for when 'el' is has not been added to the page yet.
     let b = 0;
-    if (el != undefined && el != null) {
+    if (isElementInDoc) {
       b = el./*OK*/getBoundingClientRect();
     }
 
