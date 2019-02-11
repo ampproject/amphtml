@@ -319,10 +319,30 @@ describe('ActionService parseAction', () => {
     expect(a.args['key1']).to.deep.equal({expression: 'foo.bar'});
   });
 
+  it('should return null for undefined references in dereferenced arg', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {})).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: null}))
+        .to.deep.equal({key1: null});
+  });
+
+  it('should return null for non-primitives in dereferenced args', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: undefined}}))
+        .to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: {}}}))
+        .to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: []}}))
+        .to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: () => {}}}))
+        .to.deep.equal({key1: null});
+  });
+
   it('should support event data and opt_args', () => {
     const a = parseAction('e:t.m(key1=foo,key2=x)');
     const event = createCustomEvent(window, 'MyEvent');
-    expect(dereferenceArgsVariables(a.args, {x: 'bar', event}))
+    expect(dereferenceArgsVariables(a.args, event, {x: 'bar'}))
         .to.deep.equal({key1: 'foo', key2: 'bar'});
   });
 
@@ -348,7 +368,7 @@ describe('ActionService parseAction', () => {
   it('should dereference arg expressions with an event with data', () => {
     const a = parseAction('e:t.m(key1=event.foo)');
     const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
-    expect(dereferenceArgsVariables(a.args, {event: event.detail}))
+    expect(dereferenceArgsVariables(a.args, event))
         .to.deep.equal({key1: 'bar'});
   });
 

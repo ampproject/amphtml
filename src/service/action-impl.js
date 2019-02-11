@@ -489,7 +489,7 @@ export class ActionService {
     let currentPromise = null;
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
-      const args = this.initializeArgs_(actionInfo, event, opt_args);
+      const args = dereferenceArgsVariables(actionInfo.args, event, opt_args);
       // Replace the unevaluated args with the initialized args. This is
       // for the case where opt_args is provided because otherwise the action
       // that is cached on the node for future invocations will refer to the
@@ -522,25 +522,6 @@ export class ActionService {
         ? currentPromise.then(invokeAction)
         : invokeAction();
     });
-  }
-
-  /**
-   * Initialize the action's arguments.
-   * @param {!ActionInfoDef} actionInfo
-   * @param {?ActionEventDef} event
-   * @param {?JsonObject=} opt_args
-   * @return {?JsonObject}
-   */
-  initializeArgs_(actionInfo, event, opt_args) {
-    const data = opt_args || dict({});
-    if (event) {
-      const detail = getDetail(/** @type {!Event} */ (event));
-      if (detail) {
-        data['event'] = detail;
-      }
-    }
-    // Replace any variables in args with values provided in data.
-    return dereferenceArgsVariables(actionInfo.args, data);
   }
 
   /**
@@ -1023,30 +1004,38 @@ function argValueForTokens(tokens) {
 /**
  * Dereferences expression args in `args` using values in data.
  * @param {?ActionInfoArgsDef} args
- * @param {!JsonObject} data
+ * @param {?ActionEventDef} event
+ * @param {?JsonObject=} opt_args
  * @return {?JsonObject}
  * @private
  */
-export function dereferenceArgsVariables(args, data) {
+export function dereferenceArgsVariables(args, event, opt_args) {
   if (!args) {
     return args;
   }
-  let dataStore = dict({});
-  if (data) {
-    dataStore = data;
+  const data = opt_args || dict({});
+  if (event) {
+    const detail = getDetail(/** @type {!Event} */ (event));
+    if (detail) {
+      data['event'] = detail;
+    }
   }
   const applied = map();
   Object.keys(args).forEach(key => {
     let value = args[key];
+    // Only JSON expression strings that contain dereferences (e.g. `foo.bar`)
+    // are processed as ActionInfoArgExpressionDef. We also support
+    // dereferencing strings like `foo` iff there is a corresponding key in
+    // `data`. Otherwise, `foo` is treated as a string "foo".
     if (typeof value == 'object' && value.expression) {
       const expr =
         /** @type {ActionInfoArgExpressionDef} */ (value).expression;
-      const exprValue = getValueForExpr(dataStore, expr);
+      const exprValue = getValueForExpr(data, expr);
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;
     }
-    if (dataStore[value]) {
-      applied[key] = dataStore[value];
+    if (data[value]) {
+      applied[key] = data[value];
     } else {
       applied[key] = value;
     }
