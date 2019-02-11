@@ -490,17 +490,6 @@ export class ActionService {
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
       const args = dereferenceArgsVariables(actionInfo.args, event, opt_args);
-      // Replace the unevaluated args with the initialized args. This is
-      // for the case where opt_args is provided because otherwise the action
-      // that is cached on the node for future invocations will refer to the
-      // unevaluated argument variables.
-      //
-      // e.g. {x: 1} is the args called by the caller where x is an argument
-      // variable defined on the macro that will to be dereferenced to the
-      // actual argument key 'index'; that is set on the macro. In this case we
-      // need to save the args as {index: 1}.
-      actionInfo.args = args;
-
       const invokeAction = () => {
         // For global targets e.g. "AMP, `node` is the document root. Otherwise,
         // `target` is an element id and `node` is the corresponding element.
