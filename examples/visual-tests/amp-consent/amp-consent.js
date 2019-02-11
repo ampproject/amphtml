@@ -17,11 +17,7 @@
 
 const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
 
-const goToUniqueLocalHostSubDomain = async (page) => {
-  const url = page.url();
-  const randomString = Math.random().toString(36).substring(2, 9);
-  const randomOriginUrl = url.replace('localhost', `${randomString}.localhost`);
-  await page.goto(randomOriginUrl, {waitUntil: 'load'});
+const clearLocalStorage = async (page) => {
   await page.evaluate(() => {
     localStorage.clear();
   });
@@ -31,7 +27,7 @@ const goToUniqueLocalHostSubDomain = async (page) => {
 module.exports = {
   'accept consent': async (page, name) => {
 
-    await goToUniqueLocalHostSubDomain(page);
+    await clearLocalStorage(page);
 
     await page.tap('#consent-ui #accept');
 
@@ -47,7 +43,7 @@ module.exports = {
   },
   'reject consent': async (page, name) => {
 
-    await goToUniqueLocalHostSubDomain(page);
+    await clearLocalStorage(page);
 
     await page.tap('#consent-ui #reject');
 
@@ -64,7 +60,7 @@ module.exports = {
   },
   'should preserve accepted state': async (page, name) => {
 
-    await goToUniqueLocalHostSubDomain(page);
+    await clearLocalStorage(page);
 
     // Accept the consent
     await page.tap('#consent-ui #accept');
