@@ -17,8 +17,8 @@
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
 import {dev, devAssert} from '../../../src/log';
-import {listenOncePromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
+import {iterateCursor, removeElement} from '../../../src/dom';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
@@ -33,6 +33,55 @@ const AMP_FORM_TEXTAREA_MAX_CSS = 'i-amphtml-textarea-max';
 
 const AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA = 'iAmphtmlHasExpanded';
 
+class AmpFormWithTextarea {
+  /**
+   * @param {!Element} form
+   */
+  constructor(form) {
+    /** @private */
+    this.win_ = devAssert(form.ownerDocument.defaultView);
+
+    /** @private */
+    this.unlisteners_ = [];
+
+    this.unlisteners_.push(listen(form, 'input', e => {
+      const element = dev().assertElement(e.target);
+      if (element.tagName != 'TEXTAREA' ||
+          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+        return;
+      }
+
+      maybeResizeTextarea(element);
+    }));
+
+    this.unlisteners_.push(listen(form, 'mousedown', e => {
+      if (e.which != 1) {
+        return;
+      }
+
+      const element = dev().assertElement(e.target);
+      if (element.tagName != 'TEXTAREA' ||
+          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+        return;
+      }
+
+      maybeRemoveResizeBehavior(element);
+    }));
+
+    const throttledResize = throttle(this.win_, () => {
+      resizeFormTextareaElements(form);
+    }, MIN_EVENT_INTERVAL_MS);
+    this.unlisteners_.push(listen(this.win_, 'resize', throttledResize));
+  }
+
+  /**
+   * Cleanup any consumed resources
+   */
+  dispose() {
+    this.unlisteners_.forEach(unlistener => unlistener());
+  }
+}
+
 /**
  * Install expandable textarea behavior for the given form.
  *
@@ -42,37 +91,7 @@ const AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA = 'iAmphtmlHasExpanded';
  * @param {!Element} form
  */
 export function installAmpFormTextarea(form) {
-  // TODO(cvializ): add "listener" in setter for value to change height
-  // when JS or AMP change the value of the field
-
-  form.addEventListener('input', e => {
-    const element = dev().assertElement(e.target);
-    if (element.tagName != 'TEXTAREA' ||
-        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-      return;
-    }
-
-    maybeResizeTextarea(element);
-  });
-
-  form.addEventListener('mousedown', e => {
-    if (e.which != 1) {
-      return;
-    }
-
-    const element = dev().assertElement(e.target);
-    if (element.tagName != 'TEXTAREA' ||
-        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-      return;
-    }
-
-    maybeRemoveResizeBehavior(element);
-  });
-
-  const win = devAssert(form.ownerDocument.defaultView);
-  win.addEventListener('resize', throttle(win, () => {
-    resizeFormTextareaElements(form);
-  }, MIN_EVENT_INTERVAL_MS));
+  new AmpFormWithTextarea(form);
 }
 
 /**
@@ -80,16 +99,13 @@ export function installAmpFormTextarea(form) {
  * @param {!Element} form
  */
 function resizeFormTextareaElements(form) {
-  const {length} = form.elements;
-  for (let i = 0; i < length; i++) {
-    const element = form.elements[i];
-    if (element.tagName != 'TEXTAREA' ||
-        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-      continue;
+  iterateCursor(form.getElementsByTagName('textarea'), element => {
+    if (!element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      return;
     }
 
     maybeResizeTextarea(element);
-  }
+  });
 }
 
 /**
