@@ -20,7 +20,7 @@ import {
   Criteria,
   DocMetaAnnotations,
   ENABLED_LD_JSON_TYPES,
-  ENABLED_OG_TYPES,
+  ENABLED_OG_TYPE_ARTICLE,
   LIGHTBOXABLE_ATTR,
   Mutation,
   RENDER_AREA_RATIO,
@@ -57,7 +57,7 @@ describes.realWin(TAG, {
   const {any} = sinon.match;
 
   const ldJsonSchemaTypes = Object.keys(ENABLED_LD_JSON_TYPES);
-  const ogTypes = Object.keys(ENABLED_OG_TYPES);
+  const ogTypes = [ENABLED_OG_TYPE_ARTICLE];
 
   const firstElementLeaf = el =>
     el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
@@ -235,6 +235,10 @@ describes.realWin(TAG, {
       {
         kind: 'items inside amp-story',
         wrapWith: () => html`<amp-story></amp-story>`,
+      },
+      {
+        kind: 'items inside amp-lightbox',
+        wrapWith: () => html`<amp-lightbox></amp-lightbox>`,
       },
       {
         kind: 'items inside a clickable link',

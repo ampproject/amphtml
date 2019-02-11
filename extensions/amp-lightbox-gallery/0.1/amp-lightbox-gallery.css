@@ -18,6 +18,11 @@ amp-lightbox-gallery .amp-carousel-button {
   display: none;
 }
 
+amp-lightbox-gallery amp-carousel {
+  /* Override author-defined carousel background to let mask through. */
+  background: transparent !important;
+}
+
 .i-amphtml-lbg-icon {
   width: 100% !important;
   height: 100% !important;

@@ -66,7 +66,6 @@
     "bluebird": "3.5.2",
     "body-parser": "1.18.3",
     "browserify": "16.2.3",
-    "bundlesize": "0.17.1",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "cli-highlight": "2.0.0",
