@@ -53,7 +53,8 @@ export class SaveButton {
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
-    this.round = rootElement.getAttribute('data-round');
+    this.round = rootElement.getAttribute('data-round') ||
+        rootElement.getAttribute('height') == rootElement.getAttribute('width');
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
     /** @type {?string} */
