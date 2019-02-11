@@ -1173,7 +1173,7 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
