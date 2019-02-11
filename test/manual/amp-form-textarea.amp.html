@@ -1,0 +1,279 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>Forms Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <style amp-custom>
+        input.user-invalid {
+            background-color: #dc4e41;
+        }
+
+        input.user-valid {
+            background-color: #4CAF50;
+        }
+
+        fieldset.user-invalid {
+            border: 3px solid #dc4e41;
+        }
+
+        fieldset.user-valid {
+            border: 3px solid #4CAF50;
+        }
+
+        form .form-message {
+            display: none;
+        }
+
+        form.user-invalid .invalid-message {
+            display: block;
+            color: #dc4e41;
+        }
+
+        form.user-valid .valid-message {
+            display: block;
+            color: #4CAF50;
+        }
+
+        form.amp-form-submitting .submitting-message {
+            display: block;
+            color: #919191;
+        }
+
+        form.amp-form-submit-success [submit-success] {
+            color: #0000ff;
+        }
+
+        form.amp-form-submit-error [submit-error] {
+            color: #dc4e41;
+        }
+
+        .verification-form label {
+          display: block;
+        }
+
+        .spinner,
+        .spinner:after {
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+        }
+
+        .spinner {
+          visibility: hidden;
+          margin: 5px;
+          border: 9px solid rgba(0, 0, 0, 0.3);
+          border-left-color: #fff;
+          animation: spin 1.1s infinite linear;
+        }
+
+        .amp-form-verifying .spinner {
+          visibility: visible;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .lightbox {
+            background: rgba(0,0,0,.8);
+        }
+
+        .lightbox-content {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+
+        #poll1 li {
+            position: relative;
+            padding: 1em;
+            list-style: none;
+            margin: 0;
+            display: block;
+            height: 20px;
+        }
+
+        #poll1.amp-form-submit-success fieldset {
+            display: none;
+        }
+
+        .percentage-container {
+            z-index: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .one-pc {
+            width: 1%;
+            height: 100%;
+            display: inline-block;
+        }
+        .Wekas .one-pc {
+            background: #dc4e41;
+        }
+        .Penguins .one-pc {
+            background: #3f51b5;
+        }
+        .Ostriches .one-pc {
+            background: #4CAF50;
+        }
+        .Kiwis .one-pc {
+            background: #00ffff;
+        }
+        .poll1-results .title {
+            z-index: 1;
+            color: black;
+            position: absolute;
+        }
+        amp-selector [option] {
+            box-sizing: border-box;
+            display: inline-block;
+            position: relative;
+        }
+        amp-selector[disabled],
+        amp-selector [disabled] {
+            opacity: .20;
+        }
+
+        .lol {
+            height: 200px;
+            overflow-y: scroll;
+        }
+        .lol textarea {
+          background: transparent;
+        }
+        .red { background-color: red; }
+        .green { background-color: green; }
+        .blue { background-color: blue; }
+
+        .content-box {
+            box-sizing: content-box;
+        }
+
+        .border-box {
+            box-sizing: border-box;
+        }
+        .wide {
+            width: 100%;
+        }
+        .max-height {
+          max-height: 100px;
+        }
+        .min-height {
+          min-height: 100px;
+        }
+        .fullscreen {
+          width: 100vw;
+          height: 100vh;
+        }
+        .height {
+          height: 100px;
+        }
+    </style>
+</head>
+<body>
+<h1>autoexpand text area</h1>
+
+<p>Copy paste text</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+
+    <h2>autoexpand</h2>
+    <p><code>textarea</code> element with <code>autoexpand</code> attribute which enables autoexpand and autoshink functionality</p>
+
+    <h3>regular autoexpand</h3>
+    <textarea name="comment1" autoexpand>regular autoexpand</textarea>
+
+    <h3>box-sizing: content-box</h3>
+    <textarea class="content-box" name="comment1" autoexpand>content box</textarea>
+
+    <h3>box-sizing: border-box</h3>
+    <textarea class="border-box" name="comment2" autoexpand>border box</textarea>
+
+    <h3>wide to test window resize</h3>
+    <textarea class="wide" name="comment1" autoexpand>wide</textarea>
+
+    <h3><code>max-height: 100px</code></h3>
+    <textarea class="max-height" name="comment1" autoexpand>content box</textarea>
+
+    <h3><code>min-height: 100px</code></h3>
+    <textarea class="min-height" name="comment1" autoexpand>content box</textarea>
+
+    <h3><code>height: 100px</code></h3>
+    <textarea class="height" name="comment4" autoexpand></textarea>
+
+    <h3>inside scrolling containers</h3>
+    <div class="lol">
+    <div class="lol green">
+        <textarea name="comment5" autoexpand></textarea>
+    </div>
+    <div class="lol blue">
+        <textarea name="comment6" autoexpand></textarea>
+    </div>
+    </div>
+
+    <h3>fullscreen</h3>
+    <textarea class="fullscreen" name="comment7" autoexpand autoshrink-disabled></textarea>
+
+
+    <h2>autoexpand and autoshink-disabled</h2>
+    <p><code>textarea</code> element with <code>autoexpand</code> and <code>autoshrink-disabled</code> attribute which enables autoexpand and autoshink functionality</p>
+
+    <h3>box-sizing: content-box</h3>
+    <textarea class="content-box" name="comment1" autoexpand autoshrink-disabled>content box</textarea>
+
+    <h3>box-sizing: border-box</h3>
+    <textarea class="border-box" name="comment2" autoexpand autoshrink-disabled>border box</textarea>
+
+    <h3>wide to test window resize</h3>
+    <textarea class="wide" name="comment3" autoexpand autoshrink-disabled>wide</textarea>
+
+    <h3><code>max-height: 100px</code></h3>
+    <textarea class="max-height" name="comment4" autoexpand autoshrink-disabled></textarea>
+
+    <h3><code>min-height: 100px</code></h3>
+    <textarea class="min-height" name="comment4" autoexpand autoshrink-disabled></textarea>
+
+    <h3><code>height: 100px</code></h3>
+    <textarea class="height" name="comment4" autoexpand autoshrink-disabled></textarea>
+
+    <h3>inside scrolling containers</h3>
+    <div class="lol">
+    <div class="lol green">
+        <textarea name="comment5" autoexpand autoshrink-disabled></textarea>
+    </div>
+    <div class="lol blue">
+        <textarea name="comment6" autoexpand autoshrink-disabled></textarea>
+    </div>
+    </div>
+
+    <h3>fullscreen</h3>
+    <textarea class="fullscreen" name="comment7" autoexpand autoshrink-disabled></textarea>
+
+
+    <h2>amp-bind</h2>
+    <amp-state id="lorem"><script type="application/json">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</script></amp-state>
+    <amp-state id="height"><script type="application/json">5</script></amp-state>
+    <textarea name="comment8" autoexpand [text]="value"></textarea>
+
+    <p>wow text below for spacing</p>
+</form>
+    <button on="tap:AMP.setState({value: lorem})">Lorem</button>
+    <button on="tap:AMP.setState({height: 20})">Height</button>
+
+</body>
+</html>
