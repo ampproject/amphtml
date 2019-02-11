@@ -18,6 +18,10 @@ const TAG_NAME = 'amp-carousel';
 const SLOTTED_CLASS = 'i-amphtml-carousel-slotted';
 const SPACER_CLASS = 'i-amphtml-carousel-spacer';
 const SCROLLER_SELECTOR = `${TAG_NAME} .i-amphtml-carousel-scroll`;
+const PREV_ARROW_SLOT_SELECTOR = '.i-amphtml-carousel-arrow-prev-slot';
+const NEXT_ARROW_SLOT_SELECTOR = '.i-amphtml-carousel-arrow-next-slot';
+const PREV_ARROW_SELECTOR = `${PREV_ARROW_SLOT_SELECTOR} :first-child`;
+const NEXT_ARROW_SELECTOR = `${NEXT_ARROW_SLOT_SELECTOR} :first-child`;
 
 async function waitForImgLoad(controller, el) {
   await expect(controller.getElementProperty(el, 'naturalWidth'))
@@ -60,4 +64,20 @@ export async function getSpacersForSlide(controller, n) {
 
 export async function getScrollingElement(controller) {
   return controller.findElement(SCROLLER_SELECTOR);
+}
+
+export function getPrevArrowSlot(controller) {
+  return controller.findElement(PREV_ARROW_SLOT_SELECTOR);
+}
+
+export function getNextArrowSlot(controller) {
+  return controller.findElement(NEXT_ARROW_SLOT_SELECTOR);
+}
+
+export function getPrevArrow(controller) {
+  return controller.findElement(PREV_ARROW_SELECTOR);
+}
+
+export function getNextArrow(controller) {
+  return controller.findElement(NEXT_ARROW_SELECTOR);
 }
