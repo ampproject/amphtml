@@ -71,7 +71,7 @@ export function setStyleForPreset(el, presetName) {
 /**
  * @param {string} name
  * @param {!Object} options
- * @return {!StoryAnimationPresetDef}
+ * @return {?StoryAnimationPresetDef}
  */
 // First keyframe will always be considered offset: 0 and will be applied to the
 // element as the first frame before animation starts.
@@ -337,4 +337,5 @@ export const getPresetDef = (name, options) => {
         ],
       };
   }
+  return null;
 };
