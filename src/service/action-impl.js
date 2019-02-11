@@ -532,16 +532,15 @@ export class ActionService {
    * @return {?JsonObject}
    */
   initializeArgs_(actionInfo, event, opt_args) {
-    const key = opt_args ? undefined : 'event';
-    const data = dict(opt_args);
+    const data = opt_args || dict({});
     if (event) {
       const detail = getDetail(/** @type {!Event} */ (event));
       if (detail) {
-        data[`${key}`] = detail;
+        data['event'] = detail;
       }
     }
     // Replace any variables in args with values provided in data.
-    return dereferenceArgsVariables(actionInfo.args, data, key);
+    return dereferenceArgsVariables(actionInfo.args, data);
   }
 
   /**
@@ -674,15 +673,14 @@ export class ActionService {
     let actionMap = node[ACTION_MAP_];
     if (actionMap === undefined) {
       actionMap = null;
-      const hasActionEvent = node.hasAttribute('on');
-      const hasAction = node.hasAttribute('action');
-      if (hasActionEvent) {
+      if (node.hasAttribute('on')) {
         const action = node.getAttribute('on');
         actionMap = parseActionMap(action, node);
         node[ACTION_MAP_] = actionMap;
-      } else if (hasAction) {
+      } else if (node.hasAttribute('action')) {
         const action = node.getAttribute('action');
         actionMap = parseActionMap(`${actionEventType}:${action}`, node);
+        node[ACTION_MAP_] = actionMap;
       }
     }
     return actionMap;
@@ -1025,26 +1023,16 @@ function argValueForTokens(tokens) {
 /**
  * Dereferences expression args in `args` using values in data.
  * @param {?ActionInfoArgsDef} args
- * @param {!JsonObject|null|undefined} data
- * @param {string=} opt_key The value to use in evaluating the argument expression.
- *    This will be parent property of provided data and the root property
- *    in the expression to evaluate against.
+ * @param {!JsonObject} data
  * @return {?JsonObject}
  * @private
  */
-export function dereferenceArgsVariables(args, data, opt_key) {
+export function dereferenceArgsVariables(args, data) {
   if (!args) {
     return args;
   }
   let dataStore = dict({});
-
-  if (opt_key) {
-    if (data && data[opt_key]) {
-      dataStore = data;
-    } else {
-      dataStore[opt_key] = data;
-    }
-  } else if (data) {
+  if (data) {
     dataStore = data;
   }
   const applied = map();
@@ -1057,8 +1045,7 @@ export function dereferenceArgsVariables(args, data, opt_key) {
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;
     }
-    if (!!value
-        && Object.values(dataStore).length > 0 && !!dataStore[value]) {
+    if (dataStore[value]) {
       applied[key] = dataStore[value];
     } else {
       applied[key] = value;
