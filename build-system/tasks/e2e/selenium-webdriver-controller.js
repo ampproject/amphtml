@@ -218,6 +218,19 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @param {!ElementHandle} handle
+   * @param {string} styleProperty
+   * @return {!Promise<string>} styleProperty
+   * @override
+   */
+  getElementCssValue(handle, styleProperty) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+        webElement.getCssValue(styleProperty),
+        this.getWaitFn_(() => webElement.getCssValue(styleProperty)));
+  }
+
+  /**
    * Sets width/height of the browser area.
    * @param {!WindowRectDef} rect
    * @return {!Promise}
