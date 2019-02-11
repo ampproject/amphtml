@@ -374,7 +374,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         },
         [FLEXIBLE_AD_SLOTS_EXP]: {
           isTrafficEligible: () => true,
-          branches FLEXIBLE_AD_SLOTS_BRANCHES).map(key => FLEXIBLE_AD_SLOTS_BRANCHES[key])
+          branches: Object(FLEXIBLE_AD_SLOTS_BRANCHES).values(),
+        },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
@@ -1446,6 +1447,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // compute the actual available width.
         default:
           return null;
+      }
     }
     return null;
   }
