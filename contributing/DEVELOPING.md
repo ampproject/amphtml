@@ -89,7 +89,8 @@ We also recommend scanning the [spec](../spec/). The non-element part should hel
 
 ## Code Reviews
 
-Before any code can be merged into the AMP repository, it has to be reviewed and approved by the [owner and a core committer](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md).
+Before any code can be merged into the AMP repository, it has to be reviewed and approved by the [owner and a core committer](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md). Note: In the near future, the code ownership model at
+[CODE_OWNERSHIP.md](./CODE_OWNERSHIP.md) will be put in place for code reviews.
 
 - If you are contributing a fix or a new feature to AMP, be sure to follow the tips on [preparing your code for review](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code-for-a-feature-coding--implementation-phase) and follow [instructions](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review) on how to submit a pull request.
 
