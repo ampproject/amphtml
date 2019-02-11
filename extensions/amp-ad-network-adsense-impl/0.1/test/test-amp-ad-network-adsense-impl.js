@@ -1033,7 +1033,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
   });
 
-  describe.only('#checksumVerification', () => {
+  describe('#checksumVerification', () => {
     it('should call super if missing Algorithm header', () => {
       sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
           .returns(Promise.resolve('foo'));
