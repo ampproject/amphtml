@@ -273,7 +273,7 @@ export const getPresetDef = (name, options) => {
           const offsetX = dimensions.pageWidth - dimensions.targetWidth;
           const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-          return scaleAndTranslate(0, offsetY, translateX || offsetX, offsetY,
+          return scaleAndTranslate(0, offsetY, -translateX || offsetX, offsetY,
               scalingFactor);
         },
       };
@@ -291,7 +291,7 @@ export const getPresetDef = (name, options) => {
           const offsetX = -dimensions.targetWidth / 2;
           const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-          return scaleAndTranslate(offsetX, 0, offsetX, translateY || offsetY,
+          return scaleAndTranslate(offsetX, 0, offsetX, -translateY || offsetY,
               scalingFactor);
         },
       };
@@ -310,7 +310,7 @@ export const getPresetDef = (name, options) => {
           const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
           return scaleAndTranslate(offsetX, offsetY, offsetX, translateY ?
-            offsetX + translateY : 0, scalingFactor);
+            offsetY + translateY : 0, scalingFactor);
         },
       };
     case 'zoom-in':
