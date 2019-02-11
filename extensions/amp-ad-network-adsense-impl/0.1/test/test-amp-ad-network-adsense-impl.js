@@ -19,10 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {
-  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-  AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
@@ -534,25 +530,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.divertExperiments();
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
-    });
-    it('includes eid when in amp-auto-ads holdout control', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      impl.divertExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
-      });
-    });
-    it('includes eid when in amp-auto-ads holdout experiment', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
-      });
     });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
