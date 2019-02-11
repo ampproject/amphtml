@@ -64,7 +64,7 @@ Or to disable it for your entire document altogether:
 
 ```html
 <body data-amp-auto-lightbox-disable>
-  <!-- No elements in the document be automatically lightboxed -->
+  <!-- No elements in the document will be automatically lightboxed -->
 </body>
 ```
 
