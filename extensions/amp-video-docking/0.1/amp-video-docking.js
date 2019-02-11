@@ -1248,9 +1248,12 @@ export class VideoDocking {
    * @private
    */
   getPosterImageSrc_(element) {
-    const poster = 'poster';
-    if (element.hasAttribute(poster)) {
-      return element.getAttribute(poster);
+    const attrs = ['poster', 'data-poster'];
+    for (let i = 0; i < attrs.length; i++) {
+      const attr = attrs[i];
+      if (element.hasAttribute(attr)) {
+        return element.getAttribute(attr);
+      }
     }
     const imgEl = scopedQuerySelector(element,
         'amp-img[placeholder],img[placeholder],[placeholder] amp-img');
