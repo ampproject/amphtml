@@ -222,12 +222,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    // Default value for when 'el' is has not been added to the page yet.
-    let b = new DOMRect(0, 0, 0, 0);
-    if (el.isConnected) {
-      b = el./*OK*/getBoundingClientRect();
-    }
-
+    const b = el./*OK*/getBoundingClientRect();
     if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
