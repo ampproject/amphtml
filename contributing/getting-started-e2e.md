@@ -196,7 +196,7 @@ Now that you have all of the files copied locally you can actually build the cod
    ```
    yarn
    ```
-   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
+   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore. * Note: If you are using Mac OS, you will first need to install XCode and Command Line Tools via XCode prior to running yarn. The removal for this dependency is currently being worked on.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
