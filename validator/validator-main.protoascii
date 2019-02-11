@@ -4629,7 +4629,7 @@ tags: {
     requires_extension: "amp-form"
   }
   attrs: {
-    name: "autoshrink"
+    name: "autoshrink-disabled"
     requires_extension: "amp-form"
     trigger: {
       also_requires_attr: "autoexpand"

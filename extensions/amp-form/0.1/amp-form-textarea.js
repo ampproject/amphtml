@@ -31,13 +31,20 @@ const AMP_FORM_TEXTAREA_CLONE_CSS = 'i-amphtml-textarea-clone';
 
 const AMP_FORM_TEXTAREA_MAX_CSS = 'i-amphtml-textarea-max';
 
+const AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA = 'iAmphtmlHasExpanded';
+
 /**
- * This behavior can be removed when browsers implement `height: max-content`
+ * Install expandable textarea behavior for the given form.
+ *
+ * This method can be removed when browsers implement `height: max-content`
  * for the textarea element.
  * https://github.com/w3c/csswg-drafts/issues/2141
  * @param {!Element} form
  */
 export function installAmpFormTextarea(form) {
+  // TODO(cvializ): add "listener" in setter for value to change height
+  // when JS or AMP change the value of the field
+
   form.addEventListener('input', e => {
     const element = dev().assertElement(e.target);
     if (element.tagName != 'TEXTAREA' ||
@@ -64,22 +71,33 @@ export function installAmpFormTextarea(form) {
 
   const win = devAssert(form.ownerDocument.defaultView);
   win.addEventListener('resize', throttle(win, () => {
-    const {length} = form.elements;
-    for (let i = 0; i < length; i++) {
-      const element = form.elements[i];
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-        continue;
-      }
-
-      maybeResizeTextarea(element);
-    }
+    resizeFormTextareaElements(form);
   }, MIN_EVENT_INTERVAL_MS));
+}
+
+/**
+ * Attempt to resize all textarea elements within the given form.
+ * @param {!Element} form
+ */
+function resizeFormTextareaElements(form) {
+  const {length} = form.elements;
+  for (let i = 0; i < length; i++) {
+    const element = form.elements[i];
+    if (element.tagName != 'TEXTAREA' ||
+        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      continue;
+    }
+
+    maybeResizeTextarea(element);
+  }
 }
 
 /**
  * Remove the resize behavior if a user drags the resize handle and changes
  * the height of the textarea.
+ * This makes no assumptions about the location of the resize handle, and it
+ * assumes that if the user drags the mouse at any position and the height of
+ * the textarea changes, then the user intentionally resized the textarea.
  * @param {!Element} element
  */
 export function maybeRemoveResizeBehavior(element) {
@@ -113,17 +131,19 @@ export function maybeResizeTextarea(element) {
   const win = devAssert(element.ownerDocument.defaultView);
 
   let offset = 0;
-  let scrollHeightPromise = null;
+  let scrollHeight = 0;
+  let minScrollHeightPromise = null;
   let maxHeight = 0;
 
   if (!element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR)) {
-    scrollHeightPromise = getShrinkHeight(element);
+    minScrollHeightPromise = getShrinkHeight(element);
   }
 
   return resources.measureMutateElement(element, () => {
     const computed = computedStyle(win, element);
-    if (scrollHeightPromise == null) {
-      scrollHeightPromise = Promise.resolve(element.scrollHeight);
+    scrollHeight = element.scrollHeight;
+    if (minScrollHeightPromise == null) {
+      minScrollHeightPromise = Promise.resolve(scrollHeight);
     }
 
     const maybeMaxHeight =
@@ -140,13 +160,22 @@ export function maybeResizeTextarea(element) {
           parseInt(computed.getPropertyValue('border-bottom-width'), 10);
     }
   }, () => {
-    scrollHeightPromise.then(scrollHeight => {
-      const height = scrollHeight + offset;
+    minScrollHeightPromise.then(minScrollHeight => {
+      const height = minScrollHeight + offset;
       // Prevent the scrollbar from appearing
       // unless the text is beyond the max-height
       element.classList.toggle(AMP_FORM_TEXTAREA_MAX_CSS, height > maxHeight);
-      // Set the height to the height of the text
-      setStyle(element, 'height', px(scrollHeight + offset));
+
+      // Prevent the textarea from shrinking if it has not yet expanded.
+      const hasExpanded =
+          AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
+      const shouldResize = (hasExpanded || scrollHeight <= minScrollHeight);
+
+      if (shouldResize) {
+        element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';
+        // Set the textarea height to the height of the text
+        setStyle(element, 'height', px(minScrollHeight + offset));
+      }
     });
   });
 }
@@ -173,8 +202,9 @@ function getShrinkHeight(textarea) {
 
   return resources.measureMutateElement(body, () => {
     const computed = computedStyle(win, textarea);
-    const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10);
+    const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
 
+    // maxHeight is NaN if the max-height property is 'none'.
     shouldKeepTop = (isNaN(maxHeight) || textarea.scrollHeight < maxHeight);
   }, () => {
     // Prevent a jump from the textarea element scrolling

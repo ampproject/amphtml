@@ -210,13 +210,13 @@
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <textarea name="comment" autoexpand></textarea>
   </form>
-  <!-- Valid: textarea with autoexpand and autoshrink attribute -->
+  <!-- Valid: textarea with autoexpand and autoshrink-disabled attribute -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <textarea name="comment" autoexpand autoshrink></textarea>
+    <textarea name="comment" autoexpand autoshrink-disabled></textarea>
   </form>
-  <!-- Invalid: textarea with only autoshrink attribute -->
+  <!-- Invalid: textarea with only autoshrink-disabled attribute -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <textarea name="comment" autoshrink></textarea>
+    <textarea name="comment" autoshrink-disabled></textarea>
   </form>
 </body>
 </html>
