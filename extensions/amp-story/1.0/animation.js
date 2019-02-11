@@ -22,7 +22,6 @@ import {
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
-import {PRESETS, setStyleForPreset} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
@@ -34,6 +33,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
@@ -47,7 +47,14 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-
+/** const {string} */
+const ZOOM_START_ATTRIBUTE_NAME = 'zoom-start';
+/** const {string} */
+const ZOOM_END_ATTRIBUTE_NAME = 'zoom-end';
+/** const {string} */
+const HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME = 'horizontal-translate';
+/** const {string} */
+const VERTICAL_TRANSLATE_ATTRIBUTE_NAME = 'vertical-translate';
 
 /**
  * @param {!Element} element
@@ -530,10 +537,27 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+    const options = {};
     setStyleForPreset(el, name);
 
+    if (el.hasAttribute(ZOOM_START_ATTRIBUTE_NAME)) {
+      options.zoomStart = el.getAttribute(ZOOM_START_ATTRIBUTE_NAME);
+    }
+
+    if (el.hasAttribute(ZOOM_END_ATTRIBUTE_NAME)) {
+      options.zoomEnd = el.getAttribute(ZOOM_END_ATTRIBUTE_NAME);
+    }
+
+    if (el.hasAttribute(HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME)) {
+      options.translateX = el.getAttribute(HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME);
+    }
+
+    if (el.hasAttribute(VERTICAL_TRANSLATE_ATTRIBUTE_NAME)) {
+      options.translateY = el.getAttribute(VERTICAL_TRANSLATE_ATTRIBUTE_NAME);
+    }
+
     return userAssert(
-        PRESETS[name],
+        getPresetDef(name, options),
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,
         name,
