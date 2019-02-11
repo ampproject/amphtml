@@ -341,7 +341,7 @@ function isProxyOriginOrLocalDev(ampdoc) {
   }
 
   // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  // See #20359 for details.
+  // See git.io/fhQ0a (#20359) for details.
   return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
 }
 
