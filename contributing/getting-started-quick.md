@@ -91,7 +91,7 @@ git checkout -b <branch name> master
 
 ## Build AMP & run a local server
 
-1. Make sure you have the latest packages (after you pull): `yarn`
+1. Make sure you have the latest packages (after you pull): `yarn`. * Note: If you are using Mac OS, you will first need to install XCode and Command Line Tools via XCode prior to running yarn. The removal for this dependency is currently being worked on.
 1. Start the server: `gulp`
 1. Access your server at [http://localhost:8000](http://localhost:8000)
 1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
