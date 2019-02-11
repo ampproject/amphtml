@@ -432,7 +432,7 @@ export function scan(ampdoc, opt_root) {
 
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
-  ampdoc.whenBodyAvailable().then(() => {
+  ampdoc.whenReady().then(() => {
     getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
       scan(ampdoc, dev().assertElement(target));
     });
