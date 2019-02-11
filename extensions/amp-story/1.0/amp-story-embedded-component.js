@@ -22,9 +22,10 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './analytics';
+import {AdvancementMode} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
@@ -65,8 +66,7 @@ const EXPANDABLE_COMPONENTS = {
     '2 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 ' +
     '0 78.62 23"/></g></svg>',
     actionIcon: ActionIcon.EXPAND,
-    // TODO(enriqe): change for i18n label.
-    defaultText: 'View on Twitter',
+    localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
 };
@@ -566,7 +566,8 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipText_(target, embedConfig) {
     const tooltipText = target.getAttribute('data-tooltip-text') ||
-      embedConfig.defaultText ||
+      Services.localizationService(this.win_).getLocalizedString(
+          embedConfig.localizedStringId) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');

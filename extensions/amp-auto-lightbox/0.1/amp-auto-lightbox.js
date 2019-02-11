@@ -43,15 +43,25 @@ export const LIGHTBOXABLE_ATTR = 'lightbox';
 export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
 /**
- * Types of document by schema where auto-lightbox is enabled.
- * @private @const {!Object<string, boolean>}
+ * Types of document by LD+JSON schema `@type` field where auto-lightbox should
+ * be enabled.
+ * @private @const {!Object<string|undefined, boolean>}
  */
-export const ENABLED_SCHEMA_TYPES = {
+export const ENABLED_LD_JSON_TYPES = {
   'Article': true,
   'NewsArticle': true,
   'BlogPosting': true,
   'LiveBlogPosting': true,
   'DiscussionForumPosting': true,
+};
+
+/**
+ * Types of document by Open Graph `<meta property="og:type">` where
+ * auto-lightbox should be enabled.
+ * @private @const {!Object<string|undefined, boolean>}
+ */
+export const ENABLED_OG_TYPES = {
+  'article': true,
 };
 
 /** Factor of naturalArea vs renderArea to lightbox. */
@@ -61,16 +71,25 @@ export const RENDER_AREA_RATIO = 1.2;
 export const VIEWPORT_AREA_RATIO = 0.25;
 
 /**
- * Ancestors considered "actionable", i.e. that are bound to a default onclick
- * action (e.g. `button`) or where it cannot be determined whether they're
- * actionable or not (e.g. `amp-script`).
+ * Selector for subnodes for which the auto-lightbox treatment does not apply.
  */
-const ACTIONABLE_ANCESTORS =
+const DISABLED_ANCESTORS =
+    // Runtime-specific.
+    '[placeholder],' +
+
+    // Explicitly opted out.
+    '[data-amp-auto-lightbox-disable],' +
+
+    // Ancestors considered "actionable", i.e. that are bound to a default
+    // onclick action(e.g. `button`) or where it cannot be determined whether
+    // they're actionable or not (e.g. `amp-script`).
     'a[href],' +
     'amp-selector [option],' +
     'amp-script,' +
     'amp-story,' +
     'button,' +
+
+    // Special treatment.
     // TODO(alanorozco): Allow and possibly group carousels where images are the
     // only content.
     'amp-carousel';
@@ -78,7 +97,17 @@ const ACTIONABLE_ANCESTORS =
 
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
+const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
+const META_OG_TYPE = 'meta[property="og:type"]';
+
 const NOOP = () => {};
+
+/**
+ * For better minification.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Document|!ShadowRoot}
+ */
+const getRootNode = ampdoc => ampdoc.getRootNode();
 
 
 /** @visibleForTesting */
@@ -89,9 +118,8 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsAll(element) {
-    return Criteria.meetsPlaceholderCriteria(element) &&
-      Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsActionableCriteria(element);
+    return Criteria.meetsSizingCriteria(element) &&
+      Criteria.meetsTreeShapeCriteria(element);
   }
 
   /**
@@ -120,16 +148,8 @@ export class Criteria {
    * @param {!Element} element
    * @return {boolean}
    */
-  static meetsPlaceholderCriteria(element) {
-    return !closestBySelector(element, '[placeholder]');
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static meetsActionableCriteria(element) {
-    if (closestBySelector(element, ACTIONABLE_ANCESTORS)) {
+  static meetsTreeShapeCriteria(element) {
+    if (closestBySelector(element, DISABLED_ANCESTORS)) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
@@ -214,47 +234,54 @@ export class Scanner {
 
 
 /**
- * @param {!Element} element
- * @return {boolean}
+ * Parses document metadata annotations as defined by either LD+JSON schema or
+ * Open Graph <meta> tags.
  * @visibleForTesting
  */
-export function meetsCriteria(element) {
-  return Criteria.meetsAll(element);
-}
-
-
-/**
- * Parses document schema defined as ld+json.
- * @visibleForTesting
- */
-export class Schema {
+export class DocMetaAnnotations {
 
   /**
-   * Gets document type (field `@type`) where schema is defined for the
-   * canonical URL.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {string|undefined}
    */
-  static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getRootNode().querySelectorAll(
-        'script[type="application/ld+json"]');
-
-    if (schemaTags.length <= 0) {
-      return;
+  static getOgType(ampdoc) {
+    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    if (tag) {
+      return tag.getAttribute('content');
     }
+  }
 
-    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+  /**
+   * Determines wheter the document type as defined by Open Graph meta tag
+   * e.g. `<meta property="og:type">` is in a given set.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string|undefined, boolean>} types
+   * @return {boolean}
+   */
+  static isOgTypeInSet(ampdoc, types) {
+    return types[DocMetaAnnotations.getOgType(ampdoc)];
+  }
 
-    for (let i = 0; i < schemaTags.length; i++) {
-      const schemaTag = schemaTags[i];
-      const parsed = tryParseJson(schemaTag./*OK*/innerText);
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Array<string>}
+   */
+  static getAllLdJsonTypes(ampdoc) {
+    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+        .map(({textContent}) => ((tryParseJson(textContent) || {})['@type']))
+        .filter(typeOrUndefined => typeOrUndefined);
+  }
 
-      if (parsed &&
-          (parsed['mainEntityOfPage'] == canonicalUrl ||
-          parsed['url'] == canonicalUrl)) {
-        return parsed['@type'];
-      }
-    }
+  /**
+   * Determines wheter one of the document types (field `@type`) defined in
+   * LD+JSON schema is in a given set.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string|undefined, boolean>} types
+   * @return {boolean}
+   */
+  static isLdJsonTypeInSet(ampdoc, types) {
+    return DocMetaAnnotations.getAllLdJsonTypes(ampdoc)
+        .some(type => types[type]);
   }
 }
 
@@ -290,11 +317,10 @@ function usesLightboxExplicitly(ampdoc) {
   const lightboxedElementsSelector =
       `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const querySelector = selector =>
-    ampdoc.getRootNode().querySelector(selector);
+  const exists = selector => !!getRootNode(ampdoc).querySelector(selector);
 
-  return !!querySelector(requiredExtensionSelector) &&
-    !!querySelector(lightboxedElementsSelector);
+  return exists(requiredExtensionSelector) &&
+      exists(lightboxedElementsSelector);
 }
 
 
@@ -344,8 +370,8 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  const docType = Schema.getDocumentType(ampdoc);
-  if (!docType || !ENABLED_SCHEMA_TYPES[docType]) {
+  if (!DocMetaAnnotations.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
+      !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
@@ -394,7 +420,7 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
-      if (!meetsCriteria(candidate)) {
+      if (!Criteria.meetsAll(candidate)) {
         dev().info(TAG, 'discarded', candidate);
         return;
       }
@@ -425,8 +451,8 @@ export function scan(ampdoc, opt_root) {
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-      scan(ampdoc, target);
+    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+      scan(ampdoc, dev().assertElement(target));
     });
     scan(ampdoc);
   });
