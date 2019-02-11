@@ -22,7 +22,7 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
- *   advance: function(number, string),
+ *   advance: function(number, !ActionSource=),
  * }}
  */
 let AdvanceDef;

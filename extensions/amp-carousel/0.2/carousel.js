@@ -292,7 +292,7 @@ export class Carousel {
 
   /**
    * Moves forward by the current advance count.
-   * @param {string=} actionSource
+   * @param {!ActionSource=} actionSource
    */
   next(actionSource) {
     this.advance(this.advanceCount_, actionSource);
@@ -300,7 +300,7 @@ export class Carousel {
 
   /**
    * Moves backwards by the current advance count.
-   * @param {string=} actionSource
+   * @param {!ActionSource=} actionSource
    */
   prev(actionSource) {
     this.advance(-this.advanceCount_, actionSource);
@@ -326,7 +326,7 @@ export class Carousel {
    *
    * TODO(sparhami) How can we make this work well for accessibility?
    * @param {number} delta
-   * @param {string=} actionSource
+   * @param {!ActionSource=} actionSource
    */
   advance(delta, actionSource) {
     const {slides_: slides, currentIndex_} = this;
@@ -368,7 +368,7 @@ export class Carousel {
    * @param {number} index
    * @param {{
    *   smoothScroll: (boolean|undefined),
-   *   actionSource: (string|undefined),
+   *   actionSource: (!ActionSource|undefined),
    * }=} options
    */
   goToSlide(index, {smoothScroll = true, actionSource} = {}) {
