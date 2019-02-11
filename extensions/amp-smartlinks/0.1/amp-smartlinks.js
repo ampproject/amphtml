@@ -153,7 +153,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     builder.setExtraUrlParams(payload);
     const reporter = builder.build();
 
-    reporter.trigger('page-impression', dict());
+    reporter.trigger('page-impression');
   }
 
   /**

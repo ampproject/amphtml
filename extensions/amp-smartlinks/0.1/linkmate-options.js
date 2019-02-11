@@ -34,7 +34,7 @@ export function getConfigOptions(element) {
 /**
  * The slug used to distinguish Narrativ accounts.
  * @param {!Element} element
- * @return {?string}
+ * @return {string}
  */
 function getNrtvAccountName_(element) {
   const nrtvSlug = element.getAttribute('nrtv-account-name');
@@ -71,7 +71,7 @@ function getExclusiveLinksFlag_(element) {
 /**
  * What attribute the outbound link variable is stored in an anchor.
  * @param {!Element} element
- * @return {?string}
+ * @return {string}
  */
 function getLinkAttribute_(element) {
   const linkAttribute = element.getAttribute('link-attribute');
@@ -82,7 +82,7 @@ function getLinkAttribute_(element) {
 /**
  * Selector used to get all links that are meant to be monetized.
  * @param {!Element} element
- * @return {?string}
+ * @return {string}
  */
 function getLinkSelector_(element) {
   const linkSelector = element.getAttribute('link-selector');
