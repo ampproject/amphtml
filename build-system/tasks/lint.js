@@ -34,7 +34,7 @@ const options = {
   fix: false,
   quiet: argv.quiet || false,
 };
-let collapseLintResults = !!isTravisBuild();
+let collapseLintResults = isTravisBuild();
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 const rootDir = path.dirname(path.dirname(__dirname));
