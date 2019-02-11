@@ -50,6 +50,10 @@ tags: {  # <amp-ima-video>
     }
   }
   attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
     name: "rotate-to-fullscreen"
     value: ""
   }
