@@ -56,13 +56,11 @@ export const ENABLED_LD_JSON_TYPES = {
 };
 
 /**
- * Types of document by Open Graph `<meta property="og:type">` where
- * auto-lightbox should be enabled.
- * @private @const {!Object<string|undefined, boolean>}
+ * Only of document type by Open Graph `<meta property="og:type">` where
+ * auto-lightbox should be enabled. Top-level og:type set is tiny, and `article`
+ * covers all required types.
  */
-export const ENABLED_OG_TYPES = {
-  'article': true,
-};
+export const ENABLED_OG_TYPE_ARTICLE = 'article';
 
 /** Factor of naturalArea vs renderArea to lightbox. */
 export const RENDER_AREA_RATIO = 1.2;
@@ -253,13 +251,12 @@ export class DocMetaAnnotations {
 
   /**
    * Determines wheter the document type as defined by Open Graph meta tag
-   * e.g. `<meta property="og:type">` is in a given set.
+   * e.g. `<meta property="og:type">` is valid.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
-  static isOgTypeInSet(ampdoc, types) {
-    return types[DocMetaAnnotations.getOgType(ampdoc)];
+  static hasValidOgType(ampdoc) {
+    return DocMetaAnnotations.getOgType(ampdoc) == ENABLED_OG_TYPE_ARTICLE;
   }
 
   /**
@@ -274,14 +271,13 @@ export class DocMetaAnnotations {
 
   /**
    * Determines wheter one of the document types (field `@type`) defined in
-   * LD+JSON schema is in a given set.
+   * LD+JSON schema is in ENABLED_LD_JSON_TYPES.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
-  static isLdJsonTypeInSet(ampdoc, types) {
+  static hasValidLdJsonType(ampdoc) {
     return DocMetaAnnotations.getAllLdJsonTypes(ampdoc)
-        .some(type => types[type]);
+        .some(type => ENABLED_LD_JSON_TYPES[type]);
   }
 }
 
@@ -370,8 +366,8 @@ export function resolveIsEnabledForDoc(ampdoc, candidates) {
   if (usesLightboxExplicitly(ampdoc)) {
     return resolveFalse();
   }
-  if (!DocMetaAnnotations.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
-      !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
+  if (!DocMetaAnnotations.hasValidOgType(ampdoc) &&
+      !DocMetaAnnotations.hasValidLdJsonType(ampdoc)) {
     return resolveFalse();
   }
   return isEmbeddedAndTrusted(ampdoc, candidates);
