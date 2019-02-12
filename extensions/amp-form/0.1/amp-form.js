@@ -1298,34 +1298,12 @@ export class AmpFormService {
    */
   installHandlers_(ampdoc) {
     return ampdoc.whenReady().then(() => {
-      this.installSubmissionHandlers_(
-          ampdoc.getRootNode().querySelectorAll('form'));
-      this.installTextareaAutoexpandHandler_(ampdoc.getRootNode());
-      this.installGlobalEventListener_(ampdoc.getRootNode());
+      const root = ampdoc.getRootNode();
+
+      this.installSubmissionHandlers_(root.querySelectorAll('form'));
+      AmpFormTextarea.install(ampdoc);
+      this.installGlobalEventListener_(root);
     });
-  }
-
-  /**
-   * @param {!Document|!ShadowRoot} root
-   */
-  installTextareaAutoexpandHandler_(root) {
-    let ampFormTextarea = null;
-    const maybeInstall = () => {
-      const autoexpandTextarea = root.querySelector('textarea[autoexpand]');
-      if (autoexpandTextarea && !ampFormTextarea) {
-        ampFormTextarea = new AmpFormTextarea(root);
-        return;
-      }
-
-      if (!autoexpandTextarea && ampFormTextarea) {
-        ampFormTextarea.dispose();
-        ampFormTextarea = null;
-        return;
-      }
-    };
-
-    root.addEventListener(AmpEvents.DOM_UPDATE, maybeInstall);
-    maybeInstall();
   }
 
   /**

@@ -41,9 +41,38 @@ const AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA = 'iAmphtmlHasExpanded';
  */
 export class AmpFormTextarea {
   /**
-   * @param {!Document|!ShadowRoot} root
+   * Install, monitor and cleanup the document as `textarea[autoexpand]`
+   * elements are added and removed.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(root) {
+  static install(ampdoc) {
+    const root = ampdoc.getRootNode();
+
+    let ampFormTextarea = null;
+    const maybeInstall = () => {
+      const autoexpandTextarea = root.querySelector('textarea[autoexpand]');
+      if (autoexpandTextarea && !ampFormTextarea) {
+        ampFormTextarea = new AmpFormTextarea(ampdoc);
+        return;
+      }
+
+      if (!autoexpandTextarea && ampFormTextarea) {
+        ampFormTextarea.dispose();
+        ampFormTextarea = null;
+        return;
+      }
+    };
+
+    listen(root, AmpEvents.DOM_UPDATE, maybeInstall);
+    maybeInstall();
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    const root = ampdoc.getRootNode();
+
     /** @private @const */
     this.doc_ = (root.ownerDocument || root);
 
@@ -51,7 +80,7 @@ export class AmpFormTextarea {
     this.win_ = devAssert(this.doc_.defaultView);
 
     /** @private @const */
-    this.viewport_ = Services.viewportForDoc(this.doc_);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private */
     this.unlisteners_ = [];
