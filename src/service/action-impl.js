@@ -463,12 +463,12 @@ export class ActionService {
   }
 
   /**
+   * For global targets e.g. "AMP, `node` is the document root. Otherwise,
+   * `target` is an element id and `node` is the corresponding element.
    * @param {string} target
-   * @return {?Element}
+   * @return {?Document|?Element|?ShadowRoot}
    */
   getActionNode_(target) {
-    // For global targets e.g. "AMP, `node` is the document root. Otherwise,
-    // `target` is an element id and `node` is the corresponding element.
     return this.globalTargets_[target] ?
       this.root_ :
       this.root_.getElementById(target);
