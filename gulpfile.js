@@ -111,26 +111,6 @@ const MINIMAL_EXTENSION_SET = [
 
 
 /**
- * Extensions that require `amp-video-service` to be built alongside them.
- * @private @const {!Set<string>}
- */
-// TODO(alanorozco): Determine dynamically?
-const VIDEO_EXTENSIONS = new Set([
-  'amp-3q-player',
-  'amp-brid-player',
-  'amp-dailymotion',
-  'amp-delight-player',
-  'amp-gfycat',
-  'amp-ima-video',
-  'amp-nexxtv-player',
-  'amp-ooyala-player',
-  'amp-video',
-  'amp-wistia-player',
-  'amp-youtube',
-]);
-
-
-/**
  * @typedef {{
  *   name: ?string,
  *   version: ?string,
@@ -834,11 +814,6 @@ function parseExtensionFlags() {
     if (argv.extensions || argv.extensions_from) {
       log(green('Building extension(s):'),
           cyan(getExtensionsToBuild().join(', ')));
-
-      if (maybeAddVideoService()) {
-        log(green('⤷ Video component(s) being built, added'),
-            cyan('amp-video-service'), green('to extension set.'));
-      }
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
     } else {
@@ -849,18 +824,6 @@ function parseExtensionFlags() {
     log(minimalSetMessage);
     log(extensionsFromMessage);
   }
-}
-
-/**
- * Adds `amp-video-service` to the extension set if a component requires it.
- * @return {boolean}
- */
-function maybeAddVideoService() {
-  if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
-    return false;
-  }
-  extensionsToBuild.push('amp-video-service');
-  return true;
 }
 
 /**
