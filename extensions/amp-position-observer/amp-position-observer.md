@@ -202,7 +202,7 @@ as clock becomes less than 50% visible.
   </tr>
   <tr>
     <td width="40%"><strong>intersection-ratios (optional)</strong></td>
-    <td><p>Defines how much of the target should be visible in the viewport before <code>&lt;amp-position-observer&gt;</code> triggers any of its events. The value is a number between 0 and 1 (default is 0).<br></p>
+    <td><p>Defines how much of the target should be visible in the viewport before <code>&lt;amp-position-observer&gt;</code> triggers any of its events. The value is a number between 0 and 1 (default is 0).</p>
 <p>You can specify different ratios for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
 <ul>
   <li>`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
@@ -217,7 +217,7 @@ as clock becomes less than 50% visible.
   </tr>
   <tr>
     <td width="40%"><strong>viewport-margins (optional)</strong></td>
-    <td><p>A <code>px</code> or <code>vh</code> value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed <code>px</code>. Defaults to 0.<br></p>
+    <td><p>A <code>px</code> or <code>vh</code> value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed <code>px</code>. Defaults to 0.</p>
 <p>You can specify different values for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
 <ul>
   <li>`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.

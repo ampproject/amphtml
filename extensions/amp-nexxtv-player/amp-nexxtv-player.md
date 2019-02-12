@@ -69,7 +69,7 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>data-streamtype (optional)</strong></td>
-    <td>Indicates the media streaming type, which can be one of the following:</p>
+    <td><p>Indicates the media streaming type, which can be one of the following:</p>
 <ul>
   <li>`video` (default)</li>
   <li>`audio`</li>

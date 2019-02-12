@@ -65,7 +65,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>locale (optional)</strong></td>
-    <td>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:<br></p>
+    <td><p>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:</p>
 <ul>
   <li>ar (Arabic)</li>
   <li>be (Belarusian)</li>

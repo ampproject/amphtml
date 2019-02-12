@@ -135,7 +135,7 @@ to learn more and play with samples.
   <tr>
     <td width="40%"><strong>src</strong></td>
     <td><p>This attribute can be used to load a Vega specification data file
-  from a specified remote URL. The URL must use https scheme.<br></p>
+  from a specified remote URL. The URL must use https scheme.</p>
 <p>Alternatively specification data can be included in <code>&lt;script type="application/json"&gt;</code>
   as the only child of <code>&lt;amp-viz-vega&gt;</code>.<br></p>
 <p>Only either <code>src</code> or <code>&lt;script&gt;</code> should be specified. Using both will result in error.</p></td>
@@ -145,7 +145,7 @@ to learn more and play with samples.
     <td><p>To support responsive visualization, by default <code>&lt;amp-viz-vega&gt;</code> overrides <code>width</code>
   and <code>height</code> values defined in the Vega specification data with the actual width
   and height of the <code>&lt;amp-viz-vega&gt;</code> element and re-renders when the size of the
-  element changes (e.g. going to landscape from portrait on phones).<br></p>
+  element changes (e.g. going to landscape from portrait on phones).</p>
 <p><code>use-data-width</code> and <code>use-data-height</code> attribute can be set to instruct <code>&lt;amp-viz-vega&gt;</code>
   not to override the data-defined width and height values. It is recommended to avoid
   using these attributes as they may result in visualizations that require vertical

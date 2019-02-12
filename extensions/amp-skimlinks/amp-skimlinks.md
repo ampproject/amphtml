@@ -94,7 +94,7 @@ The final code should like:
 <table>
   <tr>
     <td width="40%"><strong>publisher-code (required)</strong></td>
-    <td><p>Your skimlinks publisher code (also called "site Id").<br></p>
+    <td><p>Your skimlinks publisher code (also called "site Id").</p>
 <p>If you don't know what's your publisher code, you can find it on the <a href="https://hub.skimlinks.com/settings/sites">Skimlinks Hub</a> ("Site ID" column.).<br></p>
 <p>Example:</p>
 <pre><code class="html language-html">&lt;amp-skimlinks
@@ -124,7 +124,7 @@ excluded-domains="samsung.com amazon.com"
     <td width="40%"><strong>link-selector (optional)</strong></td>
     <td><p><code>link-selector</code> allows you to restrict which links amp-skimlinks should affiliate and track. All the links
   not matching the provided selector will simply be ignored.<br>
-  By default, amp-skimlinks affiliate and tracks all the links on the page.<br></p>
+  By default, amp-skimlinks affiliate and tracks all the links on the page.</p>
 <p><code>link-selector</code> value should be a valid <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors">CSS selector</a><br></p>
 <p><strong>WARNING:</strong>
   Don't set this option unless you really need it.
@@ -141,7 +141,7 @@ link-selector="article:not(.no-skimlinks) a"
   </tr>
   <tr>
     <td width="40%"><strong>custom-tracking-id (optional)</strong></td>
-    <td><p>The <code>custom-tracking-id</code> (also <code>called xcust</code>) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.<br></p>
+    <td><p>The <code>custom-tracking-id</code> (also <code>called xcust</code>) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.</p>
 <p><code>custom-tracking-id</code> should be &lt;=50 characters.</p></td>
   </tr>
 </table>
