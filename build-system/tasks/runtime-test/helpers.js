@@ -23,7 +23,7 @@ const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../../git');
-const {green, cyan, red} = colors;
+const {green, cyan, red, yellow} = colors;
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -192,10 +192,14 @@ function unitTestsToRun(unitTestPaths) {
   }
 
   filesChanged.forEach(file => {
+    if (!fs.existsSync(file)) {
+      log(yellow('SKIP:'), 'Skipping removed file', file);
+      return;
+    }
     if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
-      srcFiles = srcFiles.concat([file]);
+      srcFiles.push(file);
     } else if (path.extname(file) == '.css') {
       srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }
