@@ -35,7 +35,10 @@ tags: {  # <amp-animation> (json)
   mandatory_parent: "AMP-ANIMATION"
   requires_extension: "amp-animation"
   satisfies: "amp-animation extension .json script"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

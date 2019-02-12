@@ -55,15 +55,21 @@ tags: {  # <amp-sidebar> not in amp-story
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
 }
-tags: { #<amp-sidebar> in amp-story
+tags: { # <amp-sidebar> in amp-story
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
   spec_name: "amp-story >> amp-sidebar"
   requires_extension: "amp-sidebar"
   mandatory_parent: "AMP-STORY"
   amp_layout: { supported_layouts: NODISPLAY }
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
 }
 tags: {  # amp-sidebar > nav

@@ -30,7 +30,10 @@ tags: {  # amp-payment-google-inline-async (json)
   requires_extension: "amp-payment-google-inline-async"
   mandatory_parent: "AMP-PAYMENT-GOOGLE-INLINE-ASYNC"
   attrs: { name: "name" }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

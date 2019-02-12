@@ -32,7 +32,10 @@ tags: {  # amp-consent (json)
   mandatory_parent: "AMP-CONSENT"
   unique: true
   satisfies: "amp-consent extension .json script"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
