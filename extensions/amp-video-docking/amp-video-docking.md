@@ -55,7 +55,7 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 
 - The video can be docked to a default corner or to a custom fixed position.
 - The video can be dragged and repositioned by the user on a different corner.
-- Multiple videos on the same page can be docked.
+- Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
 ### <a id="support"></a> Support
 
