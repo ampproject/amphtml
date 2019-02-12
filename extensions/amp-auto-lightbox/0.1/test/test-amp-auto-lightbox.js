@@ -176,13 +176,21 @@ describes.realWin(TAG, {
       criteriaIsMetThereforeAcceptsOrRejects(false, [{rejects: 'any'}]);
     });
 
+    beforeEach(() => {
+      env.win.document.body.appendChild(html`<div id="valid"></div>`);
+    });
+
     itAcceptsOrRejects([
       {
         accepts: 'elements by default',
       },
       {
         accepts: 'elements with a non-tap action',
-        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
+        mutate: el => el.setAttribute('on', 'nottap:valid'),
+      },
+      {
+        accepts: 'elements with a tap action that does not resolve to a node',
+        mutate: el => el.setAttribute('on', 'tap:i-do-not-exist'),
       },
       {
         accepts: 'elements inside non-clickable anchor',
@@ -198,12 +206,11 @@ describes.realWin(TAG, {
       },
       {
         rejects: 'items actionable by tap with a single action',
-        mutate: el => el.setAttribute('on', 'tap:doSomething'),
+        mutate: el => el.setAttribute('on', 'tap:valid'),
       },
       {
         rejects: 'items actionable by tap with multiple actions',
-        mutate: el =>
-          el.setAttribute('on', 'whatever:doSomething;tap:doSomethingElse'),
+        mutate: el => el.setAttribute('on', 'whatever:something;tap:valid'),
       },
       {
         rejects: 'items inside an amp-selector',

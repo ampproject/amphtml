@@ -447,6 +447,34 @@ export class ActionService {
   }
 
   /**
+   * Checks if the given element's registered action resolves to at least one
+   * existing element.
+   * @param {!Element} target
+   * @param {string} actionEventType
+   * @param {!Element=} opt_stopAt
+   */
+  hasResolvableAction(target, actionEventType, opt_stopAt) {
+    const foundAction = this.findAction_(target, actionEventType, opt_stopAt);
+    if (!foundAction) {
+      return false;
+    }
+    const {actionInfos} = foundAction;
+    return actionInfos.some(({target}) => !!this.getActionNode_(target));
+  }
+
+  /**
+   * @param {string} target
+   * @return {?Element}
+   */
+  getActionNode_(target) {
+    // For global targets e.g. "AMP, `node` is the document root. Otherwise,
+    // `target` is an element id and `node` is the corresponding element.
+    return this.globalTargets_[target] ?
+      this.root_ :
+      this.root_.getElementById(target);
+  }
+
+  /**
    * Sets the action whitelist. Can be used to clear it.
    * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
    */
@@ -485,25 +513,19 @@ export class ActionService {
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    action.actionInfos.forEach(actionInfo => {
-      const {target} = actionInfo;
+    action.actionInfos.forEach(({target, args, method, str}) => {
       // Replace any variables in args with data in `event`.
-      const args = dereferenceExprsInArgs(actionInfo.args, event);
+      const dereferencedArgs = dereferenceExprsInArgs(args, event);
       const invokeAction = () => {
-        // For global targets e.g. "AMP, `node` is the document root. Otherwise,
-        // `target` is an element id and `node` is the corresponding element.
-        const node = (this.globalTargets_[target])
-          ? this.root_
-          : this.root_.getElementById(target);
-        if (node) {
-          const invocation = new ActionInvocation(node, actionInfo.method,
-              args, source, action.node, event, trust,
-              actionEventType, node.tagName || target, sequenceId);
-          return this.invoke_(invocation);
-        } else {
-          this.error_(`Target "${target}" not found for action ` +
-              `[${actionInfo.str}].`);
+        const node = this.getActionNode_(target);
+        if (!node) {
+          this.error_(`Target "${target}" not found for action [${str}].`);
+          return;
         }
+        const invocation = new ActionInvocation(node, method,
+            dereferencedArgs, source, action.node, event, trust,
+            actionEventType, node.tagName || target, sequenceId);
+        return this.invoke_(invocation);
       };
       // Wait for the previous action, if any.
       currentPromise = (currentPromise)
