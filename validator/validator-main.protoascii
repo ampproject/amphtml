@@ -26,7 +26,7 @@ min_validator_revision_required: 370
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 816
+spec_file_revision: 817
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -93,15 +93,35 @@ tags: {
 
 # 4.1 The root element
 # 4.1.1 The html element
-tags: {  # AMP
+tags: {  # HTML tag for non-transformed AMP.
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "HTML"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
+}
+tags: {  # HTML tag for transformed AMP.
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "HTML"
+  spec_name: "html (transformed)"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "i-amphtml-layout"
+    value: ""
+  }
+  attrs: {
+    name: "i-amphtml-no-boilerplate"
+    value: ""
+  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
@@ -935,9 +955,9 @@ tags: {
 tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom"
-  disabled_by: "transformed"
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
@@ -1021,9 +1041,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {  # Special custom 'author' spreadsheet for transformed AMP
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1262,9 +1282,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -1285,9 +1305,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1350,9 +1370,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "NOSCRIPT"
@@ -1372,9 +1392,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1437,9 +1457,9 @@ tags: {
 }
 tags: {
   html_format: AMP
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style[amp-runtime] (transformed)"
-  enabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4888,9 +4908,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4899,9 +4919,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
@@ -5131,7 +5151,6 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
-
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
@@ -5178,6 +5197,25 @@ tags: {  # <amp-pixel>
     defines_default_width: true
     supported_layouts: FIXED
     supported_layouts: NODISPLAY
+  }
+}
+
+# Transformed AMP specific tags.
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "I-AMPHTML-SIZER"
+  explicit_attrs_only: true
+  attrs: {
+    name: "style"
+    mandatory: true
+    blacklisted_value_regex: "!important"
+    css_declaration: {
+      name: "display"
+      value_casei: "block"
+    }
+    css_declaration: { name: "padding-top" }
   }
 }
 
