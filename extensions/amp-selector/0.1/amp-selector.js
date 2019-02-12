@@ -539,13 +539,11 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   clearSelection_(element) {
-    if (element !== undefined) {
-      element.removeAttribute('selected');
-      element.setAttribute('aria-selected', 'false');
-      const selIndex = this.selectedElements_.indexOf(element);
-      if (selIndex !== -1) {
-        this.selectedElements_.splice(selIndex, 1);
-      }
+    element.removeAttribute('selected');
+    element.setAttribute('aria-selected', 'false');
+    const selIndex = this.selectedElements_.indexOf(element);
+    if (selIndex !== -1) {
+      this.selectedElements_.splice(selIndex, 1);
     }
   }
 
