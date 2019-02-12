@@ -36,7 +36,7 @@ import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
-  closestBySelector,
+  closestAncestorElementBySelector,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -186,7 +186,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @private */
   initializeMediaPool_() {
     const storyEl = dev().assertElement(
-        closestBySelector(this.element, 'amp-story'),
+        closestAncestorElementBySelector(this.element, 'amp-story'),
         'amp-story-page must be a descendant of amp-story.');
 
     storyEl.getImpl()
