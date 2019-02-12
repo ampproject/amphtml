@@ -397,7 +397,10 @@ tags: {  # amp-story-consent (json)
   mandatory_parent: "AMP-STORY-CONSENT"
   unique: true
   satisfies: "amp-story-consent extension .json script"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

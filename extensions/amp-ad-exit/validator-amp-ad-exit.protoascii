@@ -51,7 +51,10 @@ tags: {  # amp-ad-exit config JSON
   satisfies: "amp-ad-exit configuration JSON"
   requires_extension: "amp-ad-exit"
   mandatory_parent: "AMP-AD-EXIT"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

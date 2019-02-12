@@ -34,7 +34,10 @@ tags: {  # amp-experiment (json)
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

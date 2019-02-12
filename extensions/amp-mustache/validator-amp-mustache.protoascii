@@ -64,7 +64,10 @@ tags: {
   disallowed_ancestor: "FORM DIV [submitting][template]"
   disallowed_ancestor: "FORM DIV [verify-error][template]"
   requires_extension: "amp-mustache"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -101,7 +104,10 @@ tags: {
   # AMP4EMAIL addition.
   disallowed_ancestor: "FORM DIV [submitting]"
   requires_extension: "amp-mustache"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
