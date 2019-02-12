@@ -15,9 +15,7 @@
  */
 
 /** @enum {string} */
-export const EVENTS = {
-  SMARTLINKS_REWRITER_ID: 'amp-smartlinks',
-};
+export const SMARTLINKS_REWRITER_ID = 'amp-smartlinks';
 
 const BASE_API_URL = 'https://api.narrativ.com/api';
 /** @enum {string} */
