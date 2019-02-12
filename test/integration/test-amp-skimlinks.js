@@ -113,7 +113,11 @@ describe('amp-skimlinks', function() {
       });
     });
 
-    it('Should send NA-tracking on non-merchant link click ', () => {
+    // TODO(alanorozco): Unskip on firefox
+    const itSkipFirefox = (desc, cb) =>
+      it.configure().skipFirefox().run(desc, cb);
+
+    itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#non-merchant-link');
