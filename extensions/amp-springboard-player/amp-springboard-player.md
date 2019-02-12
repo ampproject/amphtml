@@ -67,7 +67,7 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
   </tr>
   <tr>
     <td width="40%"><strong>data-mode (required)</strong></td>
-    <td>The SpringBoard player mode: `video` or `playlist`.</td>
+    <td>The SpringBoard player mode: <code>video</code> or <code>playlist</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-content-id (required)</strong></td>
@@ -87,7 +87,7 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
