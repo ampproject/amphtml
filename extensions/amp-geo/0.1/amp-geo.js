@@ -113,7 +113,6 @@ export class AmpGeo extends AMP.BaseElement {
     /** @Private {} */
   }
 
-
   /** @override */
   buildCallback() {
     // All geo config within the amp-geo component.
