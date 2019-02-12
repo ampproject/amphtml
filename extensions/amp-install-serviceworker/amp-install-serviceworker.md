@@ -84,99 +84,14 @@ Example:
   </tr>
   <tr>
      <td width="40%"><strong>data-no-service-worker-fallback-url-match</strong></td>
-     <td>The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See <a href="#shell-url-rewrite">Shell URL rewrite</a> section for more details. The value must be a valid JavaScript RegExp string. For example:</p>
-<ul>
-  <li>`amp.html`</li>
-  <li>`.*amp`</li>
-  <li>`.*\.amp\.html`</li>
-  <li>`.*\/amp---
-$category@: dynamic-content
-formats:
-  - websites
-  - stories
-teaser:
-  text: Installs a ServiceWorker.
----
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
-# amp-install-serviceworker
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Installs a <a href="https://developers.google.com/web/fundamentals/primers/service-worker/">ServiceWorker</a> for the current page.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-install-serviceworker/">Annotated code example for amp-install-serviceworker</a></td>
-  </tr>
-</table>
-
-## Behavior
-
-Registers the service worker given by the `src` attribute if the AMP document is loaded from the same origin as the given service worker URL. If the `data-iframe-src` is set, loads that URL as an iframe when the AMP document is served from an AMP cache. This allows ServiceWorker installation from the AMP cache, so that the service worker is installed by the time users visit the origin site.
-
-This service worker runs whenever the AMP file is served from the origin where you publish the AMP file. On documents served from an AMP cache, the service worker will be installed in the background but will not execute or affect the page's behavior.
-
-See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of-the-service-worker-8369841dc962) for how ServiceWorkers can help with making the AMP experience awesome with ServiceWorkers.
-
-Example:
-
-```html
-<amp-install-serviceworker
-  src="https://www.your-domain.com/serviceworker.js"
-  data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
-  layout="nodisplay">
-</amp-install-serviceworker>
-```
-
-## Attributes
-
-<table>
-  <tr>
-    <td width="40%"><strong>src (required)</strong></td>
-    <td>The URL of the ServiceWorker to register, which must use <code>https</code> protocol.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-iframe-src (optional)</strong></td>
-    <td>The URL of an HTML document that installs a ServiceWorker. The URL must use <code>https</code> protocol.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-scope (optional)</strong></td>
-    <td>The scope of the service worker to be installed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>layout</strong></td>
-    <td>Must have the value <code>nodisplay</code>.</td>
-  </tr>
-  <tr>
-     <td width="40%"><strong>data-no-service-worker-fallback-url-match</strong></td>
-     <td></li>
-</ul></td>
+     <td><p>The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See <a href="#shell-url-rewrite">Shell URL rewrite</a> section for more details. The value must be a valid JavaScript RegExp string. For example:</p>
+      <ul>
+        <li><code>amp.html</code></li>
+        <li><code>.*amp</code></li>
+        <li><code>.*\.amp\.html</code></li>
+        <li><code>.*\/amp$</code></li>
+      </ul>
+    </td>
    </tr>
    <tr>
      <td width="40%"><strong>data-no-service-worker-fallback-shell-url</strong></td>
