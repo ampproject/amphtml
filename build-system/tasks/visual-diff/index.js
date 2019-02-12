@@ -51,10 +51,6 @@ const NAVIGATE_TIMEOUT_MS = 3000;
 const MAX_PARALLEL_TABS = 10;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
-const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
-const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
-const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
-const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
@@ -157,74 +153,6 @@ async function getBuildStatus(buildId) {
     return (await request(statusUri, {json: true})).body;
   } catch (error) {
     log('fatal', 'Failed to query Percy build status:', error);
-  }
-}
-
-/**
- * Waits for Percy to finish processing a build.
- * @param {string} buildId ID of the ongoing Percy build.
- * @return {!JsonObject} The eventual status of the Percy build.
- */
-async function waitForBuildCompletion(buildId) {
-  log('info', 'Waiting for Percy build', colors.cyan(buildId),
-      'to be processed...');
-  const startTime = Date.now();
-  let status = await getBuildStatus(buildId);
-  while (status.state != 'finished' && status.state != 'failed' &&
-             Date.now() - startTime < BUILD_PROCESSING_TIMEOUT_MS) {
-    await sleep(BUILD_PROCESSING_POLLING_INTERVAL_MS);
-    status = await getBuildStatus(buildId);
-  }
-  return status;
-}
-
-/**
- * Verifies that a Percy build succeeded and didn't contain any visual diffs.
- * @param {!JsonObject} status The eventual status of the Percy build.
- * @param {string} buildId ID of the Percy build.
- */
-function verifyBuildStatus(status, buildId) {
-  switch (status.state) {
-    case 'finished':
-      if (status.total_comparisons_diff > 0) {
-        if (MASTER_BRANCHES_REGEXP.test(status.branch)) {
-          // If there are visual diffs on master or a release branch, fail
-          // Travis. For master, print instructions for how to approve new
-          // visual changes.
-          if (status.branch == 'master') {
-            log('error', 'Found visual diffs. If the changes are intentional,',
-                'you must approve the build at',
-                colors.cyan(`${PERCY_BUILD_URL}/${buildId}`),
-                'in order to update the baseline snapshots.');
-          } else {
-            log('error', `Found visual diffs on branch ${status.branch}`);
-          }
-        } else {
-          // For PR branches, just print a warning since the diff may be into
-          // intentional, with instructions for how to approve the new snapshots
-          // so they are used as the baseline for future visual diff builds.
-          log('warning', 'Percy build', colors.cyan(buildId),
-              'contains visual diffs.');
-          log('warning', 'If they are intentional, you must first approve the',
-              'build at', colors.cyan(`${PERCY_BUILD_URL}/${buildId}`),
-              'to allow your PR to be merged.');
-        }
-      } else {
-        log('info', 'Percy build', colors.cyan(buildId),
-            'contains no visual diffs.');
-      }
-      break;
-
-    case 'pending':
-    case 'processing':
-      log('error', 'Percy build not processed after',
-          `${BUILD_PROCESSING_TIMEOUT_MS}ms`);
-      break;
-
-    case 'failed':
-    default:
-      log('error', `Percy build failed: ${status.failure_reason}`);
-      break;
   }
 }
 
@@ -574,20 +502,10 @@ async function visualDiff() {
   }
 
   try {
-    if (argv.verify_status) {
-      await performVerifyStatus();
-    } else {
-      await performVisualTests();
-    }
+    await performVisualTests();
   } finally {
     return await cleanup_();
   }
-}
-
-async function performVerifyStatus() {
-  const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
-  const status = await waitForBuildCompletion(buildId);
-  verifyBuildStatus(status, buildId);
 }
 
 /**
@@ -622,9 +540,6 @@ async function performVisualTests() {
 }
 
 async function ensureOrBuildAmpRuntimeInTestMode_() {
-  if (argv.verify_status) {
-    return;
-  }
   if (argv.nobuild) {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
         fs.readFileSync('dist/amp.js', 'utf8'));
@@ -673,8 +588,6 @@ gulp.task(
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify_status':
-          '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'empty': '  Creates a dummy Percy build with only a blank snapshot',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',

@@ -453,17 +453,6 @@ const command = {
           'Found errors while running', colors.cyan(cmd));
     }
   },
-  verifyVisualDiffTests: function() {
-    if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
-      console.log(
-          '\n' + fileLogPrefix, 'Could not find environment variables',
-          colors.cyan('PERCY_PROJECT'), 'and',
-          colors.cyan('PERCY_TOKEN') +
-          '. Skipping verification of visual diff tests.');
-      return;
-    }
-    timedExec('gulp visual-diff --verify_status');
-  },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
   },
@@ -492,7 +481,6 @@ function runAllCommands() {
     command.runUnitTests();
     command.runDevDashboardTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -528,7 +516,6 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
@@ -695,13 +682,6 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
       command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-    }
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('FLAG_CONFIG') ||
-        buildTargets.has('BUILD_SYSTEM')) {
-      command.verifyVisualDiffTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
