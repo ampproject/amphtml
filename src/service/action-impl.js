@@ -463,8 +463,8 @@ export class ActionService {
   }
 
   /**
-   * For global targets e.g. "AMP, `node` is the document root. Otherwise,
-   * `target` is an element id and `node` is the corresponding element.
+   * For global targets e.g. "AMP, returns the document root. Otherwise,
+   * `target` is an element id and the corresponding element is returned.
    * @param {string} target
    * @return {?Document|?Element|?ShadowRoot}
    */
