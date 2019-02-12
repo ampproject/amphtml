@@ -110,8 +110,8 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   </tr>
   <tr>
     <td width="40%"><strong>dock</strong></td>
-    <td><strong>Requires `amp-video-docking` extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
-    For more details, see [documentation on the docking extension itself.](https://www.ampproject.org/docs/reference/components/amp-video-docking/)</td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
   </tr>
 </table>
 

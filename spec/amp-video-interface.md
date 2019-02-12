@@ -48,7 +48,7 @@ For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-v
 
 attribute: **`dock`**
 
-This attributes is currently only supported for
+This attribute is currently only supported for
 `amp-brightcove`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
@@ -58,14 +58,14 @@ component's visual area.
 - The video can be dragged and repositioned by the user on a different corner.
 - Multiple videos on the same page can be docked.
 
-In order to use this attribute, the [`amp-video-docking`](https://www.ampproject.org/docs/reference/components/amp-video-docking/)
+In order to use this attribute, the [`amp-video-docking`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
 extension script must be present:
 
 ```
 <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
 ```
 
-For more details, see [documentation on the docking extension itself.](https://www.ampproject.org/docs/reference/components/amp-video-docking/)
+For more details, see [documentation on the docking extension itself.](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
 
 <a id="rotate-to-fullscreen"></a>
 
