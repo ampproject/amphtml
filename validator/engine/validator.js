@@ -4223,9 +4223,7 @@ function validateAttributes(
       mandatoryOneofsSeen.push(mandatoryOneof);
     }
     if (attrSpec.requiresAncestor !== null) {
-      console.log(attrSpec.requiresAncestor);
       const markers = attrSpec.requiresAncestor.marker;
-      console.log(markers);
       let matchesMarker = false;
       for (const marker of markers) {
         if (context.getTagStack().hasAncestorMarker(marker)) {
