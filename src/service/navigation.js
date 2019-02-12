@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {
-  closestByTag,
+  closestAncestorElementByTag,
   escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
@@ -310,7 +310,8 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const target = closestByTag(dev().assertElement(e.target), 'A');
+    const element = dev().assertElement(e.target);
+    const target = closestAncestorElementByTag(element, 'A');
     if (!target || !target.href) {
       return;
     }
@@ -599,7 +600,8 @@ export class Navigation {
  * @param {!Event} e
  */
 function maybeExpandUrlParams(ampdoc, e) {
-  const target = closestByTag(dev().assertElement(e.target), 'A');
+  const target =
+    closestAncestorElementByTag(dev().assertElement(e.target), 'A');
   if (!target || !target.href) {
     // Not a click on a link.
     return;

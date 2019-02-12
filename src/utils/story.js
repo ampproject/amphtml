@@ -14,7 +14,7 @@
   * limitations under the License.
   */
 
-import {closestByTag, waitForChild} from '../dom';
+import {closestAncestorElementByTag, waitForChild} from '../dom';
 
 
 /**
@@ -26,7 +26,7 @@ import {closestByTag, waitForChild} from '../dom';
  * @return {boolean}
  */
 export function descendsFromStory(element) {
-  return !!closestByTag(element, 'amp-story');
+  return !!closestAncestorElementByTag(element, 'amp-story');
 }
 
 /**

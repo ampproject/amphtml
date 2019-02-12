@@ -23,7 +23,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
@@ -119,8 +119,9 @@ export class LocalSubscriptionPlatform {
    */
   initializeListeners_() {
     this.rootNode_.addEventListener('click', e => {
-      const element = closestBySelector(dev().assertElement(e.target),
-          '[subscriptions-action]');
+      const element =
+        closestAncestorElementBySelector(dev().assertElement(e.target),
+            '[subscriptions-action]');
       this.handleClick_(element);
     });
   }

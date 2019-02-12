@@ -21,7 +21,7 @@ import {
   VisibilityManagerForEmbed,
 } from './visibility-manager';
 import {
-  closestBySelector,
+  closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
@@ -221,7 +221,7 @@ export class AnalyticsRoot {
         if (selectionMethod == 'scope') {
           found = scopedQuerySelector(context, selector);
         } else if (selectionMethod == 'closest') {
-          found = closestBySelector(context, selector);
+          found = closestAncestorElementBySelector(context, selector);
         } else {
           found = this.getRoot().querySelector(selector);
         }
