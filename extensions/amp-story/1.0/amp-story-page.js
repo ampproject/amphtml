@@ -42,7 +42,6 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from './localization';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
   closestBySelector,
   iterateCursor,
@@ -50,6 +49,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
+import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -60,7 +60,6 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -256,13 +255,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * play videos from an inactive page.
    */
   delegateVideoAutoplay() {
-    const videos = this.element.querySelectorAll('amp-video');
-    if (videos.length < 1) {
-      return;
-    }
-    toArray(videos).forEach(el => {
-      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
-    });
+    iterateCursor(this.element.querySelectorAll('amp-video'), delegateAutoplay);
   }
 
   /** @private */

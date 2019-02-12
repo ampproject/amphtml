@@ -422,18 +422,6 @@ exports.extensionBundles = [
     version: '0.1',
     type: TYPES.MEDIA,
   },
-  {
-    name: 'amp-video-service',
-    version: '0.1',
-    options: {
-      // `amp-video-service` provides analytics and autoplay for all videos. We
-      // need those to be available asap. This service replaces a runtime-level
-      // provider, so loadPriority is set to high in lieu of delivering it as
-      // part of the core binary.
-      loadPriority: 'high',
-    },
-    type: TYPES.MISC,
-  },
   {name: 'amp-viqeo-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-vk', version: '0.1', type: TYPES.MISC},
   {name: 'amp-yotpo', version: '0.1', type: TYPES.MISC},
