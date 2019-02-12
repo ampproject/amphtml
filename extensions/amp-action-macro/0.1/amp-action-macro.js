@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {LayoutPriority} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -21,14 +22,35 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-action-macro';
 
 /**
-* The <amp-action-macro> element is used to define a reusable action macro.
+* The <amp-action-macro> element is used to define a reusable action.
 */
 export class AmpActionMacro extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
+
+    /** @private {!Array<string>} */
+    this.arguments_ = [];
+  }
 
   /** @override */
   buildCallback() {
     userAssert(isExperimentOn(this.win, 'amp-action-macro'),
         'Experiment is off');
+    const {element} = this;
+
+    this.actions_ = Services.actionServiceForDoc(element);
+
+    const argVarNames = element.getAttribute('arguments');
+    if (argVarNames) {
+      this.arguments_ = argVarNames.split(',').map(s => s.trim());
+    }
+
+    this.registerAction('execute', this.execute_.bind(this));
   }
 
   /** @override */
@@ -37,9 +59,27 @@ export class AmpActionMacro extends AMP.BaseElement {
     return LayoutPriority.METADATA;
   }
 
-  /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  /**
+   * Invoke the action defined on the macro.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  execute_(invocation) {
+    const {actionEventType, args, event, trust} = invocation;
+    if (args && this.arguments_.length > 0) {
+      // Verify that the argument variable names defined on the macro are used
+      // in the caller invocation.
+      for (const arg in args) {
+        userAssert(this.arguments_.includes(arg),
+            'Variable argument name "%s" is not defined in %s',
+            arg, this.element);
+      }
+    }
+    // Trigger the macro's action.
+    // TODO(alabiaga): Only allow triggering macros defined beforehand to
+    // prevent possibility of cyclic triggering of macros.
+    this.actions_.trigger(
+        this.element, `${actionEventType}`, event, trust, args);
   }
 
   /** @override */
