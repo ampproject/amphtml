@@ -23,6 +23,7 @@ limitations under the License.
   width="468"
   height="60"
   type="sas"
+  layout="fixed"
   data-customer-name="canary"
   data-size="320x50"
   data-area="areaname"
