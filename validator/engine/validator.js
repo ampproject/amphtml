@@ -4473,9 +4473,22 @@ function validateTagAgainstSpec(
 function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   const tagSpecDispatch =
       context.getRules().dispatchForTagName(encounteredTag.upperName());
+  // Filter TagSpecDispatch.AllTagSpecs by type identifiers.
+  let filteredTagSpecs = [];
+  if (tagSpecDispatch !== undefined) {
+    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
+      const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
+      // Keep TagSpecs that are used for these type identifiers.
+      if (parsedTagSpec.isUsedForTypeIdentifiers(
+              context.getTypeIdentifiers())) {
+        filteredTagSpecs.push(parsedTagSpec);
+      }
+    }
+  }
   // If there are no dispatch keys matching the tag name, ex: tag name is
   // "foo", set a disallowed tag error.
-  if (tagSpecDispatch === undefined) {
+  if (tagSpecDispatch === undefined ||
+      (!tagSpecDispatch.hasDispatchKeys() && filteredTagSpecs.length === 0)) {
     const result = new amp.validator.ValidationResult();
     let specUrl = '';
     // Special case the spec_url for font tags to be slightly more useful.
@@ -4528,7 +4541,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
   // which gives an error that reads "tag foo is disallowed except in
   // specific forms".
-  if (!tagSpecDispatch.hasTagSpecs()) {
+  if (filteredTagSpecs.length === 0) {
     const result = new amp.validator.ValidationResult();
     if (encounteredTag.upperName() === 'SCRIPT') {
       // Special case for <script> tags to produce better error messages.
@@ -4552,12 +4565,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-    const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
-    // Skip TagSpecs that aren't used for these type identifiers.
-    if (!parsedTagSpec.isUsedForTypeIdentifiers(context.getTypeIdentifiers())) {
-      continue;
-    }
+  for (const parsedTagSpec of filteredTagSpecs) {
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
     if (context.getRules().betterValidationResultThan(
