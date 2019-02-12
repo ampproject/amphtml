@@ -639,8 +639,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   removeVisibleAttribute_() {
     this.mutateElement(() => {
-      this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
-      this.visibleAdBody_ = null;
+      if (this.visibleAdBody_) {
+        this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
+        this.visibleAdBody_ = null;
+      }
     });
   }
 
