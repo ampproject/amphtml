@@ -113,10 +113,6 @@ export class AmpGeo extends AMP.BaseElement {
     /** @Private {} */
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return true;
-  }
 
   /** @override */
   buildCallback() {
