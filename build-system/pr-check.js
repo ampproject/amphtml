@@ -43,6 +43,7 @@ const {
 const {
   isTravisBuild,
   isTravisPullRequestBuild,
+  isTravisPushBuild,
   travisPullRequestSha,
 } = require('./travis');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
@@ -479,7 +480,9 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runVisualDiffTests(/* opt_mode */ 'master');
+    if (isTravisPushBuild()) {
+      command.runVisualDiffTests(/* opt_mode */ 'master');
+    }
     command.runLintCheck();
     command.runJsonCheck();
     command.runDepAndTypeChecks();
