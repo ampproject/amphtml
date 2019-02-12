@@ -676,15 +676,6 @@ describes.realWin(TAG, {
       expect(element).to.have.attribute(LIGHTBOXABLE_ATTR);
     });
 
-    it('removes `on` action', async() => {
-      const element = html`<amp-img src="chabuddy.g" on="tap:foo"></amp-img>`;
-
-      await apply(env.ampdoc, element);
-
-      expect(element).to.have.attribute(LIGHTBOXABLE_ATTR);
-      expect(element).not.to.have.attribute('on');
-    });
-
     it('sets unique group for each element', async() => {
       const candidates = [1, 2, 3].map(() => html`<amp-img></amp-img>`);
 
