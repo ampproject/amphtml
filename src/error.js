@@ -29,7 +29,6 @@ import {
   experimentTogglesOrNull,
   getBinaryType,
   isCanary,
-  isExperimentOn,
 } from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
