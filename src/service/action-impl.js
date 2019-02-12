@@ -517,7 +517,6 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
     action.actionInfos.forEach(({target, args, method, str}) => {
-      // Replace any variables in args with data in `event`.
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);
