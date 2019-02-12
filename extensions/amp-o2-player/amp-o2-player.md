@@ -63,28 +63,28 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-pid (required)</strong></p></td>
-    <td><p>The Player ID for the O2Player.</p></td>
+    <td width="40%"><strong>data-pid (required)</strong></td>
+    <td>The Player ID for the O2Player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-bcid (required)</strong></p></td>
-    <td><p>The Buyer Company ID (bcid) for the O2Player.</p></td>
+    <td width="40%"><strong>data-bcid (required)</strong></td>
+    <td>The Buyer Company ID (bcid) for the O2Player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-bid</strong></p></td>
-    <td><p>The Playlist ID (bid) for the O2Player.</p></td>
+    <td width="40%"><strong>data-bid</strong></td>
+    <td>The Playlist ID (bid) for the O2Player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-vid</strong></p></td>
-    <td><p>The Video ID (vid) for the O2Player.</p></td>
+    <td width="40%"><strong>data-vid</strong></td>
+    <td>The Video ID (vid) for the O2Player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-macros</strong></p></td>
-    <td><p>The macros for the O2Player.</p></td>
+    <td width="40%"><strong>data-macros</strong></td>
+    <td>The macros for the O2Player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

@@ -51,11 +51,11 @@ With the `responsive` layout, the width and height in this should yield correct 
 
 <table>
   <tr>
-    <td width="40%"><p><strong><strong>Examples</strong></p></td>
-    <td><p>The sdnPlayoutId from 3Q SDN.</p></td>
+    <td width="40%"><strong><strong>Examples</strong></td>
+    <td>The sdnPlayoutId from 3Q SDN.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoplay (optional)</strong></p></td>
+    <td width="40%"><strong>autoplay (optional)</strong></td>
     <td ><p>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
   <li>the video is automatically muted before autoplay starts</li>
@@ -67,8 +67,8 @@ With the `responsive` layout, the width and height in this should yield correct 
 <p>for example <code>setModelRotation(x=0.5, xMin=0, xMax=3.14)</code> will change <code>x</code> component of rotation to <code>1.57</code>.</p></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

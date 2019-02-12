@@ -78,32 +78,32 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-embedtype (required)</strong></p></td>
-    <td><p>The type of embed, either <code>post</code> or <code>comment</code>.</p></td>
+    <td width="40%"><strong>data-embedtype (required)</strong></td>
+    <td>The type of embed, either <code>post</code> or <code>comment</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-src (required)</strong></p></td>
-    <td><p>The permamlink uri for the post or comment.</p></td>
+    <td width="40%"><strong>data-src (required)</strong></td>
+    <td>The permamlink uri for the post or comment.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-uuid</strong></p></td>
-    <td><p>The provided UUID for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>. </p></td>
+    <td width="40%"><strong>data-uuid</strong></td>
+    <td>The provided UUID for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-embedcreated</strong></p></td>
-    <td><p>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>. </p></td>
+    <td width="40%"><strong>data-embedcreated</strong></td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-embedparent</strong></p></td>
-    <td><p>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>. </p></td>
+    <td width="40%"><strong>data-embedparent</strong></td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-embedlive</strong></p></td>
-    <td><p>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</p></td>
+    <td width="40%"><strong>data-embedlive</strong></td>
+    <td>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

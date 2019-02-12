@@ -27,10 +27,8 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays elements in a full-viewport “lightbox” modal.<p>
-  </td>
-  </tr>
-</p>
+    <td>Displays elements in a full-viewport “lightbox” modal.</td>
+</tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
@@ -70,33 +68,33 @@ For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](http
 
 <table>
   <tr>
-    <td width="40%"><p><strong>animate-in (optional)</strong></p></td>
-    <td><p>Defines the style of animation for opening the lightbox. By default, this will
-  be set to <code>fade-in</code>. Valid values are <code>fade-in</code>, <code>fly-in-bottom</code> and
-  <code>fly-in-top</code>.
-  <br><br>
-  <strong>Note</strong>: The <code>fly-in-*</code> animation presets modify the <code>transform</code> property of the
-  <code>amp-lightbox</code> element. Do not rely on transforming the <code>amp-lightbox</code> element
-  directly. If you need to apply a transform, set it on a nested element instead.</p></td>
+    <td width="40%"><strong>animate-in (optional)</strong></td>
+    <td>Defines the style of animation for opening the lightbox. By default, this will
+be set to <code>fade-in</code>. Valid values are <code>fade-in</code>, <code>fly-in-bottom</code> and
+<code>fly-in-top</code>.
+<br><br>
+<strong>Note</strong>: The <code>fly-in-*</code> animation presets modify the <code>transform</code> property of the
+<code>amp-lightbox</code> element. Do not rely on transforming the <code>amp-lightbox</code> element
+directly. If you need to apply a transform, set it on a nested element instead.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>close-button (required on AMPHTML ads)</strong></p></td>
-    <td><p>Renders a close button header at the top of the lightbox. This attribute is only
-  required and valid for use with <a href="#a4a">AMPHTML Ads</a>.</p></td>
+    <td width="40%"><strong>close-button (required on AMPHTML ads)</strong></td>
+    <td>Renders a close button header at the top of the lightbox. This attribute is only
+required and valid for use with <a href="#a4a">AMPHTML Ads</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>id (required)</strong></p></td>
-    <td><p>A unique identifer for the lightbox.</p></td>
+    <td width="40%"><strong>id (required)</strong></td>
+    <td>A unique identifer for the lightbox.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>layout (required)</strong></p></td>
-    <td><p>Must be set to <code>nodisplay</code>.</p></td>
+    <td width="40%"><strong>layout (required)</strong></td>
+    <td>Must be set to <code>nodisplay</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><p><strong>scrollable (optional)</strong></p></p></td>
-    <td><p>When the <code>scrollable</code> attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
-  <br><br>
-  <strong>Note</strong>: The <code>scrollable</code> attribute is not allowed when using <code>&lt;amp-lightbox&gt;</code> inside an AMPHTML ad. For details, read the <a href="#a4a">Using amp-lightbox in AMPHTML ads</a> section.</p></td>
+    <td width="40%"><strong>scrollable (optional)</strong></td>
+    <td>When the <code>scrollable</code> attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
+<br><br>
+<strong>Note</strong>: The <code>scrollable</code> attribute is not allowed when using <code>&lt;amp-lightbox&gt;</code> inside an AMPHTML ad. For details, read the <a href="#a4a">Using amp-lightbox in AMPHTML ads</a> section.</td>
   </tr>
   <tr>
     <td width="40%"><strong>scrollable (optional)</strong></td>

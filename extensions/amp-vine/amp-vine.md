@@ -56,12 +56,12 @@ A Vine simple embed has equal width and height:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-vineid (required)</strong></p></td>
-    <td><p>The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d, <code>MdKjXez002d</code> is the vineID.</p></td>
+    <td width="40%"><strong>data-vineid (required)</strong></td>
+    <td>The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d, <code>MdKjXez002d</code> is the vineID.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</td>
   </tr>
 </table>
 

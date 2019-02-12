@@ -92,30 +92,30 @@ The reasons for this policy are that:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>src</strong></p></td>
-    <td><p>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
-  source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
-  not already have a fragment.</p></td>
+    <td width="40%"><strong>src</strong></td>
+    <td>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
+not already have a fragment.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy</strong></p></td>
-    <td><p>These attributes should all behave like they do on standard iframes.
-  <br>
-  If <code>frameborder</code> is not specified, by default, it will be set to <code>0</code>.</p></td>
+    <td width="40%"><strong>srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy</strong></td>
+    <td>These attributes should all behave like they do on standard iframes.
+<br>
+If <code>frameborder</code> is not specified, by default, it will be set to <code>0</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>sandbox</strong></p></td>
-    <td><p>Iframes created by <code>amp-iframe</code> always have the <code>sandbox</code> attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting <code>sandbox</code> values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting <code>sandbox="allow-scripts"</code> allows the iframe to run JavaScript, or <code>sandbox="allow-scripts allow-same-origin"</code> allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
-  <br><br>
-  If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add <code>allow-scripts allow-same-origin</code> to the <code>sandbox</code> attribute and you might need to allow additional capabilities.
-  <br><br>
-  Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with <code>target=_blank</code> (add <code>allow-popups</code> to allow this to happen). Adding <code>allow-popups-to-escape-sandbox</code> to the <code>sandbox</code> attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, <code>allow-popups-to-escape-sandbox</code> is only supported by Chrome.
-  <br><br>
-  See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox">docs on MDN</a> for further details on the sandbox attribute.</p></td>
+    <td width="40%"><strong>sandbox</strong></td>
+    <td>Iframes created by <code>amp-iframe</code> always have the <code>sandbox</code> attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting <code>sandbox</code> values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting <code>sandbox="allow-scripts"</code> allows the iframe to run JavaScript, or <code>sandbox="allow-scripts allow-same-origin"</code> allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
+<br><br>
+If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add <code>allow-scripts allow-same-origin</code> to the <code>sandbox</code> attribute and you might need to allow additional capabilities.
+<br><br>
+Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with <code>target=_blank</code> (add <code>allow-popups</code> to allow this to happen). Adding <code>allow-popups-to-escape-sandbox</code> to the <code>sandbox</code> attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, <code>allow-popups-to-escape-sandbox</code> is only supported by Chrome.
+<br><br>
+See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox">docs on MDN</a> for further details on the sandbox attribute.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

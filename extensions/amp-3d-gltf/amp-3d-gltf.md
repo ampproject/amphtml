@@ -73,33 +73,33 @@ Unsupported features:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>src [required]</strong></p></td>
-    <td><p>A required attribute that specifies the URL to the gltf file.</p></td>
+    <td width="40%"><strong>src [required]</strong></td>
+    <td>A required attribute that specifies the URL to the gltf file.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>alpha [optional]</strong></p></td>
-    <td><p>A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
-  Default value is <code>false</code>.</p></td>
+    <td width="40%"><strong>alpha [optional]</strong></td>
+    <td>A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
+Default value is <code>false</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>antialiasing [optional]</strong></p></td>
-    <td><p>A Boolean attribute that specifies whether to turn on antialiasing. Default value is <code>false</code>.</p></td>
+    <td width="40%"><strong>antialiasing [optional]</strong></td>
+    <td>A Boolean attribute that specifies whether to turn on antialiasing. Default value is <code>false</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>clearColor [optional]</strong></p></td>
-    <td><p>A string that must contain valid CSS color, that will be used to fill free space on canvas.</p></td>
+    <td width="40%"><strong>clearColor [optional]</strong></td>
+    <td>A string that must contain valid CSS color, that will be used to fill free space on canvas.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>maxPixelRatio [optional]</strong></p></td>
-    <td><p>A numeric value that specifies the upper limit for the pixelRatio render option. The default is <code>window.devicePixelRatio</code>.</p></td>
+    <td width="40%"><strong>maxPixelRatio [optional]</strong></td>
+    <td>A numeric value that specifies the upper limit for the pixelRatio render option. The default is <code>window.devicePixelRatio</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoRotate [optional]</strong></p></td>
-    <td><p>A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is <code>false</code>.</p></td>
+    <td width="40%"><strong>autoRotate [optional]</strong></td>
+    <td>A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is <code>false</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>enableZoom [optional]</strong></p></td>
-    <td><p>A Boolean attribute that specifies whether to turn on zoom. Default value is <code>true</code>.</p></td>
+    <td width="40%"><strong>enableZoom [optional]</strong></td>
+    <td>A Boolean attribute that specifies whether to turn on zoom. Default value is <code>true</code>.</td>
   </tr>
 </table>
 

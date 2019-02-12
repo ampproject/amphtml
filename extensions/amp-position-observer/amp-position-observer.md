@@ -197,11 +197,11 @@ as clock becomes less than 50% visible.
 
 <table>
   <tr>
-    <td width="40%"><p><strong>target (optional)</strong></p></td>
-    <td><p>Specifies the ID of the element to observe. If <strong>not specified</strong>, the <strong>parent</strong> of <code>&lt;amp-position-observer&gt;</code> is used as the target.</p></td>
+    <td width="40%"><strong>target (optional)</strong></td>
+    <td>Specifies the ID of the element to observe. If <strong>not specified</strong>, the <strong>parent</strong> of <code>&lt;amp-position-observer&gt;</code> is used as the target.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>intersection-ratios (optional)</strong></p></td>
+    <td width="40%"><strong>intersection-ratios (optional)</strong></td>
     <td><p>Defines how much of the target should be visible in the viewport before <code>&lt;amp-position-observer&gt;</code> triggers any of its events. The value is a number between 0 and 1 (default is 0).<br></p>
 <p>You can specify different ratios for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
 <ul>
@@ -216,7 +216,7 @@ as clock becomes less than 50% visible.
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>viewport-margins (optional)</strong></p></td>
+    <td width="40%"><strong>viewport-margins (optional)</strong></td>
     <td><p>A <code>px</code> or <code>vh</code> value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed <code>px</code>. Defaults to 0.<br></p>
 <p>You can specify different values for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
 <ul>
@@ -229,8 +229,8 @@ as clock becomes less than 50% visible.
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>once (optional)</strong></p></td>
-    <td><p>Only triggers the <code>enter</code> and <code>exit</code> events once. The <code>scroll</code> event will also only perform one iteration.</p></td>
+    <td width="40%"><strong>once (optional)</strong></td>
+    <td>Only triggers the <code>enter</code> and <code>exit</code> events once. The <code>scroll</code> event will also only perform one iteration.</td>
   </tr>
 </table>
 

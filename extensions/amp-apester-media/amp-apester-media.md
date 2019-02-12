@@ -61,12 +61,12 @@ Playlist Mode:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>data-apester-media-id</strong></p></td>
-    <td><p>This attribute is required for single mode, and it represents the ID of the media (string value).</p></td>
+    <td width="40%"><strong>data-apester-media-id</strong></td>
+    <td>This attribute is required for single mode, and it represents the ID of the media (string value).</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-apester-channel-token</strong></p></td>
-    <td><p>This attribute is required for playlist mode, and it represents the token of the channel (string value).</p></td>
+    <td width="40%"><strong>data-apester-channel-token</strong></td>
+    <td>This attribute is required for playlist mode, and it represents the token of the channel (string value).</td>
   </tr>
 </table>
 

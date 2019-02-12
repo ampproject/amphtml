@@ -56,20 +56,20 @@ Example:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>data-imgur-id (required)</strong></p></td>
-    <td><p>The ID of the Imgur post.</p></td>
+    <td width="40%"><strong>data-imgur-id (required)</strong></td>
+    <td>The ID of the Imgur post.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>width (required)</strong></p></td>
-    <td><p>The width of the Imgur post.</p></td>
+    <td width="40%"><strong>width (required)</strong></td>
+    <td>The width of the Imgur post.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>height (required)</strong></p></td>
-    <td><p>The height of the Imgur post.</p></td>
+    <td width="40%"><strong>height (required)</strong></td>
+    <td>The height of the Imgur post.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

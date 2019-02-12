@@ -653,7 +653,7 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
 
 <table>
   <tr>
-    <td width="40%"><p><strong>src</strong></p></td>
+    <td width="40%"><strong>src</strong></td>
     <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
 <p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
 <p>{% call callout('Important', type='caution') %}
@@ -661,7 +661,7 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
   {% endcall %}</p></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>credentials (optional)</strong></p></td>
+    <td width="40%"><strong>credentials (optional)</strong></td>
     <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
 <ul>
   <li>Supported values: `omit`, `include`</li>

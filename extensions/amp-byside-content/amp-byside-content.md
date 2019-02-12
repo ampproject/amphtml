@@ -62,28 +62,28 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-webcare-id (required)</strong></p></td>
-    <td><p>The BySide customer account ID.</p></td>
+    <td width="40%"><strong>data-webcare-id (required)</strong></td>
+    <td>The BySide customer account ID.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-label (required)</strong></p></td>
-    <td><p>The content label as seen in your BySide account.</p></td>
+    <td width="40%"><strong>data-label (required)</strong></td>
+    <td>The content label as seen in your BySide account.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-lang</strong></p></td>
-    <td><p>The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").</p></td>
+    <td width="40%"><strong>data-lang</strong></td>
+    <td>The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-channel</strong></p></td>
-    <td><p>The channel identifier to use for content validation. Defaults to an empty string.</p></td>
+    <td width="40%"><strong>data-channel</strong></td>
+    <td>The channel identifier to use for content validation. Defaults to an empty string.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-fid</strong></p></td>
-    <td><p>The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.</p></td>
+    <td width="40%"><strong>data-fid</strong></td>
+    <td>The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

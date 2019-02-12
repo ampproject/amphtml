@@ -63,7 +63,7 @@ Each unique CORS endpoint is called only once per page.
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>config (required)</strong></p></td>
+    <td width="40%"><strong>config (required)</strong></td>
     <td><p>Defines a CORS URL. The URL's protocol must be HTTPS. The response must consist
   of a valid JSON object with the following fields:</p>
 <ul>

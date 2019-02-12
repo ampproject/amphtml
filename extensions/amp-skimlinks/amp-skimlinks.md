@@ -93,7 +93,7 @@ The final code should like:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>publisher-code (required)</strong></p></td>
+    <td width="40%"><strong>publisher-code (required)</strong></td>
     <td><p>Your skimlinks publisher code (also called "site Id").<br></p>
 <p>If you don't know what's your publisher code, you can find it on the <a href="https://hub.skimlinks.com/settings/sites">Skimlinks Hub</a> ("Site ID" column.).<br></p>
 <p>Example:</p>
@@ -106,12 +106,12 @@ publisher-code="123X456"
 </td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>excluded-domains (optional)</strong></p></td>
-    <td><p>A whitespace separated list of domain names.
-  All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
-  By default amp-skimlinks does not exclude any domains.
-  <br>
-  Example:</p>
+    <td width="40%"><strong>excluded-domains (optional)</strong></td>
+    <td>A whitespace separated list of domain names.
+All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
+By default amp-skimlinks does not exclude any domains.
+<br>
+Example:</p>
 <pre><code class="html language-html">&lt;amp-skimlinks
 ...
 excluded-domains="samsung.com amazon.com"
@@ -121,7 +121,7 @@ excluded-domains="samsung.com amazon.com"
 </td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>link-selector (optional)</strong></p></td>
+    <td width="40%"><strong>link-selector (optional)</strong></td>
     <td><p><code>link-selector</code> allows you to restrict which links amp-skimlinks should affiliate and track. All the links
   not matching the provided selector will simply be ignored.<br>
   By default, amp-skimlinks affiliate and tracks all the links on the page.<br></p>
@@ -140,7 +140,7 @@ link-selector="article:not(.no-skimlinks) a"
 </td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>custom-tracking-id (optional)</strong></p></td>
+    <td width="40%"><strong>custom-tracking-id (optional)</strong></td>
     <td><p>The <code>custom-tracking-id</code> (also <code>called xcust</code>) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.<br></p>
 <p><code>custom-tracking-id</code> should be &lt;=50 characters.</p></td>
   </tr>

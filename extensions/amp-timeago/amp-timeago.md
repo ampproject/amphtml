@@ -60,12 +60,12 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>datetime (required)</strong></p></td>
-    <td><p>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) <em>or</em> 2017-03-09T20:00:00-05:00 (specifying timezone offset).</p></td>
+    <td width="40%"><strong>datetime (required)</strong></td>
+    <td>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) <em>or</em> 2017-03-09T20:00:00-05:00 (specifying timezone offset).</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>locale (optional)</strong></p></td>
-    <td><p>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:<br></p>
+    <td width="40%"><strong>locale (optional)</strong></td>
+    <td>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:<br></p>
 <ul>
   <li>ar (Arabic)</li>
   <li>be (Belarusian)</li>
@@ -107,12 +107,12 @@ Example:
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>cutoff (optional)</strong></p></td>
-    <td><p>Display the original date if time distance is older than cutoff (seconds).</p></td>
+    <td width="40%"><strong>cutoff (optional)</strong></td>
+    <td>Display the original date if time distance is older than cutoff (seconds).</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

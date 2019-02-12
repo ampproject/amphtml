@@ -107,16 +107,16 @@ In the following example, we specified a `min-font-size` of `40`, which causes t
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>min-font-size</strong></p></td>
-    <td><p>Specifies the minimum font size as an integer that the <code>amp-fit-text</code> can use.</p></td>
+    <td width="40%"><strong>min-font-size</strong></td>
+    <td>Specifies the minimum font size as an integer that the <code>amp-fit-text</code> can use.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>max-font-size</strong></p></td>
-    <td><p>Specifies the maximum font size as an integer that the <code>amp-fit-text</code> can use.</p></td>
+    <td width="40%"><strong>max-font-size</strong></td>
+    <td>Specifies the maximum font size as an integer that the <code>amp-fit-text</code> can use.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

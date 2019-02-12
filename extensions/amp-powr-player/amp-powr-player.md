@@ -58,27 +58,27 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-account (required)</strong></p></td>
-    <td><p>The Powr account id.</p></td>
+    <td width="40%"><strong>data-account (required)</strong></td>
+    <td>The Powr account id.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-player (required)</strong></p></td>
-    <td><p>The Powr player id.</p></td>
+    <td width="40%"><strong>data-player (required)</strong></td>
+    <td>The Powr player id.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-video (required if data-terms isn't provided)</strong></p></td>
-    <td><p>The Powr video id. Normally a string if characters.</p></td>
+    <td width="40%"><strong>data-video (required if data-terms isn't provided)</strong></td>
+    <td>The Powr video id. Normally a string if characters.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-terms (required if data-video isn't provided)</strong></p></td>
-    <td><p>A space separated list of keywords that describe the page displaying the player. Used to fetch a playlist relevant to the site content.</p></td>
+    <td width="40%"><strong>data-terms (required if data-video isn't provided)</strong></td>
+    <td>A space separated list of keywords that describe the page displaying the player. Used to fetch a playlist relevant to the site content.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-referrer</strong></p></td>
-    <td><p>Sets the referrer to be used for analytics within the player. This supports AMP variables such as <code>EXTERNAL_REFERRER</code>.</p></td>
+    <td width="40%"><strong>data-referrer</strong></td>
+    <td>Sets the referrer to be used for analytics within the player. This supports AMP variables such as <code>EXTERNAL_REFERRER</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-param-&#42;</strong></p></td>
+    <td width="40%"><strong>data-param-&#42;</strong></td>
     <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.<br></p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.<br></p>
 <ul>
@@ -88,14 +88,14 @@ Example:
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoplay</strong></p></td>
-    <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
-  played as soon as it becomes visible. There are some conditions that the component needs to meet
-  to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

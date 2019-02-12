@@ -60,8 +60,8 @@ Examples:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>autoplay</strong></p></td>
-    <td><p>If this attribute is present, and the browser supports autoplay:</p>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
   <li>the video is automatically muted before autoplay starts</li>
   <li>when the video is scrolled out of view, the video is paused</li>
@@ -71,28 +71,28 @@ Examples:
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-partner</strong></p></td>
-    <td><p>The Brid.tv partner id.</p></td>
+    <td width="40%"><strong>data-partner</strong></td>
+    <td>The Brid.tv partner id.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-player</strong></p></td>
-    <td><p>The Brid.tv player id. Specific to every partner.</p></td>
+    <td width="40%"><strong>data-player</strong></td>
+    <td>The Brid.tv player id. Specific to every partner.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-video</strong></p></td>
-    <td><p>The Brid.tv video ID.</p></td>
+    <td width="40%"><strong>data-video</strong></td>
+    <td>The Brid.tv video ID.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-playlist</strong></p></td>
-    <td><p>The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.</p></td>
+    <td width="40%"><strong>data-playlist</strong></td>
+    <td>The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-outstream</strong></p></td>
-    <td><p>The Brid.tv outstream unit ID.</p></td>
+    <td width="40%"><strong>data-outstream</strong></td>
+    <td>The Brid.tv outstream unit ID.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

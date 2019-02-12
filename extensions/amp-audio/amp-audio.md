@@ -69,29 +69,29 @@ For example:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>src</strong></p></td>
-    <td><p>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</p></td>
+    <td width="40%"><strong>src</strong></td>
+    <td>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>preload</strong></p></td>
-    <td><p>If present, sets the preload attribute in the html <code>&lt;audio&gt;</code> tag which specifies if the author thinks that the audio file should be loaded when the page loads.</p></td>
+    <td width="40%"><strong>preload</strong></td>
+    <td>If present, sets the preload attribute in the html <code>&lt;audio&gt;</code> tag which specifies if the author thinks that the audio file should be loaded when the page loads.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoplay</strong></p></td>
-    <td><p>If present, the attribute implies that the audio will start playing as soon as
-  it is ready.</p></td>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If present, the attribute implies that the audio will start playing as soon as
+it is ready.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>loop</strong></p></td>
-    <td><p>If present, the audio will automatically loop back to the start upon reaching the end.</p></td>
+    <td width="40%"><strong>loop</strong></td>
+    <td>If present, the audio will automatically loop back to the start upon reaching the end.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>muted</strong></p></td>
-    <td><p>If present, will mute the audio by default.</p></td>
+    <td width="40%"><strong>muted</strong></td>
+    <td>If present, will mute the audio by default.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>controlsList</strong></p></td>
-    <td><p>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 audio element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</p></td>
+    <td width="40%"><strong>controlsList</strong></td>
+    <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 audio element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
   </tr>
 </table>
 

@@ -57,28 +57,28 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>data-href (required)</strong></p></td>
-    <td><p>The URL of the comments page. For example, <code>http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html</code>.</p></td>
+    <td width="40%"><strong>data-href (required)</strong></td>
+    <td>The URL of the comments page. For example, <code>http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-locale (optional)</strong></p></td>
-    <td><p>By default, the locale is set to user's system language; however, you can specify a locale as well. <br><br> For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></p></td>
+    <td width="40%"><strong>data-locale (optional)</strong></td>
+    <td>By default, the locale is set to user's system language; however, you can specify a locale as well. <br><br> For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-numposts (optional)</strong></p></td>
-    <td><p>The number of comments to show. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</p></td>
+    <td width="40%"><strong>data-numposts (optional)</strong></td>
+    <td>The number of comments to show. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-order-by (optional)</strong></p></td>
-    <td><p>The order to use when displaying comments. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</p></td>
+    <td width="40%"><strong>data-order-by (optional)</strong></td>
+    <td>The order to use when displaying comments. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-colorscheme (optional)</strong></p></td>
-    <td><p>The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</p></td>
+    <td width="40%"><strong>data-colorscheme (optional)</strong></td>
+    <td>The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

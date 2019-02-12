@@ -60,16 +60,16 @@ With the responsive layout, the width and height from the example should yield c
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-mediaid (required)</strong></p></td>
-    <td><p>Represents the ID of the media you want to play.</p></td>
+    <td width="40%"><strong>data-mediaid (required)</strong></td>
+    <td>Represents the ID of the media you want to play.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-client (required)</strong></p></td>
-    <td><p>Your domain ID.</p></td>
+    <td width="40%"><strong>data-client (required)</strong></td>
+    <td>Your domain ID.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-streamtype (optional)</strong></p></td>
-    <td><p>Indicates the media streaming type, which can be one of the following:</p>
+    <td width="40%"><strong>data-streamtype (optional)</strong></td>
+    <td>Indicates the media streaming type, which can be one of the following:</p>
 <ul>
   <li>`video` (default)</li>
   <li>`audio`</li>
@@ -80,28 +80,28 @@ With the responsive layout, the width and height from the example should yield c
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-seek-to (optional)</strong></p></td>
-    <td><p>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</p></td>
+    <td width="40%"><strong>data-seek-to (optional)</strong></td>
+    <td>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-mode (optional)</strong></p></td>
-    <td><p>Indicates the data mode, which can be <code>static</code> (default) or <code>api</code>.</p></td>
+    <td width="40%"><strong>data-mode (optional)</strong></td>
+    <td>Indicates the data mode, which can be <code>static</code> (default) or <code>api</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-origin (optional)</strong></p></td>
-    <td><p>Indicates the source from which the embedded domain media is played. By default this is set to <code>https://embed.nexx.cloud/</code>.</p></td>
+    <td width="40%"><strong>data-origin (optional)</strong></td>
+    <td>Indicates the source from which the embedded domain media is played. By default this is set to <code>https://embed.nexx.cloud/</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-disable-ads (optional)</strong></p></td>
-    <td><p>Ads are enabled by default. Set value to 1 to disable.</p></td>
+    <td width="40%"><strong>data-disable-ads (optional)</strong></td>
+    <td>Ads are enabled by default. Set value to 1 to disable.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-streaming-filter (optional)</strong></p></td>
-    <td><p>Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.</p></td>
+    <td width="40%"><strong>data-streaming-filter (optional)</strong></td>
+    <td>Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

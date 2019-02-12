@@ -72,8 +72,8 @@ With the responsive layout, the width and height from the example should yield c
 
 <table>
   <tr>
-    <td width="40%"><p><strong>autoplay</strong></p></td>
-    <td><p>If this attribute is present, and the browser supports autoplay:</p>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
   <li>the video is automatically muted before autoplay starts
   </li>
@@ -88,16 +88,16 @@ With the responsive layout, the width and height from the example should yield c
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-videoid</strong></p></td>
+    <td width="40%"><strong>data-videoid</strong></td>
     <td><p>The YouTube video id found in every YouTube video page URL.</p>
 <p>For example, in this URL: https://www.youtube.com/watch?v=Z1q71gFeRqM, <code>Z1q71gFeRqM</code> is the video id.</p></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-live-channelid</strong></p></td>
-    <td><p>The Youtube channel id that provides a stable livestream url. For example, in this URL: https://www.youtube.com/embed/live_stream?channel=UCB8Kb4pxYzsDsHxzBfnid4Q, <code>UCB8Kb4pxYzsDsHxzBfnid4Q</code> is the channel id. You can provide a <code>data-live-channelid</code> instead of a <code>data-videoid</code> attribute to embed a stable url for a live stream instead of a video. Channels do not come with default placeholders. You can provide a placeholder for the video per example 2 above.</p></td>
+    <td width="40%"><strong>data-live-channelid</strong></td>
+    <td>The Youtube channel id that provides a stable livestream url. For example, in this URL: https://www.youtube.com/embed/live_stream?channel=UCB8Kb4pxYzsDsHxzBfnid4Q, <code>UCB8Kb4pxYzsDsHxzBfnid4Q</code> is the channel id. You can provide a <code>data-live-channelid</code> instead of a <code>data-videoid</code> attribute to embed a stable url for a live stream instead of a video. Channels do not come with default placeholders. You can provide a placeholder for the video per example 2 above.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-param-&#42;</strong></p></td>
+    <td width="40%"><strong>data-param-&#42;</strong></td>
     <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.</p>
 <ul>
@@ -107,7 +107,7 @@ With the responsive layout, the width and height from the example should yield c
 </td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>credentials (optional)</strong></p></td>
+    <td width="40%"><strong>credentials (optional)</strong></td>
     <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
 <ul>
   <li>Supported values: `omit`, `include`</li>
@@ -117,8 +117,8 @@ With the responsive layout, the width and height from the example should yield c
   Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.</p></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

@@ -76,23 +76,23 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 <table>
   <tr>
-    <td width="40%"><p><strong>type (required)</strong></p></td>
-    <td><p>Selects a provider type. This is required for both pre-configured and non-configured providers.</p></td>
+    <td width="40%"><strong>type (required)</strong></td>
+    <td>Selects a provider type. This is required for both pre-configured and non-configured providers.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-target</strong></p></td>
+    <td width="40%"><strong>data-target</strong></td>
     <td><p>Specifies the target in which to open the target. The default is <code>_blank</code> for all cases other than email/SMS on iOS, in which case the target is set to <code>_top</code>.</p>
 <p>Please note that we only suggest using this override for email.</p></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-share-endpoint</strong></p></td>
-    <td><p>This attribute is <strong>required for non-configured providers</strong>.
-  <br>
-  Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section. For non-configured providers, you'll need to specify the share endpoint.</p></td>
+    <td width="40%"><strong>data-share-endpoint</strong></td>
+    <td>This attribute is <strong>required for non-configured providers</strong>.
+<br>
+Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section. For non-configured providers, you'll need to specify the share endpoint.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-param-*</strong></p></td>
-    <td><p>All <code>data-param-*</code> prefixed attributes are turned into URL parameters and passed to the share endpoint.</p></td>
+    <td width="40%"><strong>data-param-*</strong></td>
+    <td>All <code>data-param-*</code> prefixed attributes are turned into URL parameters and passed to the share endpoint.</td>
   </tr>
 </table>
 

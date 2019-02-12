@@ -60,30 +60,30 @@ In the future, additional functionality, such as animation playback control, cou
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>src</strong></p></td>
-    <td><p>Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
-  points to a publicly-cacheable image file. Cache providers may rewrite these
-  URLs when ingesting AMP files to point to a cached version of the image.</p></td>
+    <td width="40%"><strong>src</strong></td>
+    <td>Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
+points to a publicly-cacheable image file. Cache providers may rewrite these
+URLs when ingesting AMP files to point to a cached version of the image.</td>
   </tr>
   <tr>
-     <td width="40%"><p><strong>srcset</strong></p></td>
-     <td><p>Same as <code>srcset</code> attribute on the <code>img</code> tag.</p></td>
+     <td width="40%"><strong>srcset</strong></td>
+     <td>Same as <code>srcset</code> attribute on the <code>img</code> tag.</td>
    </tr>
    <tr>
-      <td width="40%"><p><strong>alt</strong></p></td>
-      <td><p>A string of alternate text, similar to the <code>alt</code> attribute on <code>img</code>.</p></td>
+      <td width="40%"><strong>alt</strong></td>
+      <td>A string of alternate text, similar to the <code>alt</code> attribute on <code>img</code>.</td>
     </tr>
     <tr>
-       <td width="40%"><p><strong>attribution</strong></p></td>
-       <td><p>A string that indicates the attribution of the image. For example, <code>attribution="CC courtesy of Cats on Flicker"</code>.</p></td>
+       <td width="40%"><strong>attribution</strong></td>
+       <td>A string that indicates the attribution of the image. For example, <code>attribution="CC courtesy of Cats on Flicker"</code>.</td>
      </tr>
      <tr>
-        <td width="40%"><p><strong>height and width</strong></p></td>
-        <td><p>An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.</p></td>
+        <td width="40%"><strong>height and width</strong></td>
+        <td>An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.</td>
       </tr>
       <tr>
-         <td width="40%"><p><strong>common attributes</strong></p></td>
-         <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+         <td width="40%"><strong>common attributes</strong></td>
+         <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
        </tr>
 </table>
 

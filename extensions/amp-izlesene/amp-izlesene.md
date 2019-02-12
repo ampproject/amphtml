@@ -52,28 +52,28 @@ With responsive layout the width and height from the example should yield correc
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>data-videoid (required)</strong></p></td>
-    <td><p>The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is <code>7221390</code>.</p></td>
+    <td width="40%"><strong>data-videoid (required)</strong></td>
+    <td>The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is <code>7221390</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-param-showrel (optional)</strong></p></td>
-    <td><p>This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.</p>
+    <td width="40%"><strong>data-param-showrel (optional)</strong></td>
+    <td>This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.</p>
 <ul>
   <li>Accepted values: `1` or `0`</li>
   <li>Default value: `1`</li>
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-param-showreplay (optional)</strong></p></td>
-    <td><p>This is an optional attribute that indicates whether to show the replay button at the end of the content.</p>
+    <td width="40%"><strong>data-param-showreplay (optional)</strong></td>
+    <td>This is an optional attribute that indicates whether to show the replay button at the end of the content.</p>
 <ul>
   <li>Accepted values: `1` or `0`</li>
   <li>Default value: `1`</li>
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

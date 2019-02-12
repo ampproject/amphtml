@@ -91,37 +91,37 @@ In the following example, we have a carousel of three images with preview button
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>type</strong></p></td>
-    <td><p>Specifies the display type for the carousel items, which can be:</p>
+    <td width="40%"><strong>type</strong></td>
+    <td>Specifies the display type for the carousel items, which can be:</p>
 <ul>
   <li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
   <li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>height (required)</strong></p></td>
-    <td><p>Specifies the height of the carousel, in pixels.</p></td>
+    <td width="40%"><strong>height (required)</strong></td>
+    <td>Specifies the height of the carousel, in pixels.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>controls (optional)</strong></p></td>
-    <td><p>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
-  By default, navigational arrows disappear after a few seconds on mobile.
-  The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</p></td>
+    <td width="40%"><strong>controls (optional)</strong></td>
+    <td>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
+By default, navigational arrows disappear after a few seconds on mobile.
+The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-next-button-aria-label (optional)</strong></p></td>
-    <td><p>Sets the aria-label for the <code>amp-carousel-button-next</code>. If no value is given, the aria-label defaults to 'Next item in carousel'.</p></td>
+    <td width="40%"><strong>data-next-button-aria-label (optional)</strong></td>
+    <td>Sets the aria-label for the <code>amp-carousel-button-next</code>. If no value is given, the aria-label defaults to 'Next item in carousel'.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-prev-button-aria-label (optional)</strong></p></td>
-    <td><p>Sets the aria-label for the <code>amp-carousel-button-prev</code>. If no value is given, the aria-label defaults to 'Previous item in carousel'.</p></td>
+    <td width="40%"><strong>data-prev-button-aria-label (optional)</strong></td>
+    <td>Sets the aria-label for the <code>amp-carousel-button-prev</code>. If no value is given, the aria-label defaults to 'Previous item in carousel'.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-button-count-format (optional)</strong></p></td>
-    <td><p>A format string that looks like <code>(%s of %s)</code>, used as a suffix to the aria-label for <code>amp-carousel-button-next</code>/<code>amp-carousel-button-prev</code>. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.</p></td>
+    <td width="40%"><strong>data-button-count-format (optional)</strong></td>
+    <td>A format string that looks like <code>(%s of %s)</code>, used as a suffix to the aria-label for <code>amp-carousel-button-next</code>/<code>amp-carousel-button-prev</code>. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoplay (optional)</strong></p></td>
+    <td width="40%"><strong>autoplay (optional)</strong></td>
     <td><p>Advances the slide to the next slide without user interaction.<br>
   If present without a value:</p>
 <ul>
@@ -137,11 +137,11 @@ In the following example, we have a carousel of three images with preview button
 </ul></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>delay (optional)</strong></p></td>
-    <td><p>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</p></td>
+    <td width="40%"><strong>delay (optional)</strong></td>
+    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>loop (optional)</strong></p></td>
+    <td width="40%"><strong>loop (optional)</strong></td>
     <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The <code>loop</code> attribute is only applicable to carousels with <code>type=slides</code>.</p>
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 <!--embedded example - displays in ampproject.org -->
@@ -153,8 +153,8 @@ In the following example, we have a carousel of three images with preview button
 </div></td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

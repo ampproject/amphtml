@@ -82,29 +82,29 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>data-url (required)</strong></p></td>
-    <td><p>The URL to retrieve embedding information.</p></td>
+    <td width="40%"><strong>data-url (required)</strong></td>
+    <td>The URL to retrieve embedding information.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-card-via</strong></p></td>
-    <td><p>Specifies the via content in the card. This is a a great way to do attribution. This is an optional attribute.</p></td>
+    <td width="40%"><strong>data-card-via</strong></td>
+    <td>Specifies the via content in the card. This is a a great way to do attribution. This is an optional attribute.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-card-theme</strong></p></td>
-    <td><p>Allows settings the <code>dark</code> theme which changes the background color of the main card container. Use <code>dark</code> to set this theme. For dark backgrounds it's better to specify this. The default is <code>light</code>, which sets no background color of the main card container.</p></td>
+    <td width="40%"><strong>data-card-theme</strong></td>
+    <td>Allows settings the <code>dark</code> theme which changes the background color of the main card container. Use <code>dark</code> to set this theme. For dark backgrounds it's better to specify this. The default is <code>light</code>, which sets no background color of the main card container.</td>
   </tr>
   <tr>
-     <td width="40%"><p><strong>data-card-embed</strong></p></td>
-     <td><p>The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.</p>
+     <td width="40%"><strong>data-card-embed</strong></td>
+     <td>The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 </td>
    </tr>
    <tr>
-     <td width="40%"><p><strong>data-card-image</strong></p></td>
-     <td><p>The URL to an image. Specifies which image to use in article cards when <code>data-url</code> points to an article.
-  Not all image URLs are supported, if the image is not loaded, try a different image or domain.</p></td>
+     <td width="40%"><strong>data-card-image</strong></td>
+     <td>The URL to an image. Specifies which image to use in article cards when <code>data-url</code> points to an article.
+Not all image URLs are supported, if the image is not loaded, try a different image or domain.</td>
    </tr>
    <tr>
-     <td width="40%"><p><strong>data-card-controls</strong></p></td>
+     <td width="40%"><strong>data-card-controls</strong></td>
      <td><p>Enables share icons.</p>
 <ul>
   <li>`0`: Disable share icons.</li>
@@ -113,11 +113,11 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 <p>The default is <code>1</code>.</p></td>
    </tr>
    <tr>
-      <td width="40%"><p><strong>data-card-align</strong></p></td>
-      <td><p>Aligns the card. The possible values are <code>left</code>, <code>center</code> and <code>right</code>. The default value is <code>center</code>.</p></td>
+      <td width="40%"><strong>data-card-align</strong></td>
+      <td>Aligns the card. The possible values are <code>left</code>, <code>center</code> and <code>right</code>. The default value is <code>center</code>.</td>
     </tr>
     <tr>
-      <td width="40%"><p><strong>data-card-recommend</strong></p></td>
+      <td width="40%"><strong>data-card-recommend</strong></td>
       <td><p>When recommendations are supported, it disables embedly recommendations on video and rich cards.<br>These are recommendations created by embedly.</p>
 <ul>
   <li>`0`: Disables embedly recommendations.</li>
@@ -126,8 +126,8 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 <p>The default value is <code>1</code>.</p></td>
     </tr>
     <tr>
-      <td width="40%"><p><strong>common attributes</strong></p></td>
-      <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+      <td width="40%"><strong>common attributes</strong></td>
+      <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
     </tr>
 </table>
 

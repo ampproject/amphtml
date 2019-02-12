@@ -57,12 +57,12 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><p><strong>height</strong></p></td>
-    <td><p>The height of the flying carpet's "window".</p></td>
+    <td width="40%"><strong>height</strong></td>
+    <td>The height of the flying carpet's "window".</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

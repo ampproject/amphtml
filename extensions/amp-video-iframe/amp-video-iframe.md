@@ -69,37 +69,37 @@ The reasons for this policy are that:
 
 <table>
   <tr>
-    <td width="40%"><p><strong>src (required)</strong></p></td>
-    <td><p>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
-  source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
-  not already have a fragment.</p></td>
+    <td width="40%"><strong>src (required)</strong></td>
+    <td>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
+not already have a fragment.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>poster (required)</strong></p></td>
-    <td><p>Points to an image URL that will be displayed while the video loads.</p>
+    <td width="40%"><strong>poster (required)</strong></td>
+    <td>Points to an image URL that will be displayed while the video loads.
 </td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>autoplay</strong></p></td>
-    <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
-  played as soon as it becomes visible. There are some conditions that the component needs to meet
-  to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>implements-media-session</strong></p></td>
-    <td><p>Set this attribute if the document inside the iframe implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API">MediaSession API</a> independently.</p></td>
+    <td width="40%"><strong>implements-media-session</strong></td>
+    <td>Set this attribute if the document inside the iframe implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API">MediaSession API</a> independently.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>implements-rotate-to-fullscreen</strong></p></td>
-    <td><p>Set this attribute if the document inside the iframe implements rotate-to-fullscreen independently.</p></td>
+    <td width="40%"><strong>implements-rotate-to-fullscreen</strong></td>
+    <td>Set this attribute if the document inside the iframe implements rotate-to-fullscreen independently.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>referrerpolicy</strong></p></td>
-    <td><p>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy"><code>referrerpolicy</code></a> to be set on the iframe element.</p></td>
+    <td width="40%"><strong>referrerpolicy</strong></td>
+    <td>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy"><code>referrerpolicy</code></a> to be set on the iframe element.</td>
   </tr>
 </table>
 

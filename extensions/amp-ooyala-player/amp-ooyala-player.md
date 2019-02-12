@@ -52,28 +52,28 @@ Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
 
 <table>
   <tr>
-    <td width="40%"><p><strong>data-embedcode (required)</strong></p></td>
-    <td><p>The video embed code from <a href="https://backlot.ooyala.com">Backlot</a>.</p></td>
+    <td width="40%"><strong>data-embedcode (required)</strong></td>
+    <td>The video embed code from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-playerid (required)</strong></p></td>
-    <td><p>The ID of the player to load from <a href="https://backlot.ooyala.com">Backlot</a>.</p></td>
+    <td width="40%"><strong>data-playerid (required)</strong></td>
+    <td>The ID of the player to load from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-pcode (required)</strong></p></td>
-    <td><p>The provider code for the account owning the embed code and player.</p></td>
+    <td width="40%"><strong>data-pcode (required)</strong></td>
+    <td>The provider code for the account owning the embed code and player.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-playerversion (optional)</strong></p></td>
-    <td><p>Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.</p></td>
+    <td width="40%"><strong>data-playerversion (optional)</strong></td>
+    <td>Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>data-config (optional)</strong></p></td>
-    <td><p>Specifies a skin.json config file URL for player V4.</p></td>
+    <td width="40%"><strong>data-config (optional)</strong></td>
+    <td>Specifies a skin.json config file URL for player V4.</td>
   </tr>
   <tr>
-    <td width="40%"><p><strong>common attributes</strong></p></td>
-    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
