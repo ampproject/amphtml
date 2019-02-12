@@ -1704,9 +1704,9 @@ class TagStack {
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
       const spec = this.stack_[i].tagSpec.getSpec();
-      if (spec.markDescendants === null) continue;
+      if (spec.markDescendants === null) {continue;}
       for (const marker of spec.markDescendants.marker) {
-        if (marker === query) return true;
+        if (marker === query) {return true;}
       }
     }
     return false;
@@ -4146,7 +4146,7 @@ function validateAttributes(
         context.getRules().getParsedAttrSpecs().getByAttrSpecId(attrId);
     // If this attribute isn't used for these type identifiers, then error.
     if (!parsedAttrSpec.isUsedForTypeIdentifiers(
-            context.getTypeIdentifiers())) {
+        context.getTypeIdentifiers())) {
       context.addError(
           amp.validator.ValidationError.Code.DISALLOWED_ATTR,
           context.getLineCol(),
@@ -4555,7 +4555,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
       const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
       // Keep TagSpecs that are used for these type identifiers.
       if (parsedTagSpec.isUsedForTypeIdentifiers(
-              context.getTypeIdentifiers())) {
+          context.getTypeIdentifiers())) {
         filteredTagSpecs.push(parsedTagSpec);
       }
     }
