@@ -17,9 +17,9 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
-import {EVENTS} from '../constants';
 import {LinkRewriterManager} from
   '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import {SMARTLINKS_REWRITER_ID} from '../constants';
 import {Services} from '../../../../src/services';
 
 const helpersFactory = env => {
@@ -238,7 +238,7 @@ describes.fakeWin('amp-smartlinks',
 
           expect(ampSmartlinks.linkRewriterService_.registerLinkRewriter
               .calledOnce).to.be.true;
-          expect(args[0]).to.equal(EVENTS.SMARTLINKS_REWRITER_ID);
+          expect(args[0]).to.equal(SMARTLINKS_REWRITER_ID);
           expect(args[1]).to.be.a('function');
           expect(args[2].linkSelector).to.equal('a');
         });

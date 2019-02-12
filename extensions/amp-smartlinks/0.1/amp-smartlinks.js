@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 
-import {ENDPOINTS, EVENTS} from './constants';
+import {ENDPOINTS, SMARTLINKS_REWRITER_ID} from './constants';
 import {LinkRewriterManager} from
   '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
@@ -115,7 +115,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * API response will be a list containing nested json values. For the purpose
    * of this extension there will only ever be one value in the list:
    *  {amp_config: {linkmate_enabled: <!boolean>, publisher_id: <!number>}}
-   * @return {!Promise<!JsonObject>}
+   * @return {?Promise<!JsonObject>}
    * @private
    */
   getLinkmateOptions_() {
@@ -123,15 +123,20 @@ export class AmpSmartlinks extends AMP.BaseElement {
         '.nrtv_slug.', this.linkmateOptions_.nrtvSlug
     );
 
-    return this.xhr_.fetchJson(fetchUrl, {
-      method: 'GET',
-      ampCors: false,
-    })
-        .then(res => res.json())
-        .then(res => {
-          return getData(res)[0]['amp_config'];
-        });
+    try {
+      return this.xhr_.fetchJson(fetchUrl, {
+        method: 'GET',
+        ampCors: false,
+      })
+          .then(res => res.json())
+          .then(res => {
+            return getData(res)[0]['amp_config'];
+          });
+    } catch (err) {
+      return null;
+    }
   }
+
 
   /**
    * API call to indicate a page load event happened
@@ -168,7 +173,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     const options = {linkSelector: this.linkmateOptions_.linkSelector};
 
     return this.linkRewriterService_.registerLinkRewriter(
-        EVENTS.SMARTLINKS_REWRITER_ID,
+        SMARTLINKS_REWRITER_ID,
         anchorList => {
           return this.linkmate_.runLinkmate(anchorList);
         },
