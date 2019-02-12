@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Functionality for videos that dock to a corner.
+  text: Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
 ---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -25,7 +25,7 @@ limitations under the License.
 
 [TOC]
 
-Functionality for videos that dock to a corner.
+Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
 
 <table>
   <tr>
