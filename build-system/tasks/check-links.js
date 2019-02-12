@@ -24,8 +24,9 @@ const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
+const {isTravisBuild} = require('../travis');
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -70,7 +71,7 @@ function checkLinks() {
               deadLinksFound = true;
               deadLinksFoundInFile = true;
               log('[%s] %s', colors.red('✖'), result.link);
-            } else if (!process.env.TRAVIS) {
+            } else if (!isTravisBuild()) {
               log('[%s] %s', colors.green('✔'), result.link);
             }
           });

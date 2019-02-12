@@ -31,6 +31,7 @@ const relativePath = require('path').relative;
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
+const {isTravisBuild} = require('./travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -419,7 +420,7 @@ function isCommonJsModule(file) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log('Writing transforms to', colors.cyan(graph.tmp));
   }
   // `sorted` will always have the files that we need.

@@ -24,6 +24,7 @@ const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan, red} = colors;
+const {isTravisBuild} = require('../../travis');
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -193,7 +194,7 @@ function unitTestsToRun(unitTestPaths) {
 
   filesChanged.forEach(file => {
     if (!fs.existsSync(file)) {
-      if (!process.env.TRAVIS) {
+      if (!isTravisBuild()) {
         log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
       }
     } else if (isUnitTest(file)) {

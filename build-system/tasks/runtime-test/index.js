@@ -32,6 +32,7 @@ const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
 
@@ -160,7 +161,7 @@ function printArgvMessages() {
     log(green('Launching'), cyan(chromeBase), green('with flags'),
         cyan(formattedFlagList));
   }
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
@@ -247,7 +248,7 @@ async function runTests() {
     c.client.verboseLogging = true;
   }
 
-  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
+  if (!isTravisBuild() && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -347,7 +348,7 @@ async function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: process.env.TRAVIS ? ['lcov'] : ['html', 'text', 'text-summary'],
+      reports: isTravisBuild() ? ['lcov'] : ['html', 'text', 'text-summary'],
     };
   }
 
@@ -376,7 +377,7 @@ async function runTests() {
 
   // Exit tests
   // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-  if (process.env.TRAVIS) {
+  if (isTravisBuild()) {
     setTimeout(() => {
       process.exit(processExitCode);
     }, 5000);
@@ -474,7 +475,7 @@ async function runTests() {
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
-        if (process.env.TRAVIS) {
+        if (isTravisBuild()) {
           const codecovCmd =
               './node_modules/.bin/codecov --file=test/coverage/lcov.info';
           let flags = '';
