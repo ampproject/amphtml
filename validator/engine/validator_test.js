@@ -967,21 +967,21 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
  * @param {string} specName
  */
 function typeIdentifiersAreValidAndUnique(
-    typeIdentifiers, specTypeIdentifiers, fieldName, specType, specName) {
+  typeIdentifiers, specTypeIdentifiers, fieldName, specType, specName) {
   const encounteredTypeIdentifiers = {};
   for (const typeIdentifier of specTypeIdentifiers) {
     it(specType + ' \'' + specName + '\' has ' + fieldName +
            ' set to an invalid type identifier: \'' + typeIdentifier + '\'',
-       () => {
-         expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
+    () => {
+      expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
        });
     it(specType + ' \'' + specName + '\' has duplicate ' + fieldName + ': \'' +
            typeIdentifier + '\'.',
-       () => {
-         expect(encounteredTypeIdentifiers.hasOwnProperty(typeIdentifier))
-             .toBe(false);
-         encounteredTypeIdentifiers[typeIdentifier] = 0;
-       });
+    () => {
+      expect(encounteredTypeIdentifiers.hasOwnProperty(typeIdentifier))
+          .toBe(false);
+      encounteredTypeIdentifiers[typeIdentifier] = 0;
+    });
   }
 }
 
@@ -997,10 +997,10 @@ function typeIdentifiersShouldMakeSense(spec, specType, specName) {
   // both enabled_by and disabled_by must not be set on the same spec.
   it(specType + ' \'' + specName + '\' has both enabled_by and disabled_by' +
          ' set and it must be one or the other, not both.',
-     () => {
-       expect((spec.enabledBy.length > 0) && (spec.disabledBy.length > 0))
-           .toBe(false);
-     });
+  () => {
+    expect((spec.enabledBy.length > 0) && (spec.disabledBy.length > 0))
+        .toBe(false);
+  });
   // enabled_by must be a valid type identifier and each type identifier
   // listed at most once.
   typeIdentifiersAreValidAndUnique(
