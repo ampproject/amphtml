@@ -654,13 +654,13 @@ describe('Action hasAction', () => {
 
 });
 
-describes.fakeWin('Action hasResolvableAction', {}, env => {
+describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
   let action;
   let html;
 
   beforeEach(() => {
     html = htmlFor(env.win.document);
-    action = new ActionService(new AmpDocSingle(env.win), env.win.document);
+    action = new ActionService(env.ampdoc, env.win.document);
 
     // Insert element for valid actions to be resolved.
     env.win.document.body.appendChild(html`<div id="valid-target"></div>`);
