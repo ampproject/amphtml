@@ -25,13 +25,11 @@ const nativeClientRect = Element.prototype.getBoundingClientRect;
  * @return {!LayoutRectDef}
  */
 function getBoundingClientRect(el) {
-  let result = layoutRectLtwh(0, 0, 0, 0);
-
   if (isConnectedNode(el)) {
-    result = nativeClientRect.call(el);
+    return nativeClientRect.call(el);
   }
 
-  return result;
+  return layoutRectLtwh(0, 0, 0, 0);
 }
 
 /**
@@ -42,8 +40,8 @@ function getBoundingClientRect(el) {
 function shouldInstall(win) {
   try {
     const div = win.document.createElement('div');
-    div.getBoundingClientRect();
-    return false;
+    const rect = div.getBoundingClientRect();
+    return div.top !== 0;
   } catch (e) {
     // IE 10 or less
     return true;
