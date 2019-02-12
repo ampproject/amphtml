@@ -50,7 +50,7 @@ The `amp-video-docking` extension allows videos to be minimized to a corner or
 to a custom positioned element via the `dock` attribute.
 
 If this attribute is present and the video is playing manually, the video will
-be "docked" and fixed to a corner or a custom position when the user scrolls out of the video
+be "docked" and float on a corner or a custom position when the user scrolls out of the video
 component's visual area. If the user scrolls back, the video reverts to its original static position.
 
 - The video can be docked to a default corner or to a custom fixed position.
