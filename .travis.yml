@@ -24,7 +24,7 @@ jobs:
     - stage: build
       name: "Validator"        
       script:
-        -echo "build stage, validator shard"        
+        - echo "build stage, validator shard"        
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
       script:
