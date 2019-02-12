@@ -4152,6 +4152,7 @@ function validateAttributes(
           context.getLineCol(),
           /* params */[attr.name, getTagSpecName(spec)], getTagSpecUrl(spec),
           result);
+      continue;
     }
     const attrSpec = parsedAttrSpec.getSpec();
     if (attrSpec.deprecation !== null) {
