@@ -974,7 +974,7 @@ function typeIdentifiersAreValidAndUnique(
            ' set to an invalid type identifier: \'' + typeIdentifier + '\'',
     () => {
       expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
-       });
+    });
     it(specType + ' \'' + specName + '\' has duplicate ' + fieldName + ': \'' +
            typeIdentifier + '\'.',
     () => {
