@@ -31,7 +31,7 @@ import {bezierCurve} from '../../../src/curve';
 import {
   childElementByTag,
   closest,
-  closestBySelector,
+  closestAncestorElementBySelector,
   elementByTag,
   escapeCssSelectorIdent,
   scopedQuerySelector,
@@ -883,7 +883,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return true;
     }
     // Note that `<amp-carousel>` type='carousel' does not support goToSlide
-    const parentCarousel = closestBySelector(target,
+    const parentCarousel = closestAncestorElementBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel && parentCarousel.isInViewport()) {
       return true;
@@ -1128,13 +1128,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const target = this.getCurrentElement_().sourceElement;
     // TODO(#13011): change to a tag selector after `<amp-carousel>`
     // type='carousel' starts supporting goToSlide.
-    const parentCarousel = closestBySelector(target,
+    const parentCarousel = closestAncestorElementBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel) {
       const allSlides = toArray(
           scopedQuerySelectorAll(parentCarousel, SLIDE_ITEM_SELECTOR));
       const targetSlide = dev().assertElement(
-          closestBySelector(target, SLIDE_ITEM_SELECTOR));
+          closestAncestorElementBySelector(target, SLIDE_ITEM_SELECTOR));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       devAssert(parentCarousel).getImpl()
           .then(carousel => carousel.goToSlide(targetSlideIndex));

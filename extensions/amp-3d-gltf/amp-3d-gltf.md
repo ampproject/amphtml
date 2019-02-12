@@ -79,11 +79,11 @@ Unsupported features:
   <tr>
     <td width="40%"><strong>alpha [optional]</strong></td>
     <td>A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
-    Default value is `false`.</td>
+Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>antialiasing [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to turn on antialiasing. Default value is `false`.</td>
+    <td>A Boolean attribute that specifies whether to turn on antialiasing. Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>clearColor [optional]</strong></td>
@@ -91,15 +91,15 @@ Unsupported features:
   </tr>
   <tr>
     <td width="40%"><strong>maxPixelRatio [optional]</strong></td>
-    <td>A numeric value that specifies the upper limit for the pixelRatio render option. The default is `window.devicePixelRatio`.</td>
+    <td>A numeric value that specifies the upper limit for the pixelRatio render option. The default is <code>window.devicePixelRatio</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoRotate [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is `false`.</td>
+    <td>A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>enableZoom [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to turn on zoom. Default value is `true`.</td>
+    <td>A Boolean attribute that specifies whether to turn on zoom. Default value is <code>true</code>.</td>
   </tr>
 </table>
 

@@ -35,7 +35,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {
-  closestBySelector,
+  closestAncestorElementBySelector,
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
@@ -180,7 +180,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @private */
   initializeMediaPool_() {
     const storyEl = dev().assertElement(
-        closestBySelector(this.element, 'amp-story'),
+        closestAncestorElementBySelector(this.element, 'amp-story'),
         'amp-story-page must be a descendant of amp-story.');
 
     storyEl.getImpl()
