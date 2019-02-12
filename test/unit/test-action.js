@@ -660,6 +660,13 @@ describes.fakeWin('Action hasResolvableAction', {}, env => {
     expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
   });
 
+  it('returns true if the target element exists (action up the tree)', () => {
+    const wrapper = html`<div on="event1: valid-target"></div>`;
+    const child = html`<div></div>`;
+    wrapper.appendChild(child);
+    expect(action.hasResolvableAction(child, 'event1')).to.equal(true);
+  });
+
   it('returns true if the target element exists (one amongst many)', () => {
     const element =
       html`<div on="event1: i-dont-exist, valid-target, i-dont-exist-either">
