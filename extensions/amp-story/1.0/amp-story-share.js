@@ -319,9 +319,11 @@ export class ShareWidget {
     });
   }
 
-  /** On desktop mode, with branching, users should be able to share a story
+  /**
+   * On desktop mode, with branching, users should be able to share a story
    * starting from a specific page.
-   * @private */
+   * @private
+  */
   maybeAddPageShareButton_() {
     const isDesktopUi =
       this.storeService_.get(
@@ -331,24 +333,22 @@ export class ShareWidget {
 
       const sharePageCheck =
         renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
-      // sharePageCheck.querySelector(
-      //     '#page-share-span').innerHTML = 'Share this page';
 
       this.root.appendChild(sharePageCheck);
     }
   }
 
   /**
-   * @param {boolean} opt_sharePage
+   * @param {boolean=} opt_sharePage
    * @private
    */
   copyUrlToClipboard_(opt_sharePage) {
     const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
-    const url =
-      (isExperimentOn(this.win, 'amp-story-branching') && opt_sharePage) ?
-        Services.documentInfoForDoc(
-            this.getAmpDoc_()).canonicalUrl + '#page=' + currentPageId :
-        Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
+    const shouldAddFragment =
+      (isExperimentOn(this.win, 'amp-story-branching') && opt_sharePage);
+
+    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl +
+    (shouldAddFragment ? '#page=' + currentPageId : '');
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
