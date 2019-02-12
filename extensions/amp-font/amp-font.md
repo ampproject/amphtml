@@ -82,36 +82,36 @@ The `amp-font` extension accepts the `layout` value:  `nodisplay`
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><strong>font-family</strong></td>
-    <td>The font-family of the custom font being loaded.</td>
+    <td width="40%"><p><strong>font-family</strong></p></td>
+    <td><p>The font-family of the custom font being loaded.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>timeout</strong></td>
-    <td>Time in milliseconds after which the we don't wait for the custom font to be available. This attribute is optional and it's default value is 3000. If the timeout is set to 0 then the amp-font loads the font if it is already in the cache, otherwise the font would not be loaded. If the timeout is has an invalid value then the timeout defaults to 3000.</td>
+    <td width="40%"><p><strong>timeout</strong></p></td>
+    <td><p>Time in milliseconds after which the we don't wait for the custom font to be available. This attribute is optional and it's default value is 3000. If the timeout is set to 0 then the amp-font loads the font if it is already in the cache, otherwise the font would not be loaded. If the timeout is has an invalid value then the timeout defaults to 3000.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>on-load-add-class</strong></td>
-    <td>CSS class that would be added to the document root after making sure that the custom font is available for display. This attribute is optional.</td>
+    <td width="40%"><p><strong>on-load-add-class</strong></p></td>
+    <td><p>CSS class that would be added to the document root after making sure that the custom font is available for display. This attribute is optional.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>on-load-remove-class</strong></td>
-    <td>CSS class that would be removed from the document root after making sure that the custom font is available for display. This attribute is optional.</td>
+    <td width="40%"><p><strong>on-load-remove-class</strong></p></td>
+    <td><p>CSS class that would be removed from the document root after making sure that the custom font is available for display. This attribute is optional.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>on-error-add-class</strong></td>
-    <td>CSS class that would be added to the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</td>
+    <td width="40%"><p><strong>on-error-add-class</strong></p></td>
+    <td><p>CSS class that would be added to the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>on-error-remove-class</strong></td>
-    <td>CSS class that would be removed from the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</td>
+    <td width="40%"><p><strong>on-error-remove-class</strong></p></td>
+    <td><p>CSS class that would be removed from the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>font-weight, font-style, font-variant</strong></td>
-    <td>The attributes above should all behave like they do on standard elements.</td>
+    <td width="40%"><p><strong>font-weight, font-style, font-variant</strong></p></td>
+    <td><p>The attributes above should all behave like they do on standard elements.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>layout</strong></td>
-    <td>Must be `nodisplay`.</td>
+    <td width="40%"><p><strong>layout</strong></p></td>
+    <td><p>Must be <code>nodisplay</code>.</p></td>
   </tr>
 </table>
 

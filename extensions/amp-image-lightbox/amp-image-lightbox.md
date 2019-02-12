@@ -126,16 +126,16 @@ Optionally, you can display captions at the bottom of the viewport for the image
 
 <table>
   <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Must be set to `nodisplay`.</td>
+    <td width="40%"><p><strong>layout (required)</strong></p></td>
+    <td><p>Must be set to <code>nodisplay</code>.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>id (required)</strong></td>
-    <td>The ID for the lightbox element that's used as a target for the image's `on` action.</td>
+    <td width="40%"><p><strong>id (required)</strong></p></td>
+    <td><p>The ID for the lightbox element that's used as a target for the image's <code>on</code> action.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-close-button-aria-label (optional)</strong></td>
-    <td>An ARIA label that you can use for a close button.</td>
+    <td width="40%"><p><strong>data-close-button-aria-label (optional)</strong></p></td>
+    <td><p>An ARIA label that you can use for a close button.</p></td>
   </tr>
 </table>
 

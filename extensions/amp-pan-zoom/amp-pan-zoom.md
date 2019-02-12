@@ -62,28 +62,28 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
 
 <table>
   <tr>
-    <td width="40%"><strong>max-scale (optional)</strong></td>
-    <td>Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.</td>
+    <td width="40%"><p><strong>max-scale (optional)</strong></p></td>
+    <td><p>Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>initial-scale (optional)</strong></td>
-    <td>Specifies a default zoom scale, which should be a positive number from 1 - 9. The default value is 1.</td>
+    <td width="40%"><p><strong>initial-scale (optional)</strong></p></td>
+    <td><p>Specifies a default zoom scale, which should be a positive number from 1 - 9. The default value is 1.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>initial-x, initial-y (optional)</strong></td>
-    <td>Specifies default translation coordinates, otherwise both are set to 0. The value is expected to be a whole number.</td>
+    <td width="40%"><p><strong>initial-x, initial-y (optional)</strong></p></td>
+    <td><p>Specifies default translation coordinates, otherwise both are set to 0. The value is expected to be a whole number.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>reset-on-resize (optional)</strong></td>
-    <td>Refers to the ability to center  the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</td>
+    <td width="40%"><p><strong>reset-on-resize (optional)</strong></p></td>
+    <td><p>Refers to the ability to center  the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>controls (optional)</strong></td>
-    <td>Shows default controls (zoom in / zoom out button) which can be customized via public CSS classes.</td>
+    <td width="40%"><p><strong>controls (optional)</strong></p></td>
+    <td><p>Shows default controls (zoom in / zoom out button) which can be customized via public CSS classes.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
   </tr>
 </table>
 

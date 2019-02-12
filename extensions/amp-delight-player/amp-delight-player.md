@@ -69,18 +69,18 @@ Example:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><strong>data-content-id (Required)</strong></td>
-    <td>The video's content ID.</td>
+    <td width="40%"><p><strong>data-content-id (Required)</strong></p></td>
+    <td><p>The video's content ID.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>autoplay</strong></td>
-    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+    <td width="40%"><p><strong>autoplay</strong></p></td>
+    <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
   </tr>
 </table>
 

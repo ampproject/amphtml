@@ -88,38 +88,36 @@ Example:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><strong>data-pub-id</strong></td>
-    <td>The AddThis publisher ID found in the URL in the [AddThis dashboard](https://addthis.com/dashboard) after logging in. For example, in the URL `https://www.addthis.com/dashboard#gallery/pub/ra-5c191331410932ff`, `ra-5c191331410932ff` is the publisher ID.</td>
+    <td width="40%"><p><strong>data-pub-id</strong></p></td>
+    <td><p>The AddThis publisher ID found in the URL in the <a href="https://addthis.com/dashboard">AddThis dashboard</a> after logging in. For example, in the URL <code>https://www.addthis.com/dashboard#gallery/pub/ra-5c191331410932ff</code>, <code>ra-5c191331410932ff</code> is the publisher ID.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-widget-id</strong></td>
-    <td>The AddThis widget ID for the tool to be displayed, also found on the [AddThis dashboard](https://addthis.com/dashboard). The widget Id for a specific tool can be found by opening that tool in the AddThis dashboard and copying the last part of the URL. For example, in the URL `https://www.addthis.com/dashboard#tool-config/pub/ra-5c191331410932ff/widgetId/957l`, `957l` is the widget Id.</td>
+    <td width="40%"><p><strong>data-widget-id</strong></p></td>
+    <td><p>The AddThis widget ID for the tool to be displayed, also found on the <a href="https://addthis.com/dashboard">AddThis dashboard</a>. The widget Id for a specific tool can be found by opening that tool in the AddThis dashboard and copying the last part of the URL. For example, in the URL <code>https://www.addthis.com/dashboard#tool-config/pub/ra-5c191331410932ff/widgetId/957l</code>, <code>957l</code> is the widget Id.</p></td>
   </tr>
   <tr>
-     <td width="40%"><strong>data-widget-type</strong></td>
-     <td>
-      Attribute that describes the type of widget.
-      <ul>
-         <li>Floating: `data-widget-type="floating"`</li>
-         <li>Inline: `data-widget-type="inline"`</li>
-       </ul>
-     </td>
+     <td width="40%"><p><strong>data-widget-type</strong></p></td>
+     <td><p>Attribute that describes the type of widget.</p>
+<ul>
+<li>Floating: `data-widget-type="floating"`</li>
+<li>Inline: `data-widget-type="inline"`</li>
+</ul></td>
    </tr>
   <tr>
-    <td width="40%"><strong>data-title</strong></td>
-    <td>Optional. If set, this is the title that the AddThis tool will attempt to share when sharing occurs. If not set, the title of the document containing the `amp-addthis` tag will be used.</td>
+    <td width="40%"><p><strong>data-title</strong></p></td>
+    <td><p>Optional. If set, this is the title that the AddThis tool will attempt to share when sharing occurs. If not set, the title of the document containing the <code>amp-addthis</code> tag will be used.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-url</strong></td>
-    <td>Optional. If set, this is the URL that the AddThis tool will attempt to share when sharing occurs. If not set, the `location.href` property of the document containing the `amp-addthis` tag will be used.</td>
+    <td width="40%"><p><strong>data-url</strong></p></td>
+    <td><p>Optional. If set, this is the URL that the AddThis tool will attempt to share when sharing occurs. If not set, the <code>location.href</code> property of the document containing the <code>amp-addthis</code> tag will be used.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-media</strong></td>
-    <td>Optional. If set, this is an URL for a piece of media (e.g., image or video) that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</td>
+    <td width="40%"><p><strong>data-media</strong></p></td>
+    <td><p>Optional. If set, this is an URL for a piece of media (e.g., image or video) that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-description</strong></td>
-    <td>Optional. If set, this is the description of the page that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</td>
+    <td width="40%"><p><strong>data-description</strong></p></td>
+    <td><p>Optional. If set, this is the description of the page that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</p></td>
   </tr>
 </table>
 

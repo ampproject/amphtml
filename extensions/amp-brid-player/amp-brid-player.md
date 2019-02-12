@@ -60,41 +60,39 @@ Examples:
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><strong>autoplay</strong></td>
-    <td>
-      If this attribute is present, and the browser supports autoplay:
-      <ul>
-          <li>the video is automatically muted before autoplay starts</li>
-          <li>when the video is scrolled out of view, the video is paused</li>
-          <li>when the video is scrolled into view, the video resumes playback</li>
-          <li>when the user taps the video, the video is unmuted</li>
-          <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-      </ul>
-    </td>
+    <td width="40%"><p><strong>autoplay</strong></p></td>
+    <td><p>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+<li>the video is automatically muted before autoplay starts</li>
+<li>when the video is scrolled out of view, the video is paused</li>
+<li>when the video is scrolled into view, the video resumes playback</li>
+<li>when the user taps the video, the video is unmuted</li>
+<li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-partner</strong></td>
-    <td>The Brid.tv partner id.</td>
+    <td width="40%"><p><strong>data-partner</strong></p></td>
+    <td><p>The Brid.tv partner id.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-player</strong></td>
-    <td>The Brid.tv player id. Specific to every partner.</td>
+    <td width="40%"><p><strong>data-player</strong></p></td>
+    <td><p>The Brid.tv player id. Specific to every partner.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-video</strong></td>
-    <td>The Brid.tv video ID.</td>
+    <td width="40%"><p><strong>data-video</strong></p></td>
+    <td><p>The Brid.tv video ID.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-playlist</strong></td>
-    <td>The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.</td>
+    <td width="40%"><p><strong>data-playlist</strong></p></td>
+    <td><p>The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-outstream</strong></td>
-    <td>The Brid.tv outstream unit ID.</td>
+    <td width="40%"><p><strong>data-outstream</strong></p></td>
+    <td><p>The Brid.tv outstream unit ID.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
   </tr>
 </table>
 

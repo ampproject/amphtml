@@ -79,31 +79,31 @@ The component HTML accepts the following types of HTML nodes as children:
 
 <table>
   <tr>
-    <td width="40%"><strong>data-tag (required)</strong></td>
-    <td>The URL for your VAST ad document. A relative URL or a URL that uses https protocol.</td>
+    <td width="40%"><p><strong>data-tag (required)</strong></p></td>
+    <td><p>The URL for your VAST ad document. A relative URL or a URL that uses https protocol.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-src</strong></td>
-    <td>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no `<source>` children are present.</td>
+    <td width="40%"><p><strong>data-src</strong></p></td>
+    <td><p>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no <code>&lt;source&gt;</code> children are present.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-poster (optional)</strong></td>
-    <td>An image for the frame to be displayed before video playback has started. By
-    default, the first frame is displayed.</td>
+    <td width="40%"><p><strong>data-poster (optional)</strong></p></td>
+    <td><p>An image for the frame to be displayed before video playback has started. By
+default, the first frame is displayed.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-delay-ad-request (optional)</strong></td>
-    <td>If true, delay the ad request until either the user scrolls the page, or for 3 seconds, whichever occurs first. Defaults to false.</td>
+    <td width="40%"><p><strong>data-delay-ad-request (optional)</strong></p></td>
+    <td><p>If true, delay the ad request until either the user scrolls the page, or for 3 seconds, whichever occurs first. Defaults to false.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-ad-label (optional)</strong></td>
-    <td>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3).  This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</td>
+    <td width="40%"><p><strong>data-ad-label (optional)</strong></p></td>
+    <td><p>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3).  This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes
-    [common attributes](https://www.ampproject.org/docs/reference/common_attributes)
-    extended to AMP components.</td>
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes
+<a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
+extended to AMP components.</p></td>
   </tr>
 </table>
 

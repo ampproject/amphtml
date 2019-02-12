@@ -62,32 +62,32 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 ## Attributes
 <table>
   <tr>
-    <td width="40%"><strong>data-site-id (required)</strong></td>
-    <td>The SpringBoard site ID. Specific to every partner.</td>
+    <td width="40%"><p><strong>data-site-id (required)</strong></p></td>
+    <td><p>The SpringBoard site ID. Specific to every partner.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-mode (required)</strong></td>
-    <td>The SpringBoard player mode: `video` or `playlist`.</td>
+    <td width="40%"><p><strong>data-mode (required)</strong></p></td>
+    <td><p>The SpringBoard player mode: <code>video</code> or <code>playlist</code>.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-content-id (required)</strong></td>
-    <td>The SpringBoard player content ID (video or playlist ID).</td>
+    <td width="40%"><p><strong>data-content-id (required)</strong></p></td>
+    <td><p>The SpringBoard player content ID (video or playlist ID).</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-player-id (required)</strong></td>
-    <td>The Springboard player ID.</td>
+    <td width="40%"><p><strong>data-player-id (required)</strong></p></td>
+    <td><p>The Springboard player ID.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-domain (required)</strong></td>
-    <td>The Springboard partner domain.</td>
+    <td width="40%"><p><strong>data-domain (required)</strong></p></td>
+    <td><p>The Springboard partner domain.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-items (required)</strong></td>
-    <td>The number of videos in the playlist.</td>
+    <td width="40%"><p><strong>data-items (required)</strong></p></td>
+    <td><p>The number of videos in the playlist.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p></td>
   </tr>
 </table>
 

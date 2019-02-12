@@ -64,12 +64,12 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><strong>data-embed-id</strong></td>
-    <td>The Reach player embed id found in the "players" section or in the generated embed itself.</td>
+    <td width="40%"><p><strong>data-embed-id</strong></p></td>
+    <td><p>The Reach player embed id found in the "players" section or in the generated embed itself.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+    <td width="40%"><p><strong>common attributes</strong></p></td>
+    <td><p>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</p>
 </td>
   </tr>
 </table>

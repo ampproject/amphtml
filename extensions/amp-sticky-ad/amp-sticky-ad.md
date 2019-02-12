@@ -74,8 +74,8 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Must be set to `nodisplay`.</td>
+    <td width="40%"><p><strong>layout (required)</strong></p></td>
+    <td><p>Must be set to <code>nodisplay</code>.</p></td>
   </tr>
 </table>
 

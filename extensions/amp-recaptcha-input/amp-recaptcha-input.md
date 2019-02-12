@@ -84,21 +84,21 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 
 <table>
   <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Required value is `nodisplay`.
+    <td width="40%"><p><strong>layout (required)</strong></p></td>
+    <td><p>Required value is <code>nodisplay</code>.</p>
 </td>
   </tr>
   <tr>
-    <td width="40%"><strong>name (required)</strong></td>
-    <td>Name of the `<amp-recaptcha-input>`. Will be used as a parameter key in the AMP form body submission.</td>
+    <td width="40%"><p><strong>name (required)</strong></p></td>
+    <td><p>Name of the <code>&lt;amp-recaptcha-input&gt;</code>. Will be used as a parameter key in the AMP form body submission.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-sitekey (required)</strong></td>
-    <td>[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) site key for the registered website.</td>
+    <td width="40%"><p><strong>data-sitekey (required)</strong></p></td>
+    <td><p><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> site key for the registered website.</p></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-action (required)</strong></td>
-    <td>[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) action to be executed on form submission.</td>
+    <td width="40%"><p><strong>data-action (required)</strong></p></td>
+    <td><p><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</p></td>
   </tr>
 </table>
 
