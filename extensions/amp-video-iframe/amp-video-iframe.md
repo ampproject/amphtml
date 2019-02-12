@@ -70,9 +70,9 @@ The reasons for this policy are that:
 <table>
   <tr>
     <td width="40%"><strong>src (required)</strong></td>
-    <td>The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
-    source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
-    not already have a fragment.</td>
+    <td>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
+not already have a fragment.</td>
   </tr>
   <tr>
     <td width="40%"><strong>poster (required)</strong></td>
@@ -82,16 +82,16 @@ The reasons for this policy are that:
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
   <tr>
     <td width="40%"><strong>implements-media-session</strong></td>
-    <td>Set this attribute if the document inside the iframe implements the [MediaSession API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) independently.</td>
+    <td>Set this attribute if the document inside the iframe implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API">MediaSession API</a> independently.</td>
   </tr>
   <tr>
     <td width="40%"><strong>implements-rotate-to-fullscreen</strong></td>
@@ -99,7 +99,7 @@ The reasons for this policy are that:
   </tr>
   <tr>
     <td width="40%"><strong>referrerpolicy</strong></td>
-    <td>The [`referrerpolicy`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy) to be set on the iframe element.</td>
+    <td>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy"><code>referrerpolicy</code></a> to be set on the iframe element.</td>
   </tr>
 </table>
 
