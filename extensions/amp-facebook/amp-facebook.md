@@ -103,31 +103,31 @@ Renders as:
   </tr>
   <tr>
     <td width="40%"><p><strong>data-embed-as</strong></p></td>
-    <td><p>The value is either <code>post</code>, <code>video</code> or <code>comment</code>.  The default is <code>post</code>.
-<br><br>
-Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
-<br><br>
-The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments</a>.
-<br><br>
-Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</p></td>
+    <td><p>The value is either <code>post</code>, <code>video</code> or <code>comment</code>. The default is <code>post</code>.
+  <br><br>
+  Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
+  <br><br>
+  The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments</a>.
+  <br><br>
+  Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-include-comment-parent</strong></p></td>
     <td><p>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
-<br><br>
-When you are embedding a comment reply, you can optionally also include the parent comment of the reply.</p></td>
+  <br><br>
+  When you are embedding a comment reply, you can optionally also include the parent comment of the reply.</p></td>
   </tr>
   <tr>
      <td width="40%"><p><strong>data-align-center</strong></p></td>
-     <td><p>The value is either <code>true</code> or <code>false</code>.  The default is <code>false</code>.
-<br><br>
-For posts and videos, having this attribute set to true would align the post/video container to center.</p></td>
+     <td><p>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
+  <br><br>
+  For posts and videos, having this attribute set to true would align the post/video container to center.</p></td>
    </tr>
    <tr>
       <td width="40%"><p><strong>data-locale (optional)</strong></p></td>
       <td><p>By default, the locale is set to user's system language; however, you can specify a locale as well.
-<br><br>
-For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></p></td>
+  <br><br>
+  For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></p></td>
     </tr>
     <tr>
        <td width="40%"><p><strong>common attributes</strong></p></td>

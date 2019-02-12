@@ -93,7 +93,7 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
   <tr>
     <td width="40%"><p><strong>data-my-content (optional - <code>amp-ad</code> only !)</strong></p></td>
     <td><p>For <code>amp-ad</code> elements of type <code>beopinion</code>, the value can be set to <code>"0"</code> (default value).
-Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1"</code>, to prevent the serving of ads outside of an <code>amp-ad</code> element.</p></td>
+  Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1"</code>, to prevent the serving of ads outside of an <code>amp-ad</code> element.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

@@ -58,11 +58,11 @@ With the `responsive` layout, the width and height in this should yield correct 
     <td width="40%"><p><strong>autoplay (optional)</strong></p></td>
     <td ><p>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
-<li>the video is automatically muted before autoplay starts</li>
-<li>when the video is scrolled out of view, the video is paused</li>
-<li>when the video is scrolled into view, the video resumes playback</li>
-<li>when the user taps the video, the video is unmuted</li>
-<li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
 </ul>
 <p>for example <code>setModelRotation(x=0.5, xMin=0, xMax=3.14)</code> will change <code>x</code> component of rotation to <code>1.57</code>.</p></td>
   </tr>

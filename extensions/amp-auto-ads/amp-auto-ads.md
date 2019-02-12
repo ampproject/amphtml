@@ -87,7 +87,7 @@ should be specified on the tag.
   </tr>
   <tr>
     <td width="40%"><p><strong>data-foo-bar</strong></p></td>
-    <td><p>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</p></td>
+    <td><p>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar". See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

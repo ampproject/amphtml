@@ -94,8 +94,8 @@ In the following example, we have a carousel of three images with preview button
     <td width="40%"><p><strong>type</strong></p></td>
     <td><p>Specifies the display type for the carousel items, which can be:</p>
 <ul>
-<li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type  supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
-<li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
+  <li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
+  <li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
 </ul></td>
   </tr>
   <tr>
@@ -105,8 +105,8 @@ In the following example, we have a carousel of three images with preview button
   <tr>
     <td width="40%"><p><strong>controls (optional)</strong></p></td>
     <td><p>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
-By default, navigational arrows disappear after a few seconds on mobile.
-The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</p></td>
+  By default, navigational arrows disappear after a few seconds on mobile.
+  The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-next-button-aria-label (optional)</strong></p></td>
@@ -123,17 +123,17 @@ The visibility of arrows can also be controlled via styling, and a media query c
   <tr>
     <td width="40%"><p><strong>autoplay (optional)</strong></p></td>
     <td><p>Advances the slide to the next slide without user interaction.<br>
-If present without a value:</p>
+  If present without a value:</p>
 <ul>
-<li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
-<li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
-<li>Requires at least 2 slides for autoplay to occur.</li>
-<li>Applies only to carousels with `type=slides`.</li>
+  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
+  <li>Requires at least 2 slides for autoplay to occur.</li>
+  <li>Applies only to carousels with `type=slides`.</li>
 </ul>
 <p>If present with a value:</p>
 <ul>
-<li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
-<li>Removes the `loop` attribute after the requisite number of loops are made.</li>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
+  <li>Removes the `loop` attribute after the requisite number of loops are made.</li>
 </ul></td>
   </tr>
   <tr>
@@ -146,14 +146,10 @@ If present without a value:</p>
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 <!--embedded example - displays in ampproject.org -->
 <div>
-<amp-iframe height="446"
-layout="fixed-height"
-sandbox="allow-scripts allow-forms allow-same-origin"
-resizable
-src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
-<div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-<div placeholder></div>
-</amp-iframe>
+  <amp-iframe height="446" layout="fixed-height" sandbox="allow-scripts allow-forms allow-same-origin" resizable src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
+    <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+    <div placeholder></div>
+  </amp-iframe>
 </div></td>
   </tr>
   <tr>

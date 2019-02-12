@@ -74,12 +74,12 @@ VR view supports mono and stereo 360 images. Note:
   <tr>
     <td width="40%"><p><strong>src</strong></p></td>
     <td><p>The source URL of a stereo image. Must resolve to https. See notes above on what
-kind of image can be passed here.</p></td>
+  kind of image can be passed here.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>stereo</strong></p></td>
     <td><p>If specified, the image provided by the <code>src</code> attribute is considered to be a stereo
-image (see above), otherwise it's a mono image.</p></td>
+  image (see above), otherwise it's a mono image.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>yaw</strong></p></td>

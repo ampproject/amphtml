@@ -71,8 +71,8 @@ The reasons for this policy are that:
   <tr>
     <td width="40%"><p><strong>src (required)</strong></p></td>
     <td><p>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
-source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
-not already have a fragment.</p></td>
+  source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
+  not already have a fragment.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>poster (required)</strong></p></td>
@@ -82,8 +82,8 @@ not already have a fragment.</p></td>
   <tr>
     <td width="40%"><p><strong>autoplay</strong></p></td>
     <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
-played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
+  played as soon as it becomes visible. There are some conditions that the component needs to meet
+  to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

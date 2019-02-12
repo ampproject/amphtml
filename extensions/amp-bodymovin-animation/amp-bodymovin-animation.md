@@ -67,7 +67,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><p><strong>loop (optional)</strong></p></td>
-    <td><p>Indicates whether the animation should be looping or not.  By default, this attribute is set to <code>true</code>. Values for this attribute can be: <code>true</code>, <code>false</code>, or a number value. If a number is specified, the animation loops that number of times.</p></td>
+    <td><p>Indicates whether the animation should be looping or not. By default, this attribute is set to <code>true</code>. Values for this attribute can be: <code>true</code>, <code>false</code>, or a number value. If a number is specified, the animation loops that number of times.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>noautoplay (optional)</strong></p></td>

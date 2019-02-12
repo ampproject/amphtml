@@ -71,17 +71,17 @@ With the responsive layout, the width and height from the example should yield c
     <td width="40%"><p><strong>data-streamtype (optional)</strong></p></td>
     <td><p>Indicates the media streaming type, which can be one of the following:</p>
 <ul>
-<li>`video` (default)</li>
-<li>`audio`</li>
-<li>`playlist`</li>
-<li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
-<li>`live`</li>
-<li>`album`: An audio playlist.</li>
+  <li>`video` (default)</li>
+  <li>`audio`</li>
+  <li>`playlist`</li>
+  <li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
+  <li>`live`</li>
+  <li>`album`: An audio playlist.</li>
 </ul></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-seek-to (optional)</strong></p></td>
-    <td><p>Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.</p></td>
+    <td><p>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-mode (optional)</strong></p></td>

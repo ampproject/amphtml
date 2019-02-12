@@ -80,7 +80,7 @@ You can use the `amp-yotpo` extension to display [Yotpo on-site widgets](https:/
   <tr>
     <td width="40%"><p><strong>data-** (optional)</strong></p></td>
     <td><p>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>product-id</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
-When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</p></td>
+  When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

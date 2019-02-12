@@ -91,18 +91,18 @@ Example:
   <tr>
     <td width="40%"><p><strong>data-param-*</strong></p></td>
     <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
-<br>
-Keys and values will be URI encoded. Keys will be camel cased.</p>
+  <br>
+  Keys and values will be URI encoded. Keys will be camel cased.</p>
 <ul>
-<li>`data-param-language="de"` becomes `&language=de`</li>
-<li>`data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`</li>
+  <li>`data-param-language="de"` becomes `&language=de`</li>
+  <li>`data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`</li>
 </ul></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>autoplay</strong></p></td>
     <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
-played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
+  played as soon as it becomes visible. There are some conditions that the component needs to meet
+  to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

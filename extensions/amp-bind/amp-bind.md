@@ -657,15 +657,15 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
     <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
 <p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
 <p>{% call callout('Important', type='caution') %}
-The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
-{% endcall %}</p></td>
+  The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  {% endcall %}</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>credentials (optional)</strong></p></td>
     <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
 <ul>
-<li>Supported values: `omit`, `include`</li>
-<li>Default: `omit`</li>
+  <li>Supported values: `omit`, `include`</li>
+  <li>Default: `omit`</li>
 </ul>
 <p>To send credentials, pass the value of <code>include</code>. If this value is set, the response must follow the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp">AMP CORS security guidelines</a>.</p></td>
   </tr>

@@ -101,14 +101,14 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
    <tr>
      <td width="40%"><p><strong>data-card-image</strong></p></td>
      <td><p>The URL to an image. Specifies which image to use in article cards when <code>data-url</code> points to an article.
-Not all image URLs are supported, if the image is not loaded, try a different image or domain.</p></td>
+  Not all image URLs are supported, if the image is not loaded, try a different image or domain.</p></td>
    </tr>
    <tr>
      <td width="40%"><p><strong>data-card-controls</strong></p></td>
      <td><p>Enables share icons.</p>
 <ul>
-<li>`0`: Disable share icons.</li>
-<li>`1`: Enable share icons</li>
+  <li>`0`: Disable share icons.</li>
+  <li>`1`: Enable share icons</li>
 </ul>
 <p>The default is <code>1</code>.</p></td>
    </tr>
@@ -120,8 +120,8 @@ Not all image URLs are supported, if the image is not loaded, try a different im
       <td width="40%"><p><strong>data-card-recommend</strong></p></td>
       <td><p>When recommendations are supported, it disables embedly recommendations on video and rich cards.<br>These are recommendations created by embedly.</p>
 <ul>
-<li>`0`: Disables embedly recommendations.</li>
-<li>`1`: Enables embedly recommendations.</li>
+  <li>`0`: Disables embedly recommendations.</li>
+  <li>`1`: Enables embedly recommendations.</li>
 </ul>
 <p>The default value is <code>1</code>.</p></td>
     </tr>

@@ -78,7 +78,7 @@ Example:
     <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.</p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.</p>
 <ul>
-<li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
+  <li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
 </ul></td>
   </tr>
   <tr>

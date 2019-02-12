@@ -87,8 +87,8 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
   <tr>
     <td width="40%"><p><strong>data-share-endpoint</strong></p></td>
     <td><p>This attribute is <strong>required for non-configured providers</strong>.
-<br>
-Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section.  For non-configured providers, you'll need to specify the share endpoint.</p></td>
+  <br>
+  Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section. For non-configured providers, you'll need to specify the share endpoint.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-param-*</strong></p></td>

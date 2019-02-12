@@ -59,16 +59,16 @@ With responsive layout the width and height from the example should yield correc
     <td width="40%"><p><strong>data-param-showrel (optional)</strong></p></td>
     <td><p>This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.</p>
 <ul>
-<li>Accepted values: `1` or `0`</li>
-<li>Default value: `1`</li>
+  <li>Accepted values: `1` or `0`</li>
+  <li>Default value: `1`</li>
 </ul></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-param-showreplay (optional)</strong></p></td>
     <td><p>This is an optional attribute that indicates whether to show the replay button at the end of the content.</p>
 <ul>
-<li>Accepted values: `1` or `0`</li>
-<li>Default value: `1`</li>
+  <li>Accepted values: `1` or `0`</li>
+  <li>Default value: `1`</li>
 </ul></td>
   </tr>
   <tr>

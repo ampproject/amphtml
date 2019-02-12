@@ -63,7 +63,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
 <table>
   <tr>
     <td width="40%"><p><strong>max-scale (optional)</strong></p></td>
-    <td><p>Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.</p></td>
+    <td><p>Specifies a max zoom scale, which should be a positive number from 1 - 9. The default value is 3.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>initial-scale (optional)</strong></p></td>
@@ -75,7 +75,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
   </tr>
   <tr>
     <td width="40%"><p><strong>reset-on-resize (optional)</strong></p></td>
-    <td><p>Refers to the ability to center  the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</p></td>
+    <td><p>Refers to the ability to center the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>controls (optional)</strong></p></td>

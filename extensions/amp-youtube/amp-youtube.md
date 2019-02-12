@@ -75,16 +75,16 @@ With the responsive layout, the width and height from the example should yield c
     <td width="40%"><p><strong>autoplay</strong></p></td>
     <td><p>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
-<li>the video is automatically muted before autoplay starts
-</li>
-<li>when the video is scrolled out of view, the video is paused
-</li>
-<li>when the video is scrolled into view, the video resumes playback
-</li>
-<li>when the user taps the video, the video is unmuted
-</li>
-<li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
-</li>
+  <li>the video is automatically muted before autoplay starts
+  </li>
+  <li>when the video is scrolled out of view, the video is paused
+  </li>
+  <li>when the video is scrolled into view, the video resumes playback
+  </li>
+  <li>when the user taps the video, the video is unmuted
+  </li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+  </li>
 </ul></td>
   </tr>
   <tr>
@@ -100,7 +100,9 @@ With the responsive layout, the width and height from the example should yield c
     <td width="40%"><p><strong>data-param-&#42;</strong></p></td>
     <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.</p>
-<ul><li>`data-param-controls=1` becomes `&controls=1`</li></ul>
+<ul>
+  <li>`data-param-controls=1` becomes `&controls=1`</li>
+</ul>
 <p>See <a href="https://developers.google.com/youtube/player_parameters">YouTube Embedded Player Parameters</a> for more parameter options for YouTube.</p>
 </td>
   </tr>
@@ -108,11 +110,11 @@ With the responsive layout, the width and height from the example should yield c
     <td width="40%"><p><strong>credentials (optional)</strong></p></td>
     <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
 <ul>
-<li>Supported values: `omit`, `include`</li>
-<li>Default: `include`</li>
+  <li>Supported values: `omit`, `include`</li>
+  <li>Default: `include`</li>
 </ul>
 <p>If you want to use the <a href="http://www.google.com/support/youtube/bin/answer.py?answer=141046">YouTube player in privacy-enhanced mode</a>, pass the value of <code>omit</code>.
-Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.</p></td>
+  Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

@@ -66,12 +66,12 @@ Classic Mode:
   <tr>
     <td width="40%"><p><strong>data-trackid</strong></p></td>
     <td><p>This attribute is required if <code>data-playlistid</code> is not defined.<br />
-The value for this attribute is the ID of a track, an integer.</p></td>
+  The value for this attribute is the ID of a track, an integer.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-playlistid</strong></p></td>
     <td><p>This attribute is required if <code>data-trackid</code> is not defined.
-The value for this attribute is the ID of a playlist, an integer.</p></td>
+  The value for this attribute is the ID of a playlist, an integer.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-secret-token (optional)</strong></p></td>

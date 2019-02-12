@@ -62,8 +62,8 @@ In the future, additional functionality, such as animation playback control, cou
   <tr>
     <td width="40%"><p><strong>src</strong></p></td>
     <td><p>Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers may rewrite these
-URLs when ingesting AMP files to point to a cached version of the image.</p></td>
+  points to a publicly-cacheable image file. Cache providers may rewrite these
+  URLs when ingesting AMP files to point to a cached version of the image.</p></td>
   </tr>
   <tr>
      <td width="40%"><p><strong>srcset</strong></p></td>

@@ -205,20 +205,28 @@ as clock becomes less than 50% visible.
     <td><p>Defines how much of the target should be visible in the viewport before <code>&lt;amp-position-observer&gt;</code> triggers any of its events. The value is a number between 0 and 1 (default is 0).<br></p>
 <p>You can specify different ratios for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
 <ul>
-<li>`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
-</li><li>`intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of the target comes into viewport and `exit` is triggered as soon as less than 50% of the target is in the viewport.
-</li><li>`intersection-ratios="1"` means `enter` is triggered when target is fully visible and `exit` is triggered as soon as a single pixel goes out of the viewport.
-</li><li>`intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
-</li></ul></td>
+  <li>`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
+  </li>
+  <li>`intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of the target comes into viewport and `exit` is triggered as soon as less than 50% of the target is in the viewport.
+  </li>
+  <li>`intersection-ratios="1"` means `enter` is triggered when target is fully visible and `exit` is triggered as soon as a single pixel goes out of the viewport.
+  </li>
+  <li>`intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
+  </li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>viewport-margins (optional)</strong></p></td>
     <td><p>A <code>px</code> or <code>vh</code> value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed <code>px</code>. Defaults to 0.<br></p>
 <p>You can specify different values for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
-<ul><li>`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
-</li><li>`viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
-</li><li>`viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
-</li></ul></td>
+<ul>
+  <li>`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+  </li>
+  <li>`viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
+  </li>
+  <li>`viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+  </li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>once (optional)</strong></p></td>

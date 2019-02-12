@@ -99,8 +99,8 @@ Example:
      <td width="40%"><p><strong>data-widget-type</strong></p></td>
      <td><p>Attribute that describes the type of widget.</p>
 <ul>
-<li>Floating: `data-widget-type="floating"`</li>
-<li>Inline: `data-widget-type="inline"`</li>
+  <li>Floating: `data-widget-type="floating"`</li>
+  <li>Inline: `data-widget-type="inline"`</li>
 </ul></td>
    </tr>
   <tr>

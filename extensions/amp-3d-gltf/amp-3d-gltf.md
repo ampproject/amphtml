@@ -79,7 +79,7 @@ Unsupported features:
   <tr>
     <td width="40%"><p><strong>alpha [optional]</strong></p></td>
     <td><p>A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
-Default value is <code>false</code>.</p></td>
+  Default value is <code>false</code>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>antialiasing [optional]</strong></p></td>

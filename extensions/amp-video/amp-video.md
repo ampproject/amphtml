@@ -86,15 +86,15 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
   <tr>
     <td width="40%"><p><strong>poster</strong></p></td>
     <td><p>The image for the frame to be displayed before video playback has started. By
-default, the first frame is displayed.
-<br>
-Alternatively, you can present a click-to-play overlay. For details, see the <a href="#click-to-play-overlay">Click-to-Play overlay</a> section below.</p></td>
+  default, the first frame is displayed.
+  <br>
+  Alternatively, you can present a click-to-play overlay. For details, see the <a href="#click-to-play-overlay">Click-to-Play overlay</a> section below.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>autoplay</strong></p></td>
     <td><p>If this attribute is present, and the browser supports autoplay, the video will be automatically
-played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
+  played as soon as it becomes visible. There are some conditions that the component needs to meet
+  to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>controls</strong></p></td>
@@ -123,7 +123,7 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   <tr>
     <td width="40%"><p><strong>noaudio</strong></p></td>
     <td><p>Annotates the video as having no audio. This hides the equalizer icon that is displayed
-when the video has autoplay.</p></td>
+  when the video has autoplay.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>rotate-to-fullscreen</strong></p></td>

@@ -86,10 +86,10 @@ Example:
      <td width="40%"><p><strong>data-no-service-worker-fallback-url-match</strong></p></td>
      <td><p>The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See <a href="#shell-url-rewrite">Shell URL rewrite</a> section for more details. The value must be a valid JavaScript RegExp string. For example:</p>
 <ul>
-<li>`amp.html`</li>
-<li>`.*amp`</li>
-<li>`.*\.amp\.html`</li>
-<li>`.*\/amp---
+  <li>`amp.html`</li>
+  <li>`.*amp`</li>
+  <li>`.*\.amp\.html`</li>
+  <li>`.*\/amp---
 $category@: dynamic-content
 formats:
   - websites

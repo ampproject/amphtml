@@ -78,7 +78,7 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
   <tr>
     <td width="40%"><p><strong>data-kd_site  (optional)</strong></p></td>
     <td><p>This attribute is also known as <code>data-kid_directed_site</code> in the Facebook SDK.
-If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this attribute. The default is <code>false</code>.</p></td>
+  If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this attribute. The default is <code>false</code>.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-layout (optional)</strong></p></td>

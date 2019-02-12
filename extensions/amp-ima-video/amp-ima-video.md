@@ -89,7 +89,7 @@ The component HTML accepts the following types of HTML nodes as children:
   <tr>
     <td width="40%"><p><strong>data-poster (optional)</strong></p></td>
     <td><p>An image for the frame to be displayed before video playback has started. By
-default, the first frame is displayed.</p></td>
+  default, the first frame is displayed.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-delay-ad-request (optional)</strong></p></td>
@@ -97,13 +97,13 @@ default, the first frame is displayed.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-ad-label (optional)</strong></p></td>
-    <td><p>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3).  This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</p></td>
+    <td><p>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3). This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>
     <td><p>This element includes
-<a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
-extended to AMP components.</p></td>
+  <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
+  extended to AMP components.</p></td>
   </tr>
 </table>
 

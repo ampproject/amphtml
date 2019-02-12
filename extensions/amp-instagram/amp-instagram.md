@@ -71,12 +71,12 @@ When using non-responsive layout you will need to account for the extra space ad
   <tr>
     <td width="40%"><p><strong>data-shortcode</strong></p></td>
     <td><p>The instagram data-shortcode is found in every instagram photo URL.
-<br>
-For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-shortcode.</p></td>
+  <br>
+  For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-shortcode.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>data-captioned</strong></p></td>
-    <td><p>Include the Instagram caption.  <code>amp-instagram</code> will attempt to resize to the correct height including the caption.</p></td>
+    <td><p>Include the Instagram caption. <code>amp-instagram</code> will attempt to resize to the correct height including the caption.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>common attributes</strong></p></td>

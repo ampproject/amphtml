@@ -79,7 +79,7 @@ For example:
   <tr>
     <td width="40%"><p><strong>autoplay</strong></p></td>
     <td><p>If present, the attribute implies that the audio will start playing as soon as
-it is ready.</p></td>
+  it is ready.</p></td>
   </tr>
   <tr>
     <td width="40%"><p><strong>loop</strong></p></td>

@@ -108,10 +108,10 @@ publisher-code="123X456"
   <tr>
     <td width="40%"><p><strong>excluded-domains (optional)</strong></p></td>
     <td><p>A whitespace separated list of domain names.
-All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
-By default amp-skimlinks does not exclude any domains.
-<br>
-Example:</p>
+  All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
+  By default amp-skimlinks does not exclude any domains.
+  <br>
+  Example:</p>
 <pre><code class="html language-html">&lt;amp-skimlinks
 ...
 excluded-domains="samsung.com amazon.com"
@@ -123,12 +123,12 @@ excluded-domains="samsung.com amazon.com"
   <tr>
     <td width="40%"><p><strong>link-selector (optional)</strong></p></td>
     <td><p><code>link-selector</code> allows you to restrict which links amp-skimlinks should affiliate and track. All the links
-not matching the provided selector will simply be ignored.<br>
-By default, amp-skimlinks affiliate and tracks all the links on the page.<br></p>
+  not matching the provided selector will simply be ignored.<br>
+  By default, amp-skimlinks affiliate and tracks all the links on the page.<br></p>
 <p><code>link-selector</code> value should be a valid <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors">CSS selector</a><br></p>
 <p><strong>WARNING:</strong>
-Don't set this option unless you really need it.
-When using this option, always double check that your CSS selector is matching your links. When <code>link-selector</code> is provided, only the links matching the provided CSS selector would be able to generate revenue, any other links would be ignored.<br></p>
+  Don't set this option unless you really need it.
+  When using this option, always double check that your CSS selector is matching your links. When <code>link-selector</code> is provided, only the links matching the provided CSS selector would be able to generate revenue, any other links would be ignored.<br></p>
 <p>(e.g: <code>div.content</code> would not match any links and therefore not generate any revenue while <code>div.content a</code> would)!<br></p>
 <p>Example:</p>
 <pre><code class="html language-html">&lt;amp-skimlinks
