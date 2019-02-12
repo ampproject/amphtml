@@ -70,16 +70,16 @@ For example:
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>Required if no `<source>` children are present. Must be HTTPS.</td>
+    <td>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</td>
   </tr>
   <tr>
     <td width="40%"><strong>preload</strong></td>
-    <td>If present, sets the preload attribute in the html `<audio>` tag which specifies if the author thinks that the audio file should be loaded when the page loads.</td>
+    <td>If present, sets the preload attribute in the html <code>&lt;audio&gt;</code> tag which specifies if the author thinks that the audio file should be loaded when the page loads.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If present, the attribute implies that the audio will start playing as soon as
-    it is ready.</td>
+it is ready.</td>
   </tr>
   <tr>
     <td width="40%"><strong>loop</strong></td>
@@ -91,7 +91,7 @@ For example:
   </tr>
   <tr>
     <td width="40%"><strong>controlsList</strong></td>
-    <td>Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 audio element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.</td>
+    <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 audio element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
   </tr>
 </table>
 
