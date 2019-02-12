@@ -105,6 +105,11 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
     <td>Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires `amp-video-docking` extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see [documentation on the docking extension itself.](https://www.ampproject.org/docs/reference/components/amp-video-docking/)</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>loop</strong></td>
     <td>If present, the video will automatically loop back to the start upon reaching the end.</td>
   </tr>

@@ -90,6 +90,11 @@ The reasons for this policy are that:
     <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires `amp-video-docking` extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see [documentation on the docking extension itself.](https://www.ampproject.org/docs/reference/components/amp-video-docking/)</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>implements-media-session</strong></td>
     <td>Set this attribute if the document inside the iframe implements the [MediaSession API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) independently.</td>
   </tr>

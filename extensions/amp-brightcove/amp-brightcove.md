@@ -110,6 +110,11 @@ Example:
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires `amp-video-docking` extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see [documentation on the docking extension itself.](https://www.ampproject.org/docs/reference/components/amp-video-docking/)</td>
+  </tr>
 </table>
 
 
