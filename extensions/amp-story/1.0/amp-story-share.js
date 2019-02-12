@@ -107,7 +107,8 @@ const SHARE_PAGE_TEMPLATE = {
     {
       tag: 'input',
       attrs: dict(
-          {'class': 'i-amphtml-page-share-check',
+          {
+            'class': 'i-amphtml-page-share-check',
             'type': 'checkbox',
             'id': 'page-share',
           }),
@@ -119,6 +120,7 @@ const SHARE_PAGE_TEMPLATE = {
         'class': 'i-amphtml-page-share-span',
         'for': 'page-share',
       }),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_BUTTON_LABEL,
     },
   ],
 };
@@ -256,12 +258,6 @@ export class ShareWidget {
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
 
-    /** @private @const {!string} */
-    this.currentPageId_ = '';
-
-    /** @private @const {!boolean} */
-    this.isDesktopUi_ = false;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
   }
@@ -288,7 +284,6 @@ export class ShareWidget {
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
-    this.initializeListeners_();
     this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
@@ -328,12 +323,16 @@ export class ShareWidget {
    * starting from a specific page.
    * @private */
   maybeAddPageShareButton_() {
-    if (isExperimentOn(this.win, 'amp-story-branching') && this.isDesktopUi_) {
+    const isDesktopUi =
+      this.storeService_.get(
+          StateProperty.UI_STATE) === UIType.DESKTOP_FULLBLEED;
+
+    if (isExperimentOn(this.win, 'amp-story-branching') && isDesktopUi) {
 
       const sharePageCheck =
         renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
-      sharePageCheck.querySelector(
-          '#page-share-span').innerHTML = 'Share this page';
+      // sharePageCheck.querySelector(
+      //     '#page-share-span').innerHTML = 'Share this page';
 
       this.root.appendChild(sharePageCheck);
     }
@@ -344,10 +343,11 @@ export class ShareWidget {
    * @private
    */
   copyUrlToClipboard_(opt_sharePage) {
+    const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
     const url =
       (isExperimentOn(this.win, 'amp-story-branching') && opt_sharePage) ?
         Services.documentInfoForDoc(
-            this.getAmpDoc_()).canonicalUrl + '#page=' + this.currentPageId_ :
+            this.getAmpDoc_()).canonicalUrl + '#page=' + currentPageId :
         Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
@@ -396,19 +396,6 @@ export class ShareWidget {
     const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
 
     return ('share' in navigator) && !isChromeWebview;
-  }
-
-  /**
-   * @private
-   */
-  initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.currentPageId_ = pageId;
-    });
-
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.isDesktopUi_ = (uiState === UIType.DESKTOP_FULLBLEED);
-    }, true /** callToInitialize */);
   }
 
   /**

@@ -171,7 +171,7 @@
 .i-amphtml-page-share-check {
   width: 12px !important;
   height: 12px !important;
-  vertical-align: middle;
+  vertical-align: middle !important;
 }
 
 .i-amphtml-page-share-span {
@@ -182,7 +182,7 @@
   position: absolute !important;
   padding: 0px 8px !important;
   bottom: 0px !important;
-  white-space: nowrap;
+  white-space: nowrap !important;
   color: #333 !important;
   text-transform: capitalize !important;
   font-family: 'Roboto', sans-serif !important;
