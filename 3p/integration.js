@@ -160,6 +160,7 @@ import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
+import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
@@ -273,6 +274,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  jubna: true,
   kuadio: true,
   'mantis-recommend': true,
   miximedia: true,
@@ -394,6 +396,7 @@ register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
 register('ix', ix);
+register('jubna', jubna);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
