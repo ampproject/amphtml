@@ -32,6 +32,7 @@ const {
   shortSha,
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -77,7 +78,7 @@ function maybeOverridePercyEnvironmentVariables() {
  */
 function setPercyBranch() {
   if (!process.env['PERCY_BRANCH'] &&
-      (!argv.master || !process.env['TRAVIS'])) {
+      (!argv.master || !isTravisBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
@@ -95,7 +96,7 @@ function setPercyBranch() {
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (process.env.TRAVIS && !argv.master) {
+  if (isTravisBuild() && !argv.master) {
     process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
   }
 }
@@ -419,7 +420,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .catch(testError => {
             log('travis', colors.red('○'));
-            if (!process.env['TRAVIS']) {
+            if (!isTravisBuild()) {
               log('error', testError);
             }
             testErrors.push(testError);
@@ -436,7 +437,7 @@ async function snapshotWebpages(percy, browser, webpages) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
-  if (process.env['TRAVIS']) {
+  if (isTravisBuild()) {
     testErrors.forEach(testError => {
       log('error', testError);
     });
