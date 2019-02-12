@@ -75,6 +75,14 @@ export const EXPANDABLE_COMPONENTS = {
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
+  'amp-youtube': {
+    actionIcon: ActionIcon.EXPAND,
+    selector: 'amp-youtube',
+  },
+  'amp-instagram': {
+    actionIcon: ActionIcon.EXPAND,
+    selector: 'amp-instagram',
+  },
 };
 
 /**
