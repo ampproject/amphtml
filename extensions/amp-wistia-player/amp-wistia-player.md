@@ -51,11 +51,11 @@ Displays a <a href="https://wistia.com">Wistia</a> video.
 <table>
   <tr>
     <td width="40%"><strong>data-media-hashed-id (required)</strong></td>
-    <td>The Wistia media id is found in every Wistia media page URL. If the media page URL is https://support.wistia.com/medias/u8p9wq6mq8, the data-media-hashed-id is `u8p9wq6mq8`.</td>
+    <td>The Wistia media id is found in every Wistia media page URL. If the media page URL is https://support.wistia.com/medias/u8p9wq6mq8, the data-media-hashed-id is <code>u8p9wq6mq8</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

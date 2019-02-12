@@ -61,16 +61,14 @@ Examples:
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>
-      If this attribute is present, and the browser supports autoplay:
-      <ul>
-          <li>the video is automatically muted before autoplay starts</li>
-          <li>when the video is scrolled out of view, the video is paused</li>
-          <li>when the video is scrolled into view, the video resumes playback</li>
-          <li>when the user taps the video, the video is unmuted</li>
-          <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-      </ul>
-    </td>
+    <td>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-partner</strong></td>
@@ -94,7 +92,7 @@ Examples:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
