@@ -540,6 +540,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'jubna': {},
+
   'kargo': {},
 
   'kiosked': {
@@ -798,7 +800,7 @@ export const adConfig = {
   },
 
   'rbinfox': {
-	    renderStartImplemented: true,
+    renderStartImplemented: true,
   },
 
   'realclick': {
