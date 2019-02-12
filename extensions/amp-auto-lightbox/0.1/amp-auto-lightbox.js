@@ -386,6 +386,10 @@ function generateLightboxUid() {
  */
 export function apply(ampdoc, element) {
   return Mutation.mutate(element, () => {
+    // amp-lightbox-gallery will reject elements with a set `on` attribute.
+    // Since the attribute is resolved to be valid before applying, this is ok
+    // to do.
+    element.removeAttribute('on');
     element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
   }).then(() => {
     Services.extensionsFor(ampdoc.win)
