@@ -53,9 +53,11 @@ export class SaveButton {
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
-    const hasOneToOneDimensions = rootElement.hasAttribute('height') && rootElement.hasAttribute('width') && 
+    const hasOneToOneDimensions = rootElement.hasAttribute('height') &&
+      rootElement.hasAttribute('width') &&
       rootElement.getAttribute('height') === rootElement.getAttribute('width');
-    this.round = rootElement.getAttribute('data-round') || hasOneToOneDimensions;
+    this.round = rootElement.getAttribute('data-round') ||
+      hasOneToOneDimensions;
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
     /** @type {?string} */
