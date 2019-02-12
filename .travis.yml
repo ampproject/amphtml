@@ -21,8 +21,12 @@ jobs:
       name: "Checks"
       script:
         - echo "build stage, checks shard"
+    - stage: build
+      name: "Validator"        
+      script:
+        -echo "build stage, validator shard"        
     - stage: test
-      name: "Dist, Bundle Size Tests"
+      name: "Dist, Bundle Size, Single Pass Tests"
       script:
         - echo "test stage, dist shard"
     - stage: test
@@ -37,12 +41,4 @@ jobs:
       name: "Remote (Sauce Labs) Tests"
       script:
         - echo "test stage, remote shard"
-    - stage: optional
-      name: "Single Pass"
-      script:
-        -echo "optional stage, single pass shard"
-    - stage: optional
-      name: "Validator"        
-      script:
-        -echo "optional stage, validator shard"
 
