@@ -50,14 +50,14 @@ The `amp-video-docking` extension allows videos to be minimized to a corner or
 to a custom positioned element via the `dock` attribute.
 
 If this attribute is present and the video is playing manually, the video will
-be "docked" and fixed to a corner when the user scrolls out of the video
-component's visual area.
+be "docked" and fixed to a corner or a custom position when the user scrolls out of the video
+component's visual area. If the user scrolls back, the video reverts to its original static position.
 
 - The video can be docked to a default corner or to a custom fixed position.
 - The video can be dragged and repositioned by the user on a different corner.
 - Multiple videos on the same page can be docked.
 
-### Support
+### <a id="support"></a> Support
 
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
 Currently, the supported players are:
@@ -75,6 +75,11 @@ Note that the video won't be docked unless it's playing *manually*. This means:
 - If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
 - If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
 - If the video is paused while scrolling, it will not be docked.
+
+## Attributes
+
+N/A. `amp-video-docking` does not define any custom elements. To use this extension, set the `dock` attribute on
+an [elligible video player component.](#support)
 
 ## <a id="target"></a> Docking target
 
