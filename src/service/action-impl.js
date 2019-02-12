@@ -467,6 +467,7 @@ export class ActionService {
    * `target` is an element id and the corresponding element is returned.
    * @param {string} target
    * @return {?Document|?Element|?ShadowRoot}
+   * @private
    */
   getActionNode_(target) {
     return this.globalTargets_[target] ?
