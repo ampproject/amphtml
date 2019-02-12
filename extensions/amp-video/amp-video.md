@@ -105,6 +105,11 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
     <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 video element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
+  </tr>
+  <tr>
     <td width="40%"><strong>loop</strong></td>
     <td>If present, the video will automatically loop back to the start upon reaching the end.</td>
   </tr>

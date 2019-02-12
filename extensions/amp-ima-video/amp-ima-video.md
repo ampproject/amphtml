@@ -100,6 +100,11 @@ default, the first frame is displayed.</td>
     <td>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3). This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</td>
   </tr>
   <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes
 <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
