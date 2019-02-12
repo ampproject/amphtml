@@ -4523,27 +4523,27 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         };
       }
     }
-    // If none of the dispatch tagspecs matched and passed and there are no
-    // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
-    // which gives an error that reads "tag foo is disallowed except in
-    // specific forms".
-    if (!tagSpecDispatch.hasTagSpecs()) {
-      const result = new amp.validator.ValidationResult();
-      if (encounteredTag.upperName() === 'SCRIPT') {
-        // Special case for <script> tags to produce better error messages.
-        context.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
-            context.getLineCol(),
-            /* params */[], context.getRules().getScriptSpecUrl(), result);
-      } else {
-        context.addError(
-            amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
-            context.getLineCol(),
-            /* params */[encounteredTag.lowerName()],
-            /* specUrl */ '', result);
-      }
-      return {validationResult: result, bestMatchTagSpec: null};
+  }
+  // None of the dispatch tagspecs matched and passed. If there are no
+  // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
+  // which gives an error that reads "tag foo is disallowed except in
+  // specific forms".
+  if (!tagSpecDispatch.hasTagSpecs()) {
+    const result = new amp.validator.ValidationResult();
+    if (encounteredTag.upperName() === 'SCRIPT') {
+      // Special case for <script> tags to produce better error messages.
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+          context.getLineCol(),
+          /* params */[], context.getRules().getScriptSpecUrl(), result);
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+          context.getLineCol(),
+          /* params */[encounteredTag.lowerName()],
+          /* specUrl */ '', result);
     }
+    return {validationResult: result, bestMatchTagSpec: null};
   }
   // Validate against all remaining tagspecs. Each tagspec will produce a
   // different set of errors. Even if none of them match, we only want to
