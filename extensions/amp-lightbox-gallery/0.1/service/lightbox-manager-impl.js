@@ -26,7 +26,7 @@ import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
-  closestByTag,
+  closestAncestorElementByTag,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
@@ -303,7 +303,7 @@ export class LightboxManager {
   getDescription(element) {
     // If the element in question is the descendant of a figure element
     // try using the figure caption as the lightbox description.
-    const figureParent = closestByTag(element, 'figure');
+    const figureParent = closestAncestorElementByTag(element, 'figure');
     if (figureParent) {
       const figCaption = elementByTag(figureParent, 'figcaption');
       if (figCaption) {

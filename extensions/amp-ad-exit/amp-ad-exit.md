@@ -402,7 +402,7 @@ See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/a
 <table>
   <tr>
     <td width="40%"><strong>id</strong></td>
-    <td>An `id` is required so that `amp-exit` can be referenced by tappable elements.</td>
+    <td>An <code>id</code> is required so that <code>amp-exit</code> can be referenced by tappable elements.</td>
   </tr>
 </table>
 

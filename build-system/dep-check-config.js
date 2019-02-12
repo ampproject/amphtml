@@ -369,6 +369,10 @@ exports.rules = [
             'src/service/extension-location.js',
       'extensions/amp-list/0.1/amp-list.js->' +
             'src/service/origin-experiments-impl.js',
+      // For action macros.
+      'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
+            'src/service/action-impl.js',
+
     ],
   },
   {

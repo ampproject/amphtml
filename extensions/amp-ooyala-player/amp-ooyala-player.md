@@ -53,11 +53,11 @@ Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
 <table>
   <tr>
     <td width="40%"><strong>data-embedcode (required)</strong></td>
-    <td>The video embed code from [Backlot](https://backlot.ooyala.com).</td>
+    <td>The video embed code from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-playerid (required)</strong></td>
-    <td>The ID of the player to load from [Backlot](https://backlot.ooyala.com).</td>
+    <td>The ID of the player to load from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-pcode (required)</strong></td>
@@ -73,7 +73,7 @@ Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
