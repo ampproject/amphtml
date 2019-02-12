@@ -26,7 +26,7 @@ min_validator_revision_required: 370
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 817
+spec_file_revision: 818
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -5855,6 +5855,13 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  # <amp-sidebar>
+  attrs: {
+    name: "autoscroll"
+    requires_ancestor {
+      marker: AUTOSCROLL
+    }
+  }
 }
 
 # Error Specificity: Used in the verbose validator to select between multiple

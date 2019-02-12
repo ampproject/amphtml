@@ -75,7 +75,7 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 22
+// NEXT AVAILABLE TAG: 23
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -148,6 +148,10 @@ message AttrSpec {
   // requires that the named extended component script tag is present on the
   // page.
   repeated string requires_extension = 19;
+
+  // If set, this attr is invalid unless the current tag has an ancestor
+  // tag which set one or more of the required markers.
+  optional AncestorMarker requires_ancestor = 22;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -296,6 +300,20 @@ message AmpLayout {
   optional bool defines_default_height = 3;
 }
 
+// An AncestorMarker is a state maintained on the stack of matching tags.
+// When a TagSpec with an AncestorMarker matches, this Marker is placed on the
+// stack until the matched html tag is popped from the stack. Other rules may be
+// triggered by the presence of a specific AncestorMarker on the stack.
+message AncestorMarker {
+  enum Marker {
+    UNKNOWN = 0;
+    // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
+    // See https://github.com/ampproject/amphtml/20524 for more context.
+    AUTOSCROLL = 1;
+  }
+  repeated Marker marker = 1;
+}
+
 // TagSpec::child_tags uses this configuration to specify which child tags
 // are expected for a specific tag.
 //
@@ -425,7 +443,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 37
+// NEXT AVAILABLE TAG: 39
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -573,6 +591,9 @@ message TagSpec {
 
   // If set, specifies which AMP Layouts are supported by this element.
   optional AmpLayout amp_layout = 11;
+
+  // If set, triggers related validation rules for descendants of this tag.
+  optional AncestorMarker mark_descendants = 38;
 
   // Deprecated fields, do not reuse.
   // reserved 14, 26;

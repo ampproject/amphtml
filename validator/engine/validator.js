@@ -29,6 +29,7 @@ goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.htmlparser.ParsedHtmlTag');
 goog.require('amp.validator.AmpLayout');
+goog.require('amp.validator.AncestorMarker');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrSpec');
@@ -1664,6 +1665,24 @@ class TagStack {
       if ((this.stack_[i].tagSpec !== null) &&
           (this.stack_[i].tagSpec.getSpec().specName === ancestor)) {
         return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the current tag has an ancestor which set the given marker.
+   * @param {!amp.validator.AncestorMarker.Marker} query
+   * @return {boolean}
+   */
+  hasAncestorMarker(query) {
+    goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
+    // Skip the first element, which is "$ROOT".
+    for (let i = 1; i < this.stack_.length; ++i) {
+      const spec = this.stack_[i].tagSpec.getSpec();
+      if (spec.markDescendants === null) continue;
+      for (const marker of spec.markDescendants.marker) {
+        if (marker === query) return true;
       }
     }
     return false;
@@ -4168,6 +4187,30 @@ function validateAttributes(
         continue;
       }
       mandatoryOneofsSeen.push(mandatoryOneof);
+    }
+    if (attrSpec.requiresAncestor !== null) {
+      console.log(attrSpec.requiresAncestor);
+      const markers = attrSpec.requiresAncestor.marker;
+      console.log(markers);
+      let matchesMarker = false;
+      for (const marker of markers) {
+        if (context.getTagStack().hasAncestorMarker(marker)) {
+          matchesMarker = true;
+          break;
+        }
+      }
+      if (!matchesMarker) {
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+            context.getLineCol(),
+            /* params */
+            [
+              attr.name,
+              getTagSpecName(spec),
+            ],
+            getTagSpecUrl(spec), result);
+        continue;
+      }
     }
     const {mandatoryAnyof} = attrSpec;
     if (mandatoryAnyof !== null) {
