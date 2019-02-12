@@ -61,13 +61,13 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 
 <amp-action-macro
     id="carousel-macro"
-    action="carousel.goToSlide(index=arg1), carousel.goToSlide(index=arg2)"
-    arguments="arg1, arg2"></amp-action-macro>
+    action="carousel.goToSlide(index=foo), carousel.goToSlide(index=bar)"
+    arguments="foo, bar"></amp-action-macro>
 
 ```
 
 ```html
- <button on="tap:carousel-macro.execute(arg1=1, arg2=2)">
+ <button on="tap:carousel-macro.execute(foo=1, bar=2)">
    Go to slide 1 then 2
  </button>
 ```

@@ -749,21 +749,8 @@ describe('Action method', () => {
 
   describe('macros', () => {
     let ampActionMacro;
-    let expectedActionInvocation;
 
     beforeEach(() => {
-      // The expected action invocation for the action macro.
-      expectedActionInvocation = new ActionInvocation(
-          ampActionMacro,
-          'method',
-          {realArgName: 'realArgValue'},
-          ampActionMacro,
-          ampActionMacro,
-          ActionTrust.HIGH,
-          'tap',
-          'AMP-ACTION-MACRO',
-          sinon.match.number
-      );
       // A caller that references an action macro.
       targetElement.setAttribute('on', 'tap:action-macro-id.execute(arg1=2)');
       ampActionMacro = document.createElement('amp-action-macro');
@@ -782,9 +769,21 @@ describe('Action method', () => {
       action.trigger(ampActionMacro, 'tap', null, ActionTrust.HIGH,
           /* opt_args */ {arg1: 'realArgValue'});
 
-      whenCalled(invoke_).then(() => {
-        expect(action.invoke_).to.have.been
-            .calledWith(expectedActionInvocation);
+      return whenCalled(invoke_).then(() => {
+        expect(action.invoke_).to.have.been.calledOnce;
+        const invocation = action.invoke_.getCall(0).args[0];
+        const {actionEventType, args, method, node, source, caller, event,
+          tagOrTarget, trust} = invocation;
+        expect(node).to.equal(ampActionMacro);
+        expect(caller).to.equal(ampActionMacro);
+        expect(event).to.be.null;
+        expect(method).to.equal('method');
+        expect(actionEventType).to.equal('tap');
+        expect(args).to.deep.equal({realArgName: 'realArgValue'});
+        expect(trust).to.equal(100);
+        expect(tagOrTarget).to.equal('AMP-ACTION-MACRO');
+        expect(actionEventType).to.equal('tap');
+        expect(source).to.equal(ampActionMacro);
       });
     });
   });

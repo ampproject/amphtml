@@ -828,11 +828,10 @@ function notImplemented() {
 /**
  * @param {string} action
  * @param {!Element} context
- * @param {?Object=} opt_args arguments to use for the action.
  * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
-export function parseActionMap(action, context, opt_args) {
+export function parseActionMap(action, context) {
   const assertAction = assertActionForParser.bind(null, action, context);
   const assertToken = assertTokenForParser.bind(null, action, context);
 
