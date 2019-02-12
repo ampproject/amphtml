@@ -26,7 +26,7 @@ min_validator_revision_required: 370
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 819
+spec_file_revision: 820
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1056,7 +1056,6 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1316,7 +1315,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -1404,7 +1402,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
@@ -4784,7 +4781,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4815,7 +4815,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4842,7 +4845,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -4870,7 +4876,10 @@ tags: {
     value_casei: "amp-rtc"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -5244,7 +5253,10 @@ attr_lists: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     value_casei: "text/javascript"

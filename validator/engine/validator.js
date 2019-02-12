@@ -339,6 +339,17 @@ class ParsedAttrSpec {
   getCssDeclarationByName() {
     return this.cssDeclarationByName_;
   }
+
+  /**
+   * Returns true if this AttrSpec should be used for the given type identifiers
+   * based on the AttrSpec's disabled_by or enabled_by fields.
+   * @param {!Array<string>} typeIdentifiers
+   * @return {boolean}
+   */
+  isUsedForTypeIdentifiers(typeIdentifiers) {
+    return isUsedForTypeIdentifiers(
+        typeIdentifiers, this.spec_.enabledBy, this.spec_.disabledBy);
+  }
 }
 
 /**
@@ -380,6 +391,38 @@ function getTagSpecUrl(tagSpec) {
   }
 
   return '';
+}
+
+/**
+ * Returns true if this spec should be used for the given type identifiers
+ * based on the spec's disabled_by or enabled_by fields.
+ * @param {!Array<string>} typeIdentifiers
+ * @param {!Array<string>} enabledBys
+ * @param {!Array<string>} disabledBys
+ * @return {boolean}
+ */
+function isUsedForTypeIdentifiers(typeIdentifiers, enabledBys, disabledBys) {
+  if (enabledBys.length > 0) {
+    for (const enabledBy of enabledBys) {
+      // Is enabled by a given type identifier, use.
+      if (typeIdentifiers.includes(enabledBy)) {
+        return true;
+      }
+    }
+    // Is not enabled for these type identifiers, do not use.
+    return false;
+  } else if (disabledBys.length > 0) {
+    for (const disabledBy of disabledBys) {
+      // Is disabled by a given type identifier, do not use.
+      if (typeIdentifiers.includes(disabledBy)) {
+        return false;
+      }
+    }
+    // Is not disabled for these type identifiers, use.
+    return true;
+  }
+  // Is not enabled nor disabled for any type identifiers, use.
+  return true;
 }
 
 /**
@@ -754,33 +797,14 @@ class ParsedTagSpec {
   }
 
   /**
-   * Returns true if this tagSpec should be used for the given type identifiers
+   * Returns true if this TagSpec should be used for the given type identifiers
    * based on the TagSpec's disabled_by or enabled_by fields.
    * @param {!Array<string>} typeIdentifiers
    * @return {boolean}
    */
   isUsedForTypeIdentifiers(typeIdentifiers) {
-    if (this.spec_.enabledBy.length > 0) {
-      for (const enabledBy of this.spec_.enabledBy) {
-        // TagSpec is enabled by a given type identifier, use.
-        if (typeIdentifiers.includes(enabledBy)) {
-          return true;
-        }
-      }
-      // TagSpec is not enabled for these type identifiers, do not use.
-      return false;
-    } else if (this.spec_.disabledBy.length > 0) {
-      for (const disabledBy of this.spec_.disabledBy) {
-        // TagSpec is disabled by a given type identifier, do not use.
-        if (typeIdentifiers.includes(disabledBy)) {
-          return false;
-        }
-      }
-      // TagSpec is not disabled for these type identifiers, use.
-      return true;
-    }
-    // TagSpec is not enabled nor disabled for any type identifiers, use.
-    return true;
+    return isUsedForTypeIdentifiers(
+        typeIdentifiers, this.spec_.enabledBy, this.spec_.disabledBy);
   }
 
   /**
@@ -4120,6 +4144,15 @@ function validateAttributes(
     }
     const parsedAttrSpec =
         context.getRules().getParsedAttrSpecs().getByAttrSpecId(attrId);
+    // If this attribute isn't used for these type identifiers, then error.
+    if (!parsedAttrSpec.isUsedForTypeIdentifiers(
+            context.getTypeIdentifiers())) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+          context.getLineCol(),
+          /* params */[attr.name, getTagSpecName(spec)], getTagSpecUrl(spec),
+          result);
+    }
     const attrSpec = parsedAttrSpec.getSpec();
     if (attrSpec.deprecation !== null) {
       context.addWarning(

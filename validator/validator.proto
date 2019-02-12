@@ -75,8 +75,18 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 23
+// NEXT AVAILABLE TAG: 25
 message AttrSpec {
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this AttrSpec. If a Type Identifier is in enabled_by then this
+  // AttrSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // AttrSpec will not be used in validating parsed documents with that
+  // Type Identifier. An AttrSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 23;
+  repeated string disabled_by = 24;
+
   // Use lower-case attribute names only.
   optional string name = 1;
   repeated string alternative_names = 2;
