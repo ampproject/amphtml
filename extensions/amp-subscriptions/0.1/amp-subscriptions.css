@@ -75,7 +75,7 @@ amp-subscriptions-dialog {
   left: 0 !important;
   margin-left: 0 !important;
   width: 100% !important;
-  z-index: 2147483641;  /* Behind lightbox if available. */
+  z-index: 2147483641 !important;  /* Paywall is behind iframes from swg.js */
   max-height: 90vh;
   box-sizing: border-box;
   opacity: 1;
