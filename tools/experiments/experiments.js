@@ -299,12 +299,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'video-service',
-    name: 'Enables new implementation of unified Video Interface services.',
-    spec: 'https://github.com/ampproject/amphtml/issues/13674',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
-  },
-  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',

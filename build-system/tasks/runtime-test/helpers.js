@@ -192,10 +192,14 @@ function unitTestsToRun(unitTestPaths) {
   }
 
   filesChanged.forEach(file => {
-    if (isUnitTest(file)) {
+    if (!fs.existsSync(file)) {
+      if (!process.env.TRAVIS) {
+        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
+      }
+    } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
-      srcFiles = srcFiles.concat([file]);
+      srcFiles.push(file);
     } else if (path.extname(file) == '.css') {
       srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }
