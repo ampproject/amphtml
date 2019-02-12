@@ -437,7 +437,10 @@ export class AmpSelector extends AMP.BaseElement {
     const normalizedIndex = mod(index, this.elements_.length);
 
     this.setSelection_(this.elements_[normalizedIndex]);
-    this.clearSelection_(this.elements_[previousIndex]);
+    const previousEl = this.elements_[previousIndex];
+    if (previousEl) {
+      this.clearSelection_(previousEl);
+    }
   }
 
   /**
