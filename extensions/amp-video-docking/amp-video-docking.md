@@ -49,4 +49,90 @@ Functionality for videos that dock to a corner.
 The `amp-video-docking` extension allows videos to be minimized to a corner or
 to a custom positioned element via the `dock` attribute.
 
-For more information, see [docking for the `VideoInterface`](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#docking).
+If this attribute is present and the video is playing manually, the video will
+be "docked" and fixed to a corner when the user scrolls out of the video
+component's visual area.
+
+- The video can be dragged and repositioned by the user on a different corner.
+- Multiple videos on the same page can be docked.
+
+This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
+Currently, the supported players are:
+
+- [`amp-brightcove`](https://www.ampproject.org/docs/reference/components/amp-brightcove)
+- [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
+- [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
+- [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)
+- [`amp-youtube`](https://www.ampproject.org/docs/reference/components/amp-youtube)
+
+### Styling
+
+The docked video can be styled by selecting elements that are created by the
+AMP runtime.
+
+#### `.amp-docked-video-shadow`
+
+References a layer that draws a `box-shadow` under the video. The shadow can be
+overridden or removed. Its opacity will change from 0 to 1 while the video is
+being docked.
+
+#### `.amp-docked-video-controls`
+
+References a layer that contains the docked video controls. Usually, this
+doesn't need to be styled. See `.amp-docked-video-controls-bg` for a background
+layer.
+
+This element also gets the classname `amp-small` applied when rendered in small areas (those under 300 pixels wide), and the classname `amp-large` when not.
+
+#### `.amp-docked-video-controls-bg`
+
+References a layer that draws an overlay background over the video and under
+the controls. It's displayed only when the controls are displayed. Its
+background can be overridden or removed.
+
+#### `.amp-docked-video-button-group`
+
+A button "group" that usually contains two buttons, with only one displayed at
+a time. It's used to draw a background when the button is active. It has a
+`border-radius` and a `background-color` set by default, both of which can be
+removed or overrridden.
+
+Direct children (`.amp-docked-video-button-group > [role=button]`) represent
+buttons, which have an SVG background. The color of the SVG can be changed by
+modifying the `fill` property. Additionally, these can be replaced by changing
+the `background` property.
+
+#### `.amp-docked-video-play`
+
+Represents the `play` button.
+
+#### `.amp-docked-video-pause`
+
+Represents the `pause` button.
+
+#### `.amp-docked-video-mute`
+
+Represents the `mute` button.
+
+#### `.amp-docked-video-unmute`
+
+Represents the `unmute` button.
+
+#### `.amp-docked-video-fullscreen`
+
+Represents the `fullscreen` button.
+
+#### `.amp-video-docked-placeholder-background`
+
+Represents a container for placeholder elements placed on the empty component area.
+
+#### `.amp-video-docked-placeholder-background-poster`
+
+Represents a layer displaying the `poster` or `placeholder` image of the video on the empty component area. Blurred by default.
+
+#### `.amp-video-docked-placeholder-icon`
+
+Represents an animated icon for a UX affordance displayed on the empty component area.
+
+This element also gets the classname `amp-small` when rendered in small viewports (those under 420 pixels wide). It also gets the classname `amp-rtl` when animating from right to left.
+
