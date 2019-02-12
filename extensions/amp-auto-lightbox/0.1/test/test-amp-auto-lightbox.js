@@ -177,6 +177,7 @@ describes.realWin(TAG, {
     });
 
     beforeEach(() => {
+      // Insert element for valid tap actions to be resolved.
       env.win.document.body.appendChild(html`<div id="valid"></div>`);
     });
 
