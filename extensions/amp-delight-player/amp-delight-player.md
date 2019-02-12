@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: The amp-delight-player element displays a cloud-hosted Delight Player.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-delight-player"></a> `amp-delight-player`
+# amp-delight-player
+
+The <code>amp-delight-player</code> element displays a cloud-hosted [Delight Player](https://delight-vr.com/).
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>The <code>amp-delight-player</code> element displays a cloud-hosted [Delight Player](https://delight-vr.com/).
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-delight-player" src="https://cdn.ampproject.org/v0/amp-delight-player-0.1.js">&lt;/script></code></td>
@@ -43,9 +48,9 @@ Example:
 ```html
 <amp-delight-player
     data-content-id="-123456789AbCdEfGhIj"
-    layout="responsive" 
-    width="16" 
-    height="9">    
+    layout="responsive"
+    width="16"
+    height="9">
 </amp-delight-player>
 ```
 
@@ -56,26 +61,28 @@ Example:
 ```html
 <amp-delight-player
     data-content-id="-123456789AbCdEfGhIj"
-    width="460" 
-    height="200">    
+    width="460"
+    height="200">
 </amp-delight-player>
 ```
 
 ## Attributes
-
-##### data-content-id (**Required**)
-
-The video's content ID.
-
-##### autoplay
-
-If this attribute is present, and the browser supports autoplay, the video will be automatically
-played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-content-id (Required)</strong></td>
+    <td>The video's content ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
+    played as soon as it becomes visible. There are some conditions that the component needs to meet
+    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Actions
 `amp-delight-player` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.

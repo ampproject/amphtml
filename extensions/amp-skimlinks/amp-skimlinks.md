@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Run skimlinks inside your AMP page.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-skimlinks"></a> `amp-skimlinks`
+# amp-skimlinks
+
+Run skimlinks inside your AMP page
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run skimlinks inside your AMP page</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js">&lt;/script></code></td>
@@ -86,66 +91,71 @@ The final code should like:
 
 ## Attributes
 
-##### publisher-code (required)
+<table>
+  <tr>
+    <td width="40%"><strong>publisher-code (required)</strong></td>
+    <td>Your skimlinks publisher code (also called "site Id").<br>
 
-Your skimlinks publisher code (also called "site Id").
+    If you don't know what's your publisher code, you can find it on the [Skimlinks Hub](https://hub.skimlinks.com/settings/sites) ("Site ID" column.).<br>
 
-If you don't know what's your publisher code, you can find it on the [Skimlinks Hub](https://hub.skimlinks.com/settings/sites) ("Site ID" column.).
+    Example:
+    ```html
+        <amp-skimlinks
+            ...
+            publisher-code="123X456"
+        >
+        </amp-skimlinks>
+    ```
+</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>excluded-domains (optional)</strong></td>
+    <td>A whitespace separated list of domain names.
+    All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
+    By default amp-skimlinks does not exclude any domains.
+<br>
+    Example:
+    ```html
+        <amp-skimlinks
+            ...
+            excluded-domains="samsung.com amazon.com"
+        >
+        </amp-skimlinks>
+    ```
+</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>link-selector (optional)</strong></td>
+    <td>`link-selector` allows you to restrict which links amp-skimlinks should affiliate and track. All the links
+    not matching the provided selector will simply be ignored.<br>
+    By default, amp-skimlinks affiliate and tracks all the links on the page.<br>
 
-Example:
-```html
-    <amp-skimlinks
-        ...
-        publisher-code="123X456"
-    >
-    </amp-skimlinks>
-```
+    `link-selector` value should be a valid [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)<br>
 
-##### excluded-domains (optional)
+    **WARNING:**
+    Don't set this option unless you really need it.
+    When using this option, always double check that your CSS selector is matching your links. When `link-selector` is provided, only the links matching the provided CSS selector would be able to generate revenue, any other links would be ignored.<br>
 
-A whitespace separated list of domain names.
-All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
-By default amp-skimlinks does not exclude any domains.
-
-Example:
-```html
-    <amp-skimlinks
-        ...
-        excluded-domains="samsung.com amazon.com"
-    >
-    </amp-skimlinks>
-```
-
-##### link-selector (optional)
-
-`link-selector` allows you to restrict which links amp-skimlinks should affiliate and track. All the links
-not matching the provided selector will simply be ignored.
-By default, amp-skimlinks affiliate and tracks all the links on the page.
-
-`link-selector` value should be a valid [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
-
-**WARNING:**
-Don't set this option unless you really need it.
-When using this option, always double check that your CSS selector is matching your links. When `link-selector` is provided, only the links matching the provided CSS selector would be able to generate revenue, any other links would be ignored.
-
-(e.g: `div.content` would not match any links and therefore not generate any revenue while `div.content a` would)!
+    (e.g: `div.content` would not match any links and therefore not generate any revenue while `div.content a` would)!<br>
 
 
-Example:
-```html
-    <amp-skimlinks
-        ...
-        link-selector="article:not(.no-skimlinks) a"
-    >
-    </amp-skimlinks>
-```
+    Example:
+    ```html
+        <amp-skimlinks
+            ...
+            link-selector="article:not(.no-skimlinks) a"
+        >
+        </amp-skimlinks>
+    ```
+</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>custom-tracking-id (optional)</strong></td>
+    <td>The `custom-tracking-id` (also `called xcust`) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.<br>
 
-##### custom-tracking-id (optional)
-
-The `custom-tracking-id` (also `called xcust`) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.
-
-`custom-tracking-id` should be <=50 characters.
-
+    `custom-tracking-id` should be <=50 characters.</td>
+  </tr>
+</table>
 
 ## Validation
 

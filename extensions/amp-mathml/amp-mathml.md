@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays a MathML formula.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-mathml`"></a> `amp-mathml`
+# amp-mathml
+
+Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
