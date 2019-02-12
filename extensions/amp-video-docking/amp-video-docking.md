@@ -65,11 +65,11 @@ Currently, the supported players are:
 - [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)
 - [`amp-youtube`](https://www.ampproject.org/docs/reference/components/amp-youtube)
 
-### <a id="target"></a> Docking target
+## <a id="target"></a> Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
-#### Corner
+### Corner
 
 When setting the `dock` attribute with an empty value, the video will dock to a corner defined by the extension:
 
@@ -79,9 +79,9 @@ When setting the `dock` attribute with an empty value, the video will dock to a 
 
 By default, the video will be minimized to the top-right corner. It will be sized at 30% of the viewport's width, no less than 180 pixels wide. If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner. When in this mode, users can drag the docked video to snap to either corner.
 
-#### Custom position by slot element
+### Custom position by "slot"
 
-When setting the `dock` attribute to a non-empty value, the video will dock to the same position as the element referenced in the attribute value by [CSS selector.](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
+When setting the `dock` attribute to a non-empty value, the video will dock to the same position as a "slot element" referenced in the attribute value by [CSS selector.](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
 
 ```html
 <amp-layout id="my-dock-slot" ...>
@@ -91,26 +91,26 @@ The slot element must always be an [`amp-layout`](https://www.ampproject.org/doc
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 
-#### Combining corner and custom position behavior
+### Combining corner and custom position behavior
 
 Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries). For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
 
-### Events
+## Events
 
-#### `dock` and `undock`
+### `dock` and `undock`
 
 When the video becomes docked or undocked by scrolling, the [low-trust events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) `dock` and `undock` are triggered respectively.
 
 These can, for example, trigger an [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
 
-#### Event source
+### Event source
 
 Depending on the [docking target](#target), the corresponding event will be triggered from different source elements:
 
 - **From the video element itself**, when the video is docked to a corner.
 - **From the slot element**, when the video is docked to the slot element.
 
-### Styling
+## Styling
 
 The docked video can be styled by selecting elements that are created by this extension.
 
