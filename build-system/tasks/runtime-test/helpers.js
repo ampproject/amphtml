@@ -196,9 +196,7 @@ function unitTestsToRun(unitTestPaths) {
       if (!process.env.TRAVIS) {
         log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
       }
-      return;
-    }
-    if (isUnitTest(file)) {
+    } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
       srcFiles.push(file);
