@@ -92,9 +92,12 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
       this.postPageImpression_();
       this.linkmate_ = new Linkmate(
-          this.ampDoc_,
-          this.xhr_,
-          this.linkmateOptions_
+          /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+          (this.ampDoc_),
+          /** @type {!../../../src/service/xhr-impl.Xhr} */
+          (this.xhr_),
+          /** @type {!Object} */
+          (this.linkmateOptions_)
       );
       this.smartLinkRewriter_ = this.initLinkRewriter_();
 

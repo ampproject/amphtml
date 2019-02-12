@@ -25,15 +25,15 @@ import {getData} from '../../../src/event-helper';
 
 export class Linkmate {
   /**
-   * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @param {?../../../src/service/xhr-impl.Xhr} xhr
-   * @param {?Object} linkmateOptions
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!../../../src/service/xhr-impl.Xhr} xhr
+   * @param {!Object} linkmateOptions
    */
   constructor(ampDoc, xhr, linkmateOptions) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = ampDoc;
 
-    /** @private {?../../../src/service/xhr-impl.Xhr} */
+    /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
     /** @private {?boolean} */
@@ -67,16 +67,16 @@ export class Linkmate {
     // changed since last API call then map any new anchors to existing
     // API response
     let syncMappedLinks = null;
-    if (this.linkmateResponse_ && this.anchorList_ &&
-      !deepEquals(this.anchorList_, anchorList)) {
+    const anchorListChanged = this.anchorList_ &&
+      !deepEquals(this.anchorList_, anchorList);
+
+    if (this.linkmateResponse_ && anchorListChanged) {
       syncMappedLinks = this.mapLinks_();
     }
 
     // If we don't have an API response or the anchor list has changed since
     // last API call then build a new payload and post to API
-    if (!this.linkmateResponse_ ||
-      (this.anchorList_ && !deepEquals(this.anchorList_, anchorList))) {
-
+    if (!this.linkmateResponse_ || anchorListChanged) {
       const asyncMappedLinks = this.postToLinkmate_(anchorList)
           .then(res => {
             this.linkmateResponse_ = getData(res)[0]['smart_links'];
@@ -85,7 +85,8 @@ export class Linkmate {
           });
 
       return new TwoStepsResponse(syncMappedLinks, asyncMappedLinks);
-    } else { // If we didn't need to make an API call return the synchronous response
+    } else {
+      // If we didn't need to make an API call return the synchronous response
       this.anchorList_ = anchorList;
       return new TwoStepsResponse(syncMappedLinks, null);
     }
