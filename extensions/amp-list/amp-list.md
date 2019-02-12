@@ -292,7 +292,7 @@ We've introduced the `amp-list-load-more` experiment as an implementation for pa
 #### Sample Usage
 
 ```html
-<amp-list load-more src="https://my.rest.endpoint/" ...>
+<amp-list load-more="auto" src="https://my.rest.endpoint/" width="100" height="200">
   <template type="amp-mustache">
   // ...
   </template>
