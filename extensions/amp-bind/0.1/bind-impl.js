@@ -302,11 +302,11 @@ export class Bind {
     dev().info(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
-        .then(() => {
-          this.history_.replace({
-            'data': dict({'amp-bind': this.state_}),
-            'title': this.localWin_.document.title,
-          });
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          if (data) {
+            this.history_.replace(data);
+          }
         });
     return this.setStatePromise_;
   }
@@ -334,12 +334,30 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(() => {
-            this.history_.push(onPop, {
-              'data': dict({'amp-bind': this.state_}),
-              'title': this.localWin_.document.title,
-            });
+          .then(this.getDataForHistory_())
+          .then(data => {
+            if (data) {
+              this.history_.push(onPop, data);
+            }
           });
+    });
+  }
+
+  /**
+   * @return {!Promise<?JsonObject>}
+   */
+  getDataForHistory_() {
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      if (trusted) {
+        // Only pass state for history updates to trusted viewers, since they
+        // may contain user data e.g. form input.
+        return dict({
+          'data': dict({'amp-bind': this.state_}),
+          'title': this.localWin_.document.title,
+        });
+      } else {
+        return null;
+      }
     });
   }
 
