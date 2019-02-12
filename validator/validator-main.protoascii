@@ -4624,18 +4624,11 @@ tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "TEXTAREA"
+  attrs: { name: "autocomplete" }
   attrs: {
     name: "autoexpand"
     requires_extension: "amp-form"
   }
-  attrs: {
-    name: "autoshrink-disabled"
-    requires_extension: "amp-form"
-    trigger: {
-      also_requires_attr: "autoexpand"
-    }
-  }
-  attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }

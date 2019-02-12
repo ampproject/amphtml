@@ -243,15 +243,5 @@ feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires inc
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <textarea name="comment" autoexpand></textarea>
 |    </form>
-|    <!-- Valid: textarea with autoexpand and autoshrink attribute -->
-|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-|      <textarea name="comment" autoexpand autoshrink></textarea>
-|    </form>
-|    <!-- Invalid: textarea with only autoshrink attribute -->
-|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-|      <textarea name="comment" autoshrink></textarea>
->>     ^~~~~~~~~
-feature_tests/forms.html:219:4 The attribute 'autoexpand' in tag 'textarea' is missing or incorrect, but required by attribute 'autoshrink'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-|    </form>
 |  </body>
 |  </html>

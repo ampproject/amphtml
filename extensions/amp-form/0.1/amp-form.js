@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
@@ -55,7 +56,6 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
-import {installAmpFormTextarea} from './amp-form-textarea';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -208,8 +208,6 @@ export class AmpForm {
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
     this.installInputMasking_();
-    installAmpFormTextarea(this.form_);
-
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -1302,8 +1300,32 @@ export class AmpFormService {
     return ampdoc.whenReady().then(() => {
       this.installSubmissionHandlers_(
           ampdoc.getRootNode().querySelectorAll('form'));
+      this.installTextareaAutoexpandHandler_(ampdoc.getRootNode());
       this.installGlobalEventListener_(ampdoc.getRootNode());
     });
+  }
+
+  /**
+   * @param {!Document|!ShadowRoot} root
+   */
+  installTextareaAutoexpandHandler_(root) {
+    let ampFormTextarea = null;
+    const maybeInstall = () => {
+      const autoexpandTextarea = root.querySelector('textarea[autoexpand]');
+      if (autoexpandTextarea && !ampFormTextarea) {
+        ampFormTextarea = new AmpFormTextarea(root);
+        return;
+      }
+
+      if (!autoexpandTextarea && ampFormTextarea) {
+        ampFormTextarea.dispose();
+        ampFormTextarea = null;
+        return;
+      }
+    };
+
+    root.addEventListener(AmpEvents.DOM_UPDATE, maybeInstall);
+    maybeInstall();
   }
 
   /**

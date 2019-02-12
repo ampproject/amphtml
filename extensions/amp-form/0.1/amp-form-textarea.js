@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
 import {dev, devAssert} from '../../../src/log';
@@ -23,8 +24,6 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
-const AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR = 'autoshrink-disabled';
-
 const MIN_EVENT_INTERVAL_MS = 100;
 
 const AMP_FORM_TEXTAREA_CLONE_CSS = 'i-amphtml-textarea-clone';
@@ -33,18 +32,31 @@ const AMP_FORM_TEXTAREA_MAX_CSS = 'i-amphtml-textarea-max';
 
 const AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA = 'iAmphtmlHasExpanded';
 
-class AmpFormWithTextarea {
+/**
+ * Install expandable textarea behavior for the given form.
+ *
+ * This class should be able to be removed when browsers implement
+ * `height: max-content` for the textarea element.
+ * https://github.com/w3c/csswg-drafts/issues/2141
+ */
+export class AmpFormTextarea {
   /**
-   * @param {!Element} form
+   * @param {!Document|!ShadowRoot} root
    */
-  constructor(form) {
-    /** @private */
-    this.win_ = devAssert(form.ownerDocument.defaultView);
+  constructor(root) {
+    /** @private @const */
+    this.doc_ = (root.ownerDocument || root);
+
+    /** @private @const */
+    this.win_ = devAssert(this.doc_.defaultView);
+
+    /** @private @const */
+    this.viewport_ = Services.viewportForDoc(this.doc_);
 
     /** @private */
     this.unlisteners_ = [];
 
-    this.unlisteners_.push(listen(form, 'input', e => {
+    this.unlisteners_.push(listen(root, 'input', e => {
       const element = dev().assertElement(e.target);
       if (element.tagName != 'TEXTAREA' ||
           !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
@@ -54,7 +66,7 @@ class AmpFormWithTextarea {
       maybeResizeTextarea(element);
     }));
 
-    this.unlisteners_.push(listen(form, 'mousedown', e => {
+    this.unlisteners_.push(listen(root, 'mousedown', e => {
       if (e.which != 1) {
         return;
       }
@@ -65,13 +77,19 @@ class AmpFormWithTextarea {
         return;
       }
 
-      maybeRemoveResizeBehavior(element);
+      handleTextareaDrag(element);
     }));
 
-    const throttledResize = throttle(this.win_, () => {
-      resizeFormTextareaElements(form);
+    let cachedTextareaElements = root.querySelectorAll('textarea');
+    this.unlisteners_.push(listen(root, AmpEvents.DOM_UPDATE, () => {
+      cachedTextareaElements = root.querySelectorAll('textarea');
+    }));
+    const throttledResize = throttle(this.win_, e => {
+      if (e.relayoutAll) {
+        resizeTextareaElements(cachedTextareaElements);
+      }
     }, MIN_EVENT_INTERVAL_MS);
-    this.unlisteners_.push(listen(this.win_, 'resize', throttledResize));
+    this.unlisteners_.push(this.viewport_.onResize(throttledResize));
   }
 
   /**
@@ -83,24 +101,13 @@ class AmpFormWithTextarea {
 }
 
 /**
- * Install expandable textarea behavior for the given form.
- *
- * This method can be removed when browsers implement `height: max-content`
- * for the textarea element.
- * https://github.com/w3c/csswg-drafts/issues/2141
- * @param {!Element} form
+ * Attempt to resize all textarea elements
+ * @param {!IArrayLike<!Element>} elements
  */
-export function installAmpFormTextarea(form) {
-  new AmpFormWithTextarea(form);
-}
-
-/**
- * Attempt to resize all textarea elements within the given form.
- * @param {!Element} form
- */
-function resizeFormTextareaElements(form) {
-  iterateCursor(form.getElementsByTagName('textarea'), element => {
-    if (!element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+function resizeTextareaElements(elements) {
+  iterateCursor(elements, element => {
+    if (element.tagName != 'TEXTAREA' ||
+        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
       return;
     }
 
@@ -109,14 +116,12 @@ function resizeFormTextareaElements(form) {
 }
 
 /**
- * Remove the resize behavior if a user drags the resize handle and changes
- * the height of the textarea.
  * This makes no assumptions about the location of the resize handle, and it
  * assumes that if the user drags the mouse at any position and the height of
  * the textarea changes, then the user intentionally resized the textarea.
  * @param {!Element} element
  */
-export function maybeRemoveResizeBehavior(element) {
+function handleTextareaDrag(element) {
   const resources = Services.resourcesForDoc(element);
 
   Promise.all([
@@ -129,11 +134,22 @@ export function maybeRemoveResizeBehavior(element) {
     return resources.measureMutateElement(element, () => {
       heightMouseUp = element.scrollHeight;
     }, () => {
-      if (heightMouseDown != heightMouseUp) {
-        element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
-      }
+      maybeRemoveResizeBehavior(element, heightMouseDown, heightMouseUp);
     });
   });
+}
+
+/**
+ * Remove the resize behavior if a user drags the resize handle and changes
+ * the height of the textarea.
+ * @param {!Element} element
+ * @param {number} startHeight
+ * @param {number} endHeight
+ */
+function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
+  if (startHeight != endHeight) {
+    element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
+  }
 }
 
 /**
@@ -142,25 +158,23 @@ export function maybeRemoveResizeBehavior(element) {
  * @param {!Element} element
  * @return {!Promise}
  */
-export function maybeResizeTextarea(element) {
+function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
   const win = devAssert(element.ownerDocument.defaultView);
 
   let offset = 0;
   let scrollHeight = 0;
-  let minScrollHeightPromise = null;
   let maxHeight = 0;
 
-  if (!element.hasAttribute(AMP_FORM_TEXTAREA_SHRINK_DISABLED_ATTR)) {
-    minScrollHeightPromise = getShrinkHeight(element);
-  }
+  // The minScrollHeight is the minimimum height required to contain the
+  // text content without showing a scrollbar.
+  // This is different than scrollHeight, which is the larger of: 1. the
+  // element's content, or 2. the element itself.
+  const minScrollHeightPromise = getShrinkHeight(element);
 
   return resources.measureMutateElement(element, () => {
     const computed = computedStyle(win, element);
     scrollHeight = element.scrollHeight;
-    if (minScrollHeightPromise == null) {
-      minScrollHeightPromise = Promise.resolve(scrollHeight);
-    }
 
     const maybeMaxHeight =
         parseInt(computed.getPropertyValue('max-height'), 10);

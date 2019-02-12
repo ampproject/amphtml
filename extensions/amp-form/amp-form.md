@@ -583,12 +583,6 @@ to expand and shrink to accomodate the user's rows of input, up to the field's m
 <textarea autoexpand></textarea>
 ```
 
-AMP Form also provides an `autoshrink-disabled` attribute to use in conjunction with the `autoexpand` attribute on  `<textarea>` elements. This prevents the textarea from reducing its size after the user deletes text from the element.
-
-```html
-<textarea autoexpand autoshrink-disabled></textarea>
-```
-
 ## Styling
 
 ### Classes and CSS hooks
