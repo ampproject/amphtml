@@ -79,7 +79,7 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 <table>
   <tr>
     <td width="40%"><strong>data-embedtype (required)</strong></td>
-    <td>The type of embed, either `post` or `comment`.</td>
+    <td>The type of embed, either <code>post</code> or <code>comment</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-src (required)</strong></td>
@@ -87,23 +87,23 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
   </tr>
   <tr>
     <td width="40%"><strong>data-uuid</strong></td>
-    <td>The provided UUID for the comment embed. Supported when `data-embedtype` is `comment`. </td>
+    <td>The provided UUID for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-embedcreated</strong></td>
-    <td>The datetime string for the comment embed. Supported when `data-embedtype` is `comment`. </td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-embedparent</strong></td>
-    <td>The datetime string for the comment embed. Supported when `data-embedtype` is `comment`. </td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-embedlive</strong></td>
-    <td> Indicates whether the embedded comment should update if the original comment is updated. Supported when `data-embedtype` is `comment`.</td>
+    <td>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

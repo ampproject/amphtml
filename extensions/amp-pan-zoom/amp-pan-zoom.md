@@ -63,7 +63,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
 <table>
   <tr>
     <td width="40%"><strong>max-scale (optional)</strong></td>
-    <td>Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.</td>
+    <td>Specifies a max zoom scale, which should be a positive number from 1 - 9. The default value is 3.</td>
   </tr>
   <tr>
     <td width="40%"><strong>initial-scale (optional)</strong></td>
@@ -75,7 +75,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
   </tr>
   <tr>
     <td width="40%"><strong>reset-on-resize (optional)</strong></td>
-    <td>Refers to the ability to center  the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</td>
+    <td>Refers to the ability to center the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</td>
   </tr>
   <tr>
     <td width="40%"><strong>controls (optional)</strong></td>
@@ -83,7 +83,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

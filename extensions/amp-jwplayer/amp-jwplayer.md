@@ -74,19 +74,19 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>data-player-id</strong></td>
-    <td>JW Platform player id. This is an 8-digit alphanumeric sequence that can be found in the [Players](https://dashboard.jwplayer.com/#/players) section in your JW Player Dashboard. (**Required**)</td>
+    <td>JW Platform player id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/players">Players</a> section in your JW Player Dashboard. (<strong>Required</strong>)</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-media-id</strong></td>
-    <td>The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the [Content](https://dashboard.jwplayer.com/#/content) section in your JW Player Dashboard. (**Required if `data-playlist-id` is not defined.**)</td>
+    <td>The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/content">Content</a> section in your JW Player Dashboard. (<strong>Required if <code>data-playlist-id</code> is not defined.</strong>)</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-playlist-id</strong></td>
-    <td>The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes precedence.  (**Required if `data-media-id` is not defined.**)</td>
+    <td>The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/content/playlists">Playlists</a> section in your JW Player Dashboard. If both <code>data-playlist-id</code> and <code>data-media-id</code> are specified, <code>data-playlist-id</code> takes precedence. (<strong>Required if <code>data-media-id</code> is not defined.</strong>)</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

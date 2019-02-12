@@ -91,7 +91,7 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
   </tr>
   <tr>
     <td width="40%"><strong>data-card-theme</strong></td>
-    <td>Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.</td>
+    <td>Allows settings the <code>dark</code> theme which changes the background color of the main card container. Use <code>dark</code> to set this theme. For dark backgrounds it's better to specify this. The default is <code>light</code>, which sets no background color of the main card container.</td>
   </tr>
   <tr>
      <td width="40%"><strong>data-card-embed</strong></td>
@@ -100,38 +100,34 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
    </tr>
    <tr>
      <td width="40%"><strong>data-card-image</strong></td>
-     <td>The URL to an image. Specifies which image to use in article cards when `data-url` points to an article.
-     Not all image URLs are supported, if the image is not loaded, try a different image or domain.</td>
+     <td>The URL to an image. Specifies which image to use in article cards when <code>data-url</code> points to an article.
+Not all image URLs are supported, if the image is not loaded, try a different image or domain.</td>
    </tr>
    <tr>
      <td width="40%"><strong>data-card-controls</strong></td>
-     <td>
-        Enables share icons.
-        <ul>
-            <li>`0`: Disable share icons.</li>
-            <li>`1`: Enable share icons</li>
-        </ul>
-        The default is `1`.
-     </td>
+     <td><p>Enables share icons.</p>
+<ul>
+  <li>`0`: Disable share icons.</li>
+  <li>`1`: Enable share icons</li>
+</ul>
+<p>The default is <code>1</code>.</p></td>
    </tr>
    <tr>
       <td width="40%"><strong>data-card-align</strong></td>
-      <td>Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.</td>
+      <td>Aligns the card. The possible values are <code>left</code>, <code>center</code> and <code>right</code>. The default value is <code>center</code>.</td>
     </tr>
     <tr>
       <td width="40%"><strong>data-card-recommend</strong></td>
-      <td>
-        When recommendations are supported, it disables embedly recommendations on video and rich cards.<br>These are recommendations created by embedly.
-        <ul>
-            <li>`0`: Disables embedly recommendations.</li>
-            <li>`1`: Enables embedly recommendations.</li>
-        </ul>
-        The default value is `1`.
-      </td>
+      <td><p>When recommendations are supported, it disables embedly recommendations on video and rich cards.<br>These are recommendations created by embedly.</p>
+<ul>
+  <li>`0`: Disables embedly recommendations.</li>
+  <li>`1`: Enables embedly recommendations.</li>
+</ul>
+<p>The default value is <code>1</code>.</p></td>
     </tr>
     <tr>
       <td width="40%"><strong>common attributes</strong></td>
-      <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+      <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
     </tr>
 </table>
 

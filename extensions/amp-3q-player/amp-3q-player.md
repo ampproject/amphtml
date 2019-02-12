@@ -56,19 +56,19 @@ With the `responsive` layout, the width and height in this should yield correct 
   </tr>
   <tr>
     <td width="40%"><strong>autoplay (optional)</strong></td>
-    <td >If this attribute is present, and the browser supports autoplay:
-      <ul>
-        <li>the video is automatically muted before autoplay starts</li>
-        <li>when the video is scrolled out of view, the video is paused</li>
-        <li>when the video is scrolled into view, the video resumes playback</li>
-        <li>when the user taps the video, the video is unmuted</li>
-        <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-      </ul>
-    for example `setModelRotation(x=0.5, xMin=0, xMax=3.14)` will change `x` component of rotation to `1.57`.</td>
+    <td ><p>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul>
+<p>for example <code>setModelRotation(x=0.5, xMin=0, xMax=3.14)</code> will change <code>x</code> component of rotation to <code>1.57</code>.</p></td>
   </tr>
   <tr>
     <td width="40%"><strong><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

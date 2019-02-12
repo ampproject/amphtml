@@ -84,12 +84,12 @@ The component HTML accepts the following types of HTML nodes as children:
   </tr>
   <tr>
     <td width="40%"><strong>data-src</strong></td>
-    <td>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no `<source>` children are present.</td>
+    <td>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no <code>&lt;source&gt;</code> children are present.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-poster (optional)</strong></td>
     <td>An image for the frame to be displayed before video playback has started. By
-    default, the first frame is displayed.</td>
+default, the first frame is displayed.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-delay-ad-request (optional)</strong></td>
@@ -97,13 +97,13 @@ The component HTML accepts the following types of HTML nodes as children:
   </tr>
   <tr>
     <td width="40%"><strong>data-ad-label (optional)</strong></td>
-    <td>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3).  This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</td>
+    <td>A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3). This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes
-    [common attributes](https://www.ampproject.org/docs/reference/common_attributes)
-    extended to AMP components.</td>
+<a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
+extended to AMP components.</td>
   </tr>
 </table>
 

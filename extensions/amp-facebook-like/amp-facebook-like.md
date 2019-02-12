@@ -61,28 +61,28 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
-    <td>The absolute URL of the page that will be liked. For example, `https://www.facebook.com/testesmegadivertidos/`.</td>
+    <td>The absolute URL of the page that will be liked. For example, <code>https://www.facebook.com/testesmegadivertidos/</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-locale (optional)</strong></td>
-    <td>By default, the locale is set to user's system language; however, you can specify a locale as well. <br> For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)</td>
+    <td>By default, the locale is set to user's system language; however, you can specify a locale as well. <br> For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-action (optional)</strong></td>
-    <td>The verb to display on the button. Can be either `like` or `recommend`. The default is `like`.</td>
+    <td>The verb to display on the button. Can be either <code>like</code> or <code>recommend</code>. The default is <code>like</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-colorscheme (optional)</strong></td>
-    <td>The color scheme used by the plugin for any text outside of the button itself. Can be `light` or `dark`. The default is `light`.</td>
+    <td>The color scheme used by the plugin for any text outside of the button itself. Can be <code>light</code> or <code>dark</code>. The default is <code>light</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-kd_site  (optional)</strong></td>
-    <td>This attribute is also known as `data-kid_directed_site` in the Facebook SDK.
-    If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this attribute. The default is `false`.</td>
+    <td>This attribute is also known as <code>data-kid_directed_site</code> in the Facebook SDK.
+If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this attribute. The default is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-layout (optional)</strong></td>
-    <td>Selects one of the different layouts that are available for the plugin. Can be one of `standard`, `button_count`, `button` or `box_count`. The default is `standard`.</td>
+    <td>Selects one of the different layouts that are available for the plugin. Can be one of <code>standard</code>, <code>button_count</code>, <code>button</code> or <code>box_count</code>. The default is <code>standard</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-ref (optional)</strong></td>
@@ -90,19 +90,19 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
   </tr>
   <tr>
     <td width="40%"><strong>data-share (optional)</strong></td>
-    <td>Specifies whether to include a share button beside the Like button. This only works with the XFBML version. The default is `false`.</td>
+    <td>Specifies whether to include a share button beside the Like button. This only works with the XFBML version. The default is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-show_faces (optional)</strong></td>
-    <td>Specifies whether to display profile photos below the button (standard layout only). You must not enable this on child-directed sites. The default is `false`.</td>
+    <td>Specifies whether to display profile photos below the button (standard layout only). You must not enable this on child-directed sites. The default is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-size (optional)</strong></td>
-    <td>The size of the button, which can be one of two sizes, `large` or `small`. The default is `small`. <br>For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).</td>
+    <td>The size of the button, which can be one of two sizes, <code>large</code> or <code>small</code>. The default is <code>small</code>. <br>For details, see the <a href="https://developers.facebook.com/docs/plugins/like-button#settings">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
