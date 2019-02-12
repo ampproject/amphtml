@@ -21,6 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width="620" height="349"
     type="unruly"
+    layout="responsive"
     data-site-id="xxx">
 </amp-ad>
 ```
