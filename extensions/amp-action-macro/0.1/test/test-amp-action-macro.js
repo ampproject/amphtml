@@ -71,7 +71,7 @@ describes.realWin('amp-action-macro', {
     beforeEach(() => {
       toggleExperiment(win, 'amp-action-macro', true);
       const macroElement = doc.createElement('amp-action-macro');
-      macroElement.setAttribute('action', 'target.execute(index=x,index=y)');
+      macroElement.setAttribute('execute', 'target.execute(index=x,index=y)');
       macroElement.setAttribute('arguments', 'x,y');
       macroElement.setAttribute('id', 'amp-action-id');
       doc.body.appendChild(macroElement);

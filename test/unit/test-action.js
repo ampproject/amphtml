@@ -756,7 +756,7 @@ describe('Action method', () => {
       ampActionMacro = document.createElement('amp-action-macro');
       ampActionMacro.setAttribute('id', id);
       ampActionMacro.setAttribute(
-          'action', 'action-macro-id.method(realArgName=arg1)');
+          'execute', 'action-macro-id.method(realArgName=arg1)');
       ampActionMacro.setAttribute('arguments', 'arg1');
       document.body.appendChild(ampActionMacro);
     });

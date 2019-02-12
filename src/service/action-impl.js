@@ -647,8 +647,8 @@ export class ActionService {
         const action = node.getAttribute('on');
         actionMap = parseActionMap(action, node);
         node[ACTION_MAP_] = actionMap;
-      } else if (node.hasAttribute('action')) {
-        const action = node.getAttribute('action');
+      } else if (node.hasAttribute('execute')) {
+        const action = node.getAttribute('execute');
         actionMap = parseActionMap(`${actionEventType}:${action}`, node);
         node[ACTION_MAP_] = actionMap;
       }
