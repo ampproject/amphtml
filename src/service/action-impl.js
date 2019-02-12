@@ -35,7 +35,6 @@ import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
-
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -161,7 +160,7 @@ export class ActionInvocation {
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event object that triggered this action.
-   * @param {ActionTrust} trust The trust level of this invocation's trigger.
+   * @param {!ActionTrust} trust The trust level of this invocation's trigger.
    * @param {?string} actionEventType The AMP event name that triggered this.
    * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} sequenceId An identifier for this action's sequence (all
@@ -181,7 +180,7 @@ export class ActionInvocation {
     this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
-    /** @const {ActionTrust} */
+    /** @const {!ActionTrust} */
     this.trust = trust;
     /** @const {?string} */
     this.actionEventType = actionEventType;
@@ -370,10 +369,11 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {!ActionTrust} trust
+   * @param {?JsonObject=} opt_args
    */
-  trigger(target, eventType, event, trust) {
-    this.action_(target, eventType, event, trust);
+  trigger(target, eventType, event, trust, opt_args) {
+    this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
@@ -471,11 +471,13 @@ export class ActionService {
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {!ActionTrust} trust
+   * @param {?JsonObject=} opt_args
    * @private
    */
-  action_(source, actionEventType, event, trust) {
-    const action = this.findAction_(source, actionEventType);
+  action_(source, actionEventType, event, trust, opt_args) {
+    const action =
+        this.findAction_(source, actionEventType);
     if (!action) {
       return;
     }
@@ -487,8 +489,7 @@ export class ActionService {
     let currentPromise = null;
     action.actionInfos.forEach(actionInfo => {
       const {target} = actionInfo;
-      // Replace any variables in args with data in `event`.
-      const args = dereferenceExprsInArgs(actionInfo.args, event);
+      const args = dereferenceArgsVariables(actionInfo.args, event, opt_args);
       const invokeAction = () => {
         // For global targets e.g. "AMP, `node` is the document root. Otherwise,
         // `target` is an element id and `node` is the corresponding element.
@@ -527,6 +528,7 @@ export class ActionService {
       user().error(TAG_, message);
     }
   }
+
 
   /**
    * @param {!ActionInvocation} invocation
@@ -625,7 +627,7 @@ export class ActionService {
    * @return {?Array<!ActionInfoDef>}
    */
   matchActionInfos_(node, actionEventType) {
-    const actionMap = this.getActionMap_(node);
+    const actionMap = this.getActionMap_(node, actionEventType);
     if (!actionMap) {
       return null;
     }
@@ -634,16 +636,22 @@ export class ActionService {
 
   /**
    * @param {!Element} node
+   * @param {string} actionEventType
    * @return {?Object<string, !Array<!ActionInfoDef>>}
    */
-  getActionMap_(node) {
+  getActionMap_(node, actionEventType) {
     let actionMap = node[ACTION_MAP_];
     if (actionMap === undefined) {
       actionMap = null;
       if (node.hasAttribute('on')) {
-        actionMap = parseActionMap(node.getAttribute('on'), node);
+        const action = node.getAttribute('on');
+        actionMap = parseActionMap(action, node);
+        node[ACTION_MAP_] = actionMap;
+      } else if (node.hasAttribute('execute')) {
+        const action = node.getAttribute('execute');
+        actionMap = parseActionMap(`${actionEventType}:${action}`, node);
+        node[ACTION_MAP_] = actionMap;
       }
-      node[ACTION_MAP_] = actionMap;
     }
     return actionMap;
   }
@@ -818,18 +826,18 @@ function notImplemented() {
 
 
 /**
- * @param {string} s
+ * @param {string} action
  * @param {!Element} context
  * @return {?Object<string, !Array<!ActionInfoDef>>}
  * @private Visible for testing only.
  */
-export function parseActionMap(s, context) {
-  const assertAction = assertActionForParser.bind(null, s, context);
-  const assertToken = assertTokenForParser.bind(null, s, context);
+export function parseActionMap(action, context) {
+  const assertAction = assertActionForParser.bind(null, action, context);
+  const assertToken = assertTokenForParser.bind(null, action, context);
 
   let actionMap = null;
 
-  const toks = new ParserTokenizer(s);
+  const toks = new ParserTokenizer(action);
   let tok;
   let peek;
   do {
@@ -849,7 +857,7 @@ export function parseActionMap(s, context) {
 
       const actions = [];
 
-      // Handlers for event
+      // Handlers for event.
       do {
         const target = assertToken(
             toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
@@ -878,7 +886,7 @@ export function parseActionMap(s, context) {
           method,
           args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
-          str: s,
+          str: action,
         });
 
         peek = toks.peek();
@@ -906,7 +914,7 @@ export function parseActionMap(s, context) {
  * @param {!ParserTokenizer} toks
  * @param {!Function} assertToken
  * @param {!Function} assertAction
- * @return {ActionInfoArgsDef}
+ * @return {?ActionInfoArgsDef}
  * @private
  */
 function tokenizeMethodArguments(toks, assertToken, assertAction) {
@@ -982,24 +990,31 @@ function argValueForTokens(tokens) {
 }
 
 /**
- * Dereferences expression args in `args` using data in `event`.
+ * Dereferences expression args in `args` using values in data.
  * @param {?ActionInfoArgsDef} args
  * @param {?ActionEventDef} event
+ * @param {?JsonObject=} opt_args
  * @return {?JsonObject}
  * @private
- * @visibleForTesting
  */
-export function dereferenceExprsInArgs(args, event) {
+export function dereferenceArgsVariables(args, event, opt_args) {
   if (!args) {
     return args;
   }
-  const data = dict();
-  if (event && getDetail(/** @type {!Event} */ (event))) {
-    data['event'] = getDetail(/** @type {!Event} */ (event));
+  const data = opt_args || dict({});
+  if (event) {
+    const detail = getDetail(/** @type {!Event} */ (event));
+    if (detail) {
+      data['event'] = detail;
+    }
   }
   const applied = map();
   Object.keys(args).forEach(key => {
     let value = args[key];
+    // Only JSON expression strings that contain dereferences (e.g. `foo.bar`)
+    // are processed as ActionInfoArgExpressionDef. We also support
+    // dereferencing strings like `foo` iff there is a corresponding key in
+    // `data`. Otherwise, `foo` is treated as a string "foo".
     if (typeof value == 'object' && value.expression) {
       const expr =
         /** @type {ActionInfoArgExpressionDef} */ (value).expression;
@@ -1007,7 +1022,11 @@ export function dereferenceExprsInArgs(args, event) {
       // If expr can't be found in data, use null instead of undefined.
       value = (exprValue === undefined) ? null : exprValue;
     }
-    applied[key] = value;
+    if (data[value]) {
+      applied[key] = data[value];
+    } else {
+      applied[key] = value;
+    }
   });
   return applied;
 }
