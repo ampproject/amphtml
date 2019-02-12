@@ -448,7 +448,7 @@ export class ActionService {
 
   /**
    * Checks if the given element's registered action resolves to at least one
-   * existing element.
+   * existing element by id or a global target (e.g. "AMP").
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
@@ -463,7 +463,7 @@ export class ActionService {
   }
 
   /**
-   * For global targets e.g. "AMP, returns the document root. Otherwise,
+   * For global targets e.g. "AMP", returns the document root. Otherwise,
    * `target` is an element id and the corresponding element is returned.
    * @param {string} target
    * @return {?Document|?Element|?ShadowRoot}
