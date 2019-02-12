@@ -76,6 +76,8 @@ export class AmpActionMacro extends AMP.BaseElement {
       }
     }
     // Trigger the macro's action.
+    // TODO(alabiaga): Only allow triggering macros defined beforehand to
+    // prevent possibility of cyclic triggering of macros.
     this.actions_.trigger(
         this.element, `${actionEventType}`, event, trust, args);
   }
