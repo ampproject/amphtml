@@ -107,7 +107,7 @@ The slot element must always be an [`amp-layout`](https://www.ampproject.org/doc
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 
-### Combining corner and custom position behavior
+### <a id="combined-targets"></a> Combining corner and custom position behavior
 
 Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
 
@@ -117,7 +117,7 @@ Custom positioning will be rejected when the element target is not visible. This
 
 When the video becomes docked or undocked by scrolling, the [low-trust events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) `dock` and `undock` are triggered respectively.
 
-These can, for example, trigger an [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+These can, for example, trigger an [`amp-animation`](https://www.ampproject.org/docs/reference/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
 
 ### Event source
 
@@ -125,6 +125,8 @@ Depending on the [docking target](#target), the corresponding event will be trig
 
 - **From the video element itself**, when the video is docked to a corner.
 - **From the slot element**, when the video is docked to the slot element.
+
+You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when [combining target types.](#combined-targets)
 
 ## Styling
 
