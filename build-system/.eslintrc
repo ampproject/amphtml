@@ -1,6 +1,6 @@
 {
   "env": {
-    "node": true
+    "node": false
   },
   "globals": {
     "require": false,
