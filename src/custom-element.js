@@ -744,7 +744,8 @@ function createBaseCustomElementClass(win) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+        this.isInTemplate_ =
+          !!dom.closestAncestorElementByTag(this, 'template');
       }
       if (this.isInTemplate_) {
         return;

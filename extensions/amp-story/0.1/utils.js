@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {user, userAssert} from '../../../src/log';
 
@@ -83,7 +83,7 @@ export function unscaledClientRect(el) {
  * @return {?AmpElement}
  */
 export function ampMediaElementFor(el) {
-  return closestBySelector(el, 'amp-video, amp-audio');
+  return closestAncestorElementBySelector(el, 'amp-video, amp-audio');
 }
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {addAttributesToElement, closestBySelector} from './dom';
+import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
@@ -495,7 +495,7 @@ export function looksLikeTrackingIframe(element) {
     return false;
   }
   // Iframe is not tracking iframe if open with user interaction
-  return !closestBySelector(element, '.i-amphtml-overlay');
+  return !closestAncestorElementBySelector(element, '.i-amphtml-overlay');
 }
 
 // Most common ad sizes
