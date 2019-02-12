@@ -25,6 +25,7 @@
 
 'use strict';
 
+const {isTravisBuild} = require('./build-system/travis');
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 
@@ -40,7 +41,7 @@ module.exports = function(api) {
         'modules': 'commonjs',
         'loose': true,
         'targets': {
-          'browsers': process.env.TRAVIS ?
+          'browsers': isTravisBuild() ?
             ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
         },
       }],
