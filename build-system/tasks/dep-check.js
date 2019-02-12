@@ -29,13 +29,14 @@ const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {isTravisBuild} = require('../travis');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * @typedef {{
