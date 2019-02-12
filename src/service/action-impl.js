@@ -452,6 +452,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
+   * @return {boolean}
    */
   hasResolvableAction(target, actionEventType, opt_stopAt) {
     const action = this.findAction_(target, actionEventType, opt_stopAt);
