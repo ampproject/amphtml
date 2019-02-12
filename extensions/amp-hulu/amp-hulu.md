@@ -55,11 +55,11 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
 <table>
   <tr>
     <td width="40%"><strong>data-eid</strong></td>
-    <td>The ID of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.</td>
+    <td>The ID of the video. For example, <code>4Dk5F2PYTtrgciuvloH3UA</code> is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

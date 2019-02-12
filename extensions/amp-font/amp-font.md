@@ -111,7 +111,7 @@ The `amp-font` extension accepts the `layout` value:  `nodisplay`
   </tr>
   <tr>
     <td width="40%"><strong>layout</strong></td>
-    <td>Must be `nodisplay`.</td>
+    <td>Must be <code>nodisplay</code>.</td>
   </tr>
 </table>
 

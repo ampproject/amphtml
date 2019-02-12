@@ -91,13 +91,13 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
     <td>The name of the BeOpinion slot on the page.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-my-content (optional - `amp-ad` only !)</strong></td>
-    <td>For `amp-ad` elements of type `beopinion`, the value can be set to `"0"` (default value).
-    Warning: the `amp-beopinion` element overrides this value to `"1"`, to prevent the serving of ads outside of an `amp-ad` element.</td>
+    <td width="40%"><strong>data-my-content (optional - <code>amp-ad</code> only !)</strong></td>
+    <td>For <code>amp-ad</code> elements of type <code>beopinion</code>, the value can be set to <code>"0"</code> (default value).
+Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1"</code>, to prevent the serving of ads outside of an <code>amp-ad</code> element.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

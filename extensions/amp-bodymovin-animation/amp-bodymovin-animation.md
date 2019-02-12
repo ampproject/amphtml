@@ -63,11 +63,11 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>The path to the exported Bodymovin animation object. Must be `https` protocol.</td>
+    <td>The path to the exported Bodymovin animation object. Must be <code>https</code> protocol.</td>
   </tr>
   <tr>
     <td width="40%"><strong>loop (optional)</strong></td>
-    <td>Indicates whether the animation should be looping or not.  By default, this attribute is set to `true`. Values for this attribute can be: `true`, `false`, or a number value. If a number is specified, the animation loops that number of times.</td>
+    <td>Indicates whether the animation should be looping or not. By default, this attribute is set to <code>true</code>. Values for this attribute can be: <code>true</code>, <code>false</code>, or a number value. If a number is specified, the animation loops that number of times.</td>
   </tr>
   <tr>
     <td width="40%"><strong>noautoplay (optional)</strong></td>
@@ -75,11 +75,11 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>renderer (optional)</strong></td>
-    <td>By default, this component uses the SVG renderer, this uses a light version of the Bodymovin animation player. However, if developers feel that they need the full player and want to use an HTML renderer they may do so by specifying the `renderer` attribute to be `html`.<br>This attribute only accepts the values `html` and `svg`.</td>
+    <td>By default, this component uses the SVG renderer, this uses a light version of the Bodymovin animation player. However, if developers feel that they need the full player and want to use an HTML renderer they may do so by specifying the <code>renderer</code> attribute to be <code>html</code>.<br>This attribute only accepts the values <code>html</code> and <code>svg</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

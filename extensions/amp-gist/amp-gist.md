@@ -69,13 +69,13 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
   </tr>
   <tr>
     <td width="40%"><strong>layout (required)</strong></td>
-    <td>Currently only supports `fixed-height`.</td>
+    <td>Currently only supports <code>fixed-height</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>height (required)</strong></td>
     <td>The initial height of the gist or gist file in pixels.
-    <br><br>
-    **Note**: You should obtain the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will resize to fit so that its contents will fit.</td>
+<br><br>
+<strong>Note</strong>: You should obtain the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will resize to fit so that its contents will fit.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-file (optional)</strong></td>

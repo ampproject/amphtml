@@ -58,17 +58,17 @@ With responsive layout, the width and height from the example should yield corre
 <table>
   <tr>
     <td width="40%"><strong>data-videoid (required)</strong></td>
-    <td>The Vimeo video id found in every Vimeo video page URL For example, `27246366` is the video id for the following url: `https://vimeo.com/27246366`.</td>
+    <td>The Vimeo video id found in every Vimeo video page URL For example, <code>27246366</code> is the video id for the following url: <code>https://vimeo.com/27246366</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

@@ -61,21 +61,21 @@ In the future, additional functionality, such as animation playback control, cou
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>Similar to the `src` attribute on the `img` tag. The value must be a URL that
-    points to a publicly-cacheable image file. Cache providers may rewrite these
-    URLs when ingesting AMP files to point to a cached version of the image.</td>
+    <td>Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
+points to a publicly-cacheable image file. Cache providers may rewrite these
+URLs when ingesting AMP files to point to a cached version of the image.</td>
   </tr>
   <tr>
      <td width="40%"><strong>srcset</strong></td>
-     <td>Same as `srcset` attribute on the `img` tag.</td>
+     <td>Same as <code>srcset</code> attribute on the <code>img</code> tag.</td>
    </tr>
    <tr>
       <td width="40%"><strong>alt</strong></td>
-      <td>A string of alternate text, similar to the `alt` attribute on `img`.</td>
+      <td>A string of alternate text, similar to the <code>alt</code> attribute on <code>img</code>.</td>
     </tr>
     <tr>
        <td width="40%"><strong>attribution</strong></td>
-       <td>A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.</td>
+       <td>A string that indicates the attribution of the image. For example, <code>attribution="CC courtesy of Cats on Flicker"</code>.</td>
      </tr>
      <tr>
         <td width="40%"><strong>height and width</strong></td>
@@ -83,7 +83,7 @@ In the future, additional functionality, such as animation playback control, cou
       </tr>
       <tr>
          <td width="40%"><strong>common attributes</strong></td>
-         <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+         <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
        </tr>
 </table>
 

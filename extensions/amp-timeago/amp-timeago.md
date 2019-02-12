@@ -61,51 +61,50 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>datetime (required)</strong></td>
-    <td>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) *or* 2017-03-09T20:00:00-05:00 (specifying timezone offset).</td>
+    <td>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) <em>or</em> 2017-03-09T20:00:00-05:00 (specifying timezone offset).</td>
   </tr>
   <tr>
     <td width="40%"><strong>locale (optional)</strong></td>
-    <td>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:<br>
-
-    <ul>
-      <li>ar (Arabic)</li>
-      <li>be (Belarusian)</li>
-      <li>bg (Bulgarian)</li>
-      <li>ca (Catalan)</li>
-      <li>da (Danish)</li>
-      <li>de (German)</li>
-      <li>el (Greek)</li>
-      <li>en (English)</li>
-      <li>enShort (English - short)</li>
-      <li>es (Spanish)</li>
-      <li>eu (Basque)</li>
-      <li>fi (Finnish)</li>
-      <li>fr (French)</li>
-      <li>he (Hebrew)</li>
-      <li>hu (Hungarian)</li>
-      <li>inBG (Bangla)</li>
-      <li>inHI (Hindi)</li>
-      <li>inID (Malay)</li>
-      <li>it (Italian)</li>
-      <li>ja (Japanese)</li>
-      <li>ko (Korean)</li>
-      <li>ml (Malayalam)</li>
-      <li>nbNO (Norwegian Bokmål)</li>
-      <li>nl (Dutch)</li>
-      <li>nnNO (Norwegian Nynorsk)</li>
-      <li>pl (Polish)</li>
-      <li>ptBR (Portuguese)</li>
-      <li>ro (Romanian)</li>
-      <li>ru (Russian)</li>
-      <li>sv (Swedish)</li>
-      <li>ta (Tamil)</li>
-      <li>th (Thai)</li>
-      <li>tr (Turkish)</li>
-      <li>uk (Ukrainian)</li>
-      <li>vi (Vietnamese)</li>
-      <li>zhCN (Chinese)</li>
-      <li>zhTW (Taiwanese)</li>
-    </ul></td>
+    <td><p>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:</p>
+<ul>
+  <li>ar (Arabic)</li>
+  <li>be (Belarusian)</li>
+  <li>bg (Bulgarian)</li>
+  <li>ca (Catalan)</li>
+  <li>da (Danish)</li>
+  <li>de (German)</li>
+  <li>el (Greek)</li>
+  <li>en (English)</li>
+  <li>enShort (English - short)</li>
+  <li>es (Spanish)</li>
+  <li>eu (Basque)</li>
+  <li>fi (Finnish)</li>
+  <li>fr (French)</li>
+  <li>he (Hebrew)</li>
+  <li>hu (Hungarian)</li>
+  <li>inBG (Bangla)</li>
+  <li>inHI (Hindi)</li>
+  <li>inID (Malay)</li>
+  <li>it (Italian)</li>
+  <li>ja (Japanese)</li>
+  <li>ko (Korean)</li>
+  <li>ml (Malayalam)</li>
+  <li>nbNO (Norwegian Bokmål)</li>
+  <li>nl (Dutch)</li>
+  <li>nnNO (Norwegian Nynorsk)</li>
+  <li>pl (Polish)</li>
+  <li>ptBR (Portuguese)</li>
+  <li>ro (Romanian)</li>
+  <li>ru (Russian)</li>
+  <li>sv (Swedish)</li>
+  <li>ta (Tamil)</li>
+  <li>th (Thai)</li>
+  <li>tr (Turkish)</li>
+  <li>uk (Ukrainian)</li>
+  <li>vi (Vietnamese)</li>
+  <li>zhCN (Chinese)</li>
+  <li>zhTW (Taiwanese)</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>cutoff (optional)</strong></td>
@@ -113,7 +112,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

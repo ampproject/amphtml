@@ -74,19 +74,16 @@ Example:
     <td>The Kaltura entry id.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-param-\*</strong></td>
-    <td>
-      All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
-
-      Keys and values will be URI encoded. Keys will be camel cased.
-      <ul>
-          <li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
-      </ul>
-    </td>
+    <td width="40%"><strong>data-param-*</strong></td>
+    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.</p>
+<p>Keys and values will be URI encoded. Keys will be camel cased.</p>
+<ul>
+  <li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
