@@ -454,12 +454,11 @@ export class ActionService {
    * @param {!Element=} opt_stopAt
    */
   hasResolvableAction(target, actionEventType, opt_stopAt) {
-    const foundAction = this.findAction_(target, actionEventType, opt_stopAt);
-    if (!foundAction) {
+    const action = this.findAction_(target, actionEventType, opt_stopAt);
+    if (!action) {
       return false;
     }
-    const {actionInfos} = foundAction;
-    return actionInfos.some(({target}) => !!this.getActionNode_(target));
+    return action.actionInfos.some(({target}) => !!this.getActionNode_(target));
   }
 
   /**
