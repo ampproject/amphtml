@@ -24,6 +24,7 @@ import {
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
 const FULL_BLEED_CATEGORY = 'full-bleed';
 const FILL_TEMPLATE_LAYOUT = 'fill';
@@ -242,7 +243,7 @@ export const getPresetDef = (name, options) => {
         },
       };
     case 'pan-left':
-      let translateX = parseFloat(options.translateX);
+      let {translateX} = options;
 
       return {
         duration: 1000,
@@ -260,7 +261,7 @@ export const getPresetDef = (name, options) => {
         },
       };
     case 'pan-right':
-      translateX = parseFloat(options.translateX);
+      translateX = options.translateX;
 
       return {
         duration: 1000,
@@ -278,7 +279,7 @@ export const getPresetDef = (name, options) => {
         },
       };
     case 'pan-down':
-      let translateY = parseFloat(options.translateY);
+      let {translateY} = options;
 
       return {
         duration: 1000,
@@ -296,7 +297,7 @@ export const getPresetDef = (name, options) => {
         },
       };
     case 'pan-up':
-      translateY = parseFloat(options.translateY);
+      translateY = options.translateY;
 
       return {
         duration: 1000,
@@ -316,6 +317,11 @@ export const getPresetDef = (name, options) => {
     case 'zoom-in':
       let {zoomStart, zoomEnd} = options;
 
+      if (zoomStart) {
+        userAssert(zoomEnd > zoomStart, '"zoom-end" value must be greater ' +
+        'than "zoom-start" value when using "zoom-in" animation.');
+      }
+
       return {
         duration: 1000,
         easing: 'linear',
@@ -327,6 +333,11 @@ export const getPresetDef = (name, options) => {
     case 'zoom-out':
       zoomStart = options.zoomStart;
       zoomEnd = options.zoomEnd;
+
+      if (zoomStart) {
+        userAssert(zoomStart > zoomEnd, '"zoom-start" value must be higher ' +
+        'than "zoom-end" value when using "zoom-out" animation.');
+      }
 
       return {
         duration: 1000,

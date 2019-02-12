@@ -52,9 +52,9 @@ const ZOOM_START_ATTRIBUTE_NAME = 'zoom-start';
 /** const {string} */
 const ZOOM_END_ATTRIBUTE_NAME = 'zoom-end';
 /** const {string} */
-const HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME = 'horizontal-translate';
+const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** const {string} */
-const VERTICAL_TRANSLATE_ATTRIBUTE_NAME = 'vertical-translate';
+const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
 
 /**
  * @param {!Element} element
@@ -541,19 +541,43 @@ export class AnimationManager {
     setStyleForPreset(el, name);
 
     if (el.hasAttribute(ZOOM_START_ATTRIBUTE_NAME)) {
-      options.zoomStart = el.getAttribute(ZOOM_START_ATTRIBUTE_NAME);
+      options.zoomStart =
+        parseFloat(el.getAttribute(ZOOM_START_ATTRIBUTE_NAME));
+
+      userAssert(options.zoomStart > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      ZOOM_START_ATTRIBUTE_NAME,
+      el);
     }
 
     if (el.hasAttribute(ZOOM_END_ATTRIBUTE_NAME)) {
-      options.zoomEnd = el.getAttribute(ZOOM_END_ATTRIBUTE_NAME);
+      options.zoomEnd =
+        parseFloat(el.getAttribute(ZOOM_END_ATTRIBUTE_NAME));
+
+      userAssert(options.zoomEnd > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      ZOOM_END_ATTRIBUTE_NAME,
+      el);
     }
 
-    if (el.hasAttribute(HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME)) {
-      options.translateX = el.getAttribute(HORIZONTAL_TRANSLATE_ATTRIBUTE_NAME);
+    if (el.hasAttribute(TRANSLATE_X_ATTRIBUTE_NAME)) {
+      options.translateX =
+        parseFloat(el.getAttribute(TRANSLATE_X_ATTRIBUTE_NAME));
+
+      userAssert(options.translateX > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      TRANSLATE_X_ATTRIBUTE_NAME,
+      el);
     }
 
-    if (el.hasAttribute(VERTICAL_TRANSLATE_ATTRIBUTE_NAME)) {
-      options.translateY = el.getAttribute(VERTICAL_TRANSLATE_ATTRIBUTE_NAME);
+    if (el.hasAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)) {
+      options.translateY =
+        parseFloat(el.getAttribute(TRANSLATE_Y_ATTRIBUTE_NAME));
+
+      userAssert(options.translateY > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      TRANSLATE_Y_ATTRIBUTE_NAME,
+      el);
     }
 
     return userAssert(
