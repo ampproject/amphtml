@@ -295,6 +295,43 @@ describes.fakeWin('amp-smartlinks',
 
           expect(linkPayload).to.deep.equal(expectedPayload);
         });
+
+        it('Should skip existing shop-links', () => {
+          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+
+          anchorList = [
+            'http://fakelink.example',
+            'http://http://shop-links.co/999',
+            'https://examplelocklink.example/#locklink',
+          ].map(helpers.createAnchor);
+
+          const expectedPayload = [{
+            'raw_url': 'http://fakelink.example/',
+            'exclusive_match_requested': false,
+          }, {
+            'raw_url': 'https://examplelocklink.example/#locklink',
+            'exclusive_match_requested': true,
+          }];
+
+          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+
+          expect(linkPayload).to.deep.equal(expectedPayload);
+        });
+
+        it('Should add amp flag to existing shop-links', () => {
+          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+
+          anchorList = [
+            'http://http://shop-links.co/999',
+          ].map(helpers.createAnchor);
+
+          const expectedAnchor = 'http://http//shop-links.co/999?amp=true';
+
+          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+
+          expect(linkPayload).to.deep.equal([]);
+          expect(anchorList[0].href).to.equal(expectedAnchor);
+        });
       });
 
       describe('getEditInfo_', () => {
