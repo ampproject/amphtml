@@ -20,7 +20,10 @@ import {
   assertDoesNotContainDisplay,
   setStyles,
 } from '../../../../src/style';
+import {dev} from '../../../../src/log';
 
+const moduleName = 'amp-animation-worklet';
+let workletModulePromise;
 
 /**
  */
@@ -76,10 +79,10 @@ export class ScrollTimelineWorkletRunner extends BaseAnimationRunner {
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
-          timeRange: 800.00,
+          timeRange: request.timing.duration,
           startScrollOffset: `${this.topMargin_}px`,
           endScrollOffset: `${this.bottomMargin_}px`,
-          fill: 'both',
+          fill: request.timing.fill,
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
@@ -95,6 +98,8 @@ export class ScrollTimelineWorkletRunner extends BaseAnimationRunner {
             });
         player.play();
         this.players_.push(player);
+      }, e => {
+        dev().error('AMP-ANIMATION SCROLLTIMELINE-WORKLET', e);
       });
     });
   }
@@ -124,9 +129,6 @@ export class ScrollTimelineWorkletRunner extends BaseAnimationRunner {
 
 }
 
-
-const moduleName = 'amp-animation-worklet';
-let workletModulePromise;
 /**
  * @param {!Window} win
  * @private
@@ -136,57 +138,51 @@ function getOrAddWorkletModule(win) {
     return workletModulePromise;
   }
   const blob =
-    `registerAnimator('${moduleName}', class {
-      constructor(options = {
-        'time-range': 0,
-        'start-offset': 0,
-        'end-offset': 0,
-        'top-ratio': 0,
-        'bottom-ratio': 0,
-        'element-height': 0,
-      }) {
-        console.info('Using animationWorklet');
-        this.timeRange = options['time-range'];
-        this.startOffset = options['start-offset'];
-        this.endOffset = options['end-offset'];
-        this.topRatio = options['top-ratio'];
-        this.bottomRatio = options['bottom-ratio'];
-        this.height = options['element-height'];
+ `registerAnimator('${moduleName}', class {
+    constructor(options = {
+      'time-range': 0,
+      'start-offset': 0,
+      'end-offset': 0,
+      'top-ratio': 0,
+      'bottom-ratio': 0,
+      'element-height': 0,
+    }) {
+      console.info('Using animationWorklet ScrollTimeline');
+      this.timeRange = options['time-range'];
+      this.startOffset = options['start-offset'];
+      this.endOffset = options['end-offset'];
+      this.topRatio = options['top-ratio'];
+      this.bottomRatio = options['bottom-ratio'];
+      this.height = options['element-height'];
+    }
+    animate(currentTime, effect) {
+      if (currentTime == NaN) {
+        return;
       }
-      animate(currentTime, effect) {
-        console.log(currentTime);
-        if (currentTime == NaN) {
-          return;
-        }
-
+       // This function mirrors updateVisibility_ in amp-position-observer
+      const currentScrollPos =
+      ((currentTime / this.timeRange) *
+      (this.endOffset - this.startOffset)) +
+      this.startOffset;
+      const halfViewport = (this.startOffset + this.endOffset) / 2;
+      const relativePositionTop = currentScrollPos > halfViewport;
+       const ratioToUse = relativePositionTop ?
+      this.topRatio : this.bottomRatio;
+      const offset = this.height * ratioToUse;
+      let isVisible = false;
+       if (relativePositionTop) {
+        isVisible =
+        currentScrollPos + this.height >= (this.startOffset + offset);
+      } else {
+        isVisible =
+        currentScrollPos <= (this.endOffset - offset);
+      }
+      if (isVisible) {
         effect.localTime = currentTime;
-
-        // // This function mirrors updateVisibility_ in amp-position-observer
-        // const currentScrollPos =
-        // ((currentTime / this.timeRange) *
-        // (this.endOffset - this.startOffset)) +
-        // this.startOffset;
-        // const halfViewport = (this.startOffset + this.endOffset) / 2;
-        // const relativePositionTop = currentScrollPos > halfViewport;
-
-        // const ratioToUse = relativePositionTop ?
-        // this.topRatio : this.bottomRatio;
-        // const offset = this.height * ratioToUse;
-        // let isVisible = false;
-
-        // if (relativePositionTop) {
-        //   isVisible =
-        //   currentScrollPos + this.height >= (this.startOffset + offset);
-        // } else {
-        //   isVisible =
-        //   currentScrollPos <= (this.endOffset - offset);
-        // }
-        // if (isVisible) {
-        //   effect.localTime = currentTime;
-        // }
       }
-    });
-    `;
+    }
+  });
+  `;
 
   workletModulePromise = win.CSS.animationWorklet.addModule(
       URL.createObjectURL(new Blob([blob],
