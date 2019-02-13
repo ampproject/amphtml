@@ -16,9 +16,7 @@
 
 import {BrowserController} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
-import {installPlatformService} from '../../src/service/platform-impl';
 import {poll} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
 
 describes.integration('amp-recaptcha-input', {
   /* eslint-disable max-len */
@@ -112,26 +110,22 @@ describes.integration('amp-recaptcha-input', {
     `,
   /* eslint-enable max-len */
   extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache'],
+  experiments: ['amp-recaptcha-input'],
   timeout: 3000,
 }, env => {
   let doc;
 
   beforeEach(() => {
-    toggleExperiment(env.win, 'amp-recaptcha-input', true);
-    installPlatformService(env.win);
-
     doc = env.win.document;
 
     const browserController = new BrowserController(env.win);
-    return browserController.waitForElementBuild('amp-recaptcha-input');
+    return browserController.waitForElementLayout('amp-recaptcha-input');
   });
 
   it('should be able to create the bootstrap frame', function() {
     this.timeout(7000);
 
-    return poll('create bootstrap frame', () => {
-      return doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
-    }, undefined, 5000).then(frame => {
+    return waitForBootstrapFrameToBeCreated(doc).then(frame => {
       expect(frame.src.includes('recaptcha')).to.be.true;
       expect(frame.getAttribute('data-amp-3p-sentinel'))
           .to.be.equal('amp-recaptcha');
@@ -170,12 +164,20 @@ describes.integration('amp-recaptcha-input', {
   });
 });
 
-function waitForBootstrapFrameOnLoad(doc) {
-  let bootstrapFrame = undefined;
+function waitForBootstrapFrameToBeCreated(doc) {
   return poll('create bootstrap frame', () => {
     return doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
-  }, undefined, 5000).then(frame => {
+  }, undefined, 5000)
+}
+
+function waitForBootstrapFrameOnLoad(doc) {
+  let bootstrapFrame = undefined;
+  return waitForBootstrapFrameToBeCreated(doc).then(frame => {
     bootstrapFrame = frame;
+
+    // Reset the frame src to ensure we get the load event
+    frame.src = frame.src + '?reload=true';
+
     const onLoadDeferred = new Deferred();
     frame.onload = onLoadDeferred.resolve;
     return onLoadDeferred.promise;
