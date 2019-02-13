@@ -17,6 +17,7 @@
 import {AmpEvents} from '../amp-events';
 import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
+import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
@@ -29,7 +30,6 @@ import {
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
-import {Services} from '../services';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
