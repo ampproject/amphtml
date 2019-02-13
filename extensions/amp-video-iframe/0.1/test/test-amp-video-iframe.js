@@ -358,7 +358,7 @@ describes.realWin('amp-video-iframe', {
   describe('#mutatedAttributesCallback', () => {
     it('updates src', async() => {
       const defaultSrc = getIframeSrc(defaultFixture);
-      const videoIframe = createVideoIframe(defaultSrc);
+      const videoIframe = createVideoIframe({src: defaultSrc});
       const {implementation_} = videoIframe;
 
       await layoutAndLoad(videoIframe);
