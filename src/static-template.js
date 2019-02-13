@@ -16,7 +16,11 @@
 
 import {LruCache} from './utils/lru-cache';
 import {devAssert} from './log';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {
+  getAmpdoc,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from './service';
 import {map} from './utils/object.js';
 
 
@@ -35,6 +39,18 @@ export function installHtmlForDoc(ampdoc) {
 
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {{
+ *  htmlInternal: !HtmlLiteralTagDef,
+ *  cachedHtmlInternal: !HtmlLiteralTagDef,
+ * }}
+ */
+function getHtml(nodeOrDoc) {
+  return getServiceForDoc(getAmpdoc(nodeOrDoc), SERVICE);
+}
+
+
+/**
  * Creates the html helper for the doc. This returns a tagged template literal
  * helper to generate static DOM trees.
  * This must be used as a tagged template, ie
@@ -47,11 +63,11 @@ export function installHtmlForDoc(ampdoc) {
  * Only the root element and its subtree will be returned. DO NOT use this
  * to render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!./service/ampdoc-impl.AmpDoc|!Element|!ShadowRoot} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!HtmlLiteralTagDef}
  */
 export function htmlFor(nodeOrDoc) {
-  return getServiceForDoc(nodeOrDoc, SERVICE).htmlInternal;
+  return getHtml(nodeOrDoc).htmlInternal;
 }
 
 
@@ -71,11 +87,11 @@ export function htmlFor(nodeOrDoc) {
  * This has a base cost, so use it only when it's likely that the same tree
  * will be rendered more than once. Otherwise use `htmlFor`.
  *
- * @param {!./service/ampdoc-impl.AmpDoc|!Element|!ShadowRoot} nodeOrDoc
+ * @param {!Document|!Element|!ShadowRoot} nodeOrDoc
  * @return {!HtmlLiteralTagDef}
  */
 export function cachedHtmlFor(nodeOrDoc) {
-  return getServiceForDoc(nodeOrDoc, SERVICE).cachedHtmlInternal;
+  return getHtml(nodeOrDoc).cachedHtmlInternal;
 }
 
 
