@@ -75,9 +75,10 @@ export class AmpActionMacro extends AMP.BaseElement {
             arg, this.element);
       }
     }
+    userAssert(!this.isRecursiveInvocation_(invocation),
+        'Action macro with ID "%s" is recursively calling itself',
+        this.element.getAttribute('id'));
     // Trigger the macro's action.
-    // TODO(alabiaga): Only allow triggering macros defined beforehand to
-    // prevent possibility of cyclic triggering of macros.
     this.actions_.trigger(
         this.element, `${actionEventType}`, event, trust, args);
   }
@@ -86,6 +87,18 @@ export class AmpActionMacro extends AMP.BaseElement {
   renderOutsideViewport() {
     // We want the macro to be available wherever it is in the document.
     return true;
+  }
+
+  /**
+   * Checks if the action is triggering itself.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {boolean}
+   * @private
+   */
+  isRecursiveInvocation_(invocation) {
+    return invocation.source.getAttribute('id')
+        === this.element.getAttribute('id')
+        && invocation.source.tagName === 'AMP-ACTION-MACRO';
   }
 }
 

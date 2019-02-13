@@ -68,9 +68,10 @@ describes.realWin('amp-action-macro', {
 
   describe('registered action', () => {
     let macro;
+    let macroElement;
     beforeEach(() => {
       toggleExperiment(win, 'amp-action-macro', true);
-      const macroElement = doc.createElement('amp-action-macro');
+      macroElement = doc.createElement('amp-action-macro');
       macroElement.setAttribute('execute', 'target.execute(index=x,index=y)');
       macroElement.setAttribute('arguments', 'x,y');
       macroElement.setAttribute('id', 'amp-action-id');
@@ -108,6 +109,18 @@ describes.realWin('amp-action-macro', {
       macro.buildCallback();
       macro.execute_(callerAction);
       expect(actions.trigger).to.have.been.called;
+    });
+
+    it('should not allow recursive calls', () => {
+      const actions = {trigger: sandbox.spy()};
+      sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+      // Given the caller is the amp action macro that is also being invoked.
+      const callerAction = new ActionInvocation(macro, 'execute', {x: 1},
+          macroElement, macroElement, {}, ActionTrust.HIGH, 'tap',
+          'AMP-ACTION-MACRO');
+      macro.buildCallback();
+      expect(() => macro.execute_(callerAction)).to.throw(
+          /Action macro with ID "amp-action-id" is recursively calling itself/);
     });
   });
 
