@@ -353,7 +353,8 @@ export class Bind {
       'title': this.localWin_.document.title,
     });
     if (!this.viewer_.isEmbedded()) {
-      return Promise.resolve(data);
+      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
+      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
