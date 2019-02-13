@@ -448,6 +448,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
           if (!el.classList.contains('i-amphtml-embedded-component')) {
+            // Since the element might be doing multiple resizes at the
+            // beginning, we have to wait some time to make sure we get the
+            // final size before we do the calculations for the animation.
             let readyForResize = true;
             listen(el, AmpEvents.SIZE_CHANGED, () => {
               readyForResize = false;

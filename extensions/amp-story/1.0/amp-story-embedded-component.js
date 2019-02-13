@@ -567,7 +567,9 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Animates into expanded view.
+   * Animates into expanded view. It calculates what the full-screen dimensions
+   * of the element will be, and uses them to deduce the translateX/Y values
+   * once the element reaches its full-screen size.
    * @param {!Element} target
    * @private
    */
@@ -577,21 +579,34 @@ export class AmpStoryEmbeddedComponent {
         /** measure */
         () => {
           const targetRect = target./*OK*/getBoundingClientRect();
+          // TODO(#20832): Store DOMRect for the page in the store to avoid
+          // having to call getBoundingClientRect().
           const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
+          // Retrieve scale() previously set by prepareForAnimation() on the
+          // element.
           this.scaleFactor_ =
-            parseFloat(getStyle(target,'transform').split('scale(')[1]);
-          const realWidth = targetRect.width / this.scaleFactor_;
-          const leftOffset = (realWidth - targetRect.width) / 2;
-          const horizontalOffset = targetRect.left - leftOffset - pageRect.left;
-          const centeredLeft = pageRect.width / 2 - realWidth / 2;
-          state.translateX = centeredLeft - horizontalOffset;
+            parseFloat(getStyle(target, 'transform').split('scale(')[1]);
+          const fullScreenWidth = targetRect.width / this.scaleFactor_;
+          // Gap on the left of the element between full-screen size and
+          // current size.
+          const leftGap = (fullScreenWidth - targetRect.width) / 2;
+          // Distance from left of page to what will be the left of the
+          // element in full-screen.
+          const fullScreenLeft = targetRect.left - leftGap - pageRect.left;
+          const centeredLeft = pageRect.width / 2 - fullScreenWidth / 2;
+          state.translateX = centeredLeft - fullScreenLeft;
 
-          const realHeight = targetRect.height / this.scaleFactor_;
-          const topOffset = (realHeight - targetRect.height) / 2;
-          const verticalOffset = targetRect.top - topOffset - pageRect.top;
-          const centeredTop = pageRect.height / 2 - realHeight / 2;
-          state.translateY = centeredTop - verticalOffset;
+          // Calculate what the height of the element will be in full-screen.
+          const fullScreenHeight = targetRect.height / this.scaleFactor_;
+          // Gap on the top of the element between full-screen size and
+          // current size.
+          const topGap = (fullScreenHeight - targetRect.height) / 2;
+          // Distance from top of page to what will be the top of the element in
+          // full-screen.
+          const fullScreenTop = targetRect.top - topGap - pageRect.top;
+          const centeredTop = pageRect.height / 2 - fullScreenHeight / 2;
+          state.translateY = centeredTop - fullScreenTop;
         },
         /** mutate */
         () => {
@@ -606,9 +621,10 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Prepares expandable component for its expanded animation.
-   * It resizes it to its full-screen size, and scales it down to match size set
-   * by publisher, adding negative margins so that content around stays put.
+   * Resizes expandable element before it is expanded to full-screen, in
+   * preparation for its animation. It resizes it to its full-screen size, and
+   * scales it down to match size set by publisher, adding negative margins so
+   * that content around stays put.
    * @param {!Element} page
    * @param {!Element} element
    * @param {!../../../src/service/resources-impl.Resources} resources
