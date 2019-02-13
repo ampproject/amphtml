@@ -156,7 +156,6 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
-      'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
       'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
