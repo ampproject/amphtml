@@ -15,10 +15,6 @@
  */
 
 import {
-  AdSenseAmpAutoAdsHoldoutBranches,
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   AdSenseAmpAutoAdsResponsiveBranches,
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
@@ -169,12 +165,9 @@ class AdSenseNetworkConfig {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
-  /**
-   * @param {!Window} win
-   */
-  isEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsExpBranch(win);
-    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  /** @override */
+  isEnabled() {
+    return true;
   }
 
   /**

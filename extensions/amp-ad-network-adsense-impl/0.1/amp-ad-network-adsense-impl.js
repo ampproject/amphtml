@@ -60,9 +60,6 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
@@ -374,12 +371,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
     const ampAutoAdsResponsiveBranch =
       getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsBranch) {
-      experimentIds.push(ampAutoAdsBranch);
-    }
     if (ampAutoAdsResponsiveBranch) {
       experimentIds.push(ampAutoAdsResponsiveBranch);
     }
