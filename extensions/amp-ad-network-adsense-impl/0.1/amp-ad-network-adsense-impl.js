@@ -24,7 +24,7 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  getMatchedContentResponsiveHeight,
+  getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -256,7 +256,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const viewportSize = this.getViewport().getSize();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              this.autoFormat_, viewportSize),
+              this.autoFormat_, viewportSize, this.element),
           viewportSize.width).catch(() => {});
     }
     // This should happen last, as some diversion criteria rely on some of the
@@ -583,10 +583,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * given width.
    * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
+   * @param {!Element} element <amp-ad> added by publisher.
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(autoFormat, viewportSize) {
+  static getResponsiveHeightForContext_(autoFormat, viewportSize, element) {
     switch (autoFormat) {
       case ADSENSE_RSPV_TAG:
         const minHeight = 100;
@@ -595,7 +596,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
       case ADSENSE_MCRSPV_TAG:
-        return getMatchedContentResponsiveHeight(viewportSize.width);
+        return getMatchedContentResponsiveHeightAndUpdatePubParams(
+            viewportSize.width, element);
       default:
         return 0;
     }

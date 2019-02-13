@@ -830,7 +830,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(promise).to.exist;
       yield promise;
 
-      expect(adsense.attemptChangeSize).to.be.calledWith(1290, VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(1386, VIEWPORT_WIDTH);
     });
   });
 
@@ -937,21 +937,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should request 100px height for very small viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 100, height: 667}))
+              'rspv', {width: 100, height: 667}, doc.createElement('div')))
           .to.be.equal(100);
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 320, height: 568}))
+              'rspv', {width: 320, height: 568}, doc.createElement('div')))
           .to.be.equal(267);
     });
 
     it('should request 300px height for wide viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 500, height: 667}))
+              'rspv', {width: 500, height: 667}, doc.createElement('div')))
           .to.be.equal(300);
     });
   });
@@ -960,15 +960,15 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('get matched content responsive height for iPhone 6', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'mcrspv', {width: 375, height: 320}))
-          .to.be.equal(1290);
+              'mcrspv', {width: 375, height: 320}, doc.createElement('div')))
+          .to.be.equal(1386);
     });
 
     it('get matched content responsive height for iPhone 5', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'mcrspv', {width: 320, height: 320}))
-          .to.be.equal(1100);
+              'mcrspv', {width: 320, height: 320}, doc.createElement('div')))
+          .to.be.equal(1200);
     });
   });
 
