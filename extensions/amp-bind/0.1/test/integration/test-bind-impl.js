@@ -262,21 +262,28 @@ describe.configure().ifChrome().run('Bind', function() {
     mockFetch: false,
   }, env => {
     let bind;
-    let container;
-    let viewer;
     let clock;
+    let container;
+    let history;
+    let viewer;
+    let sandbox;
 
     beforeEach(() => {
       const {ampdoc, win} = env;
+      sandbox = env.sandbox;
 
       // Make sure we have a chunk instance for testing.
       chunkInstanceForTesting(ampdoc);
 
       viewer = Services.viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'sendMessage');
+
       bind = new Bind(ampdoc);
+
       // Connected <div> element created by describes.js.
       container = win.document.getElementById('parent');
+
+      history = bind.historyForTesting();
 
       clock = lolex.install({target: win});
     });
@@ -337,7 +344,7 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('should call createTreeWalker() with all params', () => {
-      const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
+      const spy = sandbox.spy(env.win.document, 'createTreeWalker');
       createElement(env, container, '[text]="1+1"');
       return onBindReady(env, bind).then(() => {
         // createTreeWalker() on IE does not support optional arguments.
@@ -392,7 +399,7 @@ describe.configure().ifChrome().run('Bind', function() {
       createElement(env, container, '[class]="\'foo\'" class=" foo "');
       createElement(env, container, '[class]="\'\'"');
       createElement(env, container, '[class]="\'bar\'" class="qux"'); // Error
-      const warnSpy = env.sandbox.spy(user(), 'warn');
+      const warnSpy = sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
         expect(warnSpy).calledWithMatch('amp-bind', /\[class\]/);
@@ -403,7 +410,7 @@ describe.configure().ifChrome().run('Bind', function() {
       window.AMP_MODE = {development: true, test: true};
       // Only the initial value for [a] binding does not match.
       createElement(env, container, '[text]="\'a\'" [class]="\'b\'" class="b"');
-      const warnSpy = env.sandbox.spy(user(), 'warn');
+      const warnSpy = sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
         expect(warnSpy).calledWithMatch('amp-bind', /\[text\]/);
@@ -415,7 +422,7 @@ describe.configure().ifChrome().run('Bind', function() {
       createElement(env, container, '[disabled]="true" disabled', 'button');
       createElement(env, container, '[disabled]="false"', 'button');
       createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
-      const warnSpy = env.sandbox.spy(user(), 'warn');
+      const warnSpy = sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
         expect(warnSpy).calledWithMatch('amp-bind', /\[disabled\]/);
@@ -636,22 +643,68 @@ describe.configure().ifChrome().run('Bind', function() {
       });
     });
 
-    it('should replace history state in setStateWithExpression()', () => {
-      const replaceHistorySpy =
-          env.sandbox.spy(bind.historyForTesting(), 'replace');
-      const promise = onBindReadyAndSetStateWithExpression(
-          env, bind, '{"onePlusOne": one + one}', {one: 1});
-      return promise.then(() => {
-        expect(replaceHistorySpy).calledOnce;
-        expect(replaceHistorySpy.firstCall.args[0].data['amp-bind'])
-            .to.deep.equal({onePlusOne: 2});
+    describe('history', () => {
+      beforeEach(() => {
+        sandbox.spy(history, 'replace');
+        sandbox.spy(history, 'push');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
+      });
+
+      describe('with untrusted viewer', () => {
+        it('should not replace history on AMP.setState()', () => {
+          const promise = onBindReadyAndSetStateWithExpression(
+              env, bind, '{"onePlusOne": one + one}', {one: 1});
+          return promise.then(() => {
+            // Shouldn't call replace() with null `data`.
+            expect(history.replace).to.not.be.called;
+          });
+        });
+
+        it('should push history (no data) on AMP.pushState()', () => {
+          const promise = bind.pushStateWithExpression('{"foo": "bar"}', {});
+          return promise.then(() => {
+            expect(history.push).to.be.called;
+            // `data` param should be null on untrusted viewers.
+            expect(history.push).to.be.calledWith(sinon.match.func, null);
+          });
+        });
+      });
+
+      describe('with trusted viewer', () => {
+        beforeEach(() => {
+          sandbox.stub(viewer, 'isTrustedViewer')
+              .returns(Promise.resolve(true));
+        });
+
+        it('should replace history on AMP.setState()', () => {
+          const promise = onBindReadyAndSetStateWithExpression(
+              env, bind, '{"onePlusOne": one + one}', {one: 1});
+          return promise.then(() => {
+            expect(history.replace).calledOnce;
+            // `data` param should exist on trusted viewers.
+            expect(history.replace).calledWith({
+              data: {'amp-bind': {'onePlusOne': 2}},
+              title: '',
+            });
+          });
+        });
+
+        it('should push history on AMP.pushState()', () => {
+          const promise = bind.pushStateWithExpression('{"foo": "bar"}', {});
+          return promise.then(() => {
+            expect(history.push).calledOnce;
+            // `data` param should exist on trusted viewers.
+            expect(history.push).calledWith(sinon.match.func, {
+              data: {'amp-bind': {foo: 'bar'}},
+              title: '',
+            });
+          });
+        });
       });
     });
 
-
     it('should support pushStateWithExpression()', () => {
-      const pushHistorySpy =
-          env.sandbox.spy(bind.historyForTesting(), 'push');
+      sandbox.spy(history, 'push');
 
       const element = createElement(env, container, '[text]="foo"');
       expect(element.textContent).to.equal('');
@@ -660,9 +713,9 @@ describe.configure().ifChrome().run('Bind', function() {
         env.flushVsync();
         expect(element.textContent).to.equal('bar');
 
-        expect(pushHistorySpy).calledOnce;
+        expect(history.push).calledOnce;
         // Pop callback should restore `foo` to original value (null).
-        const onPopCallback = pushHistorySpy.firstCall.args[0];
+        const onPopCallback = history.push.firstCall.args[0];
         return onPopCallback();
       }).then(() => {
         expect(element.textContent).to.equal('null');
@@ -670,8 +723,7 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('pushStateWithExpression() should work with nested objects', () => {
-      const pushHistorySpy =
-        env.sandbox.spy(bind.historyForTesting(), 'push');
+      sandbox.spy(history, 'push');
 
       const element = createElement(env, container, '[text]="foo.bar"');
       expect(element.textContent).to.equal('');
@@ -684,9 +736,9 @@ describe.configure().ifChrome().run('Bind', function() {
         env.flushVsync();
         expect(element.textContent).to.equal('1');
 
-        expect(pushHistorySpy).calledTwice;
+        expect(history.push).calledTwice;
         // Pop callback should restore `foo.bar` to second pushed value (0).
-        const onPopCallback = pushHistorySpy.secondCall.args[0];
+        const onPopCallback = history.push.secondCall.args[0];
         return onPopCallback();
       }).then(() => {
         expect(element.textContent).to.equal('0');
@@ -720,7 +772,7 @@ describe.configure().ifChrome().run('Bind', function() {
           + 'checked [checked]="false" [disabled]="true" [multiple]="false"';
       const element = createElement(env, container, binding,
           /* opt_tagName */ 'input', /* opt_amp */ true);
-      const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
+      const spy = sandbox.spy(element, 'mutatedAttributesCallback');
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(spy).calledWithMatch({
           checked: false,
@@ -799,7 +851,7 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should stop scanning once max number of bindings is reached', () => {
       bind.setMaxNumberOfBindingsForTesting(2);
-      const errorStub = env.sandbox.stub(dev(), 'expectedError');
+      const errorStub = sandbox.stub(dev(), 'expectedError');
 
       const foo = createElement(env, container, '[text]="foo"');
       const bar = createElement(env, container, '[text]="bar" [class]="baz"');
