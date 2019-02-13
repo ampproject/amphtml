@@ -15,7 +15,10 @@
  */
 
 import {isConnectedNode} from './dom';
-import {layoutRectLtwh} from './layout-rect';
+import {
+  LayoutRectDef,
+  layoutRectLtwh,
+} from './layout-rect';
 
 const nativeClientRect = Element.prototype.getBoundingClientRect;
 
