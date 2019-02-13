@@ -47,7 +47,7 @@ export function installHtmlForDoc(ampdoc) {
  * Only the root element and its subtree will be returned. DO NOT use this
  * to render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!Element|!Document} nodeOrDoc
+ * @param {!./service/ampdoc-impl.AmpDoc|!Element|!ShadowRoot} nodeOrDoc
  * @return {!HtmlLiteralTagDef}
  */
 export function htmlFor(nodeOrDoc) {
@@ -71,7 +71,7 @@ export function htmlFor(nodeOrDoc) {
  * This has a base cost, so use it only when it's likely that the same tree
  * will be rendered more than once. Otherwise use `htmlFor`.
  *
- * @param {!Element|!Document} nodeOrDoc
+ * @param {!./service/ampdoc-impl.AmpDoc|!Element|!ShadowRoot} nodeOrDoc
  * @return {!HtmlLiteralTagDef}
  */
 export function cachedHtmlFor(nodeOrDoc) {
