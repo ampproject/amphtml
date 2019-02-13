@@ -167,7 +167,7 @@ describes.integration('amp-recaptcha-input', {
 function waitForBootstrapFrameToBeCreated(doc) {
   return poll('create bootstrap frame', () => {
     return doc.querySelector('iframe.i-amphtml-recaptcha-iframe');
-  }, undefined, 5000)
+  }, undefined, 5000);
 }
 
 function waitForBootstrapFrameOnLoad(doc) {
