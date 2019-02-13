@@ -160,7 +160,9 @@ describes.realWin('amp-video-iframe', {
 
       trackingSizes.forEach(size => {
         const {implementation_} = createVideoIframe({size});
-        expect(() => implementation_.buildCallback()).to.throw;
+        allowConsoleError(() => {
+          expect(() => implementation_.buildCallback()).to.throw();
+        });
       });
     });
   });
@@ -342,7 +344,9 @@ describes.realWin('amp-video-iframe', {
           implementation_.onMessage_({data});
           expect(expectedDispatch).to.have.been.calledOnce;
         } else {
-          expect(() => implementation_.onMessage_({data})).to.throw;
+          allowConsoleError(() => {
+            expect(() => implementation_.onMessage_({data})).to.throw();
+          });
           expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any))
               .to.not.have.been.called;
         }
