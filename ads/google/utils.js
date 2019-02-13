@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import {
+  ExternalCorePubVars,
+  MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,
+  getAutoConfig,
+  getPubControlConfig,
+} from './a4a/shared/content-recommendation.js';
 import {user} from '../../src/log';
 
 /**
@@ -176,18 +182,39 @@ function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
  * This logic should be kept as close to possible to the logic inside
  * adsbygoogle.js.
  *
- * @param {number} width
- * @return {number}
+ * @param {number} availableWidth
+ * @param {!Element} element <amp-ad> tag which contains publisher settings
+ *     if any.
+ * @return {number} height to use for the matched content slot.
  */
-export function getMatchedContentResponsiveHeight(width) {
-  if (width >= 1200) {
-    return 600;
-  } else if (width >= 850) {
-    return Math.floor(width * 0.5);
-  } else if (width >= 550) {
-    return Math.floor(width * 0.6);
-  } else if (width >= 468) {
-    return Math.floor(width * 0.7);
+export function getMatchedContentResponsiveHeightAndUpdatePubParams(
+  availableWidth, element) {
+  const pubControlParams = {
+    numberOfRows: element.getAttribute(ExternalCorePubVars.ROWS_NUM),
+    numberOfColumns: element.getAttribute(ExternalCorePubVars.COLUMNS_NUM),
+    layoutType: element.getAttribute(ExternalCorePubVars.UI_TYPE),
+  };
+  let config;
+  if (pubControlParams.numberOfRows ||
+      pubControlParams.numberOfColumns ||
+      pubControlParams.layoutType) {
+    // Publisher provided at least 1 param  which means we are in
+    // "pub controlled matched content" mode.
+    config = getPubControlConfig(availableWidth, pubControlParams);
+  } else {
+    // Publisher didn't provide any matched content params so use auto mode.
+    config = getAutoConfig(
+        availableWidth, availableWidth <= MIN_PUB_CONTROL_WIDTH_OF_DESKTOP);
   }
-  return Math.floor(width * 3.44);
+  if (config.validationError) {
+    user().error('AMP-AD', config.validationError);
+    // There was an error in pub params and we logged it in console.
+    // Return 0 as height to hide slot.
+    return 0;
+  }
+  element.setAttribute(ExternalCorePubVars.ROWS_NUM, config.numberOfRows);
+  element.setAttribute(ExternalCorePubVars.COLUMNS_NUM, config.numberOfColumns);
+  element.setAttribute(ExternalCorePubVars.UI_TYPE, config.layoutType);
+
+  return config.slotHeight;
 }

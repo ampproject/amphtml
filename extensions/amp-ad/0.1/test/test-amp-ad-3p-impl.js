@@ -463,7 +463,7 @@ describes.realWin('amp-ad-3p-impl', {
             sandbox.stub(impl, 'attemptChangeSize').callsFake(
                 (height, width) => {
                   expect(width).to.equal(VIEWPORT_WIDTH);
-                  expect(height).to.equal(1032);
+                  expect(height).to.equal(1131);
                   return Promise.resolve();
                 });
 
