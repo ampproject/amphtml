@@ -24,6 +24,9 @@ import {tryResolve} from '../src/utils/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
+const TAG = '<amp-video-iframe>';
+const __AMP__ = '__AMP__VIDEO_IFRAME__';
+
 /**
  * @typedef {{
  *   sourceUrl: string,
@@ -123,6 +126,9 @@ export class AmpVideoIntegration {
     /** @private {boolean} */
     this.muted_ = false;
 
+    /** @private {boolean} */
+    this.usedListenToHelper_ = false;
+
     /**
      * @return {!DocMetadataDef}
      * @private
@@ -200,18 +206,25 @@ export class AmpVideoIntegration {
    *    will be taken from the `window` object.
    */
   listenTo(type, obj, opt_initializer) {
-    switch (type.toLowerCase()) {
-      case 'jwplayer':
+    userAssert(!this.usedListenToHelper_,
+        '%s `listenTo` is meant to be used once per page.',
+        TAG);
+    const types = {
+      'jwplayer': () => {
         userAssert(!opt_initializer,
-            'jwplayer integration does not take an initializer');
+            '%s jwplayer integration does not take an initializer',
+            TAG);
         this.listenToJwPlayer_(obj);
-        break;
-      case 'videojs':
+      },
+      'videojs': () => {
         this.listenToVideoJs_(obj, opt_initializer);
-        break;
-      default:
-        userAssert(false, `Invalid listener type ${type}.`);
-    }
+      },
+    };
+    userAssert(types[type.toLowerCase()],
+        `%s Invalid listener type [${type}]. ` +
+        `Valid types are [${Object.keys(types).join(', ')}]`,
+        TAG)(); // notice the call here ;)
+    this.usedListenToHelper_ = true;
   }
 
   /**
@@ -326,7 +339,8 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    userAssert(validEvents.indexOf(event) > -1, `Invalid event ${event}`);
+    userAssert(validEvents.indexOf(event) > -1,
+        `%s Invalid event [${event}]`, TAG);
     this.postToParent_(dict({'event': event}));
   }
 
@@ -406,6 +420,11 @@ function listenTo(win, onMessage) {
  * @visibleForTesting
  */
 export function adopt(global) {
+  userAssert(!global[__AMP__],
+      '%s video-iframe-integration-v0.js should only be included once.');
+
+  global[__AMP__] = true;
+
   // Hacky way to make AMP errors (e.g. from listenFor) do *something*.
   global.reportError = console.error.bind(console);
 
