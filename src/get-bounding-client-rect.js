@@ -41,7 +41,7 @@ function shouldInstall(win) {
   try {
     const div = win.document.createElement('div');
     const rect = div.getBoundingClientRect();
-    return div.top !== 0;
+    return rect.top !== 0;
   } catch (e) {
     // IE 10 or less
     return true;
