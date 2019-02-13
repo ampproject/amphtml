@@ -134,6 +134,16 @@ export class Linkmate {
     const postLinks = [];
     anchorList.forEach(anchor => {
       const link = anchor[this.linkAttribute_];
+      // If a link is already a Narrativ link.
+      if (/shop-links.co/.test(link)) {
+        // Check if amp flag is there. Add if necessary. Don't add to payload.
+        if (!/\?amp=true$/.test(link)) {
+          anchor[this.linkAttribute_] =
+              `${anchor[this.linkAttribute_]}?amp=true`;
+        }
+        return;
+      }
+
       if (!/#donotlink$/.test(link)) {
         const exclusive = this.requestExclusiveLinks_ || /#locklink$/.test(link);
         const linkObj = {
