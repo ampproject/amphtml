@@ -315,36 +315,36 @@ export const getPresetDef = (name, options) => {
         },
       };
     case 'zoom-in':
-      let {zoomStart, zoomEnd} = options;
+      let {scaleStart, scaleEnd} = options;
 
-      if (zoomStart) {
-        userAssert(zoomEnd > zoomStart, '"zoom-end" value must be greater ' +
-        'than "zoom-start" value when using "zoom-in" animation.');
+      if (scaleStart) {
+        userAssert(scaleEnd > scaleStart, '"scale-end" value must be greater ' +
+        'than "scale-start" value when using "zoom-in" animation.');
       }
 
       return {
         duration: 1000,
         easing: 'linear',
         keyframes: [
-          {transform: `scale(${zoomStart || 1}, ${zoomStart || 1})`},
-          {transform: `scale(${zoomEnd || 3}, ${zoomEnd || 3})`},
+          {transform: `scale(${scaleStart || 1})`},
+          {transform: `scale(${scaleEnd || 3})`},
         ],
       };
     case 'zoom-out':
-      zoomStart = options.zoomStart;
-      zoomEnd = options.zoomEnd;
+      scaleStart = options.scaleStart;
+      scaleEnd = options.scaleEnd;
 
-      if (zoomStart) {
-        userAssert(zoomStart > zoomEnd, '"zoom-start" value must be higher ' +
-        'than "zoom-end" value when using "zoom-out" animation.');
+      if (scaleStart) {
+        userAssert(scaleStart > scaleEnd, '"scale-start" value must be ' +
+        'higher than "scale-end" value when using "zoom-out" animation.');
       }
 
       return {
         duration: 1000,
         easing: 'linear',
         keyframes: [
-          {transform: `scale(${zoomStart || 3}, ${zoomStart || 3})`},
-          {transform: `scale(${zoomEnd || 1}, ${zoomEnd || 1})`},
+          {transform: `scale(${scaleStart || 3})`},
+          {transform: `scale(${scaleEnd || 1})`},
         ],
       };
   }

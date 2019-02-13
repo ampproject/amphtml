@@ -48,9 +48,9 @@ const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /** const {string} */
-const ZOOM_START_ATTRIBUTE_NAME = 'zoom-start';
+const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
 /** const {string} */
-const ZOOM_END_ATTRIBUTE_NAME = 'zoom-end';
+const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 /** const {string} */
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** const {string} */
@@ -540,23 +540,23 @@ export class AnimationManager {
     const options = {};
     setStyleForPreset(el, name);
 
-    if (el.hasAttribute(ZOOM_START_ATTRIBUTE_NAME)) {
-      options.zoomStart =
-        parseFloat(el.getAttribute(ZOOM_START_ATTRIBUTE_NAME));
+    if (el.hasAttribute(SCALE_START_ATTRIBUTE_NAME)) {
+      options.scaleStart =
+        parseFloat(el.getAttribute(SCALE_START_ATTRIBUTE_NAME));
 
-      userAssert(options.zoomStart > 0, '"%s" attribute must be a ' +
+      userAssert(options.scaleStart > 0, '"%s" attribute must be a ' +
         'positive number. Found negative or zero in element %s',
-      ZOOM_START_ATTRIBUTE_NAME,
+      SCALE_START_ATTRIBUTE_NAME,
       el);
     }
 
-    if (el.hasAttribute(ZOOM_END_ATTRIBUTE_NAME)) {
-      options.zoomEnd =
-        parseFloat(el.getAttribute(ZOOM_END_ATTRIBUTE_NAME));
+    if (el.hasAttribute(SCALE_END_ATTRIBUTE_NAME)) {
+      options.scaleEnd =
+        parseFloat(el.getAttribute(SCALE_END_ATTRIBUTE_NAME));
 
-      userAssert(options.zoomEnd > 0, '"%s" attribute must be a ' +
+      userAssert(options.scaleEnd > 0, '"%s" attribute must be a ' +
         'positive number. Found negative or zero in element %s',
-      ZOOM_END_ATTRIBUTE_NAME,
+      SCALE_END_ATTRIBUTE_NAME,
       el);
     }
 
