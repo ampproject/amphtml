@@ -21,9 +21,9 @@
 
 
 import {Services} from './services';
+import {cachedHtmlFor} from './static-template';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
-import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
@@ -232,8 +232,8 @@ class PreconnectService {
    * @private
    */
   performPreload_(url) {
-    const preload = htmlFor(this.document_)`
-        <link rel="preload" referrerpolicy="origin" />`;
+    const html = cachedHtmlFor(this.document_);
+    const preload = html`<link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
     // Do not set 'as' attribute to correct value for now, for 2 reasons
     // - document value is not yet supported and dropped

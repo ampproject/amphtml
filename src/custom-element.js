@@ -30,13 +30,13 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
+import {cachedHtmlFor} from './static-template';
 import {createLoaderElement} from '../src/loader';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
-import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
@@ -1597,7 +1597,8 @@ function createBaseCustomElementClass(win) {
         const doc = this.ownerDocument;
         devAssert(doc);
 
-        const container = htmlFor(doc)`
+        const html = cachedHtmlFor(doc);
+        const container = html`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 

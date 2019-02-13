@@ -46,7 +46,8 @@ module.exports = function({types: t}) {
 
         if (t.isIdentifier(tag, {name: 'html'}) ||
             (t.isCallExpression(tag) &&
-             t.isIdentifier(tag.callee, {name: 'htmlFor'}))) {
+             (t.isIdentifier(tag.callee, {name: 'htmlFor'}) ||
+             t.isIdentifier(tag.callee, {name: 'cachedHtmlFor'})))) {
           // Replace a matching TemplateExpression by either inlining a
           // transpiled template or hoisting the template and referring
           // to its value.

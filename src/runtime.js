@@ -61,6 +61,7 @@ import {installDocumentStateService} from './service/document-state';
 import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
+import {installHtmlForDoc} from './static-template';
 import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -117,6 +118,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
   installUrlForDoc(ampdoc);
+  installHtmlForDoc(ampdoc);
   installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);

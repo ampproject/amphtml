@@ -14,52 +14,113 @@
  * limitations under the License.
  */
 
+import {LruCache} from './utils/lru-cache';
 import {devAssert} from './log';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {map} from './utils/object.js';
 
-let container;
 
-/**
- * Creates the html helper for the doc.
- *
- * @param {!Element|!Document} nodeOrDoc
- * @return {function(!Array<string>):!Element}
- */
-export function htmlFor(nodeOrDoc) {
-  const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
-  if (!container || container.ownerDocument !== doc) {
-    container = doc.createElement('div');
-  }
+const CACHE_CAPACITY = 10;
+const SERVICE = 'html';
 
-  return html;
+
+/** @typedef {function(!Array<string>):!Element} */
+export let HtmlLiteralTagDef;
+
+
+/** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+export function installHtmlForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, SERVICE, buildHtmlService);
 }
 
+
 /**
- * A tagged template literal helper to generate static DOM trees.
+ * Creates the html helper for the doc. This returns a tagged template literal
+ * helper to generate static DOM trees.
  * This must be used as a tagged template, ie
  *
  * ```
+ * const html = htmlFor(nodeOrDoc);
  * const div = html`<div><span></span></div>`;
  * ```
  *
- * Only the root element and its subtree will be returned. DO NOT use this to
- * render subtree's with dynamic content, it WILL result in an error!
+ * Only the root element and its subtree will be returned. DO NOT use this
+ * to render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!Array<string>} strings
- * @return {!Element}
+ * @param {!Element|!Document} nodeOrDoc
+ * @return {!HtmlLiteralTagDef}
  */
-function html(strings) {
-  devAssert(strings.length === 1, 'Improper html template tag usage.');
-  container./*OK*/innerHTML = strings[0];
+export function htmlFor(nodeOrDoc) {
+  return getServiceForDoc(nodeOrDoc, SERVICE).htmlInternal;
+}
 
-  const el = container.firstElementChild;
-  devAssert(el, 'No elements in template');
-  devAssert(!el.nextElementSibling, 'Too many root elements in template');
 
-  // Clear to free memory.
-  container.removeChild(el);
+/**
+ * Creates an html helper for the doc that will cache and clone nodes for
+ * performance. This returns a tagged template literal helper to generate static
+ * DOM trees. This must be used as a tagged template, ie
+ *
+ * ```
+ * const html = cachedHtmlFor(nodeOrDoc);
+ * const div = html`<div><span></span></div>`;
+ * ```
+ *
+ * Only the root element and its subtree will be returned. DO NOT use this
+ * to render subtree's with dynamic content, it WILL result in an error!
+ *
+ * This has a base cost, so use it only when it's likely that the same tree
+ * will be rendered more than once. Otherwise use `htmlFor`.
+ *
+ * @param {!Element|!Document} nodeOrDoc
+ * @return {!HtmlLiteralTagDef}
+ */
+export function cachedHtmlFor(nodeOrDoc) {
+  return getServiceForDoc(nodeOrDoc, SERVICE).cachedHtmlInternal;
+}
 
-  return el;
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {{html: !HtmlLiteralTagDef, cachedHtml: !HtmlLiteralTagDef}}
+ */
+export function buildHtmlService(ampdoc) {
+  const container = ampdoc.getRootNode().createElement('div');
+
+  /** @type {!LruCache|undefined} */
+  let cache;
+
+  /**
+   * @param {!Array<string>} strings
+   * @return {!Element}
+   */
+  const cachedHtmlInternal = strings => {
+    cache = (cache || new LruCache(CACHE_CAPACITY));
+    const key = strings[0];
+    const seed = cache.has(key) ?
+      cache.get(key) :
+      cache.put(key, htmlInternal(strings));
+    return seed.cloneNode(/* deep */ true);
+  };
+
+  /**
+   * @param {!Array<string>} strings
+   * @return {!Element}
+   */
+  const htmlInternal = strings => {
+    devAssert(strings.length === 1, 'Improper html template tag usage.');
+    container./*OK*/innerHTML = strings[0];
+
+    const el = container.firstElementChild;
+    devAssert(el, 'No elements in template');
+    devAssert(!el.nextElementSibling, 'Too many root elements in template');
+
+    // Clear to free memory.
+    container.removeChild(el);
+
+    return el;
+  };
+
+  return {htmlInternal, cachedHtmlInternal};
 }
 
 /**

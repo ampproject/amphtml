@@ -19,8 +19,8 @@
  * details.
  */
 
+import {cachedHtmlFor} from './static-template';
 import {dev, devAssert, userAssert} from './log';
-import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
@@ -458,9 +458,10 @@ export function applyStaticLayout(element) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
-    const sizer = htmlFor(element)`
+    const html = cachedHtmlFor(element);
+    const sizer = html`
       <i-amphtml-sizer class="i-amphtml-sizer">
-        <img alt="" role="presentation" aria-hidden="true" 
+        <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;

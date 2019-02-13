@@ -69,6 +69,7 @@ export class LruCache {
   /**
    * @param {number|string} key
    * @param {T} payload The payload to cache.
+   * @return {T} Returns payload back
    */
   put(key, payload) {
     if (!this.has(key)) {
@@ -76,6 +77,7 @@ export class LruCache {
     }
     this.cache_[key] = {payload, access: this.access_};
     this.evict_();
+    return payload;
   }
 
   /**

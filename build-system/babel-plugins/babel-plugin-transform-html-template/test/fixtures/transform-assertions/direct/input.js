@@ -84,17 +84,56 @@ console.log(htmlFor(element)`<p>
   <span>html usage</span>
   <span>with comment sibling</span>
 </p>`);
+console.log(cachedHtmlFor(element)`html usage`);
+console.log(cachedHtmlFor(element)`html usage
+multiline`);
+console.log(cachedHtmlFor(element)`<p active="true">Attribute Quote Removal</p>`);
+console.log(cachedHtmlFor(element)`<p data-order-state="new 'thing'">Impossible to Remove Quotes</p>`);
+console.log(cachedHtmlFor(element)`<p>
+  <span>html usage</span>
+  <span>more spans</span>
+</p>`);
+console.log(cachedHtmlFor(element)` <p>
+  <span>html usage</span>
+  <span>whitespace before entry tag</span>
+</p>`);
+console.log(cachedHtmlFor(element)`<p>
+  <span>html usage</span>
+  <span>whitespace after entry tag</span>
+</p>  `);
+console.log(cachedHtmlFor(element)` <p>
+  <span>html usage</span>
+  <span>whitespace before and after entry tag</span>
+</p>  `);
+console.log(cachedHtmlFor(element)`<!-- Test Comment to Remove -->
+<p>
+  <span>html usage</span>
+  <span>comment before entry tag</span>
+</p>`);
+console.log(cachedHtmlFor(element)`<p>
+  <span>html usage</span>
+  <span>comment after entry tag</span>
+</p><!-- Test Comment to Remove -->`);
+console.log(cachedHtmlFor(element)`<p>
+  <!-- Test Comment to Remove -->
+  <span>html usage</span>
+  <span>with comment sibling</span>
+</p>`);
 
 function pleaseHoistInternalUsage() {
   console.log(html`html usage`);
   console.log(htmlFor(element)`html usage`);
+  console.log(cachedHtmlFor(element)`html usage`);
 }
 
 function pleaseHoistDifferentTemplates() {
   console.log(html`html usage`);
   console.log(htmlFor(element)`html usage`);
+  console.log(cachedHtmlFor(element)`html usage`);
   console.log(html`<div>html usage</div>`);
   console.log(htmlFor(element)`<div>html usage</div>`);
+  console.log(cachedHtmlFor(element)`<div>html usage</div>`);
   console.log(html`<div>third sibling</div>`);
   console.log(htmlFor(element)`<div>fouth sibling</div>`);
+  console.log(cachedHtmlFor(element)`<div>fifth sibling</div>`);
 }

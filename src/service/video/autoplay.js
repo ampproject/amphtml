@@ -15,18 +15,9 @@
  */
 
 import {Services} from '../../services';
+import {cachedHtmlFor} from '../../static-template';
 import {dev} from '../../log';
-import {htmlFor} from '../../static-template';
 import {removeElement} from '../../dom';
-
-
-/**
- * @param {!Element} node
- * @return {!Element}
- */
-function cloneDeep(node) {
-  return dev().assertElement(node.cloneNode(/* deep */ true));
-}
 
 
 /**
@@ -34,7 +25,7 @@ function cloneDeep(node) {
  * @return {!Element}
  */
 export function renderInteractionOverlay(elOrDoc) {
-  const html = htmlFor(elOrDoc);
+  const html = cachedHtmlFor(elOrDoc);
   return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
 }
@@ -46,7 +37,7 @@ export function renderInteractionOverlay(elOrDoc) {
  * @return {!Element}
  */
 export function renderIcon(win, elOrDoc) {
-  const html = htmlFor(elOrDoc);
+  const html = cachedHtmlFor(elOrDoc);
   const icon = html`<i-amphtml-video-icon class="amp-video-eq">
     <div class="amp-video-eq-col">
       <div class="amp-video-eq-filler"></div>
@@ -57,7 +48,7 @@ export function renderIcon(win, elOrDoc) {
   // Copy equalizer column 4x and annotate filler positions for animation.
   const firstCol = dev().assertElement(icon.firstElementChild);
   for (let i = 0; i < 4; i++) {
-    const col = cloneDeep(firstCol);
+    const col = firstCol.cloneNode(/* deep */ true);
     const fillers = col.children;
     for (let j = 0; j < fillers.length; j++) {
       const filler = fillers[j];

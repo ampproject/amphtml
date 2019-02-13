@@ -47,7 +47,7 @@ module.exports = function(context) {
 
     context.report({
       node,
-      message: 'htmlFor result must be stored into a variable ' +
+      message: `${node.callee.name} result must be stored into a variable ` +
           'named "html", or used as the tag of a tagged template literal.',
     });
   }
@@ -124,10 +124,12 @@ module.exports = function(context) {
         return;
       }
 
-      if (callee.name === 'html') {
+      if (callee.name === 'html' ||
+          callee.name === 'cachedHtml') {
         return htmlCannotBeCalled(node);
       }
-      if (callee.name === 'htmlFor') {
+      if (callee.name === 'htmlFor' ||
+          callee.name === 'cachedHtmlFor') {
         return htmlForUsage(node);
       }
     },

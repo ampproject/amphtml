@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {htmlFor} from './static-template';
+import {cachedHtmlFor} from './static-template';
 
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
@@ -29,12 +29,13 @@ const LINE_LOADER_ELEMENTS = {
  * @return {!Element}
  */
 export function createLoaderElement(doc, elementName) {
+  const html = cachedHtmlFor(doc);
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    return htmlFor(doc)`<div class="i-amphtml-loader-line">
+    return html`<div class="i-amphtml-loader-line">
           <div class="i-amphtml-loader-moving-line"></div>
         </div>`;
   }
-  return htmlFor(doc)`<div class="i-amphtml-loader">
+  return html`<div class="i-amphtml-loader">
         <div class="i-amphtml-loader-dot"></div>
         <div class="i-amphtml-loader-dot"></div>
         <div class="i-amphtml-loader-dot"></div>

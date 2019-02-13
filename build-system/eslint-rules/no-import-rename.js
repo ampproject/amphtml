@@ -34,7 +34,7 @@ const path = require('path');
 
 const imports = {
   'src/utils/object': ['dict'],
-  'src/static-template': ['htmlFor'],
+  'src/static-template': ['cachedHtmlFor', 'htmlFor'],
   'src/experiments': ['isExperimentOn'],
   'src/style': [
     'assertDoesNotContainDisplay',
