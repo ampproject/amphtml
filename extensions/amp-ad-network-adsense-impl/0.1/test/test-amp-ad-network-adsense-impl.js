@@ -998,6 +998,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#delayAdRequestEnabled', () => {
     it('should return true', () =>
       expect(impl.delayAdRequestEnabled()).to.be.true);
+
+    it('should return 3 if in experiment', () => {
+      forceExperimentBranch(impl.win, 'adsense-ff-number-delay', '21063207');
+      impl.divertExperiments();
+      expect(impl.delayAdRequestEnabled()).to.equal(3);
+    });
   });
 
   describe('#preconnect', () => {
