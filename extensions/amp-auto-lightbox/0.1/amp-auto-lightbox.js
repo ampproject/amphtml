@@ -26,12 +26,11 @@ import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -56,13 +55,11 @@ export const ENABLED_LD_JSON_TYPES = {
 };
 
 /**
- * Types of document by Open Graph `<meta property="og:type">` where
- * auto-lightbox should be enabled.
- * @private @const {!Object<string|undefined, boolean>}
+ * Only of document type by Open Graph `<meta property="og:type">` where
+ * auto-lightbox should be enabled. Top-level og:type set is tiny, and `article`
+ * covers all required types.
  */
-export const ENABLED_OG_TYPES = {
-  'article': true,
-};
+export const ENABLED_OG_TYPE_ARTICLE = 'article';
 
 /** Factor of naturalArea vs renderArea to lightbox. */
 export const RENDER_AREA_RATIO = 1.2;
@@ -73,29 +70,31 @@ export const VIEWPORT_AREA_RATIO = 0.25;
 /**
  * Selector for subnodes for which the auto-lightbox treatment does not apply.
  */
-const DISABLED_ANCESTORS =
-    // Runtime-specific.
-    '[placeholder],' +
+const DISABLED_ANCESTORS = [
+  // Runtime-specific.
+  '[placeholder]',
 
-    // Explicitly opted out.
-    '[data-amp-auto-lightbox-disable],' +
+  // Explicitly opted out.
+  '[data-amp-auto-lightbox-disable]',
 
-    // Ancestors considered "actionable", i.e. that are bound to a default
-    // onclick action(e.g. `button`) or where it cannot be determined whether
-    // they're actionable or not (e.g. `amp-script`).
-    'a[href],' +
-    'amp-selector [option],' +
-    'amp-script,' +
-    'amp-story,' +
-    'button,' +
+  // Ancestors considered "actionable", i.e. that are bound to a default
+  // onclick action(e.g. `button`) or where it cannot be determined whether
+  // they're actionable or not (e.g. `amp-script`).
+  'a[href]',
+  'amp-selector [option]',
+  'amp-script',
+  'amp-story',
+  'button',
 
-    // Special treatment.
-    // TODO(alanorozco): Allow and possibly group carousels where images are the
-    // only content.
-    'amp-carousel';
+  // No nested lightboxes.
+  'amp-lightbox',
 
+  // Special treatment.
+  // TODO(alanorozco): Allow and possibly group carousels where images are the
+  // only content.
+  'amp-carousel',
+].join(',');
 
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
 const META_OG_TYPE = 'meta[property="og:type"]';
@@ -149,7 +148,7 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsTreeShapeCriteria(element) {
-    if (closestBySelector(element, DISABLED_ANCESTORS)) {
+    if (closestAncestorElementBySelector(element, DISABLED_ANCESTORS)) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
@@ -253,13 +252,12 @@ export class DocMetaAnnotations {
 
   /**
    * Determines wheter the document type as defined by Open Graph meta tag
-   * e.g. `<meta property="og:type">` is in a given set.
+   * e.g. `<meta property="og:type">` is valid.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
-  static isOgTypeInSet(ampdoc, types) {
-    return types[DocMetaAnnotations.getOgType(ampdoc)];
+  static hasValidOgType(ampdoc) {
+    return DocMetaAnnotations.getOgType(ampdoc) == ENABLED_OG_TYPE_ARTICLE;
   }
 
   /**
@@ -274,14 +272,13 @@ export class DocMetaAnnotations {
 
   /**
    * Determines wheter one of the document types (field `@type`) defined in
-   * LD+JSON schema is in a given set.
+   * LD+JSON schema is in ENABLED_LD_JSON_TYPES.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string|undefined, boolean>} types
    * @return {boolean}
    */
-  static isLdJsonTypeInSet(ampdoc, types) {
+  static hasValidLdJsonType(ampdoc) {
     return DocMetaAnnotations.getAllLdJsonTypes(ampdoc)
-        .some(type => types[type]);
+        .some(type => ENABLED_LD_JSON_TYPES[type]);
   }
 }
 
@@ -324,57 +321,46 @@ function usesLightboxExplicitly(ampdoc) {
 }
 
 
-const resolveFalse = () => tryResolve(() => false);
-const resolveTrue = () => tryResolve(() => true);
-
-
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  */
-function isEmbeddedAndTrusted(ampdoc, candidates) {
-  // Allow `localDev` in lieu of viewer for manual testing, except in tests
-  // where we need all checks.
+function isProxyOriginOrLocalDev(ampdoc) {
+  // Allow `localDev` in lieu of proxy origin for manual testing, except in
+  // tests where we need to actually perform the check.
   const {win} = ampdoc;
   if (getMode(win).localDev && !getMode(win).test) {
-    return resolveTrue();
+    return true;
   }
 
-  const viewer = Services.viewerForDoc(ampdoc);
-  if (!viewer.isEmbedded()) {
-    return resolveFalse();
-  }
-
-  // An attached node is required for viewer origin check. If no candidates are
+  // An attached node is required for proxy origin check. If no elements are
   // present, short-circuit.
-  if (candidates.length <= 0) {
-    return resolveFalse();
+  const {firstElementChild} = ampdoc.getBody();
+  if (!firstElementChild) {
+    return false;
   }
 
-  return viewer.getViewerOrigin().then(origin => {
-    const {hostname} = Services.urlForDoc(candidates[0]).parse(origin);
-    return GOOGLE_DOMAIN_RE.test(hostname);
-  });
+  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
+  // See git.io/fhQ0a (#20359) for details.
+  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
 }
 
 
 /**
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  * @visibleForTesting
  */
-export function resolveIsEnabledForDoc(ampdoc, candidates) {
+export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
-    return resolveFalse();
+    return false;
   }
-  if (!DocMetaAnnotations.isLdJsonTypeInSet(ampdoc, ENABLED_LD_JSON_TYPES) &&
-      !DocMetaAnnotations.isOgTypeInSet(ampdoc, ENABLED_OG_TYPES)) {
-    return resolveFalse();
+  if (!DocMetaAnnotations.hasValidOgType(ampdoc) &&
+      !DocMetaAnnotations.hasValidLdJsonType(ampdoc)) {
+    return false;
   }
-  return isEmbeddedAndTrusted(ampdoc, candidates);
+  return isProxyOriginOrLocalDev(ampdoc);
 }
 
 
@@ -434,18 +420,15 @@ export function runCandidates(ampdoc, candidates) {
  * Scans a document on initialization to lightbox elements that meet criteria.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element=} opt_root
- * @return {!Promise<!Array<!Promise>|undefined>}
+ * @return {!Array<!Promise>|undefined}
  */
 export function scan(ampdoc, opt_root) {
-  const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
-
-  return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
-    if (!isEnabled) {
-      dev().info(TAG, 'disabled');
-      return;
-    }
-    return runCandidates(ampdoc, candidates);
-  });
+  if (!isEnabledForDoc(ampdoc)) {
+    dev().info(TAG, 'disabled');
+    return;
+  }
+  const root = opt_root || ampdoc.win.document;
+  return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
 

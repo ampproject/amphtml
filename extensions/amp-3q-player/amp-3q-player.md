@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Embeds videos from 3Q SDN.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-3q-player"></a> `amp-3q-player`
-
+# amp-3q-player
+Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js">&lt;/script></code></td>
@@ -46,23 +49,28 @@ With the `responsive` layout, the width and height in this should yield correct 
 
 ## Attributes
 
-##### data-id (required)
-
-The sdnPlayoutId from 3Q SDN.
-
-##### autoplay (optional)
-
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong><strong>Examples</strong></td>
+    <td>The sdnPlayoutId from 3Q SDN.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>autoplay (optional)</strong></td>
+    <td ><p>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul>
+<p>for example <code>setModelRotation(x=0.5, xMin=0, xMax=3.14)</code> will change <code>x</code> component of rotation to <code>1.57</code>.</p></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

@@ -260,13 +260,13 @@ export function closestNode(node, callback) {
 
 
 /**
- * Finds the closest element with the specified name from this element
+ * Finds the closest ancestor element with the specified name from this element
  * up the DOM subtree.
  * @param {!Element} element
  * @param {string} tagName
  * @return {?Element}
  */
-export function closestByTag(element, tagName) {
+export function closestAncestorElementByTag(element, tagName) {
   if (element.closest) {
     return element.closest(tagName);
   }
@@ -277,12 +277,13 @@ export function closestByTag(element, tagName) {
 }
 
 /**
- * Finds the closest element with the specified selector from this element
+ * Finds the closest ancestor element with the specified selector from this
+ * element.
  * @param {!Element} element
  * @param {string} selector
  * @return {?Element} closest ancestor if found.
  */
-export function closestBySelector(element, selector) {
+export function closestAncestorElementBySelector(element, selector) {
   if (element.closest) {
     return element.closest(selector);
   }
@@ -293,40 +294,35 @@ export function closestBySelector(element, selector) {
 }
 
 /**
- * Checks if the given element matches the selector
- * @param  {!Element} el The element to verify
- * @param  {string} selector The selector to check against
- * @return {boolean} True if the element matched the selector. False otherwise.
+ * Finds all ancestor elements that satisfy predicate.
+ * @param {!Element} child
+ * @param {function(!Element):boolean} predicate
+ * @return {!Array<!Element>}
  */
-export function matches(el, selector) {
-  const matcher = el.matches ||
-      el.webkitMatchesSelector ||
-      el.mozMatchesSelector ||
-      el.msMatchesSelector ||
-      el.oMatchesSelector;
-  if (matcher) {
-    return matcher.call(el, selector);
+export function ancestorElements(child, predicate) {
+  const ancestors = [];
+  for (let ancestor = child.parentElement; ancestor;
+    ancestor = ancestor.parentElement) {
+    if (predicate(ancestor)) {
+      ancestors.push(ancestor);
+    }
   }
-  return false; // IE8 always returns false.
+  return ancestors;
 }
+
 
 /**
- * Finds the first descendant element with the specified name.
- * @param {!Element|!Document|!ShadowRoot} element
+ * Finds all ancestor elements that has the specified tag name.
+ * @param {!Element} child
  * @param {string} tagName
- * @return {?Element}
+ * @return {!Array<!Element>}
  */
-export function elementByTag(element, tagName) {
-  let elements;
-  // getElementsByTagName() is not supported on ShadowRoot.
-  if (typeof element.getElementsByTagName === 'function') {
-    elements = element.getElementsByTagName(tagName);
-  } else {
-    elements = element./*OK*/querySelectorAll(tagName);
-  }
-  return (elements && elements[0]) || null;
+export function ancestorElementsByTag(child, tagName) {
+  tagName = tagName.toUpperCase();
+  return ancestorElements(child, el => {
+    return el.tagName == tagName;
+  });
 }
-
 
 /**
  * Finds the first child element that satisfies the callback.
@@ -398,39 +394,6 @@ export function childNodes(parent, callback) {
 }
 
 /**
- * @type {boolean|undefined}
- * @visibleForTesting
- */
-let scopeSelectorSupported;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setScopeSelectorSupportedForTesting(val) {
-  scopeSelectorSupported = val;
-}
-
-/**
- * Test that the :scope selector is supported and behaves correctly.
- * @param {!Element} parent
- * @return {boolean}
- */
-function isScopeSelectorSupported(parent) {
-  const doc = parent.ownerDocument;
-  try {
-    const testElement = doc.createElement('div');
-    const testChild = doc.createElement('div');
-    testElement.appendChild(testChild);
-    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
-    // therefore we test actual functionality of`:scope` as well.
-    return testElement./*OK*/querySelector(':scope div') === testChild;
-  } catch (e) {
-    return false;
-  }
-}
-
-/**
  * Finds the first child element that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
@@ -487,6 +450,74 @@ export function childElementsByTag(parent, tagName) {
 }
 
 /**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {string} selector The selector to check against
+ * @return {boolean} True if the element matched the selector. False otherwise.
+ */
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false; // IE8 always returns false.
+}
+
+/**
+ * Finds the first descendant element with the specified name.
+ * @param {!Element|!Document|!ShadowRoot} element
+ * @param {string} tagName
+ * @return {?Element}
+ */
+export function elementByTag(element, tagName) {
+  let elements;
+  // getElementsByTagName() is not supported on ShadowRoot.
+  if (typeof element.getElementsByTagName === 'function') {
+    elements = element.getElementsByTagName(tagName);
+  } else {
+    elements = element./*OK*/querySelectorAll(tagName);
+  }
+  return (elements && elements[0]) || null;
+}
+
+/**
+ * @type {boolean|undefined}
+ * @visibleForTesting
+ */
+let scopeSelectorSupported;
+
+/**
+ * @param {boolean|undefined} val
+ * @visibleForTesting
+ */
+export function setScopeSelectorSupportedForTesting(val) {
+  scopeSelectorSupported = val;
+}
+
+/**
+ * Test that the :scope selector is supported and behaves correctly.
+ * @param {!Element} parent
+ * @return {boolean}
+ */
+function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
+  try {
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
  * Prefixes a selector for ancestor selection. Splits in subselectors and
  * applies prefix to each.
  *
@@ -497,15 +528,12 @@ export function childElementsByTag(parent, tagName) {
  *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
  * ```
  *
- * @param {string} ancestorSelector
- * @param {string} descendantSelector
+ * @param {string} distribute
+ * @param {string} selector
  * @return {string}
  */
-function scopeSelector(ancestorSelector, descendantSelector) {
-  return descendantSelector
-      .split(',')
-      .map(subSelector => `${ancestorSelector} ${subSelector}`)
-      .join(',');
+function scopeSelector(distribute, selector) {
+  return selector.replace(/^|,/g, `$&${distribute} `);
 }
 
 export const scopeSelectorForTesting = scopeSelector;
@@ -612,38 +640,6 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
   } while ((currentElement = currentElement.parentNode) &&
             currentElement != opt_stopNode);
   return false;
-}
-
-
-/**
- * Finds all ancestor elements that satisfy predicate.
- * @param {!Element} child
- * @param {function(!Element):boolean} predicate
- * @return {!Array<!Element>}
- */
-export function ancestorElements(child, predicate) {
-  const ancestors = [];
-  for (let ancestor = child.parentElement; ancestor;
-    ancestor = ancestor.parentElement) {
-    if (predicate(ancestor)) {
-      ancestors.push(ancestor);
-    }
-  }
-  return ancestors;
-}
-
-
-/**
- * Finds all ancestor elements that has the specified tag name.
- * @param {!Element} child
- * @param {string} tagName
- * @return {!Array<!Element>}
- */
-export function ancestorElementsByTag(child, tagName) {
-  tagName = tagName.toUpperCase();
-  return ancestorElements(child, el => {
-    return el.tagName == tagName;
-  });
 }
 
 /**

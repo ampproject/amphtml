@@ -56,7 +56,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
-      'extensions/amp-pinterest/0.1/pinit-button.js',
+      'extensions/amp-pinterest/0.1/save-button.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -919,6 +919,14 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     whitelist: [
       'validator/engine/validator.js',
+    ],
+  },
+  'process\\.env(\\.TRAVIS|\\[\\\'TRAVIS)': {
+    message: 'Do not directly use process.env.TRAVIS. Instead, add a ' +
+        'function to build-system/travis.js',
+    whitelist: [
+      'build-system/check-package-manager.js',
+      'build-system/travis.js',
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',

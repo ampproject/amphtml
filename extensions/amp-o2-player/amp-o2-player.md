@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays an AOL O2Player.
+---
 <!---
 Copyright 2016 O2Player. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-o2-player"></a> `amp-o2-player`
+# amp-o2-player
+
+Displays the AOL O2Player.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Displays the AOL O2Player.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
@@ -56,31 +61,34 @@ Example:
 
 ## Attributes
 
-##### data-pid (required)
+<table>
+  <tr>
+    <td width="40%"><strong>data-pid (required)</strong></td>
+    <td>The Player ID for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-bcid (required)</strong></td>
+    <td>The Buyer Company ID (bcid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-bid</strong></td>
+    <td>The Playlist ID (bid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-vid</strong></td>
+    <td>The Video ID (vid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-macros</strong></td>
+    <td>The macros for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The Player ID for the O2Player.
-
-##### data-bcid (required)
-
-The Buyer Company ID (bcid) for the O2Player.
-
-##### data-bid
-
-The Playlist ID (bid) for the O2Player.
-
-##### data-vid
-
-The Video ID (vid) for the O2Player.
-
-##### data-macros
-
-The macros for the O2Player.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
-## Validation 
+## Validation
 
 See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
 

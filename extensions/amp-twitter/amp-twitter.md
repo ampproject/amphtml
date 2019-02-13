@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a Twitter tweet.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-twitter"></a> `amp-twitter`
+# amp-twitter
+
+Displays a Twitter Tweet or Moment.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Twitter Tweet or Moment.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
@@ -51,7 +56,7 @@ Here's an example of a basic embedded Tweet:
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -74,7 +79,7 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -87,43 +92,35 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder-and-fallback.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
 ## Attributes
 
-##### data-tweetid / data-momentid / data-timeline-source-type (required)
-
-The ID of the Tweet or Moment, or the source type if a Timeline should be displayed.
-In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweet id.
-In a URL like https://twitter.com/i/moments/1009149991452135424, `1009149991452135424` is the moment id.
-Valid timeline source types include `profile`, `likes`, `list`, `collection`, `url`, and `widget`.
-
-##### data-timeline-* (optional)
-
-When displaying a timeline, further arguments need to be provided in addition to `timeline-source-type`. For example, `data-timeline-screen-name="amphtml"` in combination with `data-timeline-source-type="profile"` will display a timeline of the AMP Twitter account.
-For details on the available arguments, see the "Timelines" section in [Twitter's JavaScript Factory Functions Guide](https://developer.twitter.com/en/docs/twitter-for-websites/javascript-api/guides/scripting-factory-functions).
-
-##### data-* (optional)
-
-You can specify options for the Tweet, Moment, or Timeline appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
-For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference), [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0) and [for timelines](https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference). 
-
-<div>
-<amp-iframe height="202"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.options.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
-</amp-iframe>
-</div>
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-tweetid / data-momentid / data-timeline-source-type (required)</strong></td>
+    <td>The ID of the Tweet or Moment, or the source type if a Timeline should be displayed.
+In a URL like https://twitter.com/joemccann/status/640300967154597888, <code>640300967154597888</code> is the tweet id.
+In a URL like https://twitter.com/i/moments/1009149991452135424, <code>1009149991452135424</code> is the moment id.
+Valid timeline source types include <code>profile</code>, <code>likes</code>, <code>list</code>, <code>collection</code>, <code>url</code>, and <code>widget</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-timeline-* (optional)</strong></td>
+    <td>When displaying a timeline, further arguments need to be provided in addition to <code>timeline-source-type</code>. For example, <code>data-timeline-screen-name="amphtml"</code> in combination with <code>data-timeline-source-type="profile"</code> will display a timeline of the AMP Twitter account.
+For details on the available arguments, see the "Timelines" section in <a href="https://developer.twitter.com/en/docs/twitter-for-websites/javascript-api/guides/scripting-factory-functions">Twitter's JavaScript Factory Functions Guide</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-* (optional)</strong></td>
+    <td>You can specify options for the Tweet, Moment, or Timeline appearance by setting <code>data-</code> attributes. For example, <code>data-cards="hidden"</code> deactivates Twitter cards.
+For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

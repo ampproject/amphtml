@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -250,6 +251,63 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             mediaPoolMock.verify();
             done();
           });
+        });
+  });
+
+  it('should find pageIds in a goToPage action', () => {
+    const actionButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on': 'tap:story.goToPage(id=pageId)'});
+    element.appendChild(actionButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
+        });
+  });
+
+  it('should find pageIds in a goToPage action with multiple actions', () => {
+
+    const multipleActionButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on': 'tap:story.goToPage(id=pageId),foo.bar(baz=quux)'});
+    element.appendChild(multipleActionButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
+        });
+  });
+
+  it('should find pageIds in a goToPage action with multiple events', () => {
+
+    const multipleEventsButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on':
+            'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux'});
+    element.appendChild(multipleEventsButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
         });
   });
 });
