@@ -52,5 +52,6 @@
   "hidden-mutation-observer": 1,
   "sandbox-ads": 1,
   "amp-list-viewport-resize": 1,
-  "amp-list-resizable-children": 1
+  "amp-list-resizable-children": 1,
+  "adsense-ff-number-delay": 0.01
 }
