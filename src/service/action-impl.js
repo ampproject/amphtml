@@ -437,25 +437,25 @@ export class ActionService {
 
   /**
    * Checks if the given element has registered a particular action type.
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
    * @return {boolean}
    */
-  hasAction(target, actionEventType, opt_stopAt) {
-    return !!this.findAction_(target, actionEventType, opt_stopAt);
+  hasAction(element, actionEventType, opt_stopAt) {
+    return !!this.findAction_(element, actionEventType, opt_stopAt);
   }
 
   /**
    * Checks if the given element's registered action resolves to at least one
    * existing element by id or a global target (e.g. "AMP").
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
    * @return {boolean}
    */
-  hasResolvableAction(target, actionEventType, opt_stopAt) {
-    const action = this.findAction_(target, actionEventType, opt_stopAt);
+  hasResolvableAction(element, actionEventType, opt_stopAt) {
+    const action = this.findAction_(element, actionEventType, opt_stopAt);
     if (!action) {
       return false;
     }
