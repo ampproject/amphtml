@@ -528,15 +528,12 @@ function isScopeSelectorSupported(parent) {
  *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
  * ```
  *
- * @param {string} ancestorSelector
- * @param {string} descendantSelector
+ * @param {string} distribute
+ * @param {string} selector
  * @return {string}
  */
-function scopeSelector(ancestorSelector, descendantSelector) {
-  return descendantSelector
-      .split(',')
-      .map(subSelector => `${ancestorSelector} ${subSelector}`)
-      .join(',');
+function scopeSelector(distribute, selector) {
+  return selector.replace(/^|,/g, `$&${distribute} `);
 }
 
 export const scopeSelectorForTesting = scopeSelector;
