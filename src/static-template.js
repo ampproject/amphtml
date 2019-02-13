@@ -28,7 +28,7 @@ const SERVICE = 'html';
 export let HtmlLiteralTagDef;
 
 
-/** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+/** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
 export function installHtmlForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, SERVICE, buildHtmlService);
 }
