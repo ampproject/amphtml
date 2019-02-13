@@ -455,7 +455,13 @@ export class Vsync {
 function callTaskNoInline(callback, state) {
   devAssert(callback);
   try {
-    callback(state);
+    const ret = callback(state);
+    try {
+      devAssert(ret === undefined);
+    } catch (e) {
+      dev.error('VSYNC', 'callback return a value but vsync cannot propogate ' +
+        'it: %s', callback.toString());
+    }
   } catch (e) {
     rethrowAsync(e);
     return false;
