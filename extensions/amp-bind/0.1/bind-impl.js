@@ -304,6 +304,7 @@ export class Bind {
         .then(result => this.setState(result))
         .then(() => this.getDataForHistory_())
         .then(data => {
+          // Don't bother calling History.replace with empty data.
           if (data) {
             this.history_.replace(data);
           }
@@ -334,30 +335,30 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(this.getDataForHistory_())
+          .then(() => this.getDataForHistory_())
           .then(data => {
-            if (data) {
-              this.history_.push(onPop, data);
-            }
+            this.history_.push(onPop, data);
           });
     });
   }
 
   /**
+   * Returns data that should be saved in browser history on AMP.setState() or
+   * AMP.pushState(). This enables features like restoring browser tabs.
    * @return {!Promise<?JsonObject>}
    */
   getDataForHistory_() {
+    const data = dict({
+      'data': dict({'amp-bind': this.state_}),
+      'title': this.localWin_.document.title,
+    });
+    if (!this.viewer_.isEmbedded()) {
+      return Promise.resolve(data);
+    }
+    // Only pass state for history updates to trusted viewers, since they
+    // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      if (trusted) {
-        // Only pass state for history updates to trusted viewers, since they
-        // may contain user data e.g. form input.
-        return dict({
-          'data': dict({'amp-bind': this.state_}),
-          'title': this.localWin_.document.title,
-        });
-      } else {
-        return null;
-      }
+      return (trusted) ? data : null;
     });
   }
 
