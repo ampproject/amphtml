@@ -941,7 +941,7 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
-  'torimochi' : {},
+  'torimochi': {},
 
   'triplelift': {},
 
