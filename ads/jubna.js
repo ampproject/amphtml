@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const ava = require('gulp-ava');
-const gulp = require('gulp-help')(require('gulp'));
-const {isTravisBuild} = require('../travis');
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * Runs ava tests.
- */
-function runAvaTests() {
-  return gulp.src([
-    'csvify-size/test.js',
-    'get-zindex/test.js',
-    'prepend-global/test.js',
-  ])
-      .pipe(ava({silent: isTravisBuild()}));
+* @param {!Window} global
+* @param {!Object} data
+*/
+export function jubna(global, data) {
+  validateData(data, ['wid', 'pid']);
+  global._jubna = global._jubna || {
+    widgetID: data['wid'],
+    pubID: data['pid'],
+    referrer: global.context.referrer,
+  };
+  loadScript(global, 'https://cdn.jubna.com/adscripts/jb_amp_loader.js');
 }
-
-gulp.task('ava', 'Runs ava tests for gulp tasks', runAvaTests);
