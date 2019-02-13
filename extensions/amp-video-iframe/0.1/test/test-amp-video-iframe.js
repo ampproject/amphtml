@@ -37,7 +37,7 @@ describes.realWin('amp-video-iframe', {
     extensions: ['amp-video-iframe'],
   },
 }, env => {
-
+  const {any} = sinon.match;
   const defaultFixture = 'video-iframe.html';
 
   let win;
@@ -329,27 +329,22 @@ describes.realWin('amp-video-iframe', {
           },
         };
 
-        const expectedVars = vars || {};
-
         if (vars) {
           Object.assign(data.analytics, {vars});
         }
 
-        if (accept) {
-          videoIframe.implementation_.onMessage_({data});
-          expect(
-              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
-              expectedVars).to.have.been.calledOnce;
-        } else {
-          allowConsoleError(() => {
-            expect(() => {
-              videoIframe.implementation_.onMessage_({data});
-            }).to.throw();
-          });
+        const {implementation_} = videoIframe;
 
-          expect(
-              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
-              expectedVars).to.not.have.been.called;
+        if (accept) {
+          const expectedEventVars = {eventType, vars: vars || {}};
+          const expectedDispatch =
+              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, expectedEventVars);
+          implementation_.onMessage_({data});
+          expect(expectedDispatch).to.have.been.calledOnce;
+        } else {
+          expect(() => implementation_.onMessage_({data})).to.throw;
+          expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any))
+              .to.not.have.been.called;
         }
       });
     });
