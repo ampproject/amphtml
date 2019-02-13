@@ -25,7 +25,7 @@ const nativeClientRect = Element.prototype.getBoundingClientRect;
 /**
  * Polyfill for Node.getBoundingClientRect API.
  * @param {!Element} el
- * @return {!LayoutRectDef}
+ * @return {!ClientRect|!LayoutRectDef}
  */
 function getBoundingClientRect(el) {
   if (isConnectedNode(el)) {
