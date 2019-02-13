@@ -21,7 +21,7 @@ import {
 
 describes.endtoend('AMP carousel grouping', {
 }, async env => {
-  const pageWidth = 600;
+  const pageWidth = 800;
   const pageHeight = 600;
   const slideWidth = pageWidth / 2;
   let controller;

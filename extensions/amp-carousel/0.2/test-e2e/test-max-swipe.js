@@ -21,7 +21,7 @@ import {
 
 describes.endtoend('AMP carousel max-swipe', {
 }, async env => {
-  const pageWidth = 600;
+  const pageWidth = 800;
   const pageHeight = 600;
   let controller;
   let ampDriver;

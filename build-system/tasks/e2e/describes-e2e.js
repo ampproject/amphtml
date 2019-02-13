@@ -196,7 +196,11 @@ class AmpPageFixture {
 
     // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
-    const chromeOptions = {'args': ['--headless']};
+    const chromeOptions = {
+      // TODO(cvializ,estherkim,sparhami):
+      //   figure out why headless causes more flakes
+      // 'args': ['--headless']
+    };
     capabilities.set('chromeOptions', chromeOptions);
 
     const builder = new Builder().withCapabilities(capabilities);
