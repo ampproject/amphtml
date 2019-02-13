@@ -1717,6 +1717,8 @@ export class VideoDocking {
         resetStyles(el, [
           'transform',
           'transition',
+          'min-width',
+          'min-height',
           'width',
           'height',
           'opacity',
