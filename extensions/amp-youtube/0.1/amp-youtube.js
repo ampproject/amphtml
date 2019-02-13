@@ -180,7 +180,7 @@ class AmpYoutube extends AMP.BaseElement {
       descriptor = 'live_stream?channel='
         + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
     }
-    return `${baseUrl}${descriptor}enablejsapi=1`;
+    return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
   /**
