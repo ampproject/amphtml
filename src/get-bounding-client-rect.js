@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {isConnectedNode} from './dom';
 import {
   LayoutRectDef,
   layoutRectLtwh,
 } from './layout-rect';
+import {isConnectedNode} from './dom';
 
 const nativeClientRect = Element.prototype.getBoundingClientRect;
 
@@ -43,7 +43,7 @@ function getBoundingClientRect(el) {
 function shouldInstall(win) {
   try {
     const div = win.document.createElement('div');
-    const rect = div.getBoundingClientRect();
+    const rect = div./*OK*/getBoundingClientRect();
     return rect.top !== 0;
   } catch (e) {
     // IE 10 or less
