@@ -376,7 +376,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
   ...
   <amp-list-load-more load-more-end>
     Congratulations! You've reached the end. /* Custom load-end element */
-  </amp-list-load-more>>
+  </amp-list-load-more>
 </amp-list>
 ```
 
