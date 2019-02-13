@@ -175,11 +175,13 @@ function waitForBootstrapFrameOnLoad(doc) {
   return waitForBootstrapFrameToBeCreated(doc).then(frame => {
     bootstrapFrame = frame;
 
+    // Create a promise for when the iframe is loaded
+    const onLoadDeferred = new Deferred();
+    frame.onload = onLoadDeferred.resolve;
+
     // Reset the frame src to ensure we get the load event
     frame.src = frame.src + '?reload=true';
 
-    const onLoadDeferred = new Deferred();
-    frame.onload = onLoadDeferred.resolve;
     return onLoadDeferred.promise;
   }).then(() => {
     return bootstrapFrame;
