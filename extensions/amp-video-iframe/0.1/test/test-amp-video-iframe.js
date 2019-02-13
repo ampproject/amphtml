@@ -62,27 +62,17 @@ describes.realWin('amp-video-iframe', {
         fixture || defaultFixture}`);
   }
 
+  const layoutConfigAttrs = size => !size ? {layout: 'fill'} : {
+    layout: 'fixed',
+    width: size[0],
+    height: size[1],
+  };
+
   function createVideoIframe({size, src} = {}) {
     const html = htmlFor(doc);
-    const el = html`<amp-video-iframe></amp-video-iframe>`;
-
-    if (size) {
-      addAttributesToElement(el, {
-        'layout': 'fixed',
-        'width': size[0],
-        'height': size[1],
-      });
-    } else {
-      addAttributesToElement(el, {
-        'layout': 'fill',
-      });
-    }
-
-    addAttributesToElement(el, {
-      src: src || getIframeSrc(),
-      poster: 'poster.html',
-    });
-
+    const el = html`<amp-video-iframe poster=foo.png></amp-video-iframe>`;
+    el.setAttribute('src', src || getIframeSrc());
+    addAttributesToElement(el, layoutConfigAttrs(size));
     doc.body.appendChild(el);
     return el;
   }
