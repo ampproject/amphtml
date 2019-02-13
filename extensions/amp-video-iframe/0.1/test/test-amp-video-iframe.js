@@ -62,14 +62,15 @@ describes.realWin('amp-video-iframe', {
         fixture || defaultFixture}`);
   }
 
-  function createVideoIframe(opt_size) {
-    const el = htmlFor(doc)`<amp-video-iframe></amp-video-iframe>`;
+  function createVideoIframe({size, src} = {}) {
+    const html = htmlFor(doc);
+    const el = html`<amp-video-iframe></amp-video-iframe>`;
 
-    if (opt_size) {
+    if (size) {
       addAttributesToElement(el, {
         'layout': 'fixed',
-        'width': opt_size[0],
-        'height': opt_size[1],
+        'width': size[0],
+        'height': size[1],
       });
     } else {
       addAttributesToElement(el, {
@@ -77,7 +78,11 @@ describes.realWin('amp-video-iframe', {
       });
     }
 
-    addAttributesToElement(el, {src: getIframeSrc(), poster: 'poster.html'});
+    addAttributesToElement(el, {
+      src: src || getIframeSrc(),
+      poster: 'poster.html',
+    });
+
     doc.body.appendChild(el);
     return el;
   }
@@ -109,8 +114,8 @@ describes.realWin('amp-video-iframe', {
     return entry;
   }
 
-  describe('#buildCallback', () => {
-    it('sets metadata', function* () {
+  describe('#layoutCallback', () => {
+    it('sets metadata in iframe name', async() => {
       const metadata = {
         canonicalUrl: 'foo.html',
         sourceUrl: 'bar.html',
@@ -120,18 +125,35 @@ describes.realWin('amp-video-iframe', {
 
       const videoIframe = createVideoIframe();
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const {name} = videoIframe.implementation_.iframe_;
 
-      // Sinon does not support sinon.match on to.equal
-      const dummySpy = sandbox.spy();
-
-      dummySpy(tryParseJson(name));
-
-      expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
+      expect(tryParseJson(name)).to.deep.equal(metadata);
     });
 
+    it('sets amp=1 fragment in src', async() => {
+      const rawSrc = getIframeSrc();
+      const videoIframe = createVideoIframe({src: rawSrc});
+
+      await whenLoaded(videoIframe);
+
+      const {src} = videoIframe.implementation_.iframe_;
+      expect(src).to.equal(`${rawSrc}#amp=1`);
+    });
+
+    it('does not set amp=1 fragment in src when fragment present', async() => {
+      const rawSrc = `${getIframeSrc()}#my-fragment`;
+      const videoIframe = createVideoIframe({src: rawSrc});
+
+      await whenLoaded(videoIframe);
+
+      const {src} = videoIframe.implementation_.iframe_;
+      expect(src).to.equal(rawSrc);
+    });
+  });
+
+  describe('#buildCallback', () => {
     it('rejects tracking iframes', () => {
       const trackingSizes = [
         [10, 10],
@@ -147,8 +169,8 @@ describes.realWin('amp-video-iframe', {
       ];
 
       trackingSizes.forEach(size => {
-        const videoIframe = createVideoIframe(size);
-        expect(whenLoaded(videoIframe)).to.eventually.be.rejected;
+        const {implementation_} = createVideoIframe({size});
+        expect(() => implementation_.buildCallback()).to.throw;
       });
     });
   });
@@ -170,10 +192,10 @@ describes.realWin('amp-video-iframe', {
 
   describe('#onMessage_', () => {
 
-    it('should load and register on canplay', function* () {
+    it('should load and register on canplay', async() => {
       // Fixture inside frame triggers `canplay`.
       const videoIframe = createVideoIframe();
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const register =
         videoManagerStub.register.withArgs(videoIframe.implementation_);
@@ -181,10 +203,10 @@ describes.realWin('amp-video-iframe', {
       expect(register).to.have.been.calledOnce;
     });
 
-    it('should not dispatch invalid events', function* () {
+    it('should not dispatch invalid events', async() => {
       const videoIframe = createVideoIframe();
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const dispatch = spyDispatch(videoIframe);
 
@@ -196,10 +218,10 @@ describes.realWin('amp-video-iframe', {
       });
     });
 
-    it('should dispatch valid events', function* () {
+    it('should dispatch valid events', async() => {
       const videoIframe = createVideoIframe();
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const dispatch = spyDispatch(videoIframe);
 
@@ -222,14 +244,14 @@ describes.realWin('amp-video-iframe', {
       }
     });
 
-    it('should return intersection ratio if in autoplay range', function* () {
+    it('should return intersection ratio if in autoplay range', async() => {
       const id = 1234;
       const time = 1.234;
       const intersectionRatio = 2 / 3;
 
       const videoIframe = createVideoIframe();
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const postMessage = stubPostMessage(videoIframe);
 
@@ -248,7 +270,7 @@ describes.realWin('amp-video-iframe', {
           .to.have.been.calledOnce;
     });
 
-    it('should return 0 if not in autoplay range', function* () {
+    it('should return 0 if not in autoplay range', async() => {
       const id = 1234;
       const time = 1.234;
       const intersectionRatio = 1 / 3;
@@ -256,7 +278,7 @@ describes.realWin('amp-video-iframe', {
 
       const videoIframe = createVideoIframe();
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const postMessage = stubPostMessage(videoIframe);
 
@@ -302,11 +324,11 @@ describes.realWin('amp-video-iframe', {
     ].forEach(({sufix, eventType, vars, accept}) => {
       const verb = accept ? 'dispatch' : 'reject';
 
-      it(`should ${verb} custom analytics event ${sufix}`, function* () {
+      it(`should ${verb} custom analytics event ${sufix}`, async() => {
         const videoIframe = createVideoIframe();
         const dispatch = spyDispatch(videoIframe);
 
-        yield whenLoaded(videoIframe);
+        await whenLoaded(videoIframe);
 
         acceptMockedMessages(videoIframe);
 
@@ -344,15 +366,16 @@ describes.realWin('amp-video-iframe', {
   });
 
   describe('#mutatedAttributesCallback', () => {
-    it('updates src', function* () {
-      const videoIframe = createVideoIframe();
+    it('updates src', async() => {
+      const defaultSrc = getIframeSrc(defaultFixture);
+      const videoIframe = createVideoIframe(defaultSrc);
       const {implementation_} = videoIframe;
 
-      yield whenLoaded(videoIframe);
+      await whenLoaded(videoIframe);
 
       const {iframe_} = implementation_;
 
-      expect(iframe_.src).to.equal(getIframeSrc(defaultFixture));
+      expect(iframe_.src).to.match(new RegExp(`^${defaultSrc}#`));
 
       const newSrc = getIframeSrc('video-iframe-2.html');
 
@@ -360,7 +383,7 @@ describes.realWin('amp-video-iframe', {
 
       implementation_.mutatedAttributesCallback({'src': true});
 
-      expect(iframe_.src).to.equal(newSrc);
+      expect(iframe_.src).to.match(new RegExp(`^${newSrc}#`));
     });
   });
 
@@ -379,10 +402,10 @@ describes.realWin('amp-video-iframe', {
     describe(`#${method}`, () => {
       const lowercaseMethod = method.toLowerCase();
 
-      it(`should post '${lowercaseMethod}'`, function* () {
+      it(`should post '${lowercaseMethod}'`, async() => {
         const videoIframe = createVideoIframe();
 
-        yield whenLoaded(videoIframe);
+        await whenLoaded(videoIframe);
 
         const postMessage = stubPostMessage(videoIframe);
 
