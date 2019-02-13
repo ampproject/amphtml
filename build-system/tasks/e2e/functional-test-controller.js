@@ -408,7 +408,7 @@ class FunctionalTestController {
  * @typedef {{
  *   width: number,
  *   height: number
- * }}
+ * }} WindowRectDef
 */
 let WindowRectDef;
 

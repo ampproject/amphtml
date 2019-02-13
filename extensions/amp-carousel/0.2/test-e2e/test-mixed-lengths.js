@@ -22,7 +22,7 @@ import {
 
 describes.endtoend('AMP carousel mixed length slides', {
 }, async env => {
-  const pageWidth = 600;
+  const pageWidth = 800;
   const pageHeight = 600;
   let controller;
   let ampDriver;
@@ -54,8 +54,8 @@ describes.endtoend('AMP carousel mixed length slides', {
   // Test mixed lengths without snapping. This is start aligned as that seems
   // make the most sense for non-snapping mixed lengths.
   describe('no snap', () => {
-    const slideOneWidth = 450;
-    const slideTwoWidth = 300;
+    const slideOneWidth = 600;
+    const slideTwoWidth = 400;
 
     beforeEach(async() => {
       await controller.navigateTo(
@@ -89,8 +89,8 @@ describes.endtoend('AMP carousel mixed length slides', {
   // Test mixed lengths with snapping. This is center aligned as that seems
   // make the most sense for snapping mixed lengths.
   describe('snap', () => {
-    const slideOneWidth = 450;
-    const slideTwoWidth = 300;
+    const slideOneWidth = 600;
+    const slideTwoWidth = 400;
 
     beforeEach(async() => {
       await controller.navigateTo(
