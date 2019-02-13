@@ -86,7 +86,7 @@ describes.realWin('amp-video-iframe', {
         .returns(true);
   }
 
-  function whenLoaded(videoIframe) {
+  function layoutAndLoad(videoIframe) {
     return whenUpgradedToCustomElement(videoIframe).then(() => {
       videoIframe.implementation_.layoutCallback();
       return listenOncePromise(videoIframe, VideoEvents.LOAD);
@@ -115,7 +115,7 @@ describes.realWin('amp-video-iframe', {
 
       const videoIframe = createVideoIframe();
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const {name} = videoIframe.implementation_.iframe_;
 
@@ -126,7 +126,7 @@ describes.realWin('amp-video-iframe', {
       const rawSrc = getIframeSrc();
       const videoIframe = createVideoIframe({src: rawSrc});
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const {src} = videoIframe.implementation_.iframe_;
       expect(src).to.equal(`${rawSrc}#amp=1`);
@@ -136,7 +136,7 @@ describes.realWin('amp-video-iframe', {
       const rawSrc = `${getIframeSrc()}#my-fragment`;
       const videoIframe = createVideoIframe({src: rawSrc});
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const {src} = videoIframe.implementation_.iframe_;
       expect(src).to.equal(rawSrc);
@@ -185,7 +185,7 @@ describes.realWin('amp-video-iframe', {
     it('should load and register on canplay', async() => {
       // Fixture inside frame triggers `canplay`.
       const videoIframe = createVideoIframe();
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const register =
         videoManagerStub.register.withArgs(videoIframe.implementation_);
@@ -196,7 +196,7 @@ describes.realWin('amp-video-iframe', {
     it('should not dispatch invalid events', async() => {
       const videoIframe = createVideoIframe();
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const dispatch = spyDispatch(videoIframe);
 
@@ -211,7 +211,7 @@ describes.realWin('amp-video-iframe', {
     it('should dispatch valid events', async() => {
       const videoIframe = createVideoIframe();
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const dispatch = spyDispatch(videoIframe);
 
@@ -241,7 +241,7 @@ describes.realWin('amp-video-iframe', {
 
       const videoIframe = createVideoIframe();
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const postMessage = stubPostMessage(videoIframe);
 
@@ -268,7 +268,7 @@ describes.realWin('amp-video-iframe', {
 
       const videoIframe = createVideoIframe();
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const postMessage = stubPostMessage(videoIframe);
 
@@ -318,7 +318,7 @@ describes.realWin('amp-video-iframe', {
         const videoIframe = createVideoIframe();
         const dispatch = spyDispatch(videoIframe);
 
-        await whenLoaded(videoIframe);
+        await layoutAndLoad(videoIframe);
 
         acceptMockedMessages(videoIframe);
 
@@ -361,7 +361,7 @@ describes.realWin('amp-video-iframe', {
       const videoIframe = createVideoIframe(defaultSrc);
       const {implementation_} = videoIframe;
 
-      await whenLoaded(videoIframe);
+      await layoutAndLoad(videoIframe);
 
       const {iframe_} = implementation_;
 
@@ -395,7 +395,7 @@ describes.realWin('amp-video-iframe', {
       it(`should post '${lowercaseMethod}'`, async() => {
         const videoIframe = createVideoIframe();
 
-        await whenLoaded(videoIframe);
+        await layoutAndLoad(videoIframe);
 
         const postMessage = stubPostMessage(videoIframe);
 
