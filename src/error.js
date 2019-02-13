@@ -29,7 +29,6 @@ import {
   experimentTogglesOrNull,
   getBinaryType,
   isCanary,
-  isExperimentOn,
 } from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
@@ -666,8 +665,7 @@ export function detectJsEngineFromStack() {
 export function reportErrorToAnalytics(error, win) {
   // Currently this can only be executed in a single-doc mode. Otherwise,
   // it's not clear which ampdoc the event would belong too.
-  if (Services.ampdocServiceFor(win).isSingleDoc()
-      && isExperimentOn(win, 'user-error-reporting')) {
+  if (Services.ampdocServiceFor(win).isSingleDoc()) {
     const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
