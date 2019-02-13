@@ -149,7 +149,8 @@ export class LightboxManager {
     if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
-    if (element.hasAttribute('on')) {
+    const actions = Services.actionServiceForDoc(element);
+    if (actions.hasResolvableAction(element, 'tap')) {
       return false;
     }
     return true;
