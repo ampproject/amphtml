@@ -81,7 +81,10 @@ export function cachedHtmlFor(nodeOrDoc) {
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {{html: !HtmlLiteralTagDef, cachedHtml: !HtmlLiteralTagDef}}
+ * @return {{
+ *  htmlInternal: !HtmlLiteralTagDef,
+ *  cachedHtmlInternal: !HtmlLiteralTagDef,
+ * }}
  */
 export function buildHtmlService(ampdoc) {
   const container = ampdoc.getRootNode().createElement('div');
