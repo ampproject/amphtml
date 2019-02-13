@@ -154,14 +154,14 @@ function handleTextareaDrag(element) {
   const resources = Services.resourcesForDoc(element);
 
   Promise.all([
-    resources.measureElement(() => element.scrollHeight),
+    resources.measureElement(() => element./*OK*/scrollHeight),
     listenOncePromise(element, 'mouseup'),
   ]).then(results => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
     return resources.measureMutateElement(element, () => {
-      heightMouseUp = element.scrollHeight;
+      heightMouseUp = element./*OK*/scrollHeight;
     }, () => {
       maybeRemoveResizeBehavior(element, heightMouseDown, heightMouseUp);
     });
@@ -203,7 +203,7 @@ function maybeResizeTextarea(element) {
 
   return resources.measureMutateElement(element, () => {
     const computed = computedStyle(win, element);
-    scrollHeight = element.scrollHeight;
+    scrollHeight = element./*OK*/scrollHeight;
 
     const maybeMaxHeight =
         parseInt(computed.getPropertyValue('max-height'), 10);
@@ -264,17 +264,18 @@ function getShrinkHeight(textarea) {
     const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
 
     // maxHeight is NaN if the max-height property is 'none'.
-    shouldKeepTop = (isNaN(maxHeight) || textarea.scrollHeight < maxHeight);
+    shouldKeepTop =
+        (isNaN(maxHeight) || textarea./*OK*/scrollHeight < maxHeight);
   }, () => {
     // Prevent a jump from the textarea element scrolling
     if (shouldKeepTop) {
-      textarea.scrollTop = 0;
+      textarea./*OK*/scrollTop = 0;
     }
     // Append the clone to the DOM so its scrollHeight can be read
     doc.body.appendChild(clone);
   }).then(() => {
     return resources.measureMutateElement(body, () => {
-      height = clone.scrollHeight;
+      height = clone./*OK*/scrollHeight;
     }, () => {
       removeElement(clone);
     });
