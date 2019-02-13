@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {whenUpgradedToCustomElement} from '../../src/dom';
+
 const t = describe.configure()
     .ifChrome()
     .skipSinglePass()
@@ -21,6 +23,7 @@ const t = describe.configure()
 
 t.run('amp-carousel', function() {
   this.timeout(10000);
+  let document;
 
   const extensions = ['amp-carousel'];
 
@@ -30,14 +33,21 @@ t.run('amp-carousel', function() {
   </amp-carousel>
   `;
 
+  function waitForCarouselLayout() {
+    const carousel = document.querySelector('amp-carousel');
+    return whenUpgradedToCustomElement(carousel).then(() => {
+      return carousel.whenBuilt();
+    });
+  }
+
   describes.integration('type=carousel with single image', {
     body: carouselSingleImage,
     extensions,
   }, env => {
-    let document;
 
     beforeEach(() => {
       document = env.win.document;
+      return waitForCarouselLayout();
     });
 
     it('should be present', () => {
@@ -82,10 +92,9 @@ t.run('amp-carousel', function() {
     body: carouselMultipleImages,
     extensions,
   }, env => {
-    let document;
-
     beforeEach(() => {
       document = env.win.document;
+      return waitForCarouselLayout();
     });
 
     it('should be present', () => {
@@ -178,10 +187,9 @@ t.run('amp-carousel', function() {
     body: slidesSingleImage,
     extensions,
   }, env => {
-    let document;
-
     beforeEach(() => {
       document = env.win.document;
+      return waitForCarouselLayout();
     });
 
     it('should be present', () => {
@@ -226,10 +234,9 @@ t.run('amp-carousel', function() {
     body: slidesMultipleImages,
     extensions,
   }, env => {
-    let document;
-
     beforeEach(() => {
       document = env.win.document;
+      return waitForCarouselLayout();
     });
 
     it('should be present', () => {
@@ -303,10 +310,9 @@ t.run('amp-carousel', function() {
     body: slidesMultipleImagesControlsLoop,
     extensions,
   }, env => {
-    let document;
-
     beforeEach(() => {
       document = env.win.document;
+      return waitForCarouselLayout();
     });
 
     it('should be present', () => {
