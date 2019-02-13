@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from './amp-events';
 import {Pass} from '../pass';
 import {Services} from '../services';
-import {closest, domOrderComparator, matches} from '../dom';
+import {closest, domOrderComparator, matches, removeElement} from '../dom';
 import {
   computedStyle,
   getStyle,
@@ -148,6 +149,12 @@ export class FixedLayer {
     }
 
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
+
+    this.ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.cleanup_();
+      this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
+      this.update();
+    });
 
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
@@ -307,6 +314,24 @@ export class FixedLayer {
   }
 
   /**
+   * Removes any tracked fixed elements that are no longer in the DOM.
+   */
+  cleanup_() {
+    /** @type {!Array<!ElementDef>} */
+    const toRemove = this.elements_.filter(fe => {
+      let el = fe.element;
+      if (fe.isTransfered) {
+        el = fe.placeholder || el;
+      }
+      return !this.ampdoc.contains(el);
+    });
+    toRemove.forEach(fe => {
+      this.removeElement_(fe.element);
+      removeElement(fe.element);
+    });
+  }
+
+  /**
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
    */
@@ -356,10 +381,7 @@ export class FixedLayer {
    */
   update() {
     // Some of the elements may no longer be in DOM.
-    /** @type {!Array<!ElementDef>} */
-    const toRemove = this.elements_.filter(
-        fe => !this.ampdoc.contains(fe.element));
-    toRemove.forEach(fe => this.removeElement_(fe.element));
+    this.cleanup_();
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -629,6 +651,7 @@ export class FixedLayer {
         selectors: [selector],
         fixedNow: false,
         stickyNow: false,
+        isTransfered: false,
       };
       this.elements_.push(fe);
     }
@@ -780,6 +803,7 @@ export class FixedLayer {
  *   top: (string|undefined),
  *   transform: (string|undefined),
  *   forceTransfer: (boolean|undefined),
+ *   isTransfered: boolean,
  * }}
  */
 let ElementDef;
@@ -912,7 +936,7 @@ class TransferLayerBody {
   /** @override */
   transferTo(fe, index, state) {
     const {element} = fe;
-    if (element.parentElement == this.layer_) {
+    if (fe.isTransfered) {
       return;
     }
 
@@ -920,6 +944,7 @@ class TransferLayerBody {
     user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
         ' we now move the element to a fixed positioning layer:', fe.element);
 
+    fe.isTransfered = true;
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
@@ -951,10 +976,11 @@ class TransferLayerBody {
 
   /** @override */
   returnFrom(fe) {
-    if (!fe.placeholder || !this.doc_.contains(fe.placeholder)) {
+    if (!fe.isTransfered) {
       return;
     }
     dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
+    fe.isTransfered = false;
     if (this.doc_.contains(fe.element)) {
       setStyle(fe.element, 'zIndex', '');
       fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
