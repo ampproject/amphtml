@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -119,6 +119,20 @@ export class AmpFormTextarea {
       }
     }, MIN_EVENT_INTERVAL_MS);
     this.unlisteners_.push(this.viewport_.onResize(throttledResize));
+
+    // For now, warn if textareas with initial overflow are present, and
+    // prevent them from becoming autoexpand textareas.
+    iterateCursor(cachedTextareaElements, element => {
+      getHasOverflow(element).then(hasOverflow => {
+        if (hasOverflow) {
+          user().warn('amp-form',
+              '"textarea[autoexpand]" with initially scrolling content ' +
+              'will not autoexpand.\n' +
+              'See https://github.com/ampproject/amphtml/issues/20839');
+          element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
+        }
+      });
+    });
   }
 
   /**
@@ -127,6 +141,18 @@ export class AmpFormTextarea {
   dispose() {
     this.unlisteners_.forEach(unlistener => unlistener());
   }
+}
+
+/**
+ * Measure if any overflow is present on the element.
+ * @param {!Element} element
+ * @return {!Promise<boolean>}
+ */
+function getHasOverflow(element) {
+  const resources = Services.resourcesForDoc(element);
+  return resources.measureElement(() => {
+    return element.scrollHeight > element.clientHeight;
+  });
 }
 
 /**
