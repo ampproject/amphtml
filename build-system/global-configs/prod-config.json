@@ -4,7 +4,6 @@
     "amp-next-page",
     "ampdoc-shell",
     "disable-amp-story-desktop",
-    "inabox-rov",
     "linker-meta-opt-in"
   ],
   "allow-url-opt-in": [
@@ -46,13 +45,12 @@
   "no-sync-xhr-in-ads": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "inabox-rov": 1,
   "ampdoc-closest": 0.01,
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
   "hidden-mutation-observer": 1,
   "sandbox-ads": 1,
-  "amp-list-viewport-resize": 0.5,
+  "amp-list-viewport-resize": 1,
   "amp-list-resizable-children": 1
 }

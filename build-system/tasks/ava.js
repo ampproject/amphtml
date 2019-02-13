@@ -17,6 +17,7 @@
 
 const ava = require('gulp-ava');
 const gulp = require('gulp-help')(require('gulp'));
+const {isTravisBuild} = require('../travis');
 
 /**
  * Runs ava tests.
@@ -27,7 +28,7 @@ function runAvaTests() {
     'get-zindex/test.js',
     'prepend-global/test.js',
   ])
-      .pipe(ava({silent: !!process.env.TRAVIS}));
+      .pipe(ava({silent: isTravisBuild()}));
 }
 
 gulp.task('ava', 'Runs ava tests for gulp tasks', runAvaTests);

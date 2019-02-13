@@ -27,7 +27,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
-import {closestBySelector, isIframed} from '../../dom';
+import {closestAncestorElementBySelector, isIframed} from '../../dom';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -529,7 +529,7 @@ export class Viewport {
     pos = 'top') {
 
     return this.getScrollingContainerFor_(element).then(parent =>
-      this.animateScrollIntoViewInternal_(
+      this.animateScrollWithinParent(
           element,
           parent,
           dev().assertNumber(duration),
@@ -544,9 +544,8 @@ export class Viewport {
    * @param {string} curve
    * @param {string} pos (takes one of 'top', 'bottom', 'center')
    * @return {!Promise}
-   * @private
    */
-  animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
+  animateScrollWithinParent(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
 
     const {height: parentHeight} = this.isScrollingElement_(parent) ?
@@ -612,7 +611,7 @@ export class Viewport {
    */
   getScrollingContainerFor_(element) {
     return this.vsync_.measurePromise(() =>
-      closestBySelector(element, '.i-amphtml-scrollable') ||
+      closestAncestorElementBySelector(element, '.i-amphtml-scrollable') ||
         this.binding_.getScrollingElement());
   }
 

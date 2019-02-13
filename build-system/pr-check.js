@@ -40,6 +40,12 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('./git');
+const {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  isTravisPushBuild,
+  travisPullRequestSha,
+} = require('./travis');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
@@ -99,13 +105,13 @@ function timedExecOrDie(cmd) {
  * Prints a summary of files changed by, and commits included in the PR.
  */
 function printChangeSummary() {
-  if (process.env.TRAVIS) {
+  if (isTravisBuild()) {
     console.log(fileLogPrefix, colors.cyan('origin/master'),
         'is currently at commit',
         colors.cyan(shortSha(gitTravisMasterBaseline())));
     console.log(fileLogPrefix,
         'Testing the following changes at commit',
-        colors.cyan(shortSha(process.env.TRAVIS_PULL_REQUEST_SHA)));
+        colors.cyan(shortSha(travisPullRequestSha())));
   }
 
   const filesChanged = gitDiffStatMaster();
@@ -385,7 +391,7 @@ const command = {
     }
     // Unit tests with Travis' default chromium in coverage mode.
     timedExecOrDie(cmd + ' --headless --coverage');
-    if (process.env.TRAVIS) {
+    if (isTravisBuild()) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
       startSauceConnect();
@@ -408,7 +414,7 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (process.env.TRAVIS) {
+    if (isTravisBuild()) {
       if (coverage) {
         // TODO(choumx, #19658): --headless disabled for integration tests on
         // Travis until Chrome 72.
@@ -432,7 +438,7 @@ const command = {
     timedExecOrDie('rm -R dist');
   },
   runVisualDiffTests: function(opt_mode) {
-    if (process.env.TRAVIS) {
+    if (isTravisBuild()) {
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     } else if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
       console.log(
@@ -452,17 +458,6 @@ const command = {
       console.error(fileLogPrefix, colors.red('ERROR:'),
           'Found errors while running', colors.cyan(cmd));
     }
-  },
-  verifyVisualDiffTests: function() {
-    if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
-      console.log(
-          '\n' + fileLogPrefix, 'Could not find environment variables',
-          colors.cyan('PERCY_PROJECT'), 'and',
-          colors.cyan('PERCY_TOKEN') +
-          '. Skipping verification of visual diff tests.');
-      return;
-    }
-    timedExec('gulp visual-diff --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
@@ -485,14 +480,15 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runVisualDiffTests(/* opt_mode */ 'master');
+    if (isTravisPushBuild()) {
+      command.runVisualDiffTests(/* opt_mode */ 'master');
+    }
     command.runLintCheck();
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.runDevDashboardTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -528,7 +524,6 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
@@ -589,7 +584,7 @@ function main() {
   runYarnLockfileCheck();
 
   // Run the local version of all tests.
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     process.env['LOCAL_PR_CHECK'] = true;
     printChangeSummary();
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
@@ -603,8 +598,9 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
-    console.log(fileLogPrefix, 'Running all commands on push build.');
+  if (!isTravisPullRequestBuild()) {
+    console.log(fileLogPrefix,
+        'Running all commands, since this is not a PR build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
@@ -695,13 +691,6 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
       command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-    }
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('FLAG_CONFIG') ||
-        buildTargets.has('BUILD_SYSTEM')) {
-      command.verifyVisualDiffTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

@@ -22,6 +22,7 @@ const NOOP = () => {};
 describes.realWin('amp-story-auto-ads', {
   amp: {
     extensions: [
+      'amp-story:1.0',
       'amp-story-auto-ads',
     ],
   },
@@ -64,6 +65,32 @@ describes.realWin('amp-story-auto-ads', {
       const parent = pane.parentElement;
       expect(parent.tagName).to.equal('AMP-STORY-GRID-LAYER');
       expect(parent.getAttribute('template')).to.equal('fill');
+    });
+  });
+
+  describe('visible attribute', () => {
+    beforeEach(() => {
+      sandbox.stub(autoAds, 'analyticsEvent_').returns(NOOP);
+      autoAds.adPagesCreated_ = 1;
+      autoAds.adPageIds_ = {'ad-page-1': 1};
+    });
+
+    it('sets the visible attribute when showing', () => {
+      const setVisibleStub = sandbox.stub(autoAds, 'setVisibleAttribute_');
+      sandbox.stub(autoAds, 'startNextAdPage_').returns(NOOP);
+      // Switching to ad page.
+      autoAds.handleActivePageChange_(/* pageIndex */ 1,
+          /* pageId */ 'ad-page-1');
+      expect(setVisibleStub.calledOnce).to.be.true;
+    });
+
+    it('removes the visible attribute when showing', () => {
+      const removeVisibleStub = sandbox.stub(autoAds,
+          'removeVisibleAttribute_');
+      autoAds.idOfAdShowing_ = 'ad-page-1';
+      autoAds.handleActivePageChange_(/* pageIndex */ 2,
+          /* pageId */ 'non-ad-page');
+      expect(removeVisibleStub.calledOnce).to.be.true;
     });
   });
 
@@ -135,6 +162,7 @@ describes.realWin('amp-story-auto-ads', {
         element: storyElement,
         addPage: NOOP,
       };
+      autoAds.setVisibleAttribute_ = NOOP;
       autoAds.adPagesCreated_ = 1;
       const page = win.document.createElement('amp-story-page');
       sandbox.stub(autoAds, 'createAdPage_').returns(page);

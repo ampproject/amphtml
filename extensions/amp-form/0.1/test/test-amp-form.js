@@ -254,7 +254,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
-                    data: '<div>much success</div>',
+                    data: {html: '<div>much success</div>'},
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';
@@ -264,8 +264,10 @@ describes.repeated('', {
           const fetchAndRenderTemplate = sandbox.stub(
               ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
           fetchAndRenderTemplate
-              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
-              .onSecondCall().returns(Promise.resolve({html: template}));
+              .onFirstCall().returns(
+                  Promise.resolve({html: '<div>much success</div>'}))
+              .onSecondCall().returns(
+                  Promise.resolve({html: '<div>mushc success</div>'}));
 
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
@@ -275,6 +277,59 @@ describes.repeated('', {
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
                     .to.have.been.calledWith(
                         form, sinon.match.object, sinon.match.object);
+                return handleSubmitEventPromise;
+              });
+        });
+      });
+
+      it('should set html bypassing mustache rendering', () => {
+        sandbox.spy(xhrUtils, 'setupInput');
+        sandbox.spy(xhrUtils, 'setupAMPCors');
+        sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+        sandbox.stub(xhrUtils, 'verifyAmpCORSHeaders');
+
+        return getSsrAmpFormPromise.then(ampForm => {
+          const form = ampForm.form_;
+          const template = createElement('template');
+          template.setAttribute('type', 'amp-mustache');
+          template.content.appendChild(createTextNode('Some {{template}}'));
+          form.id = 'registration';
+          const event = {
+            stopImmediatePropagation: sandbox.spy(),
+            target: form,
+            preventDefault: sandbox.spy(),
+          };
+          const successTemplateContainer = createElement('div');
+          successTemplateContainer.setAttribute('submit-success', '');
+          successTemplateContainer.appendChild(template);
+
+          form.appendChild(successTemplateContainer);
+
+          form.xhrAction_ = 'https://www.xhr-action.org';
+
+          sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
+              .returns(
+                  Promise.resolve({
+                    data: '<div>much success</div>',
+                  }));
+          const renderedTemplate = createElement('div');
+          renderedTemplate.innerText = 'much success';
+          sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+              .returns(template);
+
+          const fetchAndRenderTemplate = sandbox.stub(
+              ampForm.ssrTemplateHelper_, 'renderTemplate');
+          fetchAndRenderTemplate
+              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
+              .onSecondCall().returns(Promise.resolve({html: template}));
+
+          const renderTemplate = sandbox.spy(ampForm, 'renderTemplate_');
+
+          const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
+          return whenCalled(renderTemplate, 2)
+              .then(() => {
+                expect(ampForm.ssrTemplateHelper_.renderTemplate)
+                    .to.have.been.called;
                 return handleSubmitEventPromise;
               });
         });
@@ -1846,7 +1901,6 @@ describes.repeated('', {
           expect(ampForm.urlReplacement_.expandInputValueSync)
               .to.have.been.calledWith(canonicalUrlField);
 
-
           return whenCalled(ampForm.handleNonXhrGet_).then(() => {
             expect(form.submit).to.not.have.been.called;
             expect(clientIdField.value).to.equal('');
@@ -2016,7 +2070,7 @@ describes.repeated('', {
           const submitActionPromise =
             ampForm.handleSubmitAction_(/* invocation */ {});
 
-          expect(form.submit).to.have.not.been.called;
+          expect(form.submit).to.have.been.called;
 
           return submitActionPromise;
         });
@@ -2118,7 +2172,7 @@ describes.repeated('', {
           'formFields[name]': 'John Miller',
           'formFields[email]': 'j@hnmiller.com',
         };
-        expect(form.submit).to.have.not.been.called;
+        expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit',
             expectedFormData
@@ -2232,7 +2286,7 @@ describes.repeated('', {
         const form = ampForm.form_;
         form.id = 'registration';
 
-        // Non XHR GET
+        // Non XHR Get
         ampForm.method_ = 'GET';
         ampForm.xhrAction_ = null;
         const clientIdField = createElement('input');
@@ -2266,7 +2320,6 @@ describes.repeated('', {
             'amp-form-submit',
             expectedFormData
         );
-
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -2276,7 +2329,7 @@ describes.repeated('', {
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
 
-        expect(form.submit).to.not.have.been.called;
+        expect(form.submit).to.have.been.calledOnce;
         expect(clientIdField.value).to.equal('');
         expect(canonicalUrlField.value).to.equal(
             'https%3A%2F%2Fexample.com%2Famps.html');
@@ -2318,7 +2371,7 @@ describes.repeated('', {
 
           return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
             expect(getValueStub).to.be.called;
-            expect(formElementSubmitSpy).to.be.called;
+            expect(formElementSubmitSpy).to.be.calledOnce;
           });
         });
       });

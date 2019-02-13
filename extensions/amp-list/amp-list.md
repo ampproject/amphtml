@@ -1,3 +1,12 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - stories
+teaser:
+  text: Dynamically downloads data and creates list items using a template.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,16 +23,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-list"></a> `<amp-list>`
+# amp-list
 
-[TOC]
+Fetches content dynamically from a CORS JSON endpoint and renders it
+using a supplied template.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>

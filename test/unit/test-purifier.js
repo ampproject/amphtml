@@ -234,6 +234,11 @@ function runSanitizerTests() {
       expectEqualNodeLists(actual, expected);
     });
 
+    it('should allow arbitrary protocols', () => {
+      expect(purify('<a href="foo://bar">link</a>')).to.be.equal(
+          '<a target="_top" href="foo://bar">link</a>');
+    });
+
     it('should output "rel" attribute', () => {
       // Can't use string equality since DOMPurify will reorder attributes.
       const actual = serialize(
@@ -374,6 +379,11 @@ function runSanitizerTests() {
     it('should allow form::action-xhr', () => {
       expect(purify('<form action-xhr="https://foo.com"></form>'))
           .to.equal('<form action-xhr="https://foo.com"></form>');
+    });
+
+    it('should allow input::mask-output', () => {
+      expect(purify('<input mask-output="alphanumeric">'))
+          .to.equal('<input mask-output="alphanumeric">');
     });
 
     // Need to test this since DOMPurify doesn't offer a API for tag-specific

@@ -60,9 +60,6 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
@@ -74,6 +71,7 @@ import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -373,12 +371,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
     const ampAutoAdsResponsiveBranch =
       getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsBranch) {
-      experimentIds.push(ampAutoAdsBranch);
-    }
     if (ampAutoAdsResponsiveBranch) {
       experimentIds.push(ampAutoAdsResponsiveBranch);
     }
@@ -405,6 +399,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
+          ? bytes : null);
   }
 
   /** @override */

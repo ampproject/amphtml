@@ -113,6 +113,10 @@ Command                                                                 | Descri
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
 `gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
+`gulp e2e`                                                              | Runs all end-to-end tests on Chrome.
+`gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
+`gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
+`gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
 
 ## Manual testing
 
@@ -223,10 +227,6 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
-Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homepage]
-
-[homepage]: https://saucelabs.com
-
 ## Visual Diff Tests
 
 In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
@@ -324,3 +324,16 @@ firebase deploy
 ```
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
+
+## End-to-End Tests
+
+You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon. 
+
+Run all tests with: 
+```
+gulp e2e
+```
+
+The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
+
+Create your own tests by adding them to `test\e2e` or `extensions\**\test-e2e`. For examples, see `test\e2e\test-github.js` and `extensions\amp-carousel\0.2\test-e2e\test-carousel.js`.

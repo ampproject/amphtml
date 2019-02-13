@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays an Ooyala video.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ooyala-player"></a> `amp-ooyala-player`
+# amp-ooyala-player
+
+Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-0.1.js">&lt;/script></code></td>
@@ -45,29 +50,33 @@ limitations under the License.
 
 ## Attributes
 
-##### data-embedcode (required)
+<table>
+  <tr>
+    <td width="40%"><strong>data-embedcode (required)</strong></td>
+    <td>The video embed code from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-playerid (required)</strong></td>
+    <td>The ID of the player to load from <a href="https://backlot.ooyala.com">Backlot</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-pcode (required)</strong></td>
+    <td>The provider code for the account owning the embed code and player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-playerversion (optional)</strong></td>
+    <td>Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-config (optional)</strong></td>
+    <td>Specifies a skin.json config file URL for player V4.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The video embed code from [Backlot](https://backlot.ooyala.com).
-
-##### data-playerid (required)
-
-The ID of the player to load from [Backlot](https://backlot.ooyala.com).
-
-##### data-pcode (required)
-
-The provider code for the account owning the embed code and player.
-
-##### data-playerversion (optional)
-
-Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.
-
-##### data-config (optional)
-
-Specifies a skin.json config file URL for player V4.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

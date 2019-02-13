@@ -19,10 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {
-  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-  AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
+import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -42,6 +39,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -533,25 +531,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
-    it('includes eid when in amp-auto-ads holdout control', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      impl.divertExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
-      });
-    });
-    it('includes eid when in amp-auto-ads holdout experiment', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
-      });
-    });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
       element.setAttribute('data-language', 'lxz');
@@ -1028,6 +1007,67 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return true on a non-canonical page', () => {
       impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
       expect(impl.isXhrAllowed()).to.be.true;
+    });
+  });
+
+  describe('#checksumVerification', () => {
+    it('should call super if missing Algorithm header', () => {
+      sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
+          .returns(Promise.resolve('foo'));
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'unknown';
+            case 'AMP-Verification-Checksum':
+              return btoa('2569076912');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      expect(AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders)).to.eventually.equal('foo');
+    });
+
+    it('should properly validate checksum', () => {
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'djb2a-32';
+            case 'AMP-Verification-Checksum':
+              return btoa('2569076912');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      return AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders).then(result => {
+        expect(result).to.be.ok;
+        expect(utf8Decode(result)).to.equal(creative);
+      });
+    });
+
+    it('should fail validation if invalid checksum', () => {
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'djb2a-32';
+            case 'AMP-Verification-Checksum':
+              return btoa('12345');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      expect(AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders)).to.eventually.not.be.ok;
     });
   });
 });

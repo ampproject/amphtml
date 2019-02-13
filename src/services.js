@@ -396,6 +396,26 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
+   */
+  static storyAnalyticsServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
+      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story',
+          true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService}
+   */
+  static storyAnalyticsService(win) {
+    return (/** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
+      (getExistingServiceOrNull(win, 'story-analytics')));
+  }
+
+  /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
@@ -551,12 +571,11 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/video-service-interface.VideoServiceInterface}
+   * @return {!./service/video-manager-impl.VideoManager}
    */
   static videoManagerForDoc(elementOrAmpDoc) {
-    return (
-      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
-        getServiceForDoc(elementOrAmpDoc, 'video-manager')));
+    return (/** @type {!./service/video-manager-impl.VideoManager} */ (
+      getServiceForDoc(elementOrAmpDoc, 'video-manager')));
   }
 
   /**

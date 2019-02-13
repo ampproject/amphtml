@@ -173,6 +173,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
       sandbox.stub(host.positionObserver_, 'observe').callsFake(() => {});
       iframe1.getBoundingClientRect =
           () => {return layoutRectLtwh(5, 5, 20, 20);};
+      sandbox.stub(host.positionObserver_, 'getTargetRect').callsFake(() => {
+        return iframe1.getBoundingClientRect();
+      });
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
@@ -206,6 +209,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
           callback = cb;
         },
         getViewportRect() {},
+        getTargetRect() {},
       };
 
       iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();

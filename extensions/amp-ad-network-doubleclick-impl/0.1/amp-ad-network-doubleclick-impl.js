@@ -97,6 +97,7 @@ import {parseQueryString} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -741,6 +742,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
+          ? bytes : null);
   }
 
   /** @override */

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {ActionSource} from './action-source';
 import {debounce} from '../../../src/utils/rate-limit';
 import {listenOnce} from '../../../src/event-helper';
 
-const MIN_AUTO_ADVANCE_INTERVAL = 2000;
+const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
- *   advance: function(number),
+ *   advance: function(number, !ActionSource=),
  * }}
  */
 let AdvanceDef;
@@ -146,7 +147,7 @@ export class AutoAdvance {
       return;
     }
 
-    this.advanceable_.advance(this.autoAdvanceCount_);
+    this.advanceable_.advance(this.autoAdvanceCount_, ActionSource.AUTOPLAY);
   }
 
   /**
