@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from './amp-events';
+import {AmpEvents} from '../amp-events';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {closest, domOrderComparator, matches, removeElement} from '../dom';
@@ -149,12 +149,17 @@ export class FixedLayer {
           stylesheet.cssRules, fixedSelectors, stickySelectors);
     }
 
-    this.trySetupSelectorsNoInline(root, fixedSelectors, stickySelectors);
+    this.trySetupSelectorsNoInline(dev().assertElement(root), fixedSelectors,
+        stickySelectors);
 
     root.addEventListener(AmpEvents.DOM_UPDATE, event => {
+      const {target} = event;
+      if (!target) {
+        return;
+      }
       this.cleanup_();
-      this.trySetupSelectorsNoInline(event.target, fixedSelectors,
-          stickySelectors);
+      this.trySetupSelectorsNoInline(dev().assertElement(target),
+          fixedSelectors, stickySelectors);
       this.update();
     });
 
