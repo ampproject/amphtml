@@ -26,8 +26,14 @@ import {
 import {px} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
+/** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
+/** @const {string} */
 const FILL_TEMPLATE_LAYOUT = 'fill';
+/** @const {number} */
+const SCALE_HIGH_DEFAULT = 3;
+/** @const {number} */
+const SCALE_LOW_DEFAULT = 1;
 
 /**
  * A list of animations that are full bleed.
@@ -326,8 +332,8 @@ export const getPresetDef = (name, options) => {
         duration: 1000,
         easing: 'linear',
         keyframes: [
-          {transform: `scale(${scaleStart || 1})`},
-          {transform: `scale(${scaleEnd || 3})`},
+          {transform: `scale(${scaleStart || SCALE_LOW_DEFAULT})`},
+          {transform: `scale(${scaleEnd || SCALE_HIGH_DEFAULT})`},
         ],
       };
     case 'zoom-out':
@@ -343,8 +349,8 @@ export const getPresetDef = (name, options) => {
         duration: 1000,
         easing: 'linear',
         keyframes: [
-          {transform: `scale(${scaleStart || 3})`},
-          {transform: `scale(${scaleEnd || 1})`},
+          {transform: `scale(${scaleStart || SCALE_HIGH_DEFAULT})`},
+          {transform: `scale(${scaleEnd || SCALE_LOW_DEFAULT})`},
         ],
       };
   }
