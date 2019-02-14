@@ -17,6 +17,7 @@
 
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
+import {CONSENT_POLICY_STATE} from '../src/consent-state';
 
 /**
  * @const {Object<string, string>}
@@ -37,8 +38,9 @@ function isFalseString(str) {
 /**
  * @param {string} mode
  * @param {!Window} global
+ * @param {boolean} consent
  */
-function setupAdoConfig(mode, global) {
+function setupAdoConfig(mode, global, consent) {
   if (global['ado']) {
     const config = {
       mode: (mode == 'sync') ? 'old' : 'new',
@@ -46,6 +48,7 @@ function setupAdoConfig(mode, global) {
       fif: {
         enabled: mode != 'sync',
       },
+      consent,
     };
 
     global['ado']['config'](config);
@@ -321,8 +324,16 @@ export function adocean(global, data) {
   const mode = (data['aoMode'] !== 'sync' || masterId ? 'buffered' : 'sync');
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
 
+  /*
+   * INSUFFICIENT and UNKOWN should be threated as INSUFFICIENT
+   * not defined states should be threated as INSUFFICIENT
+   */
+  const consent = (global.context.initialConsentState === null /* tags without data-block-on-consent */
+                   || global.context.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT
+                   || global.context.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+
   writeScript(global, adoUrl, () => {
-    setupAdoConfig(mode, global);
+    setupAdoConfig(mode, global, consent);
     setupPreview(global, data);
 
     if (masterId) {
