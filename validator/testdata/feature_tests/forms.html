@@ -202,5 +202,13 @@
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input mask="L0L_0L0" type="tel">
   </form>
+  <!-- Valid: textarea within form -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment"></textarea>
+  </form>
+  <!-- Valid: textarea with autoexpand attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment" autoexpand></textarea>
+  </form>
 </body>
 </html>
