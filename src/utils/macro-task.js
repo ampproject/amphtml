@@ -22,10 +22,7 @@ import {devAssert} from '../log';
  */
 export function waitForMacroTasks(win, cb, amount = 1) {
   devAssert(amount % 1 === 0 && amount >= 1);
-  return win.setTimeout(() => {
-    if (amount == 1) {
-      return cb();
-    }
+  return win.setTimeout(amount == 1 ? cb : () => {
     waitForMacroTasks(win, cb, amount - 1);
   }, 0);
 }
