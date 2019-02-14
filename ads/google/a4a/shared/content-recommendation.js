@@ -141,7 +141,7 @@ const PUB_CONTROL_EXAMPLE = '\n ' +
  * will be used in ad request.
  * @record
  */
-class CoReConfig { // eslint-disable-line no-unused-vars
+export class CoReConfig { // eslint-disable-line no-unused-vars
   /** see comment on class */
   constructor() {
     /** @const {number} */
@@ -236,13 +236,13 @@ export function getAutoConfig(availableWidth, isMobile) {
  *   layoutType: (string|undefined),
  * }}
  */
-let RawPublisherControlParams; // eslint-disable-line no-unused-vars
+export let RawPublisherControlParams; // eslint-disable-line no-unused-vars
 
 /**
  * Get CoRe Pub Control UI Sizes.
  * @param {number} availableWidth
  * @param {!RawPublisherControlParams} rawPubControlParams
- * @return {?CoReConfig}
+ * @return {!CoReConfig}
  */
 export function getPubControlConfig(availableWidth, rawPubControlParams) {
   const pubParams = validateAndParsePubControlParams(rawPubControlParams);
