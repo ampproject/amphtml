@@ -270,11 +270,12 @@ export class ConsentUI {
    */
   createPromptIframeFromSrc_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    let sandbox =  'allow-scripts';
+    let sandbox = 'allow-scripts';
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
-    const allowSameOrigin = this.allowSameOrigin_(iframe.src, window.location.href)
-    if(allowSameOrigin){
-        sandbox = 'allow-scripts allow-same-origin'
+    const allowSameOrigin = this.allowSameOrigin_(
+        iframe.src, window.location.href);
+    if (allowSameOrigin) {
+      sandbox = 'allow-scripts allow-same-origin';
     }
     iframe.setAttribute('sandbox', sandbox);
     const {classList} = iframe;
@@ -292,11 +293,10 @@ export class ConsentUI {
   allowSameOrigin_(src, containerSrc) {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
-    const url = urlService.parse(src);
-    const {hostname, protocol, origin} = url;
+    const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(containerSrc);
 
-    return origin != containerUrl.origin && protocol != 'data:'
+    return srcUrl.origin != containerUrl.origin && srcUrl.protocol != 'data:';
   }
 
   /**
