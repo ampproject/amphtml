@@ -116,8 +116,8 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
                     '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
                     '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
                     '-layout-size-defined amp-unresolved i-amphtml-' +
-                    'unresolved" style="width: 1px; height: 1px;">' +
-                    '</amp-analytics></div>');
+                    'unresolved" i-amphtml-layout="fixed" style="width: 1px;' +
+                    ' height: 1px;"></amp-analytics></div>');
           });
     });
   });
