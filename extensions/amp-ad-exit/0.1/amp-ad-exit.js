@@ -16,6 +16,10 @@
 
 import {FilterType} from './filters/filter';
 import {
+  HostServiceError,
+  HostServices,
+} from '../../../src/inabox/host-services';
+import {
   MessageType,
   deserializeMessage,
   listen,
@@ -28,7 +32,6 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {HostServiceError, HostServices} from '../../../src/inabox/host-services';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -116,7 +119,7 @@ export class AmpAdExit extends AMP.BaseElement {
             // TODO: reporting on errors
             dev().fine(TAG, 'HostServiceError: ' + errorCode);
             // fallback on browser API on environment miss match
-            if (errorCode === HostServiceError.MISS_MATCH) {
+            if (errorCode === HostServiceError.MISMATCH) {
               openWindowDialog(this.win, finalUrl, '_blank');
             }
           });
