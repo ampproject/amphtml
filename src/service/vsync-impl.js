@@ -456,9 +456,7 @@ function callTaskNoInline(callback, state) {
   devAssert(callback);
   try {
     const ret = callback(state);
-    try {
-      devAssert(ret === undefined);
-    } catch (e) {
+    if (ret !== undefined) {
       dev().error('VSYNC', 'callback returned a value but vsync cannot ' +
         'propogate it: %s', callback.toString());
     }
