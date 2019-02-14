@@ -14,43 +14,35 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {waitForMacroTasks} from './macro-task';
 
 const TAG = 'temp-cache';
 
-/**
- * Temporary cache that flushes after a number of macro-tasks.
- * @template T
- */
+/** @template T */
 export class TempCache {
 
   /**
    * @param {!Window} win
-   * @param {number=} flushAfterMacroTasks Flushes after one by default.
+   * @param {number=} flushAfterMs Flushes after 500ms by default.
    */
-  constructor(win, flushAfterMacroTasks = 1) {
+  constructor(win, flushAfterMs = 500) {
     /** @private @const {!Window} */
     this.win_ = win;
 
     /** @private @const {number} */
-    this.flushAfterMacroTasks_ = flushAfterMacroTasks;
+    this.flushAfterMs_ = flushAfterMs;
 
     /** @private @const {function()} */
     this.flush_ = () => {
-      dev().info(TAG, `flush [${this.time_()}]`);
-      this.cache_ = null;
+      dev().info(TAG, `flush [${Date.now()}]`);
+      this.flushTimerId_ = null;
+      this.cache_ = Object.create(null);
     };
 
-    /** @private {?Object<(number|string), T>} */
-    this.cache_ = null;
-  }
+    /** @private {!Object<(number|string), T>} */
+    this.cache_ = Object.create(null);
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  time_() {
-    return (new this.win_.Date()).getTime();
+    /** @private {?number} */
+    this.flushTimerId_ = null;
   }
 
   /**
@@ -58,7 +50,7 @@ export class TempCache {
    * @return {boolean}
    */
   has(key) {
-    return this.cache_ && this.cache_[key] !== undefined;
+    return !!this.cache_[key];
   }
 
   /**
@@ -66,10 +58,9 @@ export class TempCache {
    * @return {T|undefined}
    */
   get(key) {
-    if (!this.has(key)) {
-      return undefined;
+    if (this.has(key)) {
+      dev().info(TAG, `hit [${Date.now()}]`);
     }
-    dev().info(TAG, `hit [${this.time_()}]`);
     return this.cache_[key];
   }
 
@@ -79,19 +70,15 @@ export class TempCache {
    * @return {T} Returns payload back
    */
   put(key, payload) {
-    return (this.maybeInitialize_()[key] = payload);
+    this.maybeSetFlushTimeout_();
+    return (this.cache_[key] = payload);
   }
 
-  /**
-   * @return {!Object<(number|string), T>}
-   * @private
-   */
-  maybeInitialize_() {
-    const cache = this.cache_;
-    if (cache) {
-      return cache;
+  /** @private */
+  maybeSetFlushTimeout_() {
+    if (this.flushTimerId_ !== null) {
+      return;
     }
-    waitForMacroTasks(this.win_, this.flush_, this.flushAfterMacroTasks_);
-    return (this.cache_ = Object.create(null));
+    this.flushTimerId_ = this.win_.setTimeout(this.flush_, this.flushAfterMs_);
   }
 }

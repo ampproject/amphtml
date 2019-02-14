@@ -54,27 +54,6 @@ describes.fakeWin('Static Template', {amp: true}, env => {
       expect(p.nextSibling).to.be.null;
     });
 
-    // TODO(alanorozco): Unsure about what to do with this test.
-    it.skip('creates tree with last ownerDocument', () => {
-      // Setup
-      const iframe = document.createElement('iframe');
-      document.body.appendChild(iframe);
-      const iDoc = iframe.contentDocument;
-
-      const html = htmlFor(document);
-      let div = html`<div></div>`;
-      expect(div.ownerDocument).to.equal(document);
-
-      div = htmlFor(iDoc)`<div></div>`;
-      expect(div.ownerDocument).to.equal(iDoc);
-
-      div = html`<div></div>`;
-      expect(div.ownerDocument).to.equal(iDoc);
-
-      // Cleanup
-      document.body.removeChild(iframe);
-    });
-
     it('ignores text before first element', () => {
       const div = htmlFor(document)`test<div></div>`;
       expect(div.outerHTML).to.not.include('test');

@@ -24,7 +24,7 @@ import {
 import {map} from './utils/object.js';
 
 
-const FLUSH_CACHE_AFTER_MACRO_TASKS = 3;
+const FLUSH_CACHE_AFTER_MS = 200;
 const SERVICE = 'html';
 
 
@@ -84,14 +84,21 @@ export function htmlFor(nodeOrDoc) {
  * Only the root element and its subtree will be returned. DO NOT use this
  * to render subtree's with dynamic content, it WILL result in an error!
  *
- * This has a base cost, so use it only when it's likely that the same tree
- * will be rendered more than once. Otherwise use `htmlFor`.
+ * This has a base O(2) memory cost, so use it only when it's likely that the
+ * same tree will be rendered more than once during a short sequence of
+ * animation frames. Otherwise use `htmlFor`.
  *
  * @param {!Document|!Element|!ShadowRoot} nodeOrDoc
  * @return {!HtmlLiteralTagDef}
  */
 export function cachedHtmlFor(nodeOrDoc) {
   return getHtml(nodeOrDoc).cachedHtmlInternal;
+}
+
+
+/** @param {!Array<string>} strings */
+function devAssertCorrectHtmlTemplateTagUsage({length}) {
+  devAssert(length === 1, 'Improper html template tag usage.');
 }
 
 
@@ -113,7 +120,8 @@ export function buildHtmlService(ampdoc) {
    * @return {!Element}
    */
   const cachedHtmlInternal = strings => {
-    cache = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MACRO_TASKS));
+    devAssertCorrectHtmlTemplateTagUsage(strings);
+    cache = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MS));
     const key = strings[0];
     const seed = cache.has(key) ?
       cache.get(key) :
@@ -126,7 +134,7 @@ export function buildHtmlService(ampdoc) {
    * @return {!Element}
    */
   const htmlInternal = strings => {
-    devAssert(strings.length === 1, 'Improper html template tag usage.');
+    devAssertCorrectHtmlTemplateTagUsage(strings);
     container./*OK*/innerHTML = strings[0];
 
     const el = container.firstElementChild;
