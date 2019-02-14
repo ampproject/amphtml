@@ -740,9 +740,13 @@ export class AmpList extends AMP.BaseElement {
             if (this.element.getAttribute('load-more') === 'auto') {
               this.maybeLoadMoreItems_();
             }
+            setStyles(dev().assertElement(this.container_), {
+              'max-height': '',
+            });
           })
           .catch(() => {
             this.resizeFailed_ = true;
+            this.adjustContainerForLoadMoreButton_();
           });
     }
   }
