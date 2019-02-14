@@ -188,6 +188,9 @@ export class Carousel {
     /** @private {number} */
     this.advanceCount_ = 1;
 
+    /** @private {number} */
+    this.autoAdvanceLoops_ = Number.POSITIVE_INFINITY;
+
     /** @private {boolean} */
     this.mixedLength_ = false;
 
@@ -428,6 +431,16 @@ export class Carousel {
   }
 
   /**
+   * @param {number} autoAdvanceLoops The number of loops through the carousel
+   *    that should be autoadvanced before stopping. This defaults to infinite
+   *    loops.
+   */
+  updateAutoAdvanceLoops(autoAdvanceLoops) {
+    this.autoAdvanceLoops_ = autoAdvanceLoops;
+    this.updateUi();
+  }
+
+  /**
    * @param {boolean} horizontal Whether the scrollable should lay out
    *    horizontally or vertically.
    */
@@ -538,6 +551,9 @@ export class Carousel {
       if (!this.slides_.length) {
         return;
       }
+
+      this.autoAdvance_.updateMaxAdvances(
+          (this.autoAdvanceLoops_ * this.slides_.length) - 1);
       this.updateSpacers_();
       this.setChildrenSnapAlign_();
       this.hideSpacersAndSlides_();
