@@ -62,6 +62,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   getExperimentBranch,
@@ -235,8 +236,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return getExperimentBranch(
-        this.win, DELAY_NUMBER_EXP) == '21063207' ? 3 : true;
+    if (getExperimentBranch(this.win, DELAY_NUMBER_EXP) != '21063207') {
+      return true;
+    }
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
   }
 
   /** @override */

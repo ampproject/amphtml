@@ -981,6 +981,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.divertExperiments();
       expect(impl.delayAdRequestEnabled()).to.equal(3);
     });
+
+    it('should respect loading strategy in experiment', () => {
+      impl.element.setAttribute(
+          'data-loading-strategy', 'prefer-viewability-over-views');
+      forceExperimentBranch(impl.win, 'adsense-ff-number-delay', '21063207');
+      impl.divertExperiments();
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
   });
 
   describe('#preconnect', () => {
