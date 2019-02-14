@@ -835,7 +835,10 @@ export class AmpList extends AMP.BaseElement {
    */
   maybeSetLoadMore_() {
     return this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled && this.loadMoreSrc_) {
+      if (!enabled) {
+        return;
+      }
+      if (this.loadMoreSrc_) {
         const autoLoad = this.element.getAttribute('load-more') === 'auto';
         if (autoLoad) {
           this.setupLoadMoreAuto_();
@@ -853,6 +856,9 @@ export class AmpList extends AMP.BaseElement {
         }).then(() => {
           this.attemptToFit_(dev().assertElement(this.container_));
         });
+      } else {
+        return this.mutateElement(
+            () => this.loadMoreService_.setLoadMoreEnded());
       }
     });
   }
