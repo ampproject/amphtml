@@ -173,6 +173,7 @@ export class Dialog {
       setImportantStyles(this.wrapper_, {
         transform: 'translateY(100%)',
       });
+    }).then(() => {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {
