@@ -18,11 +18,33 @@ limitations under the License.
 
 ## Example
 
+##### Single placement:
 ```html
 <amp-ad width="300" height="250"
     type="adocean"
     data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
     data-ao-emitter="myao.adocean.pl">
+</amp-ad>
+```
+
+##### Master-Slave:
+```html
+<amp-ad width="300" height="250"
+      type="adocean"
+      data-ao-emitter="myao.adocean.pl"
+      data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+      data-ao-id="adoceanmyaonhqnqukjtt"
+      data-ao-keys="key1,key2,key3"
+      >
+</amp-ad>
+
+<amp-ad width="300" height="250"
+      type="adocean"
+      data-ao-emitter="myao.adocean.pl"
+      data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+      data-ao-id="adoceanmyaokiheeseoko"
+      data-ao-keys="key1,key2,key3"
+      >
 </amp-ad>
 ```
 
@@ -42,3 +64,4 @@ For details on the configuration semantics, see [AdOcean documentation](http://w
 - `data-ao-keys` - additional configuration, see adserver documentation
 - `data-ao-vars` - additional configuration, see adserver documentation
 - `data-ao-clusters` - additional configuration,see adserver documentation
+- `data-ao-master` - unique id of master placement
