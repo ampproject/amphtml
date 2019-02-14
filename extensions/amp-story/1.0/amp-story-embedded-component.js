@@ -151,11 +151,13 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 const MIN_VERTICAL_SPACE = 48;
 
 /**
- * Limits the amount of vertical space a component can take in a page.
+ * Limits the amount of vertical space a component can take in a page, this
+ * makes sure no component is blocking the close button at the top of the
+ * expanded view.
  * @const {number}
  * @private
  */
-const VERTICAL_MAX_HEIGHT_PERCENTAGE = 0.8;
+const VERTICAL_PADDING = 96;
 
 /**
  * Padding between tooltip and vertical edges of screen.
@@ -617,16 +619,16 @@ export class AmpStoryEmbeddedComponent {
    * preparation for its animation. It resizes it to its full-screen size, and
    * scales it down to match size set by publisher, adding negative margins so
    * that content around stays put.
-   * @param {!Element} page
+   * @param {!Element} pageEl
    * @param {!Element} element
    * @param {!../../../src/service/resources-impl.Resources} resources
    */
-  static prepareForAnimation(page, element, resources) {
+  static prepareForAnimation(pageEl, element, resources) {
     const state = {};
     resources.measureMutateElement(element,
         /** measure */
         () => {
-          const pageRect = page./*OK*/getBoundingClientRect();
+          const pageRect = pageEl./*OK*/getBoundingClientRect();
           const elRect = element./*OK*/getBoundingClientRect();
 
           if (elRect.width >= elRect.height) {
@@ -634,7 +636,7 @@ export class AmpStoryEmbeddedComponent {
             state.scaleFactor = elRect.width / state.newWidth;
             state.newHeight = elRect.height / elRect.width * state.newWidth;
           } else {
-            const maxHeight = pageRect.height * VERTICAL_MAX_HEIGHT_PERCENTAGE;
+            const maxHeight = pageRect.height - VERTICAL_PADDING;
             state.newWidth = Math.min(
                 elRect.width / elRect.height * maxHeight, pageRect.width);
             state.newHeight = elRect.height / elRect.width * state.newWidth;

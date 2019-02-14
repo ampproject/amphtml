@@ -449,23 +449,18 @@ export class AmpStoryPage extends AMP.BaseElement {
         .forEach(el => {
           if (!el.classList.contains('i-amphtml-embedded-component')) {
             // Since the element might be doing multiple resizes at the
-            // beginning, we have to wait some time to make sure we get the
-            // final size before we do the calculations for the animation.
-            let readyForResize = true;
-            listen(el, AmpEvents.SIZE_CHANGED, () => {
-              readyForResize = false;
+            // beginning, we have to wait some time after each resize event
+            // to make sure we get the final size before we do the calculations
+            // for the animation.
+            const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
+              debouncedPrepareforAnimation();
             });
 
-            this.timer_.poll(timeout, () => {
-              if (!readyForResize) {
-                readyForResize = true;
-                return false;
-              }
-              return true;
-            }).then(() => {
+            const debouncedPrepareforAnimation = debounce(this.win, () => {
               AmpStoryEmbeddedComponent.prepareForAnimation(this.element, el,
-                  this.resources_);
-            });
+                  this.resources_, this.storeService_);
+              unlisten();
+            }, timeout);
           }
         });
   }
