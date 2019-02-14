@@ -196,6 +196,12 @@ class FunctionalTestController {
   async getActiveElement() {}
 
   /**
+   * Gets the root of the current document, for use in scrolling e.g.
+   * @param {!ElementHandle} unusedHandle A handle to a Document or Element
+   */
+  async getDocumentElement(unusedHandle) {}
+
+  /**
    * The Find Element command is used to find the first element matching the
    * given selector in the current browsing context that can be used as the
    * web element context for future element-centric commands.

@@ -930,8 +930,10 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
       `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
-  devAssert(scriptInHead, 'Expected to find script for extension: %s',
-      fnOrStruct.n);
+  if (!getMode().development) {
+    devAssert(scriptInHead, 'Expected to find script for extension: %s',
+        fnOrStruct.n);
+  }
   if (!scriptInHead) {
     return false;
   }

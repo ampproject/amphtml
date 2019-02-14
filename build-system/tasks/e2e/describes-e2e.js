@@ -16,18 +16,28 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
+
+const puppeteer = require('puppeteer');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
-const {SeleniumWebDriverController} = require(
-    './selenium-webdriver-controller');
+const {PuppeteerController} = require('./puppeteer-controller');
+// const {Builder, Capabilities} = require('selenium-webdriver');
+// const {SeleniumWebDriverController} = require(
+//     './selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 const TIMEOUT = 20000;
 
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+
+export async function createPuppeteer(config) {
+  // const browser = await puppeteer.launch({headless: false});
+  const browser = await puppeteer.launch(
+      {headless: true, devtools: false, defaultViewport: null, timeout: 0});
+  return {browser};
+}
 
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
@@ -226,22 +236,29 @@ class AmpPageFixture {
     // };
 
     // TODO(estherkim): remove hardcoded chrome driver
-    const capabilities = Capabilities.chrome();
-    const chromeOptions = {
-      // TODO(cvializ,estherkim,sparhami):
-      //   figure out why headless causes more flakes
-      // 'args': ['--headless']
-    };
-    capabilities.set('chromeOptions', chromeOptions);
+    // const capabilities = Capabilities.chrome();
+    // const chromeOptions = {
+    //   // TODO(cvializ,estherkim,sparhami):
+    //   //   figure out why headless causes more flakes
+    //   // 'args': ['--headless']
+    // };
+    // capabilities.set('chromeOptions', chromeOptions);
 
-    const builder = new Builder().withCapabilities(capabilities);
-    const driver = await builder.build();
-    const controller = new SeleniumWebDriverController(driver);
+    // const builder = new Builder().withCapabilities(capabilities);
+    // const driver = await builder.build();
+    // const controller = new SeleniumWebDriverController(driver);
+    const {browser} = await createPuppeteer();
+
+    const controller = new PuppeteerController(browser);
+    env.controller = controller;
+    env.ampDriver = new AmpDriver(controller);
+    this.driver_ = browser;
+
     const ampDriver = new AmpDriver(controller);
 
     env.controller = controller;
     env.ampDriver = ampDriver;
-    this.driver_ = driver;
+    // this.driver_ = driver;
 
     const {
       testUrl,
@@ -268,7 +285,8 @@ class AmpPageFixture {
       await controller.switchToParent();
     }
     if (this.driver_) {
-      await this.driver_.quit();
+      await this.driver_.close();
+      // await this.driver_.quit();
     }
     this.driver_ = null;
   }

@@ -226,6 +226,18 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async getDocumentRoot() {
+    const root = await this.getRoot_();
+    const getter = root => root.ownerDocument.documentElement;
+    const documentElement =
+        await this.driver.executeScript(getter, root);
+    return new ElementHandle(documentElement);
+  }
+
+  /**
    * @param {string} location
    * @return {!Promise}
    * @override
@@ -288,6 +300,19 @@ class SeleniumWebDriverController {
     return new ControllerPromise(
         webElement.getAttribute(attribute),
         this.getWaitFn_(() => webElement.getAttribute(attribute)));
+  }
+
+  hasElementClass(handle, className) {
+    const webElement = handle.getElement();
+
+    return new ControllerPromise(
+        webElement.getAttribute('class').then(value => {
+          return (value || '').split(' ').includes(className);
+        }),
+        this.getWaitFn_(() =>
+          webElement.getAttribute('class').then(value => {
+            return (value || '').split(' ').includes(className);
+          })));
   }
 
   /**
