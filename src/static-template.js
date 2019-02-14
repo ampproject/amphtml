@@ -72,6 +72,10 @@ export function htmlFor(element) {
  * same tree will be rendered more than once during a short sequence of
  * animation frames. Otherwise use `htmlFor`.
  *
+ * Do not use this for very deep or complex trees. The memory cost is
+ * significantly higher than `htmlFor` and has performance improvements in this
+ * case are negligible.
+ *
  * @param {!Element} element
  * @return {!HtmlLiteralTagDef}
  */
@@ -99,7 +103,7 @@ export class Html {
     /** @private @const {!Element} */
     this.container_ = ampdoc.getRootNode().createElement('div');
 
-    /** @type {?TempCache<!Element>} */
+    /** @private {?TempCache<!Element>} */
     this.cache_ = null;
 
     /**
