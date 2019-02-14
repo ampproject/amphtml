@@ -52,7 +52,7 @@ describe('A4A', function() {
           cid: '', // ${clientId(a)}
           navTiming: '0', // ${navTiming(requestStart,requestStart)}
           navType: '0', // ${navType}
-          redirectCount: '0', // ${redirectCount}
+          navRedirectCount: '0', // ${navRedirectCount}
         });
         expect(queries['ampdocUrl']).to.contain('http://localhost:9876/amp4test/compose-doc?');
         expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');

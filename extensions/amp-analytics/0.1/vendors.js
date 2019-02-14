@@ -107,7 +107,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
-      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
