@@ -462,31 +462,39 @@ describe('Layout', () => {
     expect(pixel.style.width).to.equal('');
   });
 
-  it('should fail invalid width and height', () => {
+  it('should layout with pixel values', () => {
     const pixel = document.createElement('amp-pixel');
-
-    // Everything is good.
     pixel.setAttribute('width', '1px');
     pixel.setAttribute('height', '1px');
     expect(() => {
       applyStaticLayout(pixel);
     }).to.not.throw();
+  });
 
-    // Width=auto is also correct.
+  it('should layout with valid with auto width value', () => {
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('width', 'auto');
+    pixel.setAttribute('height', '1px');
     expect(() => {
       applyStaticLayout(pixel);
     }).to.not.throw();
+  });
 
+  it('should fail invalid width', () => {
+    const pixel = document.createElement('amp-pixel');
     // Width=X is invalid.
     pixel.setAttribute('width', 'X');
+    pixel.setAttribute('height', '1px');
     allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
     }).to.throw(/Invalid width value/); });
+  });
 
+  it('should fail invalid height', () => {
+    const pixel = document.createElement('amp-pixel');
     // Height=X is invalid.
-    pixel.setAttribute('height', 'X');
     pixel.setAttribute('width', '1px');
+    pixel.setAttribute('height', 'X');
     allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
     }).to.throw(/Invalid height value/); });
@@ -536,5 +544,16 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(/failed/);
     });
+  });
+
+  it('should not re-layout cloned content', () => {
+    div.setAttribute('layout', 'responsive');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
+    const clone = div.cloneNode(true);
+    expect(applyStaticLayout(clone)).to.equal(Layout.RESPONSIVE);
+    expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
   });
 });

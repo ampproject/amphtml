@@ -143,6 +143,9 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
   'template': [
     'type',
   ],
+  'textarea': [
+    'autoexpand',
+  ],
 };
 
 /** @const {!Array<string>} */
