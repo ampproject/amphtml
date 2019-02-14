@@ -49,7 +49,6 @@ export class Dialog {
 
     const doc = this.ampdoc_.win.document;
 
-    /** @private @const {!Element} */
     this.wrapper_ = createElementWithAttributes(
         doc,
         'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
@@ -144,7 +143,8 @@ export class Dialog {
         setImportantStyles(this.wrapper_, {
           transform: 'translateY(0)',
         });
-      }).then(() => this.timer_.promise(300));
+        return this.timer_.promise(300);
+      });
     }).then(() => {
       // Update page layout.
       let offsetHeight;
@@ -154,7 +154,6 @@ export class Dialog {
         },
         mutate: () => {
           this.viewport_.updatePaddingBottom(offsetHeight);
-          this.viewport_.addToFixedLayer(this.wrapper_, true);
         },
       });
     });

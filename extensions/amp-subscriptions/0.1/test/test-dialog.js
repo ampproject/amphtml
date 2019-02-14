@@ -26,7 +26,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   let dialog;
   let content;
   let vsync, viewport;
-  let addToFixedLayerSpy, updatePaddingSpy;
+  let updatePaddingSpy;
 
   beforeEach(() => {
     win = env.win;
@@ -36,7 +36,6 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
     vsync = Services.vsyncFor(ampdoc.win);
     viewport = Services.viewportForDoc(ampdoc);
-    addToFixedLayerSpy = sandbox.stub(viewport, 'addToFixedLayer');
     updatePaddingSpy = sandbox.stub(viewport, 'updatePaddingBottom');
     dialog = new Dialog(ampdoc);
     content = createElementWithAttributes(doc, 'div', {
@@ -74,7 +73,6 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
       expect(styles.transform).to.not.contain('17');
       expect(dialog.closeButton_).to.have.display('none');
       expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
-      expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(dialog.getRoot());
       expect(dialog.isVisible()).to.be.true;
     });
   });
