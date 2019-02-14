@@ -169,7 +169,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     return originExperimentsForDoc(this.element)
       .getExperiments()
       .then(trials => {
-        return trials && trials.includes('amp-list-load-more');
+        return trials && trials.includes('amp-recaptcha-input');
       });
   }
 }
