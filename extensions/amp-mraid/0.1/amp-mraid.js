@@ -20,7 +20,7 @@
  *
  * Example:
  * <code>
- * <script async host-api="amp-mraid"
+ * <script async host-service="amp-mraid"
  *         fallback-on="mismatch"></script>
  * </code>
  *
@@ -70,7 +70,7 @@ export class MraidInitializer {
     this.mraid_ = null;
 
     const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
-        'script[host-api="amp-mraid"]');
+        'script[host-service="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
       dev().error(TAG, 'Multiple amp-mraid scripts.');
       return;
