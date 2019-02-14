@@ -71,7 +71,8 @@ export class TempCache {
    */
   put(key, payload) {
     this.maybeSetFlushTimeout_();
-    return (this.cache_[key] = payload);
+    this.cache_[key] = payload;
+    return payload;
   }
 
   /** @private */
