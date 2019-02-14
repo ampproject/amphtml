@@ -21,16 +21,19 @@
  * This is run during the CI stage = test; job = remote tests.
  */
 
-const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
-const {startTimer,
+const {
+  startTimer,
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
-  timedExecOrDie,
+  timedExecOrDie: timedExecOrDieBase,
   unzipBuildOutput} = require('./utils');
+const {determineBuildTargets} = require('./build-target');
+const {isTravisPushBuild} = require('../travis');
 
 const FILENAME = 'remote-test.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);

@@ -22,11 +22,17 @@
  */
 
 const atob = require('atob');
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase,
+  unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPushBuild} = require('../travis');
-const {startTimer, stopTimer, timedExecOrDie, unzipBuildOutput} = require('./utils');
 
 const FILENAME = 'visual-diff-test.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);
@@ -39,10 +45,11 @@ function main() {
   }
   else {
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('INTEGRATION_TEST') ||
-    buildTargets.has('VISUAL_DIFF') ||
-    buildTargets.has('FLAG_CONFIG')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG')) {
+
       unzipBuildOutput();
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
       timedExecOrDie('gulp visual-diff --nobuild');
@@ -50,8 +57,8 @@ function main() {
     else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
       console.log('Skipping visual diff tests because this commit does ' +
-      'not affect the runtime, build system, integration test files, ' +
-      'visual diff test files, or flag config files.');
+        'not affect the runtime, build system, integration test files, ' +
+        'visual diff test files, or flag config files.');
     }
   }
 

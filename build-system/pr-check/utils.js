@@ -95,11 +95,12 @@ function timedExec(cmd) {
  * Executes the provided command and times it. The program terminates in case of
  * failure.
  * @param {string} cmd
+ * @param {string} functionName
  */
-function timedExecOrDie(cmd) {
-  const startTime = startTimer(cmd);
+function timedExecOrDie(cmd, functionName = 'utils.js') {
+  const startTime = startTimer(functionName);
   execOrDie(cmd);
-  stopTimer(cmd, startTime);
+  stopTimer(functionName, startTime);
 }
 
 
@@ -118,7 +119,6 @@ function unzipBuildOutput() {
 }
 
 function zipBuildOutput() {
-  timedExecOrDie(`rm -f ${BUILD_OUTPUT_FILE}`);
   timedExecOrDie(
       `log="$(zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS})" && ` +
       'echo travis_fold:start:zip_results && echo ${log} && ' +

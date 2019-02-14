@@ -22,11 +22,16 @@
  * This is run during the CI stage = build; job = checks.
  */
 
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPushBuild} = require('../travis');
-const {startTimer, stopTimer, timedExecOrDie} = require('./utils');
 
 const FILENAME = 'checks.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);
@@ -46,15 +51,17 @@ function main() {
   }
   else {
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM')) {
+        buildTargets.has('BUILD_SYSTEM')) {
+
       timedExecOrDie('gulp ava');
       timedExecOrDie('node node_modules/jest/bin/jest.js');
     }
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('UNIT_TEST') ||
-    buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+
       timedExecOrDie('gulp check-types');
       timedExecOrDie('gulp caches-json');
       timedExecOrDie('gulp json-syntax');

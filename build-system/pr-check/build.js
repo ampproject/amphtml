@@ -21,7 +21,6 @@
  * This is run during the CI stage = build; job = build.
  */
 
-//TODO(estherkim): move to util file
 const colors = require('ansi-colors');
 const {
   gitBranchName,
@@ -36,12 +35,17 @@ const {
   isTravisBuild,
   travisPullRequestSha,
 } = require('../travis');
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase,
+  zipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {getStderr} = require('../exec');
-const {startTimer, stopTimer, timedExecOrDie, zipBuildOutput} = require('./utils');
-
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -119,9 +123,9 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('UNIT_TEST') ||
-        buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('BUILD_SYSTEM')) {
+      buildTargets.has('UNIT_TEST') ||
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('BUILD_SYSTEM')) {
 
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp css');

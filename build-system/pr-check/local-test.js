@@ -21,11 +21,17 @@
  * This is run during the CI stage = test; job = local tests.
  */
 
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase,
+  unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPushBuild} = require('../travis');
-const {startTimer, stopTimer, timedExecOrDie, unzipBuildOutput} = require('./utils');
 
 const FILENAME = 'local-test.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);
@@ -42,21 +48,24 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('UNIT_TEST')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
+
       timedExecOrDie('gulp test --nobuild --headless --local-changes');
       ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+
       timedExecOrDie('gulp test --integraton --nobuild --headless --coverage');
       ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM')) {
+        buildTargets.has('BUILD_SYSTEM')) {
+
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
       //TODO(estherkim): turn on when stabilized :)
       //timedExecOrDie('gulp e2e --nobuild');
@@ -70,8 +79,8 @@ function main() {
 
     if (!ranTests) {
       console.log('Skipping unit and integration tests because ' +
-      'this commit not affect the runtime, build system, ' +
-      'unit test files, integration test files, or the dev dashboard.');
+        'this commit not affect the runtime, build system, ' +
+        'unit test files, integration test files, or the dev dashboard.');
     }
   }
 

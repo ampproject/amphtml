@@ -21,11 +21,16 @@
  * This is run during the CI stage = build; job = validator.
  */
 
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPushBuild} = require('../travis');
-const {startTimer, stopTimer, timedExecOrDie} = require('./utils');
 
 const FILENAME = 'validator.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);
@@ -43,7 +48,7 @@ function main() {
   }
   else {
     console.log('Skipping validator job because this commit does ' +
-    'not affect the validator or validator web UI.');
+      'not affect the validator or validator web UI.');
   }
 
   stopTimer(FILENAME, startTime);

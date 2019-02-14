@@ -1,5 +1,4 @@
 language: node_js
-sudo: false
 dist: trusty
 node_js:
   - "lts/*"
@@ -14,10 +13,6 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  #- export CHROME_BIN=google-chrome-stable
-  #- export DISPLAY=:99.0
-  #- unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
-  #- sh -e /etc/init.d/xvfb start
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   - pip install urllib3[secure]
@@ -64,7 +59,6 @@ jobs:
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
       before_install:
-        - export CHROME_BIN=google-chrome-stable
         - export DISPLAY=:99.0
         - sh -e /etc/init.d/xvfb start
         # Explicitly add yarn and gsutil install because this section overrides before_install parent section
@@ -89,7 +83,6 @@ jobs:
     - stage: test
       name: "Local Tests"
       before_install: 
-        - export CHROME_BIN=google-chrome-stable
         - export DISPLAY=:99.0
         - sh -e /etc/init.d/xvfb start
         # Explicitly add yarn and gsutil install because this section overrides before_install parent section

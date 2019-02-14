@@ -21,17 +21,23 @@
  * This is run during the CI stage = test; job = dist tests.
  */
 
+const {
+  startTimer,
+  stopTimer,
+  timedExecOrDie: timedExecOrDieBase,
+  unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPushBuild} = require('../travis');
-const {startTimer, stopTimer, timedExecOrDie, unzipBuildOutput} = require('./utils');
 
 const FILENAME = 'dist-test.js';
+const timedExecOrDie =
+  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
 
 function runSinglePassTest_() {
   timedExecOrDie('rm -R dist');
   timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
   timedExecOrDie('gulp test --integration' +
-   '--nobuild --compiled --single_pass');
+   '--nobuild --compiled --single_pass --headless');
   timedExecOrDie('rm -R dist');
 }
 
@@ -48,6 +54,7 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {
+
       unzipBuildOutput(); //TODO(estherkim): does this belong here?
       timedExecOrDie('gulp dist --fortesting --noextensions');
       timedExecOrDie('gulp bundle-size --on_pr_build');
@@ -57,15 +64,16 @@ function main() {
     }
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+
       runSinglePassTest_();
       ranTests = true;
     }
 
     if (!ranTests) {
       console.log('Skipping dist tests because this commit does ' +
-      'not affect the runtime, build system, or integration test files.');
+        'not affect the runtime, build system, or integration test files.');
     }
   }
 
