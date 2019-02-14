@@ -23,19 +23,73 @@
 let MediaQueriesListAndValueDef;
 
 /**
- * Manages attributes that can respond to media queries. Uses a provided config
- * Object invoke callback functions when the matching value changes. When an
- * attribute changes, `updateAttribute` should be called with the name of the
- * attribute along with the responsive MediaQuery/value pairs. This is a comma
- * separated list of media queries followed by values.
- *
- * Some examples:
+ * @param {string} value
+ * @return {!Array<!MediaQueriesListAndValueDef>}
+ */
+function getMediaQueryListsAndValues(value) {
+  return value.split(',')
+      .map(part => {
+        // Find the value portion by looking at the end.
+        const result = /[a-z0-9.]+$/.exec(part);
+        if (!result) {
+          return;
+        }
+
+        const {index} = result;
+        const value = part.slice(index);
+        // The media query is everything before the value.
+        const mediaQuery = part.slice(0, index).trim();
+        const mediaQueryList = window.matchMedia(mediaQuery);
+
+        return {
+          mediaQueryList,
+          value,
+        };
+      })
+      // Remove any items that did not match the regex above and are
+      // undefined as a result.
+      .filter(item => item);
+}
+
+/**
+ * @param {!Array<!MediaQueriesListAndValueDef>} mediaQueryListsAndValues
+ * @return {string} The value for the first matching MediaQuery, or an empty
+ *    string if none match.
+ */
+function getMatchingValue(mediaQueryListsAndValues) {
+  for (let i = 0; i < mediaQueryListsAndValues.length; i++) {
+    const {mediaQueryList, value} = mediaQueryListsAndValues[i];
+    if (mediaQueryList.matches) {
+      return value;
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Given a string of media query, value pairs, gets the value for the first
+ * matching media query, Some examples of the string:
  *
  * * "(min-width: 600px) true, false"
  * * "(min-width: 600px) 5, (min-width: 500px) 4, 3"
  * * "(min-width: 600px) and (min-height: 800px) 5, 3"
  * * "false"
  * * "(min-width: 600px) true"
+ *
+ * @param {string} str The media query/value string.
+ */
+export function getResponsiveAttributeValue(str) {
+  return getMatchingValue(getMediaQueryListsAndValues(str));
+}
+
+/**
+ * Manages attributes that can respond to media queries. Uses a provided config
+ * Object invoke callback functions when the matching value changes. When an
+ * attribute changes, `updateAttribute` should be called with the name of the
+ * attribute along with the responsive MediaQuery/value pairs. This is a comma
+ * separated list of media queries followed by values see
+ * {@link getResponsiveAttributeValue} for details on the format.
  *
  * The first value for the first media query in the list that matches is used.
  * If there are no matching media queries, the value is an empty string.
@@ -77,62 +131,15 @@ export class ResponsiveAttributes {
       this.setOnchange_(prevMqlv, null);
     }
 
-    const mqlv = this.getMediaQueryListsAndValues_(newValue);
+    const mqlv = getMediaQueryListsAndValues(newValue);
     const notifyIfChanged = () => {
-      this.notifyIfChanged_(name, this.getMatchingValue_(mqlv));
+      this.notifyIfChanged_(name, getMatchingValue(mqlv));
     };
     // Listen for future changes.
     this.setOnchange_(mqlv, notifyIfChanged);
     // Make sure to run once with the current value.
     notifyIfChanged();
     this.mediaQueryListsAndValues_[name] = mqlv;
-  }
-
-  /**
-   * @param {string} value
-   * @return {!Array<!MediaQueriesListAndValueDef>}
-   * @private
-   */
-  getMediaQueryListsAndValues_(value) {
-    return value.split(',')
-        .map(part => {
-          // Find the value portion by looking at the end.
-          const result = /[a-z0-9.]+$/.exec(part);
-          if (!result) {
-            return;
-          }
-
-          const {index} = result;
-          const value = part.slice(index);
-          // The media query is everything before the value.
-          const mediaQuery = part.slice(0, index).trim();
-          const mediaQueryList = window.matchMedia(mediaQuery);
-
-          return {
-            mediaQueryList,
-            value,
-          };
-        })
-        // Remove any items that did not match the regex above and are
-        // undefined as a result.
-        .filter(item => item);
-  }
-
-  /**
-   * @param {!Array<!MediaQueriesListAndValueDef>} mediaQueryListsAndValues
-   * @return {string} The value for the first matching MediaQuery, or an empty
-   *    string if none match.
-   * @private
-   */
-  getMatchingValue_(mediaQueryListsAndValues) {
-    for (let i = 0; i < mediaQueryListsAndValues.length; i++) {
-      const {mediaQueryList, value} = mediaQueryListsAndValues[i];
-      if (mediaQueryList.matches) {
-        return value;
-      }
-    }
-
-    return '';
   }
 
   /**

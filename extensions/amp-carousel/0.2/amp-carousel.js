@@ -18,7 +18,10 @@ import {ActionSource} from './action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from './carousel.js';
-import {ResponsiveAttributes} from './responsive-attributes';
+import {
+  ResponsiveAttributes,
+  getResponsiveAttributeValue,
+} from './responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
@@ -77,9 +80,6 @@ class AmpCarousel extends AMP.BaseElement {
       'horizontal': newValue => {
         this.carousel_.updateHorizontal(newValue == 'true');
       },
-      'initial-index': newValue => {
-        this.carousel_.updateInitialIndex(Number(newValue) || 0);
-      },
       'loop': newValue => {
         this.carousel_.updateLoop(newValue == 'true');
       },
@@ -88,6 +88,9 @@ class AmpCarousel extends AMP.BaseElement {
       },
       'side-slide-count': newValue => {
         this.carousel_.updateSideSlideCount(Number(newValue) || 0);
+      },
+      'slide': newValue => {
+        this.carousel_.goToSlide(Number(newValue));
       },
       'snap': newValue => {
         this.carousel_.updateSnap(newValue == 'true');
@@ -102,7 +105,6 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.updateVisibleCount(Number(newValue) || 0);
       },
     });
-
   }
 
   /** @override */
@@ -139,6 +141,7 @@ class AmpCarousel extends AMP.BaseElement {
       win,
       element,
       scrollContainer,
+      initialIndex: this.getInitialIndex_(),
       runMutate: cb => this.mutateElement(cb),
     });
 
@@ -192,7 +195,9 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     for (const key in mutations) {
-      this.attributeMutated_(key, mutations[key]);
+      // Stringify since the attribute logic deals with strings and amp-bind
+      // may not (e.g. value could be a Number).
+      this.attributeMutated_(key, String(mutations[key]));
     }
   }
 
@@ -285,6 +290,15 @@ class AmpCarousel extends AMP.BaseElement {
         'i-amphtml-carousel-at-end', index == this.slides_.length - 1);
     this.element.setAttribute(
         'i-amphtml-carousel-hide-buttons', this.hadTouch_);
+  }
+
+  /**
+   * @return {number} The initial index for the carousel.
+   * @private
+   */
+  getInitialIndex_() {
+    const attr = this.element.getAttribute('slide') || '0';
+    return Number(getResponsiveAttributeValue(attr));
   }
 
   /**

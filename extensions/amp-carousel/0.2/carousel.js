@@ -145,6 +145,13 @@ function sum(arr) {
  * half the slides are moved after. This could be a bit smarter and only move
  * as many as are necessary to have a sufficient amount of buffer. When slides
  * are moved, they are positioned on top of an existing spacer.
+ *
+ * Initial index:
+ *
+ * The initial index can be specified, which will make the carousel scroll to
+ * the desired index when it first renders. Since the layout of the slides is
+ * asynchronous, this should be used instead of calling `goToSlide` after
+ * creating the carousel.
  */
 export class Carousel {
   /**
@@ -152,6 +159,7 @@ export class Carousel {
   *   win: !Window,
   *   element: !Element,
   *   scrollContainer: !Element,
+  *   initialIndex: (number|undefined),
   *   runMutate: function(function()),
   * }} config
   */
@@ -159,6 +167,7 @@ export class Carousel {
     win,
     element,
     scrollContainer,
+    initialIndex = 0,
     runMutate,
   }) {
     /** @private @const */
@@ -262,10 +271,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = 0;
-
-    /** @private {number} */
-    this.initialIndex_ = 0;
+    this.currentIndex_ = initialIndex;
 
     /** @private {boolean} */
     this.loop_ = false;
@@ -372,7 +378,7 @@ export class Carousel {
    * }=} options
    */
   goToSlide(index, {smoothScroll = true, actionSource} = {}) {
-    if (index < 0 || index > this.slides_.length - 1) {
+    if (index < 0 || index > this.slides_.length - 1 || isNaN(index)) {
       return;
     }
 
@@ -437,14 +443,6 @@ export class Carousel {
   }
 
   /**
-   * @param {number} initialIndex The initial index that should be shown.
-   */
-  updateInitialIndex(initialIndex) {
-    this.initialIndex_ = initialIndex;
-    this.updateUi();
-  }
-
-  /**
    * @param {boolean} loop Whether or not the scrollable should loop when
    *    reaching the last slide.
    */
@@ -504,7 +502,7 @@ export class Carousel {
    *
    * @param {boolean} userScrollable Whether or not the carousel can be
    *    scrolled (e.g. via touch). If false, then the carousel can only be
-   *    advanced via next, prev, goToIndex or autoAdvance.
+   *    advanced via next, prev, goToSlide or autoAdvance.
    */
   updateUserScrollable(userScrollable) {
     this.userScrollable_ = userScrollable;
@@ -542,10 +540,6 @@ export class Carousel {
       this.setChildrenSnapAlign_();
       this.hideSpacersAndSlides_();
       this.resetScrollReferencePoint_(/* force */true);
-      this.ignoreNextScroll_ = true;
-      this.scrollSlideIntoView_(this.slides_[this.currentIndex_], {
-        smoothScroll: false,
-      });
     });
   }
 
