@@ -148,10 +148,10 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 
-  it('should toggle the landscape state', () => {
+  it('should toggle the viewport warning state', () => {
     const listenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.LANDSCAPE_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_LANDSCAPE, true);
+    storeService.subscribe(StateProperty.VIEWPORT_WARNING_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
