@@ -121,7 +121,8 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
-    const stylesheets = this.ampdoc.getRootNode().styleSheets;
+    const root = this.ampdoc.getRootNode();
+    const stylesheets = root.styleSheets;
     if (!stylesheets) {
       return;
     }
@@ -148,11 +149,12 @@ export class FixedLayer {
           stylesheet.cssRules, fixedSelectors, stickySelectors);
     }
 
-    this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
+    this.trySetupSelectorsNoInline(root, fixedSelectors, stickySelectors);
 
-    this.ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AmpEvents.DOM_UPDATE, event => {
       this.cleanup_();
-      this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
+      this.trySetupSelectorsNoInline(event.target, fixedSelectors,
+          stickySelectors);
       this.update();
     });
 
@@ -541,13 +543,14 @@ export class FixedLayer {
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
    * from inlining the function.
+   * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
    * @private
    */
-  trySetupSelectorsNoInline(fixedSelectors, stickySelectors) {
+  trySetupSelectorsNoInline(root, fixedSelectors, stickySelectors) {
     try {
-      this.setupSelectors_(fixedSelectors, stickySelectors);
+      this.setupSelectors_(root, fixedSelectors, stickySelectors);
     } catch (e) {
       // Fail quietly.
       dev().error(TAG, 'Failed to setup fixed elements:', e);
@@ -557,15 +560,15 @@ export class FixedLayer {
   /**
    * Calls `setupElement_` for up to 10 elements matching each selector
    * in `fixedSelectors` and for all selectors in `stickySelectors`.
+   * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
    * @private
    */
-  setupSelectors_(fixedSelectors, stickySelectors) {
+  setupSelectors_(root, fixedSelectors, stickySelectors) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          fixedSelector);
+      const elements = root.querySelectorAll(fixedSelector);
       for (let j = 0; j < elements.length; j++) {
         if (this.elements_.length > 10) {
           // We shouldn't have too many of `fixed` elements.
@@ -576,8 +579,7 @@ export class FixedLayer {
     }
     for (let i = 0; i < stickySelectors.length; i++) {
       const stickySelector = stickySelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          stickySelector);
+      const elements = root.querySelectorAll(stickySelector);
       for (let j = 0; j < elements.length; j++) {
         this.setupElement_(elements[j], stickySelector, 'sticky');
       }
