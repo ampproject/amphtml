@@ -22,6 +22,7 @@
  */
 
 const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   startSauceConnect,
@@ -29,7 +30,7 @@ const {
   timedExecOrDie: timedExecOrDieBase,
   unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-test.js';
 const timedExecOrDie =
@@ -38,14 +39,15 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME);
   const buildTargets = determineBuildTargets();
+  printChangeSummary(FILENAME);
+
   unzipBuildOutput();
   startSauceConnect(FILENAME);
 
-  if (isTravisPushBuild()) {
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
-  }
-  else {
+  } else {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||

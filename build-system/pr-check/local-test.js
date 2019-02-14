@@ -22,12 +22,13 @@
  */
 
 const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'local-test.js';
 const timedExecOrDie =
@@ -36,15 +37,16 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME);
   const buildTargets = determineBuildTargets();
+  printChangeSummary(FILENAME);
+
   unzipBuildOutput();
-  if (isTravisPushBuild()) {
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp test --integration --nobuild --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
     timedExecOrDie('gulp test --dev_dashboard --nobuild');
     //TODO(estherkim): turn on when stabilized :)
     //timedExecOrDie('gulp e2e --nobuild');
-  }
-  else {
+  } else {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||

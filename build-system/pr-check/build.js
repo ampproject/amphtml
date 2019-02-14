@@ -23,52 +23,18 @@
 
 const colors = require('ansi-colors');
 const {
-  gitBranchName,
-  gitDiffColor,
-  gitDiffCommitLog,
-  gitDiffStatMaster,
-  gitMergeBaseMaster,
-  gitTravisMasterBaseline,
-  shortSha,
-} = require('../git');
-const {
-  isTravisBuild,
-  travisPullRequestSha,
-} = require('../travis');
-const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   zipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {getStderr} = require('../exec');
+const {gitDiffColor} = require('../git');
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
-
-/**
- * Prints a summary of files changed by, and commits included in the PR.
- */
-function printChangeSummary_() {
-  if (isTravisBuild()) {
-    console.log(FILELOGPREFIX, colors.cyan('origin/master'),
-        'is currently at commit',
-        colors.cyan(shortSha(gitTravisMasterBaseline())));
-    console.log(FILELOGPREFIX,
-        'Testing the following changes at commit',
-        colors.cyan(shortSha(travisPullRequestSha())));
-  }
-
-  const filesChanged = gitDiffStatMaster();
-  console.log(filesChanged);
-
-  const branchPoint = gitMergeBaseMaster();
-  console.log(FILELOGPREFIX, 'Commit log since branch',
-      colors.cyan(gitBranchName()), 'was forked from',
-      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
-  console.log(gitDiffCommitLog() + '\n');
-}
 
 /**
  * Makes sure package.json and yarn.lock are in sync.
@@ -119,7 +85,7 @@ function main() {
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck_();
   runYarnLockfileCheck_();
-  printChangeSummary_();
+  printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets();
 
   if (buildTargets.has('RUNTIME') ||
@@ -128,7 +94,6 @@ function main() {
       buildTargets.has('BUILD_SYSTEM')) {
 
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp css');
     timedExecOrDie('gulp build --fortesting');
 
     zipBuildOutput();

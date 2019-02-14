@@ -16,13 +16,9 @@
 'use strict';
 
 /**
- * @fileoverview This file is executed by Travis (configured via
- * .travis.yml in the root directory) and is the main driver script
- * for running tests.  Execution herein is entirely synchronous, that
- * is, commands are executed on after the other (see the exec
- * function). Should a command fail, this script will then also fail.
- * This script attempts to introduce some granularity for our
- * presubmit checking, via the determineBuildTargets method.
+ * @fileoverview
+ * This script sets the build targets for our PR check, where the build targets
+ * determine which tasks are required to run for pull request builds.
  */
 const config = require('../config');
 const minimatch = require('minimatch');

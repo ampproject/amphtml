@@ -16,11 +16,43 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const {
+  gitBranchName,
+  gitDiffCommitLog,
+  gitDiffStatMaster,
+  gitMergeBaseMaster,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('../git');
 const {execOrDie, exec, getStdout} = require('../exec');
-const {travisBuildNumber} = require('../travis');
+const {travisBuildNumber, travisPullRequestSha} = require('../travis');
+
 const BUILD_OUTPUT_FILE = `amp_build_${travisBuildNumber()}.zip`;
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+
+/**
+ * Prints a summary of files changed by, and commits included in the PR.
+ * @param {string} fileName
+ */
+function printChangeSummary(fileName) {
+  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+  console.log(fileLogPrefix, colors.cyan('origin/master'),
+      'is currently at commit',
+      colors.cyan(shortSha(gitTravisMasterBaseline())));
+  console.log(fileLogPrefix,
+      'Testing the following changes at commit',
+      colors.cyan(shortSha(travisPullRequestSha())));
+
+  const filesChanged = gitDiffStatMaster();
+  console.log(filesChanged);
+
+  const branchPoint = gitMergeBaseMaster();
+  console.log(fileLogPrefix, 'Commit log since branch',
+      colors.cyan(gitBranchName()), 'was forked from',
+      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
+  console.log(gitDiffCommitLog() + '\n');
+}
 
 /**
  * Starts connection to Sauce Labs after getting account credentials
@@ -130,6 +162,7 @@ function zipBuildOutput() {
 
 
 module.exports = {
+  printChangeSummary,
   startTimer,
   stopTimer,
   startSauceConnect,

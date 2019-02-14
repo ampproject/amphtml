@@ -24,6 +24,13 @@ branches:
     - canary
     - /^amp-release-.*$/
     - /^revert-.*$/
+addons:
+  hosts:
+    - ads.localhost
+    - iframe.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
 stages:
   - build
   - test
@@ -68,12 +75,6 @@ jobs:
         - pip install gsutil --user
       addons:
         chrome: stable
-        hosts:
-          - ads.localhost
-          - iframe.localhost
-          # Requested by some tests because they need a valid font host,
-          # but should not resolve in tests.
-          - fonts.googleapis.com
       script:
         - node build-system/pr-check/dist-test.js
     - stage: test
@@ -92,12 +93,6 @@ jobs:
         - pip install gsutil --user
       addons:
         chrome: stable
-        hosts:
-          - ads.localhost
-          - iframe.localhost
-          # Requested by some tests because they need a valid font host,
-          # but should not resolve in tests.
-          - fonts.googleapis.com
       script:
         - node build-system/pr-check/local-test.js
     - stage: test

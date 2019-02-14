@@ -22,12 +22,13 @@
  */
 
 const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   unzipBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'dist-test.js';
 const timedExecOrDie =
@@ -44,13 +45,13 @@ function runSinglePassTest_() {
 function main() {
   const startTime = startTimer(FILENAME);
   const buildTargets = determineBuildTargets();
+  printChangeSummary(FILENAME);
 
-  if (isTravisPushBuild()) {
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp dist --fortesting --noextensions');
     timedExecOrDie('gulp bundle-size --on-push-build');
     runSinglePassTest_();
-  }
-  else {
+  } else {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {

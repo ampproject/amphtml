@@ -23,11 +23,12 @@
  */
 
 const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'checks.js';
 const timedExecOrDie =
@@ -36,20 +37,20 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME);
   const buildTargets = determineBuildTargets();
+  printChangeSummary(FILENAME);
 
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
 
-  if (isTravisPushBuild()) {
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp ava');
     timedExecOrDie('node node_modules/jest/bin/jest.js');
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dep-check');
-  }
-  else {
+  } else {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
 

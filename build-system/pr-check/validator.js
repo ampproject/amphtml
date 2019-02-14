@@ -22,11 +22,12 @@
  */
 
 const {
+  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
-const {isTravisPushBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'validator.js';
 const timedExecOrDie =
@@ -35,18 +36,16 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME);
   const buildTargets = determineBuildTargets();
+  printChangeSummary(FILENAME);
 
-  if (isTravisPushBuild()) {
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
-  }
-  else if (buildTargets.has('VALIDATOR')) {
+  } else if (buildTargets.has('VALIDATOR')) {
     timedExecOrDie('gulp validator');
-  }
-  else if (buildTargets.has('VALIDATOR_WEBUI')) {
+  } else if (buildTargets.has('VALIDATOR_WEBUI')) {
     timedExecOrDie('gulp validator-webui');
-  }
-  else {
+  } else {
     console.log('Skipping validator job because this commit does ' +
       'not affect the validator or validator web UI.');
   }
