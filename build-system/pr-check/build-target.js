@@ -24,9 +24,10 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const config = require('./config');
+const config = require('../config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 /**
  * Determines whether the given file belongs to the Validator webui,
@@ -186,10 +187,11 @@ function isFlagConfig(filePath) {
 /**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
- * @param {!Array<string>} filePaths
  * @return {!Set<string>}
  */
-function determineBuildTargets(filePaths) {
+function determineBuildTargets() {
+  const filePaths = gitDiffNameOnlyMaster();
+
   if (filePaths.length == 0) {
     return new Set([
       'BUILD_SYSTEM',

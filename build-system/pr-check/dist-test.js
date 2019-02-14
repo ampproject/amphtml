@@ -1,0 +1,72 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
+/**
+ * @fileoverview
+ * This script runs the bundle size check and single pass test.
+ * This is run during the CI stage = test; job = dist tests.
+ */
+
+const {determineBuildTargets} = require('./build-target');
+const {isTravisPushBuild} = require('../travis');
+const {startTimer, stopTimer, timedExecOrDie, unzipBuildOutput} = require('./utils');
+
+const FILENAME = 'dist-test.js';
+
+function runSinglePassTest_() {
+  timedExecOrDie('rm -R dist');
+  timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
+  timedExecOrDie('gulp test --integration' +
+   '--nobuild --compiled --single_pass');
+  timedExecOrDie('rm -R dist');
+}
+
+function main() {
+  const startTime = startTimer(FILENAME);
+  const buildTargets = determineBuildTargets();
+
+  if (isTravisPushBuild()) {
+    timedExecOrDie('gulp dist --fortesting --noextensions');
+    timedExecOrDie('gulp bundle-size --on-push-build');
+    runSinglePassTest_();
+  }
+  else {
+    let runTests = buildTargets.has('RUNTIME');
+
+    unzipBuildOutput(); //TODO(estherkim): does this belong here?
+    timedExecOrDie('gulp dist --fortesting --noextensions');
+    timedExecOrDie('gulp bundle-size ' +
+    `${buildTargets.has('RUNTIME') ? '--on_pr_build' : '--on_skipped_build'}`);
+
+    if (buildTargets.has('RUNTIME') ||
+    buildTargets.has('BUILD_SYSTEM') ||
+    buildTargets.has('INTEGRATION_TEST')) {
+      runSinglePassTest_();
+      runTests = true;
+    }
+
+    if (!runTests) {
+      console.log('Skipping dist tests because this commit does ' +
+      'not affect the runtime, build system, or integration test files.');
+    }
+  }
+
+  stopTimer(FILENAME, startTime);
+  return 0;
+}
+
+process.exit(main());
