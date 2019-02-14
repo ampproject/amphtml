@@ -73,8 +73,8 @@ export function htmlFor(element) {
  * animation frames. Otherwise use `htmlFor`.
  *
  * Do not use this for very deep or complex trees. The memory cost is
- * significantly higher than `htmlFor` and has performance improvements in this
- * case are negligible.
+ * significantly higher than `htmlFor` and performance improvements in this case
+ * are negligible.
  *
  * @param {!Element} element
  * @return {!HtmlLiteralTagDef}
