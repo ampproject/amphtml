@@ -358,7 +358,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'chargeads': {},
+  'chargeads': {}, // Deprecated, to be removed on 2019-04-06
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
@@ -706,6 +706,8 @@ export const adConfig = {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
     renderStartImplemented: true,
   },
+
+  'nws': {},
 
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
