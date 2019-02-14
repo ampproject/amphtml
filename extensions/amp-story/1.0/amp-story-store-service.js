@@ -90,7 +90,6 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    landscapeState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
@@ -102,6 +101,7 @@ export let InteractiveComponentDef;
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
+ *    viewportWarningState: boolean,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
@@ -130,7 +130,6 @@ export const StateProperty = {
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
-  LANDSCAPE_STATE: 'landscapeState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
@@ -144,6 +143,7 @@ export const StateProperty = {
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
+  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_WHITELIST: 'actionsWhitelist',
@@ -167,7 +167,6 @@ export const Action = {
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
-  TOGGLE_LANDSCAPE: 'toggleLandscape',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAUSED: 'togglePaused',
@@ -180,6 +179,7 @@ export const Action = {
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
+  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
 };
 
 
@@ -265,9 +265,6 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
       return /** @type {!State} */ (Object.assign({}, state,
           {[StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data}));
-    case Action.TOGGLE_LANDSCAPE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
@@ -313,6 +310,9 @@ const actions = (state, action, data) => {
             [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
             [StateProperty.UI_STATE]: data,
           }));
+    case Action.TOGGLE_VIEWPORT_WARNING:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.VIEWPORT_WARNING_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -434,7 +434,6 @@ export class AmpStoryStoreService {
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },
-      [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
@@ -446,6 +445,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_WHITELIST]: [],
