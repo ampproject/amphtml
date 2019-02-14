@@ -79,7 +79,9 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     }, opt_is3P);
 
     this.applyFillContent(iframe);
-    this.getVsync().mutate(() => this.element.appendChild(iframe));
+    this.getVsync().mutate(() => {
+      this.element.appendChild(iframe);
+    });
 
     this.iframe_ = iframe;
 
