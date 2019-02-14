@@ -136,26 +136,47 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
   stopTimer(cmd, startTime);
 }
 
-
-function downloadBuildOutput() {
-  execOrDie('gsutil cp ' +
-      `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE} ` +
-      `${BUILD_OUTPUT_FILE}`);
-  execOrDie(
-      `log="$(unzip -o ${BUILD_OUTPUT_FILE})" && ` +
-      'echo travis_fold:start:unzip_results && echo ${log} && ' +
-      'echo travis_fold:end:unzip_results');
-  execOrDie(
-      `log="$(ls -la ${BUILD_OUTPUT_DIRS})" && ` +
-      'echo travis_fold:start:verify_unzip_results && echo ${log} && ' +
-      'echo travis_fold:end:verify_unzip_results');
+/**
+ * Downloads build output from storage
+ * @param {string} functionName
+ */
+function downloadBuildOutput(functionName) {
+  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+  const buildOutputDownloadUrl =
+    `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE}`;
+  console.log(fileLogPrefix,
+      'Downloading build output from',
+      colors.cyan(buildOutputDownloadUrl) + '...');
+  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${BUILD_OUTPUT_FILE}`);
+  console.log(fileLogPrefix,
+      'Extracting',
+      colors.cyan(BUILD_OUTPUT_FILE) + '...');
+  exec('echo travis_fold:start:unzip_results');
+  execOrDie(`unzip -o ${BUILD_OUTPUT_FILE}`);
+  exec('echo travis_fold:end:unzip_results');
+  console.log(fileLogPrefix, 'Verifying extracted files...');
+  exec('echo travis_fold:start:verify_unzip_results');
+  execOrDie(`ls -la ${BUILD_OUTPUT_DIRS}`);
+  exec('echo travis_fold:end:verify_unzip_results');
 }
 
-function uploadBuildOutput() {
-  execOrDie(
-      `log="$(zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS})" && ` +
-      'echo travis_fold:start:zip_results && echo ${log} && ' +
-      'echo travis_fold:end:zip_results');
+/**
+ * Zips and uploads the build output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadBuildOutput(functionName) {
+  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+  console.log(fileLogPrefix,
+      'Compressing contents of directories',
+      colors.cyan(BUILD_OUTPUT_DIRS),
+      ' into', colors.cyan(BUILD_OUTPUT_FILE) + '...');
+  exec('echo travis_fold:start:zip_results');
+  execOrDie(`zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS}`);
+  exec('echo travis_fold:end:zip_results');
+  console.log(fileLogPrefix,
+      'Uploading',
+      colors.cyan(BUILD_OUTPUT_FILE),
+      'to', colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION) + '...');
   execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} `
     + `${BUILD_OUTPUT_STORAGE_LOCATION}`);
 }

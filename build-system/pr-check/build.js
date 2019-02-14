@@ -96,7 +96,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
 
-    uploadBuildOutput();
+    uploadBuildOutput(FILENAME);
   } else {
     console.log('Skipping build job because this commit does ' +
      'not affect the runtime, build system, or test files');

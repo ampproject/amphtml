@@ -41,7 +41,7 @@ function main() {
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
-  downloadBuildOutput();
+  downloadBuildOutput(FILENAME);
   startSauceConnect(FILENAME);
 
   if (!isTravisPullRequestBuild()) {

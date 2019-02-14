@@ -39,7 +39,7 @@ function main() {
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
-  downloadBuildOutput();
+  downloadBuildOutput(FILENAME);
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp test --integration --nobuild --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');

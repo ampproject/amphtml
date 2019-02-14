@@ -41,7 +41,7 @@ function main() {
   printChangeSummary(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    downloadBuildOutput();
+    downloadBuildOutput(FILENAME);
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
@@ -51,7 +51,7 @@ function main() {
         buildTargets.has('VISUAL_DIFF') ||
         buildTargets.has('FLAG_CONFIG')) {
 
-      downloadBuildOutput();
+      downloadBuildOutput(FILENAME);
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
