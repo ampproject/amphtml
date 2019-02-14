@@ -21,7 +21,7 @@ import {toWin} from '../../../../src/types';
  * Finds and extracts keyframes definition for Web Animations from CSS styles.
  * @param {!Document|!ShadowRoot} rootNode
  * @param {string} name
- * @return {?./web-animation-types.WebKeyframesDef}
+ * @return {?../web-animation-types.WebKeyframesDef}
  */
 export function extractKeyframes(rootNode, name) {
   const {styleSheets} = rootNode;
@@ -45,7 +45,7 @@ export function extractKeyframes(rootNode, name) {
  * @param {!Window} win
  * @param {!CSSStyleSheet} styleSheet
  * @param {string} name
- * @return {?./web-animation-types.WebKeyframesDef}
+ * @return {?../web-animation-types.WebKeyframesDef}
  */
 function scanStyle(win, styleSheet, name) {
   // No rules, e.g. a font.
@@ -71,7 +71,7 @@ function scanStyle(win, styleSheet, name) {
  * @param {!Window} win
  * @param {!CSSRuleList} rules
  * @param {string} name
- * @return {?./web-animation-types.WebKeyframesDef}
+ * @return {?../web-animation-types.WebKeyframesDef}
  */
 function scanRules(win, rules, name) {
   // Go backwards since in CSS the last one wins.
@@ -128,7 +128,7 @@ function isEnabled(win, rule) {
 
 /**
  * @param {!CSSKeyframesRule} keyframesRule
- * @return {!./web-animation-types.WebKeyframesDef}
+ * @return {!../web-animation-types.WebKeyframesDef}
  */
 function buildKeyframes(keyframesRule) {
   const array = [];

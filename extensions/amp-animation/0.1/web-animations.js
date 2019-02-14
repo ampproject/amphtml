@@ -16,9 +16,13 @@
 
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
-import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
+import {
+  ScrollTimelineWorkletRunner,
+} from './runners/scrolltimeline-worklet-runner';
 import {Services} from '../../../src/services';
 import {
+  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
@@ -32,7 +36,6 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
-import {WebAnimationRunner} from './runners/web-animation';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {
@@ -60,21 +63,6 @@ const TARGET_ANIM_ID = '__AMP_ANIM_ID';
  */
 let animIdCounter = 0;
 
-
-/**
- * A struct for parameters for `Element.animate` call.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
- *
- * @typedef {{
- *   target: !Element,
- *   keyframes: !WebKeyframesDef,
- *   vars: ?Object<string, *>,
- *   timing: !WebAnimationTimingDef,
- * }}
- */
-export let InternalWebAnimationRequestDef;
-
-
 /**
  * @const {!Object<string, boolean>}
  */
@@ -82,7 +70,6 @@ const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
 };
-
 
 /**
  * The scanner for the `WebAnimationDef` format. It calls the appropriate
@@ -207,7 +194,7 @@ export class Builder {
    * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
    * @param {?Object=} opt_viewportData
-   * @return {!Promise<!WebAnimationRunner>}
+   * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
   createRunner(spec, hasPositionObserver = false, opt_args,
     opt_viewportData = null) {
@@ -219,7 +206,7 @@ export class Builder {
         return this.useAnimationWorklet_ && hasPositionObserver ?
           new ScrollTimelineWorkletRunner(this.win_, requests,
               opt_viewportData) :
-          new WebAnimationRunner(requests);
+          new NativeWebAnimationRunner(requests);
       });
     });
   }
@@ -270,7 +257,7 @@ export class Builder {
 
 /**
  * The scanner that evaluates all expressions and builds the final
- * `WebAnimationRunner` instance for the target animation. It must be
+ * `AnimationRunner` instance for the target animation. It must be
  * executed in the "measure" vsync phase.
  */
 export class MeasureScanner extends Scanner {
@@ -766,7 +753,7 @@ export class MeasureScanner extends Scanner {
 
 
 /**
- * @implements {./css-expr-ast.CssContext}
+ * @implements {./parsers/css-expr-ast.CssContext}
  */
 class CssContextImpl {
   /**
@@ -787,7 +774,7 @@ class CssContextImpl {
     /** @private {!Object<string, !CSSStyleDeclaration>} */
     this.computedStyleCache_ = map();
 
-    /** @private {!Object<string, ?./css-expr-ast.CssNode>} */
+    /** @private {!Object<string, ?./parsers/css-expr-ast.CssNode>} */
     this.parsedCssCache_ = map();
 
     /** @private {?number} */
@@ -1018,7 +1005,7 @@ class CssContextImpl {
   /**
    * @param {*} input
    * @param {boolean} normalize
-   * @return {?./css-expr-ast.CssNode}
+   * @return {?./parsers/css-expr-ast.CssNode}
    * @private
    */
   resolveAsNode_(input, normalize) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseAnimationRunner} from './base';
+import {AnimationRunner} from './animation-runner';
 import {Observable} from '../../../../src/observable';
 import {
   WebAnimationDef,
@@ -36,10 +36,10 @@ import {devAssert, userAssert} from '../../../../src/log';
 
 /**
  */
-export class WebAnimationRunner extends BaseAnimationRunner {
+export class NativeWebAnimationRunner extends AnimationRunner {
 
   /**
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    */
   constructor(requests) {
     super(requests);
@@ -213,7 +213,6 @@ export class WebAnimationRunner extends BaseAnimationRunner {
   }
 
   /**
-   * @override
    * @param {!WebAnimationPlayState} playState
    * @private
    */

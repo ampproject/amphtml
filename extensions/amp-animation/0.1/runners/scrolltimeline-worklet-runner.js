@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseAnimationRunner} from './base';
+import {AnimationRunner} from './animation-runner';
 import {Services} from '../../../../src/services';
 import {
   assertDoesNotContainDisplay,
@@ -27,11 +27,11 @@ let workletModulePromise;
 
 /**
  */
-export class ScrollTimelineWorkletRunner extends BaseAnimationRunner {
+export class ScrollTimelineWorkletRunner extends AnimationRunner {
 
   /**
    * @param {!Window} win
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    * @param {?Object=} viewportData
    */
   constructor(win, requests, viewportData) {

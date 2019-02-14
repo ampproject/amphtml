@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import {
+  WebAnimationPlayState, // eslint-disable-line no-unused-vars
+} from '../web-animation-types';
 
 /**
  */
-export class BaseAnimationRunner {
+export class AnimationRunner {
 
   /**
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    */
   constructor(requests) {
     /** @const @protected */
@@ -92,10 +95,4 @@ export class BaseAnimationRunner {
   cancel() {
   }
 
-  /**
-   * @param {!WebAnimationPlayState} unusedPlayState
-   * @private
-   */
-  setPlayState_(unusedPlayState) {
-  }
 }
