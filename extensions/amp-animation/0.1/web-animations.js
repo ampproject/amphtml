@@ -16,11 +16,6 @@
 
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
-import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
-import {
-  ScrollTimelineWorkletRunner,
-} from './runners/scrolltimeline-worklet-runner';
-import {Services} from '../../../src/services';
 import {
   InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
   WebAnimationDef,
@@ -36,6 +31,11 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
+import {
+  ScrollTimelineWorkletRunner,
+} from './runners/scrolltimeline-worklet-runner';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {
