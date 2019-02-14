@@ -63,6 +63,22 @@ jobs:
             - python-protobuf
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
+      before_install:
+        - export CHROME_BIN=google-chrome-stable
+        - export DISPLAY=:99.0
+        # Explicitly add yarn and gsutil install because this section overrides before_install parent section
+        - curl -o- -L https://yarnpkg.com/install.sh | bash
+        - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+        - pip install urllib3[secure]
+        - pip install gsutil --user
+      addons:
+        chrome: stable
+        hosts:
+          - ads.localhost
+          - iframe.localhost
+          # Requested by some tests because they need a valid font host,
+          # but should not resolve in tests.
+          - fonts.googleapis.com
       script:
         - node build-system/pr-check/dist-test.js
     - stage: test

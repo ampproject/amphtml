@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const {execOrDie, exec, getStdout} = require('../exec');
 const {travisBuildNumber} = require('../travis');
 const BUILD_OUTPUT_FILE = `amp_build_${travisBuildNumber()}.zip`;
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 
 /**
