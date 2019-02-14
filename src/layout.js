@@ -321,9 +321,10 @@ export function isLoadingAllowed(element) {
  * @return {!Layout}
  */
 export function applyStaticLayout(element) {
-  // Check if the layout has already been done by server-side rendering. The
-  // document may be visible to the user if the boilerplate was removed so
-  // please take care in making changes here.
+  // Check if the layout has already been done by server-side rendering or
+  // client-side rendering and the element was cloned. The document may be
+  // visible to the user if the boilerplate was removed so please take care in
+  // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (devAssert(
@@ -490,5 +491,8 @@ export function applyStaticLayout(element) {
     }
     setStyle(element, 'height', 0);
   }
+  // Mark the element as having completed static layout, in case it is cloned
+  // in the future.
+  element.setAttribute('i-amphtml-layout', layout);
   return layout;
 }
