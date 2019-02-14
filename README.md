@@ -24,7 +24,7 @@ The best place to get help with **questions about using AMP** on your site is [S
 ## Further reading
 
 * [Component reference](https://www.ampproject.org/docs/reference/components)
-* [Release schedule](contributing/release-schedule.md)
+* [Release schedule](contributing/release-schedule.md) or [is my PR in production yet?](contributing/release-schedule.md#determining-if-your-change-is-in-production)
 * [Format specification](spec/amp-html-format.md)
 * [Custom element specification](spec/amp-html-components.md)
 
