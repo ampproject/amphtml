@@ -34,6 +34,27 @@ describes.sandboxed('DOM', {}, env => {
     sandbox.restore();
   });
 
+  describe('scopeSelector', () => {
+
+    const {scopeSelectorForTesting: scopeSelector} = dom;
+
+    it('concats simple', () => {
+      expect(scopeSelector('.i-amphtml-scoped', 'div'))
+          .to.equal('.i-amphtml-scoped div');
+    });
+
+    it('concats multiple selectors (2)', () => {
+      expect(scopeSelector(':scope', 'div,ul'))
+          .to.equal(':scope div,:scope ul');
+    });
+
+    it('concats multiple selectors (4)', () => {
+      expect(scopeSelector('div >', 'div,ul,ol,section'))
+          .to.equal('div > div,div > ul,div > ol,div > section');
+    });
+
+  });
+
   it('should remove all children', () => {
     const element = document.createElement('div');
     element.appendChild(document.createElement('div'));
@@ -166,8 +187,8 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, () => true)).to.equal(child);
     expect(dom.closestNode(child, () => true)).to.equal(child);
-    expect(dom.closestByTag(child, 'div')).to.equal(child);
-    expect(dom.closestByTag(child, 'DIV')).to.equal(child);
+    expect(dom.closestAncestorElementByTag(child, 'div')).to.equal(child);
+    expect(dom.closestAncestorElementByTag(child, 'DIV')).to.equal(child);
   });
 
   it('closest should stop search at opt_stopAt', () => {
@@ -202,16 +223,16 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
-    expect(dom.closestByTag(child, 'child')).to.equal(child);
+    expect(dom.closestAncestorElementByTag(child, 'child')).to.equal(child);
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
     expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
         .to.equal(element);
-    expect(dom.closestByTag(child, 'element')).to.equal(element);
+    expect(dom.closestAncestorElementByTag(child, 'element')).to.equal(element);
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
-    expect(dom.closestByTag(child, 'parent')).to.equal(parent);
+    expect(dom.closestAncestorElementByTag(child, 'parent')).to.equal(parent);
   });
 
   it('closestNode should find nodes as well as elements', () => {
@@ -228,7 +249,7 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closestBySelector should find first match', () => {
+  it('closestAncestorElementBySelector should find first match', () => {
     const parent = document.createElement('parent');
     parent.className = 'parent';
     parent.id = 'parent';
@@ -243,17 +264,26 @@ describes.sandboxed('DOM', {}, env => {
     child.className = 'child';
     element.appendChild(child);
 
-    expect(dom.closestBySelector(child, 'child')).to.equal(child);
-    expect(dom.closestBySelector(child, '.child')).to.equal(child);
-    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '.child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '#child'))
+        .to.equal(child);
 
-    expect(dom.closestBySelector(child, 'element')).to.equal(element);
-    expect(dom.closestBySelector(child, '.element')).to.equal(element);
-    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '.element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '#element'))
+        .to.equal(element);
 
-    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '.parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '#parent'))
+        .to.equal(parent);
   });
 
   it('elementByTag should find first match', () => {

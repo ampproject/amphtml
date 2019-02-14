@@ -61,7 +61,18 @@ recaptchaRouter.post(
         responseJson[bodyKey] = req.body[bodyKey];
       });
 
-      res.status(200).json(responseJson);
+      const containsRecaptchaInResponse = Object.keys(responseJson)
+          .some(responseJsonKey => {
+            return responseJsonKey.toLowerCase().includes('recaptcha');
+          });
+
+      if (containsRecaptchaInResponse) {
+        res.status(200).json(responseJson);
+      } else {
+        res.status(400).json({
+          message: 'Did not include a recaptcha token',
+        });
+      }
     }
 );
 

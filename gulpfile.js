@@ -40,6 +40,7 @@ const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile'
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
 const {extensionBundles, aliasBundles} = require('./bundles.config');
+const {isTravisBuild} = require('./build-system/travis');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {thirdPartyFrames} = require('./build-system/config');
@@ -81,7 +82,7 @@ const unminifiedAdsTarget = 'dist/amp-inabox.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
 aliasBundles.forEach(c => {
@@ -108,26 +109,6 @@ const MINIMAL_EXTENSION_SET = [
   'amp-sidebar',
   'amp-video',
 ];
-
-
-/**
- * Extensions that require `amp-video-service` to be built alongside them.
- * @private @const {!Set<string>}
- */
-// TODO(alanorozco): Determine dynamically?
-const VIDEO_EXTENSIONS = new Set([
-  'amp-3q-player',
-  'amp-brid-player',
-  'amp-dailymotion',
-  'amp-delight-player',
-  'amp-gfycat',
-  'amp-ima-video',
-  'amp-nexxtv-player',
-  'amp-ooyala-player',
-  'amp-video',
-  'amp-wistia-player',
-  'amp-youtube',
-]);
 
 
 /**
@@ -212,7 +193,7 @@ function endBuildStep(stepName, targetName, startTime) {
   } else {
     timeString += secs + '.' + ms + ' s)';
   }
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(stepName, cyan(targetName), green(timeString));
   }
 }
@@ -772,7 +753,7 @@ function buildExtensionJs(path, name, version, options) {
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) { // eslint-disable-line amphtml-internal/no-for-of-statement
       if (argv._.includes(task)) {
         log(green('To skip building during future'), cyan(task),
@@ -789,7 +770,7 @@ function printNobuildHelp() {
  * @param {string} command Command being run.
  */
 function printConfigHelp(command) {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config.'));
@@ -805,7 +786,7 @@ function printConfigHelp(command) {
  * or no extensions at all.
  */
 function parseExtensionFlags() {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     const noExtensionsMessage = green('⤷ Use ') +
         cyan('--noextensions ') +
         green('to skip building extensions.');
@@ -834,11 +815,6 @@ function parseExtensionFlags() {
     if (argv.extensions || argv.extensions_from) {
       log(green('Building extension(s):'),
           cyan(getExtensionsToBuild().join(', ')));
-
-      if (maybeAddVideoService()) {
-        log(green('⤷ Video component(s) being built, added'),
-            cyan('amp-video-service'), green('to extension set.'));
-      }
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
     } else {
@@ -849,18 +825,6 @@ function parseExtensionFlags() {
     log(minimalSetMessage);
     log(extensionsFromMessage);
   }
-}
-
-/**
- * Adds `amp-video-service` to the extension set if a component requires it.
- * @return {boolean}
- */
-function maybeAddVideoService() {
-  if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
-    return false;
-  }
-  extensionsToBuild.push('amp-video-service');
-  return true;
 }
 
 /**
@@ -937,7 +901,7 @@ function dist() {
     printConfigHelp(cmd);
   }
   if (argv.single_pass) {
-    if (!process.env.TRAVIS) {
+    if (!isTravisBuild()) {
       log(green('Not building any AMP extensions in'), cyan('single_pass'),
           green('mode.'));
     }
@@ -966,7 +930,7 @@ function dist() {
           copyCss(),
         ]);
       }).then(() => {
-        if (process.env.TRAVIS) {
+        if (isTravisBuild()) {
           // New line after all the compilation progress dots on Travis.
           console.log('\n');
         }
@@ -1094,7 +1058,7 @@ function checkTypes() {
           }),
     ]);
   }).then(() => {
-    if (process.env.TRAVIS) {
+    if (isTravisBuild()) {
       // New line after all the compilation progress dots on Travis.
       console.log('\n');
     }

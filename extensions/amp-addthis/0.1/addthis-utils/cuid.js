@@ -75,7 +75,7 @@ export const isValidCUID = cuid => {
  * @return {string}
  */
 export const createCUID = () => {
-  const suffix = '00000000' +
-      (Math.floor(Math.random() * (MAX_HEX + 1))).toString(16).slice(-8);
-  return ((CUID_SESSION_TIME / 1000) & MAX_HEX).toString(16) + suffix;
+  return ((CUID_SESSION_TIME / 1000) & MAX_HEX).toString(16) +
+    ('00000000' + (Math.floor(Math.random() * (MAX_HEX + 1))).toString(16))
+        .slice(-8);
 };

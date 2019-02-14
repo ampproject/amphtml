@@ -27,15 +27,16 @@ const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
+const {isTravisBuild, isTravisPullRequestBuild} = require('../travis');
 
 const isWatching = (argv.watch || argv.w) || false;
 const options = {
   fix: false,
   quiet: argv.quiet || false,
 };
-let collapseLintResults = !!process.env.TRAVIS;
+let collapseLintResults = isTravisBuild();
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
@@ -58,7 +59,7 @@ function initializeStream(globs, streamOptions) {
  * @param {string} message
  */
 function logOnSameLine(message) {
-  if (!process.env.TRAVIS && process.stdout.isTTY) {
+  if (!isTravisBuild() && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
@@ -74,7 +75,7 @@ function logOnSameLine(message) {
  * @return {boolean}
  */
 function runLinter(filePath, stream, options) {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(colors.green('Starting linter...'));
   }
   if (collapseLintResults) {
@@ -89,7 +90,7 @@ function runLinter(filePath, stream, options) {
       }))
       .pipe(eslintIfFixed(filePath))
       .pipe(eslint.result(function(result) {
-        if (!process.env.TRAVIS) {
+        if (!isTravisBuild()) {
           logOnSameLine(colors.green('Linted: ') + result.filePath);
         }
         if (options.fix && result.fixed) {
@@ -106,7 +107,7 @@ function runLinter(filePath, stream, options) {
           console./* OK*/log('travis_fold:end:lint_results');
         }
         if (results.errorCount == 0 && results.warningCount == 0) {
-          if (!process.env.TRAVIS) {
+          if (!isTravisBuild()) {
             logOnSameLine(colors.green('SUCCESS: ') +
                 'No linter warnings or errors.');
           }
@@ -155,7 +156,7 @@ function jsFilesChanged() {
  * @return {boolean}
  */
 function eslintRulesChanged() {
-  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+  if (!isTravisPullRequestBuild()) {
     return false;
   }
   return gitDiffNameOnlyMaster().filter(function(file) {
@@ -172,7 +173,7 @@ function eslintRulesChanged() {
 function setFilesToLint(files) {
   config.lintGlobs =
       config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     files.forEach(file => {
       log(colors.cyan(file));
@@ -192,7 +193,7 @@ function lint() {
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
   } else if (!eslintRulesChanged() &&
-      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
+      (isTravisPullRequestBuild() ||
        process.env.LOCAL_PR_CHECK ||
        argv['local-changes'])) {
     const jsFiles = jsFilesChanged();

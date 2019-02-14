@@ -184,6 +184,12 @@ const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
  */
 const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
 
+/**
+ * CSS class for sidebars in stories.
+ * @const {string}
+ */
+const SIDEBAR_CLASS_NAME = 'i-amphtml-story-sidebar';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -254,7 +260,8 @@ export class AmpStory extends AMP.BaseElement {
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
     /** Instantiates the viewport warning layer. */
-    new ViewportWarningLayer(this.win, this.element);
+    new ViewportWarningLayer(this.win, this.element, DESKTOP_WIDTH_THRESHOLD,
+        DESKTOP_HEIGHT_THRESHOLD);
 
     /** @private {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
@@ -1443,9 +1450,8 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
     if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
-      // TODO: Rename the TOGGLE_LANDSCAPE action. (#19670)
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
-      this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
+      this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       return;
     }
 
@@ -1457,10 +1463,10 @@ export class AmpStory extends AMP.BaseElement {
         state.isLandscape = offsetWidth > offsetHeight;
       },
       mutate: state => {
-        const landscapeState =
-            this.storeService_.get(StateProperty.LANDSCAPE_STATE);
+        const viewportWarningState =
+            this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE);
 
-        if (landscapeState === state.isLandscape) {
+        if (viewportWarningState === state.isLandscape) {
           return;
         }
 
@@ -1468,11 +1474,11 @@ export class AmpStory extends AMP.BaseElement {
           this.pausedStateToRestore_ =
               !!this.storeService_.get(StateProperty.PAUSED_STATE);
           this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-          this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, true);
+          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
         } else {
           this.storeService_
               .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
-          this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
+          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
         }
       },
     }, {});
@@ -1648,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @private
    */
-  openOpacityMask_() {
+  initializeOpacityMask_() {
     if (!this.maskElement_) {
       const maskEl = this.win.document.createElement('div');
       maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
@@ -1664,8 +1670,15 @@ export class AmpStory extends AMP.BaseElement {
       this.maskElement_ = maskEl;
       this.mutateElement(() => {
         this.element.appendChild(this.maskElement_);
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
       });
     }
+  }
+
+  /**
+   * @private
+   */
+  openOpacityMask_() {
     this.mutateElement(() => {
       toggle(dev().assertElement(this.maskElement_), /* display */true);
     });
@@ -1837,11 +1850,29 @@ export class AmpStory extends AMP.BaseElement {
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
     Object.keys(distanceMap).forEach(pageId => {
+
       const distance = distanceMap[pageId];
       if (!pagesByDistance[distance]) {
         pagesByDistance[distance] = [];
       }
-      pagesByDistance[distance].push(pageId);
+      // There may be other 1 skip away pages due to branching.
+      if (isExperimentOn(this.win, 'amp-story-branching')) {
+        const indexInStack =
+          this.storyNavigationPath_.indexOf(this.activePage_.element.id);
+        const maybePrev = this.storyNavigationPath_[indexInStack - 1];
+        if (indexInStack > 0 && pageId === this.activePage_.element.id) {
+          if (!pagesByDistance[1]) {
+            pagesByDistance[1] = [];
+          }
+          pagesByDistance[1].push(maybePrev);
+        }
+        // Do not overwrite, branching distance always takes precedence.
+        if (pageId !== maybePrev) {
+          pagesByDistance[distance].push(pageId);
+        }
+      } else {
+        pagesByDistance[distance].push(pageId);
+      }
     });
 
     return pagesByDistance;
@@ -2185,6 +2216,12 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.sidebar_) {
       return;
     }
+
+    this.mutateElement(() => {
+      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
+    });
+
+    this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
 

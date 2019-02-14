@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-carousel-analytics"></a>AMP Carousel and Analytics
+# AMP Carousel and Analytics
 
 ## Carousel (slides) triggers
 
