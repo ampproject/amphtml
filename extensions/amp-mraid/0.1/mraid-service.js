@@ -83,6 +83,7 @@ export class MraidService {
     //    and we can pass it through to the callback directly.
     console.log('call fake addEventListener');
     console.log('the callback is mraid-service', callback);
+    fetch('//localhost:8000/callOnVisibilityChange');
     this.mraid_.addEventListener(
         'exposureChange',
         (exposedPercentage,

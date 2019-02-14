@@ -1185,9 +1185,6 @@ export class VisibilityTracker extends EventTracker {
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
-    const visibilityManagerPromise = this.assertMeasurable_().then(() => {
-      return this.root.getVisibilityManager();
-    });
     let createReportReadyPromiseFunc = null;
 
     if (reportWhenSpec) {
@@ -1203,6 +1200,14 @@ export class VisibilityTracker extends EventTracker {
       // special polyfill for eventType: 'hidden'
       reportWhenSpec = 'documentHidden';
     }
+
+    const visibilityManagerPromise = this.root.isUsingHostAPI()
+        .then(hasHostAPI => {
+          if (hasHostAPI) {
+            this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
+          }
+          return this.root.getVisibilityManager();
+        });
 
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc =
@@ -1227,7 +1232,7 @@ export class VisibilityTracker extends EventTracker {
             createReportReadyPromiseFunc,
             this.onEvent_.bind(
                 this, eventType, listener, this.root.getRootElement()));
-      });
+      }, () => {});
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
@@ -1245,7 +1250,7 @@ export class VisibilityTracker extends EventTracker {
               this.getReadyPromise(waitForSpec, selector, element),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(this, eventType, listener, element));
-        });
+        }, () => {});
       });
     }
 
@@ -1257,24 +1262,17 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * Assert that the setting is measurable in mApp environment
+   * Assert that the setting is measurable with host API
    * @param {string=} selector
    * @param {string=} reportWhenSpec
    */
-  assertMeasurable_(selector, reportWhenSpec) {
-    console.log('assert measurable');
-    return this.root.isUsingHostAPI().then(hasHostAPI => {
-      console.log('using host API is ', hasHostAPI);
-      if (!hasHostAPI) {
-        return;
-      }
-      userAssert(!selector || selector == ':root' || selector == ':host',
-          'Element %s that is not root is not supported with host API',
-          selector);
-      // TODO(@zhouyx): Handle pageHidden and pageExit spec
-      userAssert(!reportWhenSpec,
-          'waitFor spec & hidden trigger are not supported with host API');
-    });
+  assertMeasurableWithHostApi_(selector, reportWhenSpec) {
+    userAssert(!selector || selector == ':root' || selector == ':host',
+        'Element %s that is not root is not supported with host API',
+        selector);
+
+    userAssert(!reportWhenSpec,
+        'waitFor spec & hidden trigger are not supported with host API');
   }
 
   /**

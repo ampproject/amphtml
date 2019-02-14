@@ -15,10 +15,10 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {getMinOpacity} from './opacity';
 import {VisibilityManager} from './visibility-manager';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getMinOpacity} from './opacity';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -41,8 +41,8 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     /** @const @private {!../../../src/inabox/host-services.VisibilityInterface} */
     this.visibilityInterface_ = visibilityInterface;
 
-    /** @private {number} */
-    this.intersectionRaio_ = 0;
+    /** @const @private {boolean} */
+    this.backgroundedAtStart_ = !this.viewer_.isVisible();
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.intersectionRect_ = null;
@@ -51,7 +51,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     this.disposed_ = false;
 
     // Initate the listener
-    this.unsubscribe(this.observe());
+    this.listenToVisibilityChange_();
   }
 
   /** @override */
@@ -62,32 +62,50 @@ export class VisibilityManagerForMApp extends VisibilityManager {
 
   /** @override */
   getStartTime() {
+    // viewer.getFirstVisibleTime depend on the visibilitychange API and
+    // document['hidden']
+    // Expect the viewer is always visible in webview
     return dev().assertNumber(this.viewer_.getFirstVisibleTime());
   }
 
   /** @override */
   isBackgrounded() {
-    return this.viewer_.isVisible();
+    // Listens to visibilitychange event, in theory this never fires
+    return !this.viewer_.isVisible();
   }
 
   /** @override */
   isBackgroundedAtStart() {
-    return this.viewer_.isVisible();
+    // Return the first visible state. In theory this is always true in mApp
+    return this.backgroundedAtStart_;
   }
+
 
   /** @override */
   getRootMinOpacity() {
-    // Copied from visibilityManagerForDoc, doesn't work for inabox
+    // Copied the implementation from VisibilityManagerForDoc,
+    // doesn't count iframe opacity
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
         root.documentElement || root.body || root);
     return getMinOpacity(rootElement);
   }
 
+  /** @override */
+  listenElement() {
+    // #listenElement not supported in mApp
+    devAssert(false, '%s: element level visibility not supported, ' +
+        'getElementIntersectionRect should not be called in ' +
+        'VisibilityManager for mApp', TAG);
+    return () => {};
+  }
+
   /**
    * @override
    */
   getRootLayoutBox() {
+    // By the time `#getRootLayoutBox` is called, it is garanteed that
+    // onVisibilityChangeHandler has been called at least once
     return devAssert(this.intersectionRect_);
   }
 
@@ -99,27 +117,34 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     if (this.disposed_) {
       return;
     }
-    this.setRootVisibility(visibilityData.visibleRatio);
-    this.intersectionRaio_ = visibilityData.visibleRatio;
-    this.intersectionRect_ = visibilityData.visibleRect
+    //TODO: Need discussion
+    // rootVisibility is set by hostAPI, instead of Viewer.isVisible
+    let ratio = visibilityData.visibleRatio;
+    // Convert to valid ratio range in [0, 1]
+    ratio = ratio < 0 ? 0 : ratio;
+    ratio = ratio > 1 ? 1 : ratio;
+    this.setRootVisibility(ratio);
+    this.intersectionRect_ = visibilityData.visibleRect;
   }
 
   /**
    * @override
    */
   observe() {
-    this.visibilityInterface_.onVisibilityChange(
-        this.onVisibilityChangeHandler_.bind(this));
-    // TODO: remove event listener
+    devAssert(false, '%s: element level visibility not supported, ' +
+        'getElementIntersectionRect should not be called in ' +
+        'VisibilityManager for mApp', TAG);
     return () => {};
   }
 
   /**
    * @override
-   * @return {number}
    */
   getElementVisibility() {
-    return this.intersectionRaio_;
+    devAssert(false, '%s: element level visibility not supported, ' +
+        'getElementIntersectionRect should not be called in ' +
+        'VisibilityManager for mApp', TAG);
+    return 0;
   }
 
   /**
@@ -127,8 +152,18 @@ export class VisibilityManagerForMApp extends VisibilityManager {
    * @return {?JsonObject}
    */
   getElementIntersectionRect() {
-    dev().error('getElementIntersectionRect should not be called in ' +
-        'VisibilityManager for mApp')
+    dev().error(TAG, 'element level visibility not supported, ' +
+        'getElementIntersectionRect should not be called in ' +
+        'VisibilityManager for mApp');
     return dict({});
+  }
+
+  /**
+   * Start listen to visibility change event from host API
+   * @private
+   */
+  listenToVisibilityChange_() {
+    this.visibilityInterface_.onVisibilityChange(
+        this.onVisibilityChangeHandler_.bind(this));
   }
 }

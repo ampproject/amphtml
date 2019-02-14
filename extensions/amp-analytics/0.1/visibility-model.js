@@ -73,7 +73,6 @@ export class VisibilityModel {
     this.eventResolver_ = deferred.resolve;
 
     this.eventPromise_.then(() => {
-      console.log('event Promise resolved');
       this.onTriggerObservable_.fire();
     });
 
@@ -223,13 +222,11 @@ export class VisibilityModel {
    * @param {function()} handler
    */
   onTriggerEvent(handler) {
-    console.log('visiblity condition has met');
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
-      console.log('call handler');
       handler();
     }
   }
@@ -315,7 +312,6 @@ export class VisibilityModel {
     // event when the report ready promise is resolved.
     const conditionsMet =
         this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
-    console.log('has conditionMet', conditionsMet);
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
@@ -323,7 +319,6 @@ export class VisibilityModel {
       }
       if (this.reportReady_) {
         // TODO(jonkeller): Can we eliminate eventResolver_?
-        console.log('resolve');
         this.eventResolver_();
         this.eventResolver_ = null;
         if (this.repeat_) {
@@ -347,7 +342,6 @@ export class VisibilityModel {
       if (timeToWait > 0) {
         this.scheduledUpdateTimeoutId_ = setTimeout(() => {
           this.scheduledUpdateTimeoutId_ = null;
-          console.log('update after time to wait');
           this.update();
         }, timeToWait);
       }
@@ -403,7 +397,6 @@ export class VisibilityModel {
     const timeSinceLastUpdate =
         this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
     this.matchesVisibility_ = this.isVisibilityMatch_(visibility);
-    console.log('matches visiblity is ', this.matchesVisibility_);
     if (this.matchesVisibility_) {
       this.everMatchedVisibility_ = true;
       if (prevMatchesVisibility) {

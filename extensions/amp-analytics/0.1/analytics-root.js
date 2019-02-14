@@ -26,7 +26,7 @@ import {
 } from './visibility-manager';
 import {
   VisibilityManagerForMApp,
-} from './visibility-manager-host';
+} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
   matches,
@@ -88,23 +88,21 @@ export class AnalyticsRoot {
     }
     if (!HostServices.isAvailable(this.ampdoc)) {
       this.usingHostAPIPromise_ = Promise.resolve(false);
+    } else {
+      // TODO: Using the visibility service and apply it for all tracking types
+      const promise = HostServices.visibilityForDoc(this.ampdoc);
+      this.usingHostAPIPromise_ = promise.then(visibilityService => {
+        this.hostVisibilityService_ = visibilityService;
+        return true;
+      }).catch(errorCode => {
+        dev().fine(TAG, 'HostServiceError: ' + errorCode);
+        if (errorCode == HostServiceError.MISMATCH) {
+          return false;
+        }
+        // TODO: What to do in this case.
+        throw user().createError('Host API unsupported');
+      });
     }
-
-    // TODO: Using the visibility service and apply it for all tracking types
-    const promise = HostServices.visibilityForDoc(this.ampdoc);
-    this.usingHostAPIPromise_ = promise.then(visibilityService => {
-      console.log('visibilityService is ', visibilityService);
-      this.hostVisibilityService_ = visibilityService;
-      return true;
-    }).catch(errorCode => {
-      console.log('error Code is !!!', errorCode);
-      dev().fine(TAG, 'HostServiceError: ' + errorCode);
-      if (errorCode == HostServiceError.MISMATCH) {
-        return false;
-      }
-      // TODO: What to do in this case.
-      throw user().createError('Host API invalid');
-    });
     return this.usingHostAPIPromise_;
   }
 
@@ -398,6 +396,7 @@ export class AnalyticsRoot {
    * @return {!./scroll-manager.ScrollManager}
    */
   getScrollManager() {
+    // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
       this.scrollManager_ = new ScrollManager(this.ampdoc);
     }
