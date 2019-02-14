@@ -53,7 +53,7 @@ jobs:
     - stage: build
       name: "Validator"        
       before_script:
-        - pip install --user protobuf #required by validator
+        - pip install --user protobuf # required by validator
       script:        
         - node build-system/pr-check/validator.js
       addons:

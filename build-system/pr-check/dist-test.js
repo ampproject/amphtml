@@ -45,12 +45,16 @@ function main() {
     runSinglePassTest_();
   }
   else {
-    let runTests = buildTargets.has('RUNTIME');
+    let runTests = false;
 
-    unzipBuildOutput(); //TODO(estherkim): does this belong here?
-    timedExecOrDie('gulp dist --fortesting --noextensions');
-    timedExecOrDie('gulp bundle-size ' +
-    `${buildTargets.has('RUNTIME') ? '--on_pr_build' : '--on_skipped_build'}`);
+    if (buildTargets.has('RUNTIME')) {
+      unzipBuildOutput(); //TODO(estherkim): does this belong here?
+      timedExecOrDie('gulp dist --fortesting --noextensions');
+      timedExecOrDie('gulp bundle-size --on_pr_build');
+      runTests = true;
+    } else {
+      timedExecOrDie('gulp bundle-size --on_skipped_build');
+    }
 
     if (buildTargets.has('RUNTIME') ||
     buildTargets.has('BUILD_SYSTEM') ||

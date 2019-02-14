@@ -120,6 +120,7 @@ function unzipBuildOutput() {
 
 function zipBuildOutput() {
   timedExecOrDie(
+      `[ -e ${BUILD_OUTPUT_FILE} ] && rm ${BUILD_OUTPUT_FILE} && ` +
       `log="$(zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS})" && ` +
       'echo travis_fold:start:zip_results && echo ${log} && ' +
       'echo travis_fold:end:zip_results');
