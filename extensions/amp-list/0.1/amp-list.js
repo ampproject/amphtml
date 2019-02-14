@@ -933,8 +933,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.resizeFailed_) {
       return;
     }
-    const lastItem = dev().assertElement(this.container_.lastChild);
-    this.viewport_.getClientRectAsync(lastItem)
+    const endoOfListMarker = this.container_.lastChild || this.container_;
+
+    this.viewport_.getClientRectAsync(endoOfListMarker)
         .then(positionRect => {
           const viewportHeight = this.viewport_.getHeight();
           const viewportTop = this.viewport_.getScrollTop();
