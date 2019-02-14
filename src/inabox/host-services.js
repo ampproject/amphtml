@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
@@ -38,6 +39,15 @@ export const HostServiceError = {
 };
 
 export class HostServices {
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {boolean}
+   */
+  static isAvailable(elementOrAmpDoc) {
+    const head = Services.ampdoc(elementOrAmpDoc).getHeadNode();
+    return !!head.querySelector('script[host-service]');
+  }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
