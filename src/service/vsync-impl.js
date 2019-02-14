@@ -459,7 +459,7 @@ function callTaskNoInline(callback, state) {
     try {
       devAssert(ret === undefined);
     } catch (e) {
-      dev.error('VSYNC', 'callback return a value but vsync cannot propogate ' +
+      dev().error('VSYNC', 'callback return a value but vsync cannot propogate ' +
         'it: %s', callback.toString());
     }
   } catch (e) {
