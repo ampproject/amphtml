@@ -33,8 +33,8 @@ let VsyncStateDef;
 
 /**
  * @typedef {{
- *   measure: (function(!VsyncStateDef)|undefined),
- *   mutate: (function(!VsyncStateDef)|undefined)
+ *   measure: (function(!VsyncStateDef):undefined|undefined),
+ *   mutate: (function(!VsyncStateDef):undefined|undefined)
  * }}
  */
 let VsyncTaskSpecDef;
@@ -208,7 +208,7 @@ export class Vsync {
 
   /**
    * Runs the mutate operation via vsync.
-   * @param {function()} mutator
+   * @param {function():undefined} mutator
    */
   mutate(mutator) {
     this.run({
@@ -219,7 +219,7 @@ export class Vsync {
 
   /**
    * Runs `mutate` wrapped in a promise.
-   * @param {function()} mutator
+   * @param {function():undefined} mutator
    * @return {!Promise}
    */
   mutatePromise(mutator) {
@@ -231,7 +231,7 @@ export class Vsync {
 
   /**
    * Runs the measure operation via vsync.
-   * @param {function()} measurer
+   * @param {function():undefined} measurer
    */
   measure(measurer) {
     this.run({
@@ -449,7 +449,7 @@ export class Vsync {
 
 /**
  * For optimization reasons to stop try/catch from blocking optimization.
- * @param {function(!VsyncStateDef)|undefined} callback
+ * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
  */
 function callTaskNoInline(callback, state) {
