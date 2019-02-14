@@ -24,7 +24,7 @@ import {
 import {map} from './utils/object';
 
 
-const FLUSH_CACHE_AFTER_MS = 200;
+const FLUSH_CACHE_AFTER_MS = 3 * 16; // roughly three animation frames
 const SERVICE = 'html';
 
 
