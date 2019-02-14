@@ -99,7 +99,7 @@ export class ScrollTimelineWorkletRunner extends BaseAnimationRunner {
         player.play();
         this.players_.push(player);
       }, e => {
-        dev().error('AMP-ANIMATION SCROLLTIMELINE-WORKLET', e);
+        dev().error('AMP-ANIMATION', e);
       });
     });
   }
@@ -147,7 +147,7 @@ function getOrAddWorkletModule(win) {
       'bottom-ratio': 0,
       'element-height': 0,
     }) {
-      console.info('Using animationWorklet ScrollTimeline');
+      console/*OK*/.info('Using animationWorklet ScrollTimeline');
       this.timeRange = options['time-range'];
       this.startOffset = options['start-offset'];
       this.endOffset = options['end-offset'];
