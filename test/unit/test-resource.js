@@ -47,6 +47,11 @@ describes.realWin('Resource', {amp: true}, env => {
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
 
+    const vsync = Services.vsyncFor(win);
+    sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+      mutator();
+    });
+
     resources.win = {
       document,
       getComputedStyle: el => {
