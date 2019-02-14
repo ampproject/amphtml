@@ -45,7 +45,7 @@ const {getStderr} = require('../exec');
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
-  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
+  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.

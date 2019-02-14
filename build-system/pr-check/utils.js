@@ -52,11 +52,12 @@ function stopSauceConnect(functionName) {
 /**
  * Starts a timer to measure the execution time of the given function.
  * @param {string} functionName
+ * @param {string} fileName
  * @return {DOMHighResTimeStamp}
  */
-function startTimer(functionName) {
+function startTimer(functionName, fileName) {
   const startTime = Date.now();
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       '\n' + fileLogPrefix, 'Running', colors.cyan(functionName) + '...');
   return startTime;
@@ -95,12 +96,12 @@ function timedExec(cmd) {
  * Executes the provided command and times it. The program terminates in case of
  * failure.
  * @param {string} cmd
- * @param {string} functionName
+ * @param {string} fileName
  */
-function timedExecOrDie(cmd, functionName = 'utils.js') {
-  const startTime = startTimer(functionName);
+function timedExecOrDie(cmd, fileName = 'utils.js') {
+  const startTime = startTimer(cmd, fileName);
   execOrDie(cmd);
-  stopTimer(functionName, startTime);
+  stopTimer(fileName, startTime);
 }
 
 

@@ -33,7 +33,7 @@ const {isTravisPushBuild} = require('../travis');
 
 const FILENAME = 'remote-test.js';
 const timedExecOrDie =
-  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
+  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME);

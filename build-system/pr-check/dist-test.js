@@ -31,7 +31,7 @@ const {isTravisPushBuild} = require('../travis');
 
 const FILENAME = 'dist-test.js';
 const timedExecOrDie =
-  (cmd, unusedFunctionName) => timedExecOrDieBase(cmd, FILENAME);
+  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function runSinglePassTest_() {
   timedExecOrDie('rm -R dist');
