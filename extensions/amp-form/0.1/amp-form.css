@@ -20,8 +20,8 @@ form.amp-form-submit-error [submit-error] {
   display: block;
 }
 
-textarea:not(.i-amphtml-textarea-max) {
-  overflow: hidden;
+textarea[autoexpand]:not(.i-amphtml-textarea-max) {
+  overflow: hidden!important;
 }
 
 .i-amphtml-textarea-clone {

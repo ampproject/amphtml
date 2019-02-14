@@ -125,7 +125,7 @@ export class AmpFormTextarea {
     iterateCursor(cachedTextareaElements, element => {
       getHasOverflow(element).then(hasOverflow => {
         if (hasOverflow) {
-          user().warn('amp-form',
+          user().warn('AMP-FORM',
               '"textarea[autoexpand]" with initially scrolling content ' +
               'will not autoexpand.\n' +
               'See https://github.com/ampproject/amphtml/issues/20839');
@@ -147,11 +147,12 @@ export class AmpFormTextarea {
  * Measure if any overflow is present on the element.
  * @param {!Element} element
  * @return {!Promise<boolean>}
+ * @visibleForTesting
  */
-function getHasOverflow(element) {
+export function getHasOverflow(element) {
   const resources = Services.resourcesForDoc(element);
   return resources.measureElement(() => {
-    return element.scrollHeight > element.clientHeight;
+    return element./*OK*/scrollHeight > element./*OK*/clientHeight;
   });
 }
 
@@ -212,8 +213,9 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  * needed.
  * @param {!Element} element
  * @return {!Promise}
+ * @visibleForTesting
  */
-function maybeResizeTextarea(element) {
+export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
   const win = devAssert(element.ownerDocument.defaultView);
 
@@ -245,7 +247,7 @@ function maybeResizeTextarea(element) {
           parseInt(computed.getPropertyValue('border-bottom-width'), 10);
     }
   }, () => {
-    minScrollHeightPromise.then(minScrollHeight => {
+    return minScrollHeightPromise.then(minScrollHeight => {
       const height = minScrollHeight + offset;
       // Prevent the scrollbar from appearing
       // unless the text is beyond the max-height
