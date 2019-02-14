@@ -67,26 +67,26 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const el = this.element;
+    const {element} = this;
     this.contentid_ = userAssert(
-        (el.getAttribute('data-playlist-id') ||
-        el.getAttribute('data-media-id')),
+        (element.getAttribute('data-playlist-id') ||
+        element.getAttribute('data-media-id')),
         'Either the data-media-id or the data-playlist-id ' +
         'attributes must be specified for <amp-jwplayer> %s',
-        el);
+        element);
 
     this.playerid_ = userAssert(
-        el.getAttribute('data-player-id'),
+        element.getAttribute('data-player-id'),
         'The data-player-id attribute is required for <amp-jwplayer> %s',
-        el);
+        element);
 
-    this.contentSearch_ = el.getAttribute('data-content-search') ||
+    this.contentSearch_ = element.getAttribute('data-content-search') ||
         '';
-    this.contentContextual_ = el.getAttribute('data-content-contextual') ||
+    this.contentContextual_ = element.getAttribute('data-content-contextual') ||
         false;
-    this.contentRecency_ = el.getAttribute('data-content-recency') ||
+    this.contentRecency_ = element.getAttribute('data-content-recency') ||
         '';
-    this.contentBackfill_ = el.getAttribute('data-content-backfill') ||
+    this.contentBackfill_ = element.getAttribute('data-content-backfill') ||
         false;
   }
 
@@ -96,7 +96,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     const cid = encodeURIComponent(this.contentid_);
     const pid = encodeURIComponent(this.playerid_);
-    const qs = dict({
+    const queryParams = dict({
       'search': this.getContextualVal() || undefined,
       'contextual': this.contentContextual_ || undefined,
       'recency': this.contentRecency_ || undefined,
@@ -104,7 +104,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     });
 
     const baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
-    const src = addParamsToUrl(baseUrl, qs);
+    const src = addParamsToUrl(baseUrl, queryParams);
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
