@@ -21,7 +21,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
-import {closestByTag, iterateCursor} from '../../../src/dom';
+import {closestAncestorElementByTag, iterateCursor} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -1178,7 +1178,7 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const select = closestByTag(element, 'select');
+    const select = closestAncestorElementByTag(element, 'select');
     if (!select) {
       return;
     }
@@ -1281,6 +1281,8 @@ export class Bind {
           match = (initialValue === '');
         } else if (expectedValue === false) {
           match = (initialValue === null);
+        } else if (typeof expectedValue === 'number') {
+          match = (Number(initialValue) === expectedValue);
         } else {
           match = (initialValue === expectedValue);
         }

@@ -299,12 +299,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'video-service',
-    name: 'Enables new implementation of unified Video Interface services.',
-    spec: 'https://github.com/ampproject/amphtml/issues/13674',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
-  },
-  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
@@ -361,12 +355,6 @@ const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
-  },
-  {
-    id: 'amp-inputmask',
-    name: 'Enables the amp-inputmask extension enabled through amp-form',
-    spec: 'https://github.com/ampproject/amphtml/issues/12079',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
   },
   {
     id: 'linker-form',

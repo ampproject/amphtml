@@ -26,12 +26,11 @@ import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -43,16 +42,24 @@ export const LIGHTBOXABLE_ATTR = 'lightbox';
 export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 
 /**
- * Types of document by schema where auto-lightbox is enabled.
- * @private @const {!Object<string, boolean>}
+ * Types of document by LD+JSON schema `@type` field where auto-lightbox should
+ * be enabled.
+ * @private @const {!Object<string|undefined, boolean>}
  */
-export const ENABLED_SCHEMA_TYPES = {
+export const ENABLED_LD_JSON_TYPES = {
   'Article': true,
   'NewsArticle': true,
   'BlogPosting': true,
   'LiveBlogPosting': true,
   'DiscussionForumPosting': true,
 };
+
+/**
+ * Only of document type by Open Graph `<meta property="og:type">` where
+ * auto-lightbox should be enabled. Top-level og:type set is tiny, and `article`
+ * covers all required types.
+ */
+export const ENABLED_OG_TYPE_ARTICLE = 'article';
 
 /** Factor of naturalArea vs renderArea to lightbox. */
 export const RENDER_AREA_RATIO = 1.2;
@@ -63,31 +70,43 @@ export const VIEWPORT_AREA_RATIO = 0.25;
 /**
  * Selector for subnodes for which the auto-lightbox treatment does not apply.
  */
-const DISABLED_ANCESTORS =
-    // Runtime-specific.
-    '[placeholder],' +
+const DISABLED_ANCESTORS = [
+  // Runtime-specific.
+  '[placeholder]',
 
-    // Explicitly opted out.
-    '[data-amp-auto-lightbox-disable],' +
+  // Explicitly opted out.
+  '[data-amp-auto-lightbox-disable]',
 
-    // Ancestors considered "actionable", i.e. that are bound to a default
-    // onclick action(e.g. `button`) or where it cannot be determined whether
-    // they're actionable or not (e.g. `amp-script`).
-    'a[href],' +
-    'amp-selector [option],' +
-    'amp-script,' +
-    'amp-story,' +
-    'button,' +
+  // Ancestors considered "actionable", i.e. that are bound to a default
+  // onclick action(e.g. `button`) or where it cannot be determined whether
+  // they're actionable or not (e.g. `amp-script`).
+  'a[href]',
+  'amp-selector [option]',
+  'amp-script',
+  'amp-story',
+  'button',
 
-    // Special treatment.
-    // TODO(alanorozco): Allow and possibly group carousels where images are the
-    // only content.
-    'amp-carousel';
+  // No nested lightboxes.
+  'amp-lightbox',
+
+  // Special treatment.
+  // TODO(alanorozco): Allow and possibly group carousels where images are the
+  // only content.
+  'amp-carousel',
+].join(',');
 
 
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
+const META_OG_TYPE = 'meta[property="og:type"]';
 
 const NOOP = () => {};
+
+/**
+ * For better minification.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Document|!ShadowRoot}
+ */
+const getRootNode = ampdoc => ampdoc.getRootNode();
 
 
 /** @visibleForTesting */
@@ -129,7 +148,7 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsTreeShapeCriteria(element) {
-    if (closestBySelector(element, DISABLED_ANCESTORS)) {
+    if (closestAncestorElementBySelector(element, DISABLED_ANCESTORS)) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
@@ -214,37 +233,52 @@ export class Scanner {
 
 
 /**
- * Parses document schema defined as ld+json.
+ * Parses document metadata annotations as defined by either LD+JSON schema or
+ * Open Graph <meta> tags.
  * @visibleForTesting
  */
-export class Schema {
+export class DocMetaAnnotations {
 
   /**
-   * Gets document type (field `@type`) where schema is defined for the
-   * canonical URL.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {string|undefined}
    */
-  static getDocumentType(ampdoc) {
-    const schemaTags = ampdoc.getRootNode().querySelectorAll(
-        'script[type="application/ld+json"]');
-
-    if (schemaTags.length <= 0) {
-      return;
+  static getOgType(ampdoc) {
+    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    if (tag) {
+      return tag.getAttribute('content');
     }
+  }
 
-    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+  /**
+   * Determines wheter the document type as defined by Open Graph meta tag
+   * e.g. `<meta property="og:type">` is valid.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {boolean}
+   */
+  static hasValidOgType(ampdoc) {
+    return DocMetaAnnotations.getOgType(ampdoc) == ENABLED_OG_TYPE_ARTICLE;
+  }
 
-    for (let i = 0; i < schemaTags.length; i++) {
-      const schemaTag = schemaTags[i];
-      const parsed = tryParseJson(schemaTag./*OK*/innerText);
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Array<string>}
+   */
+  static getAllLdJsonTypes(ampdoc) {
+    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+        .map(({textContent}) => ((tryParseJson(textContent) || {})['@type']))
+        .filter(typeOrUndefined => typeOrUndefined);
+  }
 
-      if (parsed &&
-          (parsed['mainEntityOfPage'] == canonicalUrl ||
-          parsed['url'] == canonicalUrl)) {
-        return parsed['@type'];
-      }
-    }
+  /**
+   * Determines wheter one of the document types (field `@type`) defined in
+   * LD+JSON schema is in ENABLED_LD_JSON_TYPES.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {boolean}
+   */
+  static hasValidLdJsonType(ampdoc) {
+    return DocMetaAnnotations.getAllLdJsonTypes(ampdoc)
+        .some(type => ENABLED_LD_JSON_TYPES[type]);
   }
 }
 
@@ -280,65 +314,53 @@ function usesLightboxExplicitly(ampdoc) {
   const lightboxedElementsSelector =
       `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const querySelector = selector =>
-    ampdoc.getRootNode().querySelector(selector);
+  const exists = selector => !!getRootNode(ampdoc).querySelector(selector);
 
-  return !!querySelector(requiredExtensionSelector) &&
-    !!querySelector(lightboxedElementsSelector);
+  return exists(requiredExtensionSelector) &&
+      exists(lightboxedElementsSelector);
 }
-
-
-const resolveFalse = () => tryResolve(() => false);
-const resolveTrue = () => tryResolve(() => true);
 
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  */
-function isEmbeddedAndTrusted(ampdoc, candidates) {
-  // Allow `localDev` in lieu of viewer for manual testing, except in tests
-  // where we need all checks.
+function isProxyOriginOrLocalDev(ampdoc) {
+  // Allow `localDev` in lieu of proxy origin for manual testing, except in
+  // tests where we need to actually perform the check.
   const {win} = ampdoc;
   if (getMode(win).localDev && !getMode(win).test) {
-    return resolveTrue();
+    return true;
   }
 
-  const viewer = Services.viewerForDoc(ampdoc);
-  if (!viewer.isEmbedded()) {
-    return resolveFalse();
-  }
-
-  // An attached node is required for viewer origin check. If no candidates are
+  // An attached node is required for proxy origin check. If no elements are
   // present, short-circuit.
-  if (candidates.length <= 0) {
-    return resolveFalse();
+  const {firstElementChild} = ampdoc.getBody();
+  if (!firstElementChild) {
+    return false;
   }
 
-  return viewer.getViewerOrigin().then(origin => {
-    const {hostname} = Services.urlForDoc(candidates[0]).parse(origin);
-    return GOOGLE_DOMAIN_RE.test(hostname);
-  });
+  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
+  // See git.io/fhQ0a (#20359) for details.
+  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
 }
 
 
 /**
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<!Element>} candidates
- * @return {!Promise<boolean>}
+ * @return {boolean}
  * @visibleForTesting
  */
-export function resolveIsEnabledForDoc(ampdoc, candidates) {
+export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
-    return resolveFalse();
+    return false;
   }
-  const docType = Schema.getDocumentType(ampdoc);
-  if (!docType || !ENABLED_SCHEMA_TYPES[docType]) {
-    return resolveFalse();
+  if (!DocMetaAnnotations.hasValidOgType(ampdoc) &&
+      !DocMetaAnnotations.hasValidLdJsonType(ampdoc)) {
+    return false;
   }
-  return isEmbeddedAndTrusted(ampdoc, candidates);
+  return isProxyOriginOrLocalDev(ampdoc);
 }
 
 
@@ -398,25 +420,22 @@ export function runCandidates(ampdoc, candidates) {
  * Scans a document on initialization to lightbox elements that meet criteria.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element=} opt_root
- * @return {!Promise<!Array<!Promise>|undefined>}
+ * @return {!Array<!Promise>|undefined}
  */
 export function scan(ampdoc, opt_root) {
-  const candidates = Scanner.getCandidates(opt_root || ampdoc.win.document);
-
-  return resolveIsEnabledForDoc(ampdoc, candidates).then(isEnabled => {
-    if (!isEnabled) {
-      dev().info(TAG, 'disabled');
-      return;
-    }
-    return runCandidates(ampdoc, candidates);
-  });
+  if (!isEnabledForDoc(ampdoc)) {
+    dev().info(TAG, 'disabled');
+    return;
+  }
+  const root = opt_root || ampdoc.win.document;
+  return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
 
 AMP.extension(TAG, '0.1', ({ampdoc}) => {
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-      scan(ampdoc, target);
+    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+      scan(ampdoc, dev().assertElement(target));
     });
     scan(ampdoc);
   });

@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -287,6 +295,41 @@ The `amp-sidebar` component can be styled with standard CSS.
 Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
 {% endcall %}
 
+## Auto scrolling within overflowing areas
+
+`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` as an attribute in both sidebar and toolbar cases.
+
+This feature is useful when dealing with long navigation list and wanting the sidebar to scroll to the current navigation items when page loads.
+
+When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` element is set to `overflow: auto` or `overflow: scroll`.
+
+```html
+<style amp-custom="">
+
+  nav [toolbar] {
+    overflow: auto;
+  }
+
+</style>
+
+<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
+  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
+    <ul>
+      <li>Nav item 1</li>
+      <li>Nav item 2</li>
+      <li>Nav item 3</li>
+      <li autoscroll class="currentPage">Nav item 4</li>
+      <li>Nav item 5</li>
+      <li>Nav item 6</li>
+    </ul>
+  </nav>
+</amp-sidebar>
+
+<div id="target-element">
+</div>
+```
+
+Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
 
 ## UX considerations
 
