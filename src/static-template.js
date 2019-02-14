@@ -99,7 +99,11 @@ function devAssertCorrectHtmlTemplateTagUsage({length}) {
 }
 
 
-/** */
+/**
+ * Service that renders static HTML templates.
+ * This is scoped to this module and is not meant to be used directly.
+ * Use `htmlFor` or `cachedHtmlFor` instead.
+ */
 export class Html {
 
   /** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
