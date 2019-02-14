@@ -22,7 +22,6 @@ import {
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
-import {PRESETS, setStyleForPreset} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
@@ -34,6 +33,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
@@ -47,7 +47,14 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-
+/** const {string} */
+const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
+/** const {string} */
+const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
+/** const {string} */
+const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
+/** const {string} */
+const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
 
 /**
  * @param {!Element} element
@@ -530,10 +537,51 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+    const options = {};
     setStyleForPreset(el, name);
 
+    if (el.hasAttribute(SCALE_START_ATTRIBUTE_NAME)) {
+      options.scaleStart =
+        parseFloat(el.getAttribute(SCALE_START_ATTRIBUTE_NAME));
+
+      userAssert(options.scaleStart > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      SCALE_START_ATTRIBUTE_NAME,
+      el);
+    }
+
+    if (el.hasAttribute(SCALE_END_ATTRIBUTE_NAME)) {
+      options.scaleEnd =
+        parseFloat(el.getAttribute(SCALE_END_ATTRIBUTE_NAME));
+
+      userAssert(options.scaleEnd > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      SCALE_END_ATTRIBUTE_NAME,
+      el);
+    }
+
+    if (el.hasAttribute(TRANSLATE_X_ATTRIBUTE_NAME)) {
+      options.translateX =
+        parseFloat(el.getAttribute(TRANSLATE_X_ATTRIBUTE_NAME));
+
+      userAssert(options.translateX > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      TRANSLATE_X_ATTRIBUTE_NAME,
+      el);
+    }
+
+    if (el.hasAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)) {
+      options.translateY =
+        parseFloat(el.getAttribute(TRANSLATE_Y_ATTRIBUTE_NAME));
+
+      userAssert(options.translateY > 0, '"%s" attribute must be a ' +
+        'positive number. Found negative or zero in element %s',
+      TRANSLATE_Y_ATTRIBUTE_NAME,
+      el);
+    }
+
     return userAssert(
-        PRESETS[name],
+        getPresetDef(name, options),
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,
         name,
