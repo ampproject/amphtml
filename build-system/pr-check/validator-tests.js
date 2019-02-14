@@ -29,12 +29,12 @@ const {
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'validator.js';
+const FILENAME = 'validator-tests.js';
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 

@@ -22,24 +22,24 @@
  */
 
 const {
+  downloadBuildOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  unzipBuildOutput} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'local-test.js';
+const FILENAME = 'local-tests.js';
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
-  unzipBuildOutput();
+  downloadBuildOutput();
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp test --integration --nobuild --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');

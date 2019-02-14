@@ -27,7 +27,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  zipBuildOutput} = require('./utils');
+  uploadBuildOutput} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {getStderr} = require('../exec');
 const {gitDiffColor} = require('../git');
@@ -80,7 +80,7 @@ function runYarnLockfileCheck_() {
 }
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck_();
@@ -96,7 +96,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
 
-    zipBuildOutput();
+    uploadBuildOutput();
   } else {
     console.log('Skipping build job because this commit does ' +
      'not affect the runtime, build system, or test files');

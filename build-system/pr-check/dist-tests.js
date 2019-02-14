@@ -25,25 +25,24 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  unzipBuildOutput} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'dist-test.js';
+const FILENAME = 'dist-tests.js';
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function runSinglePassTest_() {
-  timedExecOrDie('rm -R dist');
+  timedExecOrDie('gulp clean');
   timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
   timedExecOrDie('gulp test --integration' +
    '--nobuild --compiled --single_pass --headless');
-  timedExecOrDie('rm -R dist');
+  timedExecOrDie('gulp clean');
 }
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
@@ -55,8 +54,6 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {
-
-      unzipBuildOutput(); //TODO(estherkim): does this belong here?
       timedExecOrDie('gulp dist --fortesting --noextensions');
       timedExecOrDie('gulp bundle-size --on_pr_build');
       ranTests = true;

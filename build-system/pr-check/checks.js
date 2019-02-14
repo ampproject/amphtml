@@ -35,7 +35,7 @@ const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 

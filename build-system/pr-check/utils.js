@@ -133,35 +133,36 @@ function timedExec(cmd) {
 function timedExecOrDie(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   execOrDie(cmd);
-  stopTimer(fileName, startTime);
+  stopTimer(cmd, startTime);
 }
 
 
-function unzipBuildOutput() {
-  timedExecOrDie('gsutil cp ' +
+function downloadBuildOutput() {
+  execOrDie('gsutil cp ' +
       `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE} ` +
       `${BUILD_OUTPUT_FILE}`);
-  timedExecOrDie(
+  execOrDie(
       `log="$(unzip -o ${BUILD_OUTPUT_FILE})" && ` +
       'echo travis_fold:start:unzip_results && echo ${log} && ' +
       'echo travis_fold:end:unzip_results');
-  timedExecOrDie(
+  execOrDie(
       `log="$(ls -la ${BUILD_OUTPUT_DIRS})" && ` +
       'echo travis_fold:start:verify_unzip_results && echo ${log} && ' +
       'echo travis_fold:end:verify_unzip_results');
 }
 
-function zipBuildOutput() {
-  timedExecOrDie(
+function uploadBuildOutput() {
+  execOrDie(
       `log="$(zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS})" && ` +
       'echo travis_fold:start:zip_results && echo ${log} && ' +
       'echo travis_fold:end:zip_results');
-  timedExecOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} `
+  execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} `
     + `${BUILD_OUTPUT_STORAGE_LOCATION}`);
 }
 
 
 module.exports = {
+  downloadBuildOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -169,6 +170,5 @@ module.exports = {
   stopSauceConnect,
   timedExec,
   timedExecOrDie,
-  unzipBuildOutput,
-  zipBuildOutput,
+  uploadBuildOutput,
 };

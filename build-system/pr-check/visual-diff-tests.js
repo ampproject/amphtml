@@ -23,25 +23,25 @@
 
 const atob = require('atob');
 const {
+  downloadBuildOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  unzipBuildOutput} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-target');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'visual-diff-test.js';
+const FILENAME = 'visual-diff-tests.js';
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
-  const startTime = startTimer(FILENAME);
+  const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    unzipBuildOutput();
+    downloadBuildOutput();
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
@@ -51,7 +51,7 @@ function main() {
         buildTargets.has('VISUAL_DIFF') ||
         buildTargets.has('FLAG_CONFIG')) {
 
-      unzipBuildOutput();
+      downloadBuildOutput();
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {

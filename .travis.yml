@@ -17,6 +17,8 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   - pip install urllib3[secure]
   - pip install gsutil --user
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 branches:
   only:
     - master
@@ -40,7 +42,7 @@ jobs:
     - stage: test
       name: "Remote (Sauce Labs) Tests"
       script:
-        - node build-system/pr-check/remote-test.js
+        - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
   include:
@@ -53,11 +55,11 @@ jobs:
       script:        
         - node build-system/pr-check/checks.js
     - stage: build
-      name: "Validator"        
+      name: "Validator Tests"        
       before_script:
-        - pip install --user protobuf # required by validator
+        - pip install --user protobuf
       script:        
-        - node build-system/pr-check/validator.js
+        - node build-system/pr-check/validator-tests.js
       addons:
         apt:
           packages:
@@ -65,40 +67,24 @@ jobs:
             - python-protobuf
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
-      before_install:
-        - export DISPLAY=:99.0
-        - sh -e /etc/init.d/xvfb start
-        # Explicitly add yarn and gsutil install because this section overrides before_install parent section
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-        - pip install urllib3[secure]
-        - pip install gsutil --user
       addons:
         chrome: stable
       script:
-        - node build-system/pr-check/dist-test.js
+        - node build-system/pr-check/dist-tests.js
     - stage: test
       name: "Visual Diff Tests"
       script:
-        - node build-system/pr-check/visual-diff-test.js
+        - node build-system/pr-check/visual-diff-tests.js
     - stage: test
       name: "Local Tests"
-      before_install: 
-        - export DISPLAY=:99.0
-        - sh -e /etc/init.d/xvfb start
-        # Explicitly add yarn and gsutil install because this section overrides before_install parent section
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-        - pip install urllib3[secure]
-        - pip install gsutil --user
       addons:
         chrome: stable
       script:
-        - node build-system/pr-check/local-test.js
+        - node build-system/pr-check/local-tests.js
     - stage: test
       name: "Remote (Sauce Labs) Tests"
       script:
-        - node build-system/pr-check/remote-test.js
+        - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
 cache:
