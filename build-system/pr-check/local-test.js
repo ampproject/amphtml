@@ -39,20 +39,20 @@ function main() {
     //timedExecOrDie('gulp e2e --nobuild');
   }
   else {
-    let runTests = false;
+    let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||
     buildTargets.has('BUILD_SYSTEM') ||
     buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --nobuild --headless --local-changes');
-      runTests = true;
+      ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
     buildTargets.has('BUILD_SYSTEM') ||
     buildTargets.has('INTEGRATION_TEST')) {
       timedExecOrDie('gulp test --integraton --nobuild --headless --coverage');
-      runTests = true;
+      ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
@@ -60,15 +60,15 @@ function main() {
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
       //TODO(estherkim): turn on when stabilized :)
       //timedExecOrDie('gulp e2e --nobuild');
-      runTests = true;
+      ranTests = true;
     }
 
     if (buildTargets.has('DEV_DASHBOARD')) {
       timedExecOrDie('gulp test --dev_dashboard --nobuild');
-      runTests = true;
+      ranTests = true;
     }
 
-    if (!runTests) {
+    if (!ranTests) {
       console.log('Skipping unit and integration tests because ' +
       'this commit not affect the runtime, build system, ' +
       'unit test files, integration test files, or the dev dashboard.');

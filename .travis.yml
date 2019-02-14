@@ -66,6 +66,7 @@ jobs:
       before_install:
         - export CHROME_BIN=google-chrome-stable
         - export DISPLAY=:99.0
+        - sh -e /etc/init.d/xvfb start
         # Explicitly add yarn and gsutil install because this section overrides before_install parent section
         - curl -o- -L https://yarnpkg.com/install.sh | bash
         - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
@@ -90,6 +91,7 @@ jobs:
       before_install: 
         - export CHROME_BIN=google-chrome-stable
         - export DISPLAY=:99.0
+        - sh -e /etc/init.d/xvfb start
         # Explicitly add yarn and gsutil install because this section overrides before_install parent section
         - curl -o- -L https://yarnpkg.com/install.sh | bash
         - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"

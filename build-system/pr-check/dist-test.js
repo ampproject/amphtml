@@ -45,13 +45,13 @@ function main() {
     runSinglePassTest_();
   }
   else {
-    let runTests = false;
+    let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {
       unzipBuildOutput(); //TODO(estherkim): does this belong here?
       timedExecOrDie('gulp dist --fortesting --noextensions');
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      runTests = true;
+      ranTests = true;
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
     }
@@ -60,10 +60,10 @@ function main() {
     buildTargets.has('BUILD_SYSTEM') ||
     buildTargets.has('INTEGRATION_TEST')) {
       runSinglePassTest_();
-      runTests = true;
+      ranTests = true;
     }
 
-    if (!runTests) {
+    if (!ranTests) {
       console.log('Skipping dist tests because this commit does ' +
       'not affect the runtime, build system, or integration test files.');
     }
