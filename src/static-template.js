@@ -111,12 +111,16 @@ export class Html {
     this.cachedHtmlInternal = strings => {
       devAssertCorrectHtmlTemplateTagUsage(strings);
 
-      const cache = this.cache_;
-      this.cache_ = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MS));
+      const {win} = ampdoc;
+      const cache = this.cache_ || new TempCache(win, FLUSH_CACHE_AFTER_MS);
+
+      this.cache_ = cache;
+
       const key = strings[0];
       const seed = cache.has(key) ?
         cache.get(key) :
         cache.put(key, this.htmlInternal(strings));
+
       return seed.cloneNode(/* deep */ true);
     };
 
