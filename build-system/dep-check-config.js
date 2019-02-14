@@ -235,7 +235,7 @@ exports.rules = [
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
 
       // Ads needs concurrent loading
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/concurrent-load.js',
 
