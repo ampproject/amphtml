@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ * IE 10 throws "Unspecified error" when calling getBoundingClientRect() on a
+ * disconnected node.
+ * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
+ */
+
 import {
   LayoutRectDef,
   layoutRectLtwh,
@@ -58,7 +65,7 @@ function shouldInstall(win) {
  */
 export function install(win) {
   if (shouldInstall(win)) {
-    win.Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
+    win.Object.defineProperty(win.Element.prototype, 'getBoundingClientRect', {
       value: getBoundingClientRect,
     });
   }
