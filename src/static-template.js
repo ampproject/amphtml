@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
+import {TempCache} from './utils/temp-cache';
 import {devAssert} from './log';
 import {
   getAmpdoc,
@@ -24,7 +24,7 @@ import {
 import {map} from './utils/object.js';
 
 
-const CACHE_CAPACITY = 10;
+const FLUSH_CACHE_AFTER_MACRO_TASKS = 3;
 const SERVICE = 'html';
 
 
@@ -105,7 +105,7 @@ export function cachedHtmlFor(nodeOrDoc) {
 export function buildHtmlService(ampdoc) {
   const container = ampdoc.getRootNode().createElement('div');
 
-  /** @type {!LruCache|undefined} */
+  /** @type {!TempCache<!Element>|undefined} */
   let cache;
 
   /**
@@ -113,7 +113,7 @@ export function buildHtmlService(ampdoc) {
    * @return {!Element}
    */
   const cachedHtmlInternal = strings => {
-    cache = (cache || new LruCache(CACHE_CAPACITY));
+    cache = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MACRO_TASKS));
     const key = strings[0];
     const seed = cache.has(key) ?
       cache.get(key) :
