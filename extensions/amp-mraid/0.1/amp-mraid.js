@@ -109,21 +109,12 @@ export class MraidInitializer {
       this.mraidLoadSuccess_();
     });
     mraidJs.addEventListener('error', () => {
-      this.handleError_(HostServiceError.MISMATCH);
+      if (!this.registeredWithHostServices_) {
+        this.handleMismatch_();
+      }
     });
     const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraidJs);
-  }
-
-  /**
-   * @param {number} hostServiceError
-   */
-  handleError_(hostServiceError) {
-    if (!this.registeredWithHostServices_ &&
-        this.fallbackOn_.includes(hostServiceError)) {
-      this.declineService_();
-    }
-    // TODO: send error ping
   }
 
   /**
@@ -132,13 +123,29 @@ export class MraidInitializer {
   mraidReady_() {
     const mraidService = new MraidService(this.mraid_);
 
-    HostServices.installVisibilityServiceForDoc(
-        this.ampdoc_, () => mraidService);
-    HostServices.installFullscreenServiceForDoc(
-        this.ampdoc_, () => mraidService);
-    HostServices.installExitServiceForDoc(
-        this.ampdoc_, () => mraidService);
+    if (this.mraid_.addEventListener) {
+      HostServices.installVisibilityServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectVisibilityServiceForDoc(
+          this.ampdoc_, HostServiceError.UNSUPPORTED);
+    }
 
+    if (this.mraid_.expand && this.mraid_.close) {
+      HostServices.installFullscreenServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectFullscreenServiceForDoc(
+          this.ampdoc_, HostServiceError.UNSUPPORTED);
+    }
+
+    if (this.mraid_.open) {
+      HostServices.installExitServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectExitServiceForDoc(
+          this.ampdoc_, HostServiceError.UNSUPPORTED);
+    }
     this.registeredWithHostServices_ = true;
   }
 
@@ -147,9 +154,8 @@ export class MraidInitializer {
    */
   mraidLoadSuccess_() {
     const mraid = window['mraid'];
-    if (!mraid || !mraid.getState || !mraid.addEventListener
-        || !mraid.close || !mraid.open || !mraid.expand) {
-      this.handleError_(HostServiceError.UNSUPPORTED);
+    if (!mraid || !mraid.getState) {
+      this.handleMismatch_();
       return;
     }
     this.mraid_ = mraid;
@@ -163,11 +169,15 @@ export class MraidInitializer {
   }
 
   /**
-   * Stub for handling the case when we want to allow fallback to the standard
-   * web way of doing things.
+   * Handles mismatch error.
    */
-  declineService_() {
-    // Needs API change
+  handleMismatch_() {
+    HostServices.rejectVisibilityServiceForDoc(
+        this.ampdoc_, HostServiceError.MISMATCH);
+    HostServices.rejectExitServiceForDoc(
+        this.ampdoc_, HostServiceError.MISMATCH);
+    HostServices.rejectFullscreenServiceForDoc(
+        this.ampdoc_, HostServiceError.MISMATCH);
   }
 }
 

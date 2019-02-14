@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
+  rejectServicePromiseForDoc,
 } from '../service';
 
 const ServiceNames = {
@@ -69,6 +70,14 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {string|number} error
+   */
+  static rejectVisibilityServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY, error);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
@@ -87,6 +96,14 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {string|number} error
+   */
+  static rejectFullscreenServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN, error);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
@@ -101,6 +118,14 @@ export class HostServices {
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
         ServiceNames.EXIT, impl, /* opt_instantiate */ true);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {string|number} error
+   */
+  static rejectExitServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT, error);
   }
 }
 

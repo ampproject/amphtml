@@ -166,6 +166,17 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   }
 }
 
+/**
+ * Reject a service promise.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @param {string|number} error
+ */
+export function rejectServicePromiseForDoc(nodeOrDoc, id, error) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  rejectServicePromiseInternal(holder, id, error);
+}
 
 /**
  * Returns a service for the given id and window (a per-window singleton). Users
@@ -395,6 +406,9 @@ function getServiceInternal(holder, id) {
     if (s.resolve) {
       s.resolve(s.obj);
     }
+    if (s.reject) {
+      delete s.reject;
+    }
   }
   return s.obj;
 }
@@ -450,9 +464,39 @@ function getServicePromiseInternal(holder, id) {
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
   const deferred = new Deferred();
-  const {promise, resolve} = deferred;
+  const {promise, resolve, reject} = deferred;
 
   const services = getServices(holder);
+  services[id] = {
+    obj: null,
+    promise,
+    resolve,
+    reject,
+    context: null,
+    ctor: null,
+  };
+  return promise;
+}
+
+/**
+ * @param {!Object} holder
+ * @param {string} id of the service.
+ * @param {string|number} error
+ */
+function rejectServicePromiseInternal(holder, id, error) {
+  const services = getServices(holder);
+  const s = services[id];
+  if (s) {
+    if (s.reject) {
+      s.reject(error);
+      delete s.reject;
+    } // otherwise the service has already been registred or rejected
+    return;
+  }
+
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+
   services[id] = {
     obj: null,
     promise,
@@ -460,9 +504,8 @@ function getServicePromiseInternal(holder, id) {
     context: null,
     ctor: null,
   };
-  return promise;
+  reject(error);
 }
-
 
 /**
  * Returns a promise for service `id` if the service has been registered
