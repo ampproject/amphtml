@@ -21,9 +21,11 @@ limitations under the License.
 ##### Single placement:
 ```html
 <amp-ad width="300" height="250"
-    type="adocean"
-    data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
-    data-ao-emitter="myao.adocean.pl">
+      type="adocean"
+      data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
+      data-ao-emitter="myao.adocean.pl"
+      data-block-on-consent
+      >
 </amp-ad>
 ```
 
@@ -35,6 +37,7 @@ limitations under the License.
       data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
       data-ao-id="adoceanmyaonhqnqukjtt"
       data-ao-keys="key1,key2,key3"
+      data-block-on-consent
       >
 </amp-ad>
 
@@ -44,24 +47,27 @@ limitations under the License.
       data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
       data-ao-id="adoceanmyaokiheeseoko"
       data-ao-keys="key1,key2,key3"
+      data-block-on-consent
       >
 </amp-ad>
 ```
+
+Do not define different values for slaves within one master for paramerters: data-ao-keys, data-ao-vars and data-block-on-consent. Otherwise, the behavior will be non-deterministic.
 
 ## Configuration
 
 For details on the configuration semantics, see [AdOcean documentation](http://www.adocean-global.com).
 
-### Required parameters 
+### Required parameters
 
 - `data-ao-id` - Ad unit unique id
 - `data-ao-emitter` - Ad server hostname
 
-### Optional parameters 
+### Optional parameters
 
 - `data-ao-mode` - sync|buffered - processing mode
 - `data-ao-preview` - livepreview configuration id
-- `data-ao-keys` - additional configuration, see adserver documentation
-- `data-ao-vars` - additional configuration, see adserver documentation
+- `data-ao-keys` - additional configuration, see adserver documentation, do not define different values for slaves within one master
+- `data-ao-vars` - additional configuration, see adserver documentation, do not define different values for slaves within one master
 - `data-ao-clusters` - additional configuration,see adserver documentation
 - `data-ao-master` - unique id of master placement
