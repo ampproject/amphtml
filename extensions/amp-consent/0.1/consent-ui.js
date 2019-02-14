@@ -291,8 +291,7 @@ export class ConsentUI {
    * @return {boolean}
    */
   allowSameOrigin_(src, containerSrc) {
-    const {element} = this;
-    const urlService = Services.urlForDoc(element);
+    const urlService = Services.urlForDoc(this.parent_);
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(containerSrc);
 
