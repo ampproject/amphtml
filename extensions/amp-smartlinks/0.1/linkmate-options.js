@@ -35,6 +35,7 @@ export function getConfigOptions(element) {
  * The slug used to distinguish Narrativ accounts.
  * @param {!Element} element
  * @return {string}
+ * @private
  */
 function getNrtvAccountName_(element) {
   const nrtvSlug = element.getAttribute('nrtv-account-name');
@@ -48,6 +49,7 @@ function getNrtvAccountName_(element) {
  * Flag to specify if we are to run our Linkmate service.
  * @param {!Element} element
  * @return {boolean}
+ * @private
  */
 function getLinkmateFlag_(element) {
   const linkmateEnabled = element.getAttribute('linkmate').toLowerCase();
@@ -65,13 +67,14 @@ function getLinkmateFlag_(element) {
 function getExclusiveLinksFlag_(element) {
   const exclusiveLinks = element.getAttribute('exclusive-links');
 
-  return exclusiveLinks ? exclusiveLinks.toLowerCase() === 'true' : false;
+  return !!exclusiveLinks && exclusiveLinks.toLowerCase() === 'true';
 }
 
 /**
  * What attribute the outbound link variable is stored in an anchor.
  * @param {!Element} element
  * @return {string}
+ * @private
  */
 function getLinkAttribute_(element) {
   const linkAttribute = element.getAttribute('link-attribute');
@@ -83,6 +86,7 @@ function getLinkAttribute_(element) {
  * Selector used to get all links that are meant to be monetized.
  * @param {!Element} element
  * @return {string}
+ * @private
  */
 function getLinkSelector_(element) {
   const linkSelector = element.getAttribute('link-selector');
