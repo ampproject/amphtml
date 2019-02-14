@@ -18,10 +18,10 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
+import {dev, userAssert} from '../../../../../src/log';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -84,20 +84,17 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildElement(articleData, doc) {
-    const html = htmlFor(doc);
+  buildElement(articleData, contextEl) {
+    const html = htmlFor(contextEl);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el =
-        html`
-        <a class="i-amphtml-story-bookend-article
+        html`<a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
           <div class="i-amphtml-story-bookend-article-text-content">
-            <h2
-              class="i-amphtml-story-bookend-article-heading" ref="heading">
+            <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
             </h2>
-            <div
-              class="i-amphtml-story-bookend-component-meta" ref="meta">
+            <div class="i-amphtml-story-bookend-component-meta" ref="meta">
             </div>
           </div>
         </a>`;
@@ -108,16 +105,12 @@ export class ArticleComponent {
     }
 
     if (articleData.image) {
-      const imgEl =
-          html`
-          <div class="i-amphtml-story-bookend-article-image">
-            <img ref="image">
-            </img>
-          </div>`;
+      const container =
+          html`<div class="i-amphtml-story-bookend-article-image"><img></div>`;
 
-      const {image} = htmlRefs(imgEl);
+      const image = dev().assertElement(container.firstElementChild);
       addAttributesToElement(image, dict({'src': articleData.image}));
-      el.appendChild(imgEl);
+      el.appendChild(container);
     }
 
     const articleElements = htmlRefs(el);

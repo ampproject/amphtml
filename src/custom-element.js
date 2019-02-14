@@ -1594,15 +1594,12 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (!this.loadingContainer_) {
-        const doc = this.ownerDocument;
-        devAssert(doc);
-
-        const html = cachedHtmlFor(doc);
+        const html = cachedHtmlFor(this);
         const container = html`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(doc, this.elementName());
+        const element = createLoaderElement(this, this.elementName());
         container.appendChild(element);
 
         this.appendChild(container);

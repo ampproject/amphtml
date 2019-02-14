@@ -194,7 +194,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
-      this.container_ = htmlFor(this.doc_)`
+      this.container_ = htmlFor(this.element)`
         <div class="i-amphtml-lbg">
           <div class="i-amphtml-lbg-mask"></div>
         </div>`;
@@ -221,7 +221,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildControls_() {
-    this.controlsContainer_ = htmlFor(this.doc_)`
+    this.controlsContainer_ = htmlFor(this.element)`
       <div class="i-amphtml-lbg-controls"></div>`;
     this.buildDescriptionBox_();
     this.buildTopBar_();
@@ -284,7 +284,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.doc_.createElement('div');
-        const imageViewer = htmlFor(this.doc_)`
+        const imageViewer = htmlFor(this.element)`
           <amp-image-viewer layout="fill"></amp-image-viewer>`;
         clonedNode.removeAttribute('class');
         imageViewer.appendChild(clonedNode);
@@ -346,7 +346,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
-      this.carousel_ = htmlFor(this.doc_)`
+      this.carousel_ = htmlFor(this.element)`
         <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>`;
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
@@ -390,7 +390,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-    this.descriptionBox_ = htmlFor(this.doc_)`
+    this.descriptionBox_ = htmlFor(this.element)`
       <div class="i-amphtml-lbg-desc-box i-amphtml-lbg-standard">
         <div class="i-amphtml-lbg-desc-text"></div>
         <div class="i-amphtml-lbg-desc-mask"></div>
@@ -595,7 +595,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildButton_(label, className, action) {
     devAssert(this.topBar_);
 
-    const button = htmlFor(this.doc_)`
+    const button = htmlFor(this.element)`
     <div role="button" class="i-amphtml-lbg-button">
       <span class="i-amphtml-lbg-icon"></span>
     </div>`;
@@ -1274,7 +1274,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.updateVideoThumbnails_();
     } else {
       // Build gallery
-      this.gallery_ = htmlFor(this.doc_)`
+      this.gallery_ = htmlFor(this.element)`
       <div class="i-amphtml-lbg-gallery"></div>`;
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
@@ -1403,7 +1403,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   createThumbnailElement_(thumbnailObj) {
-    const element = htmlFor(this.doc_)`
+    const element = htmlFor(this.element)`
     <div class="i-amphtml-lbg-gallery-thumbnail">
       <img class="i-amphtml-lbg-gallery-thumbnail-img"></img>
     </div>`;
@@ -1417,7 +1417,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     element.appendChild(imgElement);
 
     if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
-      const timestampDiv = htmlFor(this.doc_)`
+      const timestampDiv = htmlFor(this.element)`
       <div class="i-amphtml-lbg-thumbnail-timestamp-container">
         <span class="i-amphtml-lbg-thumbnail-play-icon"></span>
       <div>`;

@@ -16,11 +16,7 @@
 
 import {TempCache} from './utils/temp-cache';
 import {devAssert} from './log';
-import {
-  getAmpdoc,
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from './service';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {map} from './utils/object';
 
 
@@ -39,32 +35,23 @@ export function installHtmlForDoc(ampdoc) {
 
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Html}
- */
-function getHtml(nodeOrDoc) {
-  return getServiceForDoc(getAmpdoc(nodeOrDoc), SERVICE);
-}
-
-
-/**
  * Creates the html helper for the doc. This returns a tagged template literal
  * helper to generate static DOM trees.
  * This must be used as a tagged template, ie
  *
  * ```
- * const html = htmlFor(nodeOrDoc);
+ * const html = htmlFor(element);
  * const div = html`<div><span></span></div>`;
  * ```
  *
  * Only the root element and its subtree will be returned. DO NOT use this
  * to render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element} element
  * @return {!HtmlLiteralTagDef}
  */
-export function htmlFor(nodeOrDoc) {
-  return getHtml(nodeOrDoc).htmlInternal;
+export function htmlFor(element) {
+  return getServiceForDoc(element, SERVICE).htmlInternal;
 }
 
 
@@ -74,7 +61,7 @@ export function htmlFor(nodeOrDoc) {
  * DOM trees. This must be used as a tagged template, ie
  *
  * ```
- * const html = cachedHtmlFor(nodeOrDoc);
+ * const html = cachedHtmlFor(element);
  * const div = html`<div><span></span></div>`;
  * ```
  *
@@ -85,11 +72,11 @@ export function htmlFor(nodeOrDoc) {
  * same tree will be rendered more than once during a short sequence of
  * animation frames. Otherwise use `htmlFor`.
  *
- * @param {!Document|!Element|!ShadowRoot} nodeOrDoc
+ * @param {!Element} element
  * @return {!HtmlLiteralTagDef}
  */
-export function cachedHtmlFor(nodeOrDoc) {
-  return getHtml(nodeOrDoc).cachedHtmlInternal;
+export function cachedHtmlFor(element) {
+  return getServiceForDoc(element, SERVICE).cachedHtmlInternal;
 }
 
 
@@ -116,11 +103,14 @@ export class Html {
     this.cache_ = null;
 
     /**
+     * Cached HTML template tag. Must be arrow func for scope.
+     * DO NOT use this directly. Use `cachedHtmlFor` instead.
      * @param {!Array<string>} strings
      * @return {!Element}
      */
-    this.cachedHtmlInternal = strings => { // must be arrow func for scope
+    this.cachedHtmlInternal = strings => {
       devAssertCorrectHtmlTemplateTagUsage(strings);
+
       const cache = this.cache_;
       this.cache_ = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MS));
       const key = strings[0];
@@ -131,11 +121,14 @@ export class Html {
     };
 
     /**
+     * HTML template tag. Must be arrow func for scope.
+     * DO NOT use this directly. Use `htmlFor` instead.
      * @param {!Array<string>} strings
      * @return {!Element}
      */
-    this.htmlInternal = strings => { // must be arrow func for scope
+    this.htmlInternal = strings => {
       devAssertCorrectHtmlTemplateTagUsage(strings);
+
       const container = this.container_;
       container./*OK*/innerHTML = strings[0];
 

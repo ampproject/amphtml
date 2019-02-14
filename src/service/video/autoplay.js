@@ -21,11 +21,11 @@ import {removeElement} from '../../dom';
 
 
 /**
- * @param {!Element|!Document} elOrDoc
+ * @param {!Element} element
  * @return {!Element}
  */
-export function renderInteractionOverlay(elOrDoc) {
-  const html = cachedHtmlFor(elOrDoc);
+export function renderInteractionOverlay(element) {
+  const html = cachedHtmlFor(element);
   return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
 }
@@ -33,11 +33,11 @@ export function renderInteractionOverlay(elOrDoc) {
 
 /**
  * @param {!Window} win
- * @param {!Element|!Document} elOrDoc
+ * @param {!Element} element
  * @return {!Element}
  */
-export function renderIcon(win, elOrDoc) {
-  const html = cachedHtmlFor(elOrDoc);
+export function renderIcon(win, element) {
+  const html = cachedHtmlFor(element);
   const icon = html`<i-amphtml-video-icon class="amp-video-eq">
     <div class="amp-video-eq-col">
       <div class="amp-video-eq-filler"></div>

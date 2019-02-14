@@ -22,7 +22,7 @@ import {LandscapeComponent} from './components/landscape';
 import {LocalizedStringId} from '../localization';
 import {PortraitComponent} from './components/portrait';
 import {TextBoxComponent} from './components/text-box';
-import {dev} from '../../../../src/log';
+import {dev, devAssert} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
@@ -136,10 +136,11 @@ export class BookendComponent {
    */
   static buildFromJson(components, el) {
     return components.reduce((builtComponents, component) => {
-      const componentBuilder = componentBuilderInstanceFor(component.type);
+      const {type} = component;
+      const componentBuilder = componentBuilderInstanceFor(type);
       if (!componentBuilder) {
-        dev().error(TAG, 'Component type `' + component.type +
-        '` is not supported. Skipping invalid.');
+        dev().error(TAG,
+            `Component type ${type} is not supported. Skipping invalid.`);
         return builtComponents;
       }
       componentBuilder.assertValidity(component, el);
@@ -152,12 +153,13 @@ export class BookendComponent {
    * Builds the bookend components elements by choosing the appropriate builder
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
-   * @param {!Document} doc
+   * @param {!Element} contextEl
    * @param {?../localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
-  static buildElements(components, doc, localizationService) {
-    const fragment = doc.createDocumentFragment();
+  static buildElements(components, contextEl, localizationService) {
+    const fragment =
+        devAssert(contextEl.ownerDocument).createDocumentFragment();
 
     components = prependTitle(components, localizationService);
 
@@ -165,7 +167,7 @@ export class BookendComponent {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         fragment.appendChild(componentBuilderInstanceFor(type)
-            .buildElement(component, doc));
+            .buildElement(component, contextEl));
       }
     });
     return fragment;
@@ -174,11 +176,10 @@ export class BookendComponent {
   /**
    * Builds container for components.
    * @param {!Element} element Bookend container
-   * @param {!Document} doc
    * @return {?Element}
    */
-  static buildContainer(element, doc) {
-    const html = htmlFor(doc);
+  static buildContainer(element) {
+    const html = htmlFor(element);
     const containerTemplate =
       html`<div class="i-amphtml-story-bookend-component-set
           i-amphtml-story-bookend-top-level"></div>`;

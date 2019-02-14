@@ -232,7 +232,7 @@ class PreconnectService {
    * @private
    */
   performPreload_(url) {
-    const html = cachedHtmlFor(this.document_);
+    const html = cachedHtmlFor(this.head_);
     const preload = html`<link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
     // Do not set 'as' attribute to correct value for now, for 2 reasons

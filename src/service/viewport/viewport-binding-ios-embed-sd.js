@@ -113,7 +113,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       documentElement.classList.add('i-amphtml-body-minheight');
     }
 
-    const scroller = htmlFor(doc)`
+    const html = htmlFor(documentElement);
+    const scroller = html`
       <div id="i-amphtml-scroller">
         <div id="i-amphtml-body-wrapper">
           <slot></slot>

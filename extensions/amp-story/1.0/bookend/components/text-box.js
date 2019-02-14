@@ -15,7 +15,7 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
-import {htmlFor} from '../../../../../src/static-template';
+import {cachedHtmlFor, htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
 
@@ -26,6 +26,20 @@ import {userAssert} from '../../../../../src/log';
  * }}
  */
 export let TextBoxComponentDef;
+
+
+/**
+ * @param {string} line
+ * @param {!Element} contextEl
+ * @return {!Element}
+ */
+function buildLineElement(line, contextEl) {
+  const html = cachedHtmlFor(contextEl);
+  const el = html `<h3 class="i-amphtml-story-bookend-text"></h3>`;
+  el.textContent = line;
+  return el;
+}
+
 
 /**
  * Builder class for the textbox bookend component.
@@ -53,21 +67,14 @@ export class TextBoxComponent {
   }
 
   /** @override */
-  buildElement(textboxData, doc) {
-    const html = htmlFor(doc);
-    const container =
-        html`
-        <div class="i-amphtml-story-bookend-textbox
-          i-amphtml-story-bookend-component"></div>`;
+  buildElement(textboxData, contextEl) {
+    const html = htmlFor(contextEl);
+    const container = html`<div class="i-amphtml-story-bookend-textbox
+      i-amphtml-story-bookend-component"></div>`;
 
-    let textSeed = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
     textboxData['text'].forEach(currentLine => {
-      const el = textSeed.cloneNode(/* deep */ true);
-      el.textContent = currentLine;
-      container.appendChild(el);
+      container.appendChild(buildLineElement(currentLine, contextEl));
     });
-
-    textSeed = null;
 
     return container;
   }

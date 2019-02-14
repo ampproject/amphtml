@@ -24,12 +24,12 @@ const LINE_LOADER_ELEMENTS = {
 /**
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.
- * @param {!Document} doc
+ * @param {!Element} contextElement
  * @param {string} elementName
  * @return {!Element}
  */
-export function createLoaderElement(doc, elementName) {
-  const html = cachedHtmlFor(doc);
+export function createLoaderElement(contextElement, elementName) {
+  const html = cachedHtmlFor(contextElement);
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
     return html`<div class="i-amphtml-loader-line">
           <div class="i-amphtml-loader-moving-line"></div>

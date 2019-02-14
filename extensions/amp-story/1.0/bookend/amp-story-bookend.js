@@ -522,11 +522,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
     return Services
         .localizationServiceForOrNull(this.win).then(localizationService => {
           const bookendEls = BookendComponent
-              .buildElements(
-                  components, this.win.document, localizationService);
+              .buildElements(components, this.element, localizationService);
           const container = dev().assertElement(
-              BookendComponent.buildContainer(this.getInnerContainer_(),
-                  this.win.document));
+              BookendComponent.buildContainer(this.getInnerContainer_()));
           this.mutateElement(() => container.appendChild(bookendEls));
         }).catch(e => {
           user().error(TAG, 'Unable to fetch localization service.', e.message);

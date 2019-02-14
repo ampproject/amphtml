@@ -18,15 +18,15 @@ import {htmlFor, htmlRefs, installHtmlForDoc} from '../../src/static-template';
 
 describes.fakeWin('Static Template', {amp: true}, env => {
 
-  let document;
+  let contextEl;
   beforeEach(() => {
-    document = env.win.document;
+    contextEl = env.win.document.body;
     installHtmlForDoc(env.ampdoc);
   });
 
   describe('htmlFor', () => {
     it('generates static html tree', () => {
-      const div = htmlFor(document)`<div attr="test"><p class="er"></p></div>`;
+      const div = htmlFor(contextEl)`<div attr="test"><p class="er"></p></div>`;
 
       expect(div.tagName).to.equal('DIV');
       expect(div.getAttribute('attr')).to.equal('test');
@@ -40,7 +40,7 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     });
 
     it('works as a variable', () => {
-      const html = htmlFor(document);
+      const html = htmlFor(contextEl);
       const div = html`<div attr="test"><p class="er"></p></div>`;
 
       expect(div.tagName).to.equal('DIV');
@@ -55,19 +55,19 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     });
 
     it('ignores text before first element', () => {
-      const div = htmlFor(document)`test<div></div>`;
+      const div = htmlFor(contextEl)`test<div></div>`;
       expect(div.outerHTML).to.not.include('test');
     });
 
     it('ignores text after first element', () => {
-      const div = htmlFor(document)`<div></div>test`;
+      const div = htmlFor(contextEl)`<div></div>test`;
       expect(div.outerHTML).to.not.include('test');
     });
 
     it('rejects multiple root elements', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)`<div></div><div></div>`;
+          htmlFor(contextEl)`<div></div><div></div>`;
         });
       }).to.throw('template');
     });
@@ -75,7 +75,7 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     it('rejects non-existent root', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)``;
+          htmlFor(contextEl)``;
         });
       }).to.throw('template');
     });
@@ -83,7 +83,7 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     it('rejects dynamic templates', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)`<div>${'text'}</div>`;
+          htmlFor(contextEl)`<div>${'text'}</div>`;
         });
       }).to.throw('template');
     });
@@ -105,13 +105,13 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     });
 
     it('ignores element if it has ref attribute', () => {
-      const el = htmlFor(document)`<div ref="test"></div>`;
+      const el = htmlFor(contextEl)`<div ref="test"></div>`;
       const refs = htmlRefs(el);
       expect(refs).to.deep.equal({});
     });
 
     it('rejects empty ref attribute', () => {
-      const el = htmlFor(document)`<div><div ref=""></div></div>`;
+      const el = htmlFor(contextEl)`<div><div ref=""></div></div>`;
       expect(() => {
         allowConsoleError(() => {
           htmlRefs(el);
@@ -120,7 +120,7 @@ describes.fakeWin('Static Template', {amp: true}, env => {
     });
 
     it('rejects duplicate ref attribute', () => {
-      const el = htmlFor(document)`<div>
+      const el = htmlFor(contextEl)`<div>
             <div ref="test"></div>
             <div ref="test"</div>
           </div>`;

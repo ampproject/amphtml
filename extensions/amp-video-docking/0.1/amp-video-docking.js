@@ -299,7 +299,7 @@ export class VideoDocking {
     this.preferredCornerX_ =
         isRTL(this.getDoc_()) ? RelativeX.LEFT : RelativeX.RIGHT;
 
-    const html = htmlFor(this.getDoc_());
+    const html = htmlFor(dev().assertElement(ampdoc.getBody()));
 
     /**
      * Returns an element representing a shadow under the docked video.

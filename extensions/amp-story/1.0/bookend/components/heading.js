@@ -35,7 +35,7 @@ export class HeadingComponent {
   /**
    * @param {!../bookend-component.BookendComponentDef} headingJson
    * @override
-   * */
+   */
   assertValidity(headingJson) {
     userAssert('text' in headingJson, 'Heading component must contain ' +
       '`text` field, skipping invalid.');
@@ -45,7 +45,7 @@ export class HeadingComponent {
    * @param {!../bookend-component.BookendComponentDef} headingJson
    * @return {!HeadingComponentDef}
    * @override
-   * */
+   */
   build(headingJson) {
     return {
       type: headingJson['type'],
@@ -53,14 +53,9 @@ export class HeadingComponent {
     };
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} headingData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildElement(headingData, doc) {
-    const html = htmlFor(doc);
+  /** @override */
+  buildElement(headingData, contextEl) {
+    const html = htmlFor(contextEl);
     const template =
       html`<h3 class="i-amphtml-story-bookend-component
         i-amphtml-story-bookend-heading"></h3>`;

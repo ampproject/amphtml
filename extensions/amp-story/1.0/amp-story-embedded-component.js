@@ -357,8 +357,7 @@ export class AmpStoryEmbeddedComponent {
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
 
-    this.focusedStateOverlay_ =
-      devAssert(this.buildFocusedStateTemplate_(this.win_.document));
+    this.focusedStateOverlay_ = this.buildFocusedStateTemplate_();
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
     this.focusedStateOverlay_
@@ -728,12 +727,11 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Builds the focused state template.
-   * @param {!Document} doc
    * @return {!Element}
    * @private
    */
-  buildFocusedStateTemplate_(doc) {
-    const html = htmlFor(doc);
+  buildFocusedStateTemplate_() {
+    const html = htmlFor(this.storyEl_);
     const tooltipOverlay =
         html`
         <section class="i-amphtml-story-focused-state-layer i-amphtml-hidden">
