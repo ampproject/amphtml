@@ -21,7 +21,7 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from './service';
-import {map} from './utils/object.js';
+import {map} from './utils/object';
 
 
 const FLUSH_CACHE_AFTER_MS = 200;
@@ -34,16 +34,13 @@ export let HtmlLiteralTagDef;
 
 /** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
 export function installHtmlForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, SERVICE, buildHtmlService);
+  registerServiceBuilderForDoc(ampdoc, SERVICE, Html);
 }
 
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {{
- *  htmlInternal: !HtmlLiteralTagDef,
- *  cachedHtmlInternal: !HtmlLiteralTagDef,
- * }}
+ * @return {!Html}
  */
 function getHtml(nodeOrDoc) {
   return getServiceForDoc(getAmpdoc(nodeOrDoc), SERVICE);
@@ -102,52 +99,52 @@ function devAssertCorrectHtmlTemplateTagUsage({length}) {
 }
 
 
-/**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {{
- *  htmlInternal: !HtmlLiteralTagDef,
- *  cachedHtmlInternal: !HtmlLiteralTagDef,
- * }}
- */
-export function buildHtmlService(ampdoc) {
-  const container = ampdoc.getRootNode().createElement('div');
+/** */
+export class Html {
 
-  /** @type {!TempCache<!Element>|undefined} */
-  let cache;
+  /** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
 
-  /**
-   * @param {!Array<string>} strings
-   * @return {!Element}
-   */
-  const cachedHtmlInternal = strings => {
-    devAssertCorrectHtmlTemplateTagUsage(strings);
-    cache = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MS));
-    const key = strings[0];
-    const seed = cache.has(key) ?
-      cache.get(key) :
-      cache.put(key, htmlInternal(strings));
-    return seed.cloneNode(/* deep */ true);
-  };
+    /** @private @const {!Element} */
+    this.container_ = ampdoc.getRootNode().createElement('div');
 
-  /**
-   * @param {!Array<string>} strings
-   * @return {!Element}
-   */
-  const htmlInternal = strings => {
-    devAssertCorrectHtmlTemplateTagUsage(strings);
-    container./*OK*/innerHTML = strings[0];
+    /** @type {?TempCache<!Element>} */
+    this.cache_ = null;
 
-    const el = container.firstElementChild;
-    devAssert(el, 'No elements in template');
-    devAssert(!el.nextElementSibling, 'Too many root elements in template');
+    /**
+     * @param {!Array<string>} strings
+     * @return {!Element}
+     */
+    this.cachedHtmlInternal = strings => { // must be arrow func for scope
+      devAssertCorrectHtmlTemplateTagUsage(strings);
+      const cache = this.cache_;
+      this.cache_ = (cache || new TempCache(ampdoc.win, FLUSH_CACHE_AFTER_MS));
+      const key = strings[0];
+      const seed = cache.has(key) ?
+        cache.get(key) :
+        cache.put(key, this.htmlInternal(strings));
+      return seed.cloneNode(/* deep */ true);
+    };
 
-    // Clear to free memory.
-    container.removeChild(el);
+    /**
+     * @param {!Array<string>} strings
+     * @return {!Element}
+     */
+    this.htmlInternal = strings => { // must be arrow func for scope
+      devAssertCorrectHtmlTemplateTagUsage(strings);
+      const container = this.container_;
+      container./*OK*/innerHTML = strings[0];
 
-    return el;
-  };
+      const el = container.firstElementChild;
+      devAssert(el, 'No elements in template');
+      devAssert(!el.nextElementSibling, 'Too many root elements in template');
 
-  return {htmlInternal, cachedHtmlInternal};
+      // Clear to free memory.
+      container.removeChild(el);
+
+      return el;
+    };
+  }
 }
 
 /**
