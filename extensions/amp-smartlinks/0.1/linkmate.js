@@ -182,8 +182,9 @@ export class Linkmate {
           .map(anchor => {
             return {
               anchor,
-              replacementUrl: anchor[this.linkAttribute_] === smartLink['url'] ?
-                `https://shop-links.co/${smartLink['auction_id']}/?amp=true` : null,
+              replacementUrl: anchor[this.linkAttribute_] === smartLink['url']
+                && smartLink['auction_id']
+                ? `https://shop-links.co/${smartLink['auction_id']}/?amp=true` : null,
             };
           });
     })[0];
