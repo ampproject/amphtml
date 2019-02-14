@@ -84,18 +84,20 @@ export class AmpViewerAssistance {
   /**
    * @private
    * @restricted
+   * @return {!AmpViewerAssistance}
    */
   start_() {
     if (!this.enabled_) {
-      user().info(
-          TAG, 'Invalid AMP Action - no "id=amp-viewer-assistance" element');
+      user().error(TAG, 'Could not find #amp-viewer-assistance element.');
       return this;
     }
     return this.viewer_.isTrustedViewer().then(isTrustedViewer => {
       if (!isTrustedViewer &&
          !isExperimentOn(this.ampdoc_.win, 'amp-viewer-assistance-untrusted')) {
         this.enabled_ = false;
-        user().info(TAG, 'Disabling AMP Action since viewer is not trusted');
+        user().error(TAG,
+            'amp-viewer-assistance is currently only supported on trusted'
+            + ' viewers.');
         return this;
       }
       this.action_.installActionHandler(
@@ -120,7 +122,7 @@ export class AmpViewerAssistance {
       'providers': [GSI_TOKEN_PROVIDER],
     }))
         .then(token => {
-          this.setIdTokenStatus_(Boolean(token));
+          this.setIdTokenStatus_(Boolean(!!token));
           return token;
         }).catch(() => {
           this.setIdTokenStatus_(/*available=*/false);
@@ -139,6 +141,8 @@ export class AmpViewerAssistance {
         this.setIdTokenStatus_(/*available=*/true);
         this.action_.trigger(
             this.assistanceElement_, 'signedIn', null, ActionTrust.HIGH);
+      } else {
+        this.setIdTokenStatus_(/*available=*/false);
       }
     });
   }
@@ -151,8 +155,6 @@ export class AmpViewerAssistance {
   setIdTokenStatus_(available) {
     this.toggleTopClass_(
         'amp-viewer-assistance-identity-available', available);
-    this.toggleTopClass_(
-        'amp-viewer-assistance-identity-unavailable', !available);
   }
 
   /**

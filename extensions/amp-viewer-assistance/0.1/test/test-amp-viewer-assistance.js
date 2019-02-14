@@ -155,7 +155,7 @@ describes.fakeWin('AmpViewerAssistance', {
         .then(token => expect(token).to.equal('idToken'));
   });
 
-  it('should set the css classes if IDENTITY_TOKEN is unavailable', () => {
+  it('should set a css class if IDENTITY_TOKEN is available', () => {
     const config = {
       'providerId': 'foo-bar',
     };
@@ -167,7 +167,7 @@ describes.fakeWin('AmpViewerAssistance', {
       },
     };
     const sendMessageStub = service.viewer_.sendMessageAwaitResponse;
-    sendMessageStub.returns(Promise.reject());
+    sendMessageStub.returns(Promise.resolve('idToken'));
     return service.getIdTokenPromise().then(() => {
       expect(sendMessageStub).to.be.calledOnce;
       expect(sendMessageStub.firstCall.args[0]).to.equal(
@@ -175,10 +175,8 @@ describes.fakeWin('AmpViewerAssistance', {
       expect(sendMessageStub.firstCall.args[1]).to.deep.equal({
         providers: ['actions-on-google-gsi'],
       });
-      expect(document.documentElement).not.to.have.class(
-          'amp-viewer-assistance-identity-available');
       expect(document.documentElement).to.have.class(
-          'amp-viewer-assistance-identity-unavailable');
+          'amp-viewer-assistance-identity-available');
     });
   });
 });
