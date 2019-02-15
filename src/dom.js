@@ -120,6 +120,7 @@ export function waitForBody(doc, callback) {
   ), callback);
 }
 
+
 /**
  * Waits for document's body to be available.
  * @param {!Document} doc
