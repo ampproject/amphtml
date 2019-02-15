@@ -431,9 +431,9 @@ export class AmpSelector extends AMP.BaseElement {
     // past the beginning or end.
     const previousIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
-    // If previousIndex === -1 is true, then a negative delta will be offset 
-    // one more than is wanted when looping back around in the options. This occurs when 
-    // no options are selected and "selectUp" is called.
+    // If previousIndex === -1 is true, then a negative delta will be offset
+    // one more than is wanted when looping back around in the options.
+    // This occurs when no options are selected and "selectUp" is called.
     const selectUpWhenNoneSelected = previousIndex === -1 && delta < 0;
     const index = selectUpWhenNoneSelected ? delta : previousIndex + delta;
     const normalizedIndex = mod(index, this.elements_.length);
