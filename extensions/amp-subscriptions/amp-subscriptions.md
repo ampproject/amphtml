@@ -424,7 +424,7 @@ Following are the events and the conditions when the events are triggered.
  - If the event result reports a success, `subscriptions-action-ActionName-success` is triggered.
  - This event does not contain any data.
 13. `subscriptions-action-ActionName-rejected`:
- - If the event result reports a success, `subscriptions-action-ActionName-rejected` is triggered.
+ - If the event result reports a failure, `subscriptions-action-ActionName-rejected` is triggered.
  - This event does not contain any data.
 
 
