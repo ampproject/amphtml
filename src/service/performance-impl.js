@@ -232,7 +232,7 @@ export class Performance {
       if (recordedFirstInputDelay) {
         return;
       }
-      this.tick('fid', entry.processingStart - entry.startTime);
+      this.tickDelay('fid', entry.processingStart - entry.startTime);
       recordedFirstInputDelay = true;
     };
     const observer = new this.win.PerformanceObserver(list => {
