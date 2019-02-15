@@ -835,7 +835,10 @@ export class AmpList extends AMP.BaseElement {
    */
   maybeSetLoadMore_() {
     return this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled && this.loadMoreSrc_) {
+      if (!enabled) {
+        return;
+      }
+      if (this.loadMoreSrc_) {
         const autoLoad = this.element.getAttribute('load-more') === 'auto';
         if (autoLoad) {
           this.setupLoadMoreAuto_();
@@ -853,6 +856,9 @@ export class AmpList extends AMP.BaseElement {
         }).then(() => {
           this.attemptToFit_(dev().assertElement(this.container_));
         });
+      } else {
+        return this.mutateElement(
+            () => this.loadMoreService_.setLoadMoreEnded());
       }
     });
   }
@@ -927,8 +933,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.resizeFailed_) {
       return;
     }
-    const lastItem = dev().assertElement(this.container_.lastChild);
-    this.viewport_.getClientRectAsync(lastItem)
+    const endoOfListMarker = this.container_.lastChild || this.container_;
+
+    this.viewport_.getClientRectAsync(dev().assertElement(endoOfListMarker))
         .then(positionRect => {
           const viewportHeight = this.viewport_.getHeight();
           const viewportTop = this.viewport_.getScrollTop();
