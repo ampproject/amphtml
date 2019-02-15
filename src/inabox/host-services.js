@@ -39,6 +39,21 @@ const ServiceNames = {
  */
 export let HostServiceError;
 
+/**
+ * A set of service interfaces that is used when the AMP document is loaded
+ * in an environment that does not provide regular web APIs for things like
+ * - open URL
+ * - scroll events, IntersectionObserver
+ * - expand to fullscreen
+ *
+ * The consumers of those services should get the service by calling
+ * XXXForDoc(), which returns a Promise that resolves to the service Object,
+ * or gets rejected with an error Object. (See HostServiceError)
+ *
+ * The providers of those services should install the service by calling
+ * installXXXServiceForDoc() when it's available, or
+ * rejectXXXServiceForDoc() when there is a failure.
+ */
 export class HostServices {
 
   /**

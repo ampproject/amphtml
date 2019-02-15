@@ -155,7 +155,7 @@ export class MraidInitializer {
   }
 
   /**
-   * Handles mismatch error.
+   * Called when we determine that MRAID isn't available.
    */
   handleMismatch_() {
     HostServices.rejectVisibilityServiceForDoc(
