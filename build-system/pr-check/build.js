@@ -80,6 +80,26 @@ function runYarnLockfileCheck_() {
   }
 }
 
+/**
+ * Validate build targets.
+ * Exit early if flag-config files are mixed with runtime files.
+ * @param {!Set<string>} buildTargets
+ * @return {boolean}
+ * @private
+ */
+function validateBuildTargets_(buildTargets) {
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
+    console.log(FILENAME, colors.red('ERROR:'),
+        'Looks like your PR contains',
+        colors.cyan('{prod|canary}-config.json'),
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
+    return false;
+  }
+  return true;
+}
+
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
@@ -88,6 +108,11 @@ function main() {
   runYarnLockfileCheck_();
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets();
+
+  if (validateBuildTargets_(buildTargets)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    return 1;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
@@ -98,7 +123,8 @@ function main() {
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('DEV_DASHBOARD')) {
+        buildTargets.has('DEV_DASHBOARD') ||
+        buildTargets.has('FLAG_CONFIG')) {
 
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');

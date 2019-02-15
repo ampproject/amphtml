@@ -66,7 +66,8 @@ function main() {
     }
 
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
 
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
       //TODO(estherkim): turn on when stabilized :)

@@ -51,21 +51,22 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
       ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
-    buildTargets.has('BUILD_SYSTEM') ||
-    buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST')) {
       timedExecOrDie('gulp test --integration --nobuild --saucelabs');
       ranTests = true;
     }
 
     if (!ranTests) {
       console.log('Skipping Sauce Labs unit and integration tests because ' +
-      'this commit not affect the runtime, build system, ' +
+      'this commit does not affect the runtime, build system, ' +
       'or integration test files.');
     }
   }
