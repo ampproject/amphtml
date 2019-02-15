@@ -191,7 +191,6 @@ function uploadBuildOutput(functionName) {
   exec('echo travis_fold:end:upload_results');
 }
 
-
 module.exports = {
   downloadBuildOutput,
   printChangeSummary,

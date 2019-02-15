@@ -48,7 +48,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp dist --fortesting --noextensions');
-    timedExecOrDie('gulp bundle-size --on-push-build');
+    timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {
     let ranTests = false;
