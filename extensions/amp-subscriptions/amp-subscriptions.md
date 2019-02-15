@@ -425,6 +425,15 @@ The `amp-subscriptions` extension triggers the following analytics signals:
 13. `subscriptions-action-ActionName-rejected`
  - Triggered when the execution result of action `ActionName` is reported as a failure.
  - Data: none.
+14. `subscriptions-link-requested`
+ - Triggered when a subscription account linking request is initiated by the selected service.
+ - Data: `serviceId` of the selected service.
+15. `subscriptions-link-complete`
+ - Triggered when subscription account linking has been completed by the selected service.
+ - Data: `serviceId` of the selected service.
+16. `subscriptions-link-canceled`
+ - Triggered when a subscription account linking request initiated by the selected service has been cancelled.
+ - Data: `serviceId` of the selected service.
 
 ## Available vendor services
 
