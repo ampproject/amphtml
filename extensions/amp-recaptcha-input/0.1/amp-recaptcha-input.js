@@ -27,13 +27,13 @@ import {
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
-  installRecaptchaServiceForDoc,
-  recaptchaServiceForDoc,
-} from './amp-recaptcha-service';
-import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
+import {
+  installRecaptchaServiceForDoc,
+  recaptchaServiceForDoc,
+} from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -64,28 +64,30 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return this._isExperimentEnabled().then(enabled => {
+    return this.isExperimentEnabled_().then(enabled => {
 
       if (!enabled) {
         user().error(TAG, 'Experiment "amp-recaptcha-input" is not enabled.');
-        return;
+        return Promise.reject(
+            'Experiment "amp-recaptcha-input" is not enabled.'
+        );
       }
 
       this.sitekey_ = userAssert(
-        this.element.getAttribute('data-sitekey'),
-        'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+          this.element.getAttribute('data-sitekey'),
+          'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+          this.element);
 
       this.action_ = userAssert(
-        this.element.getAttribute('data-action'),
-        'The data-action attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+          this.element.getAttribute('data-action'),
+          'The data-action attribute is required for <amp-recaptcha-input> %s',
+          this.element);
 
       userAssert(
-        this.element.getAttribute(AsyncInputAttributes.NAME),
-        'The %s attribute is required for <amp-recaptcha-input> %s',
-        AsyncInputAttributes.NAME,
-        this.element);
+          this.element.getAttribute(AsyncInputAttributes.NAME),
+          'The %s attribute is required for <amp-recaptcha-input> %s',
+          AsyncInputAttributes.NAME,
+          this.element);
 
       this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
 
@@ -157,20 +159,20 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
    * through origin trial, or AMP.toggleExperiment
    * @return {!Promise<boolean>}
    */
-  _isExperimentEnabled() {
+  isExperimentEnabled_() {
 
     // Check if we are enabled by AMP.toggleExperiment
-    if(isExperimentOn(this.win, 'amp-recaptcha-input')) {
+    if (isExperimentOn(this.win, 'amp-recaptcha-input')) {
       return Promise.resolve(true);
     }
 
     // Check if we are enabled by an origin trial
     installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
-      .getExperiments()
-      .then(trials => {
-        return trials && trials.includes('amp-recaptcha-input');
-      });
+        .getExperiments()
+        .then(trials => {
+          return trials && trials.includes('amp-recaptcha-input');
+        });
   }
 }
 
