@@ -150,19 +150,19 @@ function downloadBuildOutput(functionName) {
 
   console.log(
       `${fileLogPrefix} Downloading build output from ` +
-      `${colors.cyan(buildOutputDownloadUrl)}...`);
-  exec('echo travis_fold:start:download_results');
+      colors.cyan(buildOutputDownloadUrl) + '...');
+  exec('echo travis_fold:start:download_results && echo');
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${BUILD_OUTPUT_FILE}`);
   exec('echo travis_fold:end:download_results');
 
   console.log(
-      `${fileLogPrefix} Extracting ${colors.cyan(BUILD_OUTPUT_FILE)}...`);
-  exec('echo travis_fold:start:unzip_results');
+      `${fileLogPrefix} Extracting ` + colors.cyan(BUILD_OUTPUT_FILE) + '...');
+  exec('echo travis_fold:start:unzip_results && echo');
   execOrDie(`unzip -o ${BUILD_OUTPUT_FILE}`);
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
-  exec('echo travis_fold:start:verify_unzip_results');
+  exec('echo travis_fold:start:verify_unzip_results && echo');
   execOrDie(`ls -la ${BUILD_OUTPUT_DIRS}`);
   exec('echo travis_fold:end:verify_unzip_results');
 }
@@ -175,17 +175,16 @@ function uploadBuildOutput(functionName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
-      `\n${fileLogPrefix} Compressing contents of directories ` +
-      `${colors.cyan(BUILD_OUTPUT_DIRS)} into ` +
-      `${colors.cyan(BUILD_OUTPUT_FILE)}...`);
-  exec('echo travis_fold:start:zip_results');
+      `\n${fileLogPrefix} Compressing ` + colors.cyan(BUILD_OUTPUT_DIRS) +
+      ' into ' + colors.cyan(BUILD_OUTPUT_FILE) + '...');
+  exec('echo travis_fold:start:zip_results && echo');
   execOrDie(`zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS}`);
   exec('echo travis_fold:end:zip_results');
 
   console.log(
-      `${fileLogPrefix} Uploading ${colors.cyan(BUILD_OUTPUT_FILE)} ` +
-      `to ${colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION)}...`);
-  exec('echo travis_fold:start:upload_results');
+      `${fileLogPrefix} Uploading ` + colors.cyan(BUILD_OUTPUT_FILE) + ' to ' +
+      colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION) + '...');
+  exec('echo travis_fold:start:upload_results && echo');
   execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} ` +
       `${BUILD_OUTPUT_STORAGE_LOCATION}`);
   exec('echo travis_fold:end:upload_results');

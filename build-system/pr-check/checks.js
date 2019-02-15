@@ -46,10 +46,10 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp ava');
     timedExecOrDie('node node_modules/jest/bin/jest.js');
-    timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dep-check');
+    timedExecOrDie('gulp check-types');
   } else {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
@@ -63,10 +63,10 @@ function main() {
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST')) {
 
-      timedExecOrDie('gulp check-types');
       timedExecOrDie('gulp caches-json');
       timedExecOrDie('gulp json-syntax');
       timedExecOrDie('gulp dep-check');
+      timedExecOrDie('gulp check-types');
     }
 
     if (buildTargets.has('DOCS')) {
