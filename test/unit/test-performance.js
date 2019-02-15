@@ -770,7 +770,7 @@ describes.realWin('performance with firstInput events', {amp: true}, env => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
       });
-      sinon.replace(env.win, 'PerformanceObserver', PerformanceObserverStub);
+      env.sandbox.stub(env.win, 'PerformanceObserver', PerformanceObserverStub);
 
       installPerformanceService(env.win);
 
