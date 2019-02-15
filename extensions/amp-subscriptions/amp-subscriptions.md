@@ -386,33 +386,33 @@ Values in the `data` object of an Entitlements response can be used to build exp
 
 The `amp-subscriptions` extension triggers the following analytics signals:
 
-1. `subscriptions-service-activated`
- - Triggered when a configured service is selected and activated for use.  See [Selecting a service](#selecting-a-service).
- - Data: `serviceId` of the selected service.
-2. `subscriptions-access-granted`
- - Triggered when the entitlement from the selected service grants access to the document.
- - Data: `serviceId` of the selected service.
-3. `subscriptions-access-denied`
- - Triggered when the entitlement from the selected service denies access to the document.
- - Data: `serviceId` of the selected service.
-4. `subscriptions-paywall-activated`
- - Triggered when the entitlement from the selected service does not grant access to the document.
- - Data: `serviceId` of the selected service.
-5. `subscriptions-service-registered`
- - Triggered when `amp-subscriptions` is able to resolve the instance of the service.  A service is free to initialize itself at anytime on the page.
- - Data: `serviceId` of the selected service.
-6. `subscriptions-service-re-authorized`
- - Triggered when re-authorization of a service is complete.  A service can request re-authorization after any action is performed e.g., `login`.  A new entitlement is fetched for the service after re-authorization is complete.
- - Data: `serviceId` of the selected service.
-7. `subscriptions-action-delegated`
- - Triggered just before a delegated service action is handed off to the other service.  See [Action delegation](##action-delegation).
- - Data: `serviceId` and the delegated `action` of the selected service.
-8. `subscriptions-entitlement-resolved`
- - Triggered when the entitlement fetch for a service is complete.
- - Data: `serviceId` and `action` of the selected service.
-9. `subscriptions-started`
+1. `subscriptions-started`
  - Triggered when `amp-subscriptions` is initialized.
  - Data: none.
+2. `subscriptions-service-registered`
+ - Triggered when `amp-subscriptions` is able to resolve the instance of the service.  A service is free to initialize itself at anytime on the page.
+3. `subscriptions-service-activated`
+ - Triggered when a configured service is selected and activated for use.  See [Selecting a service](#selecting-a-service).
+ - Data: `serviceId` of the selected service.
+4. `subscriptions-entitlement-resolved`
+ - Triggered when the entitlement fetch for a service is complete.
+ - Data: `serviceId` and `action` of the selected service.
+ - Data: `serviceId` of the selected service.
+5. `subscriptions-access-granted`
+ - Triggered when the entitlement from the selected service grants access to the document.
+ - Data: `serviceId` of the selected service.
+6. `subscriptions-paywall-activated`
+ - Triggered when the entitlement from the selected service does not grant access to the document.
+ - Data: `serviceId` of the selected service.
+7. `subscriptions-access-denied`
+ - Triggered when the entitlement from the selected service denies access to the document.
+ - Data: `serviceId` of the selected service.
+8. `subscriptions-service-re-authorized`
+ - Triggered when re-authorization of a service is complete.  A service can request re-authorization after any action is performed e.g., `login`.  A new entitlement is fetched for the service after re-authorization is complete.
+ - Data: `serviceId` of the selected service.
+9. `subscriptions-action-delegated`
+ - Triggered just before a delegated service action is handed off to the other service.  See [Action delegation](#action-delegation).
+ - Data: `serviceId` and the delegated `action` of the selected service.
 10. `subscriptions-action-ActionName-started`
  - Triggered when the execution of action `ActionName` starts.
  - Data: none.
