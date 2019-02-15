@@ -76,7 +76,8 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
       expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
       // TODO(dvoytenko, #20608): add to fixed layer, once the SwG/FL
       // conflict is resolved.
-      // expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(dialog.getRoot());
+      // expect(addToFixedLayerSpy).to.be.calledOnce
+      //     .calledWith(dialog.getRoot());
       expect(addToFixedLayerSpy).to.not.be.called;
       expect(dialog.isVisible()).to.be.true;
     });
