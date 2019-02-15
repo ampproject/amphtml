@@ -196,6 +196,23 @@ describes.realWin('extension-analytics', {
         'xhrpost': false,
       });
     });
+
+    it('Should allow to specify extraUrlParams config', () => {
+      parent.getResourceId = () => { return 1; };
+      parent.signals = () => {
+        return {
+          whenSignal: () => { return Promise.resolve(); },
+        };
+      };
+      builder.setExtraUrlParams({
+        'a': 'b',
+      });
+
+      const reporter = builder.build();
+      expect(reporter.config_.extraUrlParams).to.jsonEqual({
+        'a': 'b',
+      });
+    });
   });
 
   describe('CustomEventReporter test', () => {
