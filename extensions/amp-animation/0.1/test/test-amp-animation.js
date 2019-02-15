@@ -16,8 +16,8 @@
 
 import {AmpAnimation} from '../amp-animation';
 import {DEFAULT_ACTION} from '../../../../src/action-constants';
-import {WebAnimationPlayState} from '../web-animation-types';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {WebAnimationPlayState} from '../web-animation-types';
 
 describes.sandboxed('AmpAnimation', {}, () => {
 
