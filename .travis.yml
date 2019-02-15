@@ -80,7 +80,8 @@ jobs:
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
   fast_finish: true
-  allowed_failures:
+  #TODO(ampproject/wg-infra): remove when remote tests stabilize
+  allow_failures:
       - script:
           - node build-system/pr-check/remote-tests.js
 cache:

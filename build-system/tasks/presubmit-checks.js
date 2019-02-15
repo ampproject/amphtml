@@ -105,6 +105,7 @@ const forbiddenTerms = {
       'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'build-system/pr-check/build.js',
+      'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/local-tests.js',

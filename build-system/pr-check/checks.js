@@ -27,7 +27,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
-const {determineBuildTargets} = require('./build-target');
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'checks.js';

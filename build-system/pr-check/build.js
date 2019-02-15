@@ -28,7 +28,7 @@ const {
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   uploadBuildOutput} = require('./utils');
-const {determineBuildTargets} = require('./build-target');
+const {determineBuildTargets} = require('./build-targets');
 const {getStderr} = require('../exec');
 const {gitDiffColor} = require('../git');
 const {isTravisPullRequestBuild} = require('../travis');
@@ -97,14 +97,15 @@ function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('BUILD_SYSTEM')) {
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('DEV_DASHBOARD')) {
 
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
-      console.log('Skipping build job because this commit does ' +
-       'not affect the runtime, build system, or test files');
+      console.log('Skipping build job because this commit does not affect ' +
+          'the runtime, build system, test files, or the dev dashboard');
     }
   }
 

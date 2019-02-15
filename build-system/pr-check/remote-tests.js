@@ -29,7 +29,7 @@ const {
   startSauceConnect,
   stopSauceConnect,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
-const {determineBuildTargets} = require('./build-target');
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
@@ -44,6 +44,7 @@ function main() {
   startSauceConnect(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
   } else {
