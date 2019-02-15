@@ -40,7 +40,6 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
-
   downloadBuildOutput(FILENAME);
   startSauceConnect(FILENAME);
 

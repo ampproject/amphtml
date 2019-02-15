@@ -31,6 +31,7 @@ const {
 const {determineBuildTargets} = require('./build-target');
 const {getStderr} = require('../exec');
 const {gitDiffColor} = require('../git');
+const {isTravisPullRequestBuild} = require('../travis');
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
@@ -88,18 +89,23 @@ function main() {
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets();
 
-  if (buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM')) {
-
+  if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
-
     uploadBuildOutput(FILENAME);
   } else {
-    console.log('Skipping build job because this commit does ' +
-     'not affect the runtime, build system, or test files');
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie('gulp build --fortesting');
+      uploadBuildOutput(FILENAME);
+    } else {
+      console.log('Skipping build job because this commit does ' +
+       'not affect the runtime, build system, or test files');
+    }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
