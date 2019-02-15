@@ -37,7 +37,6 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
   downloadBuildOutput(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
@@ -47,6 +46,7 @@ function main() {
     //TODO(estherkim): turn on when stabilized :)
     //timedExecOrDie('gulp e2e --nobuild');
   } else {
+    printChangeSummary(FILENAME);
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||

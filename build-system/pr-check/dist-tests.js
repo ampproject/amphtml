@@ -44,13 +44,13 @@ function runSinglePassTest_() {
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp dist --fortesting --noextensions');
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {
+    printChangeSummary(FILENAME);
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {

@@ -39,7 +39,6 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
   downloadBuildOutput(FILENAME);
   startSauceConnect(FILENAME);
 
@@ -48,6 +47,7 @@ function main() {
     timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
   } else {
+    printChangeSummary(FILENAME);
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME') ||
