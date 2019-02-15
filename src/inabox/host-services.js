@@ -27,17 +27,17 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
-export const HostServiceError = {
-  // The host service doesn't match its environment.  For example, a SafeFrame
-  // host service when run in something that isn't a SafeFrame.  The
-  // implementation should consider falling back to its default implementation
-  // on the regular web.
-  MISMATCH: 1,
-  // The host service is correct for its environment, but not able to function.
-  // For example, a SafeFrame host service running inside a SafeFrame
-  // implementation that is incomplete or out of date.
-  UNSUPPORTED: 2,
-};
+/**
+ * Error object for various host services. It is passed around in case
+ * of host service failures for proper error handling.
+ *
+ * - fallback: if the caller should fallback to other impl
+ *
+ * @typedef {{
+ *   fallback: boolean
+ * }}
+ */
+export let HostServiceError;
 
 export class HostServices {
 
@@ -70,7 +70,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {number} error
+   * @param {!HostServiceError} error
    */
   static rejectVisibilityServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY, error);
@@ -96,7 +96,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {number} error
+   * @param {!HostServiceError} error
    */
   static rejectFullscreenServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN, error);
@@ -122,7 +122,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {number} error
+   * @param {!HostServiceError} error
    */
   static rejectExitServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT, error);

@@ -26,10 +26,7 @@
  *
  */
 
-import {
-  HostServiceError,
-  HostServices,
-} from '../../../src/inabox/host-services';
+import {HostServices} from '../../../src/inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -41,11 +38,11 @@ const FALLBACK_ON = 'fallback-on';
  * String representations of the HostServicesErrors that can be used in the
  * 'fallback-on' attribute.
  *
- * @const @enum {number}
+ * @const @enum {string}
  */
 const FallbackErrorNames = {
-  'mismatch': HostServiceError.MISMATCH,
-  'unsupported': HostServiceError.UNSUPPORTED,
+  MISMATCH: 'mismatch',
+  UNSUPPORTED: 'unsupported',
 };
 
 /**
@@ -60,14 +57,19 @@ export class MraidInitializer {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Array<number>} */
-    this.fallbackOn_ = [];
-
     /** @private {boolean} */
     this.registeredWithHostServices_ = false;
 
     /** @private */
     this.mraid_ = null;
+
+    /** @private {boolean} */
+    this.fallback_ = false;
+
+    if (getMode().runtime !== 'inabox') {
+      dev().error(TAG, 'Only supported with Inabox');
+      return;
+    }
 
     const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
         'script[host-service="amp-mraid"]');
@@ -79,25 +81,9 @@ export class MraidInitializer {
       return;
     }
     const element = ampMraidScripts[0];
-
-    if (getMode().runtime !== 'inabox') {
-      dev().error(TAG, 'Only supported with Inabox');
-      return;
-    }
-
-    this.fallbackOn_ = [];
-    const fallbackOnErrorNames =
-          (element.getAttribute(FALLBACK_ON) || '').split(' ');
-    for (let i = 0; i < fallbackOnErrorNames.length; i++) {
-      const errorName = fallbackOnErrorNames[i];
-      if (errorName) {
-        if (!(errorName in FallbackErrorNames)) {
-          dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorName}"`);
-          return;
-        }
-        this.fallbackOn_.push(FallbackErrorNames[errorName]);
-      }
-    }
+    const fallbackOn =
+        (element.getAttribute(FALLBACK_ON) || '').split(' ');
+    this.fallback_ = fallbackOn.includes(FallbackErrorNames.MISMATCH);
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
@@ -128,7 +114,7 @@ export class MraidInitializer {
           this.ampdoc_, () => mraidService);
     } else {
       HostServices.rejectVisibilityServiceForDoc(
-          this.ampdoc_, HostServiceError.UNSUPPORTED);
+          this.ampdoc_, {fallback: false});
     }
 
     if (this.mraid_.expand && this.mraid_.close) {
@@ -136,7 +122,7 @@ export class MraidInitializer {
           this.ampdoc_, () => mraidService);
     } else {
       HostServices.rejectFullscreenServiceForDoc(
-          this.ampdoc_, HostServiceError.UNSUPPORTED);
+          this.ampdoc_, {fallback: false});
     }
 
     if (this.mraid_.open) {
@@ -144,7 +130,7 @@ export class MraidInitializer {
           this.ampdoc_, () => mraidService);
     } else {
       HostServices.rejectExitServiceForDoc(
-          this.ampdoc_, HostServiceError.UNSUPPORTED);
+          this.ampdoc_, {fallback: true}); // always fallback for exit service
     }
     this.registeredWithHostServices_ = true;
   }
@@ -173,11 +159,11 @@ export class MraidInitializer {
    */
   handleMismatch_() {
     HostServices.rejectVisibilityServiceForDoc(
-        this.ampdoc_, HostServiceError.MISMATCH);
+        this.ampdoc_, {fallback: this.fallback_});
     HostServices.rejectExitServiceForDoc(
-        this.ampdoc_, HostServiceError.MISMATCH);
+        this.ampdoc_, {fallback: true}); // always fallback for exit service
     HostServices.rejectFullscreenServiceForDoc(
-        this.ampdoc_, HostServiceError.MISMATCH);
+        this.ampdoc_, {fallback: this.fallback_});
   }
 }
 
