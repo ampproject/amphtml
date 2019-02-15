@@ -56,6 +56,9 @@ export class AutoAdvance {
     /** @private @const */
     this.advanceable_ = advanceable;
 
+    /** @private {number} */
+    this.advances_ = 0;
+
     /** @private {boolean} */
     this.autoAdvance_ = false;
 
@@ -70,6 +73,9 @@ export class AutoAdvance {
 
     /** @private {?function()} */
     this.debouncedAdvance_ = null;
+
+    /** @private {number} */
+    this.maxAdvances_ = Number.POSITIVE_INFINITY;
 
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
@@ -108,6 +114,14 @@ export class AutoAdvance {
   }
 
   /**
+   * @param {number} maxAdvances The maximum number of advances that should be
+   *    performed.
+   */
+  updateMaxAdvances(maxAdvances) {
+    this.maxAdvances_ = maxAdvances;
+  }
+
+  /**
    * Creates a debounced advance function.
    * @param {number} interval
    * @private
@@ -132,6 +146,16 @@ export class AutoAdvance {
   }
 
   /**
+   * @return {boolean} Whether or not autodadvancing should occur.
+   * @private
+   */
+  shouldAutoAdvance_() {
+    return this.autoAdvance_ &&
+        !this.paused_ &&
+        this.advances_ < this.maxAdvances_;
+  }
+
+  /**
    * Handles scroll, resetting the auto advance.
    */
   handleScroll_() {
@@ -139,15 +163,15 @@ export class AutoAdvance {
   }
 
   /**
-   * Advances, as long as auto advance is still enabled and the advancing has
-   * not been paused.
+   * Advances, as long as we should still auto advance.
    */
   advance_() {
-    if (!this.autoAdvance_ || this.paused_) {
+    if (!this.shouldAutoAdvance_()) {
       return;
     }
 
     this.advanceable_.advance(this.autoAdvanceCount_, ActionSource.AUTOPLAY);
+    this.advances_ += this.autoAdvanceCount_;
   }
 
   /**
@@ -155,7 +179,7 @@ export class AutoAdvance {
    * is enabled, it starts a debounced timer for advancing.
    */
   resetAutoAdvance_() {
-    if (!this.autoAdvance_) {
+    if (!this.shouldAutoAdvance_()) {
       return;
     }
 

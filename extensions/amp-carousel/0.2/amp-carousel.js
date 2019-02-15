@@ -77,6 +77,9 @@ class AmpCarousel extends AMP.BaseElement {
       'auto-advance-interval': newValue => {
         this.carousel_.updateAutoAdvanceInterval(Number(newValue) || 0);
       },
+      'auto-advance-loops': newValue => {
+        this.carousel_.updateAutoAdvanceLoops(Number(newValue) || 0);
+      },
       'horizontal': newValue => {
         this.carousel_.updateHorizontal(newValue == 'true');
       },
