@@ -249,6 +249,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-skimlinks', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-smartlinks', version: '0.1', type: TYPES.MISC},
   {name: 'amp-soundcloud', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-springboard-player', version: '0.1', type: TYPES.MEDIA},
   {
