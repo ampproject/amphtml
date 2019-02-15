@@ -36,7 +36,7 @@ export const HostServiceError = {
   // The host service is correct for its environment, but not able to function.
   // For example, a SafeFrame host service running inside a SafeFrame
   // implementation that is incomplete or out of date.
-  UNSUPPORTED: 2,
+  UNSUPPORTED: 1,
 };
 
 export class HostServices {
@@ -70,7 +70,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {string|number} error
+   * @param {number} error
    */
   static rejectVisibilityServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY, error);
@@ -96,7 +96,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {string|number} error
+   * @param {number} error
    */
   static rejectFullscreenServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN, error);
@@ -122,7 +122,7 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @param {string|number} error
+   * @param {number} error
    */
   static rejectExitServiceForDoc(elementOrAmpDoc, error) {
     rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT, error);
