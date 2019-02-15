@@ -74,7 +74,7 @@ function main() {
     }
   }
 
-  stopTimer(FILENAME, FILENAME,  startTime);
+  stopTimer(FILENAME, FILENAME, startTime);
   return 0;
 }
 

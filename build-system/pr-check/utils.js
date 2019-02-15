@@ -175,7 +175,7 @@ function uploadBuildOutput(functionName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
-      `${fileLogPrefix} Compressing contents of directories ` +
+      `\n ${fileLogPrefix} Compressing contents of directories ` +
       `${colors.cyan(BUILD_OUTPUT_DIRS)} into ` +
       `${colors.cyan(BUILD_OUTPUT_FILE)}...`);
   exec('echo travis_fold:start:zip_results');
