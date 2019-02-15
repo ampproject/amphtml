@@ -93,7 +93,7 @@ export function waitForChildPromise(parent, checkFunc) {
  * @param {function()} callback
  */
 export function waitForHead(doc, callback) {
-  waitForChild(doc.documentElement, () => !!doc.head, callback);
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
 }
 
 /**
