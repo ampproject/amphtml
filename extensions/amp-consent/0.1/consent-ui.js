@@ -272,8 +272,7 @@ export class ConsentUI {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     let sandbox = 'allow-scripts';
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
-    const allowSameOrigin = this.allowSameOrigin_(
-        iframe.src, window.location.href);
+    const allowSameOrigin = this.allowSameOrigin_(iframe.src);
     if (allowSameOrigin) {
       sandbox = 'allow-scripts allow-same-origin';
     }
@@ -287,15 +286,14 @@ export class ConsentUI {
   /**
    * Determines if allow-same-origin should be enabled for the prompt iframe
    * @param {string} src
-   * @param {string} containerSrc
    * @return {boolean}
    */
-  allowSameOrigin_(src, containerSrc) {
+  allowSameOrigin_(src) {
     const urlService = Services.urlForDoc(this.parent_);
     const srcUrl = urlService.parse(src);
-    const containerUrl = urlService.parse(containerSrc);
+    const containerUrl = urlService.parse(this.ampdoc_.getUrl());
 
-    return srcUrl.origin != containerUrl.origin && srcUrl.protocol != 'data:';
+    return srcUrl.origin != containerUrl.origin;
   }
 
   /**
