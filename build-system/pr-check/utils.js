@@ -149,7 +149,7 @@ function downloadBuildOutput(functionName) {
     `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE}`;
 
   console.log(
-      `${fileLogPrefix} 'Downloading build output from ` +
+      `${fileLogPrefix} Downloading build output from ` +
       `${colors.cyan(buildOutputDownloadUrl)}...`);
   exec('echo travis_fold:start:download_results');
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${BUILD_OUTPUT_FILE}`);
@@ -175,7 +175,7 @@ function uploadBuildOutput(functionName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
-      `\n ${fileLogPrefix} Compressing contents of directories ` +
+      `\n${fileLogPrefix} Compressing contents of directories ` +
       `${colors.cyan(BUILD_OUTPUT_DIRS)} into ` +
       `${colors.cyan(BUILD_OUTPUT_FILE)}...`);
   exec('echo travis_fold:start:zip_results');
