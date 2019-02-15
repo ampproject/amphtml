@@ -37,20 +37,22 @@ const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
  */
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(fileLogPrefix, colors.cyan('origin/master'),
-      'is currently at commit',
-      colors.cyan(shortSha(gitTravisMasterBaseline())));
-  console.log(fileLogPrefix,
-      'Testing the following changes at commit',
-      colors.cyan(shortSha(travisPullRequestSha())));
+
+  console.log(
+      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
+      `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
+  console.log(
+      `${fileLogPrefix} Testing the following changes at commit ` +
+      `${colors.cyan(shortSha(travisPullRequestSha()))}`);
 
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
 
   const branchPoint = gitMergeBaseMaster();
-  console.log(fileLogPrefix, 'Commit log since branch',
-      colors.cyan(gitBranchName()), 'was forked from',
-      colors.cyan('master'), 'at', colors.cyan(shortSha(branchPoint)) + ':');
+  console.log(
+      `${fileLogPrefix} Commit log since branch ` +
+      `${colors.cyan(gitBranchName())} was forked from ` +
+      `${colors.cyan('master')} at ${colors.cyan(shortSha(branchPoint))}:`);
   console.log(gitDiffCommitLog() + '\n');
 }
 
@@ -144,16 +146,20 @@ function downloadBuildOutput(functionName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl =
     `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE}`;
-  console.log(fileLogPrefix,
-      'Downloading build output from',
-      colors.cyan(buildOutputDownloadUrl) + '...');
+
+  console.log(
+      `${fileLogPrefix} 'Downloading build output from ` +
+      `${colors.cyan(buildOutputDownloadUrl)}...`);
+  exec('echo travis_fold:start:download_results');
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${BUILD_OUTPUT_FILE}`);
-  console.log(fileLogPrefix,
-      'Extracting',
-      colors.cyan(BUILD_OUTPUT_FILE) + '...');
+  exec('echo travis_fold:end:download_results');
+
+  console.log(
+      `${fileLogPrefix} Extracting ${colors.cyan(BUILD_OUTPUT_FILE)}...`);
   exec('echo travis_fold:start:unzip_results');
   execOrDie(`unzip -o ${BUILD_OUTPUT_FILE}`);
   exec('echo travis_fold:end:unzip_results');
+
   console.log(fileLogPrefix, 'Verifying extracted files...');
   exec('echo travis_fold:start:verify_unzip_results');
   execOrDie(`ls -la ${BUILD_OUTPUT_DIRS}`);
@@ -166,19 +172,22 @@ function downloadBuildOutput(functionName) {
  */
 function uploadBuildOutput(functionName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(fileLogPrefix,
-      'Compressing contents of directories',
-      colors.cyan(BUILD_OUTPUT_DIRS),
-      ' into', colors.cyan(BUILD_OUTPUT_FILE) + '...');
+
+  console.log(
+      `${fileLogPrefix} Compressing contents of directories ` +
+      `${colors.cyan(BUILD_OUTPUT_DIRS)} into ` +
+      `${colors.cyan(BUILD_OUTPUT_FILE)}...`);
   exec('echo travis_fold:start:zip_results');
   execOrDie(`zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS}`);
   exec('echo travis_fold:end:zip_results');
-  console.log(fileLogPrefix,
-      'Uploading',
-      colors.cyan(BUILD_OUTPUT_FILE),
-      'to', colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION) + '...');
-  execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} `
-    + `${BUILD_OUTPUT_STORAGE_LOCATION}`);
+
+  console.log(
+      `${fileLogPrefix} Uploading ${colors.cyan(BUILD_OUTPUT_FILE)} ` +
+      `to ${colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION)}...`);
+  exec('echo travis_fold:start:upload_results');
+  execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} ` +
+      `${BUILD_OUTPUT_STORAGE_LOCATION}`);
+  exec('echo travis_fold:end:upload_results');
 }
 
 

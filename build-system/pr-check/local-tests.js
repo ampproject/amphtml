@@ -61,7 +61,7 @@ function main() {
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
 
-      timedExecOrDie('gulp test --integraton --nobuild --headless --coverage');
+      timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
       ranTests = true;
     }
 
