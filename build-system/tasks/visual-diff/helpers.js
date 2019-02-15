@@ -70,15 +70,13 @@ function log(mode, ...messages) {
  * @throws {Error} an encountered error.
  */
 async function verifySelectorInvisible(page, testName, selectors) {
-  if (selectors) {
-    log('verbose', 'Waiting for invisibility of all:',
-        colors.cyan(selectors.join(', ')));
-    for (const selector of selectors) {
-      if (!(await waitForElementVisibility(page, selector, {hidden: true}))) {
-        throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
-            `selector ${colors.cyan(selector)} is still visible after ` +
-            `${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      }
+  log('verbose', 'Waiting for invisibility of all:',
+      colors.cyan(selectors.join(', ')));
+  for (const selector of selectors) {
+    if (!(await waitForElementVisibility(page, selector, {hidden: true}))) {
+      throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+          `selector ${colors.cyan(selector)} is still visible after ` +
+          `${CSS_SELECTOR_TIMEOUT_MS} ms`);
     }
   }
 }
