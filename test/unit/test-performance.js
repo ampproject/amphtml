@@ -734,7 +734,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           name: "first-contentful-paint",
           startTime: 10
       }];
-      const getEntriesByType = sinon.stub();
+      const getEntriesByType = env.sandbox.stub();
       getEntriesByType.withArgs('paint').returns(entries);
       getEntriesByType.returns([]);
       env.sandbox.stub(env.win.performance, 'getEntriesByType').callsFake(getEntriesByType);
@@ -762,7 +762,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       env.win.PerformancePaintTiming = true;
 
       // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = sinon.stub();
+      const PerformanceObserverStub = env.sandbox.stub();
 
       let performanceObserver;
       PerformanceObserverStub.callsFake(callback => {
@@ -822,7 +822,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         processingStart: 103,
         startTime: 100,
       }];
-      const getEntriesByType = sinon.stub();
+      const getEntriesByType = env.sandbox.stub();
       getEntriesByType.withArgs('firstInput').returns(entries);
       getEntriesByType.returns([]);
       env.sandbox.stub(env.win.performance, 'getEntriesByType').callsFake(getEntriesByType);
@@ -846,7 +846,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       env.win.PerformanceEventTiming = true;
 
       // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = sinon.stub();
+      const PerformanceObserverStub = env.sandbox.stub();
 
       let performanceObserver;
       PerformanceObserverStub.callsFake(callback => {
@@ -885,4 +885,5 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     });
   });
 });
+
 
