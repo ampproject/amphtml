@@ -104,6 +104,14 @@ const forbiddenTerms = {
       'build-system/app.js',
       'build-system/amp4test.js',
       'build-system/check-package-manager.js',
+      'build-system/pr-check/build.js',
+      'build-system/pr-check/checks.js',
+      'build-system/pr-check/dist-tests.js',
+      'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/remote-tests.js',
+      'build-system/pr-check/utils.js',
+      'build-system/pr-check/validator-tests.js',
+      'build-system/pr-check/visual-diff-tests.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -397,6 +405,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',

@@ -30,6 +30,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
+import {htmlFor} from '../../src/static-template';
 import {setParentWindow} from '../../src/service';
 import {whenCalled} from '../../testing/test-helper.js';
 
@@ -650,6 +651,55 @@ describe('Action hasAction', () => {
         element.setAttribute('on', 'event1:action1');
         expect(action.hasAction(element, 'event2')).to.equal(false);
       });
+
+});
+
+describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
+  let action;
+  let html;
+
+  beforeEach(() => {
+    html = htmlFor(env.win.document);
+    action = new ActionService(env.ampdoc, env.win.document);
+
+    // Insert element for valid actions to be resolved.
+    env.win.document.body.appendChild(html`<div id="valid-target"></div>`);
+  });
+
+  it('returns true if the target element exists (single)', () => {
+    const element = html`<div on="event1: valid-target"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns true if the target element exists (action up the tree)', () => {
+    const wrapper = html`<div on="event1: valid-target"></div>`;
+    const child = html`<div></div>`;
+    wrapper.appendChild(child);
+    expect(action.hasResolvableAction(child, 'event1')).to.equal(true);
+  });
+
+  it('returns true if the target element exists (one amongst many)', () => {
+    const element =
+      html`<div on="event1: i-dont-exist, valid-target, i-dont-exist-either">
+      </div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns false if the target element does not exist (one)', () => {
+    const element = html`<div on="event1: i-do-not-exist"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(false);
+  });
+
+  it('returns false if the target element does not exist (multiple)', () => {
+    const element =
+      html`<div on="event1: i-do-not-exist, i-dont-exist-either"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(false);
+  });
+
+  it('returns false if target element does not have the target action', () => {
+    const element = html`<div on="event1: valid-target"></div>`;
+    expect(action.hasResolvableAction(element, 'event2')).to.equal(false);
+  });
 
 });
 

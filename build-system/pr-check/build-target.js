@@ -16,17 +16,14 @@
 'use strict';
 
 /**
- * @fileoverview This file is executed by Travis (configured via
- * .travis.yml in the root directory) and is the main driver script
- * for running tests.  Execution herein is entirely synchronous, that
- * is, commands are executed on after the other (see the exec
- * function). Should a command fail, this script will then also fail.
- * This script attempts to introduce some granularity for our
- * presubmit checking, via the determineBuildTargets method.
+ * @fileoverview
+ * This script sets the build targets for our PR check, where the build targets
+ * determine which tasks are required to run for pull request builds.
  */
-const config = require('./config');
+const config = require('../config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 /**
  * Determines whether the given file belongs to the Validator webui,
@@ -186,10 +183,11 @@ function isFlagConfig(filePath) {
 /**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
- * @param {!Array<string>} filePaths
  * @return {!Set<string>}
  */
-function determineBuildTargets(filePaths) {
+function determineBuildTargets() {
+  const filePaths = gitDiffNameOnlyMaster();
+
   if (filePaths.length == 0) {
     return new Set([
       'BUILD_SYSTEM',

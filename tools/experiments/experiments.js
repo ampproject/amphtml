@@ -105,12 +105,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-auto-ads-adsense-holdout',
-    name: 'AMP Auto Ads AdSense Holdout',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
-  },
-  {
     id: 'amp-auto-ads-adsense-responsive',
     name: 'AMP Auto Ads AdSense Responsive',
     spec: '',
@@ -224,11 +218,6 @@ const EXPERIMENTS = [
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
-  },
-  {
-    id: 'user-error-reporting',
-    name: 'Report error to publishers',
-    spec: 'https://github.com/ampproject/amphtml/issues/6415',
   },
   {
     id: 'disable-rtc',
