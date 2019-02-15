@@ -15,29 +15,24 @@
  */
 'use strict';
 
-const {verifyCssElements} = require('../../build-system/tasks/visual-diff/helpers');
+const {
+  verifySelectorInvisible,
+  verifySelectorVisible,
+} = require('../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'single selector select option 2': async (page, name) => {
     await page.tap('#single_selector span[option="2"]');
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
-        '#single_selector span[option="2"][selected]',
-      ]);
+    await verifySelectorVisible(
+      page, name, ['#single_selector span[option="2"][selected]']);
   },
 
   'single selector select option 2, then 3': async (page, name) => {
     await page.tap('#single_selector span[option="2"]');
     await page.waitFor('#single_selector span[option="2"][selected]');
     await page.tap('#single_selector span[option="3"]');
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
-        '#single_selector span[option="3"][selected]',
-      ]);
+    await verifySelectorVisible(
+      page, name, ['#single_selector span[option="3"][selected]']);
   },
 
   'try to select disabled options': async page => {
@@ -50,13 +45,9 @@ module.exports = {
   'change mutli select': async (page, name) => {
     await page.tap('#multi_selector span[option="1"]');
     await page.tap('#multi_selector span[option="4"]');
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ [
-        '#multi_selector span[option="1"][selected]',
-      ],
-      /* loadingCompleteCss */ [
-        '#multi_selector span[option="4"][selected]',
-      ]);
+    await verifySelectorInvisible(
+      page, name, ['#multi_selector span[option="1"][selected]']);
+    await verifySelectorVisible(
+      page, name, ['#multi_selector span[option="4"][selected]']);
   },
  };

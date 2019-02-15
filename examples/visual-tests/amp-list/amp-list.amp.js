@@ -15,17 +15,13 @@
  */
 'use strict';
 
-const sleep = require('sleep-promise');
-const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorInvisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
 
   'tap "see more" button': async (page, name) => {
     await page.tap('div.amp-visible[overflow]');
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ ['div.amp-visible[overflow]'],
-      /* loadingCompleteCss */ null);
+    await verifySelectorInvisible(page, name, ['div.amp-visible[overflow]']);
   },
 
 };
