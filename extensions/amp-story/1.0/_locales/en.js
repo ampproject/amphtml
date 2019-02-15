@@ -170,10 +170,21 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label in the tooltip text for when a Twitter embed is ' +
         'expandable.',
   },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
+    string: 'Expand the height of your window to view this experience',
+    description: 'Text for a warning screen that informs the user that ' +
+        'stories are only supported in taller browser windows.',
+  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Expand your window to view this experience',
+    string: 'Expand both the height and width of your window to view this ' +
+        'experience',
     description: 'Text for a warning screen that informs the user that ' +
         'stories are only supported in larger browser windows.',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
+    string: 'Expand the width of your window to view this experience',
+    description: 'Text for a warning screen that informs the user that ' +
+        'stories are only supported in wider browser windows.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'You must enable the amp-story experiment to view this content.',

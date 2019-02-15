@@ -152,7 +152,7 @@ export class Criteria {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
-    return !actions.hasAction(element, 'tap');
+    return !actions.hasResolvableAction(element, 'tap');
   }
 }
 

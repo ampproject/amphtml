@@ -4642,6 +4642,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "TEXTAREA"
   attrs: { name: "autocomplete" }
+  attrs: {
+    name: "autoexpand"
+    requires_extension: "amp-form"
+  }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }
