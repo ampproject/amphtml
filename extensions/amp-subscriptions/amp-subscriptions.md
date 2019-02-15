@@ -410,7 +410,7 @@ Following are the events and the conditions when the events are triggered.
  - This event is fired with `serviceId` and `action` of the selected service.
 8. `subscriptions-entitlement-resolved`:
  - Once the service is registered, the entitlements from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
- - This event is fired with `serviceId` and `action` of the selected service.
+ - This event is fired with `serviceId` of the selected service.
 9. `subscriptions-started`:
  - This event is triggered when `amp-subscriptions` is initialized.
  - This event does not contain any data.
