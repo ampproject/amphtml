@@ -1271,8 +1271,8 @@ export class VisibilityTracker extends EventTracker {
         'Element %s that is not root is not supported with host API',
         selector);
 
-    userAssert(!reportWhenSpec,
-        'waitFor spec & hidden trigger are not supported with host API');
+    userAssert(reportWhenSpec !== 'documentExit',
+        'reportWhen : documentExit is not supported with host API');
   }
 
   /**

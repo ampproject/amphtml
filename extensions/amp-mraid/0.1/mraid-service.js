@@ -20,6 +20,7 @@ import {
   VisibilityDataDef,
   VisibilityInterface,
 } from '../../../src/inabox/host-services';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 
 /**
  * Translates between the AMP HostServices APIs and MRAID.
@@ -81,18 +82,19 @@ export class MraidService {
     //    concept than visibleRectangle represents.  visibleRectangle is a
     //    subset of LayoutRectDef, though, with x/y position and width/height,
     //    and we can pass it through to the callback directly.
-    console.log('call fake addEventListener');
-    console.log('the callback is mraid-service', callback);
-    fetch('//localhost:8000/callOnVisibilityChange');
     this.mraid_.addEventListener(
         'exposureChange',
         (exposedPercentage,
           visibleRectangle,
           unusedOcclusionRectangles) => {
-          console.log('call callback function');
           // AMP handles intersectionRatio from 0.0 to 1.0
           callback({
-            visibleRect: visibleRectangle,
+            // Need to convert x/y to the AMP runtime used left/top
+            visibleRect: layoutRectLtwh(
+                visibleRectangle.x,
+                visibleRectangle.y,
+                visibleRectangle.width,
+                visibleRectangle.height),
             // AMP handles intersectionRatio from 0.0 to 1.0
             visibleRatio: exposedPercentage / 100,
           });

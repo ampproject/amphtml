@@ -91,9 +91,7 @@ export class MraidInitializer {
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');
-    console.log('import mraid js');
     mraidJs.addEventListener('load', () => {
-      console.log('mraid load success');
       this.mraidLoadSuccess_();
     });
     mraidJs.addEventListener('error', () => {
@@ -149,7 +147,6 @@ export class MraidInitializer {
     }
     this.mraid_ = mraid;
     if (mraid.getState() === 'loading') {
-      console.log('call fake addEventListener');
       mraid.addEventListener('ready', () => {
         this.mraidReady_();
       });

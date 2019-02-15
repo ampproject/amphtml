@@ -1553,16 +1553,9 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(analyticsElement, 'visible', config, eventResolver);
       });
 
-      it('hidden trigger is unmeasurable', () => {
+      it('reportWhen documentExit is unmeasurable', () => {
         expectAsyncConsoleError(
-            /waitFor spec & hidden trigger are not supported with host API/);
-        const config = {visibilitySpec: {selector: ':root'}};
-        tracker.add(analyticsElement, 'hidden', config, eventResolver);
-      });
-
-      it('reportWhen is unmeasurable', () => {
-        expectAsyncConsoleError(
-            /waitFor spec & hidden trigger are not supported with host API/);
+            /reportWhen : documentExit is not supported with host API/);
         const config =
             {visibilitySpec: {selector: ':root', reportWhen: 'documentExit'}};
         tracker.add(analyticsElement, 'visible', config, eventResolver);

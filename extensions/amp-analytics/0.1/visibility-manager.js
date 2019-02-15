@@ -496,7 +496,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   getStartTime() {
-    console.log(this.viewer_.getFirstVisibleTime());
     return dev().assertNumber(this.viewer_.getFirstVisibleTime());
   }
 
