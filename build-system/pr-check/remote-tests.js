@@ -21,6 +21,7 @@
  * This is run during the CI stage = test; job = remote tests.
  */
 
+const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
   printChangeSummary,
@@ -33,6 +34,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -65,9 +67,10 @@ function main() {
     }
 
     if (!ranTests) {
-      console.log('Skipping Sauce Labs unit and integration tests because ' +
-      'this commit does not affect the runtime, build system, ' +
-      'or integration test files.');
+      console.log(
+          `${FILELOGPREFIX} Skipping Sauce Labs unit and integration tests ` +
+          'because this commit does not affect the runtime, build system, ' +
+          'or integration test files.');
     }
   }
 

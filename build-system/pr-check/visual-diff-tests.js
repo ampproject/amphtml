@@ -22,6 +22,7 @@
  */
 
 const atob = require('atob');
+const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
   printChangeSummary,
@@ -32,6 +33,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'visual-diff-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -56,9 +58,10 @@ function main() {
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
-      console.log('Skipping visual diff tests because this commit does ' +
-        'not affect the runtime, build system, integration test files, ' +
-        'visual diff test files, or flag config files.');
+      console.log(
+          `${FILELOGPREFIX} Skipping visual diff tests because this commit ` +
+          'does not affect the runtime, build system, integration ' +
+          'test files, visual diff test files, or flag config files.');
     }
   }
 

@@ -21,6 +21,7 @@
  * This is run during the CI stage = test; job = dist tests.
  */
 
+const colors = require('ansi-colors');
 const {
   printChangeSummary,
   startTimer,
@@ -30,6 +31,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'dist-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -70,8 +72,9 @@ function main() {
     }
 
     if (!ranTests) {
-      console.log('Skipping dist tests because this commit does ' +
-        'not affect the runtime, build system, or integration test files.');
+      console.log(`${FILELOGPREFIX} Skipping dist tests because this commit ` +
+        'does not affect the runtime, build system, or ' +
+        'integration test files.');
     }
   }
 
