@@ -386,10 +386,12 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             await waitForLoaderDot(page, name);
             if (webpage.loading_incomplete_css) {
-              await verifySelectorInvisible(webpage.loading_incomplete_css);
+              await verifySelectorInvisible(
+                  page, name, webpage.loading_incomplete_css);
             }
             if (webpage.loading_complete_css) {
-              await verifySelectorVisible(webpage.loading_complete_css);
+              await verifySelectorVisible(
+                  page, name, webpage.loading_complete_css);
             }
 
             if (webpage.loading_complete_delay_ms) {
