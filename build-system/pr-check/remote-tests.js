@@ -44,8 +44,8 @@ function main() {
   startSauceConnect(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
   } else {
     let ranTests = false;
