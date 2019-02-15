@@ -1,5 +1,4 @@
 language: node_js
-sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
   - "lts/*"
@@ -14,17 +13,12 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome-stable
-  - export DISPLAY=:99.0
-  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
-  - sh -e /etc/init.d/xvfb start
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-before_script:
-  - pip install --user protobuf
-script: node build-system/pr-check.js
-after_script:
-  - build-system/sauce_connect/stop_sauce_connect.sh
+  - pip install urllib3[secure]
+  - pip install gsutil --user
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 branches:
   only:
     - master
@@ -33,21 +27,63 @@ branches:
     - /^amp-release-.*$/
     - /^revert-.*$/
 addons:
-  chrome: stable
   hosts:
     - ads.localhost
     - iframe.localhost
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
-  apt:
-    packages:
-      - protobuf-compiler
-      - python-protobuf
-matrix:
+stages:
+  - build
+  - test
+jobs:
   include:
-    - env: BUILD_SHARD="unit_tests"
-    - env: BUILD_SHARD="integration_tests"
+    - stage: build
+      name: "Build"
+      script:
+        - node build-system/pr-check/build.js
+    - stage: build
+      name: "Checks" 
+      script:        
+        - node build-system/pr-check/checks.js
+    - stage: build
+      name: "Validator Tests"        
+      before_script:
+        - pip install --user protobuf
+      script:        
+        - node build-system/pr-check/validator-tests.js
+      addons:
+        apt:
+          packages:
+            - protobuf-compiler
+            - python-protobuf
+    - stage: test
+      name: "Dist, Bundle Size, Single Pass Tests"
+      addons:
+        chrome: stable
+      script:
+        - node build-system/pr-check/dist-tests.js
+    - stage: test
+      name: "Visual Diff Tests"
+      script:
+        - node build-system/pr-check/visual-diff-tests.js
+    - stage: test
+      name: "Local Tests"
+      addons:
+        chrome: stable
+      script:
+        - node build-system/pr-check/local-tests.js
+    - stage: test
+      name: "Remote (Sauce Labs) Tests"
+      script:
+        - node build-system/pr-check/remote-tests.js
+      after_script:
+        - build-system/sauce_connect/stop_sauce_connect.sh
+  fast_finish: true
+  #TODO(ampproject/wg-infra): remove when remote tests stabilize
+  allow_failures:
+      - script:
+          - node build-system/pr-check/remote-tests.js
 cache:
   yarn: true
   directories:

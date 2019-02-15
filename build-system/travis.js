@@ -51,6 +51,18 @@ exports.isTravisPushBuild = function() {
 };
 
 /**
+ * Returns the build number of the ongoing Travis build.
+ * @return {string}
+ */
+exports.travisBuildNumber = function() {
+  if (!exports.isTravisBuild()) {
+    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
+        cyan('process.env.TRAVIS_BUILD_NUMBER') + '.');
+  }
+  return process.env.TRAVIS_BUILD_NUMBER;
+};
+
+/**
  * Returns the job number of the ongoing Travis build.
  * @return {string}
  */
