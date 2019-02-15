@@ -34,11 +34,11 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
-  '__AMP_UPG_PRM';
+    '__AMP_UPG_PRM';
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
-  '__AMP_UPG_RES';
+    '__AMP_UPG_RES';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -131,6 +131,7 @@ export function waitForBodyPromise(doc) {
   });
 }
 
+
 /**
  * Removes the element.
  * @param {!Element} element
@@ -140,6 +141,7 @@ export function removeElement(element) {
     element.parentElement.removeChild(element);
   }
 }
+
 
 /**
  * Removes all child nodes of the specified element.
@@ -320,10 +322,10 @@ export function closestBySelector(element, selector) {
  */
 export function matches(el, selector) {
   const matcher = el.matches ||
-    el.webkitMatchesSelector ||
-    el.mozMatchesSelector ||
-    el.msMatchesSelector ||
-    el.oMatchesSelector;
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
   if (matcher) {
     return matcher.call(el, selector);
   }
@@ -630,7 +632,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
       return true;
     }
   } while ((currentElement = currentElement.parentNode) &&
-    currentElement != opt_stopNode);
+            currentElement != opt_stopNode);
   return false;
 }
 
@@ -737,8 +739,8 @@ export function openWindowDialog(win, url, target, opt_features) {
  */
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
-    element.hasAttribute('type') &&
-    element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+            element.hasAttribute('type') &&
+            element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
 
 /**
@@ -748,7 +750,7 @@ export function isJsonScriptTag(element) {
  */
 export function isJsonLdScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
-    element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
+      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
 }
 
 /**
@@ -758,8 +760,8 @@ export function isJsonLdScriptTag(element) {
  */
 export function isRTL(doc) {
   const dir = doc.body.getAttribute('dir')
-    || doc.documentElement.getAttribute('dir')
-    || 'ltr';
+                 || doc.documentElement.getAttribute('dir')
+                 || 'ltr';
   return dir == 'rtl';
 }
 
@@ -843,8 +845,8 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return startsWith(tag, 'AMP-') &&
-    // Some "amp-*" elements are not really AMP elements. :smh:
-    !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+      // Some "amp-*" elements are not really AMP elements. :smh:
+      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
 }
 
 /**
@@ -958,7 +960,7 @@ export function isEnabled(element) {
 }
 
 const PRECEDING_OR_CONTAINS =
-  Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
 /**
  * A sorting comparator that sorts elements in DOM tree order.
