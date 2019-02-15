@@ -235,6 +235,7 @@ function createElementRules_() {
       'advance-count': null,
       'auto-advance-count': null,
       'auto-advance-interval': null,
+      'auto-advance-loops': null,
       'auto-advance': null,
       'horizontal': null,
       'initial-index': null,
