@@ -87,7 +87,7 @@ function runYarnLockfileCheck_() {
  * @return {boolean}
  * @private
  */
-function validateBuildTargets_(buildTargets) {
+function areValidBuildTargets_(buildTargets) {
   if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(FILENAME, colors.red('ERROR:'),
         'Looks like your PR contains',
@@ -109,7 +109,7 @@ function main() {
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets();
 
-  if (validateBuildTargets_(buildTargets)) {
+  if (!areValidBuildTargets_(buildTargets)) {
     stopTimer(FILENAME, FILENAME, startTime);
     return 1;
   }
