@@ -85,6 +85,22 @@ Example:
     <td>The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/content/playlists">Playlists</a> section in your JW Player Dashboard. If both <code>data-playlist-id</code> and <code>data-media-id</code> are specified, <code>data-playlist-id</code> takes precedence. (<strong>Required if <code>data-media-id</code> is not defined.</strong>)</td>
   </tr>
   <tr>
+    <td width="40%"><strong>data-content-search</strong></td>
+    <td>Denotes the type of the playlist. This is a search playlist that takes in a keyword or phrase as the search query and generates a playlist based on that search query. If contextual article matching is desired, use the value <code>__CONTEXTUAL__</code> (data-content-contextual must also be <code>true</code>).)</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content-contextual</strong></td>
+    <td>Enables the Player to grab the OG title (or HTML title if there is no OG title) of a given webpage and use that as the search query (required to do Contextual Article Matching). (<strong>'true' or 'false'</strong>)</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content-recency</strong></td>
+    <td>Limits the videos added into the playlist based on their age (i.e. the playlist includes videos that are max [xx] days old). Specified in the format <code>xD</code>, where x is a numerical value (i.e. <code>'9D'</code>).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content-backfill</strong></td>
+    <td>Ensures that there is always a search result. If there are no search results for the given query, this parameter ensures that a list of trending videos are served. (<strong>'true' or 'false'</strong>)</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
