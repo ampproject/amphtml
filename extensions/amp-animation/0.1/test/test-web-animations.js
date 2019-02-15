@@ -13,14 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {
-  Builder,
-  NativeWebAnimationRunner,
-} from '../runners/native-web-animation-runner';
-import {
-  WebAnimationPlayState,
-} from '../web-animation-types';
+import {Builder} from '../web-animations';
+import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {WebAnimationPlayState} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
