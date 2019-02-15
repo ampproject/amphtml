@@ -15,11 +15,11 @@
  */
 'use strict';
 
-const {verifySelectorVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'open sidebar': async (page, name) => {
     await page.tap('[on="tap:sidebar1.toggle"]');
-    await verifySelectorVisible(page, name, ['amp-sidebar[open]']);
+    await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
   },
 };

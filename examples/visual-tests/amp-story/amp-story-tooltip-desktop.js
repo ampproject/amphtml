@@ -15,14 +15,14 @@
  */
 'use strict';
 
-const {verifySelectorVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
-    await verifySelectorVisible(page, name, ['a.i-amphtml-story-tooltip']);
+    await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
   'tapping outside tooltip should hide it': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -30,7 +30,7 @@ module.exports = {
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('.i-amphtml-story-focused-state-layer');
-    await verifySelectorVisible(
+    await verifySelectorsVisible(
       page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
   },
   'tapping on tooltip should keep it open': async (page, name) => {
@@ -39,7 +39,7 @@ module.exports = {
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('a.i-amphtml-story-tooltip');
-    await verifySelectorVisible(page, name, ['a.i-amphtml-story-tooltip']);
+    await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
   'tapping arrow when tooltip is open should navigate': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -48,6 +48,6 @@ module.exports = {
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('button.i-amphtml-story-button-move');
     await page.waitFor(150);
-    await verifySelectorVisible(page, name, ['amp-story-page#cover[active]']);
+    await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
   },
  };

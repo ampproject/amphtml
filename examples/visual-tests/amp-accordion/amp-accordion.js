@@ -15,12 +15,12 @@
  */
 'use strict';
 
-const {verifySelectorVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'click section one': async (page, name) => {
     await page.tap('amp-accordion section:first-child');
-    await verifySelectorVisible(page, name,
+    await verifySelectorsVisible(page, name,
         ['amp-accordion section:first-child[expanded] .i-amphtml-accordion-content[style=""]']);
   },
  };

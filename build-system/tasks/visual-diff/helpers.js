@@ -69,7 +69,7 @@ function log(mode, ...messages) {
  *     be removed from the page.
  * @throws {Error} an encountered error.
  */
-async function verifySelectorInvisible(page, testName, selectors) {
+async function verifySelectorsInvisible(page, testName, selectors) {
   log('verbose', 'Waiting for invisibility of all:',
       colors.cyan(selectors.join(', ')));
   for (const selector of selectors) {
@@ -90,7 +90,7 @@ async function verifySelectorInvisible(page, testName, selectors) {
  *     eventually appear on the page.
  * @throws {Error} an encountered error.
  */
-async function verifySelectorVisible(page, testName, selectors) {
+async function verifySelectorsVisible(page, testName, selectors) {
   log('verbose', 'Waiting for existence of all:',
       colors.cyan(selectors.join(', ')));
   for (const selector of selectors) {
@@ -118,7 +118,7 @@ async function verifySelectorVisible(page, testName, selectors) {
  * @param {string} testName the full name of the test.
  * @throws {Error} an encountered error.
  */
-async function waitForLoaderDot(page, testName) {
+async function waitForLoaderDots(page, testName) {
   const allLoaderDotsGone = await waitForElementVisibility(
       page, '.i-amphtml-loader-dot', {hidden: true});
   if (!allLoaderDotsGone) {
@@ -197,7 +197,7 @@ async function waitForSelectorExistence(page, selector) {
 
 module.exports = {
   log,
-  waitForLoaderDot,
-  verifySelectorInvisible,
-  verifySelectorVisible,
+  waitForLoaderDots,
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
 };

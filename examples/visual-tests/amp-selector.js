@@ -16,14 +16,14 @@
 'use strict';
 
 const {
-  verifySelectorInvisible,
-  verifySelectorVisible,
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
 } = require('../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'single selector select option 2': async (page, name) => {
     await page.tap('#single_selector span[option="2"]');
-    await verifySelectorVisible(
+    await verifySelectorsVisible(
       page, name, ['#single_selector span[option="2"][selected]']);
   },
 
@@ -31,7 +31,7 @@ module.exports = {
     await page.tap('#single_selector span[option="2"]');
     await page.waitFor('#single_selector span[option="2"][selected]');
     await page.tap('#single_selector span[option="3"]');
-    await verifySelectorVisible(
+    await verifySelectorsVisible(
       page, name, ['#single_selector span[option="3"][selected]']);
   },
 
@@ -45,9 +45,9 @@ module.exports = {
   'change mutli select': async (page, name) => {
     await page.tap('#multi_selector span[option="1"]');
     await page.tap('#multi_selector span[option="4"]');
-    await verifySelectorInvisible(
+    await verifySelectorsInvisible(
       page, name, ['#multi_selector span[option="1"][selected]']);
-    await verifySelectorVisible(
+    await verifySelectorsVisible(
       page, name, ['#multi_selector span[option="4"][selected]']);
   },
  };

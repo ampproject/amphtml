@@ -15,11 +15,11 @@
  */
 'use strict';
 
-const {verifySelectorVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'shows corresponding buttons for first page': async (page, name) => {
-    await verifySelectorVisible(page, name,
+    await verifySelectorsVisible(page, name,
       [
         '.next-container > .i-amphtml-story-button-move',
         '.prev-container.i-amphtml-story-button-hidden',
@@ -29,7 +29,7 @@ module.exports = {
       async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor('amp-story-page#page-2[active]');
-    await verifySelectorVisible(page, name,
+    await verifySelectorsVisible(page, name,
       [
         '.next-container > button.i-amphtml-story-button-move',
         '.prev-container > button.i-amphtml-story-button-move',
@@ -40,7 +40,7 @@ module.exports = {
     await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor('amp-story-page#page-3[active]');
-    await verifySelectorVisible(page, name,
+    await verifySelectorsVisible(page, name,
       [
         '.i-amphtml-story-fwd-more',
         '.prev-container > button.i-amphtml-story-button-move',
@@ -53,7 +53,7 @@ module.exports = {
     await page.waitFor('amp-story-page#page-3[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor('.i-amphtml-story-bookend-active');
-    await verifySelectorVisible(page, name,
+    await verifySelectorsVisible(page, name,
       [
         '.i-amphtml-story-fwd-replay',
         '.i-amphtml-story-back-close-bookend',

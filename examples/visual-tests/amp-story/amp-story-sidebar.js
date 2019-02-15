@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {verifySelectorVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'tapping on sidebar control button should show sidebar ': async (page, name) => {
@@ -23,6 +23,6 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#cover[active]');
     await page.tap('.i-amphtml-story-sidebar-control');
-    await verifySelectorVisible(page, name, ['amp-sidebar[side][open]']);
+    await verifySelectorsVisible(page, name, ['amp-sidebar[side][open]']);
   },
  };

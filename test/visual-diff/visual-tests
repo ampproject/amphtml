@@ -108,15 +108,15 @@
    *   //   module.exports = {
    *   //     'tap red button': async (page, name) => {
    *   //       await page.tap('#red_button');
-   *   //       await verifySelectorInvisible(page, name, ['.red-loading']);
-   *   //       await verifySelectorVisible(page, name, ['.red-loaded']);
+   *   //       await verifySelectorsInvisible(page, name, ['.red-loading']);
+   *   //       await verifySelectorsVisible(page, name, ['.red-loaded']);
    *   //     },
    *   //     'tap red and blue button': async (page, name) => {
    *   //       await page.tap('#red_button');
    *   //       await page.tap('#blue_button');
-   *   //       await verifySelectorInvisible(
+   *   //       await verifySelectorsInvisible(
    *   //           page, name, ['.red-loading', '.blue-loading']);
-   *   //       await verifySelectorVisible(
+   *   //       await verifySelectorsVisible(
    *   //           page, name, ['.red-loaded', '.blue-loaded']);
    *   //     },
    *   //   };

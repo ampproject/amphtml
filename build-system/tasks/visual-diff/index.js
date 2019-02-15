@@ -33,9 +33,9 @@ const {
 } = require('../../git');
 const {
   log,
-  waitForLoaderDot,
-  verifySelectorInvisible,
-  verifySelectorVisible,
+  waitForLoaderDots,
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
 } = require('./helpers');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
@@ -384,13 +384,13 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             await page.bringToFront();
 
-            await waitForLoaderDot(page, name);
+            await waitForLoaderDots(page, name);
             if (webpage.loading_incomplete_css) {
-              await verifySelectorInvisible(
+              await verifySelectorsInvisible(
                   page, name, webpage.loading_incomplete_css);
             }
             if (webpage.loading_complete_css) {
-              await verifySelectorVisible(
+              await verifySelectorsVisible(
                   page, name, webpage.loading_complete_css);
             }
 
