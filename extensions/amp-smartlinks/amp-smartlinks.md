@@ -33,13 +33,15 @@ limitations under the License.
 
 ## Overview
 
-At [Narrativ](https://narrativ.com/), we transform static information into dynamic, monetized content. Our goal is to lift publisher revenues from organic content through real-time bidding and machine learning solutions.
+ At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
 
 This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](http://docs.narrativ.com/en/stable/linkmate.html).
 
 ## Getting started
 
-Your account must be a member of our Linkmate program to use this feature. For more information about this program, feel free to contact your account manager.
+Your account must be a member of our Linkmate program to use this feature. For more information about this program, feel free to contact your account manager or [hello@narrativ.com](mailto:hello@narrativ.com).
+
+NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you will need to specify the meta tag shown below. The tag will specify the order in which the affiliate tags fire.
 
 In your AMP page you will have to add the following snippets:
 
@@ -48,6 +50,7 @@ In your AMP page you will have to add the following snippets:
 <html ⚡>
 <head>
   ...
+  <meta name="amp-link-rewriter-priorities" content="amp-smartlinks amp-other-affiliate">
   <script async custom-element="amp-smartlinks" src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"></script>
   ...
   <script async src="https://cdn.ampproject.org/v0.js"></script>
