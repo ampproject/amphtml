@@ -100,15 +100,16 @@ function startTimer(functionName, fileName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
+ * @param {string} fileName
  * @param {DOMHighResTimeStamp} startTime
  * @return {number}
  */
-function stopTimer(functionName, startTime) {
+function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),
       'Total time:', colors.green(mins + 'm ' + secs + 's'));
@@ -135,7 +136,7 @@ function timedExec(cmd) {
 function timedExecOrDie(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   execOrDie(cmd);
-  stopTimer(cmd, startTime);
+  stopTimer(cmd, fileName, startTime);
 }
 
 /**

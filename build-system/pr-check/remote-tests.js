@@ -71,7 +71,7 @@ function main() {
   }
 
   stopSauceConnect(FILENAME);
-  stopTimer(FILENAME, startTime);
+  stopTimer(FILENAME, FILENAME, startTime);
   return 0;
 }
 

@@ -50,7 +50,7 @@ function main() {
       'not affect the validator or validator web UI.');
   }
 
-  stopTimer(FILENAME, startTime);
+  stopTimer(FILENAME, FILENAME, startTime);
   return 0;
 }
 

@@ -102,7 +102,7 @@ function main() {
      'not affect the runtime, build system, or test files');
   }
 
-  stopTimer(FILENAME, startTime);
+  stopTimer(FILENAME, FILENAME, startTime);
   return 0;
 }
 

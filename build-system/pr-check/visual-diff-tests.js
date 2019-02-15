@@ -62,7 +62,7 @@ function main() {
     }
   }
 
-  stopTimer(FILENAME, startTime);
+  stopTimer(FILENAME, FILENAME, startTime);
   return 0;
 }
 
