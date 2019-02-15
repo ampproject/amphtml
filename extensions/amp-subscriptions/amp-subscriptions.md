@@ -174,7 +174,7 @@ The `services` property contains an array of service configurations. There must 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
 
-## Selecting a Service
+## Selecting a service
 If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected. Each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.  If no `baseScore` is specified it defaults to `0`.
 
 The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
@@ -239,7 +239,7 @@ The vendor service configuration must reference the service ID and can contain a
 See the vendor service's documentation for details.
 
 
-## Authorization endpoint and Entitlements
+## Authorization endpoint and entitlements
 
 Authorization is an endpoint provided by the local service and called by the AMP Runtime. It is a credentialed CORS GET endpoint. This endpoint returns the Entitlements object that can be used by the Content Markup to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
 
@@ -388,7 +388,7 @@ The `amp-subscriptions` triggers seven types of analytics signals during the dif
 Following are the events and the conditions when the events are triggered.
 
 1. `subscriptions-service-activated`:
- - This event is fired when one of the services configured is selected and activated to be used(see [Selecting a Service](#selecting-a-service)).
+ - This event is fired when one of the services configured is selected and activated to be used(see [Selecting a service](#selecting-a-service)).
  - This event is fired with `serviceId` of the selected service.
 2. `subscriptions-access-granted`:
  - This event is fired when one of the configured services is selected and the entitlement from the selected service grants access to the document.
