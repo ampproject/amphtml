@@ -55,7 +55,7 @@ Implements subscription-style access protocol.
 
 ## Introduction
 
-The `amp-subscriptions` extensions implements the subscription-style access/paywall rules.
+The `amp-subscriptions` extension implements subscription-style access/paywall rules.
 
 ## Relationship to `amp-access`
 
