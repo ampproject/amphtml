@@ -31,9 +31,14 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../git');
+const {
+  log,
+  waitForLoaderDots,
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
+} = require('./helpers');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
-const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
 // optional dependencies for local development (outside of visual diff tests)
@@ -379,8 +384,15 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             await page.bringToFront();
 
-            await verifyCssElements(page, name, webpage.forbidden_css,
-                webpage.loading_incomplete_css, webpage.loading_complete_css);
+            await waitForLoaderDots(page, name);
+            if (webpage.loading_incomplete_css) {
+              await verifySelectorsInvisible(
+                  page, name, webpage.loading_incomplete_css);
+            }
+            if (webpage.loading_complete_css) {
+              await verifySelectorsVisible(
+                  page, name, webpage.loading_complete_css);
+            }
 
             if (webpage.loading_complete_delay_ms) {
               log('verbose', 'Waiting',

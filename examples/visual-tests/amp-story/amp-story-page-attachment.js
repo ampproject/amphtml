@@ -15,23 +15,13 @@
  */
 'use strict';
 
-const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
-
 module.exports = {
   'open attachment UI element': async (page, name) => {
     await page.waitFor(1600);
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ []);
   },
 
   'open attachment': async (page, name) => {
     await page.tap('.i-amphtml-story-page-open-attachment-text');
     await page.waitFor(410);
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ []);
   },
  };

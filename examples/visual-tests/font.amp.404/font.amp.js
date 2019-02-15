@@ -15,12 +15,17 @@
  */
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
-
 module.exports = {
-  'click section one': async (page, name) => {
-    await page.tap('amp-accordion section:first-child');
-    await verifySelectorsVisible(page, name,
-        ['amp-accordion section:first-child[expanded] .i-amphtml-accordion-content[style=""]']);
+  'forbid loaded css classes': async (page, name) => {
+    const forbiddenSelectors = [
+      '.comic-amp-font-loaded',
+      '.comic-amp-bold-font-loaded',
+    ];
+    for (const selector of forbiddenSelectors) {
+      if ((await page.$(selector)) !== null) {
+        throw new Error(`${colors.cyan(testName)} | The forbidden CSS ` +
+            `element ${colors.cyan(selector)} exists in the page`);
+      }
+    }
   },
- };
+};
