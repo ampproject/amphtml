@@ -59,20 +59,20 @@ The `amp-subscriptions` extension implements subscription-style access/paywall r
 
 ## Relationship to `amp-access`
 
-The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md)
+The `amp-subscriptions` extension is similar to [`amp-access`](../amp-access/amp-access.md)
 and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
 authorization, but it's striclty defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
-for the page to participate in access/paywall decisions. They are executed
+for the page to participate in access/paywall decisions. Services are executed
 concurrently and prioritized based on which service returns the positive response.
 3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
 response based on an independent agreement with publishers as a proof of access.
 4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
 
-Because of standardization of markup, multi provider support and improved viewer
+Because of standardization of markup, support for multiple providers, and improved viewer
 support it is recommended that new publisher and paywall provider implementations
 use `amp-subscriptions`.
 
