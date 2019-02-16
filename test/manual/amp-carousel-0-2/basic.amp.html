@@ -18,28 +18,13 @@
 <body>
   <h1>A Basic carousel, with looping</h1>
   <amp-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="true">
-    <!-- wrapping divs to workaround https://bugs.webkit.org/show_bug.cgi?id=191816 -->
-    <div>
-      <amp-img src="./img/redgradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/greengradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/bluegradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/orangegradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/tealgradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/lemonyellowgradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div>
-      <amp-img src="./img/lilacgradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
+    <amp-img src="./img/redgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/greengradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/bluegradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/orangegradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/tealgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/lemonyellowgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/lilacgradient.png" layout="flex-item"></amp-img>
   </amp-carousel>
   <button on="tap:carousel-1.prev()">Prev</button>
   <button on="tap:carousel-1.next()">Next</button>

@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP #0</title>
+  <title>Peeking sides carousel, center aligned</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
@@ -25,25 +25,16 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>Peaking sides, centered, with loop</h1>
+  <h1>Peeking sides carousel, centered, with loop</h1>
   <!--
     Using aspect ratio of 3:2 for images, showing 1.2 at a time, so carousel
     should have an aspect ratio of 3.6:2 or 36:20.
   -->
   <amp-carousel id="carousel-1" width="36" height="20" layout="responsive" loop="true" visible-count="1.2" snap-align="center">
-    <!-- wrapping divs to workaround https://bugs.webkit.org/show_bug.cgi?id=191816 -->
-    <div class="slide">
-      <amp-img src="./img/redgradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div class="slide">
-      <amp-img src="./img/greengradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div class="slide">
-      <amp-img src="./img/bluegradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
-    <div class="slide">
-      <amp-img src="./img/orangegradient.png" width=300 height=200 layout="responsive"></amp-img>
-    </div>
+    <amp-img class="slide" src="./img/redgradient.png" layout="flex-item"></amp-img>
+    <amp-img class="slide" src="./img/greengradient.png" layout="flex-item"></amp-img>
+    <amp-img class="slide" src="./img/bluegradient.png" layout="flex-item"></amp-img>
+    <amp-img class="slide" src="./img/orangegradient.png" layout="flex-item"></amp-img>
   </amp-carousel>
 </body>
 </html>
