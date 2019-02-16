@@ -717,27 +717,28 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     }
   }
 
-  describe('should forward first-paint and first-contentful-paint metrics for performance entries', () => {
+  describe('should forward paint metrics for performance entries', () => {
     it('created before performance service registered', () => {
       // Pretend that the PaintTiming API exists.
       env.win.PerformancePaintTiming = true;
 
       const entries = [{
-          duration: 1,
-          entryType: "paint",
-          name: "first-paint",
-          startTime: 10,
-        },
-        {
-          duration: 5,
-          entryType: "paint",
-          name: "first-contentful-paint",
-          startTime: 10
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
       }];
       const getEntriesByType = env.sandbox.stub();
       getEntriesByType.withArgs('paint').returns(entries);
       getEntriesByType.returns([]);
-      env.sandbox.stub(env.win.performance, 'getEntriesByType').callsFake(getEntriesByType);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
 
       installPerformanceService(env.win);
 
@@ -769,23 +770,24 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
       });
-      env.sandbox.stub(env.win, 'PerformanceObserver').callsFake(PerformanceObserverStub);
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
 
       installPerformanceService(env.win);
 
       const perf = Services.performanceFor(env.win);
 
       const entries = [{
-          duration: 1,
-          entryType: "paint",
-          name: "first-paint",
-          startTime: 10,
-        },
-        {
-          duration: 5,
-          entryType: "paint",
-          name: "first-contentful-paint",
-          startTime: 10
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
       }];
       const list = {
         getEntries() {
@@ -796,19 +798,19 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       performanceObserver.triggerCallback(list);
       expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0])
-        .to.be.jsonEqual({
-          label: 'fp',
-          delta: 11,
-        },
-        {
-          label: 'fcp',
-          delta: 15,
-        });
+          .to.be.jsonEqual({
+            label: 'fp',
+            delta: 11,
+          },
+          {
+            label: 'fcp',
+            delta: 15,
+          });
       delete env.win.PerformanceEventTiming;
     });
   });
 
-  describe('should forward first-paint and first-contentful-paint metrics for performance entries', () => {
+  describe('should forward first input metrics for performance entries', () => {
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
       env.win.PerformanceEventTiming = true;
@@ -825,7 +827,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       const getEntriesByType = env.sandbox.stub();
       getEntriesByType.withArgs('firstInput').returns(entries);
       getEntriesByType.returns([]);
-      env.sandbox.stub(env.win.performance, 'getEntriesByType').callsFake(getEntriesByType);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
 
       installPerformanceService(env.win);
 
@@ -853,7 +856,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
       });
-      env.sandbox.stub(env.win, 'PerformanceObserver').callsFake(PerformanceObserverStub);
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
 
       installPerformanceService(env.win);
 

@@ -176,7 +176,8 @@ export class Performance {
   }
 
   /**
-   * Reports performance metrics first paint, first contentful paint, and first input delay.
+   * Reports performance metrics first paint, first contentful paint,
+   * and first input delay.
    * See https://github.com/WICG/paint-timing
    */
   registerPerformanceObserver_() {
@@ -202,7 +203,7 @@ export class Performance {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
       }
-    }
+    };
 
     const entryTypesToObserve = [];
     if (this.win.PerformancePaintTiming) {
