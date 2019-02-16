@@ -51,7 +51,8 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     this.disposed_ = false;
 
     // Initate the listener
-    this.listenToVisibilityChange_();
+    this.visibilityInterface_.onVisibilityChange(
+      this.onVisibilityChangeHandler_.bind(this));
   }
 
   /** @override */
@@ -104,7 +105,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
    * @override
    */
   getRootLayoutBox() {
-    // By the time `#getRootLayoutBox` is called, it is garanteed that
+    // By the time `#getRootLayoutBox` is called, it is guaranteed that
     // onVisibilityChangeHandler has been called at least once
     return devAssert(this.intersectionRect_);
   }
@@ -121,8 +122,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     // rootVisibility is set by hostAPI, instead of Viewer.isVisible
     let ratio = visibilityData.visibleRatio;
     // Convert to valid ratio range in [0, 1]
-    ratio = ratio < 0 ? 0 : ratio;
-    ratio = ratio > 1 ? 1 : ratio;
+    ratio = Math.min(Math.max(0, ratio), 1);
     this.setRootVisibility(ratio);
     this.intersectionRect_ = visibilityData.visibleRect;
   }
@@ -156,14 +156,5 @@ export class VisibilityManagerForMApp extends VisibilityManager {
         'getElementIntersectionRect should not be called in ' +
         'VisibilityManager for mApp');
     return dict({});
-  }
-
-  /**
-   * Start listen to visibility change event from host API
-   * @private
-   */
-  listenToVisibilityChange_() {
-    this.visibilityInterface_.onVisibilityChange(
-        this.onVisibilityChangeHandler_.bind(this));
   }
 }
