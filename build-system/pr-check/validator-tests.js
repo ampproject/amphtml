@@ -21,6 +21,7 @@
  * This is run during the CI stage = build; job = validator.
  */
 
+const colors = require('ansi-colors');
 const {
   printChangeSummary,
   startTimer,
@@ -30,24 +31,28 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'validator-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
-  } else if (buildTargets.has('VALIDATOR')) {
-    timedExecOrDie('gulp validator');
-  } else if (buildTargets.has('VALIDATOR_WEBUI')) {
-    timedExecOrDie('gulp validator-webui');
   } else {
-    console.log('Skipping validator job because this commit does ' +
-      'not affect the validator or validator web UI.');
+    printChangeSummary(FILENAME);
+    if (buildTargets.has('VALIDATOR')) {
+      timedExecOrDie('gulp validator');
+    } else if (buildTargets.has('VALIDATOR_WEBUI')) {
+      timedExecOrDie('gulp validator-webui');
+    } else {
+      console.log(
+          `${FILELOGPREFIX} Skipping validator job because this commit does ` +
+          'not affect the validator or validator web UI.');
+    }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
