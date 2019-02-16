@@ -106,7 +106,6 @@ function main() {
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck_();
   runYarnLockfileCheck_();
-  printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets();
 
   if (!areValidBuildTargets_(buildTargets)) {
@@ -119,6 +118,7 @@ function main() {
     timedExecOrDie('gulp build --fortesting');
     uploadBuildOutput(FILENAME);
   } else {
+    printChangeSummary(FILENAME);
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
