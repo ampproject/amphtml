@@ -59,32 +59,33 @@ function main() {
           `${FILELOGPREFIX} Skipping unit and integration tests because ` +
           'this commit not affect the runtime, build system, ' +
           'unit test files, integration test files, or the dev dashboard.');
-    } else {
-      downloadBuildOutput(FILENAME);
-      if (buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('UNIT_TEST')) {
-        timedExecOrDie('gulp test --nobuild --headless --local-changes');
-      }
+      stopTimer(FILENAME, FILENAME, startTime);
+      return 0;
+    }
+    downloadBuildOutput(FILENAME);
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp test --nobuild --headless --local-changes');
+    }
 
-      if (buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('INTEGRATION_TEST')) {
-        timedExecOrDie('gulp test --integration --nobuild ' +
-            '--headless --coverage');
-      }
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+      timedExecOrDie('gulp test --integration --nobuild ' +
+          '--headless --coverage');
+    }
 
-      if (buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('UNIT_TEST')) {
-        timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
-        //TODO(estherkim): turn on when stabilized :)
-        //timedExecOrDie('gulp e2e --nobuild');
-      }
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
+      //TODO(estherkim): turn on when stabilized :)
+      //timedExecOrDie('gulp e2e --nobuild');
+    }
 
-      if (buildTargets.has('DEV_DASHBOARD')) {
-        timedExecOrDie('gulp test --dev_dashboard --nobuild');
-      }
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      timedExecOrDie('gulp test --dev_dashboard --nobuild');
     }
   }
 

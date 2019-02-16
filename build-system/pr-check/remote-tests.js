@@ -61,23 +61,24 @@ function main() {
           `${FILELOGPREFIX} Skipping Sauce Labs unit and integration tests ` +
           'because this commit does not affect the runtime, build system, ' +
           'or integration test files.');
-    } else {
-      startSauceConnect(FILENAME);
-      downloadBuildOutput(FILENAME);
-
-      if (buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('UNIT_TEST')) {
-        timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-      }
-
-      if (buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('INTEGRATION_TEST')) {
-        timedExecOrDie('gulp test --integration --nobuild --saucelabs');
-      }
-      stopSauceConnect(FILENAME);
+      stopTimer(FILENAME, FILENAME, startTime);
+      return 0;
     }
+    startSauceConnect(FILENAME);
+    downloadBuildOutput(FILENAME);
+
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    }
+
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+      timedExecOrDie('gulp test --integration --nobuild --saucelabs');
+    }
+    stopSauceConnect(FILENAME);
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
