@@ -72,8 +72,7 @@ function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
-      timedExecOrDie('gulp test --integration --nobuild ' +
-          '--headless --coverage');
+      timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
     }
 
     if (buildTargets.has('RUNTIME') ||
