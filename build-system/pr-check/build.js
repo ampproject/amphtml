@@ -130,7 +130,6 @@ function main() {
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
-      uploadBuildOutput(FILENAME);
       console.log('Skipping build job because this commit does not affect ' +
           'the runtime, build system, test files, or the dev dashboard');
     }
