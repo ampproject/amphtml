@@ -77,50 +77,41 @@
   z-index: -1;  
 }
 
-.i-amphtml-carousel-scroll > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll > .i-amphtml-carousel-spacer{
+.i-amphtml-carousel-slotted,
+.i-amphtml-carousel-spacer {
   box-sizing: border-box !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
+  width: 100%;
+  height: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"][mixed-length="false"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="true"][mixed-length="false"] > .i-amphtml-carousel-spacer{
+.i-amphtml-carousel-scroll[horizontal="true"][mixed-length="false"] > .i-amphtml-carousel-spacer {
   /** TODO(sparhami) Do not use CSS custom property */
   width: calc(100% / var(--visible-count)) !important;
   min-width: auto !important;
   max-width: none !important;
-  height: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-spacer{
+.i-amphtml-carousel-scroll[horizontal="false"][mixed-length="false"] > .i-amphtml-carousel-spacer {
   /** TODO(sparhami) Do not use CSS custom property */
   height: calc(100% / var(--visible-count)) !important;
   min-height: auto !important;
   max-height: none !important;
-  width: 100%;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer{
+.i-amphtml-carousel-scroll[horizontal="true"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer {
   max-width: 100% !important;
 }
 
 .i-amphtml-carousel-scroll[horizontal="false"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-slotted,
-.i-amphtml-carousel-scroll[horizontal="false"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer{
+.i-amphtml-carousel-scroll[horizontal="false"][snap="true"][mixed-length="true"] > .i-amphtml-carousel-spacer {
   max-height: 100% !important;
 }
 
 .i-amphtml-carousel-scroll > .i-amphtml-carousel-slotted {
   will-change: transform;
-}
-
-
-.i-amphtml-carousel-scroll[horizontal="true"] > .i-amphtml-carousel-spacer{
-  height: 100%;
-}
-
-.i-amphtml-carousel-scroll[horizontal="false"] > .i-amphtml-carousel-spacer{
-  width: 100%;
 }
