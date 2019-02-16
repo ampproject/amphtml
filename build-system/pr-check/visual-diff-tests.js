@@ -47,6 +47,7 @@ function main() {
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST') ||
@@ -54,7 +55,6 @@ function main() {
         buildTargets.has('FLAG_CONFIG')) {
 
       downloadBuildOutput(FILENAME);
-      process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
