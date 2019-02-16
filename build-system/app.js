@@ -892,7 +892,7 @@ function escapeRegExp(string) {
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
-      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      `<${tagName}[(\\s)][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
 }
 
