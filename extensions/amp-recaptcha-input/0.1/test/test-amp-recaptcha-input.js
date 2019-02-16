@@ -60,6 +60,17 @@ describes.realWin('amp-recaptcha-input', {
 
   describe('amp-recaptcha-input', () => {
 
+    it('Rejects because experiment is not enabled', () => {
+      toggleExperiment(win, 'amp-recaptcha-input', false);
+
+      return allowConsoleError(() => {
+        return getRecaptchaInput()
+            .should.eventually.be.rejectedWith(
+                /Experiment/
+            );
+      });
+    });
+
     it('Rejects because data-name is missing', () => {
 
       const ampRecaptchaInputConfig =
