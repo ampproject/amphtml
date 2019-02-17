@@ -1644,7 +1644,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     }
 
     function stubInA4A(isInA4A) {
-      sandbox.stub(element, 'isInA4A_').callsFake(() => isInA4A);
+      sandbox.stub(element, 'isInA4A_').returns(isInA4A);
     }
 
     beforeEach(() => {
@@ -1675,6 +1675,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
       container = doc.createElement('div');
       doc.body.appendChild(container);
+      container.appendChild(element); // for htmlFor
     });
 
     afterEach(() => {
