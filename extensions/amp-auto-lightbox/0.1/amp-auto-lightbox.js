@@ -24,9 +24,10 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {CarouselCriteria} from './carousel-criteria';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
@@ -67,21 +68,34 @@ export const RENDER_AREA_RATIO = 1.2;
 /** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.25;
 
+/** @const {!Array<string>} */
+const CANDIDATES = ['amp-img', 'amp-carousel'];
+
 /**
- * Selector for subnodes for which the auto-lightbox treatment does not apply.
+ * Selector for subnodes by attribute for which the auto-lightbox treatment
+ * does not apply. These can be set directly on the candidate or on an ancestor.
  */
-const DISABLED_ANCESTORS = [
+const DISABLED_BY_ATTR = [
   // Runtime-specific.
   '[placeholder]',
 
   // Explicitly opted out.
   '[data-amp-auto-lightbox-disable]',
 
+  // Considered "actionable", i.e. that are bound to a default
+  // onclick action(e.g. `button`) or where it cannot be determined whether
+  // they're actionable or not (e.g. `amp-script`).
+  'amp-selector [option]',
+].join(',');
+
+/**
+ * Selector for subnodes for which the auto-lightbox treatment does not apply.
+ */
+const DISABLED_ANCESTORS = [
   // Ancestors considered "actionable", i.e. that are bound to a default
   // onclick action(e.g. `button`) or where it cannot be determined whether
   // they're actionable or not (e.g. `amp-script`).
   'a[href]',
-  'amp-selector [option]',
   'amp-script',
   'amp-story',
   'button',
@@ -90,8 +104,6 @@ const DISABLED_ANCESTORS = [
   'amp-lightbox',
 
   // Special treatment.
-  // TODO(alanorozco): Allow and possibly group carousels where images are the
-  // only content.
   'amp-carousel',
 ].join(',');
 
@@ -117,10 +129,65 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsAll(element) {
-    return Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsTreeShapeCriteria(element);
+    return Criteria.meetsSimpleCriteria(element) &&
+      Criteria.meetsTreeShapeCriteria(element) &&
+      Criteria.meetsComplexCriteria(element);
   }
 
+  /**
+   * Criteria that is "simple", ie runs quickly and discards elements in order
+   * to shortcircuit.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static meetsSimpleCriteria(element) {
+    switch (element.tagName) {
+      case 'AMP-IMG':
+        return ImageCriteria.meetsSizingCriteria(element);
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Criteria that is "complex", ie takes longer to run quickly and discards
+   * elements after they're likely to be good candidates per previous
+   * conditions.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static meetsComplexCriteria(element) {
+    switch (element.tagName) {
+      case 'AMP-CAROUSEL':
+        return CarouselCriteria.meetsAll(element);
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static meetsTreeShapeCriteria(element) {
+    const disabledSelector = `${DISABLED_ANCESTORS},${DISABLED_BY_ATTR}`;
+    const disabledAncestor =
+        closestAncestorElementBySelector(element, disabledSelector);
+    // since we lookup both amp-img and amp-carousel at the same level, and
+    // we'd like to give amp-carousel special treatment by containing amp-img's,
+    // we need to filter out images inside carousels, but not carousels
+    // themselves.
+    if (disabledAncestor &&
+        (disabledAncestor != element ||
+        matches(disabledAncestor, DISABLED_BY_ATTR))) {
+      return false;
+    }
+    const actions = Services.actionServiceForDoc(element);
+    return !actions.hasResolvableAction(element, 'tap');
+  }
+}
+
+class ImageCriteria {
   /**
    * @param {!Element} element
    * @return {boolean}
@@ -141,18 +208,6 @@ export class Criteria {
         naturalHeight,
         vw,
         vh);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static meetsTreeShapeCriteria(element) {
-    if (closestAncestorElementBySelector(element, DISABLED_ANCESTORS)) {
-      return false;
-    }
-    const actions = Services.actionServiceForDoc(element);
-    return !actions.hasResolvableAction(element, 'tap');
   }
 }
 
@@ -206,6 +261,15 @@ function markAsVisited(candidate) {
 
 
 /**
+ * @param {string} tagName
+ * @return {string}
+ */
+function candidateSelector(tagName) {
+  return `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+}
+
+
+/**
  * @param {!Element} element
  * @return {!Promise<!Element>}
  */
@@ -223,8 +287,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector =
-        `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+    const selector = CANDIDATES.map(candidateSelector).join(',');
     const candidates = toArray(root.querySelectorAll(selector));
     candidates.forEach(markAsVisited);
     return candidates;

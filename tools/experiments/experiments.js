@@ -401,6 +401,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
+  {
+    id: 'amp-auto-lightbox-carousel',
+    name: 'Automatically detects carousels to group in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
 ];
 
 if (getMode().localDev) {

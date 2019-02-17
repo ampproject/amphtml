@@ -53,6 +53,24 @@ const CAROUSEL_TAG = 'AMP-CAROUSEL';
 const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
+/**
+ * @param {!Element} slide
+ * @return {!Element}
+ */
+function getBaseElementForSlide(slide) {
+  if (slide.tagName == 'AMP-IMG' || slide.tagName == 'FIGURE') {
+    return slide;
+  }
+  const figure = slide.querySelector('figure');
+  if (figure) {
+    return figure;
+  }
+  const allImages = slide.querySelectorAll('amp-img');
+  userAssert(allImages.length == 1,
+      'Found more than one images or none in slide!');
+  return dev().assertElement(allImages[0]);
+}
+
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
  *  placeholderSrc: string,
@@ -188,20 +206,24 @@ export class LightboxManager {
    */
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
-    'carousel' + (carousel.getAttribute('id') || this.counter_++);
+      `carousel${carousel.getAttribute('id') || this.counter_++}`;
+
     this.getSlidesFromCarousel_(carousel).then(slides => {
       slides.forEach(slide => {
-        const shouldExcludeSlide = slide.hasAttribute('lightbox-exclude')
-            || (slide.hasAttribute('lightbox')
+        const shouldExcludeSlide =
+            slide.hasAttribute('lightbox-exclude') || (
+              slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
-        if (!shouldExcludeSlide) {
-          if (this.seen_.includes(slide)) {
-            return;
-          }
-          slide.setAttribute('lightbox', lightboxGroupId);
-          this.seen_.push(slide);
-          this.processBaseLightboxElement_(slide, lightboxGroupId);
+        if (shouldExcludeSlide) {
+          return;
         }
+        const baseElement = getBaseElementForSlide(slide);
+        if (this.seen_.includes(baseElement)) {
+          return;
+        }
+        baseElement.setAttribute('lightbox', lightboxGroupId);
+        this.seen_.push(baseElement);
+        this.processBaseLightboxElement_(baseElement, lightboxGroupId);
       });
     });
   }
@@ -253,9 +275,8 @@ export class LightboxManager {
           lightboxGroupId);
       if (!unwrappedFigureElement) {
         return;
-      } else {
-        element = unwrappedFigureElement;
       }
+      element = unwrappedFigureElement;
     }
 
     userAssert(this.baseElementIsSupported_(element),
