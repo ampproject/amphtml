@@ -30,8 +30,8 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
-import {whenCalled} from '../../../../testing/test-helper.js';
 import {tryResolve} from '../../../../src/utils/promise';
+import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin('consent-ui', {
   amp: {
