@@ -287,7 +287,8 @@ export class ConsentUI {
     toggle(placeholder, false);
     placeholder.classList.add(consentUiClasses.placeholder);
 
-    const loadingSpinner = htmlFor(placeholder)`
+    const html = htmlFor(this.parent_);
+    const loadingSpinner = html`
       <svg viewBox="0 0 40 40">
         <defs>
           <linearGradient id="grad">

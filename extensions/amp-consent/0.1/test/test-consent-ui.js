@@ -31,6 +31,7 @@ import {
 } from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {whenCalled} from '../../../../testing/test-helper.js';
+import {tryResolve} from '../../../../src/utils/promise';
 
 describes.realWin('consent-ui', {
   amp: {
@@ -59,7 +60,7 @@ describes.realWin('consent-ui', {
     parent.appendChild(postPrompt);
     doc.body.appendChild(parent);
     mockInstance = {
-      getAmpDoc: () => {return ampdoc;},
+      getAmpDoc: () => ampdoc,
       element: parent,
       win,
       getViewport: () => {
@@ -68,16 +69,11 @@ describes.realWin('consent-ui', {
           removeFromFixedLayer: () => {},
         };
       },
-      getVsync: () => {
-        return {
-          mutate: callback => {callback();},
-        };
-      },
+      getVsync: () => ({
+        mutate: callback => {callback();},
+      }),
       scheduleLayout: () => {},
-      mutateElement: callback => {
-        callback();
-        return Promise.resolve();
-      },
+      mutateElement: callback => tryResolve(callback),
     };
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
@@ -86,6 +82,9 @@ describes.realWin('consent-ui', {
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test'));},
       });
     });
+
+    // for `htmlFor`
+    doc.body.appendChild(parent);
 
     toggleExperiment(win, 'amp-consent-v2', true);
   });
