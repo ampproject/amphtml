@@ -26,6 +26,7 @@ import {
 } from '../../src/service/viewport/viewport-binding-natural';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
+import {installHtmlForDoc} from '../../src/static-template';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {toggleExperiment} from '../../src/experiments';
@@ -486,6 +487,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
   let iframe;
   let win;
+  let ampdoc;
   let binding;
   let vsync;
   let child;
@@ -493,7 +495,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
   // Can only test when Shadow DOM is available.
   describe.configure().if(() => Element.prototype.attachShadow).run('Viewport' +
       'BindingIosEmbedShadowRoot_', function() {
-    beforeEach(function() {
+    beforeEach(() => {
       iframe = env.iframe;
       iframe.style.width = '100px';
       iframe.style.height = '100px';
@@ -519,6 +521,8 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       installDocumentStateService(win);
       installVsyncService(win);
       vsync = Services.vsyncFor(win);
+      ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      installHtmlForDoc(ampdoc);
       binding = new ViewportBindingIosEmbedShadowRoot_(win);
       binding.connect();
     });
