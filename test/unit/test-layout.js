@@ -336,6 +336,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'intrinsic');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
+    document.body.appendChild(div); // for htmlFor
     expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
@@ -353,6 +354,7 @@ describe('Layout', () => {
     div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
+    document.body.appendChild(div); // for htmlFor
     expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
