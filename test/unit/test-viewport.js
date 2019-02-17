@@ -39,6 +39,7 @@ import {
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installDocumentStateService} from '../../src/service/document-state';
+import {installHtmlForDoc} from '../../src/static-template.js';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -1406,6 +1407,7 @@ describe('createViewport', () => {
       installDocumentStateService(win);
       ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
+      installHtmlForDoc(ampDoc);
       viewer = Services.viewerForDoc(ampDoc);
       win.getComputedStyle = () => ({});
     });
@@ -1471,6 +1473,7 @@ describe('createViewport', () => {
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
+      installHtmlForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
