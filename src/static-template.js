@@ -100,8 +100,11 @@ export class Html {
   /** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
 
-    /** @private @const {!Element} */
-    this.container_ = ampdoc.getRootNode().createElement('div');
+    /** @private @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private {?Element} */
+    this.container_ = null;
 
     /** @private {?TempCache<!Element>} */
     this.cache_ = null;
@@ -115,7 +118,7 @@ export class Html {
     this.cachedHtmlInternal = strings => {
       devAssertCorrectHtmlTemplateTagUsage(strings);
 
-      const {win} = ampdoc;
+      const {win} = this.ampdoc_;
       const cache = this.cache_ || new TempCache(win, FLUSH_CACHE_AFTER_MS);
 
       this.cache_ = cache;
@@ -137,7 +140,11 @@ export class Html {
     this.htmlInternal = strings => {
       devAssertCorrectHtmlTemplateTagUsage(strings);
 
-      const container = this.container_;
+      const container = this.container_ ||
+        this.ampdoc_.getRootNode().createElement('div');
+
+      this.container_ = container;
+
       container./*OK*/innerHTML = strings[0];
 
       const el = container.firstElementChild;
