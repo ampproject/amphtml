@@ -28,6 +28,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
+import {cachedHtmlFor, htmlFor} from '../../../src/static-template';
 import {
   childElementByTag,
   closest,
@@ -44,7 +45,6 @@ import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
-import {htmlFor} from '../../../src/static-template';
 import {
   numeric,
   setStyles as setStylesTransition,
@@ -271,6 +271,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildCarouselSlides_(lightboxableElements) {
     let index = 0;
     this.elementsMetadata_[this.currentLightboxGroupId_] = [];
+
+    // Using cachedHtmlFor since we're re-rendering the same template in a loop.
+    const html = cachedHtmlFor(this.element);
+
     lightboxableElements.forEach(element => {
       element.lightboxItemId = index++;
       const clonedNode = this.cloneLightboxableElement_(element);
@@ -284,8 +288,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.doc_.createElement('div');
-        const imageViewer = htmlFor(this.element)`
-          <amp-image-viewer layout="fill"></amp-image-viewer>`;
+        const imageViewer =
+            html`<amp-image-viewer layout="fill"></amp-image-viewer>`;
         clonedNode.removeAttribute('class');
         imageViewer.appendChild(clonedNode);
         container.appendChild(imageViewer);
