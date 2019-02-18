@@ -63,7 +63,6 @@ const ADMISSIBLE_HTML_ELEMENTS = {
   'HGROUP': true,
   'HR': true,
   'I': true,
-  'I-AMPHTML-SIZER': true,
   'IMG': true,
   'LABEL': true,
   'LEGEND': true,
