@@ -18,7 +18,7 @@ import {Deferred} from './utils/promise';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {isDocumentReady} from './document-ready';
+import {onDocumentReady, whenDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -116,7 +116,7 @@ export function waitForHeadPromise(doc) {
  */
 export function waitForBody(doc, callback) {
   waitForChild(doc.documentElement, () => (
-    isDocumentReady(doc) && !!doc.body
+    onDocumentReady(doc)
   ), callback);
 }
 
@@ -127,9 +127,7 @@ export function waitForBody(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyPromise(doc) {
-  return new Promise(resolve => {
-    waitForBody(doc, resolve);
-  });
+  return whenDocumentReady(doc);
 }
 
 
