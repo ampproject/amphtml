@@ -15,13 +15,16 @@
  */
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {isAmpElement} from '../../../src/dom';
+import {devAssert} from '../../../src/log';
+import {isAmpElement, iterateCursor} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
+import {tryResolve} from '../../../src/utils/promise';
 
 const MAX_TRAVERSING_DEPTH = 8;
 const MAX_TRAVERSING_BREADTH = 8;
+
+const MIN_IMG_SLIDE_AREA_RATIO = 0.5;
 
 /** @private @const {!Object<string, boolean>} */
 const ADMISSIBLE_AMP_ELEMENTS = {
@@ -117,42 +120,70 @@ export class CarouselCriteria {
       return false;
     }
 
-    return toArray(slides)
-        .every(slide => CarouselElementCriteria.meetsAll(slide));
+    let promise = tryResolve(() => true);
+
+    iterateCursor(slides, slide => {
+      promise = promise.then(previousWasAccepted => {
+        if (!previousWasAccepted) {
+          return false;
+        }
+        return SlideCriteria.meetsAll(slide);
+      });
+    });
+
+    return promise;
   }
 }
 
-class CarouselElementCriteria {
+class SlideCriteria {
+
   /**
    * @param {!Element} element
-   * @param {number=} depth
-   * @param {!Element=} opt_slide
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
-  static meetsAll(element, depth = 0, opt_slide) {
-    const actions = Services.actionServiceForDoc(element);
-
-    // Traverse up the tree if we're at the slide root. Otherwise, we can stop
-    // at parentElement since we're navigating top-down.
-    const actionLookupStopAt = depth < 1 ?
-      undefined :
-      element.parentElement;
-
-    if (depth == 0 && element.tagName == 'AMP-IMG') {
-      return !actions.hasResolvableAction(element, 'tap', actionLookupStopAt);
+  static meetsAll(element) {
+    if (element.tagName == 'AMP-IMG') {
+      // Already traversed up the tree, we only need to check the immediate
+      // action.
+      const actionLookupStopAt = element.parentElement;
+      const actions = Services.actionServiceForDoc(element);
+      return tryResolve(() =>
+        !actions.hasResolvableAction(element, 'tap', actionLookupStopAt));
     }
+
+    const img = element.querySelector('amp-img');
+    if (!img) {
+      return false;
+    }
+
+    const slideMeetsSizingPromise =
+        SlideCriteria.meetsSizingCriteria(img, element);
+
+    return slideMeetsSizingPromise.then(slideMeetsSizing => {
+      if (!slideMeetsSizing) {
+        return false;
+      }
+      return SlideCriteria.meetsAllSync(element, /* depth */ 0);
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {number} depth
+   * @return {!Promise<boolean>}
+   */
+  static meetsAllSync(element, depth) {
     if (depth > MAX_TRAVERSING_DEPTH) {
       return false;
     }
     if (!isElementAdmissible(element)) {
       return false;
     }
+    // Already traversed up the tree, we only need to check the immediate
+    // action.
+    const actionLookupStopAt = element.parentElement;
+    const actions = Services.actionServiceForDoc(element);
     if (actions.hasResolvableAction(element, 'tap', actionLookupStopAt)) {
-      return false;
-    }
-    if (element.tagName == 'AMP-IMG' &&
-        !CarouselElementCriteria
-            .meetsSizingCriteria(element, dev().assertElement(opt_slide))) {
       return false;
     }
     if (!shouldElementBeTraversed(element)) {
@@ -163,17 +194,35 @@ class CarouselElementCriteria {
       return false;
     }
     return toArray(children).every(child =>
-      CarouselElementCriteria
-          .meetsAll(child, depth + 1, opt_slide || element));
+      SlideCriteria.meetsAllSync(child, depth + 1));
   }
 
   /**
-   * @param {!Element} element
+   * @param {!AmpElement} img
    * @param {!Element} slide
    * @return {boolean}
    */
-  static meetsSizingCriteria(element, slide) {
-    return true;
+  static meetsSizingCriteria(img, slide) {
+    devAssert(img.tagName == 'AMP-IMG');
+
+    return img.getImpl().then(impl => new Promise(resolve => {
+      impl.measureElement(() => {
+        const {
+          width: imgWidth,
+          height: imgHeight,
+        } = img.getLayoutBox();
+
+        const {
+          width: slideWidth,
+          height: slideHeight,
+        } = slide./*OK*/getBoundingClientRect();
+
+        const imgArea = imgWidth * imgHeight;
+        const slideArea = slideWidth * slideHeight;
+
+        resolve((imgArea / slideArea) >= MIN_IMG_SLIDE_AREA_RATIO);
+      });
+    }));
   }
 }
 

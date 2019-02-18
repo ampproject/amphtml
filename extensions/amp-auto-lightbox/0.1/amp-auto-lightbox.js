@@ -32,6 +32,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -126,12 +127,14 @@ export class Criteria {
 
   /**
    * @param {!Element} element
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   static meetsAll(element) {
-    return Criteria.meetsSimpleCriteria(element) &&
-      Criteria.meetsTreeShapeCriteria(element) &&
-      Criteria.meetsComplexCriteria(element);
+    if (!Criteria.meetsSimpleCriteria(element) ||
+        !Criteria.meetsTreeShapeCriteria(element)) {
+      return tryResolve(() => false);
+    }
+    return Criteria.meetsComplexCriteria(element);
   }
 
   /**
@@ -154,14 +157,14 @@ export class Criteria {
    * elements after they're likely to be good candidates per previous
    * conditions.
    * @param {!Element} element
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   static meetsComplexCriteria(element) {
     switch (element.tagName) {
       case 'AMP-CAROUSEL':
         return CarouselCriteria.meetsAll(element);
       default:
-        return true;
+        return tryResolve(() => true);
     }
   }
 
@@ -469,12 +472,14 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
-      if (!Criteria.meetsAll(candidate)) {
-        dev().info(TAG, 'discarded', candidate);
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return Criteria.meetsAll(candidate).then(meetsAll => {
+        if (!meetsAll) {
+          dev().info(TAG, 'discarded', candidate);
+          return;
+        }
+        dev().info(TAG, 'apply', candidate);
+        return apply(ampdoc, candidate);
+      });
     }, NOOP));
 }
 
