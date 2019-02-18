@@ -1,3 +1,10 @@
+---
+$category@: layout
+formats:
+  - websites
+teaser:
+  text: Slides a floating element in-and-out of view as the document is scrolled up or down.
+---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
