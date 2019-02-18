@@ -31,6 +31,9 @@ FAIL
 |  </head>
 |  <body>
 |
+|    <!-- Example target reference. -->
+|    <header id="a">My website</header>
+|
 |    <!-- Valid: layout and target -->
 |    <amp-scroll-toggle layout="nodisplay" target="a"></amp-scroll-toggle>
 |
@@ -45,27 +48,27 @@ FAIL
 |    <!-- Invalid position -->
 |    <amp-scroll-toggle layout="nodisplay" target="a" position="left">
 >>   ^~~~~~~~~
-amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:45:2 The attribute 'position' in tag 'amp-scroll-toggle' is set to the invalid value 'left'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
+amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:48:2 The attribute 'position' in tag 'amp-scroll-toggle' is set to the invalid value 'left'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
 |    </amp-scroll-toggle>
 |
 |    <!-- Invalid: target with invalid chars -->
 |    <amp-scroll-toggle layout="nodisplay" target="$"></amp-scroll-toggle>
 >>   ^~~~~~~~~
-amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:49:2 The attribute 'target' in tag 'amp-scroll-toggle' is set to the invalid value '$'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
+amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:52:2 The attribute 'target' in tag 'amp-scroll-toggle' is set to the invalid value '$'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
 |
 |    <!-- Invalid: empty target -->
 |    <amp-scroll-toggle layout="nodisplay" target></amp-scroll-toggle>
 >>   ^~~~~~~~~
-amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:52:2 The attribute 'target' in tag 'amp-scroll-toggle' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
+amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:55:2 The attribute 'target' in tag 'amp-scroll-toggle' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [DISALLOWED_HTML]
 |
 |    <!-- Invalid: no target -->
 |    <amp-scroll-toggle layout="nodisplay"></amp-scroll-toggle>
 >>   ^~~~~~~~~
-amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:55:2 The mandatory attribute 'target' is missing in tag 'amp-scroll-toggle'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [AMP_TAG_PROBLEM]
+amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:58:2 The mandatory attribute 'target' is missing in tag 'amp-scroll-toggle'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid layout -->
 |    <amp-scroll-toggle layout="responsive" target="a"></amp-scroll-toggle>
 >>   ^~~~~~~~~
-amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:58:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-scroll-toggle'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [AMP_LAYOUT_PROBLEM]
+amp-scroll-toggle/0.1/test/validator-amp-scroll-toggle.html:61:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-scroll-toggle'. (see https://www.ampproject.org/docs/reference/components/amp-scroll-toggle) [AMP_LAYOUT_PROBLEM]
 |  </body>
 |  </html>

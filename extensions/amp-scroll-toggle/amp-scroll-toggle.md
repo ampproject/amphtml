@@ -68,12 +68,12 @@ When [in the Google viewer](https://developers.google.com/search/docs/guides/abo
 
 ## <a id="target-css-properties"></a> Mandatory `target` properties
 
-The element must contain the following CSS properties set to the corresponding values:
+The target element must contain the following CSS properties set to the corresponding values:
 
 * `overflow: hidden`
 * `position: fixed`
-* if the `position` attribute is set to `top`, the target must have `top: 0`
-* if the `position` attribute is set to `bottom`, the target must have `bottom: 0`
+* if the `position` attribute on `<amp-scroll-toggle>` is set to `top`, the target must have `top: 0`
+* if the `position` attribute on `<amp-scroll-toggle>` is set to `bottom`, the target must have `bottom: 0`
 
 If any of these properties is absent or set to an incorrect value, an error will
 be thrown and sliding behavior will not be enabled for this target.
