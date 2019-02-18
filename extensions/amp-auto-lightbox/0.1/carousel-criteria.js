@@ -36,7 +36,7 @@ const ADMISSIBLE_AMP_ELEMENTS = {
 
 /** @private @const {!Object<string, boolean>} */
 const ADMISSIBLE_HTML_ELEMENTS = {
-  'A': true, // special case, see treatment
+  'A': true,
   'ABBR': true,
   'ACRONYM': true,
   'B': true,
@@ -63,14 +63,34 @@ const ADMISSIBLE_HTML_ELEMENTS = {
   'HGROUP': true,
   'HR': true,
   'I': true,
+  'I-AMPHTML-SIZER': true,
+  'IMG': true,
   'LABEL': true,
   'LEGEND': true,
   'NOBR': true,
   'NOSCRIPT': true,
+  'O:P': true,
   'P': true,
+  'PRE': true,
+  'Q': true,
+  'RP': true,
+  'RT': true,
+  'RTC': true,
+  'RUBY': true,
+  'S': true,
   'SCRIPT': true,
+  'SECTION': true,
+  'SMALL': true,
   'SPAN': true,
+  'STRIKE': true,
   'STRONG': true,
+  'SUB': true,
+  'SUMMARY': true,
+  'SUP': true,
+  'TIME': true,
+  'U': true,
+  'VAR': true,
+  'WBR': true,
 
   // The following could potentially be admissible but are either unlikely
   // to be used where auto-lightbox is desired, or are obsolete.
@@ -96,6 +116,8 @@ const ADMISSIBLE_HTML_ELEMENTS = {
   // 'MULTICOL': true,
   // 'NAV': true,
   // 'NEXTID': true,
+  // 'SAMP': true,
+  // 'SPACER': true,
 };
 
 export class CarouselCriteria {
