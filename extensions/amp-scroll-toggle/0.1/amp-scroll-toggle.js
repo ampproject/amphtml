@@ -101,6 +101,7 @@ export class ScrollToggleDispatcher {
    * The logic here matches the Google SERP viewer's.
    * See go/amp-viewer-scroll internally.
    * @param {number} scrollTop
+   * @private
    */
   onScroll_(scrollTop) {
     this.lastScrollTop_ = scrollTop;
@@ -138,7 +139,10 @@ export class ScrollToggleDispatcher {
     }
   }
 
-  /** @param {boolean} isShown */
+  /**
+   * @param {boolean} isShown
+   * @private
+   */
   toggle_(isShown) {
     if (this.isShown_ == isShown) {
       return;
@@ -160,6 +164,11 @@ export class AmpScrollToggle extends AMP.BaseElement {
 
     /** @private {!Position} */
     this.position_ = Position.TOP;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -226,10 +235,6 @@ export class AmpScrollToggle extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
 }
 
 /**
