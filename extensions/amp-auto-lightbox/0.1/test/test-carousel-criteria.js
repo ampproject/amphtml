@@ -53,7 +53,7 @@ describes.realWin(TAG, {
       html`<div>Slide 2</div>`,
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.false;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
   });
 
   it('rejects carousels with <amp-img> but non-image slides', () => {
@@ -63,7 +63,7 @@ describes.realWin(TAG, {
       html`<div>Slide</div>`,
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.false;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
   });
 
   it('accepts carousels with only <amp-img>', () => {
@@ -73,7 +73,7 @@ describes.realWin(TAG, {
       html`<amp-img></amp-img>`,
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.true;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
   });
 
   it('accepts carousels with only <amp-img> (nested)', () => {
@@ -83,7 +83,7 @@ describes.realWin(TAG, {
       html`<div><amp-img></amp-img></div>`,
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.true;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
   });
 
   it('accepts carousels with <amp-img> in every slide (mixed)', () => {
@@ -94,7 +94,7 @@ describes.realWin(TAG, {
       html`<div><h1>My Image</h1><amp-img></amp-img></div>`,
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.true;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
   });
 
   it('rejects deep trees with only <amp-img>', () => {
@@ -108,7 +108,7 @@ describes.realWin(TAG, {
       deep.cloneNode(/* deep */ true),
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.false;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
   });
 
   it('rejects wide trees with only <amp-img>', () => {
@@ -130,7 +130,7 @@ describes.realWin(TAG, {
       wide.cloneNode(/* deep */ true),
     ]);
 
-    expect(CarouselCriteria.meetsAll(root)).to.be.false;
+    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
   });
 
 });

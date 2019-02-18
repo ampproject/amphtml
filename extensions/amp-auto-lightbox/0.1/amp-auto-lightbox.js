@@ -30,9 +30,9 @@ import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {resolveFalse, resolveTrue} from './utils/promise';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
 
 
 const TAG = 'amp-auto-lightbox';
@@ -132,7 +132,7 @@ export class Criteria {
   static meetsAll(element) {
     if (!Criteria.meetsSimpleCriteria(element) ||
         !Criteria.meetsTreeShapeCriteria(element)) {
-      return tryResolve(() => false);
+      return resolveFalse();
     }
     return Criteria.meetsComplexCriteria(element);
   }
@@ -164,7 +164,7 @@ export class Criteria {
       case 'AMP-CAROUSEL':
         return CarouselCriteria.meetsAll(element);
       default:
-        return tryResolve(() => true);
+        return resolveTrue();
     }
   }
 

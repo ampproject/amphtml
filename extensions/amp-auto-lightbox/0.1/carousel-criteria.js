@@ -15,9 +15,10 @@
  */
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isAmpElement, iterateCursor} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {resolveFalse, resolveTrue} from './utils/promise';
 import {toArray, toWin} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 
@@ -100,27 +101,27 @@ const ADMISSIBLE_HTML_ELEMENTS = {
 export class CarouselCriteria {
   /**
    * @param {!Element} element
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   static meetsAll(element) {
     const win = toWin(element.ownerDocument.defaultView);
 
     if (!isExperimentOn(win, 'amp-auto-lightbox-carousel')) {
-      return false;
+      return resolveFalse();
     }
 
     const slides = element.querySelectorAll('.amp-carousel-slide');
     const images = element.querySelectorAll('amp-img');
 
     if (images.length < 1) {
-      return false;
+      return resolveFalse();
     }
 
     if (slides.length != images.length) {
-      return false;
+      return resolveFalse();
     }
 
-    let promise = tryResolve(() => true);
+    let promise = resolveTrue();
 
     iterateCursor(slides, slide => {
       promise = promise.then(previousWasAccepted => {
@@ -145,7 +146,7 @@ class SlideCriteria {
     if (element.tagName == 'AMP-IMG') {
       // Already traversed up the tree, we only need to check the immediate
       // action.
-      const actionLookupStopAt = element.parentElement;
+      const actionLookupStopAt = dev().assertElement(element.parentElement);
       const actions = Services.actionServiceForDoc(element);
       return tryResolve(() =>
         !actions.hasResolvableAction(element, 'tap', actionLookupStopAt));
@@ -153,14 +154,14 @@ class SlideCriteria {
 
     const img = element.querySelector('amp-img');
     if (!img) {
-      return false;
+      return resolveFalse();
     }
 
     const slideMeetsSizingPromise =
         SlideCriteria.meetsSizingCriteria(img, element);
 
-    return slideMeetsSizingPromise.then(slideMeetsSizing => {
-      if (!slideMeetsSizing) {
+    return slideMeetsSizingPromise.then(slideMeetsSizingCriteria => {
+      if (!slideMeetsSizingCriteria) {
         return false;
       }
       return SlideCriteria.meetsAllSync(element, /* depth */ 0);
@@ -170,7 +171,7 @@ class SlideCriteria {
   /**
    * @param {!Element} element
    * @param {number} depth
-   * @return {!Promise<boolean>}
+   * @return {boolean}
    */
   static meetsAllSync(element, depth) {
     if (depth > MAX_TRAVERSING_DEPTH) {
@@ -181,7 +182,7 @@ class SlideCriteria {
     }
     // Already traversed up the tree, we only need to check the immediate
     // action.
-    const actionLookupStopAt = element.parentElement;
+    const actionLookupStopAt = dev().assertElement(element.parentElement);
     const actions = Services.actionServiceForDoc(element);
     if (actions.hasResolvableAction(element, 'tap', actionLookupStopAt)) {
       return false;
@@ -200,7 +201,7 @@ class SlideCriteria {
   /**
    * @param {!AmpElement} img
    * @param {!Element} slide
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   static meetsSizingCriteria(img, slide) {
     devAssert(img.tagName == 'AMP-IMG');
