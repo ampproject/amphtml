@@ -34,7 +34,6 @@ export function isVarCss(css, normalize) {
   return VAR_CSS_RE.test(css) || (normalize && NORM_CSS_RE.test(css));
 }
 
-
 /**
  * An interface that assists in CSS evaluation.
  * @interface

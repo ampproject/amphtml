@@ -59,7 +59,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.configJson_ = null;
 
-    /** @private {?./web-animations.AnimationRunner} */
+    /** @private {?./runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?Promise} */
@@ -449,7 +449,7 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * @param {?JsonObject=} opt_args
    * @param {?Object=} opt_viewportData
-   * @return {!Promise<!./web-animations.WebAnimationRunner>}
+   * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    * @private
    */
   createRunner_(opt_args, opt_viewportData) {

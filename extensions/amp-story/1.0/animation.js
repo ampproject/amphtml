@@ -119,7 +119,7 @@ class AnimationRunner {
 
     /**
      * @private @const {!Promise<
-     *    !../../amp-animation/0.1/web-animations.WebAnimationRunner>}
+     *    !../../amp-animation/0.1/runners/animation-runner.AnimationRunner>}
      */
     this.runnerPromise_ = this.getWebAnimationDef_().then(webAnimDef =>
       webAnimationBuilderPromise.then(builder =>
@@ -129,7 +129,7 @@ class AnimationRunner {
     this.firstFrameProps_ =
         this.keyframes_.then(keyframes => omit(keyframes[0], ['offset']));
 
-    /** @private {?../../amp-animation/0.1/web-animations.WebAnimationRunner} */
+    /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?PlaybackActivity} */
@@ -242,7 +242,7 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
+   * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
    */
   startWhenReady_(runner) {
@@ -265,7 +265,7 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
+   * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
    */
   finishWhenReady_(runner) {
@@ -309,7 +309,7 @@ class AnimationRunner {
   playbackWhenReady_(activity, wait) {
     const runner =
         /**
-         * @type {!../../amp-animation/0.1/web-animations.WebAnimationRunner}
+         * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
          */
         (devAssert(
             this.runner_,
@@ -332,7 +332,7 @@ class AnimationRunner {
 
   /**
    * Marks runner as ready and executes playback activity if needed.
-   * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
+   * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
    */
   onRunnerReady_(runner) {
