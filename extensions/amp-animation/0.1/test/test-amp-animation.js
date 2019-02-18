@@ -16,8 +16,8 @@
 
 import {AmpAnimation} from '../amp-animation';
 import {DEFAULT_ACTION} from '../../../../src/action-constants';
+import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {WebAnimationRunner} from '../web-animations';
 
 describes.sandboxed('AmpAnimation', {}, () => {
 
@@ -61,7 +61,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       win = env.win;
       viewer = win.services.viewer.obj;
       viewer.setVisibilityState_('hidden');
-      runner = new WebAnimationRunner([]);
+      runner = new NativeWebAnimationRunner([]);
       runnerMock = sandbox.mock(runner);
       createRunnerStub =
           sandbox.stub(AmpAnimation.prototype, 'createRunner_').callsFake(
