@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {extractKeyframes} from '../keyframes-extractor';
+import {extractKeyframes} from '../parsers/keyframes-extractor';
 import {poll} from '../../../../testing/iframe';
 
 
