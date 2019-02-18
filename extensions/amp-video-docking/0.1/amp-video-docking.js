@@ -347,6 +347,12 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isDragging_ = false;
 
+    /** @private {number} */
+    this.previousDragOffsetX_ = 0;
+
+    /** @private {number} */
+    this.dragVelocityX_ = 0;
+
     /** @private {!Array<!../../../src/video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
@@ -1320,6 +1326,11 @@ export class VideoDocking {
     const {centerX} = this.getCenter_(offsetX, offsetY);
     const offsetRelativeX = this.calculateRelativeX_(centerX);
 
+    this.dragVelocityX_ = offsetX - this.previousDragOffsetX_;
+    this.previousDragOffsetX_ = offsetX;
+
+    dev().info(TAG, 'drag velocity', this.dragVelocityX_);
+
     this.placeAt_(video, x + offsetX, y + offsetY, scale, step,
         transitionDurationMs, offsetRelativeX);
   }
@@ -1471,7 +1482,92 @@ export class VideoDocking {
 
     this.getControls_().enable();
 
-    this.snap_(offset.x, offset.y);
+    if (Math.abs(this.dragVelocityX_) < 40) {
+      this.snap_(offset.x, offset.y);
+    } else {
+      this.flickToDismiss_(this.previousDragOffsetX_,
+          Math.sign(this.dragVelocityX_));
+    }
+
+    this.dragVelocityX_ = 0;
+    this.previousDragOffsetX_ = 0;
+  }
+
+  /**
+   * @param {number} offsetX
+   * @param {number} direction -1 or 1
+   * @private
+   */
+  flickToDismiss_(offsetX, direction) {
+    devAssert(Math.abs(direction) == 1);
+
+    const video = this.getDockedVideo_();
+
+    video.pause();
+
+    if (this.isVisible_(video.element, 0.2)) {
+      this.bounceToDismiss_(offsetX, direction);
+      return;
+    }
+
+    const step = 1;
+    const {target} = devAssert(this.currentlyDocked_);
+
+    const {x, y, width} = this.getTargetArea_(video, target);
+    const {scale} = this.getDims_(video, target, step);
+
+    const currentX = x + offsetX;
+    const nextX = direction == 1 ?
+      this.getRightEdge_() :
+      this.getLeftEdge_() - width;
+
+    const transitionDurationMs = Math.min(600, Math.abs(nextX - currentX));
+
+    const {centerX} = this.getCenter_(nextX, /* offsetY */ 0);
+    const offsetRelativeX = this.calculateRelativeX_(centerX);
+
+    this.reconcileUndocked_();
+
+    video.showControls();
+
+    this.placeAt_(video, nextX, y, scale, /* step */ 0, transitionDurationMs,
+        offsetRelativeX).then(() => {
+      this.resetOnUndock_(video);
+    });
+  }
+
+  /**
+   * @param {number} offsetX
+   * @param {number} direction -1 or 1
+   * @private
+   */
+  bounceToDismiss_(offsetX, direction) {
+    devAssert(Math.abs(direction) == 1);
+
+    const video = this.getDockedVideo_();
+
+    const step = 1;
+    const {target} = devAssert(this.currentlyDocked_);
+
+    const {x, y, width} = this.getTargetArea_(video, target);
+    const {scale} = this.getDims_(video, target, step);
+
+    const areaWidth = this.getAreaWidth_();
+
+    const currentX = x + offsetX;
+    const nextX = direction == 1 ?
+      calculateRightJustifiedX(areaWidth, width, /* margin */ 0, step) :
+      calculateLeftJustifiedX(areaWidth, width, /* margin */ 0, step);
+
+    const transitionDurationMs = Math.min(300, Math.abs(nextX - currentX) / 2);
+
+    this.reconcileUndocked_();
+
+    this.placeAt_(video, nextX, y, scale, /* step */ 0, transitionDurationMs)
+        .then(() => {
+          this.undock_(video, /* reconciled */ true);
+          video.showControls();
+        });
   }
 
   /**
@@ -1637,16 +1733,14 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
+   * @param {boolean=} opt_reconciled
    * @return {!Promise}
    * @private
    */
-  undock_(video) {
+  undock_(video, opt_reconciled) {
     dev().info(TAG, 'undock', {video});
 
-    this.getControls_().disable();
-
     const {element} = video;
-
     const isMostlyInView = this.isVisible_(element, REVERT_TO_INLINE_RATIO);
 
     if (!isMostlyInView) {
@@ -1658,10 +1752,9 @@ export class VideoDocking {
       video.showControls();
     }
 
-    // Prevents ghosting
-    this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
-
-    this.trigger_(Actions.UNDOCK);
+    if (!opt_reconciled) {
+      this.reconcileUndocked_();
+    }
 
     const step = 0;
 
@@ -1683,6 +1776,16 @@ export class VideoDocking {
           video.showControls();
           this.resetOnUndock_(video);
         });
+  }
+
+  /** @private */
+  reconcileUndocked_() {
+    this.getControls_().disable();
+
+    // Prevents ghosting
+    this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
+
+    this.trigger_(Actions.UNDOCK);
   }
 
 
