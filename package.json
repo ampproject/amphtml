@@ -173,7 +173,7 @@
     "rollup-plugin-babel": "4.1.0",
     "rollup-plugin-commonjs": "9.2.0",
     "rollup-plugin-node-resolve": "4.0.0",
-    "sinon": "7.1.1",
+    "sinon": "7.2.4",
     "sinon-chai": "3.3.0",
     "sleep-promise": "8.0.1",
     "tempy": "0.2.1",
