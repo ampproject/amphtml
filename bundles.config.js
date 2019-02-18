@@ -430,6 +430,7 @@ exports.extensionBundles = [
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mraid', version: '0.1', type: TYPES.AD},
+  {name: 'amp-scroll-toggle', version: '0.1', type: TYPES.MISC},
 ];
 
 exports.aliasBundles = [
