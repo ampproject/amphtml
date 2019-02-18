@@ -223,7 +223,7 @@ export class AmpScrollToggle extends AMP.BaseElement {
       if (isShown) {
         return;
       }
-      offset = target.getBoundingClientRect().height;
+      offset = target./*OK*/getBoundingClientRect().height;
       if (this.position_ == Position.TOP) {
         offset *= -1;
       }
