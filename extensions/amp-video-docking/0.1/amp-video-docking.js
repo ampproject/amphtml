@@ -1506,7 +1506,7 @@ export class VideoDocking {
     video.pause();
 
     if (this.isVisible_(video.element, 0.2)) {
-      this.bounceToDismiss_(offsetX, direction);
+      this.bounceToDismiss_(video, offsetX, direction);
       return;
     }
 
@@ -1521,30 +1521,28 @@ export class VideoDocking {
       this.getRightEdge_() :
       this.getLeftEdge_() - width;
 
-    const transitionDurationMs = Math.min(600, Math.abs(nextX - currentX));
-
-    const {centerX} = this.getCenter_(nextX, /* offsetY */ 0);
-    const offsetRelativeX = this.calculateRelativeX_(centerX);
+    const transitionDurationMs =
+        this.calculateDismissalTransitionDurationMs_(nextX - currentX);
 
     this.reconcileUndocked_();
 
+    // Show immediately due to Chrome freeze bug when out-of-view.
     video.showControls();
 
-    this.placeAt_(video, nextX, y, scale, /* step */ 0, transitionDurationMs,
-        offsetRelativeX).then(() => {
-      this.resetOnUndock_(video);
-    });
+    this.placeAt_(video, nextX, y, scale, /* step */ 0, transitionDurationMs)
+        .then(() => {
+          this.resetOnUndock_(video);
+        });
   }
 
   /**
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number} offsetX
    * @param {number} direction -1 or 1
    * @private
    */
-  bounceToDismiss_(offsetX, direction) {
+  bounceToDismiss_(video, offsetX, direction) {
     devAssert(Math.abs(direction) == 1);
-
-    const video = this.getDockedVideo_();
 
     const step = 1;
     const {target} = devAssert(this.currentlyDocked_);
@@ -1559,7 +1557,8 @@ export class VideoDocking {
       calculateRightJustifiedX(areaWidth, width, /* margin */ 0, step) :
       calculateLeftJustifiedX(areaWidth, width, /* margin */ 0, step);
 
-    const transitionDurationMs = Math.min(300, Math.abs(nextX - currentX) / 2);
+    const transitionDurationMs =
+      this.calculateDismissalTransitionDurationMs_(nextX - currentX);
 
     this.reconcileUndocked_();
 
@@ -1568,6 +1567,15 @@ export class VideoDocking {
           this.undock_(video, /* reconciled */ true);
           video.showControls();
         });
+  }
+
+  /**
+   * @param {number} deltaX
+   * @return {number}
+   * @private
+   */
+  calculateDismissalTransitionDurationMs_(deltaX) {
+    return Math.min(300, Math.abs(deltaX) / 2);
   }
 
   /**
