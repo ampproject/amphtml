@@ -45,7 +45,7 @@ const ANIMATION_DURATION_MS = 300;
  * @param {string} prop
  * @param {string} expected
  * @param {string} targetId
- * @param {string} opt_sufix
+ * @param {string=} opt_sufix
  */
 function userAssertComputedStyle(
   computed, prop, expected, targetId, opt_sufix) {
@@ -186,12 +186,13 @@ export class AmpScrollToggle extends AMP.BaseElement {
       this.position_ = position;
     }
 
-    this.target_ = this.user().assertElement(
+    this.target_ = userAssert(
         element.ownerDocument.getElementById(targetId),
-        'Target by id absent: %s', targetId);
+        `Target by id absent: ${targetId}`);
 
     this.measureElement(() => {
-      const computed = computedStyle(this.win, this.target_);
+      const target = dev().assertElement(this.target_);
+      const computed = computedStyle(this.win, target);
 
       userAssertComputedStyle(computed, 'overflow', 'hidden', targetId);
       userAssertComputedStyle(computed, 'position', 'fixed', targetId);
@@ -204,7 +205,7 @@ export class AmpScrollToggle extends AMP.BaseElement {
             `with position="${Position.BOTTOM}"`);
       }
 
-      scrollDispatcherForDoc(this.getAmpDoc()).then(dispatcher => {
+      scrollDispatcherForDoc(element).then(dispatcher => {
         dispatcher.observe(isShown => this.toggle_(isShown));
       });
     });
