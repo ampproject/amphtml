@@ -36,7 +36,7 @@ tags: {  # <amp-scroll-toggle>
   attrs: {
     name: "target"
     mandatory: true
-    value_regex: "^[A-Za-z]+[\\w\\-\\:\\.]*$"
+    value_regex: "^[A-Za-z]+[\\w\\p{L}\\p{N}_\\-\\:\\.]*$"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
