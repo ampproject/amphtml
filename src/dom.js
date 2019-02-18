@@ -115,9 +115,7 @@ export function waitForHeadPromise(doc) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  waitForChild(doc.documentElement, () => (
-    onDocumentReady(doc)
-  ), callback);
+  return onDocumentReady(doc, callback);
 }
 
 
