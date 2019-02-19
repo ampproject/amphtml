@@ -23,6 +23,7 @@
 
 const colors = require('ansi-colors');
 const {
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -48,7 +49,7 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp dist --fortesting --noextensions');
+    downloadDistOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {

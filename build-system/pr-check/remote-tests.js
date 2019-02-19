@@ -44,14 +44,10 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    startSauceConnect(FILENAME);
-
-    downloadBuildOutput(FILENAME);
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-
     downloadDistOutput(FILENAME);
+    startSauceConnect(FILENAME);
+    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
-
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -66,8 +62,8 @@ function main() {
       stopTimer(FILENAME, FILENAME, startTime);
       return 0;
     }
-    startSauceConnect(FILENAME);
     downloadBuildOutput(FILENAME);
+    startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||

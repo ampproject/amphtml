@@ -180,7 +180,8 @@ function uploadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
-      `\n${fileLogPrefix} Compressing ` + colors.cyan(OUTPUT_DIRS) +
+      `\n${fileLogPrefix} Compressing ` +
+      colors.cyan(OUTPUT_DIRS.split(' ').join(', ')) +
       ' into ' + colors.cyan(outputFileName) + '...');
   exec('echo travis_fold:start:zip_results && echo');
   execOrDie(`zip -r ${outputFileName} ${OUTPUT_DIRS}`);
