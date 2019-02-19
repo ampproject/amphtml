@@ -25,9 +25,10 @@ const {
   shortSha,
 } = require('../git');
 const {execOrDie, exec, getStdout} = require('../exec');
-const {travisBuildNumber, travisPullRequestSha} = require('../travis');
+const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
-const BUILD_OUTPUT_FILE = `amp_build_${travisBuildNumber()}.zip`;
+const BUILD_OUTPUT_FILE =
+  isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : '';
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 
@@ -38,12 +39,14 @@ const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
-  console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-      `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
-  console.log(
-      `${fileLogPrefix} Testing the following changes at commit ` +
-      `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+  if (isTravisBuild()) {
+    console.log(
+        `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
+        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
+    console.log(
+        `${fileLogPrefix} Testing the following changes at commit ` +
+        `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+  }
 
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
