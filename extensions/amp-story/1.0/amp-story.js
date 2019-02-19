@@ -409,8 +409,15 @@ export class AmpStory extends AMP.BaseElement {
         if (args) {
           this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+
+          if (caller['offsetParent'].tagName === 'AMP-SIDEBAR') {
+            this.sidebar_.getImpl()
+                .then(sidebarImpl => sidebarImpl.close_());
+            this.switchTo_(args['id'], NavigationDirection.NEXT);
+            this.closeOpacityMask_();
+          }
         }
+        this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
   }
@@ -2209,6 +2216,28 @@ export class AmpStory extends AMP.BaseElement {
     this.sidebar_ = this.element.querySelector('amp-sidebar');
     if (!this.sidebar_) {
       return;
+    }
+
+    if (isExperimentOn(this.win,'amp-story-branching')) {
+      this.sidebar_.addEventListener('click', e => {
+
+        if (e.target.tagName === 'A') {
+          const url = e.target.getAttribute('href');
+          if (url.indexOf('#page=') >= 0) {
+            // Do not let the browser scroll
+            e.preventDefault();
+
+            // Handle for absolute URLs, in addition to fragments only.
+            this.win.location.hash = url.slice(url.search('\#(.*)'));
+
+            const actions = Services.actionServiceForDoc(this.element);
+            actions.execute(dev().assertElement(this.sidebar_),
+                'close', /* args */ null, /* source */ null, /* caller */ null,
+                /* event */ null, ActionTrust.HIGH);
+            this.closeOpacityMask_();
+          }
+        }
+      });
     }
 
     this.mutateElement(() => {
