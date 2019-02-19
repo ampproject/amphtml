@@ -391,13 +391,13 @@ The `amp-subscriptions` extension triggers the following analytics signals:
  - Data: none.
 2. `subscriptions-service-registered`
  - Triggered when `amp-subscriptions` is able to resolve the instance of the service.  A service is free to initialize itself at anytime on the page.
+ - Data: `serviceId` of the selected service.
 3. `subscriptions-service-activated`
  - Triggered when a configured service is selected and activated for use.  See [Selecting a service](#selecting-a-service).
  - Data: `serviceId` of the selected service.
 4. `subscriptions-entitlement-resolved`
  - Triggered when the entitlement fetch for a service is complete.
  - Data: `serviceId` and `action` of the selected service.
- - Data: `serviceId` of the selected service.
 5. `subscriptions-access-granted`
  - Triggered when the entitlement from the selected service grants access to the document.
  - Data: `serviceId` of the selected service.
