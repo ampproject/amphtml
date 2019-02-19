@@ -114,6 +114,7 @@ const forbiddenTerms = {
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
+      'build-system/pr-check/yarn-checks.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
