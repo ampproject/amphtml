@@ -31,7 +31,7 @@ export function promoteiq(global, data) {
 
   loadScript(global, data.src, () => {
     if (!!global['TagDeliveryContent']) {
-      const sfCallback = new Function('return ' + data['sfcallback']);
+      const sfCallback = new Function('response', data['sfcallback']);
       global['TagDeliveryContent']['request'](sfInputs, sfCallback);
     } else {
       user().error(TAG, 'TagDeliveryContent object not loaded on page');
