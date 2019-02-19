@@ -39,11 +39,11 @@ export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
         '|${quantity}',
   },
   'linkers': {
-    '_ml' : {
-      'ids' : {
-        'marin_amp_id': 'CLIENT_ID(marin_amp_id)'
-      }
-    }
+    '_ml': {
+      'ids': {
+        'marin_amp_id': 'CLIENT_ID(marin_amp_id)',
+      },
+    },
   },
   'transport': {
     'beacon': true,
