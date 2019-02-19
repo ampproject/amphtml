@@ -158,7 +158,7 @@ export class Vsync {
         this.ampdocService_.isSingleDoc()) {
       this.mutationObserver_ = new MutationObserver(
           this.mutationHandler_.bind(this));
-      const doc = this.ampdocService_.getAmpDocIfAvailable();
+      const doc = this.win.document;
       this.mutationObserver_.observe(doc, {
         attributes: true,
         characterData: true,
@@ -469,15 +469,17 @@ export class Vsync {
   }
 
   /**
-   * @param {!Array<!MutationRecord>} records
+   * @param {!Array<!MutationRecord>|null} records
    * @private
    */
   mutationHandler_(records) {
+    if (!records) {
+      return;
+    }
     for (let i = 0; i < records.length; i++) {
-      const record = records[i];
-      const {target} = record;
-      dev().error('VSYNC', `Detected ${record.type} mutation on ` +
-        `${target.tagName} outside of mutation phase: %s`, target);
+      const {target, type} = records[i];
+      dev().error('VSYNC', `Detected ${type} mutation on ${target.tagName} ` +
+        'outside of mutation phase: %s', target);
     }
   }
 
