@@ -24,6 +24,7 @@
 const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -44,10 +45,11 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     startSauceConnect(FILENAME);
-    downloadBuildOutput(FILENAME);
 
+    downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp dist --fortesting');
+
+    downloadDistOutput(FILENAME);
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
