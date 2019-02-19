@@ -24,6 +24,7 @@
 const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -43,13 +44,10 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
+    downloadDistOutput(FILENAME);
     startSauceConnect(FILENAME);
-    downloadBuildOutput(FILENAME);
-
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
-
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -58,14 +56,15 @@ function main() {
           buildTargets.has('UNIT_TEST') ||
           buildTargets.has('INTEGRATION_TEST'))) {
       console.log(
-          `${FILELOGPREFIX} Skipping Sauce Labs unit and integration tests ` +
-          'because this commit does not affect the runtime, build system, ' +
-          'or integration test files.');
+          `${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Remote (Sauce Labs) Tests ') +
+          'because this commit does not affect the runtime, ' +
+          'build system, or integration test files.');
       stopTimer(FILENAME, FILENAME, startTime);
       return 0;
     }
-    startSauceConnect(FILENAME);
     downloadBuildOutput(FILENAME);
+    startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
