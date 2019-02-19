@@ -168,9 +168,6 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
   'template': [
     'type',
   ],
-  'textarea': [
-    'autoexpand',
-  ],
 };
 
 /**
@@ -283,9 +280,6 @@ export function purifyConfig() {
     FORCE_BODY: true,
     // Avoid need for serializing to/from string by returning Node directly.
     RETURN_DOM: true,
-    // BLACKLISTED_ATTR_VALUES are enough. Other unknown protocols are safe.
-    // This allows native app deeplinks.
-    ALLOW_UNKNOWN_PROTOCOLS: true,
   }));
   return /** @type {!DomPurifyConfig} */ (config);
 }

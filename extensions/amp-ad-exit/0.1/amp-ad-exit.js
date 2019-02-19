@@ -16,10 +16,6 @@
 
 import {FilterType} from './filters/filter';
 import {
-  HostServiceError,
-  HostServices,
-} from '../../../src/inabox/host-services';
-import {
   MessageType,
   deserializeMessage,
   listen,
@@ -38,7 +34,6 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
 import {parseUrlDeprecated} from '../../../src/url';
-
 const TAG = 'amp-ad-exit';
 
 /**
@@ -111,23 +106,10 @@ export class AmpAdExit extends AMP.BaseElement {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    const finalUrl = substituteVariables(target.finalUrl);
-    if (HostServices.isAvailable(this.getAmpDoc())) {
-      HostServices.exitForDoc(this.getAmpDoc())
-          .then(exitService => exitService.openUrl(finalUrl))
-          .catch(errorCode => {
-            // TODO: reporting on errors
-            dev().fine(TAG, 'HostServiceError: ' + errorCode);
-            // fallback on browser API on environment miss match
-            if (errorCode === HostServiceError.MISMATCH) {
-              openWindowDialog(this.win, finalUrl, '_blank');
-            }
-          });
-    } else {
-      const clickTarget = (target.behaviors && target.behaviors.clickTarget
+    const clickTarget = (target.behaviors && target.behaviors.clickTarget
       && target.behaviors.clickTarget == '_top') ? '_top' : '_blank';
-      openWindowDialog(this.win, finalUrl, clickTarget);
-    }
+    openWindowDialog(this.win, substituteVariables(target.finalUrl),
+        clickTarget);
   }
 
 
