@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+// TODO(choumx): Avoid bundling an extra copy of DOMPurify here.
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
