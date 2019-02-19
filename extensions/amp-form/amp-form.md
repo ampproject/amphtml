@@ -576,6 +576,13 @@ The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill 
 
 Regular expression matching is a common validation feature supported natively on most input elements, except for `<textarea>`. We polyfill this functionality and support the `pattern` attribute on `<textarea>` elements.
 
+AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
+to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
+
+```html
+<textarea autoexpand></textarea>
+```
+
 ## Styling
 
 ### Classes and CSS hooks

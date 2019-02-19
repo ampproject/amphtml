@@ -1,3 +1,12 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - email 
+  - ads
+teaser:
+  text: Captures analytics data from an AMP document.
+---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +23,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-analytics"></a>`amp-analytics`
+# amp-analytics
+Capture analytics data from an AMP document.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Capture analytics data from an AMP document.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
@@ -511,7 +517,7 @@ The element visibility trigger waits for the signal specified by the `waitFor` p
 If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
-##### Error trigger (In experiment)
+##### Error trigger
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 

@@ -42,14 +42,14 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from './localization';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
-  closestBySelector,
+  closestAncestorElementBySelector,
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
+import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -60,7 +60,6 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -256,19 +255,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * play videos from an inactive page.
    */
   delegateVideoAutoplay() {
-    const videos = this.element.querySelectorAll('amp-video');
-    if (videos.length < 1) {
-      return;
-    }
-    toArray(videos).forEach(el => {
-      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
-    });
+    iterateCursor(this.element.querySelectorAll('amp-video'), delegateAutoplay);
   }
 
   /** @private */
   initializeMediaPool_() {
     const storyEl = dev().assertElement(
-        closestBySelector(this.element, 'amp-story'),
+        closestAncestorElementBySelector(this.element, 'amp-story'),
         'amp-story-page must be a descendant of amp-story.');
 
     storyEl.getImpl()
@@ -701,7 +694,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Array<string>}
    */
   getAdjacentPageIds() {
-    const adjacentPageIds = [];
+    const adjacentPageIds =
+      isExperimentOn(this.win, 'amp-story-branching') ?
+        this.actions_() :
+        [];
 
     const autoAdvanceNext =
         this.getNextPageId(true /* opt_isAutomaticAdvance */);
@@ -768,6 +764,32 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     return null;
+  }
+
+  /**
+   * Finds any elements in the page that has a goToPage action.
+   * @return {!Array<string>} The IDs of the potential next pages in the story
+   * or null if there aren't any.
+   * @private
+   */
+  actions_() {
+    const actionElements =
+      Array.prototype.slice.call(
+          this.element.querySelectorAll('[on*=goToPage]'));
+
+    const actionAttrs = actionElements.map(action => action.getAttribute('on'));
+
+    return actionAttrs.reduce((res, actions) => {
+      // Handling for multiple actions on one event or multiple events.
+      const actionList = actions.split(/[;,]+/);
+      actionList.forEach(action => {
+        if (action.indexOf('goToPage') >= 0) {
+          // The pageId is in between the equals sign & closing parenthesis.
+          res.push(action.slice(action.search('\=(.*)') + 1,-1));
+        }
+      });
+      return res;
+    }, []);
   }
 
   /**

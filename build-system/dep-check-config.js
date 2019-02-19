@@ -156,7 +156,6 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
-      'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
       'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -236,6 +235,7 @@ exports.rules = [
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
 
       // Ads needs concurrent loading
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/concurrent-load.js',
 
@@ -369,6 +369,12 @@ exports.rules = [
             'src/service/extension-location.js',
       'extensions/amp-list/0.1/amp-list.js->' +
             'src/service/origin-experiments-impl.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
+            'src/service/origin-experiments-impl.js',
+      // For action macros.
+      'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
+            'src/service/action-impl.js',
+
     ],
   },
   {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionSource} from './action-source';
 import {
   Alignment,
   Axis,
@@ -144,6 +145,13 @@ function sum(arr) {
  * half the slides are moved after. This could be a bit smarter and only move
  * as many as are necessary to have a sufficient amount of buffer. When slides
  * are moved, they are positioned on top of an existing spacer.
+ *
+ * Initial index:
+ *
+ * The initial index can be specified, which will make the carousel scroll to
+ * the desired index when it first renders. Since the layout of the slides is
+ * asynchronous, this should be used instead of calling `goToSlide` after
+ * creating the carousel.
  */
 export class Carousel {
   /**
@@ -151,6 +159,7 @@ export class Carousel {
   *   win: !Window,
   *   element: !Element,
   *   scrollContainer: !Element,
+  *   initialIndex: (number|undefined),
   *   runMutate: function(function()),
   * }} config
   */
@@ -158,6 +167,7 @@ export class Carousel {
     win,
     element,
     scrollContainer,
+    initialIndex = 0,
     runMutate,
   }) {
     /** @private @const */
@@ -186,6 +196,9 @@ export class Carousel {
 
     /** @private {number} */
     this.advanceCount_ = 1;
+
+    /** @private {number} */
+    this.autoAdvanceLoops_ = Number.POSITIVE_INFINITY;
 
     /** @private {boolean} */
     this.mixedLength_ = false;
@@ -241,17 +254,27 @@ export class Carousel {
     */
     this.touching_ = false;
 
+    /**
+     * Tracks the source of what cause the carousel to change index. This can
+     * be provided when moving the carousel programmatically, and the value
+     * will be propagated.
+     * @private {!ActionSource|undefined}
+     */
+    this.actionSource_ = undefined;
+
     /** @private {!Alignment} */
     this.alignment_ = Alignment.START;
 
     /** @private {!Axis} */
     this.axis_ = Axis.X;
 
-    /** @private {number} */
-    this.currentIndex_ = 0;
-
-    /** @private {number} */
-    this.initialIndex_ = 0;
+    /**
+     * TODO(sparhami) Rename this to `activeIndex`. We do not want to expose
+     * this as it changes, only when the user stops scrolling. Also change
+     * restingIndex to currentIndex.
+     * @private {number}
+     */
+    this.currentIndex_ = initialIndex;
 
     /** @private {boolean} */
     this.loop_ = false;
@@ -272,20 +295,24 @@ export class Carousel {
         'scroll', () => this.handleScroll_(), true);
     this.scrollContainer_.addEventListener(
         'touchstart', () => this.handleTouchStart_(), true);
+    this.scrollContainer_.addEventListener(
+        'wheel', () => this.handleWheel_(), true);
   }
 
   /**
    * Moves forward by the current advance count.
+   * @param {!ActionSource=} actionSource
    */
-  next() {
-    this.advance(this.advanceCount_);
+  next(actionSource) {
+    this.advance(this.advanceCount_, actionSource);
   }
 
   /**
    * Moves backwards by the current advance count.
+   * @param {!ActionSource=} actionSource
    */
-  prev() {
-    this.advance(-this.advanceCount_);
+  prev(actionSource) {
+    this.advance(-this.advanceCount_, actionSource);
   }
 
   /**
@@ -308,8 +335,9 @@ export class Carousel {
    *
    * TODO(sparhami) How can we make this work well for accessibility?
    * @param {number} delta
+   * @param {!ActionSource=} actionSource
    */
-  advance(delta) {
+  advance(delta, actionSource) {
     const {slides_: slides, currentIndex_} = this;
 
     const newIndex = currentIndex_ + delta;
@@ -319,18 +347,28 @@ export class Carousel {
     const passingStart = newIndex < 0;
     const passingEnd = newIndex > endIndex;
 
+    let slideIndex;
     if (this.loop_) {
-      this.goToSlide(mod(newIndex, endIndex + 1));
+      slideIndex = mod(newIndex, endIndex + 1);
     } else if (delta > 0 && this.inLastWindow_(currentIndex_) &&
         this.inLastWindow_(newIndex)) {
-      this.goToSlide(0);
+      slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
-      this.goToSlide(endIndex);
+      slideIndex = endIndex;
     } else if ((passingStart && !atStart) || (passingEnd && atEnd)) {
-      this.goToSlide(0);
+      slideIndex = 0;
     } else {
-      this.goToSlide(newIndex);
+      slideIndex = newIndex;
     }
+
+    this.goToSlide(slideIndex, {actionSource});
+  }
+
+  /**
+   * @return {number} The current index of the carousel.
+   */
+  getCurrentIndex() {
+    return this.currentIndex_;
   }
 
   /**
@@ -339,10 +377,11 @@ export class Carousel {
    * @param {number} index
    * @param {{
    *   smoothScroll: (boolean|undefined),
+   *   actionSource: (!ActionSource|undefined),
    * }=} options
    */
-  goToSlide(index, {smoothScroll = true} = {}) {
-    if (index < 0 || index > this.slides_.length - 1) {
+  goToSlide(index, {smoothScroll = true, actionSource} = {}) {
+    if (index < 0 || index > this.slides_.length - 1 || isNaN(index)) {
       return;
     }
 
@@ -350,9 +389,9 @@ export class Carousel {
       return;
     }
 
+    this.actionSource_ = actionSource;
     // TODO(sparhami) This does not work with side-slide-count
-    this.updateCurrentIndex_(index);
-    this.scrollCurrentIntoView_({smoothScroll});
+    this.scrollSlideIntoView_(this.slides_[index], {smoothScroll});
   }
 
   /**
@@ -398,19 +437,21 @@ export class Carousel {
   }
 
   /**
+   * @param {number} autoAdvanceLoops The number of loops through the carousel
+   *    that should be autoadvanced before stopping. This defaults to infinite
+   *    loops.
+   */
+  updateAutoAdvanceLoops(autoAdvanceLoops) {
+    this.autoAdvanceLoops_ = autoAdvanceLoops;
+    this.updateUi();
+  }
+
+  /**
    * @param {boolean} horizontal Whether the scrollable should lay out
    *    horizontally or vertically.
    */
   updateHorizontal(horizontal) {
     this.axis_ = horizontal ? Axis.X : Axis.Y;
-    this.updateUi();
-  }
-
-  /**
-   * @param {number} initialIndex The initial index that should be shown.
-   */
-  updateInitialIndex(initialIndex) {
-    this.initialIndex_ = initialIndex;
     this.updateUi();
   }
 
@@ -474,7 +515,7 @@ export class Carousel {
    *
    * @param {boolean} userScrollable Whether or not the carousel can be
    *    scrolled (e.g. via touch). If false, then the carousel can only be
-   *    advanced via next, prev, goToIndex or autoAdvance.
+   *    advanced via next, prev, goToSlide or autoAdvance.
    */
   updateUserScrollable(userScrollable) {
     this.userScrollable_ = userScrollable;
@@ -508,12 +549,13 @@ export class Carousel {
       if (!this.slides_.length) {
         return;
       }
+
+      this.autoAdvance_.updateMaxAdvances(
+          (this.autoAdvanceLoops_ * this.slides_.length) - 1);
       this.updateSpacers_();
       this.setChildrenSnapAlign_();
       this.hideSpacersAndSlides_();
       this.resetScrollReferencePoint_(/* force */true);
-      this.ignoreNextScroll_ = true;
-      this.scrollCurrentIntoView_({smoothScroll: false});
     });
   }
 
@@ -536,6 +578,7 @@ export class Carousel {
     this.element_.dispatchEvent(
         createCustomEvent(this.win_, 'indexchange', dict({
           'index': currentIndex,
+          'actionSource': this.actionSource_,
         })));
   }
 
@@ -546,6 +589,7 @@ export class Carousel {
    */
   handleTouchStart_() {
     this.touching_ = true;
+    this.actionSource_ = ActionSource.TOUCH;
 
     listenOnce(window, 'touchend', () => {
       this.touching_ = false;
@@ -553,6 +597,14 @@ export class Carousel {
     }, {
       capture: true,
     });
+  }
+
+  /**
+   * Handles a wheel event.
+   * @private
+   */
+  handleWheel_() {
+    this.actionSource_ = ActionSource.WHEEL;
   }
 
   /**
@@ -783,7 +835,7 @@ export class Carousel {
     }
 
     this.runMutate_(() => {
-      this.updateCurrentIndex_(newIndex);
+      this.currentIndex_ = newIndex;
       this.moveSlides_(totalLength);
     });
   }
@@ -812,6 +864,7 @@ export class Carousel {
 
     this.runMutate_(() => {
       this.restingIndex_ = this.currentIndex_;
+      this.updateCurrentIndex_(this.restingIndex_);
 
       this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();
@@ -852,17 +905,20 @@ export class Carousel {
   }
 
   /**
-   * Scrolls the current element into view based on its alignment.
+   * Scrolls a slide into view based on its alignment.
+   * @param {!Element} slide
    * @param {{
    *   smoothScroll: boolean,
    * }} options
    * @private
    */
-  scrollCurrentIntoView_({smoothScroll}) {
+  scrollSlideIntoView_(slide, {
+    smoothScroll,
+  }) {
     const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
     runner(this.scrollContainer_, () => {
       scrollContainerToElement(
-          this.slides_[this.currentIndex_],
+          slide,
           this.scrollContainer_,
           this.axis_,
           this.alignment_

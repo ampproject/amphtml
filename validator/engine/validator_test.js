@@ -362,12 +362,14 @@ describe('ValidationResultTransformerVersion', () => {
   });
 });
 
-describe('ValidatorCssLengthValidation', () => {
-  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') { return; }
+describe('ValidatorCssLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
   // testcase is valid, we modify a valid testcase
-  // (features/css_length.html) designed for this purpose in code.
+  // (feature_tests/css_length.html) designed for this purpose in code.
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
@@ -407,84 +409,6 @@ describe('ValidatorCssLengthValidation', () => {
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
        '(see https://www.ampproject.org/docs/reference/spec' +
        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
-    test.run();
-  });
-
-  it('will accept 50010 bytes in author stylesheet that includes an URL',
-      () => {
-        const url = 'http://example.com/';
-        assertStrictEqual(19, url.length);
-        const cssWithUrl = 'a{b:url(\'' + url + '\')';
-        assertStrictEqual(30, cssWithUrl.length);
-        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-        // 10 bytes over limit, 19 of which are the URL.
-        assertStrictEqual(50010, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-        test.ampHtmlFileContents
-            .replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        // TODO(gregable): Modify this test to pass for transformed AMP.
-        // test.expectedOutput = 'PASS';
-        test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
-
-  it('will accept 50010 bytes in stylesheet that includes a relative URL',
-      () => {
-        const url = 'a-relative-url.html';
-        assertStrictEqual(19, url.length);
-        const cssWithUrl = 'a{b:url(\'' + url + '\')';
-        assertStrictEqual(30, cssWithUrl.length);
-        const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-        // 10 bytes over limit, 19 of which are the URL.
-        assertStrictEqual(50010, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-        test.ampHtmlFileContents
-            .replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        test.expectedOutput = 'PASS';
-        // TODO(gregable): Modify this test to pass for transformed AMP.
-        // test.expectedOutput = 'PASS';
-        test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
-
-  it('will accept 50010 bytes in stylesheet that includes a data URL', () => {
-    const url = 'data:nineteen-bytes';
-    assertStrictEqual(19, url.length);
-    const cssWithUrl = 'a{b:url(\'' + url + '\')';
-    assertStrictEqual(30, cssWithUrl.length);
-    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
-    // 10 bytes over limit, 19 of which are the URL.
-    assertStrictEqual(50010, stylesheet.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.inlineOutput = false;
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -561,6 +485,187 @@ describe('ValidatorCssLengthValidation', () => {
        'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
        '/author-develop/responsive/style_pages) ' +
        '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
+});
+
+describe('ValidatorCssLengthWithUrls', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Rather than encoding some really long author stylesheets in
+  // testcases, which would be difficult to read/verify that the
+  // testcase is valid, we modify a valid testcase
+  // (feature_tests/css_length.html) designed for this purpose in code.
+
+  // We use a blob of length 10 (both bytes and chars) to make it easy to
+  // construct stylesheets of any length that we want.
+  const validStyleBlob = 'h1 {a: b}\n';
+  assertStrictEqual(10, validStyleBlob.length);
+
+  it('will accept 50010 bytes in author stylesheet that includes an URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'http://example.com/';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
+
+  it('will accept 50010 bytes in stylesheet that includes a relative URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'a-relative-url.html';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
+
+  it('will accept 50010 bytes in stylesheet that includes a data URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'data:nineteen-bytes';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
+});
+
+describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // Rather than encoding some really long author stylesheets in
+  // testcases, which would be difficult to read/verify that the
+  // testcase is valid, we modify a valid testcase
+  // (transformed_feature_tests/css_length.html) designed for this
+  // purpose in code.
+
+  // We use a blob of length 10 (both bytes and chars) to make it easy to
+  // construct stylesheets of any length that we want.
+  const validStyleBlob = 'h1 {a: b}\n';
+  assertStrictEqual(10, validStyleBlob.length);
+
+  it('will accept 50010 bytes in author stylesheet that includes an URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'http://example.com/';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test =
+        new ValidatorTestCase('transformed_feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'PASS';
+    test.run();
+  });
+
+  it('will accept 50010 bytes in stylesheet that includes a relative URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'a-relative-url.html';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test =
+        new ValidatorTestCase('transformed_feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'PASS';
+    test.run();
+  });
+
+  it('will accept 50010 bytes in stylesheet that includes a data URL ' +
+         'of 19 bytes',
+  () => {
+    const url = 'data:nineteen-bytes';
+    assertStrictEqual(19, url.length);
+    const cssWithUrl = 'a{b:url(\'' + url + '\')';
+    assertStrictEqual(30, cssWithUrl.length);
+    const stylesheet = Array(4999).join(validStyleBlob) + cssWithUrl;
+    // 10 bytes over limit, 19 of which are the URL.
+    assertStrictEqual(50010, stylesheet.length);
+    const test =
+        new ValidatorTestCase('transformed_feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'transformed_feature_tests/css_length.html:29:2 The author ' +
+        'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
+        'is too long - document contains 50010 bytes whereas the limit ' +
+        'is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -843,6 +948,67 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
       }
     });
   }
+  // Transformed AMP does not allow `nonce` attributes, so it must have
+  // disabled_by: "transformed".
+  if ((attrSpec.name === 'nonce') &&
+      tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP)) {
+    it('nonce attributes must have `disabled_by: "transformed"`', () => {
+      expect(attrSpec.disabledBy.includes('transformed')).toBe(true);
+    });
+  }
+}
+
+/**
+ * Helper for typeIdentifiersShouldMakeSense.
+ * @param {!Object<string, number>} typeIdentifiers
+ * @param {!Array<string>} specTypeIdentifiers
+ * @param {string} fieldName
+ * @param {string} specType
+ * @param {string} specName
+ */
+function typeIdentifiersAreValidAndUnique(
+  typeIdentifiers, specTypeIdentifiers, fieldName, specType, specName) {
+  const encounteredTypeIdentifiers = {};
+  for (const typeIdentifier of specTypeIdentifiers) {
+    it(specType + ' \'' + specName + '\' has ' + fieldName +
+           ' set to an invalid type identifier: \'' + typeIdentifier + '\'',
+    () => {
+      expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
+    });
+    it(specType + ' \'' + specName + '\' has duplicate ' + fieldName + ': \'' +
+           typeIdentifier + '\'.',
+    () => {
+      expect(encounteredTypeIdentifiers.hasOwnProperty(typeIdentifier))
+          .toBe(false);
+      encounteredTypeIdentifiers[typeIdentifier] = 0;
+    });
+  }
+}
+
+/**
+ * Helper for ValidatorRulesMakeSense.
+ * @param {!amp.validator.TagSpec|!amp.validator.AttrSpec} spec
+ * @param {string} specType
+ * @param {string} specName
+ */
+function typeIdentifiersShouldMakeSense(spec, specType, specName) {
+  const typeIdentifiers =
+      {'amp': 0, 'amp4ads': 0, 'amp4email': 0, 'actions': 0, 'transformed': 0};
+  // both enabled_by and disabled_by must not be set on the same spec.
+  it(specType + ' \'' + specName + '\' has both enabled_by and disabled_by' +
+         ' set and it must be one or the other, not both.',
+  () => {
+    expect((spec.enabledBy.length > 0) && (spec.disabledBy.length > 0))
+        .toBe(false);
+  });
+  // enabled_by must be a valid type identifier and each type identifier
+  // listed at most once.
+  typeIdentifiersAreValidAndUnique(
+      typeIdentifiers, spec.enabledBy, 'enabled_by', specType, specName);
+  // disabled_by must be a valid type identifier and each type identifier
+  // listed at most once.
+  typeIdentifiersAreValidAndUnique(
+      typeIdentifiers, spec.disabledBy, 'disabled_by', specType, specName);
 }
 
 // Test which verifies some constraints on the rules file which the validator
@@ -970,6 +1136,9 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
+    if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {
+      typeIdentifiersShouldMakeSense(tagSpec, 'tag_spec', tagSpecName);
+    }
     it('unique named_id if present', () => {
       if (tagSpec.namedId !== null &&
           tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {
@@ -985,6 +1154,7 @@ describe('ValidatorRulesMakeSense', () => {
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
         'amp-accordion': 0,
+        'amp-action-macro': 0,
         'amp-ad-exit': 0,
         'amp-analytics': 0,
         'amp-anim': 0,
@@ -1021,6 +1191,7 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
+        'AMP-ACTION-MACRO': 0,
         'AMP-ANIM': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
@@ -1078,12 +1249,21 @@ describe('ValidatorRulesMakeSense', () => {
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
+        const attrName = rules.internedStrings[-1 - attrSpecId];
         it('unique attr_name within tag_spec \'' + tagSpecName + '\'', () => {
-          const attrName = rules.internedStrings[-1 - attrSpecId];
-
           expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
           attrNameIsUnique[attrName] = 0;
         });
+        // Transformed AMP does not allow `nonce` attributes, so it must have
+        // disabled_by: "transformed" on the attrSpec or the tagSpec. Since this
+        // attribute does not have an attrSpec then it must be on the tagSpec.
+        // Verify that it is set on the tagSpec.
+        if ((attrName === 'nonce') &&
+            tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP)) {
+          it('nonce attributes must have `disabled_by: "transformed"`', () => {
+            expect(tagSpec.disabledBy.includes('transformed')).toBe(true);
+          });
+        }
         continue;
       }
       const attrSpec = rules.attrs[attrSpecId];
@@ -1094,6 +1274,9 @@ describe('ValidatorRulesMakeSense', () => {
         expect(attrNameIsUnique.hasOwnProperty(attrSpec.name)).toBe(false);
         attrNameIsUnique[attrSpec.name] = 0;
       });
+      if ((attrSpec.enabledBy.length > 0) || (attrSpec.disabledBy.length > 0)) {
+        typeIdentifiersShouldMakeSense(attrSpec, 'attr_spec', attrSpec.name);
+      }
       // Special check that every <script> tag with a src attribute has a
       // whitelist check on the attribute value.
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {

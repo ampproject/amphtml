@@ -28,17 +28,6 @@ rules.  Similar in spirit to the
 [AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
 
-**Table of Contents**
-
-* [AMPHTML ad format rules](#amphtml-ad-format-rules)
-    * [Boilerplate](#boilerplate)
-    * [CSS](#css)
-        * [CSS animations and transitions](#css-animations-and-transitions)
-            * [Selectors](#selectors)
-            * [Transitionable and animatable properties](#transitionable-and-animatable-properties)
-    * [Allowed AMP extensions and builtins](#allowed-amp-extensions-and-builtins)
-    * [HTML tags](#html-tags)
-
 ## AMPHTML ad format rules
 
 Unless otherwise specified below, the creative must obey all rules given by the
