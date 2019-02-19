@@ -118,6 +118,15 @@ export const LOADING_ELEMENTS_ = {
 
 
 /**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name. A few components don't follow this convention for historical
+ * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * @private @const {!RegExp}
+ */
+const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
+
+
+/**
  * @param {string} s
  * @return {Layout|undefined} Returns undefined in case of failure to parse
  *   the layout string.
@@ -310,7 +319,7 @@ export function isLoadingAllowed(element) {
  * @return {boolean}
  */
 function isVideoPlayerComponent(tagName) {
-  return /^amp\-(video|.+player)/i.test(tagName);
+  return videoPlayerTagNameRe.test(tagName);
 }
 
 
