@@ -182,7 +182,8 @@ export class Builder {
     /** @private {boolean} */
     this.useAnimationWorklet_ =
       isExperimentOn(this.win_, 'chrome-animation-worklet') &&
-      'animationWorklet' in CSS;
+      'animationWorklet' in CSS &&
+      getMode(win).runtime != 'inabox';
   }
 
   /**

@@ -37,6 +37,7 @@ import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
+import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-position-observer';
 
@@ -237,11 +238,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
       const scrolltop = this.viewport_.getScrollTop();
-      const additionalViewportData = {
+      const additionalViewportData = dict({
         'start-scroll-offset': scrolltop,
         'end-scroll-offset': scrolltop + this.remainingScrollToExit_,
         'initial-inview-percent': this.scrollProgress_,
-      };
+      });
       this.triggerScroll_(additionalViewportData);
     }
   }
