@@ -15,10 +15,7 @@
  */
 
 import {FilterType} from './filters/filter';
-import {
-  HostServiceError,
-  HostServices,
-} from '../../../src/inabox/host-services';
+import {HostServices} from '../../../src/inabox/host-services';
 import {
   MessageType,
   deserializeMessage,
@@ -115,11 +112,10 @@ export class AmpAdExit extends AMP.BaseElement {
     if (HostServices.isAvailable(this.getAmpDoc())) {
       HostServices.exitForDoc(this.getAmpDoc())
           .then(exitService => exitService.openUrl(finalUrl))
-          .catch(errorCode => {
+          .catch(error => {
             // TODO: reporting on errors
-            dev().fine(TAG, 'HostServiceError: ' + errorCode);
-            // fallback on browser API on environment miss match
-            if (errorCode === HostServiceError.MISMATCH) {
+            dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
+            if (error.fallback) {
               openWindowDialog(this.win, finalUrl, '_blank');
             }
           });
