@@ -15,7 +15,6 @@
  */
 
 import {
-  HostServiceError,
   HostServices,
 } from '../../../src/inabox/host-services';
 import {ScrollManager} from './scroll-manager';
@@ -69,8 +68,6 @@ export class AnalyticsRoot {
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
 
-    this.visibilityMangerPromise_ = null;
-
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
 
@@ -94,13 +91,14 @@ export class AnalyticsRoot {
       this.usingHostAPIPromise_ = promise.then(visibilityService => {
         this.hostVisibilityService_ = visibilityService;
         return true;
-      }).catch(errorCode => {
-        dev().fine(TAG, 'HostServiceError: ' + errorCode);
-        if (errorCode == HostServiceError.MISMATCH) {
+      }).catch(error => {
+        dev().fine(TAG, 'VisibilityServiceError - fallback=' + error.fallback);
+        if (error.fallback) {
+          // Do not use HostAPI, fallback to original implementation.
           return false;
         }
-        // TODO: What to do in this case.
-        throw user().createError('Host API unsupported');
+        // Cannot fallback, service error. Throw user error.
+        throw user().createError('Host Visibility Service Error');
       });
     }
     return this.usingHostAPIPromise_;
@@ -466,6 +464,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   createVisibilityManager() {
     if (this.hostVisibilityService_) {
       // If there is hostAPI (hostAPI never exist with the FIE case)
+      fetch('http://localhost:8000/visiblityManagerForMAPP');
       return new VisibilityManagerForMApp(
           this.ampdoc, this.hostVisibilityService_);
     }

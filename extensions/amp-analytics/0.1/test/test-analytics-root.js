@@ -25,7 +25,6 @@ import {
   CustomEventTracker,
 } from '../events';
 import {
-  HostServiceError,
   HostServices,
 } from '../../../../src/inabox/host-services';
 import {ScrollManager} from '../scroll-manager';
@@ -164,7 +163,9 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   it('should fallback to correct visibilityManager', () => {
     sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
     sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
-      return Promise.reject(HostServiceError.MISMATCH);
+      return Promise.reject({
+        fallback: true,
+      });
     });
     return root.isUsingHostAPI().then(() => {
       const visibilityManager = root.getVisibilityManager();

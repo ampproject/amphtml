@@ -135,7 +135,6 @@ export class MraidInitializer {
     this.registeredWithHostServices_ = true;
   }
 
-
   /**
    * Runs if mraid.js was loaded successfully.
    */
