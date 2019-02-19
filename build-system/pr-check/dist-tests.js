@@ -41,7 +41,6 @@ function runSinglePassTest_() {
   timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
-  timedExecOrDie('gulp clean');
 }
 
 function main() {
@@ -73,9 +72,10 @@ function main() {
     }
 
     if (!ranTests) {
-      console.log(`${FILELOGPREFIX} Skipping dist tests because this commit ` +
-        'does not affect the runtime, build system, or ' +
-        'integration test files.');
+      console.log(`${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Dist, Bundle Size, Single Pass Tests ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'or integration test files.');
     }
   }
 

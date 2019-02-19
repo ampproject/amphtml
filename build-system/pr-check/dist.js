@@ -42,8 +42,8 @@ function main() {
     uploadDistOutput(FILENAME);
   } else {
     printChangeSummary();
-    console.log(`${FILELOGPREFIX} Skipping dist job because pull requests ` +
-        'do not require dist files to be built for remote tests');
+    console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Dist ') +
+        'because this is a PR build');
   }
 
   stopTimer(FILENAME, FILENAME, startTime);

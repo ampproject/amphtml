@@ -56,9 +56,10 @@ function main() {
           buildTargets.has('UNIT_TEST') ||
           buildTargets.has('INTEGRATION_TEST'))) {
       console.log(
-          `${FILELOGPREFIX} Skipping Sauce Labs unit and integration tests ` +
-          'because this commit does not affect the runtime, build system, ' +
-          'or integration test files.');
+          `${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Remote (Sauce Labs) Tests ') +
+          'because this commit does not affect the runtime, ' +
+          'build system, or integration test files.');
       stopTimer(FILENAME, FILENAME, startTime);
       return 0;
     }
