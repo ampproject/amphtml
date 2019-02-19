@@ -262,6 +262,14 @@ describes.repeated('amp-list', {
         });
       });
 
+      it('should resize with viewport', () => {
+        const resize = sandbox.spy(list, 'attemptToFit_');
+        list.layoutCallback().then(() => {
+          list.viewport_.resize_();
+          expect(resize).to.have.been.called;
+        });
+      });
+
       // TODO(choumx, #14772): Flaky.
       it.skip('should only process one result at a time for rendering', () => {
         const doRenderPassSpy = sandbox.spy(list, 'doRenderPass_');
