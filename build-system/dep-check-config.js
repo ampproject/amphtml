@@ -261,10 +261,6 @@ exports.rules = [
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/doc-impl.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/entitlement.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/score-factors.js',
-
-      // amp-smartlinks depends on amp-skimlinks/link-rewriter
-      'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
-      'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
     ],
   },
   {
@@ -372,6 +368,8 @@ exports.rules = [
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
       'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
             'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
