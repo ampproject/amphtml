@@ -4,94 +4,24 @@ node_js:
   - "lts/*"
 python:
   - "2.7"
-notifications:
-  email:
-    recipients:
-      - amp-build-cop@grotations.appspotmail.com
-    on_success: change
-    on_failure: change
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-  - pip install urllib3[secure]
-  - pip install gsutil --user
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-branches:
-  only:
-    - master
-    - release
-    - canary
-    - /^amp-release-.*$/
-    - /^revert-.*$/
-addons:
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-    # Requested by some tests because they need a valid font host,
-    # but should not resolve in tests.
-    - fonts.googleapis.com
 stages:
   - build
-  - test
 jobs:
   include:
     - stage: build
-      name: "Build"
+      name: "Job 1"
+      if: env(TRAVIS_EVENT_TYPE) = pull_request
       script:
-        - node build-system/pr-check/build.js
+        - echo "Running Job 1"
     - stage: build
-      name: "Checks" 
-      script:        
-        - node build-system/pr-check/checks.js
-    - stage: build
-      name: "Validator Tests"        
-      before_script:
-        - pip install --user protobuf
-      script:        
-        - node build-system/pr-check/validator-tests.js
-      addons:
-        apt:
-          packages:
-            - protobuf-compiler
-            - python-protobuf
-    - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
-      addons:
-        chrome: stable
+      name: "Job 2"
+      if: env(TRAVIS_EVENT_TYPE) = push
       script:
-        - node build-system/pr-check/dist-tests.js
-    - stage: test
-      name: "Visual Diff Tests"
-      script:
-        - node build-system/pr-check/visual-diff-tests.js
-    - stage: test
-      name: "Local Tests"
-      addons:
-        chrome: stable
-      script:
-        - node build-system/pr-check/local-tests.js
-    - stage: test
-      name: "Remote (Sauce Labs) Tests"
-      script:
-        - node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
-  fast_finish: true
-  #TODO(ampproject/wg-infra): remove when remote tests stabilize
-  allow_failures:
-      - script:
-          - node build-system/pr-check/remote-tests.js
+        - echo "Running Job 2"
 cache:
   yarn: true
   directories:
-    - build-system/tasks/visual-diff/node_modules
     - node_modules
-    - validator/node_modules
-    - validator/nodejs/node_modules
-    - validator/webui/node_modules
-    - sauce_connect
-  pip: true
-  bundler: true
