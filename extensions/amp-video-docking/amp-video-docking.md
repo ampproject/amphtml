@@ -63,7 +63,7 @@ This extension is used in conjunction with a [supported video player](../../spec
 Currently, the supported players are:
 
 - [`amp-brightcove`](https://www.ampproject.org/docs/reference/components/amp-brightcove)
-- [`amp-delight-player`](https://www.ampproject.org/docs/reference/components/amp-delight-player)
+- [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
 - [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
 - [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
 - [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)
