@@ -903,7 +903,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const imageBoxWithOffset = imageViewer.getImageBoxWithOffset();
+          const {width, height} = imageViewer.getImageBoxWithOffset() || {};
 
           const width = imageBoxWithOffset ? imageBoxWithOffset.width : null;
           const height = imageBoxWithOffset ? imageBoxWithOffset.height : null;
