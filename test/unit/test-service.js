@@ -31,6 +31,7 @@ import {
   isDisposable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
+  rejectServicePromiseForDoc,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -368,6 +369,39 @@ describe('service', () => {
       registerServiceBuilderForDoc(ampdoc, 'a', factory);
       const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
       expect(p).to.not.be.null;
+    });
+
+    it('should reject service promise - reject before get', () => {
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 1});
+      const p = getServicePromiseForDoc(ampdoc, 'a');
+      return expect(p).to.eventually.be.rejectedWith({code: 1});
+    });
+
+    it('should reject service promise - reject after get', () => {
+      const p = getServicePromiseForDoc(ampdoc, 'a');
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 1});
+      return expect(p).to.eventually.be.rejectedWith({code: 1});
+    });
+
+    it('should reject service promise - reject multiple times', () => {
+      const p = getServicePromiseForDoc(ampdoc, 'a');
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 1});
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 2});
+      return expect(p).to.eventually.be.rejectedWith({code: 1});
+    });
+
+    it('should reject service promise - reject before register', () => {
+      const p = getServicePromiseForDoc(ampdoc, 'a');
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 1});
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      return expect(p).to.eventually.be.rejectedWith({code: 1});
+    });
+
+    it('should not reject service promise if already registered', () => {
+      const p = getServicePromiseForDoc(ampdoc, 'a');
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      rejectServicePromiseForDoc(ampdoc, 'a', {code: 1});
+      return expect(p).to.eventually.be.ok;
     });
 
     it('should resolve service for a child window', () => {
