@@ -35,7 +35,6 @@ import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {
   ScrollTimelineWorkletRunner,
 } from './runners/scrolltimeline-worklet-runner';
-import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {
@@ -182,7 +181,6 @@ export class Builder {
 
     /** @private {boolean} */
     this.useAnimationWorklet_ =
-      Services.platformFor(this.win_).isChrome() &&
       isExperimentOn(this.win_, 'chrome-animation-worklet') &&
       'animationWorklet' in CSS;
   }

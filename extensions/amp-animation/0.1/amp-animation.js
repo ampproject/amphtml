@@ -290,8 +290,8 @@ export class AmpAnimation extends AMP.BaseElement {
     this.triggered_ = true;
     this.hasPositionObserver_ = !!invocation.caller &&
       invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
-    const viewportData = (invocation && invocation.event) ?
-      invocation.event.additionalViewportData : null;
+    const viewportData = (invocation.event && invocation.event.detail) ?
+      invocation.event.detail.additionalViewportData : null;
     return this.createRunnerIfNeeded_(null, viewportData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
