@@ -210,11 +210,9 @@ export class AmpList extends AMP.BaseElement {
       this.attemptToFit_(placeholder);
     }
 
-    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
-      this.viewport_.onResize(() => {
-        this.attemptToFit_(dev().assertElement(this.container_));
-      });
-    }
+    this.viewport_.onResize(() => {
+      this.attemptToFit_(dev().assertElement(this.container_));
+    });
 
     this.loadMoreEnabledPromise_.then(enabled => {
       if (enabled) {
