@@ -23,8 +23,6 @@ tags: {  # amp-action-macro
     name: "amp-action-macro"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -35,12 +33,16 @@ tags: {  # <amp-action-macro>
   html_format: ACTIONS
   tag_name: "AMP-ACTION-MACRO"
   requires_extension: "amp-action-macro"
-  attrs: { name: "id" mandatory: true }
-  attrs: { name: "execute" mandatory: true }
-  attrs: { name: "arguments" mandatory: false }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-action-macro"
-  amp_layout: {
-    supported_layouts: CONTAINER
+  attrs: {
+    name: "arguments"
   }
+  attrs: {
+    name: "execute"
+    mandatory: true
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-action-macro"
 }

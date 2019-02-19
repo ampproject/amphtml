@@ -37,17 +37,17 @@
   <amp-action-macro id="action-macro-id" execute="amp-component.doSomething()">
   </amp-action-macro>
 
+  <!-- Valid, optional arguments -->
+  <amp-action-macro id="action-macro-id" execute="amp-component.doSomething(foo=x,bar=y)"
+      arguments="x,y">
+  </amp-action-macro>
+
   <!-- Invalid, requires ID -->
   <amp-action-macro execute="amp-component.doSomething()">
   </amp-action-macro>
 
   <!-- Invalid, requires execute -->
   <amp-action-macro id="action-macro-id">
-  </amp-action-macro>
-
-  <!-- Valid, optional arguments -->
-  <amp-action-macro id="action-macro-id" execute="amp-component.doSomething(foo=x,bar=y)"
-      arguments="x,y">
   </amp-action-macro>
 
 </body>
