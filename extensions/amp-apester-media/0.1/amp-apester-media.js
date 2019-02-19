@@ -34,6 +34,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
+console.log('hello world');
 /** @const */
 const TAG = 'amp-apester-media';
 /**
