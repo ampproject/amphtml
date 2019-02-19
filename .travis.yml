@@ -69,6 +69,7 @@ jobs:
         - node build-system/pr-check/visual-diff-tests.js
     - stage: test
       name: "Local Tests"
+      os: windows
       addons:
         chrome: stable
       script:
