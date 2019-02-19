@@ -695,21 +695,31 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
+   * @param {!Promise=} opt_onComplete Optional promise that's resolved when
+   *     the caller finishes opening the lightbox e.g. transition animations.
    * @return {!Promise}
    */
-  enterLightboxMode(opt_requestingElement) {
+  enterLightboxMode(opt_requestingElement, opt_onComplete) {
     this.viewer_.sendMessage(
         'requestFullOverlay', dict(), /* cancelUnsent */ true);
 
     this.enterOverlayMode();
-    this.hideFixedLayer();
+    // Prevents fixed elements from being displayed on top of lightbox.
+    this.fixedLayer_.setVisible(false);
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
           dev().assertElement(opt_requestingElement));
+
+      // TODO(choumx)
+      if (opt_onComplete) {
+        opt_onComplete.then(() => {
+          this.fixedLayer_.scanElement(opt_requestingElement,
+              /* opt_allowLightbox */ true);
+        });
+      }
     }
 
     return this.binding_.updateLightboxMode(true);
@@ -717,21 +727,24 @@ export class Viewport {
 
   /**
    * Instruct the viewport to leave lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
    * @return {!Promise}
    */
   leaveLightboxMode(opt_requestingElement) {
     this.viewer_.sendMessage(
         'cancelFullOverlay', dict(), /* cancelUnsent */ true);
 
-    this.showFixedLayer();
+    this.fixedLayer_.setVisible(true);
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
       this.maybeLeaveFieLightboxMode(
           dev().assertElement(opt_requestingElement));
+
+      // TODO(choumx)
+      this.fixedLayer_.scanElement(opt_requestingElement,
+          /* opt_allowLightbox */ false);
     }
 
     return this.binding_.updateLightboxMode(false);
@@ -882,20 +895,6 @@ export class Viewport {
    */
   hasScrolled() {
     return this.scrollCount_ > 0;
-  }
-
-  /**
-   * Hides the fixed layer.
-   */
-  hideFixedLayer() {
-    this.fixedLayer_.setVisible(false);
-  }
-
-  /**
-   * Shows the fixed layer.
-   */
-  showFixedLayer() {
-    this.fixedLayer_.setVisible(true);
   }
 
   /**

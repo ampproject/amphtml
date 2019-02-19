@@ -16,7 +16,12 @@
 
 import {Pass} from '../pass';
 import {Services} from '../services';
-import {closest, domOrderComparator, matches} from '../dom';
+import {
+  closest,
+  domOrderComparator,
+  matches,
+  scopedQuerySelectorAll,
+} from '../dom';
 import {
   computedStyle,
   getStyle,
@@ -42,7 +47,7 @@ const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
  *
  * @param {!Element} el
  */
-function lightboxOrDescendant(el) {
+function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
 }
 
@@ -100,6 +105,12 @@ export class FixedLayer {
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
+
+    /** @private {!Array<string>} */
+    this.fixedSelectors_ = null;
+
+    /** @private {!Array<string>} */
+    this.stickySelectors_ = null;
   }
 
   /**
@@ -120,13 +131,14 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
-    const stylesheets = this.ampdoc.getRootNode().styleSheets;
+    const root = this.ampdoc.getRootNode();
+    const stylesheets = root.styleSheets;
     if (!stylesheets) {
       return;
     }
 
-    const fixedSelectors = [];
-    const stickySelectors = [];
+    this.fixedSelectors_ = [];
+    this.stickySelectors_ = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
       // Rare but may happen if the document is being concurrently disposed.
@@ -143,14 +155,11 @@ export class FixedLayer {
               ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      this.discoverSelectors_(
-          stylesheet.cssRules, fixedSelectors, stickySelectors);
+      this.discoverSelectors_(stylesheet.cssRules, this.fixedSelectors_,
+          this.stickySelectors_);
     }
 
-    this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
-
-    // Sort tracked elements in document order.
-    this.sortInDomOrder_();
+    this.scanElement(root);
 
     if (this.elements_.length > 0) {
       this.observeHiddenMutations();
@@ -162,6 +171,19 @@ export class FixedLayer {
           ' as Google\'s because the fixed or sticky positioning might have' +
           ' slightly different layout.');
     }
+  }
+
+  /**
+   * TODO(choumx)
+   * @param {!Element} element
+   * @param {boolean=} allowLightbox
+   */
+  scanElement(element, allowLightbox = false) {
+    this.trySetupSelectorsNoInline(element, this.fixedSelectors_,
+        this.stickySelectors_, allowLightbox);
+
+    // Sort tracked elements in document order.
+    this.sortInDomOrder_();
 
     this.update();
   }
@@ -519,13 +541,18 @@ export class FixedLayer {
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
    * from inlining the function.
+   * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
+   * @param {boolean=} opt_allowLightbox
    * @private
    */
-  trySetupSelectorsNoInline(fixedSelectors, stickySelectors) {
+  trySetupSelectorsNoInline(
+    root, fixedSelectors, stickySelectors, opt_allowLightbox
+  ) {
     try {
-      this.setupSelectors_(fixedSelectors, stickySelectors);
+      this.setupSelectors_(root, fixedSelectors, stickySelectors,
+          opt_allowLightbox);
     } catch (e) {
       // Fail quietly.
       dev().error(TAG, 'Failed to setup fixed elements:', e);
@@ -535,29 +562,31 @@ export class FixedLayer {
   /**
    * Calls `setupElement_` for up to 10 elements matching each selector
    * in `fixedSelectors` and for all selectors in `stickySelectors`.
+   * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
+   * @param {boolean=} opt_allowLightbox
    * @private
    */
-  setupSelectors_(fixedSelectors, stickySelectors) {
+  setupSelectors_(root, fixedSelectors, stickySelectors, opt_allowLightbox) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          fixedSelector);
+      const elements = root.querySelectorAll(fixedSelector);
       for (let j = 0; j < elements.length; j++) {
         if (this.elements_.length > 10) {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
-        this.setupElement_(elements[j], fixedSelector, 'fixed');
+        this.setupElement_(elements[j], fixedSelector, 'fixed',
+            /* opt_forceTransfer */ undefined, opt_allowLightbox);
       }
     }
     for (let i = 0; i < stickySelectors.length; i++) {
       const stickySelector = stickySelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          stickySelector);
+      const elements = root.querySelectorAll(stickySelector);
       for (let j = 0; j < elements.length; j++) {
-        this.setupElement_(elements[j], stickySelector, 'sticky');
+        this.setupElement_(elements[j], stickySelector, 'sticky',
+            /* opt_forceTransfer */ undefined, opt_allowLightbox);
       }
     }
   }
@@ -586,16 +615,25 @@ export class FixedLayer {
    * @param {!Element} element
    * @param {string} selector
    * @param {string} position
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the transfer layer.
+   * @param {boolean=} opt_forceTransfer If true, then the element will
+   *    be forcibly transferred to the transfer layer.
+   * @param {boolean=} opt_allowLightbox
    * @private
    */
-  setupElement_(element, selector, position, opt_forceTransfer) {
+  setupElement_(
+    element, selector, position, opt_forceTransfer, opt_allowLightbox
+  ) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
 
+    if (isLightbox(element)) {
+      return;
+    }
     // TODO(jridgewell, #19149): This should be an official API.
-    if (closest(element, lightboxOrDescendant)) {
+    if (!opt_allowLightbox && closest(element, isLightbox)) {
+      // TODO(choumx): Transferred lightbox descendants are not reachable since
+      // no longer a child of amp-lightbox.
+      this.removeElement_(element);
       return;
     }
 

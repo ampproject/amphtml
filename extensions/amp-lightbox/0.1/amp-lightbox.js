@@ -40,6 +40,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import { Deferred } from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -266,8 +267,9 @@ class AmpLightbox extends AMP.BaseElement {
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
 
-    this.getViewport().enterLightboxMode(this.element)
-        .then(() => this.finalizeOpen_());
+    const {promise, resolve} = new Deferred();
+    this.getViewport().enterLightboxMode(this.element, promise)
+        .then(() => this.finalizeOpen_(resolve));
   }
 
   /** @override */
@@ -295,9 +297,10 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Function} callback Called when open animation completes.
    * @private
    */
-  finalizeOpen_() {
+  finalizeOpen_(callback) {
     const {element} = this;
 
     const {durationSeconds, openStyle, closedStyle} =
@@ -340,10 +343,16 @@ class AmpLightbox extends AMP.BaseElement {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
     }
+
+    const onAnimationEnd = () => {
+      this.boundReschedule_();
+      callback();
+    };
+    element.addEventListener('transitionend', onAnimationEnd);
+    element.addEventListener('animationend', onAnimationEnd);
+
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    element.addEventListener('transitionend', this.boundReschedule_);
-    element.addEventListener('animationend', this.boundReschedule_);
     this.scheduleLayout(container);
     this.scheduleResume(container);
     this.triggerEvent_(LightboxEvents.OPEN);
@@ -553,7 +562,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   forEachVisibleChild_(pos, callback) {
     const containerHeight = this.getSize_().height;
-    const descendants = this.getComponentDescendants_();
+    const descendants = this.getComponentDescendants_(/* opt_refresh */ true);
     for (let i = 0; i < descendants.length; i++) {
       const descendant = descendants[i];
       let offsetTop = 0;
