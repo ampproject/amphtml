@@ -300,7 +300,7 @@ We've introduced the `amp-list-load-more` experiment as an implementation for pa
 
 ```
 
-For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](test/manual/amp-list/infinite-scroll-1.amp.html).
+For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
 
 ### Attributes
 #### load-more (mandatory)
