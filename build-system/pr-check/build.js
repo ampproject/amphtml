@@ -57,6 +57,7 @@ function main() {
     timedExecOrDie('gulp build --fortesting');
     uploadBuildOutput(FILENAME);
   } else {
+    printChangeSummary(FILENAME);
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
