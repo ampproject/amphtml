@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 370
+min_validator_revision_required: 375
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 816
+spec_file_revision: 822
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -93,15 +93,35 @@ tags: {
 
 # 4.1 The root element
 # 4.1.1 The html element
-tags: {  # AMP
+tags: {  # HTML tag for non-transformed AMP.
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "HTML"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
+}
+tags: {  # HTML tag for transformed AMP.
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "HTML"
+  spec_name: "html (transformed)"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "i-amphtml-layout"
+    value: ""
+  }
+  attrs: {
+    name: "i-amphtml-no-boilerplate"
+    value: ""
+  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
@@ -935,9 +955,9 @@ tags: {
 tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom"
-  disabled_by: "transformed"
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
@@ -1021,9 +1041,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {  # Special custom 'author' spreadsheet for transformed AMP
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1036,7 +1056,6 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1262,9 +1281,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -1285,9 +1304,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1296,7 +1315,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -1350,9 +1368,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "NOSCRIPT"
@@ -1372,9 +1390,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1384,7 +1402,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
@@ -1437,9 +1454,9 @@ tags: {
 }
 tags: {
   html_format: AMP
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style[amp-runtime] (transformed)"
-  enabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4625,6 +4642,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "TEXTAREA"
   attrs: { name: "autocomplete" }
+  attrs: {
+    name: "autoexpand"
+    requires_extension: "amp-form"
+  }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }
@@ -4764,7 +4785,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4795,7 +4819,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4822,7 +4849,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -4850,7 +4880,10 @@ tags: {
     value_casei: "amp-rtc"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -4888,9 +4921,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4899,9 +4932,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
@@ -5131,7 +5164,6 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
-
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
@@ -5181,6 +5213,25 @@ tags: {  # <amp-pixel>
   }
 }
 
+# Transformed AMP specific tags.
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "I-AMPHTML-SIZER"
+  explicit_attrs_only: true
+  attrs: {
+    name: "style"
+    mandatory: true
+    blacklisted_value_regex: "!important"
+    css_declaration: {
+      name: "display"
+      value_casei: "block"
+    }
+    css_declaration: { name: "padding-top" }
+  }
+}
+
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
 # depending on amp layout the validator will examine these fields and
@@ -5206,7 +5257,10 @@ attr_lists: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     value_casei: "text/javascript"
@@ -5817,6 +5871,27 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  # <amp-sidebar>
+  attrs: {
+    name: "autoscroll"
+    requires_ancestor {
+      marker: AUTOSCROLL
+    }
+  }
+  # Transformed AMP
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-layout"
+    value_casei: "container"
+    value_casei: "fill"
+    value_casei: "fixed"
+    value_casei: "fixed-height"
+    value_casei: "flex-item"
+    value_casei: "fluid"
+    value_casei: "intrinsic"
+    value_casei: "nodisplay"
+    value_casei: "responsive"
+  }
 }
 
 # Error Specificity: Used in the verbose validator to select between multiple

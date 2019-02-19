@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Allows publishers to easily integrate with the LaterPay micropayments platform.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-access-laterpay`
+# amp-access-laterpay
+Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Scripts</strong></td>
     <td>
@@ -46,7 +50,15 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-access-laterpay` component uses AMP Access internally to provide a behavior similar to AMP Access, but tailored for usage with the LaterPay service. <a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of $5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
+<a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of $5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
+
+If you're integrating LaterPay via the [Connector Script integration](https://docs.laterpay.net/connector/) you won't be able to use that integration on AMP pages. `amp-access-laterpay` is analogous to Connector Script, providing a similar set of features, but built for AMP pages.
+
+It's also possible to sell content via LaterPay simply using `amp-access-laterpay` as the sole integration method.
+
+The `amp-access-laterpay` component uses AMP Access internally to provide a behavior similar to AMP Access, but tailored for usage with the LaterPay service.
+
+If you have your own paywall service that you'd like to use with AMP Access and would like to use it together with LaterPay on the same page, it's <a href="#using-amp-access-laterpay-together-with-amp-access ">also possible to do so</a>.
 
 The `amp-access-laterpay` component does not require an authorization or pingback configuration, because it is pre-configured to work with the LaterPay service. It also does not require manual setup of login links.
 
@@ -250,6 +262,69 @@ The following message keys can be translated or customized, but be aware that th
     <td></td>
   </tr>
 </table>
+
+## Analytics
+
+Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](https://www.ampproject.org/docs/reference/components/amp-access#integration-with-amp-analytics) sent by `amp-access`.
+
+The examples at https://ampexample.laterpay.net/ are all configured to send these analytics events if you'd like to see a more complete example as to how this would look in practice.
+
+## Using AMP Access LaterPay together with AMP Access
+
+If you have an existing subscription system and you intend to use LaterPay only for individual article sales, it's possible to have both sale methods coexist in the same page, using both AMP Access and AMP Access LaterPay together.
+
+First of, please refer to the [AMP Access](https://www.ampproject.org/docs/reference/components/amp-access) documentation to learn how to configure AMP Access with your existing paywall.
+
+The [multiple providers](https://www.ampproject.org/docs/reference/components/amp-access#multiple-access-providers) section explains how to setup multiple providers with namespaces.
+
+When using it with LaterPay and an existing paywall integration, the necessary configuration can look something like this:
+
+```html
+<script id="amp-access" type="application/json">
+  [
+    {
+      "vendor": "laterpay",
+      "laterpay": {
+        "region": "us"
+      },
+      "namespace": "laterpay"
+    },
+    {
+      "authorization":
+          "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
+      "pingback":
+          "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
+      "login":
+          "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
+      "authorizationFallbackResponse": {"error": true},
+      "namespace": "publishername"
+    }
+  ]
+</script>
+```
+
+Where as the content access markup could end up looking like this:
+
+
+```html
+<section amp-access="NOT error AND NOT laterpay.access AND NOT publishername.access" amp-access-hide>
+  <p>
+    <a on="tap:amp-access.login-publishername">Login here to access your PublisherName subscription.</a>
+  </p>
+
+  <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
+</section>
+
+<section amp-access="error" amp-access-hide class="error-section">
+  Oops... Something broke.
+</section>
+
+<div amp-access="laterpay.access OR publishername.access" amp-access-hide>
+  <p>...article content...</p>
+</div>
+```
+
+You can find a more complete example at https://ampexample.laterpay.net/dual-amp-access.html
 
 ## Related Documentation
 

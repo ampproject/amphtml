@@ -6,12 +6,8 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-cross-fader" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
   <style amp-custom>
-    body {
-      max-width: 527px;
-    }
-
     amp-carousel img {
       object-fit: cover;
     }
@@ -20,16 +16,20 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>A cross-fader</h1>
-  <amp-cross-fader width="300" height="200" layout="responsive" side-slide-count="1">
-    <amp-img src="./1988_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./1992_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./1996_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2000_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2004_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2008_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2012_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2016_large.png" width=300 height=200 layout="responsive"></amp-img>
+  <h1>A Basic carousel, with custom arrows and looping</h1>
+  <amp-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="true">
+    <amp-img src="./img/redgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/greengradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/bluegradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/orangegradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/tealgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/lemonyellowgradient.png" layout="flex-item"></amp-img>
+    <amp-img src="./img/lilacgradient.png" layout="flex-item"></amp-img>
+    <button slot="next-arrow">Next</button>
+    <button slot="prev-arrow">Prev</button>
   </amp-carousel>
+  <button on="tap:carousel-1.prev()">Prev</button>
+  <button on="tap:carousel-1.next()">Next</button>
+  <button on="tap:carousel-1.goToSlide(index = 1)">Slide 2 (1 indexed)</button>
 </body>
 </html>

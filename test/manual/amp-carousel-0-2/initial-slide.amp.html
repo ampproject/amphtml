@@ -2,16 +2,12 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>Basic Carousel</title>
+  <title>Initial index carousel</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-cross-fader" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
   <style amp-custom>
-    body {
-      max-width: 527px;
-    }
-
     amp-carousel img {
       object-fit: cover;
     }
@@ -20,16 +16,31 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>A cross-fader</h1>
-  <amp-cross-fader width="300" height="200" layout="responsive" side-slide-count="1">
-    <amp-img src="./1988_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./1992_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./1996_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2000_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2004_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2008_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2012_large.png" width=300 height=200 layout="responsive"></amp-img>
-    <amp-img src="./2016_large.png" width=300 height=200 layout="responsive"></amp-img>
+  <h1>A carousel with an initial index of "2"</h1>
+  <amp-carousel id="carousel-1" width="300" height="200" layout="responsive"
+      slide="(min-width: 800px) 3, 2">
+    <!-- wrapping divs to workaround https://bugs.webkit.org/show_bug.cgi?id=191816 -->
+    <div>
+      <amp-img src="./img/redgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/greengradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/bluegradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/orangegradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/tealgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/lemonyellowgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/lilacgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
   </amp-carousel>
 </body>
 </html>

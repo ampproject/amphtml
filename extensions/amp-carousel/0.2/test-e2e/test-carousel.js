@@ -24,7 +24,7 @@ describes.endtoend('AMP carousel', {
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
-  const pageWidth = 600;
+  const pageWidth = 800;
   const pageHeight = 600;
   let controller;
   let ampDriver;
@@ -113,8 +113,8 @@ describes.endtoend('AMP carousel', {
 
   it('should have the correct scroll position when resizing', async() => {
     // Note: 513 seems to be the smallest settable width.
-    controller.setWindowRect({
-      width: 600,
+    await controller.setWindowRect({
+      width: 800,
       height: 600,
     });
 
@@ -125,11 +125,11 @@ describes.endtoend('AMP carousel', {
     await waitForCarouselImg(controller, 1);
     await expect(controller.getElementRect(firstSlide)).to.include({
       'x': 0,
-      'width': 600,
+      'width': 800,
     });
 
-    controller.setWindowRect({
-      width: 700,
+    await controller.setWindowRect({
+      width: 900,
       height: 600,
     });
 
@@ -137,7 +137,7 @@ describes.endtoend('AMP carousel', {
     // that the carousel moves this to the correct position again.
     await expect(controller.getElementRect(firstSlide)).to.include({
       'x': 0,
-      'width': 700,
+      'width': 900,
     });
     await controller.takeScreenshot('screenshots/after-resize.png');
   });

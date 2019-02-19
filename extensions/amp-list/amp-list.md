@@ -1,3 +1,12 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - stories
+teaser:
+  text: Dynamically downloads data and creates list items using a template.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,16 +23,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-list"></a> `amp-list`
+# amp-list
 
-[TOC]
+Fetches content dynamically from a CORS JSON endpoint and renders it
+using a supplied template.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
@@ -286,8 +291,8 @@ We've introduced the `amp-list-load-more` experiment as an implementation for pa
 
 #### Sample Usage
 
-```
-<amp-list load-more src="https://my.rest.endpoint/" ...>
+```html
+<amp-list load-more="auto" src="https://my.rest.endpoint/" width="100" height="200">
   <template type="amp-mustache">
   // ...
   </template>
@@ -310,22 +315,25 @@ This attribute specifies a field name in the returned data that will give the ur
 `<amp-list>` with the `load-more` attribute contains these UI elements: a load-more button, a loader, a load-failed element, and optionally an end-cap marking the end of the list. These elements can be customized by providing `<amp-list-load-more>` elements as children of `<amp-list>` with the following attributes:
 
 #### load-more-button
-An `<amp-list-load-more>` element with the `load-more-button` attribute that a button with the `load-more-clickable` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
+An `<amp-list-load-more>` element with the `load-more-button` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
 
 ##### Example:
 
-```
-<amp-list load-more src="https://www.load.more/" ...>
-  <div load-more-button>
-    See More /* My custom see more button */
-  </div>
+```html
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+  ...
+  <amp-list-load-more load-more-button>
+    <button>See More</button> /* My custom see more button */
+  </amp-list-load-more>
 </amp-list>
 ```
 It can be templated via `amp-mustache`.
 
 ##### Example:
-```
-<amp-list load-more src="https://www.load.more/" ...>
+
+```html
+<amp-list load-more="auto" width="100" height="500" src="https://www.load.more.example.com/">
+  ...
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
       Showing {{#count}} out of {{#total}} items
@@ -339,9 +347,10 @@ It can be templated via `amp-mustache`.
 
 #### load-more-loading
 This element is a loader that will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the `<amp-list>` are still loading). This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-loading`. Example below:
-```
-<amp-list load-more src="https://www.load.more/" ...>
-  <amp-list-load-more> load-more-loading>
+```html
+<amp-list load-more=auto src="https://www.load.more.example.com/" width="400" height="800">
+  ...
+  <amp-list-load-more load-more-loading>
     <svg>...</svg> /* My custom loader */
   </amp-list-load-more>
 </amp-list>
@@ -349,30 +358,25 @@ This element is a loader that will be displayed if the user reaches the end of t
 
 #### load-more-failed
 A `<amp-list-load-more>` element containing the `load-more-failed` attribute that contains a button with the `load-more-clickable` attribute that will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-failed`. Example below:
-```
 
-<amp-list-load-more load-more-failed class="i-amphtml-default-ui">
-  <div class="i-amphtml-list-load-more-message">
-    Unable to Load More
-  </div>
-  <button load-more-clickable
-    class="i-amphtml-list-load-more-button
-            i-amphtml-list-load-more-button-has-icon
-            i-amphtml-list-load-more-button-small"
-  >
-    <div class="i-amphtml-list-load-more-icon"></div>
-    <label>Retry</label>
-  </button>
-</amp-list-load-more>
+```html
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="200" height="500">
+  ...
+  <amp-list-load-more load-more-failed>
+    <button>Unable to Load More</button>
+  </amp-list-load-more>
+</amp-list>
 ```
 
 #### load-more-end
 This element is not provided by default, but if a `<amp-list-load-more>` element containing the `load-more-end` attribute is attached to `<amp-list>` as a child element, this element will be displayed at the bottom of the `<amp-list>` if there are no more items.  This element can be templated via `amp-mustache`. Example below:
-```
-<amp-list load-more src="https://www.load.more/" ...>
-  <amp-list-load-more> load-more-end>
+
+```html
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="200" height="500">
+  ...
+  <amp-list-load-more load-more-end>
     Congratulations! You've reached the end. /* Custom load-end element */
-  </amp-list-load-more>>
+  </amp-list-load-more>
 </amp-list>
 ```
 
