@@ -21,6 +21,7 @@
  * This is run during the CI stage = build; job = build.
  */
 
+const colors = require('ansi-colors');
 const {
   areValidBuildTargets,
   determineBuildTargets} = require('./build-targets');
@@ -35,6 +36,7 @@ const {
   uploadBuildOutput} = require('./utils');
 const {isTravisPullRequestBuild} = require('../travis');
 const FILENAME = 'build.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -69,8 +71,9 @@ function main() {
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
-      console.log('Skipping build job because this commit does not affect ' +
-          'the runtime, build system, test files, or the dev dashboard');
+      console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
+          'because this commit does not affect the runtime, ' +
+          'build system, test files, or the dev dashboard');
     }
   }
 
