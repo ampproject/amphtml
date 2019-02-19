@@ -20,6 +20,7 @@ import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
 import {dev, devAssert, rethrowAsync} from '../log';
+import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
 
@@ -150,12 +151,20 @@ export class Vsync {
 
     /** @private {!JankMeter} */
     this.jankMeter_ = new JankMeter(this.win);
-  }
 
-  /** @private */
-  onVisibilityChanged_() {
-    if (this.scheduled_) {
-      this.forceSchedule_();
+    /** @private {MutationObserver} */
+    this.mutationObserver_ = null;
+    if (getMode().localDev && !getMode().test &&
+        this.ampdocService_.isSingleDoc()) {
+      this.mutationObserver_ = new MutationObserver(
+          this.mutationHandler_.bind(this));
+      const doc = this.ampdocService_.getAmpDocIfAvailable();
+      this.mutationObserver_.observe(doc, {
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true,
+      });
     }
   }
 
@@ -396,7 +405,9 @@ export class Vsync {
       tasks_: tasks,
       states_: states,
       nextFrameResolver_: resolver,
+      mutationObserver_: mo,
     } = this;
+
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering
@@ -410,11 +421,23 @@ export class Vsync {
         }
       }
     }
+
+    if (mo) {
+      // Mutations that happened before the mutation phase started are bad.
+      // Process those mutations now.
+      this.mutationHandler_(mo.takeRecords());
+    }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
         callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
+    if (mo) {
+      // Mutations that happened inside the mutate phase are good. Clear these
+      // mutations from the MutationObserver so they are not reported.
+      mo.takeRecords();
+    }
+
     // Swap last arrays into double buffer.
     this.nextTasks_ = tasks;
     this.nextStates_ = states;
@@ -443,6 +466,26 @@ export class Vsync {
       lastTime = now + timeToCall;
       this.win.setTimeout(fn, timeToCall);
     };
+  }
+
+  /**
+   * @param {!Array<!MutationRecord>} records
+   * @private
+   */
+  mutationHandler_(records) {
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      const {target} = record;
+      dev().error('VSYNC', `Detected ${record.type} mutation on ` +
+        `${target.tagName} outside of mutation phase: %s`, target);
+    }
+  }
+
+  /** @private */
+  onVisibilityChanged_() {
+    if (this.scheduled_) {
+      this.forceSchedule_();
+    }
   }
 }
 
