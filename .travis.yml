@@ -57,6 +57,11 @@ jobs:
           packages:
             - protobuf-compiler
             - python-protobuf
+    - stage: build
+      name: "Dist"
+      if: type != pull_request
+      script:
+        - node build-system/pr-check/dist.js      
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
       addons:
