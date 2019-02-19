@@ -903,7 +903,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const {width, height} = imageViewer.getImageBoxWithOffset();
+          const {imageBoxWithOffset = imageViewer.getImageBoxWithOffset();
+
+          const width = imageBoxWithOffset ? imageBoxWithOffset.width : null;
+          const height = imageBoxWithOffset ? imageBoxWithOffset.height : null;
+
           // Check if our imageBox has a width or height. We may be in the
           // gallery view if not, and we do not want to animate.
           if (!width || !height) {
