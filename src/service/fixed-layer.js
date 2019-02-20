@@ -112,22 +112,69 @@ export class FixedLayer {
   }
 
   /**
-   * @param {boolean} visible
+   * Informs FixedLayer that a lightbox was opened.
+   *
+   * - FixedLayer hides any transfer layer elements that may be overlayed on
+   *   top of the lightbox, which is confusing UX. When `onComplete` resolves,
+   * - FixedLayer scans and transfers any fixed descendants of `lightbox`.
+   *   This enables unjanky fixed elements in lightboxes on iOS.
+   *
+   * @param {!Element} lightbox
+   * @param {!Promise} onComplete Promise that resolves when "enter lightbox"
+   *   UX completes e.g. transition animations.
    */
-  setVisible(visible) {
+  enterLightbox(lightbox, onComplete) {
+    const isLightboxExperiment =
+        isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox');
+
+    this.setLightboxMode_(true, isLightboxExperiment);
+
+    if (isLightboxExperiment) {
+      onComplete.then(() => {
+        this.scanElement_(lightbox, /* lightboxMode */ true);
+      });
+    }
+  }
+
+  /**
+   * Reverses the actions performed by `enterLightbox()`.
+   */
+  leaveLightbox() {
+    const isLightboxExperiment =
+        isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox');
+
+    this.setLightboxMode_(false, isLightboxExperiment);
+
+    if (isLightboxExperiment) {
+      const fes = remove(this.elements_, fe => fe.lightboxed);
+      this.returnFixedElements_(fes);
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
+    }
+  }
+
+  /**
+   * @param {boolean} on
+   * @param {boolean=} opt_isLightboxExperiment
+   * @private
+   */
+  setLightboxMode_(on, opt_isLightboxExperiment) {
     if (!this.transferLayer_) {
       return;
     }
     this.vsync_.mutate(() => {
       const root = this.transferLayer_.getRoot();
-      if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
-        if (visible) {
-          root.removeAttribute('i-amphtml-hidden');
+      if (opt_isLightboxExperiment) {
+        if (on) {
+          root.setAttribute('i-amphtml-lightbox', '');
         } else {
-          root.setAttribute('i-amphtml-hidden', '');
+          root.removeAttribute('i-amphtml-lightbox');
         }
       } else {
-        setStyle(root, 'visibility', visible ? 'visible' : 'hidden');
+        // Legacy behavior is to hide transfer layer when entering lightbox
+        // and unhide when exiting.
+        setStyle(root, 'visibility', on ? 'hidden' : 'visible');
       }
     });
   }
@@ -199,21 +246,6 @@ export class FixedLayer {
     this.sortInDomOrder_();
 
     this.update();
-  }
-
-  /**
-   * @param {!Element} lightbox
-   */
-  enterLightbox(lightbox) {
-    this.scanElement_(lightbox, /* lightboxMode */ true);
-  }
-
-  /**
-   *
-   */
-  leaveLightbox() {
-    const fes = remove(this.elements_, fe => fe.lightboxed);
-    this.removeFes_(fes);
   }
 
   /**
@@ -361,15 +393,19 @@ export class FixedLayer {
    * @param {!Element} element
    */
   removeElement(element) {
-    const fes = this.removeElement_(element);
-    this.removeFes_(fes);
+    const fes = this.tearDownElement_(element);
+    this.returnFixedElements_(fes);
+    if (!this.elements_.length) {
+      this.unobserveHiddenMutations_();
+    }
   }
 
   /**
+   * Returns fixed elements from the transfer layer.
    * @param {!Array<ElementDef>} fes
    * @private
    */
-  removeFes_(fes) {
+  returnFixedElements_(fes) {
     if (fes.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
         for (let i = 0; i < fes.length; i++) {
@@ -379,9 +415,6 @@ export class FixedLayer {
           }
         }
       });
-      if (!this.elements_.length) {
-        this.unobserveHiddenMutations_();
-      }
     }
   }
 
@@ -417,7 +450,7 @@ export class FixedLayer {
     /** @type {!Array<!ElementDef>} */
     const toRemove = this.elements_.filter(
         fe => !this.ampdoc.contains(fe.element));
-    toRemove.forEach(fe => this.removeElement_(fe.element));
+    toRemove.forEach(fe => this.tearDownElement_(fe.element));
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -712,13 +745,14 @@ export class FixedLayer {
   }
 
   /**
-   * Removes element from the fixed layer.
+   * Undoes set up by removing element record and and resets `top` style.
+   * Does _not_ return the element from the transfer layer.
    *
    * @param {!Element} element
    * @return {!Array<!ElementDef>}
    * @private
    */
-  removeElement_(element) {
+  tearDownElement_(element) {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
@@ -1020,7 +1054,7 @@ class TransferLayerBody {
     // Identify lightboxed elements so they can be visible when the transfer
     // layer is "hidden", and hidden with the transfer layer is "visible".
     if (fe.lightboxed) {
-      element.classList.add('i-amphtml-lightboxed');
+      element.classList.add('i-amphtml-lightbox-element');
     }
 
     element.parentElement.replaceChild(fe.placeholder, element);
@@ -1048,7 +1082,7 @@ class TransferLayerBody {
     dev().fine(TAG, 'return from fixed:', fe.id, element);
 
     if (fe.lightboxed) {
-      element.classList.remove('i-amphtml-lightboxed');
+      element.classList.remove('i-amphtml-lightbox-element');
     }
 
     if (this.doc_.contains(element)) {

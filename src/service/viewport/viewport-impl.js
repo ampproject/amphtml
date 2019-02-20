@@ -706,20 +706,11 @@ export class Viewport {
         'requestFullOverlay', dict(), /* cancelUnsent */ true);
 
     this.enterOverlayMode();
-    // Prevents fixed elements from being displayed on top of lightbox.
-    this.fixedLayer_.setVisible(false);
+    this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
           dev().assertElement(opt_requestingElement));
-
-      // TODO(choumx)
-      if (opt_onComplete) {
-        opt_onComplete.then(() => {
-          this.fixedLayer_.enterLightbox(opt_requestingElement,
-              /* opt_allowLightbox */ true);
-        });
-      }
     }
 
     return this.binding_.updateLightboxMode(true);
@@ -735,15 +726,12 @@ export class Viewport {
     this.viewer_.sendMessage(
         'cancelFullOverlay', dict(), /* cancelUnsent */ true);
 
-    this.fixedLayer_.setVisible(true);
+    this.fixedLayer_.leaveLightbox();
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
       this.maybeLeaveFieLightboxMode(
           dev().assertElement(opt_requestingElement));
-
-      // TODO(choumx)
-      this.fixedLayer_.leaveLightbox();
     }
 
     return this.binding_.updateLightboxMode(false);
