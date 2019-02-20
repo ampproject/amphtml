@@ -14,6 +14,50 @@
  * limitations under the License.
  */
 
+
+/** @enum {string} */
+const Environments = {
+  SINGLE: 'single',
+  VIEWER_DEMO: 'viewer-demo',
+  SHADOW_DEMO: 'shadow-demo',
+};
+
+const AmpEnvironments = {
+  [Environments.SINGLE]: {
+    ready(unusedController) {
+      return Promise.resolve();
+    },
+
+    url(url) {
+      return url;
+    },
+  },
+
+  [Environments.VIEWER_DEMO]: {
+    ready(controller) {
+      return controller.findElement('#AMP_DOC_dynamic[data-loaded]')
+          .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return `http://localhost:8000/examples/viewer.html?${url}`;
+    },
+  },
+
+  [Environments.SHADOW_DEMO]: {
+    async ready(controller) {
+      // TODO(cvializ): this is a HACK
+      const shadowRoot = await controller.findElement(
+          'amp-doc-host[style="visibility: visible;"]');
+      await controller.switchToShadow(shadowRoot);
+    },
+
+    url(url) {
+      return `http://localhost:8000/pwa#href=${url}`;
+    },
+  },
+};
+
 /**
  * Provides AMP-related utilities for E2E Functional Tests.
  */
@@ -37,8 +81,22 @@ class AmpDriver {
       window.AMP.toggleExperiment(name, toggle);
     }, name, toggle);
   }
+
+  async navigateToEnvironment(environment, url) {
+    const ampEnv = AmpEnvironments[environment];
+    await this.controller_.navigateTo(ampEnv.url(url));
+    if (environment == Environments.VIEWER_DEMO) {
+      await AmpEnvironments[environment].ready(this.controller_);
+    }
+  }
+
+  async serveMode(mode) {
+    await this.controller_.navigateTo(
+        `http://localhost:8000/serve_mode=${mode}`);
+  }
 }
 
 module.exports = {
   AmpDriver,
+  Environments,
 };

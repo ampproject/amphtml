@@ -16,7 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
-const {AmpDriver} = require('./amp-driver');
+const {AmpDriver, Environments} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
@@ -183,7 +183,7 @@ class AmpPageFixture {
   }
 
   /** @override */
-  setup(env) {
+  async setup(env) {
     // TODO(estherkim): implement sessions
     // TODO(estherkim): ensure tests are in a sandbox
     // See https://w3c.github.io/webdriver/#sessions
@@ -204,21 +204,71 @@ class AmpPageFixture {
     capabilities.set('chromeOptions', chromeOptions);
 
     const builder = new Builder().withCapabilities(capabilities);
-    return builder.build().then(driver => {
-      const controller = new SeleniumWebDriverController(driver);
-      env.controller = controller;
-      env.ampDriver = new AmpDriver(controller);
-      this.driver_ = driver;
-    });
+    const driver = await builder.build();
+    const controller = new SeleniumWebDriverController(driver);
+    const ampDriver = new AmpDriver(controller);
+
+    env.controller = controller;
+    env.ampDriver = ampDriver;
+    this.driver_ = driver;
+
+    const {
+      fixture,
+      experiments,
+      environment,
+      serveMode,
+    } = this.spec;
+
+    await setServeMode(ampDriver, serveMode);
+    await toggleExperiments(ampDriver, fixture, experiments);
+    await ampDriver.navigateToEnvironment(environment, fixture);
   }
 
   /** @override */
-  async teardown(unusedEnv) {
+  async teardown(env) {
+    const {controller} = env;
+    if (controller) {
+      await controller.switchToParent();
+    }
     if (this.driver_) {
       await this.driver_.quit();
     }
     this.driver_ = null;
   }
+}
+
+/**
+ * Set the serve mode on the AMP dev server
+ * @param {!AmpDriver} ampDriver
+ * @param {string} serveMode cdn, compiled, uncompiled
+ */
+function setServeMode(ampDriver, serveMode) {
+  if (!serveMode) {
+    return Promise.resolve();
+  }
+
+  return ampDriver.serveMode(serveMode);
+}
+
+/**
+ * Toggle the given experiments for the given fixture URL domain.
+ * @param {!AmpDriver} ampDriver
+ * @param {string} fixture
+ * @param {!Array<string>} experiments
+ */
+function toggleExperiments(ampDriver, fixture, experiments) {
+  if (!Array.isArray(experiments)) {
+    return Promise.resolve();
+  }
+
+  const navigate =
+      ampDriver.navigateToEnvironment(Environments.SINGLE, fixture);
+  return navigate.then(() => {
+    const togglePromises = experiments.map(experiment => {
+      return ampDriver.toggleExperiment(experiment, true);
+    });
+    return Promise.all(togglePromises);
+  });
 }
 
 module.exports = {

@@ -21,13 +21,16 @@ import {
 } from './helpers';
 
 describes.endtoend('AMP carousel', {
+  fixture: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
+  experiments: ['amp-carousel-v2'],
+  serveMode: 'compiled',
+  environment: 'viewer-demo', // or 'single' or 'shadow'
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
   const pageWidth = 800;
   const pageHeight = 600;
   let controller;
-  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -35,18 +38,11 @@ describes.endtoend('AMP carousel', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo('http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
 
     await controller.setWindowRect({
       width: pageWidth,
       height: pageHeight,
     });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html');
   });
 
   it('should render correctly', async() => {
