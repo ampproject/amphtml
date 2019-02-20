@@ -50,6 +50,12 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
+
+    /**
+     * The current width used by the automatically generated sizes attribute
+     * @private {number}
+     * */
+    this.sizesWidth_ = 0;
   }
 
   /** @override */
@@ -60,6 +66,13 @@ export class AmpImg extends BaseElement {
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    }
+  }
+
+  /** @override */
+  onMeasureChanged() {
+    if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
+      this.maybeGenerateSizes_();
     }
   }
 
@@ -132,7 +145,7 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    if (isExperimentOn(this.win, 'amp-img-auto-sizes')) {
+    if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
       this.maybeGenerateSizes_();
     }
     this.applyFillContent(this.img_, true);
@@ -141,10 +154,14 @@ export class AmpImg extends BaseElement {
   }
 
   /**
-   * TODO: auto-generate sizes
+   * This function automatically generates sizes for amp-imgs without
+   * the sizes attribute.
    * @private
    */
   maybeGenerateSizes_() {
+    if (!this.img_) {
+      return;
+    }
     // No need to generate sizes if already present.
     const sizes = this.element.getAttribute('sizes');
     if (sizes && sizes !== 'auto') {
@@ -157,43 +174,35 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    // Basic implementation
     const width = this.getLayoutWidth();
     const viewportWidth = this.getViewport().getWidth();
-    let defaultSize = '100vw';
-    let entry = `(max-width: ${viewportWidth}px) ${width}px, `;
 
-    // Add one entry for the current viewport size
-    const layout = this.getLayout();
-    switch (layout) {
-      // For fixed layout, the final width will be the same regardless
-      // of viewport size
-      case Layout.FIXED:
-        defaultSize = width + 'px';
-        break;
-      // These layouts will always fill the parent with, and keep the same
-      // ratio with the viewport width unless there are media queries.
-      case Layout.FIXED_HEIGHT:
-      case Layout.FLEX_ITEM:
-      case Layout.FILL:
-      case Layout.RESPONSIVE:
+    const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
+    const ratio = Math.round(width * 100 / viewportWidth);
 
-        const ratio = width / viewportWidth * 100;
-        entry = `(max-width: ${viewportWidth}px) ${ratio}vw, `;
-        // TODO(cathyxz): handle media queries (is it efficient to getStyles?).
-        // TODO(cathyxz): rerun this onMeasureChanged?
+    let defaultSize = width + 'px';
 
-        break;
-      case Layout.INTRINSIC:
-        // TODO: see if it's possible to implement reasonable sizes for this.
-        // Likely not because height is not bounded by viewport dimensions.
-        break;
-      default:
-        break;
+    if (this.getLayout() !== Layout.FIXED) {
+      defaultSize = ratio > 100 ?
+        ratio + 'vw' : '100vw';
+    }
+    const generatedSizes = entry + defaultSize;
+
+    if (this.shouldSetSizes_()) {
+      this.img_.setAttribute('sizes', generatedSizes);
+      this.sizesWidth_ = width;
+    }
+  }
+
+  /**
+   * @private
+   */
+  shouldSetSizes_() {
+    if (!this.img_.hasAttribute('sizes')) {
+      return true;
     }
 
-    const generatedSizes = entry + defaultSize;
-    this.img_.setAttribute('sizes', generatedSizes);
+    return this.getLayoutWidth() > this.sizesWidth_;
   }
 
   /** @override */
