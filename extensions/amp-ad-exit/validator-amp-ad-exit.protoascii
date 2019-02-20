@@ -29,10 +29,7 @@ tags: {  # <amp-ad-exit>
   tag_name: "AMP-AD-EXIT"
   requires_extension: "amp-ad-exit"
   requires: "amp-ad-exit configuration JSON"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id"
   attr_lists: "extended-amp-global"
   child_tags: {
     mandatory_num_child_tags: 1

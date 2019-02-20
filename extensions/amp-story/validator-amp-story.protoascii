@@ -163,10 +163,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
@@ -421,10 +418,7 @@ tags: {  # <amp-story-consent>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
   requires: "amp-story-consent extension .json script"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
