@@ -334,6 +334,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
           destinationDomains: ['*.bar.com*'],
         },
+        testLinker3: {
+          ids: {
+            id: '333',
+          },
+          destinationDomains: ['*.baz.co*'],
+        },
       },
     };
 
@@ -342,14 +348,32 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       const subdomain = clickAnchor('https://amp.foo.com/path');
       expect(subdomain).to.contain('testLinker1=');
       expect(subdomain).to.not.contain('testLinker2=');
+      expect(subdomain).to.not.contain('testLinker3=');
+
+      const noDot = clickAnchor('https://foo.com/path');
+      expect(noDot).to.not.contain('testLinker1=');
+      expect(noDot).to.not.contain('testLinker2=');
+      expect(noDot).to.not.contain('testLinker3=');
+
+      const thirdLevel = clickAnchor('https://a.b.foo.com/path');
+      expect(thirdLevel).to.contain('testLinker1=');
+      expect(thirdLevel).to.not.contain('testLinker2=');
+      expect(thirdLevel).to.not.contain('testLinker3=');
 
       const multiTLDDomainEnabled = clickAnchor('https://foo.bar.com.uk/path');
       expect(multiTLDDomainEnabled).to.contain('testLinker2=');
       expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
+      expect(multiTLDDomainEnabled).to.not.contain('testLinker3=');
 
       const multiTLDDomainDisabled = clickAnchor('https://amp.foo.com.uk/path');
       expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
       expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker3=');
+
+      const co = clickAnchor('https://www.baz.com/path');
+      expect(co).to.contain('testLinker3=');
+      expect(co).not.to.contain('testLinker1=');
+      expect(co).not.to.contain('testLinker2=');
     });
   });
 
