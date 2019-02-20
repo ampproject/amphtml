@@ -223,8 +223,8 @@ function userAssertComputedStyle(
   }
   const suffix = opt_suffix ? ` ${opt_suffix}` : '';
   userAssert(false, // not asserting direclty since elementShorthand is costly
-      `FX element must have \`${prop}: ${expected}\` style ` +
-      `[${elementShorthand(element)}]${suffix}.`);
+      'FX element must have `%s: %s` style [%s]%s.',
+      prop, expected, elementShorthand(element), suffix);
 }
 
 
