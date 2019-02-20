@@ -1708,7 +1708,6 @@ export class VideoDocking {
       this.getControls_().reset();
 
       [
-        element,
         internalElement,
         shadowLayer,
         placeholderBackground,
