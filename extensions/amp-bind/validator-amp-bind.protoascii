@@ -78,7 +78,7 @@ tags: {  # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "mandatory-id"
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
@@ -98,7 +98,7 @@ tags: {  # <amp-state>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
-  attr_lists: "mandatory-id"
+  attr_lists: "mandatory-id-attr"
   attr_lists: "optional-src-amp4email"
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
@@ -129,7 +129,7 @@ tags: { # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "mandatory-id"
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
@@ -149,6 +149,6 @@ tags: {  # <amp-bind-macro>
     name: "expression"
     mandatory: true
   }
-  attr_lists: "mandatory-id"
+  attr_lists: "mandatory-id-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
