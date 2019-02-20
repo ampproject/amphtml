@@ -76,11 +76,10 @@ jobs:
       name: "Local Tests"
       os: windows
       before_install:
-        - choco install googlechrome
+        # - choco install googlechrome
         # - choco install yarn
         - choco install python
-        - powershell cd C:\Python37
-        - powershell python get-pip.py
+        - python get-pip.py
         - pip install urllib3[secure]
         - pip install gsutil --user
       script:
