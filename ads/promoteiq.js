@@ -29,7 +29,7 @@ export function promoteiq(global, data) {
   validateData(data, mandatoryDataFields, []);
   const sfInputs = parseJson(data['params']);
 
-  loadScript(global, data.src, () => {
+  loadScript(global, data['src'], () => {
     if (!!global['TagDeliveryContent']) {
       const sfCallback = new Function('response', data['sfcallback']);
       global['TagDeliveryContent']['request'](sfInputs, sfCallback);
