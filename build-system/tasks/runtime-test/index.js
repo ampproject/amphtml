@@ -314,6 +314,7 @@ async function runTests() {
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
+    testServerPort: c.client.testServerPort,
   };
 
   if (argv.compiled) {
@@ -353,15 +354,16 @@ async function runTests() {
   }
 
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
-    port: 8081,
+    port: karmaDefault.client.testServerPort,
     host: 'localhost',
     directoryListing: true,
     middleware: [app],
   }).on('kill', function() {
-    log(yellow('Shutting down test responses server on localhost:8081'));
+    log(yellow('Shutting down test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
   }));
-  log(yellow(
-      'Started test responses server on localhost:8081'));
+  log(yellow('Started test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
