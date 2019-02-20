@@ -284,8 +284,19 @@ export class LinkerManager {
       return false;
     }
 
-    // See if any domains match.
-    if (domains && !domains.includes(hostname)) {
+    // If domains are given we check for exact match or wildcard match.
+    if (domains) {
+      for (let i = 0; i < domains.length; i++) {
+        const domain = domains[i];
+        // Exact match.
+        if (domain === hostname) {
+          return true;
+        }
+        // Allow wildcard subdomain matching.
+        if (domain.includes('*') && this.isWildCardMatch_(hostname, domain)) {
+          return true;
+        }
+      }
       return false;
     }
 
@@ -308,6 +319,20 @@ export class LinkerManager {
       }
     }
     return true;
+  }
+
+  /**
+   * Allows specified wildcard matching of domains.
+   * Example:
+   *    `*.foo.com` matches `amp.foo.com`
+   *    `*.foo.com*` matches `amp.foo.com.uk`
+   * @param {string} hostname
+   * @param {string} domain
+   */
+  isWildCardMatch_(hostname, domain) {
+    const escaped = regexEscape(domain);
+    const regex = escaped.replace(/\*/g, '.*');
+    return new RegExp('^' + regex + '$').test(hostname);
   }
 
   /**
@@ -423,4 +448,12 @@ export function areFriendlyDomains(domain1, domain2) {
  */
 function getBaseDomain(domain) {
   return domain.replace(/^(?:www\.|m\.|amp\.)+/, '');
+}
+
+/**
+ * Escape any regex flags other than `*`
+ * @param {Sring} str
+ */
+function regexEscape(str) {
+  return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
 }

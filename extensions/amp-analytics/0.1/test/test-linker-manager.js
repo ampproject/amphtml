@@ -318,6 +318,41 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should accept wildcard domains', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        destinationDomains: ['*.foo.com'],
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+        testLinker2: {
+          ids: {
+            id: '222',
+          },
+          destinationDomains: ['*.bar.com*'],
+        },
+      },
+    };
+
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
+      const subdomain = clickAnchor('https://amp.foo.com/path');
+      expect(subdomain).to.contain('testLinker1=');
+      expect(subdomain).to.not.contain('testLinker2=');
+
+      const multiTLDDomainEnabled = clickAnchor('https://foo.bar.com.uk/path');
+      expect(multiTLDDomainEnabled).to.contain('testLinker2=');
+      expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
+
+      const multiTLDDomainDisabled = clickAnchor('https://amp.foo.com.uk/path');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
+    });
+  });
+
   it('should match friendly domain if destinationDomains unspecified', () => {
     const config = {
       linkers: {
