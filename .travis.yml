@@ -1,5 +1,5 @@
 language: node_js
-# dist: trusty
+dist: trusty
 node_js:
   - "lts/*"
 python:
@@ -38,63 +38,55 @@ stages:
   - test
 jobs:
   include:
-    - stage: build
-      name: "Build"
-      script:
-        - node build-system/pr-check/build.js
-      os: linux
-      dist: trusty
-    - stage: build
-      name: "Checks" 
-      script:        
-        - node build-system/pr-check/checks.js
-      os: linux
-      dist: trusty        
-    - stage: build
-      name: "Validator Tests"        
-      before_script:
-        - pip install --user protobuf
-      script:        
-        - node build-system/pr-check/validator-tests.js
-      os: linux
-      dist: trusty
-      addons:
-        apt:
-          packages:
-            - protobuf-compiler
-            - python-protobuf
-    - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
-      os: linux
-      dist: trusty
-      addons:
-        chrome: stable
-      script:
-        - node build-system/pr-check/dist-tests.js
-    - stage: test
-      name: "Visual Diff Tests"
-      script:
-        - node build-system/pr-check/visual-diff-tests.js
-      os: linux
-      dist: trusty
+    # - stage: build
+    #   name: "Build"
+    #   script:
+    #     - node build-system/pr-check/build.js
+    # - stage: build
+    #   name: "Checks" 
+    #   script:        
+    #     - node build-system/pr-check/checks.js     
+    # - stage: build
+    #   name: "Validator Tests"        
+    #   before_script:
+    #     - pip install --user protobuf
+    #   script:        
+    #     - node build-system/pr-check/validator-tests.js
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - protobuf-compiler
+    #         - python-protobuf
+    # - stage: test
+    #   name: "Dist, Bundle Size, Single Pass Tests"
+    #   addons:
+    #     chrome: stable
+    #   script:
+    #     - node build-system/pr-check/dist-tests.js
+    # - stage: test
+    #   name: "Visual Diff Tests"
+    #   script:
+    #     - node build-system/pr-check/visual-diff-tests.js
     - stage: test
       name: "Local Tests"
       os: windows
-      addons:
-        chrome: stable
+      before_install:
+        - choco install googlechrome
+        - choco install yarn
+        - choco install python --version 2.7
+        - pip install urllib3[secure]
+        - pip install gsutil --user
       script:
         - node build-system/pr-check/local-tests.js
       os: windows
-    - stage: test
-      name: "Remote (Sauce Labs) Tests"
-      script:
-        - node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
-      os: linux
-      dist: trusty
+    # - stage: test
+    #   name: "Remote (Sauce Labs) Tests"
+    #   script:
+    #     - node build-system/pr-check/remote-tests.js
+    #   after_script:
+    #     - build-system/sauce_connect/stop_sauce_connect.sh
   fast_finish: true
-  #TODO(ampproject/wg-infra): remove when remote tests stabilize
+  # TODO(ampproject/wg-infra): remove when remote tests stabilize
   allow_failures:
       - script:
           - node build-system/pr-check/remote-tests.js
