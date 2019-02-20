@@ -47,7 +47,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
@@ -65,7 +65,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
@@ -82,7 +82,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
@@ -99,7 +99,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
@@ -116,7 +116,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
@@ -133,7 +133,7 @@ tags: {
   }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
