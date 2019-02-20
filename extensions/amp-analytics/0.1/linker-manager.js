@@ -293,7 +293,8 @@ export class LinkerManager {
           return true;
         }
         // Allow wildcard subdomain matching.
-        if (domain.includes('*') && this.isWildCardMatch_(hostname, domain)) {
+        if (domain.indexOf('*') !== -1 &&
+            this.isWildCardMatch_(hostname, domain)) {
           return true;
         }
       }
@@ -301,22 +302,20 @@ export class LinkerManager {
     }
 
     // If no domains given, default to friendly domain matching.
-    if (!domains) {
-      // Don't append linker for exact domain match, relative urls, or
-      // fragments.
-      const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-      if (winHostname === hostname) {
-        return false;
-      }
+    // Don't append linker for exact domain match, relative urls, or
+    // fragments.
+    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+    if (winHostname === hostname) {
+      return false;
+    }
 
-      const {sourceUrl, canonicalUrl} =
-          Services.documentInfoForDoc(this.ampdoc_);
-      const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
-      const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-      if (!areFriendlyDomains(sourceOrigin, hostname)
-          && !areFriendlyDomains(canonicalOrigin, hostname)) {
-        return false;
-      }
+    const {sourceUrl, canonicalUrl} =
+        Services.documentInfoForDoc(this.ampdoc_);
+    const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
+    const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
+    if (!areFriendlyDomains(sourceOrigin, hostname)
+        && !areFriendlyDomains(canonicalOrigin, hostname)) {
+      return false;
     }
     return true;
   }
@@ -452,7 +451,7 @@ function getBaseDomain(domain) {
 
 /**
  * Escape any regex flags other than `*`
- * @param {Sring} str
+ * @param {string} str
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
