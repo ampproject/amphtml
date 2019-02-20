@@ -59,9 +59,10 @@ function main() {
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
       console.log(
-          `${FILELOGPREFIX} Skipping visual diff tests because this commit ` +
-          'does not affect the runtime, build system, integration ' +
-          'test files, visual diff test files, or flag config files.');
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Visual Diff Tests ') +
+          'because this commit does not affect the ' +
+          'runtime, build system, integration test files, ' +
+          'visual diff test files, or flag config files.');
     }
   }
 
