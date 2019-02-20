@@ -1167,7 +1167,6 @@ describe('ValidatorRulesMakeSense', () => {
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
         'amp-accordion': 0,
-        'amp-action-macro': 0,
         'amp-ad-exit': 0,
         'amp-analytics': 0,
         'amp-anim': 0,
@@ -1204,7 +1203,6 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
-        'AMP-ACTION-MACRO': 0,
         'AMP-ANIM': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
