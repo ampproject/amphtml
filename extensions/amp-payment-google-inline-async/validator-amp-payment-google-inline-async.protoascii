@@ -29,7 +29,6 @@ tags: {  # amp-payment-google-inline-async (json)
   spec_name: "amp-payment-google-inline-async extension .json script"
   requires_extension: "amp-payment-google-inline-async"
   mandatory_parent: "AMP-PAYMENT-GOOGLE-INLINE-ASYNC"
-  attrs: { name: "name" }
   attrs: {
     disabled_by: "transformed"
     name: "nonce"
@@ -40,6 +39,7 @@ tags: {  # amp-payment-google-inline-async (json)
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "name-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -57,10 +57,7 @@ tags: {  # <amp-payment-google-inline-async>
     value_casei: "false"
     value_casei: "true"
   }
-  attrs: {
-    name: "name"
-    mandatory: true
-  }
+  attr_lists: "mandatory-name-attr"
   child_tags: {
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
