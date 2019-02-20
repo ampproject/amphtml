@@ -152,12 +152,13 @@ export class Vsync {
     /** @private {!JankMeter} */
     this.jankMeter_ = new JankMeter(this.win);
 
-    /** @private {MutationObserver} */
-    this.mutationObserver_ = null;
-    if (getMode().localDev && !getMode().test &&
-        this.ampdocService_.isSingleDoc()) {
-      this.mutationObserver_ = new MutationObserver(
-          this.mutationHandler_.bind(this));
+    /** @private @const {!MutationObserver|null} */
+    this.mutationObserver_ = (getMode().localDev && !getMode().test &&
+        this.ampdocService_.isSingleDoc())
+      ? new MutationObserver(this.mutationHandler_.bind(this))
+      : null;
+
+    if (this.mutationObserver_) {
       const doc = this.win.document;
       this.mutationObserver_.observe(doc, {
         attributes: true,
@@ -405,7 +406,6 @@ export class Vsync {
       tasks_: tasks,
       states_: states,
       nextFrameResolver_: resolver,
-      mutationObserver_: mo,
     } = this;
 
     this.nextFrameResolver_ = null;
@@ -422,20 +422,22 @@ export class Vsync {
       }
     }
 
-    if (mo) {
+    if (getMode().localDev && !getMode().test &&
+        this.ampdocService_.isSingleDoc()) {
       // Mutations that happened before the mutation phase started are bad.
       // Process those mutations now.
-      this.mutationHandler_(mo.takeRecords());
+      this.mutationHandler_(this.mutationObserver_.takeRecords());
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
         callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
-    if (mo) {
+    if (getMode().localDev && !getMode().test &&
+        this.ampdocService_.isSingleDoc()) {
       // Mutations that happened inside the mutate phase are good. Clear these
       // mutations from the MutationObserver so they are not reported.
-      mo.takeRecords();
+      this.mutationObserver_.takeRecords();
     }
 
     // Swap last arrays into double buffer.
