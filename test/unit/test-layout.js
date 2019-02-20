@@ -41,19 +41,35 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
+      // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
       'AMP-EMBED',
+      'AMP-FACEBOOK',
+      'AMP-FACEBOOK-COMMENTS',
+      'AMP-FACEBOOK-LIKE',
+      'AMP-FACEBOOK-PAGE',
+      'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
       'AMP-IMG',
       'AMP-INSTAGRAM',
       'AMP-LIST',
-      'AMP-OOYALA-PLAYER',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-VIDEO',
       'AMP-YOUTUBE',
+      'AMP-VIMEO',
+
+      // matched by video player naming convention (fake)
+      'AMP-FOO-PLAYER',
+      'AMP-VIDEO-FOO',
+
+      // matched by video player naming convention (actual)
+      'AMP-JWPLAYER',
+      'AMP-OOYALA-PLAYER',
+      'AMP-VIDEO',
+      'AMP-VIDEO-IFRAME',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;
