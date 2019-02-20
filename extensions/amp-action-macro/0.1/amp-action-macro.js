@@ -21,6 +21,9 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-action-macro';
 
+/** @type {number} */
+let REGISTER_ACTION_COUNTER = 0;
+
 /**
 * The <amp-action-macro> element is used to define a reusable action.
 */
@@ -29,6 +32,9 @@ export class AmpActionMacro extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {number} */
+    this.element['registrationId'] = Date.now() + REGISTER_ACTION_COUNTER++;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.actions_ = null;
@@ -75,9 +81,15 @@ export class AmpActionMacro extends AMP.BaseElement {
             arg, this.element);
       }
     }
-    userAssert(!this.isRecursiveInvocation_(invocation),
-        'Action macro with ID "%s" is recursively calling itself',
-        this.element.getAttribute('id'));
+    if (invocation.caller.tagName === 'AMP-ACTION-MACRO') {
+      userAssert(!this.isRecursiveInvocation_(invocation),
+          'Action macro with ID "%s" is recursively calling itself',
+          this.element.getAttribute('id'));
+      userAssert(!this.isInvalidMacroReference_(
+          invocation.caller['registrationId']),
+      'Action macro with ID "%s" cannot reference macros defined after it',
+      this.element.getAttribute('id'));
+    }
     // Trigger the macro's action.
     this.actions_.trigger(
         this.element, `${actionEventType}`, event, trust, args);
@@ -96,9 +108,19 @@ export class AmpActionMacro extends AMP.BaseElement {
    * @private
    */
   isRecursiveInvocation_(invocation) {
-    return invocation.source.getAttribute('id')
-        === this.element.getAttribute('id')
-        && invocation.source.tagName === 'AMP-ACTION-MACRO';
+    return invocation.caller.getAttribute('id')
+        === this.element.getAttribute('id');
+  }
+
+  /**
+   * Checks if invoking action that was defined after it. This constraint is to
+   * prevent possible recursive calls.
+   * @param {number} invocationRegistrationId
+   * @return {boolean}
+   * @private
+   */
+  isInvalidMacroReference_(invocationRegistrationId) {
+    return invocationRegistrationId <= this.element['registrationId'];
   }
 }
 
