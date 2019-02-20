@@ -46,13 +46,10 @@ tags: {  # <amp-live-list>
     value: ""
   }
   attrs: {
-    name: "id"
-    mandatory: true
-  }
-  attrs: {
     name: "sort"
     value: "ascending"
   }
+  attr_lists: "mandatory-id-attr"
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [update]"
     mandatory: true
@@ -119,9 +116,6 @@ tags: {
   }
   attrs: { name: "data-tombstone" }
   attrs: { name: "data-update-time" }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
 }

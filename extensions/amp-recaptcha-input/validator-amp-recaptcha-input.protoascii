@@ -30,10 +30,6 @@ tags: {  # <amp-form> <amp-recaptcha-input>
   requires_extension: "amp-form"
   requires_extension: "amp-recaptcha-input"
   attrs: {
-    name: "name"
-    mandatory: true
-  }
-  attrs: {
     name: "data-sitekey"
     mandatory: true
   }
@@ -41,6 +37,7 @@ tags: {  # <amp-form> <amp-recaptcha-input>
     name: "data-action"
     mandatory: true
   }
+  attr_lists: "mandatory-name-attr"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

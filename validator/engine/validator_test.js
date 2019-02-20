@@ -922,6 +922,19 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   it('attr_spec only has one value set', () => {
     expect(numValues).toBeLessThan(2);
   });
+  // `id` attribute must have blacklisted_value_regex set if no explicit values.
+  if ((attrSpec.name === 'id') && (numValues === 0)) {
+    it('"id" attribute must have blacklisted_value_regex set', () => {
+      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    });
+  }
+  // `name` attribute must have blacklisted_value_regex set if no explicit
+  // values.
+  if ((attrSpec.name === 'name') && (numValues === 0)) {
+    it('"name" attribute must have blacklisted_value_regex set', () => {
+      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    });
+  }
   // deprecation
   if ((attrSpec.deprecation !== null) || (attrSpec.deprecationUrl !== null)) {
     it('deprecation and deprecation_url must both be defined if one is defined',
