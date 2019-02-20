@@ -117,10 +117,11 @@ export class AmpViewerAssistance {
    * @return {!Promise<undefined>}
    */
   getIdTokenPromise() {
-    return this.viewer_./*OK*/sendMessageAwaitResponse('getAccessTokenPassive', dict({
-      // For now there's only 1 provider option, so we just hard code it
-      'providers': [GSI_TOKEN_PROVIDER],
-    }))
+    return this.viewer_./*OK*/sendMessageAwaitResponse('getAccessTokenPassive',
+        dict({
+          // For now there's only 1 provider option, so we just hard code it
+          'providers': [GSI_TOKEN_PROVIDER],
+        }))
         .then(token => {
           this.setIdTokenStatus_(Boolean(!!token));
           return token;
