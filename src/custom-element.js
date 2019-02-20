@@ -660,7 +660,7 @@ function createBaseCustomElementClass(win) {
         this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       let shouldSetWidth = !!this.sizeList_;
-      if (isExperimentOn(this.win, 'amp-img-auto-sizes')) {
+      if (isExperimentOn(this.ampdoc_.win, 'amp-img-auto-sizes')) {
         shouldSetWidth = !!this.sizeList_ && this.tagName !== 'AMP-IMG';
       }
       if (shouldSetWidth) {
