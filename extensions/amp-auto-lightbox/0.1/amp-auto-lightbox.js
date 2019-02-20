@@ -299,8 +299,7 @@ export class Mutation {
    */
   static mutate(ampEl, mutator) {
     return whenUpgradedToCustomElement(ampEl)
-        .then(ampEl => ampEl.getImpl())
-        .then(impl => impl.mutateElement(mutator));
+        .then(ampEl => ampEl.getResources().mutateElement(ampEl, mutator));
   }
 }
 
