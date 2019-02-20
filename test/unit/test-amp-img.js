@@ -218,6 +218,10 @@ describe('amp-img', () => {
       errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       toggleSpy = sandbox.spy(impl, 'toggleFallback');
 
+      impl.getAmpDoc = function() {
+        return iframe;
+      };
+
       impl.getVsync = function() {
         return {
           mutate(fn) {
@@ -367,6 +371,9 @@ describe('amp-img', () => {
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
+    impl.getAmpDoc = function() {
+      return window.AMP.ampdoc;
+    };
     impl.buildCallback();
     impl.layoutCallback();
     const img = el.querySelector('img');
@@ -405,6 +412,9 @@ describe('amp-img', () => {
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
+      impl.getAmpDoc = function() {
+        return iframe;
+      };
       sandbox.stub(impl, 'getLayoutWidth').returns(200);
       impl.togglePlaceholder = sandbox.stub();
       return impl;
@@ -464,6 +474,9 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
+      impl.getAmpDoc = function() {
+        return iframe;
+      };
       impl.getVsync = function() {
         return {
           mutate(fn) {
@@ -480,15 +493,15 @@ describe('amp-img', () => {
     }
 
     beforeEach(() => {
-      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
+      toggleExperiment(iframe.win, 'amp-img-auto-sizes', true, true);
     });
 
     it('should not generate sizes for amp-imgs that already have sizes', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        src: '/examples/img/sample.jpg',
+        srcset: SRCSET_STRING,
         sizes: '50vw',
         width: 300,
         height: 200,
@@ -504,9 +517,9 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs without srcset', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
-        src: 'test.jpg',
+        src: '/examples/img/sample.jpg',
         width: 300,
         height: 200,
       }).then(ampImg => {
@@ -521,9 +534,9 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs with x descriptors', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
-        srcset: 'small.jpg, medium.jpg 1.5x, large.jpg 2x',
+        srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
         height: 200,
       }).then(ampImg => {
@@ -537,7 +550,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FIXED,
         src: 'test.jpg',
@@ -554,7 +567,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout responsive', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.RESPONSIVE,
         src: 'test.jpg',
@@ -567,11 +580,11 @@ describe('amp-img', () => {
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
       expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 50vw, 100vw');
+          .equal('(max-width: 320px) 160px, 100vw');
     });
 
     it('should generate correct sizes for layout fixed-height', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FIXED_HEIGHT,
         src: 'test.jpg',
@@ -584,11 +597,11 @@ describe('amp-img', () => {
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
       expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 50vw, 100vw');
+          .equal('(max-width: 320px) 160px, 100vw');
     });
 
     it('should generate correct sizes for layout fill', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FILL,
         src: 'test.jpg',
@@ -601,11 +614,11 @@ describe('amp-img', () => {
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
       expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 50vw, 100vw');
+          .equal('(max-width: 320px) 160px, 100vw');
     });
 
     it('should generate correct sizes for layout flex-item', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FLEX_ITEM,
         src: 'test.jpg',
@@ -618,7 +631,7 @@ describe('amp-img', () => {
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
       expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 50vw, 100vw');
+          .equal('(max-width: 320px) 160px, 100vw');
     });
 
   });
