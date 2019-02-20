@@ -78,8 +78,8 @@ jobs:
       before_install:
         - choco install googlechrome
         # - choco install yarn
-        - choco install python --install-directory=C:\Python
-        - powershell cd C:\Python
+        - choco install python
+        - powershell cd C:\Python37
         - powershell python get-pip.py
         - pip install urllib3[secure]
         - pip install gsutil --user
