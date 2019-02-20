@@ -68,6 +68,13 @@
   arguments="y,x">
 </amp-action-macro>
 
+<!-- An amp action macro referencing an action macro that is defined after it. -->
+<amp-action-macro
+  id="scrollable-carousel-macro-refers-an-action-macro-defined-after-it"
+  execute="scrollable-carousel-macro-refers-an-action-macro.execute(x=2)"
+  arguments="x">
+</amp-action-macro>
+
 <!-- An amp action macro referencing another action macro. -->
 <amp-action-macro
   id="scrollable-carousel-macro-refers-an-action-macro"
@@ -87,6 +94,9 @@
 
 <!-- Call to an action-macro that calls an action macro. -->
 <button on="tap:scrollable-carousel-macro-refers-an-action-macro.execute()">Go to slide 2</button>
+
+<!-- Invalid call action macro call. Action macro referenced -->
+<button on="tap:scrollable-carousel-macro-refers-an-action-macro-defined-after-it.execute()">Invalid call</button>
 
 </body>
 </html>
