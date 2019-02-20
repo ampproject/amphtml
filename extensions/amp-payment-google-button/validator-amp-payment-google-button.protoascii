@@ -56,6 +56,11 @@ tags: {  # <amp-payment-google-button>
     value_casei: "false"
     value_casei: "true"
   }
+  attrs: {
+    name: "render_only_if_payment_method_present"
+    value_casei: "false"
+    value_casei: "true"
+  }
   child_tags: {
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
