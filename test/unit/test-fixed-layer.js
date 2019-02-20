@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {FakeMutationObserver} from '../../testing/fake-dom';
+import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
@@ -1167,14 +1167,29 @@ describes.sandboxed('FixedLayer', {}, () => {
   describe('with-transfer', () => {
     let fixedLayer;
 
+    const borderTop = 0;
+    const paddingTop = 11;
+    const transfer = true;
+
     beforeEach(() => {
-      fixedLayer = new FixedLayer(ampdoc, vsyncApi,
-          /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ true);
+      fixedLayer = new FixedLayer(ampdoc, vsyncApi, borderTop, paddingTop,
+          transfer);
       fixedLayer.setup();
     });
 
-    it('should initialize fixed layer to null', () => {
+    it('should instantiate transfer layer with fixed selectors', () => {
       expect(fixedLayer.transfer_).to.be.true;
+      expect(fixedLayer.transferLayer_).to.not.be.null;
+    });
+
+    it('should not instantiate transfer layer with no fixed selectors', () => {
+      const win = new FakeWindow();
+      const ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+
+      const fixedLayer = new FixedLayer(
+          ampdoc, vsyncApi, borderTop, paddingTop, transfer);
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -1376,7 +1391,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.not.exist;
-      expect(fixedLayer.transferLayer_).to.not.exist;
+      expect(fixedLayer.transferLayer_).to.exist;
     });
 
     it('should return transfered element if it no longer matches', () => {
