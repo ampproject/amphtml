@@ -34,7 +34,7 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
+  # - build
   - test
 jobs:
   include:
