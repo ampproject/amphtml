@@ -1329,8 +1329,6 @@ export class VideoDocking {
     this.dragVelocityX_ = offsetX - this.previousDragOffsetX_;
     this.previousDragOffsetX_ = offsetX;
 
-    dev().info(TAG, 'drag velocity', this.dragVelocityX_);
-
     this.placeAt_(video, x + offsetX, y + offsetY, scale, step,
         transitionDurationMs, offsetRelativeX);
   }
