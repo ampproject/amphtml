@@ -155,7 +155,15 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
       (2) to offset scroll adjustment to 1 to avoid scroll freeze problem. */
   border-top: 1px solid transparent !important;
 }
-
+#i-amphtml-wrapper + body[i-amphtml-hidden] {
+  visibility: hidden;
+}
+#i-amphtml-wrapper + body .i-amphtml-lightboxed {
+  visibility: hidden;
+}
+#i-amphtml-wrapper + body[i-amphtml-hidden] .i-amphtml-lightboxed {
+  visibility: visible;
+}
 
 /**
  * iOS-Embed Wrapper shadow root mode. The `body` children are distributed

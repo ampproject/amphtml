@@ -716,7 +716,7 @@ export class Viewport {
       // TODO(choumx)
       if (opt_onComplete) {
         opt_onComplete.then(() => {
-          this.fixedLayer_.scanElement(opt_requestingElement,
+          this.fixedLayer_.enterLightbox(opt_requestingElement,
               /* opt_allowLightbox */ true);
         });
       }
@@ -743,8 +743,7 @@ export class Viewport {
           dev().assertElement(opt_requestingElement));
 
       // TODO(choumx)
-      this.fixedLayer_.scanElement(opt_requestingElement,
-          /* opt_allowLightbox */ false);
+      this.fixedLayer_.leaveLightbox();
     }
 
     return this.binding_.updateLightboxMode(false);

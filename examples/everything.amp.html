@@ -120,17 +120,20 @@
   <style amp-custom>
   .fixed {
     position: fixed;
-    z-index: 100;
     top: 50px;
+    z-index: 10;
   }
   </style>
 </head>
 <body class="comic-amp-font-loading">
+
 <article>
 
 <h1 id="top">AMP #0</h1>
+<h1 class="fixed" style="background-color: red">Fixed header</h1>
+
   <h2>Scrollable Lightbox</h2>
-  <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay">
+  <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay" animate-in="fly-in-bottom">
     <button on="tap:lightbox-scrollable.close" class="lightbox-close-button">
       Close Scrollable Lightbox
     </button>

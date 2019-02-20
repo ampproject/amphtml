@@ -20,7 +20,6 @@ import {
   closest,
   domOrderComparator,
   matches,
-  scopedQuerySelectorAll,
 } from '../dom';
 import {
   computedStyle,
@@ -33,8 +32,9 @@ import {
   toggle,
 } from '../style';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {endsWith, startsWith} from '../string';
 import {isExperimentOn} from '../experiments';
+import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
 
@@ -119,10 +119,12 @@ export class FixedLayer {
   setVisible(visible) {
     if (this.transferLayer_) {
       this.vsync_.mutate(() => {
-        setStyle(
-            this.transferLayer_.getRoot(),
-            'visibility',
-            visible ? 'visible' : 'hidden');
+        const root = this.transferLayer_.getRoot();
+        if (visible) {
+          root.removeAttribute('i-amphtml-hidden');
+        } else {
+          root.setAttribute('i-amphtml-hidden', '');
+        }
       });
     }
   }
@@ -159,7 +161,12 @@ export class FixedLayer {
           this.stickySelectors_);
     }
 
-    this.scanElement(root);
+    // TODO(choumx)
+    if (this.fixedSelectors_.length > 0) {
+      this.getTransferLayer_();
+    }
+
+    this.scanElement_(root);
 
     if (this.elements_.length > 0) {
       this.observeHiddenMutations();
@@ -174,11 +181,11 @@ export class FixedLayer {
   }
 
   /**
-   * TODO(choumx)
    * @param {!Element} element
    * @param {boolean=} allowLightbox
+   * @private
    */
-  scanElement(element, allowLightbox = false) {
+  scanElement_(element, allowLightbox = false) {
     this.trySetupSelectorsNoInline(element, this.fixedSelectors_,
         this.stickySelectors_, allowLightbox);
 
@@ -186,6 +193,21 @@ export class FixedLayer {
     this.sortInDomOrder_();
 
     this.update();
+  }
+
+  /**
+   * @param {!Element} lightbox
+   */
+  enterLightbox(lightbox) {
+    this.scanElement_(lightbox, true);
+  }
+
+  /**
+   *
+   */
+  leaveLightbox() {
+    const fes = remove(this.elements_, fe => fe.lightboxed);
+    this.removeFes_(fes);
   }
 
   /**
@@ -333,11 +355,19 @@ export class FixedLayer {
    * @param {!Element} element
    */
   removeElement(element) {
-    const removed = this.removeElement_(element);
-    if (removed.length > 0 && this.transferLayer_) {
+    const fes = this.removeElement_(element);
+    this.removeFes_(fes);
+  }
+
+  /**
+   * @param {!Array<ElementDef>} fes
+   * @private
+   */
+  removeFes_(fes) {
+    if (fes.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        for (let i = 0; i < removed.length; i++) {
-          const fe = removed[i];
+        for (let i = 0; i < fes.length; i++) {
+          const fe = fes[i];
           if (fe.position == 'fixed') {
             this.transferLayer_.returnFrom(fe);
           }
@@ -629,11 +659,9 @@ export class FixedLayer {
     if (isLightbox(element)) {
       return;
     }
+    const isLightboxDescendant = closest(element, isLightbox);
     // TODO(jridgewell, #19149): This should be an official API.
-    if (!opt_allowLightbox && closest(element, isLightbox)) {
-      // TODO(choumx): Transferred lightbox descendants are not reachable since
-      // no longer a child of amp-lightbox.
-      this.removeElement_(element);
+    if (!opt_allowLightbox && isLightboxDescendant) {
       return;
     }
 
@@ -667,6 +695,7 @@ export class FixedLayer {
         selectors: [selector],
         fixedNow: false,
         stickyNow: false,
+        lightboxed: isLightboxDescendant,
       };
       this.elements_.push(fe);
     }
@@ -685,10 +714,12 @@ export class FixedLayer {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
-      if (fe.element == element) {
-        this.vsync_.mutate(() => {
-          setStyle(element, 'top', '');
-        });
+      if (fe.element === element) {
+        if (!fe.lightboxed) {
+          this.vsync_.mutate(() => {
+            setStyle(element, 'top', '');
+          });
+        }
         this.elements_.splice(i, 1);
         removed.push(fe);
       }
@@ -730,9 +761,9 @@ export class FixedLayer {
       this.transferLayer_.returnFrom(fe);
     }
 
-    // Update `top`. This is necessary to adjust position to the viewer's
-    // paddingTop.
-    if (state.top && (state.fixed || state.sticky)) {
+    // Update `top` to adjust position to the viewer's paddingTop.
+    // TODO(choumx)
+    if (state.top && (state.fixed || state.sticky) && !fe.lightboxed) {
       if (state.fixed || !this.transfer_) {
         // Fixed positions always need top offsetting, as well as stickies on
         // non iOS Safari.
@@ -818,6 +849,7 @@ export class FixedLayer {
  *   top: (string|undefined),
  *   transform: (string|undefined),
  *   forceTransfer: (boolean|undefined),
+ *   lightboxed: (boolean|undefined),
  * }}
  */
 let ElementDef;
@@ -906,7 +938,6 @@ class TransferLayerBody {
       padding: 'none',
       transform: 'none',
       transition: 'none',
-      visibility: 'visible',
     });
     setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
@@ -939,7 +970,8 @@ class TransferLayerBody {
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (name === 'style' || body.hasAttribute(name)) {
+      if (name === 'style' || startsWith(name, 'i-amphtml-')
+          || body.hasAttribute(name)) {
         continue;
       }
       layer.removeAttribute(name);
@@ -971,6 +1003,11 @@ class TransferLayerBody {
     setStyle(element, 'zIndex',
         `calc(${10000 + index} + ${state.zIndex || 0})`);
 
+    // TODO(choumx)
+    if (fe.lightboxed) {
+      element.classList.add('i-amphtml-lightboxed');
+    }
+
     element.parentElement.replaceChild(fe.placeholder, element);
     this.layer_.appendChild(element);
 
@@ -992,12 +1029,19 @@ class TransferLayerBody {
     if (!fe.placeholder || !this.doc_.contains(fe.placeholder)) {
       return;
     }
-    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (this.doc_.contains(fe.element)) {
+    const {element, placeholder} = fe;
+    dev().fine(TAG, 'return from fixed:', fe.id, element);
+
+    // TODO(choumx)
+    if (fe.lightboxed) {
+      element.classList.remove('i-amphtml-lightboxed');
+    }
+
+    if (this.doc_.contains(element)) {
       setStyle(fe.element, 'zIndex', '');
-      fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
+      placeholder.parentElement.replaceChild(element, placeholder);
     } else {
-      fe.placeholder.parentElement.removeChild(fe.placeholder);
+      placeholder.parentElement.removeChild(placeholder);
     }
   }
 
