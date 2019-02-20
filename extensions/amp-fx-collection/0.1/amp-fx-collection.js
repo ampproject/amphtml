@@ -15,7 +15,10 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {FxProvider} from './providers/fx-provider';
+import {
+  PositionBoundFxProvider,
+  ScrollToggleFxProvider,
+} from './providers/fx-provider';
 import {Services} from '../../../src/services';
 import {devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
@@ -29,24 +32,124 @@ const TAG = 'amp-fx-collection';
  * @enum {string}
  */
 const FxType = {
-  PARALLAX: 'parallax',
+  // Keep alphabetically sorted.
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
+  FLOAT_IN_BOTTOM: 'float-in-bottom',
+  FLOAT_IN_TOP: 'float-in-top',
   FLY_IN_BOTTOM: 'fly-in-bottom',
   FLY_IN_LEFT: 'fly-in-left',
   FLY_IN_RIGHT: 'fly-in-right',
   FLY_IN_TOP: 'fly-in-top',
+  PARALLAX: 'parallax',
 };
 
-const restrictedFxTypes = {
-  'parallax': ['fly-in-top', 'fly-in-bottom'],
-  'fly-in-top': ['parallax', 'fly-in-bottom'],
-  'fly-in-bottom': ['fly-in-top', 'parallax'],
-  'fly-in-right': ['fly-in-left'],
-  'fly-in-left': ['fly-in-right'],
-  'fade-in': ['fade-in-scroll'],
-  'fade-in-scroll': ['fade-in'],
+/**
+ * Type foldings.
+ * @enum {string}
+ */
+const FxProviderId = {
+  FLOAT_IN: 'float-in',
 };
+
+/**
+ * Providers that get folded by type.
+ * @enum {string}
+ */
+const FxProviderMapping = {
+  [FxType.FLOAT_IN_BOTTOM]: FxProviderId.FLOAT_IN,
+  [FxType.FLOAT_IN_TOP]: FxProviderId.FLOAT_IN,
+};
+
+
+/** @const {!Object<!FxType, boolean>} */
+const ScrollToggleFxTypes = {
+  [FxProviderId.FLOAT_IN]: true,
+};
+
+/**
+ * Symmetric matrix normalized alphabetically, don't repeat mirror side.
+ * Keep symmetric properties!
+ *
+ * For comparison, a full table would look like this: https://git.io/fhFvT
+ *
+ * If you need to update this table this may help you: https://git.io/fhdh3
+ * Copy that table into a spreadsheet and add a column and row for the new
+ * type in the alphabetical position. Gray out invalid/repeated cells like in
+ * the example above. Add the restricted cells, and then include them here.
+ *
+ * e.g.
+ * ```
+ *  1. Initial matrix
+ *
+ *        A   B   D
+ *    A  ///      X
+ *    B  /// ///
+ *    D  /// /// ///
+ *
+ *  2. Add "C" in its alphabetical position and its restrictions.
+ *
+ *        A   B   C   D
+ *    A  ///      X   X
+ *    B  /// ///  X
+ *    C  /// /// ///
+ *    D  /// /// /// ///
+ *
+ * 3. Add the example restrictions (A, C) and (B, C) to this object. The
+ *    mirrored restrictions (C, A) and (C, B) DO NOT need to be included.
+ *
+ * You can also just sort every restriction tuple you need to add alphabetically
+ * and add each unique resulting tuple here.
+ * ```
+ * @private @const {!Object<FxType, !Array<FxType>>}
+ */
+const restrictedFxTypes = {
+  [FxType.FADE_IN]: [
+    FxType.FADE_IN_SCROLL,
+    // scroll-toggled is not compatible with position-bound fx
+    FxType.FLOAT_IN_BOTTOM,
+    FxType.FLOAT_IN_TOP,
+  ],
+  [FxType.FADE_IN_SCROLL]: [
+    FxType.FLOAT_IN_BOTTOM,
+    FxType.FLOAT_IN_TOP,
+  ],
+  [FxType.FLOAT_IN_BOTTOM]: [
+    FxType.FLOAT_IN_TOP,
+    // scroll-toggled is not compatible with position-bound fx
+    FxType.FLY_IN_BOTTOM,
+    FxType.FLY_IN_LEFT,
+    FxType.FLY_IN_RIGHT,
+    FxType.FLY_IN_TOP,
+    FxType.PARALLAX,
+  ],
+  [FxType.FLOAT_IN_TOP]: [
+    // scroll-toggled is not compatible with position-bound fx
+    FxType.FLY_IN_BOTTOM,
+    FxType.FLY_IN_LEFT,
+    FxType.FLY_IN_RIGHT,
+    FxType.FLY_IN_TOP,
+    FxType.PARALLAX,
+  ],
+  [FxType.FLY_IN_BOTTOM]: [FxType.FLY_IN_TOP, FxType.PARALLAX],
+  [FxType.FLY_IN_LEFT]: [FxType.FLY_IN_RIGHT],
+  [FxType.FLY_IN_TOP]: [FxType.PARALLAX],
+};
+
+/**
+ * @param {FxType} fxTypeA
+ * @param {FxType} fxTypeB
+ * @return {boolean}
+ * @private
+ */
+function isFxTupleRestricted(fxTypeA, fxTypeB) {
+  // Normalize alphabetically to check symmetric matrix.
+  const normalA = fxTypeA < fxTypeB ? fxTypeA : fxTypeB;
+  const normalB = fxTypeA < fxTypeB ? fxTypeB : fxTypeA;
+
+  const restricted = restrictedFxTypes[normalA];
+  return restricted && restricted[normalA].indexOf(normalB) > -1;
+}
 
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
@@ -72,7 +175,7 @@ export class AmpFxCollection {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Object<FxType, FxProvider>} */
+    /** @private @const {!Object<!FxType, ./providers/fx-provider.FxProviderInterface>} */
     this.fxProviderInstances_ = map();
 
     Promise.all([
@@ -100,7 +203,6 @@ export class AmpFxCollection {
       // Don't break for all components if only a subset are misconfigured.
       try {
         this.register_(fxElement);
-        this.seen_.push(fxElement);
       } catch (e) {
         rethrowAsync(e);
       }
@@ -122,6 +224,8 @@ export class AmpFxCollection {
       const fxProvider = this.getFxProvider_(fxType);
       fxProvider.installOn(fxElement);
     });
+
+    this.seen_.push(fxElement);
   }
 
   /**
@@ -160,33 +264,49 @@ export class AmpFxCollection {
    * @return {!Array<!FxType>}
    */
   sanitizeFxTypes_(fxTypes) {
-    for (let i = 0; i < fxTypes.length; i++) {
-      const currentType = fxTypes[i];
-      if (currentType in restrictedFxTypes) {
-        for (let j = i + 1; j < fxTypes.length; j++) {
-          if (restrictedFxTypes[currentType].indexOf(fxTypes[j]) !== -1) {
-            user().warn(TAG,
-                '%s preset can\'t be combined with %s preset as the ' +
-                'resulting animation isn\'t valid.', currentType, fxTypes[j]);
-            fxTypes.splice(j, 1);
-          }
+    iterateCursor(fxTypes, (fxTypeA, i) => {
+      iterateCursor(fxTypes, (fxTypeB, j) => {
+        if (i == j) {
+          return;
         }
-      }
-    }
+        if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
+          user().warn(TAG,
+              '%s preset can\'t be combined with %s preset as the ' +
+              'resulting animation isn\'t valid.', fxTypeB, fxTypeA);
+          fxTypes.splice(j, 1);
+        }
+      });
+    });
     return fxTypes;
   }
 
   /**
    * Given an fx type, instantiates the appropriate provider if needed and
    * returns it.
-   * @param {FxType} fxType
+   * @param {!FxType} fxType
+   * @return {!./providers/fx-provider.FxProviderInterface}
    */
   getFxProvider_(fxType) {
-    if (!this.fxProviderInstances_[fxType]) {
-      this.fxProviderInstances_[fxType] =
-        new FxProvider(this.ampdoc_, fxType);
+    const mappedType = FxProviderMapping[fxType] || fxType;
+    if (this.fxProviderInstances_[mappedType]) {
+      return this.fxProviderInstances_[mappedType];
     }
-    return this.fxProviderInstances_[fxType];
+    const ctor = this.getFxProviderCtor_(mappedType);
+    const instance = new ctor(this.ampdoc_, mappedType);
+    return (this.fxProviderInstances_[mappedType] = instance);
+  }
+
+  /**
+   * Given an fx type, instantiates the appropriate provider if needed and
+   * returns it.
+   * @param {!FxType|!FxProviderId} typeOrProviderId
+   * @return {function(new: ./providers/fx-provider.FxProviderInterface)}
+   */
+  getFxProviderCtor_(typeOrProviderId) {
+    if (ScrollToggleFxTypes[typeOrProviderId]) {
+      return ScrollToggleFxProvider;
+    }
+    return PositionBoundFxProvider; // by default
   }
 }
 

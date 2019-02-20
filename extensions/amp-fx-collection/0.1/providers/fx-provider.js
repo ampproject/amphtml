@@ -18,21 +18,134 @@ import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
+import {
+  ScrollToggleDispatcher,
+  getScrollToggleFloatInOffset,
+  getScrollTogglePosition,
+  installScrollToggleStyles,
+  scrollToggleFloatIn,
+  userAsertValidScrollToggleElement,
+} from '../scroll-toggle';
 import {Services} from '../../../../src/services';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {convertEasingKeyword, defaultDurationValues,
-  defaultEasingValues, defaultFlyInDistanceValues,
-  defaultMarginValues, installStyles, resolvePercentageToNumber}
-  from './amp-fx-presets-utils';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  setStyles,
+} from '../../../../src/style';
+import {
+  convertEasingKeyword,
+  defaultDurationValues,
+  defaultEasingValues,
+  defaultFlyInDistanceValues,
+  defaultMarginValues,
+  installStyles,
+  resolvePercentageToNumber,
+} from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
+import {once} from '../../../../src/utils/function';
+
+
+export class FxProviderInterface {
+
+  /**
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   * @param {string} unusedFxType
+   */
+  constructor(unusedAmpdoc, unusedFxType) {}
+
+  /**
+   * @param {!Element} unusedElement
+   */
+  installOn(unusedElement) {}
+}
+
 
 /**
- * Class that implements the various preset animation providers.
+ * Provides preset scroll-toggled fx.
+ * These are intended for fixed-position elements that appear with the entire
+ * document, similar to the auto-sliding header in the Google SERP viewer.
+ * @implements {FxProviderInterface}
  */
-export class FxProvider {
+export class ScrollToggleFxProvider {
+
+  /**
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} unusedFxType
+   */
+  constructor(ampdoc, unusedFxType) {
+    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!../../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
+
+    // TODO(alanorozco): This can be duplicated. This is not an issue since
+    // there's only one scroll-toggled fx type currently, but some refactoring
+    // is needed.
+    /** @private @const {function():!ScrollToggleDispatcher} */
+    this.dispatcher_ = once(() => new ScrollToggleDispatcher(this.ampdoc_));
+  }
+
+  /**
+   * @param {!Element} element
+   */
+  installOn(element) {
+    // TODO(alanorozco): Remove assumption of one fxType.
+    const measure = () => {
+      const computed = computedStyle(this.ampdoc_.win, element);
+      userAsertValidScrollToggleElement(computed, element);
+      this.observe_(element, getScrollTogglePosition(computed, element));
+    };
+
+    const mutate = () => {
+      installScrollToggleStyles(element);
+    };
+
+    this.resources_.measureMutateElement(element, measure, mutate);
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!../scroll-toggle.ScrollTogglePosition} position
+   * @private
+   */
+  observe_(element, position) {
+    this.dispatcher_().observe(isShown => {
+      this.toggle_(element, isShown, position);
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {boolean} isShown
+   * @param {!../scroll-toggle.ScrollTogglePosition} position
+   * @private
+   */
+  toggle_(element, isShown, position) {
+    // TODO(alanorozco): Remove assumption of one fxType.
+    let offset = 0;
+
+    const measure = () => {
+      offset = getScrollToggleFloatInOffset(element, isShown, position);
+    };
+
+    const mutate = () => {
+      scrollToggleFloatIn(element, offset);
+    };
+
+    this.resources_.measureMutateElement(element, measure, mutate);
+  }
+}
+
+
+/**
+ * Provides preset position-bound fx.
+ * @implements {FxProviderInterface}
+ */
+export class PositionBoundFxProvider {
 
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
