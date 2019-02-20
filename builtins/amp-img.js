@@ -71,7 +71,6 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    debugger;
     if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
       this.maybeGenerateSizes_();
     }
@@ -146,7 +145,6 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    debugger;
     if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
       this.maybeGenerateSizes_();
     }
