@@ -24,16 +24,6 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
-
-      /*
-       * The share pill text does not show in the same place consistently, and
-       * as such causes the visual tests to be flaky.  This hides the share pill
-       * with visibility: hidden, so as to keep other elements in the same place
-       * that they would otherwise be, while deflaking the tests.  See #19890.
-       */
-       .i-amphtml-story-share-pill {
-        visibility: hidden;
-      }
     </style>
     <script>
       // TODO(#17108): Remove this when getMode().test is set.
