@@ -17,11 +17,7 @@
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
-  closest,
-  domOrderComparator,
-  matches,
-} from '../dom';
-import {
+  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -31,6 +27,11 @@ import {
   setStyles,
   toggle,
 } from '../style';
+import {
+  closest,
+  domOrderComparator,
+  matches,
+} from '../dom';
 import {dev, user} from '../log';
 import {endsWith, startsWith} from '../string';
 import {isExperimentOn} from '../experiments';
@@ -42,9 +43,6 @@ const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
 /**
- * Passed to closest to determine if the fixed element is a lightbox, or a
- * descendant of one. If so, FixedLayer ignores the element. #19149
- *
  * @param {!Element} el
  */
 function isLightbox(el) {
@@ -117,16 +115,21 @@ export class FixedLayer {
    * @param {boolean} visible
    */
   setVisible(visible) {
-    if (this.transferLayer_) {
-      this.vsync_.mutate(() => {
-        const root = this.transferLayer_.getRoot();
+    if (!this.transferLayer_) {
+      return;
+    }
+    this.vsync_.mutate(() => {
+      const root = this.transferLayer_.getRoot();
+      if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
         if (visible) {
           root.removeAttribute('i-amphtml-hidden');
         } else {
           root.setAttribute('i-amphtml-hidden', '');
         }
-      });
-    }
+      } else {
+        setStyle(root, 'visibility', visible ? 'visible' : 'hidden');
+      }
+    });
   }
 
   /**
@@ -161,7 +164,10 @@ export class FixedLayer {
           this.stickySelectors_);
     }
 
-    // TODO(choumx)
+    // Optimistically create the transfer layer. Otherwise, setVisible() may be
+    // called before the transfer layer is created, resulting in an incorrect
+    // initial visibility state. Alternatively, we could force creation of
+    // the transfer layer in setVisible().
     if (this.fixedSelectors_.length > 0) {
       this.getTransferLayer_();
     }
@@ -182,12 +188,12 @@ export class FixedLayer {
 
   /**
    * @param {!Element} element
-   * @param {boolean=} allowLightbox
+   * @param {boolean=} opt_lightboxMode
    * @private
    */
-  scanElement_(element, allowLightbox = false) {
+  scanElement_(element, opt_lightboxMode) {
     this.trySetupSelectorsNoInline(element, this.fixedSelectors_,
-        this.stickySelectors_, allowLightbox);
+        this.stickySelectors_, opt_lightboxMode);
 
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
@@ -199,7 +205,7 @@ export class FixedLayer {
    * @param {!Element} lightbox
    */
   enterLightbox(lightbox) {
-    this.scanElement_(lightbox, true);
+    this.scanElement_(lightbox, /* lightboxMode */ true);
   }
 
   /**
@@ -574,15 +580,15 @@ export class FixedLayer {
    * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
-   * @param {boolean=} opt_allowLightbox
+   * @param {boolean=} opt_lightboxMode
    * @private
    */
   trySetupSelectorsNoInline(
-    root, fixedSelectors, stickySelectors, opt_allowLightbox
+    root, fixedSelectors, stickySelectors, opt_lightboxMode
   ) {
     try {
       this.setupSelectors_(root, fixedSelectors, stickySelectors,
-          opt_allowLightbox);
+          opt_lightboxMode);
     } catch (e) {
       // Fail quietly.
       dev().error(TAG, 'Failed to setup fixed elements:', e);
@@ -595,10 +601,10 @@ export class FixedLayer {
    * @param {!Element} root
    * @param {!Array<string>} fixedSelectors
    * @param {!Array<string>} stickySelectors
-   * @param {boolean=} opt_allowLightbox
+   * @param {boolean=} opt_lightboxMode
    * @private
    */
-  setupSelectors_(root, fixedSelectors, stickySelectors, opt_allowLightbox) {
+  setupSelectors_(root, fixedSelectors, stickySelectors, opt_lightboxMode) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = root.querySelectorAll(fixedSelector);
@@ -608,7 +614,7 @@ export class FixedLayer {
           break;
         }
         this.setupElement_(elements[j], fixedSelector, 'fixed',
-            /* opt_forceTransfer */ undefined, opt_allowLightbox);
+            /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
     }
     for (let i = 0; i < stickySelectors.length; i++) {
@@ -616,7 +622,7 @@ export class FixedLayer {
       const elements = root.querySelectorAll(stickySelector);
       for (let j = 0; j < elements.length; j++) {
         this.setupElement_(elements[j], stickySelector, 'sticky',
-            /* opt_forceTransfer */ undefined, opt_allowLightbox);
+            /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
     }
   }
@@ -647,21 +653,23 @@ export class FixedLayer {
    * @param {string} position
    * @param {boolean=} opt_forceTransfer If true, then the element will
    *    be forcibly transferred to the transfer layer.
-   * @param {boolean=} opt_allowLightbox
+   * @param {boolean=} opt_lightboxMode If true, then descendants of lightboxes
+   *    are allowed to be set up. Default is false.
    * @private
    */
   setupElement_(
-    element, selector, position, opt_forceTransfer, opt_allowLightbox
+    element, selector, position, opt_forceTransfer, opt_lightboxMode
   ) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
 
+    // Ignore lightboxes because FixedLayer can interfere with their
+    // opening/closing animations (#19149).
     if (isLightbox(element)) {
       return;
     }
     const isLightboxDescendant = closest(element, isLightbox);
-    // TODO(jridgewell, #19149): This should be an official API.
-    if (!opt_allowLightbox && isLightboxDescendant) {
+    if (!opt_lightboxMode && isLightboxDescendant) {
       return;
     }
 
@@ -761,8 +769,8 @@ export class FixedLayer {
       this.transferLayer_.returnFrom(fe);
     }
 
-    // Update `top` to adjust position to the viewer's paddingTop.
-    // TODO(choumx)
+    // Update `top` to adjust position to the viewer's paddingTop. However,
+    // ignore lightboxed elements since lightboxes ignore the viewer header.
     if (state.top && (state.fixed || state.sticky) && !fe.lightboxed) {
       if (state.fixed || !this.transfer_) {
         // Fixed positions always need top offsetting, as well as stickies on
@@ -915,7 +923,7 @@ class TransferLayerBody {
     /** @private @const {!Element} */
     this.layer_ = doc.body.cloneNode(/* deep */ false);
     this.layer_.removeAttribute('style');
-    setStyles(this.layer_, {
+    const styles = {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -923,7 +931,6 @@ class TransferLayerBody {
       width: 0,
       pointerEvents: 'none',
       overflow: 'hidden',
-
       // Reset possible BODY styles.
       animation: 'none',
       background: 'none',
@@ -938,7 +945,14 @@ class TransferLayerBody {
       padding: 'none',
       transform: 'none',
       transition: 'none',
-    });
+      visibility: 'visible',
+    };
+    // This experiment uses a CSS rule for toggling transfer layer visibility,
+    // which has lower specificity than an inline style.
+    if (isExperimentOn(doc.defaultView, 'fixed-elements-in-lightbox')) {
+      delete styles.visibility;
+    }
+    setStyles(this.layer_, assertDoesNotContainDisplay(styles));
     setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
   }
@@ -1003,7 +1017,8 @@ class TransferLayerBody {
     setStyle(element, 'zIndex',
         `calc(${10000 + index} + ${state.zIndex || 0})`);
 
-    // TODO(choumx)
+    // Identify lightboxed elements so they can be visible when the transfer
+    // layer is "hidden", and hidden with the transfer layer is "visible".
     if (fe.lightboxed) {
       element.classList.add('i-amphtml-lightboxed');
     }
@@ -1032,7 +1047,6 @@ class TransferLayerBody {
     const {element, placeholder} = fe;
     dev().fine(TAG, 'return from fixed:', fe.id, element);
 
-    // TODO(choumx)
     if (fe.lightboxed) {
       element.classList.remove('i-amphtml-lightboxed');
     }

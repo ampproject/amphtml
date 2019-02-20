@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
@@ -40,7 +41,6 @@ import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-import { Deferred } from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -117,9 +117,6 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?Array<!Element>} */
-    this.componentDescendants_ = null;
-
     /** @private {number} */
     this.historyId_ = -1;
 
@@ -183,23 +180,18 @@ class AmpLightbox extends AMP.BaseElement {
    */
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
-    this.getComponentDescendants_(/* opt_refresh */ true).forEach(child => {
+    this.getComponentDescendants_().forEach(child => {
       this.setAsOwner(child);
     });
   }
 
   /**
    * Gets a list of all AMP element descendants.
-   * @param {boolean=} opt_refresh Whether to requery the descendants.
    * @return {!Array<!Element>}
    * @private
    */
-  getComponentDescendants_(opt_refresh) {
-    if (!this.componentDescendants_ || opt_refresh) {
-      this.componentDescendants_ = toArray(
-          this.element.getElementsByClassName('i-amphtml-element'));
-    }
-    return this.componentDescendants_;
+  getComponentDescendants_() {
+    return toArray(this.element.getElementsByClassName('i-amphtml-element'));
   }
 
   /**
@@ -562,7 +554,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   forEachVisibleChild_(pos, callback) {
     const containerHeight = this.getSize_().height;
-    const descendants = this.getComponentDescendants_(/* opt_refresh */ true);
+    const descendants = this.getComponentDescendants_();
     for (let i = 0; i < descendants.length; i++) {
       const descendant = descendants[i];
       let offsetTop = 0;
