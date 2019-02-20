@@ -168,6 +168,28 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="8"] #container8 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="8"] #show-container8-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="dynamic"] #container-dynamic {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="dynamic"] #show-container-dynamic-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -197,6 +219,8 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
+      this.startResolve_ = null;
+      this.startPromise_ = null;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -261,24 +285,29 @@
         this.frameOrigin_, this.processRequest_.bind(this),
         /* logs id */ this.id);
 
-      this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
         this.iframe.style.display = '';
         this.iframe.setAttribute('src', url);
       }.bind(this));
+
+      return this.startPromise_ = new Promise(resolve => {
+        this.startResolve_ = resolve;
+      });
     };
 
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
-      this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.ampViewerHost_.sendRequest('visibilitychange', {
-        state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
-      }, true);
-      if (updateToggle) {
-        this.updateVisibilityToggle_();
-      }
+      this.startPromise_.then(() => {
+        this.visibilityState_ = visible ? 'visible' : 'hidden';
+        this.ampViewerHost_.sendRequest('visibilitychange', {
+          state: this.visibilityState_,
+          prerenderSize: this.prerenderSize
+        }, true);
+        if (updateToggle) {
+          this.updateVisibilityToggle_();
+        }
+      });
     };
 
     Viewer.prototype.loaded_ = function() {
@@ -291,6 +320,7 @@
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
+      this.iframe.dataset['loaded'] = '';
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
       this.iframe.contentWindow.onbeforeunload = (function() {
@@ -298,6 +328,7 @@
         this.container.textContent =
             'Unload of the AMP iframe is not allowed!';
       }).bind(this);
+      this.startResolve_();
     };
 
 
@@ -545,7 +576,7 @@
           'container1',
           '1',
           './everything.amp.html?amp_js_v=0.1',
-          true).start();
+          !window.location.search).start();
       addShowContainer('1');
 
       new Viewer(
@@ -590,8 +621,28 @@
           false).start();
       addShowContainer('7');
 
-      showContainer('1');
+      new Viewer(
+            'container8',
+            '8',
+            '../test/manual/amp-carousel-0-2/vertical.amp.html?amp_js_v=0.1',
+            false).start();
+        addShowContainer('8');
+
+      if (window.location.search) {
+        new Viewer(
+            'container-dynamic',
+            'dynamic',
+            `${window.location.search.slice(1)}?amp_js_v=0.1`,
+            true).start();
+        document.getElementById('show-containerdynamic-anchor').hidden = false;
+        addShowContainer('dynamic');
+        showContainer('dynamic');
+      } else {
+        showContainer('1');
+      }
     }
+
+
 
     function addShowContainer(id) {
       var anchor = document.getElementById('show-container' + id + '-anchor');
@@ -634,6 +685,8 @@
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
+      <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
+      <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -671,7 +724,17 @@
     <div class="wait">
       Please wait, the AMP doc will appear here...
     </div>
-</container>
+    </container>
+    <container id="container8">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+    </container>
+    <container id="container-dynamic">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+    </container>
   </viewer>
 </body>
 </html>
