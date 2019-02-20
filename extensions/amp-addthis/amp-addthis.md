@@ -131,8 +131,8 @@ Example:
 
 And that’s it! You should see the share buttons appearing on your page!
 
-Check out our YouTube video for step-by-step instructions:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/BSkuAB4er2o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+Check out our [YouTube video](https://www.youtube.com/watch?v=BSkuAB4er2o) for step-by-step instructions:
+<amp-youtube data-videoid="BSkuAB4er2o" layout="responsive" width="480" height="270"></amp-youtube>
 
 ## Validation
 
