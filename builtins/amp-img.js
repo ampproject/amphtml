@@ -170,7 +170,7 @@ export class AmpImg extends BaseElement {
     // Sizes is useless without the srcset attribute or if the srcset
     // attribute uses the x descriptor.
     const srcset = this.element.getAttribute('srcset');
-    if (!srcset || RegExp('[0-9]+x.*').test(srcset)) {
+    if (!srcset || RegExp('[0-9]+x,.*|[0-9]+x$').test(srcset)) {
       return;
     }
 
