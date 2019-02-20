@@ -17,6 +17,7 @@
 import {AmpEvents} from '../amp-events';
 import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
+import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
@@ -874,12 +875,15 @@ export class Resource {
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
 
-    let promise;
-    try {
-      promise = this.element.layoutCallback();
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    const promise = new Promise((resolve, reject) => {
+      Services.vsyncFor(this.hostWin).mutate(() => {
+        try {
+          resolve(this.element.layoutCallback());
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));

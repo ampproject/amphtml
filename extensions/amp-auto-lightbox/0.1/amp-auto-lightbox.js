@@ -26,7 +26,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
@@ -152,7 +155,7 @@ export class Criteria {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
-    return !actions.hasAction(element, 'tap');
+    return !actions.hasResolvableAction(element, 'tap');
   }
 }
 
@@ -295,7 +298,8 @@ export class Mutation {
    * @return {!Promise}
    */
   static mutate(ampEl, mutator) {
-    return ampEl.getImpl().then(impl => impl.mutateElement(mutator));
+    return whenUpgradedToCustomElement(ampEl)
+        .then(ampEl => ampEl.getResources().mutateElement(ampEl, mutator));
   }
 }
 

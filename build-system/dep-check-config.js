@@ -49,8 +49,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
-      // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
-      // Contact @choumx for questions.
+      // DEPRECATED: Use src/purifier.js instead. @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
     ],
   },
@@ -58,8 +57,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
-      'src/sanitizer.js->src/purifier.js',
-      'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
+      // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
       'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
       'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
     ],
@@ -156,7 +154,6 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
-      'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
       'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -236,6 +233,7 @@ exports.rules = [
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
 
       // Ads needs concurrent loading
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/concurrent-load.js',
 
@@ -368,6 +366,8 @@ exports.rules = [
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
       'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
             'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +

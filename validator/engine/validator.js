@@ -4549,7 +4549,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   const tagSpecDispatch =
       context.getRules().dispatchForTagName(encounteredTag.upperName());
   // Filter TagSpecDispatch.AllTagSpecs by type identifiers.
-  let filteredTagSpecs = [];
+  const filteredTagSpecs = [];
   if (tagSpecDispatch !== undefined) {
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
       const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
