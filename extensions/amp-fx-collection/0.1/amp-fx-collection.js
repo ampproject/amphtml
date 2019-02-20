@@ -250,9 +250,7 @@ export class AmpFxCollection {
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
 
-    this.sanitizeFxTypes_(fxTypes);
-
-    return fxTypes;
+    return this.sanitizeFxTypes_(fxTypes);
   }
 
   /**
@@ -264,19 +262,20 @@ export class AmpFxCollection {
    * @return {!Array<!FxType>}
    */
   sanitizeFxTypes_(fxTypes) {
-    iterateCursor(fxTypes, (fxTypeA, i) => {
-      iterateCursor(fxTypes, (fxTypeB, j) => {
-        if (i == j) {
-          return;
+    for (let i = 0; i < fxTypes.length; i++) {
+      const fxTypeA = fxTypes[i];
+      if (fxTypeA in restrictedFxTypes) {
+        for (let j = i + 1; j < fxTypes.length; j++) {
+          const fxTypeB = fxTypes[j];
+          if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
+            user().warn(TAG,
+                '%s preset can\'t be combined with %s preset as the ' +
+                'resulting animation isn\'t valid.', fxTypeA, fxTypeB);
+            fxTypes.splice(j, 1);
+          }
         }
-        if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
-          user().warn(TAG,
-              '%s preset can\'t be combined with %s preset as the ' +
-              'resulting animation isn\'t valid.', fxTypeB, fxTypeA);
-          fxTypes.splice(j, 1);
-        }
-      });
-    });
+      }
+    }
     return fxTypes;
   }
 
