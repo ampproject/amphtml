@@ -52,6 +52,8 @@ describes.fakeWin('AmpViewerAssistance', {
   });
 
   it('should disable service when the viewer is not trusted', () => {
+    expectAsyncConsoleError('[amp-viewer-assistance] amp-viewer-assistance is'
+        + ' currently only supported on trusted viewers.');
     viewerMock.isTrustedViewer.returns(Promise.resolve(false));
     const config = {
       'providerId': 'foo-bar',
