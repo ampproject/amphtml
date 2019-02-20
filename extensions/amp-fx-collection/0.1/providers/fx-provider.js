@@ -20,6 +20,7 @@ import {
 import {Presets} from './amp-fx-presets';
 import {
   ScrollToggleDispatcher,
+  ScrollTogglePosition, // eslint-disable-line no-unused-vars
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
   installScrollToggleStyles,
@@ -48,14 +49,8 @@ import {
 import {once} from '../../../../src/utils/function';
 
 
+/** @interface */
 export class FxProviderInterface {
-
-  /**
-   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
-   * @param {string} unusedFxType
-   */
-  constructor(unusedAmpdoc, unusedFxType) {}
-
   /**
    * @param {!Element} unusedElement
    */
@@ -89,9 +84,7 @@ export class ScrollToggleFxProvider {
     this.dispatcher_ = once(() => new ScrollToggleDispatcher(this.ampdoc_));
   }
 
-  /**
-   * @param {!Element} element
-   */
+  /** @override */
   installOn(element) {
     // TODO(alanorozco): Remove assumption of one fxType.
     const measure = () => {
@@ -109,7 +102,7 @@ export class ScrollToggleFxProvider {
 
   /**
    * @param {!Element} element
-   * @param {!../scroll-toggle.ScrollTogglePosition} position
+   * @param {!ScrollTogglePosition} position
    * @private
    */
   observe_(element, position) {
@@ -121,7 +114,7 @@ export class ScrollToggleFxProvider {
   /**
    * @param {!Element} element
    * @param {boolean} isShown
-   * @param {!../scroll-toggle.ScrollTogglePosition} position
+   * @param {!ScrollTogglePosition} position
    * @private
    */
   toggle_(element, isShown, position) {
@@ -171,10 +164,7 @@ export class PositionBoundFxProvider {
     this.fxType_ = fxType;
   }
 
-  /**
-   * Installs effect on the element
-   * @param {!Element} element
-   */
+  /** @override */
   installOn(element) {
     new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,

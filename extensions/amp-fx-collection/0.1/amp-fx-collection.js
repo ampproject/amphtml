@@ -54,7 +54,7 @@ const FxProviderId = {
 
 /**
  * Providers that get folded by type.
- * @enum {string}
+ * @private @const {!Object<FxType, FxProviderId>}
  */
 const FxProviderMapping = {
   [FxType.FLOAT_IN_BOTTOM]: FxProviderId.FLOAT_IN,
@@ -62,7 +62,7 @@ const FxProviderMapping = {
 };
 
 
-/** @const {!Object<!FxType, boolean>} */
+/** @const {!Object<(FxType|FxProviderId), boolean>} */
 const ScrollToggleFxTypes = {
   [FxProviderId.FLOAT_IN]: true,
 };
@@ -148,7 +148,7 @@ function isFxTupleRestricted(fxTypeA, fxTypeB) {
   const normalB = fxTypeA < fxTypeB ? fxTypeB : fxTypeA;
 
   const restricted = restrictedFxTypes[normalA];
-  return restricted && restricted[normalA].indexOf(normalB) > -1;
+  return restricted && restricted.indexOf(normalB) > -1;
 }
 
 /**
@@ -175,7 +175,7 @@ export class AmpFxCollection {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Object<!FxType, ./providers/fx-provider.FxProviderInterface>} */
+    /** @private @const {!Object<string, ./providers/fx-provider.FxProviderInterface>} */
     this.fxProviderInstances_ = map();
 
     Promise.all([
@@ -288,7 +288,7 @@ export class AmpFxCollection {
   getFxProvider_(fxType) {
     const mappedType = FxProviderMapping[fxType] || fxType;
     if (this.fxProviderInstances_[mappedType]) {
-      return this.fxProviderInstances_[mappedType];
+      return devAssert(this.fxProviderInstances_[mappedType]);
     }
     const ctor = this.getFxProviderCtor_(mappedType);
     const instance = new ctor(this.ampdoc_, mappedType);
@@ -299,7 +299,7 @@ export class AmpFxCollection {
    * Given an fx type, instantiates the appropriate provider if needed and
    * returns it.
    * @param {!FxType|!FxProviderId} typeOrProviderId
-   * @return {function(new: ./providers/fx-provider.FxProviderInterface)}
+   * @return {function(new: ./providers/fx-provider.FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc, string):undefined}
    */
   getFxProviderCtor_(typeOrProviderId) {
     if (ScrollToggleFxTypes[typeOrProviderId]) {
