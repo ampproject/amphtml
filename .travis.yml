@@ -77,11 +77,13 @@ jobs:
       os: windows
       before_install:
         - choco install googlechrome        
-        - choco install python        
+        - choco install python
         - py -m pip install urllib3[secure]
         - py -m pip install gsutil --user
       script:
         - node build-system/pr-check/local-tests.js
+      env:
+        - YARN_GPG=no #long running gpg prevents Windows build from shutting down
     - stage: test
       name: "Remote (Sauce Labs) Tests"
       script:
