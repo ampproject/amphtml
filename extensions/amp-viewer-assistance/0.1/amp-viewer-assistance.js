@@ -71,7 +71,7 @@ export class AmpViewerAssistance {
   actionHandler_(invocation) {
     const {method, args} = invocation;
     if (method == 'updateActionState' && !!args) {
-      this.viewer_.sendMessageAwaitResponse(method, args).catch(error => {
+      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
         user().error(TAG, error.toString());
       });
     } else if (method == 'signIn') {
@@ -106,7 +106,7 @@ export class AmpViewerAssistance {
 
       this.getIdTokenPromise();
 
-      this.viewer_.sendMessage('viewerAssistanceConfig',dict({
+      this.viewer_./*OK*/sendMessage('viewerAssistanceConfig',dict({
         'config': this.configJson_,
       }));
       return this;
@@ -117,7 +117,7 @@ export class AmpViewerAssistance {
    * @return {!Promise<undefined>}
    */
   getIdTokenPromise() {
-    return this.viewer_.sendMessageAwaitResponse('getAccessTokenPassive', dict({
+    return this.viewer_./*OK*/sendMessageAwaitResponse('getAccessTokenPassive', dict({
       // For now there's only 1 provider option, so we just hard code it
       'providers': [GSI_TOKEN_PROVIDER],
     }))
@@ -133,7 +133,7 @@ export class AmpViewerAssistance {
    * @private
    */
   requestSignIn_() {
-    this.viewer_.sendMessageAwaitResponse('requestSignIn', dict({
+    this.viewer_./*OK*/sendMessageAwaitResponse('requestSignIn', dict({
       'providers': [GSI_TOKEN_PROVIDER],
     })).then(token => {
       user().info(TAG, 'Token: ' + token);
