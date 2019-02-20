@@ -135,6 +135,11 @@ With responsive layout, the width and height from the example should yield corre
 <p>Please read <a href="https://developer.dailymotion.com/player#player-parameters">Dailymotion's video player documentation</a> to know more about parameters and options.</p></td>
   </tr>
   <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>

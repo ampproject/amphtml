@@ -49,7 +49,7 @@ For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-v
 attribute: **`dock`**
 
 This attribute is currently only supported for
-`amp-brightcove`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
+`amp-brightcove`, `amp-dailymotion`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
