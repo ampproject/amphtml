@@ -166,7 +166,7 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 /**
  * The exception to the above is descendants of lightboxes, which we only
- * want to display when a lightbox is open (opposite to other fixed elements).
+ * want to display when a lightbox is open (the opposite behavior!).
  * See fixed-layer.js#enterLightbox() for details.
  */
 #i-amphtml-wrapper + body .i-amphtml-lightbox-element {
