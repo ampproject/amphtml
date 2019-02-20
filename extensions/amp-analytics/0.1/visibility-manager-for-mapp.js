@@ -52,7 +52,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
 
     // Initate the listener
     this.visibilityInterface_.onVisibilityChange(
-      this.onVisibilityChangeHandler_.bind(this));
+        this.onVisibilityChangeHandler_.bind(this));
   }
 
   /** @override */

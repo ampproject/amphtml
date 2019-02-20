@@ -96,7 +96,7 @@ export class MraidService {
                 visibleRectangle && visibleRectangle.width ?
                     visibleRectangle.width : 0,
                 visibleRectangle && visibleRectangle.height ?
-                    visibleRectangle.height : 0,
+                    visibleRectangle.height : 0
             ),
             // AMP handles intersectionRatio from 0.0 to 1.0
             visibleRatio: exposedPercentage / 100,
