@@ -65,6 +65,7 @@ Currently, the supported players are:
 
 - [`amp-brightcove`](https://www.ampproject.org/docs/reference/components/amp-brightcove)
 - [`amp-dailymotion`](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
+- [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
 - [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
 - [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
 - [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)

@@ -15,13 +15,14 @@
  */
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
 import {
   getData,
   listen,
   listenOncePromise,
 } from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -168,6 +169,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+      return false; // do nothing, do not relayout
+    }
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -192,11 +197,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.element.ownerDocument.createElement('div');
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
-    placeholder.setAttribute('placeholder', '');
+    const html = htmlFor(this.element);
+    const placeholder =
+        html`<div placeholder><amp-img layout=fill></amp-img></div>`;
 
-    setStyle(placeholder, 'background-image', `url(${src})`);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+
+    placeholder.firstElementChild.setAttribute('src', src);
 
     this.placeholderEl_ = placeholder;
 
