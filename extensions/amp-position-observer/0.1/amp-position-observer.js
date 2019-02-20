@@ -37,7 +37,6 @@ import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
-import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-position-observer';
 

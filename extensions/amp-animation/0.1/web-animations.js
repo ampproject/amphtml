@@ -47,6 +47,7 @@ import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -178,12 +179,6 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
-
-    /** @private {boolean} */
-    this.useAnimationWorklet_ =
-      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
-      'animationWorklet' in CSS &&
-      getMode(win).runtime != 'inabox';
   }
 
   /**
@@ -202,7 +197,7 @@ export class Builder {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return this.useAnimationWorklet_ && hasPositionObserver ?
+        return this.isAnimationWorkletSupported_() && hasPositionObserver ?
           new ScrollTimelineWorkletRunner(this.win_, requests,
               opt_viewportData) :
           new NativeWebAnimationRunner(requests);
@@ -250,6 +245,17 @@ export class Builder {
   createScanner_(path, target, index, vars, timing) {
     return new MeasureScanner(this, this.css_, path,
         target, index, vars, timing);
+  }
+
+  /**
+   * @return {boolean} Whether animationWorklet can be used.
+   * @private
+   */
+  isAnimationWorkletSupported_() {
+    return isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+    'animationWorklet' in CSS &&
+    getMode(this.win_).runtime != 'inabox' &&
+    !isInFie(this.win_.document.documentElement);
   }
 }
 
