@@ -23,6 +23,7 @@
 
 const colors = require('ansi-colors');
 const {
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -40,7 +41,6 @@ function runSinglePassTest_() {
   timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
-  timedExecOrDie('gulp clean');
 }
 
 function main() {
@@ -48,7 +48,7 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp dist --fortesting --noextensions');
+    downloadDistOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {
@@ -72,9 +72,10 @@ function main() {
     }
 
     if (!ranTests) {
-      console.log(`${FILELOGPREFIX} Skipping dist tests because this commit ` +
-        'does not affect the runtime, build system, or ' +
-        'integration test files.');
+      console.log(`${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Dist, Bundle Size, Single Pass Tests ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'or integration test files.');
     }
   }
 
