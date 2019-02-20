@@ -207,8 +207,7 @@
 }
 
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
-.i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons,
-.i-amphtml-story-ui-no-buttons .i-amphtml-story-share-pill {
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons {
   visibility: hidden !important;
 }
 
