@@ -15,8 +15,8 @@
   <!-- Should read "John Miller" after form submit & setState. -->
   <p id="xhrText" [text]="result.name"></p>
 
-  <form method="GET" action="http://localhost:8081/form/post/success"
-      action-xhr="http://localhost:8081/form/post/success" target="_blank"
+  <form method="GET" action="http://localhost:__TEST_SERVER_PORT__/form/post/success"
+      action-xhr="http://localhost:__TEST_SERVER_PORT__/form/post/success" target="_blank"
       on="submit-success:AMP.setState({result: event.response})">
     <input id="submitButton" type="submit" value="Submit">
 

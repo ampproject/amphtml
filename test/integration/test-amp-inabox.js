@@ -215,10 +215,13 @@ describe('inabox', function() {
 });
 
 describe('inabox with a complex image ad', function() {
+  const {testServerPort} = window.ampTestRuntimeConfig;
+
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
   const adBody = __html__['test/fixtures/amp-cupcake-ad.html'] // eslint-disable-line no-undef
+      .replace(/__TEST_SERVER_PORT__/g, testServerPort)
       .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
       .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
       .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
