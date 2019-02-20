@@ -70,11 +70,11 @@ const scrollToggledFxTypes = {
  *    D  /// /// ///
  *
  *  2. Add "C" in its alphabetical position and its restrictions.
- *
+ *               👇
  *        A   B   C   D
  *    A  ///      X   X
  *    B  /// ///  X
- *    C  /// /// ///
+ * 👉 C  /// /// ///
  *    D  /// /// /// ///
  *
  * 3. Add the example restrictions (A, C) and (B, C) to this object. The
