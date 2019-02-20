@@ -84,7 +84,7 @@ export class AmpViewerAssistance {
   /**
    * @private
    * @restricted
-   * @return {!AmpViewerAssistance}
+   * @return {!AmpViewerAssistance|Promise<!AmpViewerAssistance>}
    */
   start_() {
     if (!this.enabled_) {
