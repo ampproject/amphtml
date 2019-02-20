@@ -197,9 +197,9 @@ app.get('/a4a/:bid', (req, res) => {
             "canonicalUrl": "\${canonicalUrl}",
             "cid": "\${clientId(a)}",
             "img": "\${htmlAttr(amp-img,src)}",
-            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
-            "adNavType": "\${adNavType}",
-            "adRedirectCount": "\${adRedirectCount}"
+            "navTiming": "\${navTiming(requestStart,requestStart)}",
+            "navType": "\${navType}",
+            "navRedirectCount": "\${navRedirectCount}"
           }
         }
       }

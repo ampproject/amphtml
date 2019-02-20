@@ -22,10 +22,10 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-  rewriteAttributeValue,
-} from './purifier';
+} from './sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
 

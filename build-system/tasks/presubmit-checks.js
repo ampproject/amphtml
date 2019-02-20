@@ -107,12 +107,14 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
+      'build-system/pr-check/dist.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
+      'build-system/pr-check/yarn-checks.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -808,7 +810,7 @@ const forbiddenTermsSrcInclusive = {
     'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/css-expr-impl.js',
+      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
       'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
