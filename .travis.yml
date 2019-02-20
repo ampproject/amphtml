@@ -78,7 +78,8 @@ jobs:
       before_install:
         # - choco install googlechrome
         # - choco install yarn
-        - choco install python
+        - choco install python        
+        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         - python get-pip.py
         - pip install urllib3[secure]
         - pip install gsutil --user
