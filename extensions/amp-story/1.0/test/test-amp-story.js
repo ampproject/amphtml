@@ -187,19 +187,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should not prerender/load the share menu on desktop', () => {
-    createPages(story.element, 2);
-
-    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-
-    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildShareMenuStub).to.not.have.been.called;
-        });
-  });
-
   it('should return a valid page index', () => {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
