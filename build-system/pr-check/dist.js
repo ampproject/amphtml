@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script runs validator tests.
- * This is run during the CI stage = build; job = validator.
+ * This script builds the AMP runtime for production.
+ * This is run during the CI stage = build; job = dist.
  */
 
 const colors = require('ansi-colors');
@@ -26,34 +26,24 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+  timedExecOrDie: timedExecOrDieBase,
+  uploadDistOutput} = require('./utils');
 const {isTravisPullRequestBuild} = require('../travis');
-
-const FILENAME = 'validator-tests.js';
+const FILENAME = 'dist.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp validator');
-    timedExecOrDie('gulp validator-webui');
+    timedExecOrDie('gulp dist --fortesting');
+    uploadDistOutput(FILENAME);
   } else {
-    printChangeSummary(FILENAME);
-    if (buildTargets.has('VALIDATOR')) {
-      timedExecOrDie('gulp validator');
-    } else if (buildTargets.has('VALIDATOR_WEBUI')) {
-      timedExecOrDie('gulp validator-webui');
-    } else {
-      console.log(
-          `${FILELOGPREFIX} Skipping ` + colors.cyan('Validator Tests ') +
-          'because this commit does not affect ' +
-          'the validator or validator web UI.');
-    }
+    printChangeSummary();
+    console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Dist ') +
+        'because this is a PR build');
   }
 
   stopTimer(FILENAME, FILENAME, startTime);

@@ -45,7 +45,7 @@ jobs:
     # - stage: build
     #   name: "Checks" 
     #   script:        
-    #     - node build-system/pr-check/checks.js     
+    #     - node build-system/pr-check/checks.js
     # - stage: build
     #   name: "Validator Tests"        
     #   before_script:
@@ -57,6 +57,11 @@ jobs:
     #       packages:
     #         - protobuf-compiler
     #         - python-protobuf
+    # - stage: build
+    #   name: "Dist"
+    #   if: type != pull_request
+    #   script:
+    #     - node build-system/pr-check/dist.js      
     # - stage: test
     #   name: "Dist, Bundle Size, Single Pass Tests"
     #   addons:
