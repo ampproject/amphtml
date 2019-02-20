@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 825
+spec_file_revision: 826
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -5150,8 +5150,8 @@ attr_lists: {
   attrs: {
     name: "id"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update for:
-    # name-attr, name-attr-mandatory, and id in $GLOBAL_ATTRS.
+    # When updating this blacklisted_value_regex, also update the entry for
+    # "id" in $GLOBAL_ATTRS.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -5279,8 +5279,8 @@ attr_lists: {
   name: "name-attr"
   attrs: {
     name: "name"
-    # When updating this blacklisted_value_regex, also update for:
-    # mandatory-id-attr, mandatory-name-attr, and id in $GLOBAL_ATTRS.
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-name-attr.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -5407,8 +5407,7 @@ attr_lists: {
   attrs: {
     name: "name"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update for:
-    # mandatory-id-attr, name-attr, and id in $GLOBAL_ATTRS.
+    # When updating this blacklisted_value_regex, also update for name-attr.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -5822,8 +5821,8 @@ attr_lists: {
   }
   attrs: {
     name: "id"
-    # When updating this blacklisted_value_regex, also update for:
-    # mandatory-id-attr, name-attr, and mandatory-name-attr.
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-id-attr.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
