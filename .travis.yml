@@ -79,10 +79,9 @@ jobs:
         # - choco install googlechrome
         # - choco install yarn
         - choco install python        
-        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        - python get-pip.py
-        - pip install urllib3[secure]
-        - pip install gsutil --user
+        - py -m pip install -U pip
+        - py -m pip install urllib3[secure]
+        - py -m pip install gsutil --user
       script:
         - node build-system/pr-check/local-tests.js
     # - stage: test
