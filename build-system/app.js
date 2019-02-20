@@ -24,15 +24,13 @@ const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const devDashboard = require('./app-index/index');
+const enableCors = require('./amp-cors');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {
-  enableCors,
-} = require('./amp-cors');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');

@@ -16,10 +16,8 @@
 'use strict';
 
 const app = require('express').Router();
+const enableCors = require('./amp-cors');
 const minimist = require('minimist');
-const {
-  enableCors,
-} = require('./amp-cors');
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
 const multer = require('multer');

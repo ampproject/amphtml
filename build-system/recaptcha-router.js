@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  enableCors,
-} = require('./amp-cors');
+const enableCors = require('./amp-cors');
 const pc = process;
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
