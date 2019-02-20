@@ -15,10 +15,9 @@
  */
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
-import {isEnumValue} from '../../../src/types';
 import {once} from '../../../src/utils/function';
 import {px, setImportantStyles} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
 /** @enum {string} */
 export const ScrollTogglePosition = {
@@ -36,7 +35,7 @@ export const ANIMATION_DURATION_MS = 300;
 
 
 /** Dispatches a signal when an element is supposed to be toggled on scroll. */
-export class ScrollToggleDispatcher {
+export class ScrollToggleDispatch {
 
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
@@ -174,27 +173,24 @@ export function userAsertValidScrollToggleElement(computedStyle, element) {
 }
 
 /**
- * @param {!Object<string, string>} computedStyle
  * @param {!Element} element
+ * @param {string} type
+ * @param {!Object<string, string>} computedStyle
  * @return {!ScrollTogglePosition}
  */
-export function getScrollTogglePosition(computedStyle, element) {
-  const attr = devAssert(element.getAttribute('amp-fx'));
+export function getScrollTogglePosition(element, type, computedStyle) {
   const position = /** @type {!ScrollTogglePosition} */ (
-    attr.replace(/^.*float\-in\-([^\s]+).*$/, '$1'));
+    type.replace(/^.*float\-in\-([^\s]+).*$/, '$1'));
 
-  if (!isEnumValue(ScrollTogglePosition, position)) {
-    userAssert(false, // not asserting direclty since elementShorthand is costly
-        'Position must be one of [top, bottom] [%s]',
-        elementShorthand(element));
-  }
+  const withAmpFxType = `with amp-fx="${type}"`;
+  const zeroPx = px(0);
 
   if (position == ScrollTogglePosition.TOP) {
-    userAssertComputedStyle(computedStyle, 'top', px(0), element,
-        `with position="${ScrollTogglePosition.TOP}"`);
+    userAssertComputedStyle(
+        computedStyle, 'top', zeroPx, element, withAmpFxType);
   } else {
-    userAssertComputedStyle(computedStyle, 'bottom', px(0), element,
-        `with position="${ScrollTogglePosition.BOTTOM}"`);
+    userAssertComputedStyle(
+        computedStyle, 'bottom', zeroPx, element, withAmpFxType);
   }
 
   return position;

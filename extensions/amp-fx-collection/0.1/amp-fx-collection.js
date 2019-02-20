@@ -15,15 +15,14 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {
-  PositionBoundFxProvider,
-  ScrollToggleFxProvider,
-} from './providers/fx-provider';
 import {Services} from '../../../src/services';
 import {devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
+import {
+  installPositionBoundFx,
+  installScrollToggledFx,
+} from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
 
 const TAG = 'amp-fx-collection';
 
@@ -44,27 +43,10 @@ const FxType = {
   PARALLAX: 'parallax',
 };
 
-/**
- * Type foldings.
- * @enum {string}
- */
-const FxProviderId = {
-  FLOAT_IN: 'float-in',
-};
-
-/**
- * Providers that get folded by type.
- * @private @const {!Object<FxType, FxProviderId>}
- */
-const FxProviderMapping = {
-  [FxType.FLOAT_IN_BOTTOM]: FxProviderId.FLOAT_IN,
-  [FxType.FLOAT_IN_TOP]: FxProviderId.FLOAT_IN,
-};
-
-
-/** @const {!Object<(FxType|FxProviderId), boolean>} */
-const ScrollToggleFxTypes = {
-  [FxProviderId.FLOAT_IN]: true,
+/** @const {!Object<!FxType, boolean>} */
+const scrollToggledFxTypes = {
+  [FxType.FLOAT_IN_BOTTOM]: true,
+  [FxType.FLOAT_IN_TOP]: true,
 };
 
 /**
@@ -101,7 +83,7 @@ const ScrollToggleFxTypes = {
  * You can also just sort every restriction tuple you need to add alphabetically
  * and add each unique resulting tuple here.
  * ```
- * @private @const {!Object<FxType, !Array<FxType>>}
+ * @private @const {!Object<!FxType, !Array<!FxType>>}
  */
 const restrictedFxTypes = {
   [FxType.FADE_IN]: [
@@ -144,8 +126,10 @@ const restrictedFxTypes = {
  */
 function isFxTupleRestricted(fxTypeA, fxTypeB) {
   // Normalize alphabetically to check symmetric matrix.
-  const normalA = fxTypeA < fxTypeB ? fxTypeA : fxTypeB;
-  const normalB = fxTypeA < fxTypeB ? fxTypeB : fxTypeA;
+  const aLowerThanB = fxTypeA < fxTypeB;
+
+  const normalA = aLowerThanB ? fxTypeA : fxTypeB;
+  const normalB = aLowerThanB ? fxTypeB : fxTypeA;
 
   const restricted = restrictedFxTypes[normalA];
   return restricted && restricted.indexOf(normalB) > -1;
@@ -166,26 +150,21 @@ export class AmpFxCollection {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private @const {!Document|!ShadowRoot} */
-    this.root_ = ampdoc.getRootNode();
-
     /** @private @const {!Array<!Element>} */
     this.seen_ = [];
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Object<string, ./providers/fx-provider.FxProviderInterface>} */
-    this.fxProviderInstances_ = map();
-
     Promise.all([
       ampdoc.whenReady(),
       this.viewer_.whenFirstVisible(),
     ]).then(() => {
+      const root = this.ampdoc_.getRootNode();
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(this.root_, AmpEvents.DOM_UPDATE, this.scan_.bind(this));
+      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
     });
   }
 
@@ -194,15 +173,15 @@ export class AmpFxCollection {
    * fx provider.
    */
   scan_() {
-    const fxElements = this.root_.querySelectorAll('[amp-fx]');
-    iterateCursor(fxElements, fxElement => {
-      if (this.seen_.includes(fxElement)) {
+    const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
+    iterateCursor(elements, element => {
+      if (this.seen_.includes(element)) {
         return;
       }
 
       // Don't break for all components if only a subset are misconfigured.
       try {
-        this.register_(fxElement);
+        this.register_(element);
       } catch (e) {
         rethrowAsync(e);
       }
@@ -211,102 +190,87 @@ export class AmpFxCollection {
 
   /**
    * Registers an fx-enabled element with its requested fx providers.
-   * @param {!Element} fxElement
+   * @param {!Element} element
    */
-  register_(fxElement) {
-    devAssert(fxElement.hasAttribute('amp-fx'));
-    devAssert(!this.seen_.includes(fxElement));
+  register_(element) {
+    devAssert(element.hasAttribute('amp-fx'));
+    devAssert(!this.seen_.includes(element));
     devAssert(this.viewer_.isVisible());
 
-    const fxTypes = this.getFxTypes_(fxElement);
-
-    fxTypes.forEach(fxType => {
-      const fxProvider = this.getFxProvider_(fxType);
-      fxProvider.installOn(fxElement);
+    getFxTypes(element).forEach(type => {
+      this.install_(element, type);
     });
 
-    this.seen_.push(fxElement);
+    this.seen_.push(element);
   }
 
   /**
-   * Returns the array of fx types this component has specified as a
-   * space-separated list in the value of `amp-fx` attribute.
-   * e.g. `amp-fx="parallax fade-in"
-   *
-   * @param {!Element} fxElement
-   * @return {!Array<!FxType>}
+   * @param {!Element} element
+   * @param {!FxType} type
+   * @private
    */
-  getFxTypes_(fxElement) {
-    devAssert(fxElement.hasAttribute('amp-fx'));
-    const fxTypes = fxElement.getAttribute('amp-fx')
-        .trim()
-        .toLowerCase()
-        .split(/\s+/);
-
-    userAssert(fxTypes.length, 'No value provided for `amp-fx` attribute');
-
-    // Validate that we support the requested fx types.
-    fxTypes.forEach(fxType => {
-      user().assertEnumValue(FxType, fxType, 'amp-fx');
-    });
-
-    return this.sanitizeFxTypes_(fxTypes);
+  install_(element, type) {
+    if (scrollToggledFxTypes[type]) {
+      return installScrollToggledFx(this.ampdoc_, element, type);
+    }
+    installPositionBoundFx(this.ampdoc_, element, type);
   }
+}
 
-  /**
-   * Returns the array of fx types this component after checking that no
-   * clashing fxTypes are present on the same element.
-   * e.g. `amp-fx="parallax fade-in"
-   *
-   * @param {!Array<!FxType>} fxTypes
-   * @return {!Array<!FxType>}
-   */
-  sanitizeFxTypes_(fxTypes) {
-    for (let i = 0; i < fxTypes.length; i++) {
-      const fxTypeA = fxTypes[i];
-      if (fxTypeA in restrictedFxTypes) {
-        for (let j = i + 1; j < fxTypes.length; j++) {
-          const fxTypeB = fxTypes[j];
-          if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
-            user().warn(TAG,
-                '%s preset can\'t be combined with %s preset as the ' +
-                'resulting animation isn\'t valid.', fxTypeA, fxTypeB);
-            fxTypes.splice(j, 1);
-          }
+
+/**
+ * Returns the array of fx types this component has specified as a
+ * space-separated list in the value of `amp-fx` attribute.
+ * e.g. `amp-fx="parallax fade-in"
+ *
+ * @param {!Element} element
+ * @return {!Array<!FxType>}
+ */
+export function getFxTypes(element) {
+  devAssert(element.hasAttribute('amp-fx'));
+  const fxTypes = element.getAttribute('amp-fx')
+      .trim()
+      .toLowerCase()
+      .split(/\s+/);
+
+  userAssert(fxTypes.length, 'No value provided for `amp-fx` attribute');
+
+  // Validate that we support the requested fx types.
+  fxTypes.forEach(fxType => {
+    user().assertEnumValue(FxType, fxType, 'amp-fx');
+  });
+
+  return sanitizeFxTypes(fxTypes);
+}
+
+
+/**
+ * Returns the array of fx types this component after checking that no clashing
+ * fx types are present on the same element.
+ *
+ * e.g.`amp-fx="parallax fade-in"
+ *
+ * This will modify the array in place.
+ *
+ * @param {!Array<!FxType>} types
+ * @return {!Array<!FxType>}
+ */
+function sanitizeFxTypes(types) {
+  for (let i = 0; i < types.length; i++) {
+    const fxTypeA = types[i];
+    if (fxTypeA in restrictedFxTypes) {
+      for (let j = i + 1; j < types.length; j++) {
+        const fxTypeB = types[j];
+        if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
+          user().warn(TAG,
+              '%s preset can\'t be combined with %s preset as the ' +
+              'resulting animation isn\'t valid.', fxTypeA, fxTypeB);
+          types.splice(j, 1);
         }
       }
     }
-    return fxTypes;
   }
-
-  /**
-   * Given an fx type, instantiates the appropriate provider if needed and
-   * returns it.
-   * @param {!FxType} fxType
-   * @return {!./providers/fx-provider.FxProviderInterface}
-   */
-  getFxProvider_(fxType) {
-    const mappedType = FxProviderMapping[fxType] || fxType;
-    if (this.fxProviderInstances_[mappedType]) {
-      return devAssert(this.fxProviderInstances_[mappedType]);
-    }
-    const ctor = this.getFxProviderCtor_(mappedType);
-    const instance = new ctor(this.ampdoc_, mappedType);
-    return (this.fxProviderInstances_[mappedType] = instance);
-  }
-
-  /**
-   * Given an fx type, instantiates the appropriate provider if needed and
-   * returns it.
-   * @param {!FxType|!FxProviderId} typeOrProviderId
-   * @return {function(new: ./providers/fx-provider.FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc, string):undefined}
-   */
-  getFxProviderCtor_(typeOrProviderId) {
-    if (ScrollToggleFxTypes[typeOrProviderId]) {
-      return ScrollToggleFxProvider;
-    }
-    return PositionBoundFxProvider; // by default
-  }
+  return types;
 }
 
 AMP.extension(TAG, '0.1', AMP => {

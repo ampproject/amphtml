@@ -19,7 +19,7 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {
-  ScrollToggleDispatcher,
+  ScrollToggleDispatch,
   ScrollTogglePosition, // eslint-disable-line no-unused-vars
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -42,136 +42,83 @@ import {
   installStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
-import {getServiceForDoc} from '../../../../src/service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {once} from '../../../../src/utils/function';
-
-
-/** @interface */
-export class FxProviderInterface {
-  /**
-   * @param {!Element} unusedElement
-   */
-  installOn(unusedElement) {}
-}
 
 
 /**
- * Provides preset scroll-toggled fx.
- * These are intended for fixed-position elements that appear with the entire
- * document, similar to the auto-sliding header in the Google SERP viewer.
- * @implements {FxProviderInterface}
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element The element to give a preset effect.
+ * @param {string} type
  */
-export class ScrollToggleFxProvider {
+export function installScrollToggledFx(ampdoc, element, type) {
+  const fxScrollDispatch = 'fx-scroll-dispatch';
 
-  /**
-   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} unusedFxType
-   */
-  constructor(ampdoc, unusedFxType) {
-    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
 
-    /** @private @const {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+  const resources = Services.resourcesForDoc(element);
+  const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
-    // TODO(alanorozco): This can be duplicated. This is not an issue since
-    // there's only one scroll-toggled fx type currently, but some refactoring
-    // is needed.
-    /** @private @const {function():!ScrollToggleDispatcher} */
-    this.dispatcher_ = once(() => new ScrollToggleDispatcher(this.ampdoc_));
-  }
+  let shouldMutate = false;
 
-  /** @override */
-  installOn(element) {
-    // TODO(alanorozco): Remove assumption of one fxType.
-    const measure = () => {
-      const computed = computedStyle(this.ampdoc_.win, element);
-      userAsertValidScrollToggleElement(computed, element);
-      this.observe_(element, getScrollTogglePosition(computed, element));
-    };
+  const measure = () => {
+    const computed = computedStyle(ampdoc.win, element);
+    const position = getScrollTogglePosition(element, type, computed);
 
-    const mutate = () => {
-      installScrollToggleStyles(element);
-    };
+    userAsertValidScrollToggleElement(computed, element);
 
-    this.resources_.measureMutateElement(element, measure, mutate);
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {!ScrollTogglePosition} position
-   * @private
-   */
-  observe_(element, position) {
-    this.dispatcher_().observe(isShown => {
-      this.toggle_(element, isShown, position);
+    dispatch.observe(isShown => {
+      scrollToggle(element, isShown, position);
     });
-  }
 
-  /**
-   * @param {!Element} element
-   * @param {boolean} isShown
-   * @param {!ScrollTogglePosition} position
-   * @private
-   */
-  toggle_(element, isShown, position) {
-    // TODO(alanorozco): Remove assumption of one fxType.
-    let offset = 0;
+    shouldMutate = true;
+  };
 
-    const measure = () => {
-      offset = getScrollToggleFloatInOffset(element, isShown, position);
-    };
+  const mutate = () => {
+    if (!shouldMutate) {
+      return;
+    }
+    installScrollToggleStyles(element);
+  };
 
-    const mutate = () => {
-      scrollToggleFloatIn(element, offset);
-    };
-
-    this.resources_.measureMutateElement(element, measure, mutate);
-  }
+  resources.measureMutateElement(element, measure, mutate);
 }
 
+/**
+ * @param {!Element} element
+ * @param {boolean} isShown
+ * @param {!ScrollTogglePosition} position
+ */
+function scrollToggle(element, isShown, position) {
+  let offset = 0;
+
+  const measure = () => {
+    offset = getScrollToggleFloatInOffset(element, isShown, position);
+  };
+
+  const mutate = () => {
+    scrollToggleFloatIn(element, offset);
+  };
+
+  Services.resourcesForDoc(element)
+      .measureMutateElement(element, measure, mutate);
+}
 
 /**
- * Provides preset position-bound fx.
- * @implements {FxProviderInterface}
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element The element to give a preset effect.
+ * @param {string} type
  */
-export class PositionBoundFxProvider {
-
-  /**
-   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} fxType
-   */
-  constructor(ampdoc, fxType) {
-
-    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(ampdoc);
-
-    /** @private @const {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
-
-    installPositionObserverServiceForDoc(ampdoc);
-
-    /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
-
-    /** @private @const  {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
-    /** @private @string */
-    this.fxType_ = fxType;
-  }
-
-  /** @override */
-  installOn(element) {
-    new FxElement(
-        element, this.positionObserver_, this.viewport_, this.resources_,
-        this.ampdoc_, this.fxType_);
-    setStyles(element, assertDoesNotContainDisplay(installStyles(
-        element, this.fxType_)));
-  }
+export function installPositionBoundFx(ampdoc, element, type) {
+  installPositionObserverServiceForDoc(ampdoc);
+  new FxElement(ampdoc, element, type);
+  setStyles(element,
+      assertDoesNotContainDisplay(installStyles(element, type)));
 }
 
 /**
@@ -179,23 +126,20 @@ export class PositionBoundFxProvider {
  */
 export class FxElement {
   /**
-   * @param {!Element} element The element to give a preset effect.
-   * @param {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} positionObserver
-   * @param {!../../../../src/service/viewport/viewport-impl.Viewport} viewport
-   * @param {!../../../../src/service/resources-impl.Resources} resources
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element The element to give a preset effect.
    * @param {string} fxType
    */
-  constructor(element, positionObserver, viewport, resources, ampdoc, fxType) {
+  constructor(ampdoc, element, fxType) {
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = positionObserver;
+    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
 
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = viewport;
+    this.viewport_ = Services.viewportForDoc(element);
 
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(element);
 
     /** @type {?number} */
     this.viewportHeight = null;
