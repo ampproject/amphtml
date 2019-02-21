@@ -259,6 +259,38 @@ tags: {
   attrs: { name: "animate-in-duration" }
   attrs: { name: "grid-area" }
   attrs: {
+    name: "scale-end"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-left" }
+      properties: { name: "animate-in" value: "pan-right" }
+    }
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-up" }
+      properties: { name: "animate-in" value: "pan-down" }
+    }
+  }
+  attrs: {
     name: "justify-content"
     value: "center"
     value: "end"
@@ -329,6 +361,38 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-left" }
+      properties: { name: "animate-in" value: "pan-right" }
+    }
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-up" }
+      properties: { name: "animate-in" value: "pan-down" }
+    }
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -465,6 +529,38 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "^[0-9]*$"
+    value_properties: {
+      properties: { name: "animate-in" value: "zoom-in" }
+      properties: { name: "animate-in" value: "zoom-out" }
+    }
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-left" }
+      properties: { name: "animate-in" value: "pan-right" }
+    }
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "^[0-9]*px$"
+    value_properties: {
+      properties: { name: "animate-in" value: "pan-up" }
+      properties: { name: "animate-in" value: "pan-down" }
+    }
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
