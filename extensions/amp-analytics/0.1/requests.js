@@ -17,12 +17,14 @@
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
+  getConsentStateStr,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
@@ -37,6 +39,8 @@ export class RequestHandler {
    * @param {boolean} isSandbox
    */
   constructor(element, request, preconnect, transport, isSandbox) {
+
+    this.element_ = element;
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = element.getAmpDoc();
@@ -121,6 +125,9 @@ export class RequestHandler {
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
         this.win, trigger['resourceTimingSpec'], this.startTime_);
+    // TODO: (@zhouyx) Move to variable service once that becomes
+    // a doc level services
+    bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
