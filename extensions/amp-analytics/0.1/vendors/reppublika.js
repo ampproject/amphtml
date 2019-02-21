@@ -23,8 +23,8 @@ export const REPPUBLIKA_CONFIG = /** @type {!JsonObject} */ ({
     'pageview': '${host}${basePrefix}${code}/track.gif?${baseSuffix}',
   },
     'transport': {
-    'beacon': false,
-    'xhrpost': false,
-    'image': true,
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
   },
 });
