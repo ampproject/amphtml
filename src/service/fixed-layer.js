@@ -116,9 +116,10 @@ export class FixedLayer {
    * Informs FixedLayer that a lightbox was opened.
    *
    * - FixedLayer hides any transfer layer elements that may be overlayed on
-   *   top of the lightbox, which is confusing UX. When `onComplete` resolves,
-   * - FixedLayer scans and transfers any fixed descendants of `lightbox`.
-   *   This enables unjanky fixed elements in lightboxes on iOS.
+   *   top of the lightbox, which is confusing UX.
+   * - When `onComplete` resolves, FixedLayer scans and transfers any fixed
+   *   descendants of `lightbox`. This enables unjanky fixed elements in
+   *   lightboxes on iOS.
    *
    * @param {!Element=} opt_lightbox
    * @param {!Promise=} opt_onComplete Promise that resolves when lightbox
