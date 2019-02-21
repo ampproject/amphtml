@@ -1177,12 +1177,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       fixedLayer.setup();
     });
 
-    it('should instantiate transfer layer with fixed selectors', () => {
-      expect(fixedLayer.transfer_).to.be.true;
-      expect(fixedLayer.transferLayer_).to.not.be.null;
-    });
-
-    it('should not instantiate transfer layer with no fixed selectors', () => {
+    it('should not instantiate transfer layer on setup', () => {
       const win = new FakeWindow();
       const ampdoc = new AmpDocSingle(win);
       installPlatformService(win);
@@ -1190,6 +1185,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       const fixedLayer = new FixedLayer(
           ampdoc, vsyncApi, borderTop, paddingTop, transfer);
+      fixedLayer.setup();
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -1391,7 +1387,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.not.exist;
-      expect(fixedLayer.transferLayer_).to.exist;
+      expect(fixedLayer.transferLayer_).to.not.exist;
     });
 
     it('should return transfered element if it no longer matches', () => {
