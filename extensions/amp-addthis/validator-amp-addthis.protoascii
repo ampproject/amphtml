@@ -30,6 +30,12 @@ tags: {  # <amp-addthis>
   tag_name: "AMP-ADDTHIS"
   requires_extension: "amp-addthis"
   attrs: {
+    name: "data-product-code"
+    trigger: {
+      also_requires_attr: "data-pub-id"
+    }
+  }
+  attrs: {
     name: "data-pub-id"
     mandatory: true
   }
@@ -51,7 +57,9 @@ tags: {  # <amp-addthis>
   }
   attrs: {
     name: "data-widget-id"
-    mandatory: true
+    trigger: {
+      also_requires_attr: "data-pub-id"
+    }
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
