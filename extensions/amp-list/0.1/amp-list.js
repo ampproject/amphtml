@@ -223,6 +223,7 @@ export class AmpList extends AMP.BaseElement {
           if (overflowElement) {
             toggle(overflowElement, false);
           }
+          this.element.warnOnMissingOverflow = false;
         }).then(() => {
           this.adjustContainerForLoadMoreButton_();
         });
