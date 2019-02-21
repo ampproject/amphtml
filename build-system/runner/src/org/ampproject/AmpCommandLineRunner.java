@@ -19,6 +19,7 @@ package org.ampproject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
+import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
@@ -45,8 +46,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean is_production_env = true;
 
   private boolean single_file_compilation = false;
-  
-  private boolean scan_json_casts = false;
 
   /**
    * List of string suffixes to eliminate from the AST.
@@ -78,9 +77,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
         assignmentReplacements, prodAssignmentReplacements);
-    AmpPassJSONObjectCastFinder jsonObjectCastFinder = new AmpPassJSONObjectCastFinder(getCompiler());
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
     
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
@@ -118,8 +115,11 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   protected CompilerOptions createTypeCheckingOptions() {
     CompilerOptions options = super.createOptions();
-    options.setCheckTypes(true);
-    options.setInferTypes(true);
+    //options.setCheckTypes(true);
+    //options.setInferTypes(true);
+    //CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
+    AmpPassJSONObjectCastFinder jsonObjectCastFinder = new AmpPassJSONObjectCastFinder(getCompiler());
+    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, jsonObjectCastFinder);
     return options;
   }
 
@@ -136,8 +136,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
         runner.single_file_compilation = true;
-      } else if (arg.contains("SCAN_JSON_CASTS=true")) {
-        runner.scan_json_casts = true;
       }
     }
 

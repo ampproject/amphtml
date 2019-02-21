@@ -28,23 +28,10 @@ import com.google.javascript.jscomp.Es6SyntacticScopeCreator;
 import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.NodeTraversal;
 import com.google.javascript.rhino.Node;
+import com.google.javascript.rhino.Token;
 import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeRegistry;
 
-/**
- * Does a `stripTypeSuffix` which currently can't be done through
- * the normal `strip` mechanisms provided by closure compiler.
- * Some of the known mechanisms we tried before writing our own compiler pass
- * are setStripTypes, setStripTypePrefixes, setStripNameSuffixes, setStripNamePrefixes.
- * The normal mechanisms found in closure compiler can't strip the expressions we want because
- * they are either prefix based and/or operate on the es6 translated code which would mean they
- * operate on a qualifier string name that looks like
- * "module$__$__$__$extensions$amp_test$0_1$log.dev.fine".
- *
- * Other custom pass examples found inside closure compiler src:
- * https://github.com/google/closure-compiler/blob/master/src/com/google/javascript/jscomp/PolymerPass.java
- * https://github.com/google/closure-compiler/blob/master/src/com/google/javascript/jscomp/AngularPass.java
- */
 class AmpPassJSONObjectCastFinder implements NodeTraversal.Callback, CompilerPass {
 
   final AbstractCompiler compiler;
@@ -57,41 +44,31 @@ class AmpPassJSONObjectCastFinder implements NodeTraversal.Callback, CompilerPas
 
   @Override
   public void process(Node externsRoot, Node jsRoot) {
-	check(jsRoot);
+    check(jsRoot);
   }
-  
+
   void check(Node jsRoot) {
-	 Es6SyntacticScopeCreator scopeCreator = new Es6SyntacticScopeCreator(this.compiler);
-	 NodeTraversal t = new NodeTraversal(compiler, this, scopeCreator); 
-	 t.traverse(jsRoot);
+    Es6SyntacticScopeCreator scopeCreator = new Es6SyntacticScopeCreator(this.compiler);
+    NodeTraversal t = new NodeTraversal(compiler, this, scopeCreator);
+    t.traverse(jsRoot);
   }
 
   public void visit(NodeTraversal t, Node n, Node parent) {
-    if (isCast(n)) {
-    	Node castNode = n;
-    	Node exprNode = castNode.getFirstChild();
-    	
-    	JSType castType = castNode.getJSType();
-    	JSType exprType = exprNode.getJSType();
-    	String error = "cast from type: " + exprType + " " + this.typeRegistry.getReadableTypeName(exprNode) +
-    			" to " + castType + " " +  this.typeRegistry.getReadableTypeName(exprNode) + ". " + castNode.getSourceFileName() + ":" + castNode.getLineno() + "\n";
-    	JSError err = JSError.make(DiagnosticType.warning("JSERROR", "{0}"), error);
-    	this.compiler.report(err);
+    if (n != null && n.isCast()) {
+      Node castNode = n;
+      Node exprNode = castNode.getFirstChild();
 
+      JSType castType = castNode.getJSType();
+      JSType exprType = exprNode.getJSType();
+      String error = "cast from type: " + exprType + " " + this.typeRegistry.getReadableTypeName(exprNode) +
+          " to " + castType + " " +  this.typeRegistry.getReadableTypeName(exprNode) + ". " + castNode.getSourceFileName() + ":" + castNode.getLineno() + "\n";
+      JSError err = JSError.make(DiagnosticType.warning("JSERROR", "{0}"), error);
+      this.compiler.report(err);
     }
-  }
-
-  private boolean isCast(Node n) {
-	  return n != null && n.isCast();
-  }
-  
-  public static void writeCastWarnings(String str) throws IOException {       
-      Path path = Paths.get("/Users/erwinm/dev/amphtml/build-system/runner/types.txt");
-      Files.write(path, str.getBytes(), StandardOpenOption.APPEND);
   }
 
   @Override
   public boolean shouldTraverse(NodeTraversal nodeTraversal, Node n, Node parent) {
-	return true;
+    return true;
   }
 }
