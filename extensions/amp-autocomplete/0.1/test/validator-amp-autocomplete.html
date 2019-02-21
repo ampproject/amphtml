@@ -12,67 +12,106 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-autocomplete layout="fixed" width="150" height="80" filter="prefix">
+  <!-- Valid: amp-component with static data and filter=prefix attribute -->
+  <amp-autocomplete filter="prefix">
     <input type="text">
-    <script type="application/json">
-      {
-        items: [
-          "Albany, New York",
-          "Annapolis, Maryland",
-          "Atlanta, Georgia",
-          "Augusta, Maine",
-          "Austin, Texas",
-          "Baton Rouge, Louisiana",
-          "Bismarck, North Dakota",
-          "Boise, Idaho",
-          "Boston, Massachusetts",
-          "Carson City, Nevada",
-          "Charleston, West Virginia",
-          "Cheyenne, Wyoming",
-          "Columbia, South Carolina",
-          "Columbus, Ohio",
-          "Concord, New Hampshire",
-          "Denver, Colorado",
-          "Des Moines, Iowa",
-          "Dover, Delaware",
-          "Frankfort, Kentucky",
-          "Harrisburg, Pennsylvania",
-          "Hartford, Connecticut",
-          "Helena, Montana",
-          "Honolulu, Hawaii",
-          "Indianapolis, Indiana",
-          "Jackson, Mississippi",
-          "Jefferson City, Missouri",
-          "Juneau, Alaska",
-          "Lansing, Michigan",
-          "Lincoln, Nebraska",
-          "Little Rock, Arkansas",
-          "Madison, Wisconsin",
-          "Montgomery, Alabama",
-          "Montpelier, Vermont",
-          "Nashville, Tennessee",
-          "Oklahoma City, Oklahoma",
-          "Olympia, Washington",
-          "Phoenix, Arizona",
-          "Pierre, South Dakota",
-          "Providence, Rhode Island",
-          "Raleigh, North Carolina",
-          "Richmond, Virginia",
-          "Sacramento, California",
-          "Saint Paul, Minnesota",
-          "Salem, Oregon",
-          "Salt Lake City, Utah",
-          "Santa Fe, New Mexico",
-          "Springfield, Illinois",
-          "Tallahassee, Florida",
-          "Topeka, Kansas",
-          "Trenton, New Jersey"
-        ]
-      }
+    <script type="application/ld+json">
+      { items: [ "a", "b", "c" ] }
     </script>
   </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and filter=token-prefix attribute -->
+  <amp-autocomplete filter="token-prefix">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and filter=substring attribute -->
+  <amp-autocomplete filter="substring">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and filter=fuzzy attribute -->
+  <amp-autocomplete filter="fuzzy">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and filter=none attribute -->
+  <amp-autocomplete filter="none">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+  
+  <!-- Valid: amp-component with static data and filter=custom and filter-expr attribute -->
+  <amp-autocomplete filter="custom" filter-expr="true">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and min-characters attribute -->
+  <amp-autocomplete min-characters=3>
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and max-entries attribute -->
+  <amp-autocomplete max-entries=10>
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with static data and suggest-first attribute -->
+  <amp-autocomplete suggest-first>
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>  
+
+  <!-- Valid: amp-component with static data and submit-on-enter attribute -->
+  <amp-autocomplete submit-on-enter>
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>  
+
+  <!-- Invalid: width is mistyped -->
+  <amp-autocomplete widht=100>
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>  
+
+  <!-- Invalid: responsive layout is not supported -->
+  <amp-autocomplete layout="responsive">
+      <input type="text">
+      <script type="application/ld+json">
+        { items: [ "a", "b", "c" ] }
+      </script>
+  </amp-autocomplete>  
+
 </body>
 </html>

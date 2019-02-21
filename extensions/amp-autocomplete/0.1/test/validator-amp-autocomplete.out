@@ -1,4 +1,9 @@
-PASS
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-autocomplete tag.
+|  -->
+|
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -7,15 +12,133 @@ PASS
 |    <link rel="canonical" href="amps.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-|    <style amp-custom>
-|      amp-autocomplete {
-|        color: red;
-|      }
-|    </style>
 |    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-autocomplete layout="responsive" width="150" height="80"></amp-autocomplete>
+|    <!-- Valid: amp-component with static data and filter=prefix attribute -->
+|    <amp-autocomplete filter="prefix">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:21:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|      <input type="text">
+|      <script type="application/ld+json">
+|        { items: [ "a", "b", "c" ] }
+|      </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and filter=token-prefix attribute -->
+|    <amp-autocomplete filter="token-prefix">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:29:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and filter=substring attribute -->
+|    <amp-autocomplete filter="substring">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:37:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and filter=fuzzy attribute -->
+|    <amp-autocomplete filter="fuzzy">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:45:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and filter=none attribute -->
+|    <amp-autocomplete filter="none">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:53:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|    
+|    <!-- Valid: amp-component with static data and filter=custom and filter-expr attribute -->
+|    <amp-autocomplete filter="custom" filter-expr="true">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:61:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and min-characters attribute -->
+|    <amp-autocomplete min-characters=3>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:69:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and max-entries attribute -->
+|    <amp-autocomplete max-entries=10>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:77:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>
+|
+|    <!-- Valid: amp-component with static data and suggest-first attribute -->
+|    <amp-autocomplete suggest-first>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:85:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>  
+|
+|    <!-- Valid: amp-component with static data and submit-on-enter attribute -->
+|    <amp-autocomplete submit-on-enter>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:93:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: width is mistyped -->
+|    <amp-autocomplete widht=100>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:101:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:101:2 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: responsive layout is not supported -->
+|    <amp-autocomplete layout="responsive">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:109:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+|        <input type="text">
+|        <script type="application/ld+json">
+|          { items: [ "a", "b", "c" ] }
+|        </script>
+|    </amp-autocomplete>  
+|
 |  </body>
 |  </html>
