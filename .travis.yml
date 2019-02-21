@@ -76,6 +76,7 @@ jobs:
       name: "Local Tests"
       os: windows
       before_install:
+        - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
         - choco install googlechrome        
         - choco install python
         - py -m pip install urllib3[secure]
@@ -83,7 +84,7 @@ jobs:
       script:
         - node build-system/pr-check/local-tests.js
       env:
-        - PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+        # - PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
         - YARN_GPG=no #long running gpg prevents Windows build from shutting down
     - stage: test
       name: "Remote (Sauce Labs) Tests"
