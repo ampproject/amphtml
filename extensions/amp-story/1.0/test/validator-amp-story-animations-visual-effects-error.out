@@ -1,6 +1,6 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -49,18 +49,18 @@ FAIL
 |          <h1>visual-effects</h1>
 |          <div animate-in="zoom-in" animate-in-duration="5s" class="img-container" pan-up="200px">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:49:8 The attribute 'pan-up' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:49:8 The attribute 'pan-up' may not appear in tag 'div'. [DISALLOWED_HTML]
 |              <amp-img id="ken-burns-img1"
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The attribute 'translate-x' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value '100'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:50:12 The attribute 'translate-x' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value '100'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The tag 'amp-img', a child tag of 'AMP-STORY-GRID-LAYER default', does not satisfy the reference point 'AMP-STORY-GRID-LAYER animate-in'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:50:12 The tag 'amp-img', a child tag of 'AMP-STORY-GRID-LAYER default', does not satisfy the reference point 'AMP-STORY-GRID-LAYER animate-in'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The attribute 'animate-in' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:50:12 The attribute 'animate-in' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:50:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The attribute 'translate-x' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:50:12 The attribute 'translate-x' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |                 src="https://picsum.photos/1024/768?image=1077"
 |                 animate-in="pan-left"
 |                 translate-x="100"
@@ -73,21 +73,21 @@ amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:50:12 The attri
 |          <div animate-in="fade-in" animate-in-after="ken-burns-img1" animate-in-delay="0.25s" animate-in-duration="1s">
 |            <div
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'scale-end' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value 'invalid'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'scale-end' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value 'invalid'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'scale-start' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value 'invalid'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'scale-start' in tag 'AMP-STORY-GRID-LAYER animate-in' is set to the invalid value 'invalid'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The tag 'div', a child tag of 'AMP-STORY-GRID-LAYER default', does not satisfy the reference point 'AMP-STORY-GRID-LAYER animate-in'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The tag 'div', a child tag of 'AMP-STORY-GRID-LAYER default', does not satisfy the reference point 'AMP-STORY-GRID-LAYER animate-in'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'animate-in' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'animate-in' may not appear in tag 'div'. [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'animate-in-after' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'animate-in-after' may not appear in tag 'div'. [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'animate-in-duration' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'animate-in-duration' may not appear in tag 'div'. [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'scale-end' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'scale-end' may not appear in tag 'div'. [DISALLOWED_HTML]
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attribute 'scale-start' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:61:10 The attribute 'scale-start' may not appear in tag 'div'. [DISALLOWED_HTML]
 |              animate-in="zoom-out"
 |              scale-start="invalid"
 |              scale-end="invalid"
@@ -96,11 +96,11 @@ amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:61:10 The attri
 |              animate-in-after="ken-burns-img1">
 |              <amp-img id="ken-burns-img2"
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:68:12 The attribute 'animate-in-after' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:68:12 The attribute 'animate-in-after' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:68:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:68:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-vfx-parameters-error.html:68:12 The attribute 'translate-y' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-error.html:68:12 The attribute 'translate-y' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |                src="https://picsum.photos/1024/768?image=1026"
 |                layout="fixed"
 |                width="1024"
