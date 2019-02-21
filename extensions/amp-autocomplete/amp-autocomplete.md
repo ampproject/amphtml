@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>An autocomplete-enabled input field suggests completed results corresponding to the user input as they type into the input field.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +31,50 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>container, fixed, fixed-width, nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>AMP By Example coming soon.</td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from the current viewport.
+
+Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
+
+By default, `<amp-container>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item
+elements rendered via the template.
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+### filter
+The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (`filter != none`), it is done client side. 
+
+The following are supported values:
+* `substring`: if the user input is a substring of an item, then the item is suggested
+* `prefix`: if the user input is a prefix of an item, then the item gets suggested
+* `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
+* `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
+* `none`: 
+* `custom`:  a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including `amp-bind`; if `filter==custom`, an additional attribute `filter-expr` is required to specify a boolean expression by which to perform the custom filter.
+
+### filter-expr
+Required if `filter==custom`
+
+### min-characters (optional)
+The min character length of a user input to provide results, default 1
+
+### max-entries (optional)
+The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+
+### suggest-first (optional)
+Suggest the first entry in the list of results by marking it active; only possible if `filter==prefix` (does nothing otherwise)
+
+### submit-on-enter (optional)
+The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
 
 ## Validation
 See [amp-autocomplete rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-autocomplete/validator-amp-autocomplete.protoascii) in the AMP validator specification.
