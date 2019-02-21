@@ -47,8 +47,10 @@ function writeFriendlyFrame(doc, iframe, adContent) {
  * then add it to the document.
  */
 function writeSafeFrame(doc, iframe, adContent) {
+  const {testServerPort} = window.ampTestRuntimeConfig;
   iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src = 'http://tpc.googlesyndication.com/safeframe/1-0-32/html/container.html';
+  iframe.src = 'http://localhost:' + testServerPort +
+      '/test/fixtures/served/iframe-safeframe.html';
   doc.body.appendChild(iframe);
 }
 
@@ -150,6 +152,10 @@ describe('inabox', function() {
         <script src="/examples/inabox-tag-integration.js"></script>
         `,
     }, env => {
+      beforeEach(() => {
+        env.iframe.style.height = '100vh';
+      });
+
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
@@ -173,10 +179,7 @@ describe('inabox', function() {
     let iframe;
     before(() => {
       // Gets the same ad as the other tests.
-      // Replace relative path with absolute path so it would work in safe frame
-      return fetchAdContent().then(text => {
-        adContent = text.replace(/\/dist/g, 'http://localhost:8081/dist');
-      });
+      return fetchAdContent().then(text => { adContent = text; });
     });
 
     beforeEach(() => {
@@ -213,9 +216,7 @@ describe('inabox', function() {
     let adContent;
     let iframe;
     before(() => {
-      return fetchAdContent().then(text => {
-        adContent = text.replace(/\/dist/g, 'http://localhost:8081/dist');
-      });
+      return fetchAdContent().then(text => { adContent = text; });
     });
 
     beforeEach(() => {
