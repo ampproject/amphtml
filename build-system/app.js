@@ -24,6 +24,7 @@ const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const devDashboard = require('./app-index/index');
+const enableCors = require('./amp-cors');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -33,8 +34,14 @@ const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
+const {
+  recaptchaFrameRequestHandler,
+  recaptchaRouter,
+} = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
+
+const upload = multer();
 
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
@@ -76,48 +83,68 @@ if (!global.AMP_TESTING) {
     devDashboard.setCacheStatus(false);
   }
 
-  app.get(['/', '/*'], devDashboard.serveIndex({
-    // Sitting on build-system/, so we go back one dir for the repo root.
-    root: path.join(__dirname, '../'),
-    mapBasepath(url) {
-      // Serve /examples/ on main page.
-      if (url == '/') {
-        return '/examples';
-      }
-      // Serve root on /~ as a fallback.
-      if (url == '/~') {
-        return '/';
-      }
-      // Serve basepath from URL otherwise.
-      return url;
-    },
-  }));
-
-  app.get('/serve_mode.json', (req, res) => {
-    res.json({serveMode: pc.env.SERVE_MODE || 'default'});
-  });
-
-  app.get('/serve_mode_change', (req, res) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    const {mode} = req.query;
-    if (isValidServeMode(mode)) {
-      setServeMode(mode);
-      res.json({ok: true});
-      return;
-    }
-    res.status(400).json({ok: false});
-  });
-
-  app.get('/proxy', (req, res) => {
-    const {mode, url} = req.query;
-    const prefix = (mode || '').replace(/\/$/, '');
-    const sufix = url.replace(/^http(s?):\/\//i, '');
-    res.redirect(`${prefix}/proxy/s/${sufix}`);
-  });
+  devDashboard.installExpressMiddleware(app);
 }
+
+
+// Changes the current serve mode via query param
+// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// (See ./app-index/settings.js)
+app.get('/serve_mode_change', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  const {mode} = req.query;
+  if (isValidServeMode(mode)) {
+    setServeMode(mode);
+    res.json({ok: true});
+    return;
+  }
+  res.status(400).json({ok: false});
+});
+
+
+// Redirects to a proxied document with optional mode through query params.
+//
+// Mode can be one of:
+//   - '/', empty string, or unset for an unwrapped doc
+//   - '/a4a/' for an AMP4ADS wrapper
+//   - '/a4a-3p/' for a 3P AMP4ADS wrapper
+//   - '/inabox/' for an AMP inabox wrapper
+//   - '/shadow/' for a shadow-wrapped document
+//
+// Examples:
+//   - /proxy/?url=hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=hello.com?mode=/shadow/ 👉 /shadow/proxy/s/hello.com
+//   - /proxy/?url=https://hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=https://www.google.com/amp/s/hello.com 👉 /proxy/s/hello.com
+//
+// This passthrough is useful to generate the URL from <form> values,
+// (See ./app-index/proxy-fom.js)
+app.get('/proxy', (req, res) => {
+  const {mode, url} = req.query;
+  const prefix = (mode || '').replace(/\/$/, '');
+  const sufixClearPrefixReStr =
+      '^http(s?)://' +
+      '((www\.)?google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)/amp/s/)?';
+  const sufix = url.replace(new RegExp(sufixClearPrefixReStr, 'i'), '');
+  res.redirect(`${prefix}/proxy/s/${sufix}`);
+});
+
+/*
+ * Intercept Recaptcha frame for,
+ * integration tests. Using this to mock
+ * out the recaptcha api.
+ */
+app.get(
+    '/dist.3p/current*/recaptcha.*html',
+    recaptchaFrameRequestHandler
+);
+app.use(
+    '/recaptcha',
+    recaptchaRouter
+);
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -261,8 +288,6 @@ app.use('/form/json/poll1', (req, res) => {
   });
 });
 
-const upload = multer();
-
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);
 
@@ -296,6 +321,7 @@ app.use('/form/search-json/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     term: req.query.term,
+    additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
 });
@@ -867,7 +893,7 @@ function escapeRegExp(string) {
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
-      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      `<${tagName}[\\s][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
 }
 
@@ -1359,18 +1385,6 @@ function addQueryParam(url, param, value) {
     url += '&' + paramValue;
   }
   return url;
-}
-
-function enableCors(req, res, origin, opt_exposeHeaders) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  if (req.query.__amp_source_origin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.query.__amp_source_origin);
-  }
 }
 
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders,

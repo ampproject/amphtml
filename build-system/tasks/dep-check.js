@@ -29,13 +29,14 @@ const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {isTravisBuild} = require('../travis');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -118,6 +119,17 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
+
+        // Allow extension files to depend on their own code.
+        const dir = path.dirname(dep);
+        if (dir.startsWith('extensions/')) {
+          // eg, 'extensions/amp-geo/0.1'
+          const match = /extensions\/[^\/]+\/[^\/]+/.exec(dir);
+          if (match && path.dirname(moduleName).startsWith(match[0])) {
+            return;
+          }
+        }
+
         const inWhitelist = this.whitelist_.some(entry => {
           const pair = entry.split('->');
           const whitelistedModuleName = pair[0];

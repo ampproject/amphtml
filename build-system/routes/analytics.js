@@ -28,6 +28,16 @@ router.post('/rewriter', (req, res) => {
     Object.assign(body, requestsConfig);
   }
 
+  if (body.vars && body.vars.useIframePing) {
+    Object.assign(body, {
+      triggers: {
+        view: {
+          'iframePing': true,
+        },
+      },
+    });
+  }
+
   const extraUrlParams = {
     extraUrlParams: {
       testId: 12358,

@@ -49,6 +49,7 @@ export class Dialog {
 
     const doc = this.ampdoc_.win.document;
 
+    /** @private @const {!Element} */
     this.wrapper_ = createElementWithAttributes(
         doc,
         'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
@@ -143,8 +144,7 @@ export class Dialog {
         setImportantStyles(this.wrapper_, {
           transform: 'translateY(0)',
         });
-        return this.timer_.promise(300);
-      });
+      }).then(() => this.timer_.promise(300));
     }).then(() => {
       // Update page layout.
       let offsetHeight;
@@ -154,6 +154,9 @@ export class Dialog {
         },
         mutate: () => {
           this.viewport_.updatePaddingBottom(offsetHeight);
+          // TODO(dvoytenko, #20608): add to fixed layer, once the SwG/FL
+          // conflict is resolved.
+          // this.viewport_.addToFixedLayer(this.wrapper_, true);
         },
       });
     });
@@ -172,6 +175,7 @@ export class Dialog {
       setImportantStyles(this.wrapper_, {
         transform: 'translateY(100%)',
       });
+    }).then(() => {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {

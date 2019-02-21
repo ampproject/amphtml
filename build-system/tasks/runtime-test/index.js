@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const babelify = require('babelify');
 const colors = require('ansi-colors');
 const config = require('../../config');
 const deglob = require('globs-to-files');
@@ -31,6 +32,7 @@ const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
 
@@ -96,11 +98,11 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
-        'SL_Chrome',
+        //'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
-        'SL_Edge_17',
+        //'SL_Edge_17',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
@@ -159,7 +161,7 @@ function printArgvMessages() {
     log(green('Launching'), cyan(chromeBase), green('with flags'),
         cyan(formattedFlagList));
   }
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
@@ -246,9 +248,22 @@ async function runTests() {
     c.client.verboseLogging = true;
   }
 
-  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
+  if (!isTravisBuild() && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
+
+  c.browserify.configure = function(bundle) {
+    bundle.on('prebundle', function() {
+      log(green('Transforming tests with'), cyan('browserify') + green('...'));
+    });
+    bundle.on('transform', function(tr) {
+      if (tr instanceof babelify) {
+        tr.once('babelify', function() {
+          process.stdout.write('.');
+        });
+      }
+    });
+  };
 
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
   // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
@@ -299,6 +314,7 @@ async function runTests() {
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
+    testServerPort: c.client.testServerPort,
   };
 
   if (argv.compiled) {
@@ -333,20 +349,21 @@ async function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: process.env.TRAVIS ? ['lcov'] : ['html', 'text', 'text-summary'],
+      reports: isTravisBuild() ? ['lcov'] : ['html', 'text', 'text-summary'],
     };
   }
 
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
-    port: 8081,
+    port: karmaDefault.client.testServerPort,
     host: 'localhost',
     directoryListing: true,
     middleware: [app],
   }).on('kill', function() {
-    log(yellow('Shutting down test responses server on localhost:8081'));
+    log(yellow('Shutting down test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
   }));
-  log(yellow(
-      'Started test responses server on localhost:8081'));
+  log(yellow('Started test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
@@ -362,7 +379,7 @@ async function runTests() {
 
   // Exit tests
   // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-  if (process.env.TRAVIS) {
+  if (isTravisBuild()) {
     setTimeout(() => {
       process.exit(processExitCode);
     }, 5000);
@@ -460,7 +477,7 @@ async function runTests() {
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
-        if (process.env.TRAVIS) {
+        if (isTravisBuild()) {
           const codecovCmd =
               './node_modules/.bin/codecov --file=test/coverage/lcov.info';
           let flags = '';
@@ -496,6 +513,9 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
+    }).on('browsers_ready', function() {
+      console./*OK*/log('\n');
+      log(green('Done. Running tests...'));
     }).on('browser_complete', function(browser) {
       const result = browser.lastResult;
       // Prevent cases where Karma detects zero tests and still passes. #16851.
@@ -515,7 +535,7 @@ async function runTests() {
         message += red(result.failed + ' FAILED');
       }
       message += '\n';
-      console./* OK*/log('\n');
+      console./*OK*/log('\n');
       log(message);
     }).start();
     return deferred;

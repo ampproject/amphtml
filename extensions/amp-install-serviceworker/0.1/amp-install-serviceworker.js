@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {closestByTag, removeElement} from '../../../src/dom';
+import {closestAncestorElementByTag, removeElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -267,7 +267,8 @@ class UrlRewriter_ {
     if (event.defaultPrevented) {
       return;
     }
-    const target = closestByTag(dev().assertElement(event.target), 'A');
+    const target =
+      closestAncestorElementByTag(dev().assertElement(event.target), 'A');
     if (!target || !target.href) {
       return;
     }
@@ -307,35 +308,37 @@ class UrlRewriter_ {
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src, element) {
-  const scope = element.getAttribute('data-scope') || '/';
-  return win.navigator.serviceWorker.register(src, {
-    scope,
-  }).then(function(registration) {
-    if (getMode().development) {
-      user().info(TAG, 'ServiceWorker registration successful with scope: ',
-          registration.scope);
-    }
-    // Check if there is a new service worker installing.
-    const installingSw = registration.installing;
-    if (installingSw) {
-      // if not already active, wait till it becomes active
-      installingSw.addEventListener('statechange', evt => {
-        if (evt.target.state === 'activated') {
-          performServiceWorkerOptimizations(
-              registration,
-              win,
-              element
-          );
+  const options = {};
+  if (element.hasAttribute('data-scope')) {
+    options.scope = element.getAttribute('data-scope');
+  }
+  return win.navigator.serviceWorker.register(src, options)
+      .then(function(registration) {
+        if (getMode().development) {
+          user().info(TAG, 'ServiceWorker registration successful with scope: ',
+              registration.scope);
         }
-      });
-    } else if (registration.active) {
-      performServiceWorkerOptimizations(registration, win, element);
-    }
+        // Check if there is a new service worker installing.
+        const installingSw = registration.installing;
+        if (installingSw) {
+          // if not already active, wait till it becomes active
+          installingSw.addEventListener('statechange', evt => {
+            if (evt.target.state === 'activated') {
+              performServiceWorkerOptimizations(
+                  registration,
+                  win,
+                  element
+              );
+            }
+          });
+        } else if (registration.active) {
+          performServiceWorkerOptimizations(registration, win, element);
+        }
 
-    return registration;
-  }, function(e) {
-    user().error(TAG, 'ServiceWorker registration failed:', e);
-  });
+        return registration;
+      }, function(e) {
+        user().error(TAG, 'ServiceWorker registration failed:', e);
+      });
 }
 
 /**

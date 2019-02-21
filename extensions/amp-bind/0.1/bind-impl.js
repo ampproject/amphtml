@@ -21,6 +21,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
+import {closestAncestorElementByTag, iterateCursor} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -31,9 +32,8 @@ import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {iterateCursor} from '../../../src/dom';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/purifier';
+import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
@@ -302,11 +302,12 @@ export class Bind {
     dev().info(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
-        .then(() => {
-          this.history_.replace({
-            'data': dict({'amp-bind': this.state_}),
-            'title': this.localWin_.document.title,
-          });
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          // Don't bother calling History.replace with empty data.
+          if (data) {
+            this.history_.replace(data);
+          }
         });
     return this.setStatePromise_;
   }
@@ -334,12 +335,31 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(() => {
-            this.history_.push(onPop, {
-              'data': dict({'amp-bind': this.state_}),
-              'title': this.localWin_.document.title,
-            });
+          .then(() => this.getDataForHistory_())
+          .then(data => {
+            this.history_.push(onPop, data);
           });
+    });
+  }
+
+  /**
+   * Returns data that should be saved in browser history on AMP.setState() or
+   * AMP.pushState(). This enables features like restoring browser tabs.
+   * @return {!Promise<?JsonObject>}
+   */
+  getDataForHistory_() {
+    const data = dict({
+      'data': dict({'amp-bind': this.state_}),
+      'title': this.localWin_.document.title,
+    });
+    if (!this.viewer_.isEmbedded()) {
+      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
+      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
+    }
+    // Only pass state for history updates to trusted viewers, since they
+    // may contain user data e.g. form input.
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      return (trusted) ? data : null;
     });
   }
 
@@ -390,6 +410,7 @@ export class Bind {
       this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
     });
     const added = bindings.length;
+    // Early-out if there are no elements to add -- just clean up `removed`.
     if (added === 0) {
       return cleanup(0);
     }
@@ -1122,7 +1143,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty = (tag == 'INPUT' && property in element);
+        const updateProperty = (tag === 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -1140,6 +1161,11 @@ export class Bind {
             element.removeAttribute(property);
             mutated = true;
           }
+          if (mutated) {
+            // Safari-specific workaround for updating <select> elements
+            // when a child option[selected] attribute changes.
+            this.updateSelectForSafari_(element, property, newValue);
+          }
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
               element, property, String(newValue), updateProperty);
@@ -1151,6 +1177,36 @@ export class Bind {
         break;
     }
     return null;
+  }
+
+  /**
+   * Hopefully we can delete this with Safari 13+.
+   * @param {!Element} element
+   * @param {string} property
+   * @param {BindExpressionResultDef} newValue
+   */
+  updateSelectForSafari_(element, property, newValue) {
+    // We only care about option[selected].
+    if (element.tagName !== 'OPTION' || property !== 'selected') {
+      return;
+    }
+    // We only care if this option was selected, not deselected.
+    if (!newValue) {
+      return;
+    }
+    // Workaround only needed for Safari.
+    if (!Services.platformFor(this.win_).isSafari()) {
+      return;
+    }
+    const select = closestAncestorElementByTag(element, 'select');
+    if (!select) {
+      return;
+    }
+    // Set corresponding selectedIndex on <select> parent.
+    const index = toArray(select.options).indexOf(element);
+    if (index >= 0) {
+      select.selectedIndex = index;
+    }
   }
 
   /**
@@ -1245,6 +1301,8 @@ export class Bind {
           match = (initialValue === '');
         } else if (expectedValue === false) {
           match = (initialValue === null);
+        } else if (typeof expectedValue === 'number') {
+          match = (Number(initialValue) === expectedValue);
         } else {
           match = (initialValue === expectedValue);
         }

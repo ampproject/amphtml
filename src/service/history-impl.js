@@ -41,7 +41,7 @@ let HistoryIdDef;
 let HistoryStateDef;
 
 /**
- * @typedef {{title: (string|undefined), fragment: (string|undefined), data: (!JsonObject|undefined)}}
+ * @typedef {{title: (string|undefined), fragment: (string|undefined), url: (string|undefined), canonicalUrl: (string|undefined), data: (!JsonObject|undefined)}}
  */
 let HistoryStateUpdateDef;
 
@@ -542,8 +542,10 @@ export class HistoryBindingNatural_ {
     return this.whenReady_(() => {
       const newState = this.mergeStateUpdate_(
           this.getState_(), opt_stateUpdate || {});
-      this.historyReplaceState_(newState, /* title */ undefined,
-          newState.fragment ? ('#' + newState.fragment) : undefined);
+      const url = (newState.url || '').replace(/#.*/, '');
+      const fragment = newState.fragment ? '#' + newState.fragment : '';
+      this.historyReplaceState_(newState, newState.title,
+          (url || fragment) ? url + fragment : undefined);
       return tryResolve(() =>
         this.mergeStateUpdate_(newState, {stackIndex: this.stackIndex_})
       );
@@ -905,6 +907,20 @@ export class HistoryBindingVirtual_ {
    * @override
    */
   replace(opt_stateUpdate) {
+    if (opt_stateUpdate && opt_stateUpdate.url) {
+      if (!this.viewer_.hasCapability('fullReplaceHistory')) {
+        // Full URL replacement requested, but not supported by the viewer.
+        // Don't update, and return the current state.
+        const curState = /** @type {!HistoryStateDef} */ (dict(
+            {'stackIndex': this.stackIndex_}));
+        return Promise.resolve(curState);
+      }
+
+      // replace fragment, only explicit fragment param will be sent.
+      const url = opt_stateUpdate.url.replace(/#.*/, '');
+      opt_stateUpdate.url = url;
+    }
+
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
     );

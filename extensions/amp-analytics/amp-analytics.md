@@ -1,3 +1,12 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - email 
+  - ads
+teaser:
+  text: Captures analytics data from an AMP document.
+---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +23,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-analytics"></a>`amp-analytics`
+# amp-analytics
+Capture analytics data from an AMP document.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Capture analytics data from an AMP document.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
@@ -171,6 +177,90 @@ In this example, we specify the `config` attribute to load the configuration dat
 
 ```html
 <amp-analytics config="https://example.com/analytics.account.config.json">
+```
+
+#### Configuration Rewriter
+
+The configuration rewriter feature is designed to allow analytics providers to dynamically rewrite a provided configuration. This is similar to the remote configuration feature but additionally includes any user-provided configuration in the request made to the sever. This currently can only be enabled by an analytics vendor.
+
+An analytics vendor specifies a configRewriter property with a server url.
+```js
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+    },
+    ...
+}
+```
+
+The runtime sends a request containing the inlined configuration, merged with the provided remote configuration, to the configRewriter endpoint given by the vendor. The vendor uses this data server side to construction and return a new rewritten configuration.
+
+The runtime then merges all the provided configuration to determine the final configuration in order of highest to lowest precedence:
+1. Rewritten Configuration
+1. Inlined Configuration
+1. Vendor defined configuration
+
+##### Variable Groups
+
+Variable Groups is a feature that allows analytics providers to group a predefined set of variables that can easily be enabled by a user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
+
+Analytics providers need to create a new `varGroups` object inside of the `configRewriter` configuration to enable this feature. Publishers can then include any named analytic provider created `varGroups` they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
+
+For example we may have a vendor whose configuration looks like this:
+```js
+// This is predefined by vendor.
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+      'varGroups' : {
+        'group1': {
+          'referrer': 'DOCUMENT_REFERRER',
+          'source': 'SOURCE_URL',
+        'group2': {
+          'title': 'TITLE',
+        },
+      },
+    },
+    ...
+}
+```
+
+You can specify which variable groups are enabled by including `{enabled: true}` for the specified `varGroups` within the provider's `<amp-analytics>` configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
+
+In the example below, both `group1` and `group2` have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
+
+```html
+/* Included on publisher page */
+<amp-analytics type="myVendor" id="myVendor" data-credentials="include">
+  <script type="application/json">
+  {
+    "configRewriter": {
+      "varGroups": {
+        "group1": {
+          "enabled": true
+        },
+        "group2": {
+          "enabled": true
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+```
+
+In this example the request body would look something like this:
+```json
+/* Sent to configuration rewriter server. */
+"configRewriter": {
+  "vars": {
+    "referrer": "https://www.example.com",
+    "source": "https://www.amp.dev",
+    "title": "Cool Amp Tips"
+  }
+}
 ```
 
 ###  Configuration data objects
@@ -427,7 +517,7 @@ The element visibility trigger waits for the signal specified by the `waitFor` p
 If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
-##### Error trigger (In experiment)
+##### Error trigger
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 

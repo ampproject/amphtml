@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays dynamic content from the BySide service.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-byside-content`"></a> `amp-byside-content`
+# amp-byside-content
+
+Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.
+
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-byside-content" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js">&lt;/script></code></td>
@@ -33,7 +39,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-byside-content` component is available for BySide customers and  
+The `amp-byside-content` component is available for BySide customers and
 displays dynamic content that can be retrieved from the [BySide](http://www.byside.com/) customization mechanisms.
 
 Example:
@@ -54,29 +60,32 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 
 ## Attributes
 
-##### data-webcare-id (required)
-
-The BySide customer account ID.
-
-##### data-label (required)
-
-The content label as seen in your BySide account.
-
-##### data-lang
-
-The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").
-
-#####  data-channel
-
-The channel identifier to use for content validation. Defaults to an empty string.
-
-##### data-fid
-
-The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-webcare-id (required)</strong></td>
+    <td>The BySide customer account ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-label (required)</strong></td>
+    <td>The content label as seen in your BySide account.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-lang</strong></td>
+    <td>The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-channel</strong></td>
+    <td>The channel identifier to use for content validation. Defaults to an empty string.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-fid</strong></td>
+    <td>The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Privacy and cookies policy
 

@@ -49,6 +49,7 @@ describes.realWin('amp-story', {
 
   let win;
   let element;
+  let hasSwipeCapability = false;
   let story;
   let replaceStateStub;
 
@@ -84,6 +85,10 @@ describes.realWin('amp-story', {
     win = env.win;
 
     replaceStateStub = sandbox.stub(win.history, 'replaceState');
+
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    sandbox.stub(viewer, 'hasCapability')
+        .withArgs('swipe').returns(hasSwipeCapability);
 
     sandbox.stub(Services, 'storyStoreService')
         .callsFake(() => new AmpStoryStoreService(win));
@@ -179,19 +184,6 @@ describes.realWin('amp-story', {
     return story.layoutCallback()
         .then(() => {
           expect(buildShareMenuStub).to.have.been.calledOnce;
-        });
-  });
-
-  it('should not prerender/load the share menu on desktop', () => {
-    createPages(story.element, 2);
-
-    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-
-    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildShareMenuStub).to.not.have.been.called;
         });
   });
 
@@ -1240,14 +1232,77 @@ describes.realWin('amp-story', {
           });
     });
   });
-  describe('amp-story branching', () => {
 
+  describe('touch events handlers', () => {
+    const getTouchOptions = (x, y) => {
+      const touch = new Touch({
+        target: story.element,
+        identifier: Date.now(),
+        clientX: x,
+        clientY: y,
+      });
+
+      return {touches: [touch], bubbles: true};
+    };
+
+    const dispatchSwipeEvent = (deltaX, deltaY) => {
+      story.element.dispatchEvent(
+          new TouchEvent('touchstart', getTouchOptions(-10, -10)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchmove', getTouchOptions(0, 0)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchmove', getTouchOptions(deltaX, deltaY)));
+      story.element.dispatchEvent(
+          new TouchEvent('touchend', getTouchOptions(deltaX, deltaY)));
+    };
+
+    describe('without #cap=swipe', () => {
+      it('should handle touch events at the story level', () => {
+        const touchmoveSpy = sandbox.spy();
+        story.win.document.addEventListener('touchmove', touchmoveSpy);
+        dispatchSwipeEvent(100, 0);
+        expect(touchmoveSpy).to.not.have.been.called;
+      });
+
+      it('should trigger the navigation overlay', () => {
+        dispatchSwipeEvent(100, 0);
+        return story.mutateElement(() => {
+          const hintEl =
+              story.element.querySelector('.i-amphtml-story-hint-container');
+          expect(hintEl).to.not.have.class('i-amphtml-hidden');
+        });
+      });
+    });
+
+    describe('with #cap=swipe', () => {
+      before(() => hasSwipeCapability = true);
+      after(() => hasSwipeCapability = false);
+
+      it('should let touch events bubble up to be forwarded', () => {
+        const touchmoveSpy = sandbox.spy();
+        story.win.document.addEventListener('touchmove', touchmoveSpy);
+        dispatchSwipeEvent(100, 0);
+        expect(touchmoveSpy).to.have.been.called;
+      });
+
+      it('should not trigger the navigation education overlay', () => {
+        dispatchSwipeEvent(100, 0);
+        return story.mutateElement(() => {
+          const hintEl =
+              story.element.querySelector('.i-amphtml-story-hint-container');
+          expect(hintEl).to.not.exist;
+        });
+      });
+    });
+  });
+
+  describe('amp-story branching', () => {
     beforeEach(() => {toggleExperiment(win, 'amp-story-branching', true);});
     afterEach(() => {toggleExperiment(win, 'amp-story-branching', false);});
 
     it('should advance to specified page with advanced-to attribute', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-      story.buildCallback();
+
       return story.layoutCallback()
           .then(() => {
             expect(story.activePage_.element.id).to.equal('cover');
@@ -1266,6 +1321,7 @@ describes.realWin('amp-story', {
           createPages(story.element, 4,
               ['cover', 'page-1', 'page-2', 'page-3']);
           story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.element.setAttribute('id', 'story');
@@ -1286,6 +1342,7 @@ describes.realWin('amp-story', {
           createPages(story.element, 4,
               ['cover', 'page-1', 'page-2', 'page-3']);
           story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.element.setAttribute('id', 'story');
@@ -1311,7 +1368,7 @@ describes.realWin('amp-story', {
         () => {
           createPages(
               story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-          story.buildCallback();
+
           return story.layoutCallback()
               .then(() => {
                 story.getPageById('cover')
@@ -1326,6 +1383,105 @@ describes.realWin('amp-story', {
                 story.activePage_.element.dispatchEvent(
                     new MouseEvent('click', {clientX: 0}));
                 expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should begin at the specified page fragment parameter value', () => {
+      win.location.hash = 'page=page-1';
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2','page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should begin at initial page when fragment parameter value is wrong',
+        () => {
+          win.location.hash = 'page=BADVALUE';
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should update browser history with the story navigation path', () => {
+      const pageCount = 2;
+      createPages(story.element, pageCount, ['cover', 'page-1']);
+
+      return story.layoutCallback()
+          .then(() => {
+            story.activePage_.element.dispatchEvent(
+                new MouseEvent('click', {clientX: 200}));
+            return expect(replaceStateStub).to.have.been.calledWith(
+                {ampStoryNavigationPath: ['cover', 'page-1']});
+          });
+    });
+
+    it('should navigate to the correct previous page after navigating away',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                const currentLocation = win.location;
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                win.location = 'https://example.com/';
+                win.location = currentLocation;
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 0}));
+
+                expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should correctly mark goToPage pages are distance 1', () => {
+      createPages(
+          story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.element.setAttribute('id', 'story');
+
+            const actionButton = createElementWithAttributes(
+                win.document,
+                'button',
+                {'id': 'actionButton',
+                  'on': 'tap:story.goToPage(id=page-2)'});
+
+            story.element.querySelector('#cover').appendChild(actionButton);
+
+            const distanceGraph = story.getPagesByDistance_();
+            expect(distanceGraph[1].includes('page-2')).to.be.true;
+          });
+    });
+
+    it('should correctly mark previous pages in the stack as distance 1',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                const distanceGraph = story.getPagesByDistance_();
+                expect(distanceGraph[1].includes('cover')).to.be.true;
+
               });
         });
   });

@@ -96,26 +96,51 @@ describe('inabox', function() {
     return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
   }
 
-  describes.integration('AMPHTML ads rendered on non-AMP page ATF', {
-    amp: false,
-    body: `
-      <iframe
-      src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
-          scrolling="no"
-          width="300" height="250">
-      </iframe>
-      <script src="/examples/inabox-tag-integration.js"></script>
-      `,
-  }, () => {
-    // TODO: unskip this test once #14010 is fixed
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
-        'amp-analytics', () => {
-      // See amp4test.js for creative content
-      return testAmpComponents();
+  const describeWebkit = describe.configure().skipFirefox();
+
+  describeWebkit.run('AMPHTML ads', () => {
+    describes.integration('rendered on non-AMP page ATF', {
+      amp: false,
+      body: `
+        <iframe
+        src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
+            scrolling="no"
+            width="300" height="250">
+        </iframe>
+        <script src="/examples/inabox-tag-integration.js"></script>
+        `,
+    }, () => {
+      // TODO: unskip this test once #14010 is fixed
+      it('should layout amp-img, amp-pixel, ' +
+          'amp-analytics', () => {
+        // See amp4test.js for creative content
+        return testAmpComponents();
+      });
+    });
+
+    describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
+      amp: false,
+      body: `
+        <div style="height: 100vh"></div>
+        <iframe
+        src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
+            scrolling="no"
+            width="300" height="250">
+        </iframe>
+        <script src="/examples/inabox-tag-integration.js"></script>
+        `,
+    }, env => {
+      // TODO: unskip this test once #14010 is fixed
+      it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+          'amp-analytics', () => {
+        // See amp4test.js for creative content
+        return testAmpComponentsBTF(env.win);
+      });
     });
   });
 
-  describes.integration('AMPHTML ads rendered on non-AMP page ATF within ' +
+
+  describes.integration('rendered on non-AMP page ATF within ' +
       'friendly frame and safe frame', {
     amp: false,
     body: `
@@ -138,36 +163,16 @@ describe('inabox', function() {
       env.win.document.body.removeChild(iframe);
     });
 
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+    it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
     });
 
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+    it('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
-    });
-  });
-
-  describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
-    amp: false,
-    body: `
-      <div style="height: 100vh"></div>
-      <iframe
-      src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
-          scrolling="no"
-          width="300" height="250">
-      </iframe>
-      <script src="/examples/inabox-tag-integration.js"></script>
-      `,
-  }, env => {
-    // TODO: unskip this test once #14010 is fixed
-    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
-        'amp-analytics', () => {
-      // See amp4test.js for creative content
-      return testAmpComponentsBTF(env.win);
     });
   });
 
@@ -210,10 +215,13 @@ describe('inabox', function() {
 });
 
 describe('inabox with a complex image ad', function() {
+  const {testServerPort} = window.ampTestRuntimeConfig;
+
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
   const adBody = __html__['test/fixtures/amp-cupcake-ad.html'] // eslint-disable-line no-undef
+      .replace(/__TEST_SERVER_PORT__/g, testServerPort)
       .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
       .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
       .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
@@ -252,15 +260,13 @@ describe('inabox with a complex image ad', function() {
       Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
     });
 
-    it.configure().skipSafari().run(
-        'should properly render ad in a friendly iframe with viewability pings',
+    it('should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().run(
-        'should properly render ad in a safe frame with viewability pings',
+    it('should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);

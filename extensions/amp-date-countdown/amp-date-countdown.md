@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays GL Transmission Format (gITF) 3D models.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-date-countdown`"></a> `amp-date-countdown`
+# amp-date-countdown
+Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.</td>
-  </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>

@@ -20,6 +20,7 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const {isTravisBuild} = require('../travis');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
@@ -46,7 +47,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
-            if (process.env.TRAVIS) {
+            if (isTravisBuild()) {
               // Print a progress dot after each task to avoid Travis timeouts.
               process.stdout.write('.');
             }
@@ -242,7 +243,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
-      'src/!(inabox)*/**/*.js',
+      'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',

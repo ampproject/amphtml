@@ -22,6 +22,9 @@ import {
 } from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
+import {
+  install as installGetBoundingClientRect,
+} from './get-bounding-client-rect';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
@@ -38,8 +41,11 @@ installObjectValues(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+installGetBoundingClientRect(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
-if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
+// TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+// is DCE'd from production builds.
+if ((false && isExperimentOn(self, 'custom-elements-v1')) || getMode().test) {
   installCustomElements(self);
 } else {
   installRegisterElement(self, 'auto');

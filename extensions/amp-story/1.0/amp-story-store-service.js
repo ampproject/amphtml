@@ -55,6 +55,25 @@ export const UIType = {
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
+/**
+ * States in which an embedded component could be found in.
+ * @enum {number}
+ */
+export const EmbeddedComponentState = {
+  HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
+  FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
+  EXPANDED: 2, // Component is in expanded mode.
+};
+
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    state: !EmbeddedComponentState,
+ *    clientX: number,
+ *    clientY: number,
+ * }}
+ */
+export let InteractiveComponentDef;
 
 /**
  * @typedef {{
@@ -68,11 +87,9 @@ export const UIType = {
  *    adState: boolean,
  *    bookendState: boolean,
  *    desktopState: boolean,
- *    embeddedComponent: ?Element,
- *    expandedComponent: ?Element,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
- *    landscapeState: boolean,
+ *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
@@ -84,6 +101,7 @@ export const UIType = {
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
+ *    viewportWarningState: boolean,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
@@ -109,11 +127,9 @@ export const StateProperty = {
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
   DESKTOP_STATE: 'desktopState',
-  EMBEDDED_COMPONENT: 'embeddedComponent',
-  EXPANDED_COMPONENT: 'expandedComponent',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
-  LANDSCAPE_STATE: 'landscapeState',
+  INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
@@ -127,6 +143,7 @@ export const StateProperty = {
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
+  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_WHITELIST: 'actionsWhitelist',
@@ -134,6 +151,7 @@ export const StateProperty = {
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   PAGES_COUNT: 'pagesCount',
+  ADVANCEMENT_MODE: 'advancementMode',
 };
 
 
@@ -143,13 +161,12 @@ export const Action = {
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
+  SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
-  TOGGLE_EMBEDDED_COMPONENT: 'toggleEmbeddedComponent',
-  TOGGLE_EXPANDED_COMPONENT: 'toggleExpandedComponent',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
-  TOGGLE_LANDSCAPE: 'toggleLandscape',
+  TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAUSED: 'togglePaused',
@@ -162,6 +179,7 @@ export const Action = {
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
+  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
 };
 
 
@@ -172,6 +190,12 @@ export const Action = {
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+  [StateProperty.INTERACTIVE_COMPONENT_STATE]:
+      /**
+       * @param {InteractiveComponentDef} old
+       * @param {InteractiveComponentDef} curr
+       */
+      (old, curr) => old.element !== curr.element || old.state !== curr.state,
 };
 
 
@@ -215,18 +239,17 @@ const actions = (state, action, data) => {
             [StateProperty.BOOKEND_STATE]: !!data,
             [StateProperty.PAUSED_STATE]: !!data,
           }));
-    case Action.TOGGLE_EMBEDDED_COMPONENT:
+    case Action.TOGGLE_INTERACTIVE_COMPONENT:
+      data = /** @type {InteractiveComponentDef} */ (data);
       return /** @type {!State} */ (Object.assign(
           {}, state, {
-            [StateProperty.EMBEDDED_COMPONENT]: data,
-            [StateProperty.PAUSED_STATE]: !!data,
-          }));
-    case Action.TOGGLE_EXPANDED_COMPONENT:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !data,
-            [StateProperty.EXPANDED_COMPONENT]: data,
+            [StateProperty.PAUSED_STATE]:
+              data.state === EmbeddedComponentState.EXPANDED ||
+              data.state === EmbeddedComponentState.FOCUSED,
+            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
+              data.state !== EmbeddedComponentState.EXPANDED ||
+              state.uiState === UIType.DESKTOP_PANELS,
+            [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
           }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
@@ -242,9 +265,6 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
       return /** @type {!State} */ (Object.assign({}, state,
           {[StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data}));
-    case Action.TOGGLE_LANDSCAPE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
@@ -290,6 +310,9 @@ const actions = (state, action, data) => {
             [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
             [StateProperty.UI_STATE]: data,
           }));
+    case Action.TOGGLE_VIEWPORT_WARNING:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.VIEWPORT_WARNING_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -302,6 +325,9 @@ const actions = (state, action, data) => {
     case Action.SET_PAGES_COUNT:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAGES_COUNT]: data}));
+    case Action.SET_ADVANCEMENT_MODE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.ADVANCEMENT_MODE]: data}));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -403,11 +429,11 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
-      [StateProperty.EMBEDDED_COMPONENT]: null,
-      [StateProperty.EXPANDED_COMPONENT]: null,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.LANDSCAPE_STATE]: false,
+      [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
+        state: EmbeddedComponentState.HIDDEN,
+      },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
@@ -419,6 +445,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_WHITELIST]: [],
@@ -426,6 +453,7 @@ export class AmpStoryStoreService {
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
       [StateProperty.PAGES_COUNT]: 0,
+      [StateProperty.ADVANCEMENT_MODE]: '',
     });
   }
 

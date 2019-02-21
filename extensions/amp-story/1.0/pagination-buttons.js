@@ -18,6 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
+import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -145,6 +146,10 @@ class PaginationButton {
    */
   onClick_(e) {
     e.preventDefault();
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     if (this.state_.triggers) {
       dispatch(this.win_, this.element, devAssert(this.state_.triggers),
           /* payload */ undefined, {bubbles: true});

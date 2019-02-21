@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
+import {simulateKeyboardInteraction} from './utils';
 
 const config = describe.configure().retryOnSaucelabs().ifChrome();
 config.skip('amp-inputmask', () => {
+  const {testServerPort} = window.ampTestRuntimeConfig;
+
   describes.integration('attributes', {
     body: `
-    <form method="post" action-xhr="http://localhost:8081/form/post" target="_blank">
+    <form method="post" action-xhr="http://localhost:${testServerPort}/form/post" target="_blank">
       <input name="alphabetic" mask="L">
       <input name="numeric" mask="0">
       <input name="mask-output-test" mask="(A)" mask-output="alphanumeric">
     </form>
   `,
     extensions: ['amp-form', 'amp-inputmask'],
-    experiments: ['amp-inputmask'],
   }, env => {
     let win, doc;
 
@@ -41,7 +42,7 @@ config.skip('amp-inputmask', () => {
       it('should allow input matching the mask', () => {
         const input = doc.querySelector('[name="alphabetic"]');
 
-        return simulateKeyboardInteraction(input, 'A').then(() => {
+        return simulateKeyboardInteraction(win, input, 'A').then(() => {
           expect(input.value).to.equal('A');
         });
       });
@@ -49,7 +50,7 @@ config.skip('amp-inputmask', () => {
       it('should prevent input not matching the mask', () => {
         const input = doc.querySelector('[name="numeric"]');
 
-        return simulateKeyboardInteraction(input, 'A').then(() => {
+        return simulateKeyboardInteraction(win, input, 'A').then(() => {
           expect(input.value).to.equal('');
         });
       });
@@ -75,14 +76,4 @@ config.skip('amp-inputmask', () => {
       });
     });
   });
-
-  function simulateKeyboardInteraction(input, key) {
-    const promise = listenOncePromise(input, 'keypress');
-    const keyCode = key.charCodeAt(0);
-    const keydown = new KeyboardEvent('keydown', {key, keyCode});
-    const keypress = new KeyboardEvent('keypress', {key, keyCode});
-    input.dispatchEvent(keydown);
-    input.dispatchEvent(keypress);
-    return promise;
-  }
 });

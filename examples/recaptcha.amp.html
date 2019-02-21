@@ -79,6 +79,7 @@
       <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
       <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
       <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+      <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
       <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
@@ -130,7 +131,7 @@
             <div submit-error>
               <template type="amp-mustache">
                 <h1>Error! Please check the JS Console in your dev tools.</h1>
-                <p>{{error}}</p>
+                <p>{{message}}</p>
               </template>
             </div>
 
@@ -138,9 +139,6 @@
         </div>
       </amp-lightbox>
     <div>
-
-
-
 
     <!-- Standard Example -->
     <div>
@@ -164,11 +162,10 @@
           </div>
         </div>
       </form>
-      <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
-      <form method="get"
-            action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-            action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-            target="_blank">
+      <h4>Search (POST xhr same origin current host > /recaptcha/submit)</h4>
+      <form method="post"
+            action-xhr="/recaptcha/submit"
+            target="_top">
         <fieldset>
           <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
           <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
@@ -196,16 +193,81 @@
         <div submit-error>
           <template type="amp-mustache">
             <h1>Error! Please check the JS Console in your dev tools.</h1>
-            <p>{{error}}</p>
+            <p>{{message}}</p>
           </template>
         </div>
 
       </form>
     </div>
 
+    <!-- AMP bind example -->
+    <h4>Search (GET non-xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+    <amp-state id="ampBindStateGetNonXhrSameOrigin">
+      <script type="application/json">
+        "Not Changed"
+      </script>
+    </amp-state>
+    <form id="amp-bind-form-get-non-xhr-same-origin" method="get" action="/form/search-html/get" target="_blank">
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input hidden type="text" name="ampBind" [value]="ampBindStateGetNonXhrSameOrigin">
+        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+        </amp-recaptcha-input>
+      </fieldset>
+
+      <button type="button" on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
+        Submit AMP Bind Search
+      </button>
 
 
+      <div class="loading-spinner">
+        <div class="donut">
+        </div>
+      </div>
+    </form>
 
+    <h4>Search (POST xhr same origin current host > /recaptcha/submit) Using AMP Bind and Amp Action (on="tap:....")</h4>
+    <amp-state id="ampBindStatePostXhrSameOrigin">
+      <script type="application/json">
+        "Not Changed"
+      </script>
+    </amp-state>
+    <form id="amp-bind-form-post-xhr-same-origin" method="post" action-xhr="/recaptcha/submit" target="_top">
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input hidden type="text" name="additionalFields" [value]="ampBindStatePostXhrSameOrigin">
+        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+        </amp-recaptcha-input>
+      </fieldset>
+
+      <button type="button" on="tap:AMP.setState({ ampBindStatePostXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-post-xhr-same-origin.submit">
+        Submit AMP Bind Search
+      </button>
+
+
+      <div class="loading-spinner">
+        <div class="donut">
+        </div>
+      </div>
+
+      <div submit-success>
+        <template type="amp-mustache">
+          <h1>You searched for: {{term}}</h1>
+          <p>Recaptcha token: {{recaptcha_example}}</p>
+          <p>The submitted amp bind state was: {{additionalFields}}</p>
+        </template>
+      </div>
+    </form>
 
     <!-- Scrolled in Example -->
     <div class="push-down">
@@ -243,7 +305,7 @@
         <div submit-error>
           <template type="amp-mustache">
             <h1>Error! Please check the JS Console in your dev tools.</h1>
-            <p>{{error}}</p>
+            <p>{{message}}</p>
           </template>
         </div>
 

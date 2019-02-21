@@ -62,7 +62,7 @@ const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
 const testPaths = commonIntegrationTestPaths.concat([
-  'test/**/*.js',
+  'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);
@@ -168,6 +168,7 @@ module.exports = {
     '!validator/nodejs/node_modules/**/*.*',
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
+    '!build-system/tasks/e2e/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build-system/tasks/visual-diff/node_modules/**/*.*',
     '!build-system/tasks/visual-diff/snippets/*.js',
