@@ -29,9 +29,32 @@ tags: {  # <amp-autocomplete>
   tag_name: "AMP-AUTOCOMPLETE"
   requires_extension: "amp-autocomplete"
   requires_extension: "amp-form"
+  attrs: {
+    name: "filter"
+    value_casei: "substring"
+    value_casei: "token-prefix"
+    value_casei: "prefix"
+    value_casei: "fuzzy"
+    value_casei: "custom"
+    value_casei: "none"
+    trigger: {
+      if_value_regex: "custom"
+      also_requires_attr: "filter-expr"
+    }
+  }
+  attrs: {
+    name: "filter-expr"
+    requires_extension: "amp-bind"
+  }
+  attrs: { name: "min-characters" }
+  attrs: { name: "max-entries" }
+  attrs: { name: "suggest-first" }
+  attrs: { name: "submit-on-enter" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-autocomplete"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
   }
 }
