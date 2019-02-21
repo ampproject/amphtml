@@ -15,7 +15,7 @@ notifications:
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-  - pip install urllib3[secure]
+  - pip install urllib3[secure] --user
   - pip install gsutil --user
 branches:
   only:
