@@ -89,13 +89,6 @@ tags: {  # <amp-audio> for AMP, amp-story (autoplay attribute mandatory)
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
   amp_layout {
-    defines_default_height: true
-    # TODO(johannes): in the longer run, defines_default_width should
-    # be false, to make it a fixed height layout per default, rather
-    # than a fixed one.
-    defines_default_width: true
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY
   }
 }
