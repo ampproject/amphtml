@@ -917,7 +917,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    const figure = dom.closestAncestorElementByTag(sourceElement, 'figure');
+    const figure = dom.closestAncestorElementBySelector(sourceElement, 'figure');
     if (figure) {
       caption = dom.elementByTag(figure, 'figcaption');
     }
