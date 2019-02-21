@@ -24,6 +24,7 @@ const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const devDashboard = require('./app-index/index');
+const enableCors = require('./amp-cors');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -36,7 +37,7 @@ const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
-} = require('./recaptcha-router.js');
+} = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
@@ -1384,18 +1385,6 @@ function addQueryParam(url, param, value) {
     url += '&' + paramValue;
   }
   return url;
-}
-
-function enableCors(req, res, origin, opt_exposeHeaders) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  if (req.query.__amp_source_origin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.query.__amp_source_origin);
-  }
 }
 
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
