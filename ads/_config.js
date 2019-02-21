@@ -764,6 +764,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'promoteiq': {},
+
   'pubexchange': {},
 
   'pubguru': {
@@ -840,6 +842,10 @@ export const adConfig = {
 
   'runative': {
     prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
+    renderStartImplemented: true,
+  },
+
+  'sas': {
     renderStartImplemented: true,
   },
 
@@ -950,6 +956,10 @@ export const adConfig = {
 
   'uas': {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
+  },
+
+  'ucfunnel': {
+    renderStartImplemented: true,
   },
 
   'uzou': {

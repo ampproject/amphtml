@@ -93,6 +93,39 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
+    // Initiate whitelisted varaibles first in case the resolver function needs
+    // to be overwritten.
+    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
+      const varName = WHITELISTED_VARIABLES[v];
+      const resolvers = this.globalVariableSource_.get(varName);
+      this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
+    }
+
+    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required');
+      return getTimingDataSync(
+          this.win_,
+          /**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    }).setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required');
+      return getTimingDataAsync(
+          this.win_,
+          /**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
+
+    this.set('NAV_TYPE', () => {
+      return getNavigationData(this.win_, 'type');
+    });
+
+    this.set('NAV_REDIRECT_COUNT', () => {
+      return getNavigationData(this.win_, 'redirectCount');
+    });
+
+    // TODO: Remove once the migration to NAV_TIMING is done
     this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
       userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
           ' start attribute name, is required');
@@ -121,12 +154,6 @@ export class A4AVariableSource extends VariableSource {
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
 
     this.set('CLIENT_ID', () => null);
-
-    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
-      const varName = WHITELISTED_VARIABLES[v];
-      const resolvers = this.globalVariableSource_.get(varName);
-      this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
-    }
   }
 
   /**

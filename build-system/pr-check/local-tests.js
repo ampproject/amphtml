@@ -42,6 +42,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp test --integration --nobuild --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
     timedExecOrDie('gulp test --dev_dashboard --nobuild');
@@ -56,13 +57,14 @@ function main() {
           buildTargets.has('INTEGRATION_TEST') ||
           buildTargets.has('DEV_DASHBOARD'))) {
       console.log(
-          `${FILELOGPREFIX} Skipping unit and integration tests because ` +
-          'this commit not affect the runtime, build system, ' +
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Local Tests ') +
+          'because this commit not affect the runtime, build system, ' +
           'unit test files, integration test files, or the dev dashboard.');
       stopTimer(FILENAME, FILENAME, startTime);
       return 0;
     }
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
