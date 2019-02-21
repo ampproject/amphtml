@@ -114,9 +114,9 @@ function startTimer(functionName, fileName) {
  */
 function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
-  const executionTime = new Date(endTime - startTime);
-  const mins = executionTime.getMinutes();
-  const secs = executionTime.getSeconds();
+  const executionTime = endTime - startTime;
+  const mins = Math.floor(executionTime / 60000);
+  const secs = Math.floor((executionTime - mins * 60000) / 1000);
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),
