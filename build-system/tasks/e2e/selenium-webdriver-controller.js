@@ -58,9 +58,6 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
       .then(result => result.value); // Unbox the value.
 }
 
-/** @typedef {!Driver|!WebElement} */
-let SeleniumRootDef;
-
 /** @implements {FunctionalTestController} */
 class SeleniumWebDriverController {
   /**
@@ -69,13 +66,11 @@ class SeleniumWebDriverController {
   constructor(driver) {
     this.driver = driver;
 
-    /** @private {!SeleniumRootDef} */
-    this.currentRoot_ = this.driver;
+    /** @private {?WebElement} */
+    this.shadowRoot_ = null;
 
-    /** @private {string} */
-    this.xpath_ = '';
-
-
+    /** @private {boolean} */
+    this.isXpathInstalled_ = false;
   }
 
   /**
@@ -97,6 +92,9 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * This waits for an element to become available similar to Selenium's
+   * until.js#elementLocated
+   * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L237}
    * @param {string} selector
    * @return {!Promise<!ElementHandle<!WebElement>>}
    * @override
@@ -104,18 +102,28 @@ class SeleniumWebDriverController {
   async findElement(selector) {
     const bySelector = By.css(selector);
 
-    const webElement = await this.driver.wait(new Condition('', async() => {
+    const label = 'for element to be located ' + selector;
+    const condition = new Condition(label, async() => {
       try {
-        const result = await this.currentRoot_.findElement(bySelector);
+        const root = await this.getRoot_();
+        const result = await root.findElement(bySelector);
         return result;
       } catch (nse) {
+        // WebElement.prototype.findElement differs from
+        // WebDriver.prototype.findElement in that the WebElement method will
+        // throw a NoSuchElementExcpetion if the element is not found, and does
+        // not wait for the element to appear in the document.
         return null;
       }
-    }), ELEMENT_WAIT_TIMEOUT);
+    });
+    const webElement = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
 
   /**
+   * This waits for elements to become available similar to Selenium's
+   * until.js#elementsLocated
+   * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L258}   *
    * @param {string} selector
    * @return {!Promise<!Array<!ElementHandle<!WebElement>>>}
    * @override
@@ -123,14 +131,17 @@ class SeleniumWebDriverController {
   async findElements(selector) {
     const bySelector = By.css(selector);
 
-    const webElements = await this.driver.wait(new Condition('', async() => {
+    const label = 'for at least one element to be located ' + selector;
+    const condition = new Condition(label, async() => {
       try {
-        const elements = await this.currentRoot_.findElements(bySelector);
+        const root = await this.getRoot_();
+        const elements = await root.findElements(bySelector);
         return elements.length ? elements : null;
       } catch (nse) {
         return null;
       }
-    }), ELEMENT_WAIT_TIMEOUT);
+    });
+    const webElements = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
@@ -140,15 +151,13 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementXPath(xpath) {
-    if (!this.xpath_) {
-      this.xpath_ = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
-      await this.driver.executeScript(this.xpath_);
-    }
+    await this.maybeInstallXpath_();
 
     const webElement = await this.driver.wait(new Condition('', async() => {
       try {
+        const root = await this.getRoot_();
         const results =
-            await this.evaluate(queryXpath, xpath, this.currentRoot_);
+            await this.evaluate(queryXpath, xpath, root);
         return results[0];
       } catch (nse) {
         return null;
@@ -163,21 +172,33 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementsXPath(xpath) {
-    if (!this.xpath_) {
-      this.xpath_ = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
-      await this.driver.executeScript(this.xpath_);
-    }
+    await this.maybeInstallXpath_();
 
     const webElements = await this.driver.wait(new Condition('', async() => {
       try {
+        const root = await this.getRoot_();
         const results =
-            await this.evaluate(queryXpath, xpath, this.currentRoot_);
+            await this.evaluate(queryXpath, xpath, root);
         return results;
       } catch (nse) {
         return null;
       }
     }), ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
+  }
+
+  /**
+   * Install a third-party XPath library if it is not already installed.
+   * @return {!Promise}
+   */
+  async maybeInstallXpath_() {
+    if (this.isXpathInstalled_) {
+      return;
+    }
+    this.isXpathInstalled_ = true;
+
+    const script = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
+    await this.driver.executeScript(script);
   }
 
   /**
@@ -459,23 +480,23 @@ class SeleniumWebDriverController {
     const shadowHost = handle.getElement();
     const shadowRootBody = await this.evaluate(
         shadowHost => shadowHost.shadowRoot.body, shadowHost);
-    this.currentRoot_ = shadowRootBody;
+    this.shadowRoot_ = shadowRootBody;
   }
 
   async switchToLight() {
-    this.currentRoot_ = this.driver;
+    this.shadowRoot_ = null;
   }
 
   /**
-   * @param {!ElementHandle<!WebElement>} handle
-   * @param {function():(!Promise|undefined)} fn
-   * @return {!Promise}
-   * @override
+   * Get the current root
+   * @return {!Promise<!WebElement>}
    */
-  async usingFrame(handle, fn) {
-    await this.switchToFrame_(handle);
-    await fn();
-    await this.switchToParent_();
+  getRoot_() {
+    if (this.shadowRoot_) {
+      return this.shadowRoot_;
+    }
+
+    return this.evaluate(() => document.documentElement);
   }
 }
 

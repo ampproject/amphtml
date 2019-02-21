@@ -12,11 +12,17 @@
  * document's tree.
  *
  * This function runs in the document under test, and has no access to
- * variables in this file except what is passed in.
+ * variables except what is passed in and what is on the global object
+ * in the test page.
+ *
+ * This returns null instead of an empty list when there are not yet any
+ * results because Selenium uses the null value to determine that it should
+ * continue waiting.
  *
  * Precondition: wgxpath has been installed on the window object
  * @param {string} xpathString
  * @param {!Element} context
+ * @return {?Array<!Element>}
  */
 function queryXpath(xpathString, context) {
   // Install https://github.com/google/wicked-good-xpath
@@ -63,10 +69,6 @@ function queryXpath(xpathString, context) {
     }
   }
 
-  if (ids.length == 0) {
-    return null;
-  }
-
   const elements = ids.map(id => {
     const selector = `[data-i-amphtml-test-id="${id}"]`;
     return context./*OK*/querySelector(selector);
@@ -77,7 +79,7 @@ function queryXpath(xpathString, context) {
     removeData(node, i);
   }
 
-  return elements;
+  return elements.length ? elements : null;
 }
 
 module.exports = {
