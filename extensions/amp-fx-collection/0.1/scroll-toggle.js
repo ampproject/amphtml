@@ -188,7 +188,7 @@ export function getScrollTogglePosition(element, type, computedStyle) {
   devAssert(position.length > 0);
 
   // naming convention win:
-  // position `top` should have `top: 0px` & `bottom` should have `bottom: 0px`
+  // position `top` should have `top: 0` and `bottom` should have `bottom: 0`
   if (!assertStyleOrWarn(
       computedStyle, position, px(0), element, `amp-fx=${type}`)) {
     return null;
