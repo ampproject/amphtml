@@ -1,0 +1,78 @@
+<!--
+  Test Description:
+  Tests for the amp-autocomplete tag.
+-->
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-autocomplete example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-autocomplete layout="fixed" width="150" height="80" filter="prefix">
+    <input type="text">
+    <script type="application/json">
+      {
+        items: [
+          "Albany, New York",
+          "Annapolis, Maryland",
+          "Atlanta, Georgia",
+          "Augusta, Maine",
+          "Austin, Texas",
+          "Baton Rouge, Louisiana",
+          "Bismarck, North Dakota",
+          "Boise, Idaho",
+          "Boston, Massachusetts",
+          "Carson City, Nevada",
+          "Charleston, West Virginia",
+          "Cheyenne, Wyoming",
+          "Columbia, South Carolina",
+          "Columbus, Ohio",
+          "Concord, New Hampshire",
+          "Denver, Colorado",
+          "Des Moines, Iowa",
+          "Dover, Delaware",
+          "Frankfort, Kentucky",
+          "Harrisburg, Pennsylvania",
+          "Hartford, Connecticut",
+          "Helena, Montana",
+          "Honolulu, Hawaii",
+          "Indianapolis, Indiana",
+          "Jackson, Mississippi",
+          "Jefferson City, Missouri",
+          "Juneau, Alaska",
+          "Lansing, Michigan",
+          "Lincoln, Nebraska",
+          "Little Rock, Arkansas",
+          "Madison, Wisconsin",
+          "Montgomery, Alabama",
+          "Montpelier, Vermont",
+          "Nashville, Tennessee",
+          "Oklahoma City, Oklahoma",
+          "Olympia, Washington",
+          "Phoenix, Arizona",
+          "Pierre, South Dakota",
+          "Providence, Rhode Island",
+          "Raleigh, North Carolina",
+          "Richmond, Virginia",
+          "Sacramento, California",
+          "Saint Paul, Minnesota",
+          "Salem, Oregon",
+          "Salt Lake City, Utah",
+          "Santa Fe, New Mexico",
+          "Springfield, Illinois",
+          "Tallahassee, Florida",
+          "Topeka, Kansas",
+          "Trenton, New Jersey"
+        ]
+      }
+    </script>
+  </amp-autocomplete>
+</body>
+</html>
