@@ -119,6 +119,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
+    'build-system/event-timing.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
