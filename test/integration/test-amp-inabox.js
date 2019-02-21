@@ -108,7 +108,7 @@ describe('inabox', function() {
       // Scroll the top frame by 1 pixel manually because the host script lives
       // there so it will only fire the position changed event if the top window
       // itself is scrolled.
-      win.top.scrollTo(win.top.scrollX, win.top.scrollY - 1);
+      window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
     }, 2000);
     return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
   }
@@ -354,7 +354,7 @@ describe('inabox with a complex image ad', function() {
       Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
       setTimeout(() => {
         env.win.scrollTo(0, 1000);
-        env.win.top.scrollTo(env.win.top.scrollX, env.win.top.scrollY - 1);
+        window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
       }, 2000);
     });
 
