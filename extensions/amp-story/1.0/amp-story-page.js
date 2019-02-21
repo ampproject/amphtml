@@ -237,7 +237,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    upgradeBackgroundAudio(this.element);
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -364,6 +363,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    upgradeBackgroundAudio(this.element);
     this.muteAllMedia();
 
     return Promise.all([
