@@ -42,6 +42,7 @@ import {
   installStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
+import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -77,7 +78,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
     }
 
     dispatch.observe(isShown => {
-      scrollToggle(element, isShown, position);
+      scrollToggle(element, isShown, devAssert(position));
     });
   };
 
