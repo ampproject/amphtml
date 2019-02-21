@@ -167,16 +167,25 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
-   * Selects the current top-level browsing context or a child browsing context
-   * of the current browsing context to use as the current browsing context for
-   * subsequent commands.
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
    * {@link https://github.com/w3c/webdriver/pull/1320}
    * https://github.com/SeleniumHQ/selenium/issues/5869
    *
    * @param {!ElementHandle} unusedHandle
    * @return {!Promise}
    */
-  async switchToShadowDOM(unusedHandle) {}
+  async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects the main top-level DOM tree to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @return {!Promise}
+   */
+  async switchToLight() {}
 
   /**
    * Gets the active element of the current browsing context’s document element.

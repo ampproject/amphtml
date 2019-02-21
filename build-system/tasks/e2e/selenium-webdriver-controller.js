@@ -111,7 +111,7 @@ class SeleniumWebDriverController {
       } catch (nse) {
         // WebElement.prototype.findElement differs from
         // WebDriver.prototype.findElement in that the WebElement method will
-        // throw a NoSuchElementExcpetion if the element is not found, and does
+        // throw a NoSuchElementException if the element is not found, and does
         // not wait for the element to appear in the document.
         return null;
       }
@@ -156,8 +156,7 @@ class SeleniumWebDriverController {
     const webElement = await this.driver.wait(new Condition('', async() => {
       try {
         const root = await this.getRoot_();
-        const results =
-            await this.evaluate(queryXpath, xpath, root);
+        const results = await this.evaluate(queryXpath, xpath, root);
         return results[0];
       } catch (nse) {
         return null;
@@ -177,8 +176,7 @@ class SeleniumWebDriverController {
     const webElements = await this.driver.wait(new Condition('', async() => {
       try {
         const root = await this.getRoot_();
-        const results =
-            await this.evaluate(queryXpath, xpath, root);
+        const results = await this.evaluate(queryXpath, xpath, root);
         return results;
       } catch (nse) {
         return null;
