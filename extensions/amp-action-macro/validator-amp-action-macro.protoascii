@@ -36,9 +36,6 @@ tags: {  # <amp-action-macro>
     name: "execute"
     mandatory: true
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-action-macro"
 }
