@@ -318,6 +318,7 @@ export function ancestorElements(child, predicate) {
  * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
+  assertOnlyTagName(tagName);
   tagName = tagName.toUpperCase();
   return ancestorElements(child, el => {
     return el.tagName == tagName;
@@ -400,6 +401,8 @@ export function childNodes(parent, callback) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
+  // Yah, it's supposed to be an attr and not a tag name. But same code.
+  assertOnlyTagName(attr);
   return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -411,6 +414,8 @@ export function childElementByAttr(parent, attr) {
  * @return {?Element}
  */
 export function lastChildElementByAttr(parent, attr) {
+  // Yah, it's supposed to be an attr and not a tag name. But same code.
+  assertOnlyTagName(attr);
   return lastChildElement(parent, el => {
     return el.hasAttribute(attr);
   });
@@ -424,6 +429,8 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
+  // Yah, it's supposed to be an attr and not a tag name. But same code.
+  assertOnlyTagName(attr);
   return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -435,6 +442,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
+  assertOnlyTagName(tagName);
   return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -446,6 +454,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
+  assertOnlyTagName(tagName);
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -474,14 +483,18 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  let elements;
-  // getElementsByTagName() is not supported on ShadowRoot.
-  if (typeof element.getElementsByTagName === 'function') {
-    elements = element.getElementsByTagName(tagName);
-  } else {
-    elements = element./*OK*/querySelectorAll(tagName);
-  }
-  return (elements && elements[0]) || null;
+  assertOnlyTagName(tagName);
+  return element./*OK*/querySelector(tagName);
+}
+
+/**
+ * Asserts that tagName is just an alphanumeric word, and does not contain
+ * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * nor ids.
+ * @param {string} tagName
+ */
+function assertOnlyTagName(tagName) {
+  devAssert(!/[^\w-]/.test(tagName));
 }
 
 /**
