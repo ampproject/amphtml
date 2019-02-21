@@ -34,7 +34,7 @@ export class AmpActionMacro extends AMP.BaseElement {
     super(element);
 
     /** @private {number} */
-    this.element['registrationId'] = Date.now() + REGISTER_ACTION_COUNTER++;
+    this.element['registrationId'] = REGISTER_ACTION_COUNTER++;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.actions_ = null;
