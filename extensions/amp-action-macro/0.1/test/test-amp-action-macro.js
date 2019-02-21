@@ -147,7 +147,7 @@ describes.realWin('amp-action-macro', {
           'AMP-ACTION-MACRO');
       macro.buildCallback();
       expect(() => macro.execute_(callerAction)).to.throw(
-          /Action macro with ID "amp-action-id" is recursively calling itself/);
+          /Action macro with ID "amp-action-id" cannot reference itself or macros defined after it/);
     });
 
     it('should allow calls to macros defined before itself', () => {
@@ -175,7 +175,7 @@ describes.realWin('amp-action-macro', {
           'AMP-ACTION-MACRO');
       unreferrableMacro.buildCallback();
       expect(() => unreferrableMacro.execute_(callerAction)).to.throw(
-          /Action macro with ID "amp-action-id-unreferrable" cannot reference macros defined after it/);
+          /Action macro with ID "amp-action-id-unreferrable" cannot reference itself or macros defined after it/);
     });
   });
 
