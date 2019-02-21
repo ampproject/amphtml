@@ -15,9 +15,12 @@
  */
 
 const fs = require('fs');
-const {By, Condition, Key, until} = require('selenium-webdriver');
+const {By, Condition, Key} = require('selenium-webdriver');
 const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
 const {expect} = require('chai');
+const {queryXpath} = require('./driver/query-xpath');
+
+const ELEMENT_WAIT_TIMEOUT = 5000;
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -55,6 +58,9 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
       .then(result => result.value); // Unbox the value.
 }
 
+/** @typedef {!Driver|!WebElement} */
+let SeleniumRootDef;
+
 /** @implements {FunctionalTestController} */
 class SeleniumWebDriverController {
   /**
@@ -62,6 +68,14 @@ class SeleniumWebDriverController {
    */
   constructor(driver) {
     this.driver = driver;
+
+    /** @private {!SeleniumRootDef} */
+    this.currentRoot_ = this.driver;
+
+    /** @private {string} */
+    this.xpath_ = '';
+
+
   }
 
   /**
@@ -90,8 +104,14 @@ class SeleniumWebDriverController {
   async findElement(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
-    const webElement = await this.driver.findElement(bySelector);
+    const webElement = await this.driver.wait(new Condition('', async() => {
+      try {
+        const result = await this.currentRoot_.findElement(bySelector);
+        return result;
+      } catch (nse) {
+        return null;
+      }
+    }), ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
 
@@ -103,8 +123,14 @@ class SeleniumWebDriverController {
   async findElements(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
-    const webElements = await this.driver.findElements(bySelector);
+    const webElements = await this.driver.wait(new Condition('', async() => {
+      try {
+        const elements = await this.currentRoot_.findElements(bySelector);
+        return elements.length ? elements : null;
+      } catch (nse) {
+        return null;
+      }
+    }), ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
@@ -114,10 +140,20 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementXPath(xpath) {
-    const byXpath = By.xpath(xpath);
+    if (!this.xpath_) {
+      this.xpath_ = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
+      await this.driver.executeScript(this.xpath_);
+    }
 
-    await this.driver.wait(until.elementLocated(byXpath));
-    const webElement = await this.driver.findElement(byXpath);
+    const webElement = await this.driver.wait(new Condition('', async() => {
+      try {
+        const results =
+            await this.evaluate(queryXpath, xpath, this.currentRoot_);
+        return results[0];
+      } catch (nse) {
+        return null;
+      }
+    }), ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
 
@@ -127,10 +163,20 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementsXPath(xpath) {
-    const byXpath = By.xpath(xpath);
+    if (!this.xpath_) {
+      this.xpath_ = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
+      await this.driver.executeScript(this.xpath_);
+    }
 
-    await this.driver.wait(until.elementLocated(byXpath));
-    const webElements = await this.driver.findElements(byXpath);
+    const webElements = await this.driver.wait(new Condition('', async() => {
+      try {
+        const results =
+            await this.evaluate(queryXpath, xpath, this.currentRoot_);
+        return results;
+      } catch (nse) {
+        return null;
+      }
+    }), ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
@@ -407,6 +453,17 @@ class SeleniumWebDriverController {
   async switchToParent() {
     // await this.driver.switchTo().parentFrame();
     await this.driver.switchTo().defaultContent();
+  }
+
+  async switchToShadow(handle) {
+    const shadowHost = handle.getElement();
+    const shadowRootBody = await this.evaluate(
+        shadowHost => shadowHost.shadowRoot.body, shadowHost);
+    this.currentRoot_ = shadowRootBody;
+  }
+
+  async switchToLight() {
+    this.currentRoot_ = this.driver;
   }
 
   /**

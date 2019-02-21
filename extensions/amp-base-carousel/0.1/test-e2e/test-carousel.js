@@ -23,8 +23,7 @@ import {
 describes.endtoend('AMP carousel', {
   fixture: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
   experiments: ['amp-carousel-v2'],
-  serveMode: 'compiled',
-  environment: 'viewer-demo', // or 'single' or 'shadow'
+  environment: 'shadow-demo',
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;

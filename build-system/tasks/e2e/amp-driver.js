@@ -47,9 +47,9 @@ const AmpEnvironments = {
   [Environments.SHADOW_DEMO]: {
     async ready(controller) {
       // TODO(cvializ): this is a HACK
-      const shadowRoot = await controller.findElement(
-          'amp-doc-host[style="visibility: visible;"]');
-      await controller.switchToShadow(shadowRoot);
+      const shadowHost = await controller.findElement(
+          '.amp-doc-host[style="visibility: visible;"]');
+      await controller.switchToShadow(shadowHost);
     },
 
     url(url) {
@@ -85,9 +85,7 @@ class AmpDriver {
   async navigateToEnvironment(environment, url) {
     const ampEnv = AmpEnvironments[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
-    if (environment == Environments.VIEWER_DEMO) {
-      await AmpEnvironments[environment].ready(this.controller_);
-    }
+    await AmpEnvironments[environment].ready(this.controller_);
   }
 
   async serveMode(mode) {
