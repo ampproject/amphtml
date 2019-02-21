@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 370
+min_validator_revision_required: 375
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 816
+spec_file_revision: 829
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -93,15 +93,35 @@ tags: {
 
 # 4.1 The root element
 # 4.1.1 The html element
-tags: {  # AMP
+tags: {  # HTML tag for non-transformed AMP.
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "HTML"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
+}
+tags: {  # HTML tag for transformed AMP.
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "HTML"
+  spec_name: "html (transformed)"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "i-amphtml-layout"
+    value: ""
+  }
+  attrs: {
+    name: "i-amphtml-no-boilerplate"
+    value: ""
+  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
@@ -935,9 +955,9 @@ tags: {
 tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom"
-  disabled_by: "transformed"
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
@@ -1021,9 +1041,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {  # Special custom 'author' spreadsheet for transformed AMP
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style amp-custom (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1036,7 +1056,6 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1262,9 +1281,9 @@ tags: {  # Special custom 'author' spreadsheet for AMP
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -1285,9 +1304,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1296,7 +1315,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -1350,9 +1368,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "NOSCRIPT"
@@ -1372,9 +1390,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1384,7 +1402,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
@@ -1437,9 +1454,9 @@ tags: {
 }
 tags: {
   html_format: AMP
+  enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style[amp-runtime] (transformed)"
-  enabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -1771,7 +1788,6 @@ tags: {
   }
   attrs: { name: "hreflang" }
   attrs: { name: "media" }
-  attrs: { name: "name" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "referrerpolicy" }
   attrs: {
     name: "rel"
@@ -1819,6 +1835,7 @@ tags: {
     name: "type"
     value_casei: "text/html"
   }
+  attr_lists: "name-attr"
   # <amp-bind>
   attrs: { name: "[href]" }
   spec_url: "https://www.ampproject.org/docs/reference/spec#links"
@@ -1858,7 +1875,6 @@ tags: {
   attrs: { name: "hreflang" }
   # TODO(gregable): Specify the set of allowed media queries.
   attrs: { name: "media" }
-  attrs: { name: "name" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "role"
     implicit: true
@@ -1875,6 +1891,7 @@ tags: {
     name: "type"
     value_casei: "text/html"
   }
+  attr_lists: "name-attr"
 }
 
 # 4.5.2 The em element
@@ -2208,7 +2225,6 @@ tags: {
     value: "1"
   }
   attrs: { name: "height" }
-  attrs: { name: "name" }
   attrs: { name: "referrerpolicy" }
   attrs: {
     name: "resizable"
@@ -2240,6 +2256,7 @@ tags: {
   attrs: {
     name: "width"
   }
+  attr_lists: "name-attr"
 }
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
@@ -3906,7 +3923,6 @@ tags {  # <form method=GET ...>
     # it matches this tagspec.
     value_casei: "get"
   }
-  attrs: { name: "name" }
   attrs: { name: "novalidate" }
   attrs: {
     name: "target"
@@ -3921,6 +3937,7 @@ tags {  # <form method=GET ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "name-attr"
 }
 tags {  # <form method=POST ...>
   html_format: AMP
@@ -3955,7 +3972,6 @@ tags {  # <form method=POST ...>
     value_casei: "post"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "name" }
   attrs: { name: "novalidate" }
   # The target attribute has no effect, and should not be in POST forms.
   # However, in the past it was required, so disallowing it would break many
@@ -3972,6 +3988,7 @@ tags {  # <form method=POST ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "name-attr"
 }
 # ACTIONS <form method=POST ...> for POST identity token
 tags: {  # <form method=POST ...>
@@ -4015,7 +4032,6 @@ tags: {  # <form method=POST ...>
     value_casei: "post"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "name" }
   attrs: { name: "novalidate" }
   # The target attribute has no effect, and should not be in POST forms.
   # However, in the past it was required, so disallowing it would break many
@@ -4032,6 +4048,7 @@ tags: {  # <form method=POST ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "name-attr"
 }
 # AMP4EMAIL allows action-xhr and disallows action attribute. It also disallows
 # the use of mustache templates in action-xhr. The only allowed
@@ -4067,8 +4084,8 @@ tags {  # <form method=GET ...>
     # it matches this tagspec.
     value_casei: "get"
   }
-  attrs: { name: "name" }
   attrs: { name: "novalidate" }
+  attr_lists: "name-attr"
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -4103,8 +4120,8 @@ tags {  # <form method=POST ...>
     value_casei: "post"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "name" }
   attrs: { name: "novalidate" }
+  attr_lists: "name-attr"
 }
 # Will add verify state template if requested by users
 tags {
@@ -4286,129 +4303,6 @@ attr_lists: {
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
 }
-attr_lists: {
-  name: "input-name-attr"
-  attrs: {
-    name: "name"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
-        "__amp_\\S*|"
-        "__count__|"
-        "__defineGetter__|"
-        "__defineSetter__|"
-        "__lookupGetter__|"
-        "__lookupSetter__|"
-        "__noSuchMethod__|"
-        "__parent__|"
-        "__proto__|"
-        "__AMP_\\S*|"
-        "\\$p|"
-        "\\$proxy|"
-        "acceptCharset|"
-        "addEventListener|"
-        "appendChild|"
-        "assignedSlot|"
-        "attachShadow|"
-        "baseURI|"
-        "checkValidity|"
-        "childElementCount|"
-        "childNodes|"
-        "classList|"
-        "className|"
-        "clientHeight|"
-        "clientLeft|"
-        "clientTop|"
-        "clientWidth|"
-        "compareDocumentPosition|"
-        "computedName|"
-        "computedRole|"
-        "contentEditable|"
-        "createShadowRoot|"
-        "enqueAction|"
-        "firstChild|"
-        "firstElementChild|"
-        "getAnimations|"
-        "getAttribute|"
-        "getAttributeNS|"
-        "getAttributeNode|"
-        "getAttributeNodeNS|"
-        "getBoundingClientRect|"
-        "getClientRects|"
-        "getDestinationInsertionPoints|"
-        "getElementsByClassName|"
-        "getElementsByTagName|"
-        "getElementsByTagNameNS|"
-        "getRootNode|"
-        "hasAttribute|"
-        "hasAttributeNS|"
-        "hasAttributes|"
-        "hasChildNodes|"
-        "hasPointerCapture|"
-        "innerHTML|"
-        "innerText|"
-        "inputMode|"
-        "insertAdjacentElement|"
-        "insertAdjacentHTML|"
-        "insertAdjacentText|"
-        "isContentEditable|"
-        "isDefaultNamespace|"
-        "isEqualNode|"
-        "isSameNode|"
-        "lastChild|"
-        "lastElementChild|"
-        "lookupNamespaceURI|"
-        "namespaceURI|"
-        "nextElementSibling|"
-        "nextSibling|"
-        "nodeName|"
-        "nodeType|"
-        "nodeValue|"
-        "offsetHeight|"
-        "offsetLeft|"
-        "offsetParent|"
-        "offsetTop|"
-        "offsetWidth|"
-        "outerHTML|"
-        "outerText|"
-        "ownerDocument|"
-        "parentElement|"
-        "parentNode|"
-        "previousElementSibling|"
-        "previousSibling|"
-        "querySelector|"
-        "querySelectorAll|"
-        "releasePointerCapture|"
-        "removeAttribute|"
-        "removeAttributeNS|"
-        "removeAttributeNode|"
-        "removeChild|"
-        "removeEventListener|"
-        "replaceChild|"
-        "reportValidity|"
-        "requestPointerLock|"
-        "scrollHeight|"
-        "scrollIntoView|"
-        "scrollIntoViewIfNeeded|"
-        "scrollLeft|"
-        "scrollWidth|"
-        "setAttribute|"
-        "setAttributeNS|"
-        "setAttributeNode|"
-        "setAttributeNodeNS|"
-        "setPointerCapture|"
-        "shadowRoot|"
-        "styleMap|"
-        "tabIndex|"
-        "tagName|"
-        "textContent|"
-        "toString|"
-        "valueOf|"
-        "(webkit|ms|moz|o)dropzone|"
-        "(webkit|moz|ms|o)MatchesSelector|"
-        "(webkit|moz|ms|o)RequestFullScreen|"
-        "(webkit|moz|ms|o)RequestFullscreen"
-        ")(\\s|$)"
-  }
-}
 # 4.10.4 The label element
 tags: {
   html_format: AMP
@@ -4440,7 +4334,7 @@ tags: {
         ")(\\s|$)"
   }
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   # Note that this amp-bind attribute is not available for the AMP4Email format
   # thus we add this manually for the formats that should.
   attrs: { name: "[type]" }
@@ -4461,7 +4355,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -4476,7 +4370,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -4495,7 +4389,7 @@ tags: {
         ")(\\s|$)"
   }
   attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
@@ -4523,7 +4417,7 @@ tags: {
   attrs: { name: "[disabled]" }
   attrs: { name: "[type]" }
   attrs: { name: "[value]" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
 }
 # Button variant specifically supporting <amp-app-banner> tag with the
 # open-button attribute.
@@ -4548,7 +4442,7 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
 }
 # 4.10.7 The select element
 tags: {
@@ -4572,7 +4466,7 @@ tags: {
   attrs: { name: "[multiple]" }
   attrs: { name: "[required]" }
   attrs: { name: "[size]" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.8 The datalist element
@@ -4625,6 +4519,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "TEXTAREA"
   attrs: { name: "autocomplete" }
+  attrs: {
+    name: "autoexpand"
+    requires_extension: "amp-form"
+  }
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }
@@ -4661,7 +4559,7 @@ tags: {
   attrs: { name: "[selectionstart]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.13 The output element
@@ -4673,7 +4571,7 @@ tags: {
   tag_name: "OUTPUT"
   attrs: { name: "for" }
   attrs: { name: "form" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
 }
 # 4.10.14 The progress element
 tags: {
@@ -4709,7 +4607,7 @@ tags: {
   attrs: { name: "disabled" }
   # <amp-bind>
   attrs: { name: "[disabled]" }
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
 }
 # 4.10.17 The legend element
 tags: {
@@ -4764,7 +4662,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4795,7 +4696,10 @@ tags: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "src"
     mandatory: true
@@ -4822,7 +4726,10 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -4850,7 +4757,10 @@ tags: {
     value_casei: "amp-rtc"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -4888,9 +4798,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
-  disabled_by: "transformed"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4899,9 +4809,9 @@ tags: {
 tags: {
   html_format: AMP
   html_format: ACTIONS
+  enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
-  enabled_by: "transformed"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
@@ -4989,7 +4899,7 @@ tags: {
   html_format: AMP
   html_format: ACTIONS
   tag_name: "SLOT"
-  attrs: { name: "name" }
+  attr_lists: "name-attr"
 }
 
 # This tag is a preserved indicator for documents created in microsoft word.
@@ -5131,7 +5041,6 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
-
 tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
@@ -5181,6 +5090,25 @@ tags: {  # <amp-pixel>
   }
 }
 
+# Transformed AMP specific tags.
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "I-AMPHTML-SIZER"
+  explicit_attrs_only: true
+  attrs: {
+    name: "style"
+    mandatory: true
+    blacklisted_value_regex: "!important"
+    css_declaration: {
+      name: "display"
+      value_casei: "block"
+    }
+    css_declaration: { name: "padding-top" }
+  }
+}
+
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
 # depending on amp layout the validator will examine these fields and
@@ -5206,10 +5134,397 @@ attr_lists: {
     mandatory: true
     value: ""
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     value_casei: "text/javascript"
+  }
+}
+
+# Mandatory "id" attribute.
+attr_lists: {
+  name: "mandatory-id-attr"
+  attrs: {
+    name: "id"
+    mandatory: true
+    # When updating this blacklisted_value_regex, also update the entry for
+    # "id" in $GLOBAL_ATTRS.
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "__AMP_\\S*|"
+        "\\$p|"
+        "\\$proxy|"
+        "acceptCharset|"
+        "addEventListener|"
+        "appendChild|"
+        "assignedSlot|"
+        "attachShadow|"
+        "AMP|"
+        "baseURI|"
+        "checkValidity|"
+        "childElementCount|"
+        "childNodes|"
+        "classList|"
+        "className|"
+        "clientHeight|"
+        "clientLeft|"
+        "clientTop|"
+        "clientWidth|"
+        "compareDocumentPosition|"
+        "computedName|"
+        "computedRole|"
+        "contentEditable|"
+        "createShadowRoot|"
+        "enqueAction|"
+        "firstChild|"
+        "firstElementChild|"
+        "getAnimations|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
+        "hasPointerCapture|"
+        "i-amphtml-\\S*|"
+        "innerHTML|"
+        "innerText|"
+        "inputMode|"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isContentEditable|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lastChild|"
+        "lastElementChild|"
+        "lookupNamespaceURI|"
+        "namespaceURI|"
+        "nextElementSibling|"
+        "nextSibling|"
+        "nodeName|"
+        "nodeType|"
+        "nodeValue|"
+        "offsetHeight|"
+        "offsetLeft|"
+        "offsetParent|"
+        "offsetTop|"
+        "offsetWidth|"
+        "outerHTML|"
+        "outerText|"
+        "ownerDocument|"
+        "parentElement|"
+        "parentNode|"
+        "previousElementSibling|"
+        "previousSibling|"
+        "querySelector|"
+        "querySelectorAll|"
+        "releasePointerCapture|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "reportValidity|"
+        "requestPointerLock|"
+        "scrollHeight|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "scrollLeft|"
+        "scrollWidth|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "setPointerCapture|"
+        "shadowRoot|"
+        "styleMap|"
+        "tabIndex|"
+        "tagName|"
+        "textContent|"
+        "toString|"
+        "valueOf|"
+        "(webkit|ms|moz|o)dropzone|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
+        ")(\\s|$)"
+  }
+}
+
+# Not mandatory "name" attribute.
+attr_lists: {
+  name: "name-attr"
+  attrs: {
+    name: "name"
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-name-attr.
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "__AMP_\\S*|"
+        "\\$p|"
+        "\\$proxy|"
+        "acceptCharset|"
+        "addEventListener|"
+        "appendChild|"
+        "assignedSlot|"
+        "attachShadow|"
+        "baseURI|"
+        "checkValidity|"
+        "childElementCount|"
+        "childNodes|"
+        "classList|"
+        "className|"
+        "clientHeight|"
+        "clientLeft|"
+        "clientTop|"
+        "clientWidth|"
+        "compareDocumentPosition|"
+        "computedName|"
+        "computedRole|"
+        "contentEditable|"
+        "createShadowRoot|"
+        "enqueAction|"
+        "firstChild|"
+        "firstElementChild|"
+        "getAnimations|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
+        "hasPointerCapture|"
+        "innerHTML|"
+        "innerText|"
+        "inputMode|"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isContentEditable|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lastChild|"
+        "lastElementChild|"
+        "lookupNamespaceURI|"
+        "namespaceURI|"
+        "nextElementSibling|"
+        "nextSibling|"
+        "nodeName|"
+        "nodeType|"
+        "nodeValue|"
+        "offsetHeight|"
+        "offsetLeft|"
+        "offsetParent|"
+        "offsetTop|"
+        "offsetWidth|"
+        "outerHTML|"
+        "outerText|"
+        "ownerDocument|"
+        "parentElement|"
+        "parentNode|"
+        "previousElementSibling|"
+        "previousSibling|"
+        "querySelector|"
+        "querySelectorAll|"
+        "releasePointerCapture|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "reportValidity|"
+        "requestPointerLock|"
+        "scrollHeight|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "scrollLeft|"
+        "scrollWidth|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "setPointerCapture|"
+        "shadowRoot|"
+        "styleMap|"
+        "tabIndex|"
+        "tagName|"
+        "textContent|"
+        "toString|"
+        "valueOf|"
+        "(webkit|ms|moz|o)dropzone|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
+        ")(\\s|$)"
+  }
+}
+
+# Mandatory "name" attribute.
+attr_lists: {
+  name: "mandatory-name-attr"
+  attrs: {
+    name: "name"
+    mandatory: true
+    # When updating this blacklisted_value_regex, also update for name-attr.
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "__AMP_\\S*|"
+        "\\$p|"
+        "\\$proxy|"
+        "acceptCharset|"
+        "addEventListener|"
+        "appendChild|"
+        "assignedSlot|"
+        "attachShadow|"
+        "baseURI|"
+        "checkValidity|"
+        "childElementCount|"
+        "childNodes|"
+        "classList|"
+        "className|"
+        "clientHeight|"
+        "clientLeft|"
+        "clientTop|"
+        "clientWidth|"
+        "compareDocumentPosition|"
+        "computedName|"
+        "computedRole|"
+        "contentEditable|"
+        "createShadowRoot|"
+        "enqueAction|"
+        "firstChild|"
+        "firstElementChild|"
+        "getAnimations|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
+        "hasPointerCapture|"
+        "innerHTML|"
+        "innerText|"
+        "inputMode|"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isContentEditable|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lastChild|"
+        "lastElementChild|"
+        "lookupNamespaceURI|"
+        "namespaceURI|"
+        "nextElementSibling|"
+        "nextSibling|"
+        "nodeName|"
+        "nodeType|"
+        "nodeValue|"
+        "offsetHeight|"
+        "offsetLeft|"
+        "offsetParent|"
+        "offsetTop|"
+        "offsetWidth|"
+        "outerHTML|"
+        "outerText|"
+        "ownerDocument|"
+        "parentElement|"
+        "parentNode|"
+        "previousElementSibling|"
+        "previousSibling|"
+        "querySelector|"
+        "querySelectorAll|"
+        "releasePointerCapture|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "reportValidity|"
+        "requestPointerLock|"
+        "scrollHeight|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "scrollLeft|"
+        "scrollWidth|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "setPointerCapture|"
+        "shadowRoot|"
+        "styleMap|"
+        "tabIndex|"
+        "tagName|"
+        "textContent|"
+        "toString|"
+        "valueOf|"
+        "(webkit|ms|moz|o)dropzone|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
+        ")(\\s|$)"
   }
 }
 
@@ -5506,6 +5821,8 @@ attr_lists: {
   }
   attrs: {
     name: "id"
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-id-attr.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -5817,6 +6134,27 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  # <amp-sidebar>
+  attrs: {
+    name: "autoscroll"
+    requires_ancestor {
+      marker: AUTOSCROLL
+    }
+  }
+  # Transformed AMP
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-layout"
+    value_casei: "container"
+    value_casei: "fill"
+    value_casei: "fixed"
+    value_casei: "fixed-height"
+    value_casei: "flex-item"
+    value_casei: "fluid"
+    value_casei: "intrinsic"
+    value_casei: "nodisplay"
+    value_casei: "responsive"
+  }
 }
 
 # Error Specificity: Used in the verbose validator to select between multiple

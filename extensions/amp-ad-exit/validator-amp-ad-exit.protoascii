@@ -29,11 +29,8 @@ tags: {  # <amp-ad-exit>
   tag_name: "AMP-AD-EXIT"
   requires_extension: "amp-ad-exit"
   requires: "amp-ad-exit configuration JSON"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-id-attr"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
@@ -51,7 +48,10 @@ tags: {  # amp-ad-exit config JSON
   satisfies: "amp-ad-exit configuration JSON"
   requires_extension: "amp-ad-exit"
   mandatory_parent: "AMP-AD-EXIT"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

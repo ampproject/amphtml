@@ -21,7 +21,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
-import {closestByTag, iterateCursor} from '../../../src/dom';
+import {closestAncestorElementByTag, iterateCursor} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -33,7 +33,7 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/purifier';
+import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
@@ -302,11 +302,12 @@ export class Bind {
     dev().info(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
-        .then(() => {
-          this.history_.replace({
-            'data': dict({'amp-bind': this.state_}),
-            'title': this.localWin_.document.title,
-          });
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          // Don't bother calling History.replace with empty data.
+          if (data) {
+            this.history_.replace(data);
+          }
         });
     return this.setStatePromise_;
   }
@@ -334,12 +335,31 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(() => {
-            this.history_.push(onPop, {
-              'data': dict({'amp-bind': this.state_}),
-              'title': this.localWin_.document.title,
-            });
+          .then(() => this.getDataForHistory_())
+          .then(data => {
+            this.history_.push(onPop, data);
           });
+    });
+  }
+
+  /**
+   * Returns data that should be saved in browser history on AMP.setState() or
+   * AMP.pushState(). This enables features like restoring browser tabs.
+   * @return {!Promise<?JsonObject>}
+   */
+  getDataForHistory_() {
+    const data = dict({
+      'data': dict({'amp-bind': this.state_}),
+      'title': this.localWin_.document.title,
+    });
+    if (!this.viewer_.isEmbedded()) {
+      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
+      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
+    }
+    // Only pass state for history updates to trusted viewers, since they
+    // may contain user data e.g. form input.
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      return (trusted) ? data : null;
     });
   }
 
@@ -1178,7 +1198,7 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const select = closestByTag(element, 'select');
+    const select = closestAncestorElementByTag(element, 'select');
     if (!select) {
       return;
     }

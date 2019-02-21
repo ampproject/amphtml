@@ -105,12 +105,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-auto-ads-adsense-holdout',
-    name: 'AMP Auto Ads AdSense Holdout',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
-  },
-  {
     id: 'amp-auto-ads-adsense-responsive',
     name: 'AMP Auto Ads AdSense Responsive',
     spec: '',
@@ -226,11 +220,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'user-error-reporting',
-    name: 'Report error to publishers',
-    spec: 'https://github.com/ampproject/amphtml/issues/6415',
-  },
-  {
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
@@ -297,12 +286,6 @@ const EXPERIMENTS = [
     name: 'Applies a sandbox to ad iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/14240',
     cleanupIssue: 'TODO',
-  },
-  {
-    id: 'video-service',
-    name: 'Enables new implementation of unified Video Interface services.',
-    spec: 'https://github.com/ampproject/amphtml/issues/13674',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
   },
   {
     id: 'iframe-messaging',
@@ -405,12 +388,6 @@ const EXPERIMENTS = [
     name: 'Forces min-height on body (fix for #18861 and #8798)',
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'amp-list-viewport-resize',
-    name: 'Enables amp-list to resize on viewport resize',
-    spec: 'https://github.com/ampproject/amphtml/issues/19945',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
   },
   {
     id: 'amp-auto-lightbox',

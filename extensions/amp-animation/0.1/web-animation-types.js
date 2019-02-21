@@ -20,6 +20,18 @@
 // WARNING
 // File must be synced with amp.extens.js
 
+/**
+ * A struct for parameters for `Element.animate` call.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
+ *
+ * @typedef {{
+ *   target: !Element,
+ *   keyframes: !WebKeyframesDef,
+ *   vars: ?Object<string, *>,
+ *   timing: !WebAnimationTimingDef,
+ * }}
+ */
+export let InternalWebAnimationRequestDef;
 
 /**
  * @typedef {

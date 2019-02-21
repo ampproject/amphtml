@@ -1,3 +1,10 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: Provides a way to display and stick ad content at the bottom of the page.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-sticky-ad"></a> `amp-sticky-ad`
+# amp-sticky-ad
 
 <table>
   <tr>
@@ -65,9 +72,12 @@ Example:
 
 ## Attributes
 
-##### layout (required)
-
-Must be set to `nodisplay`.
+<table>
+  <tr>
+    <td width="40%"><strong>layout (required)</strong></td>
+    <td>Must be set to <code>nodisplay</code>.</td>
+  </tr>
+</table>
 
 ## Styling
 
