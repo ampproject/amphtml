@@ -260,35 +260,19 @@ tags: {
   attrs: { name: "grid-area" }
   attrs: {
     name: "scale-end"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "scale-start"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "translate-x"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-left" }
-      properties: { name: "animate-in" value: "pan-right" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   attrs: {
     name: "translate-y"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-up" }
-      properties: { name: "animate-in" value: "pan-down" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   attrs: {
     name: "justify-content"
@@ -363,35 +347,19 @@ tags: {
   attrs: { name: "animate-in-duration" }
   attrs: {
     name: "scale-end"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "scale-start"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "translate-x"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-left" }
-      properties: { name: "animate-in" value: "pan-right" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   attrs: {
     name: "translate-y"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-up" }
-      properties: { name: "animate-in" value: "pan-down" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
@@ -531,35 +499,19 @@ tags: {
   attrs: { name: "animate-in-duration" }
   attrs: {
     name: "scale-end"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "scale-start"
-    value_regex: "^[0-9]*$"
-    value_properties: {
-      properties: { name: "animate-in" value: "zoom-in" }
-      properties: { name: "animate-in" value: "zoom-out" }
-    }
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "translate-x"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-left" }
-      properties: { name: "animate-in" value: "pan-right" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   attrs: {
     name: "translate-y"
-    value_regex_casei: "^[0-9]*px$"
-    value_properties: {
-      properties: { name: "animate-in" value: "pan-up" }
-      properties: { name: "animate-in" value: "pan-down" }
-    }
+    value_regex_casei: "[0-9]+([.][0-9]+)?px"
   }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"

@@ -47,7 +47,7 @@ PASS
 |      <amp-story-page id="visual-effects">
 |        <amp-story-grid-layer template="vertical">
 |          <h1>visual-effects</h1>
-|          <div animate-in="zoom-in" animate-in-duration="5s" class="img-container" scale-start="1" scale-end="3">
+|          <div animate-in="zoom-in" animate-in-duration="5s" class="img-container" scale-start="20" scale-end="1.2">
 |              <amp-img id="ken-burns-img1"
 |                 src="https://picsum.photos/1024/768?image=1077"
 |                 animate-in="pan-left"
