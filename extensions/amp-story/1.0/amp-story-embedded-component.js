@@ -32,15 +32,13 @@ import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {
-  getStyle,
   px,
-  resetStyles,
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 /**
  * Action icons to be placed in tooltip.
@@ -131,6 +129,12 @@ export function embeddedComponentSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
   return interactiveComponentSelectors;
 }
+
+/**
+ * Maps each embedded element to its corresponding style.
+ * @type {!JsonObject}
+ */
+const embedStyleEls = dict();
 
 /**
  * Builds expanded view overlay for expandable components.
@@ -232,15 +236,12 @@ export class AmpStoryEmbeddedComponent {
     /** @private {?Element} */
     this.expandedViewOverlay_ = null;
 
-    /** @private {?number} */
-    this.scaleFactor_ = null;
-
     /**
-     * Target producing the tooltip. Used to avoid building the same
-     * element twice.
+     * Target producing the tooltip and going to expanded view (when
+     * expandable).
      * @private {?Element}
      */
-    this.previousTarget_ = null;
+    this.triggeringTarget_ = null;
 
     /**
      * Page containing component.
@@ -336,13 +337,8 @@ export class AmpStoryEmbeddedComponent {
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           this.componentPage_.classList.toggle(
               'i-amphtml-expanded-mode', false);
-          this.previousTarget_.classList.toggle('i-amphtml-expanded-component',
-              false);
           toggle(devAssert(this.expandedViewOverlay_), false);
-          resetStyles(devAssert(this.previousTarget_), ['transform']);
-          setImportantStyles(devAssert(this.previousTarget_), {
-            transform: `scale(${this.scaleFactor_})`,
-          });
+          this.closeExpandedEl_();
         });
       return;
     }
@@ -458,7 +454,7 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipEl_(component);
     this.componentPage_ = devAssert(this.storyEl_.querySelector(
         'amp-story-page[active]'));
-    this.previousTarget_ = component.element;
+    this.triggeringTarget_ = component.element;
 
     this.resources_.mutateElement(
         devAssert(this.focusedStateOverlay_),
@@ -527,7 +523,7 @@ export class AmpStoryEmbeddedComponent {
     event.stopPropagation();
 
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EmbeddedComponentState.EXPANDED, element: this.previousTarget_});
+      state: EmbeddedComponentState.EXPANDED, element: this.triggeringTarget_});
   }
 
   /**
@@ -561,6 +557,25 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
+   * Returns expanded element back to original state.
+   * @private
+   */
+  closeExpandedEl_() {
+    this.triggeringTarget_.classList.toggle(
+        'i-amphtml-expanded-component', false);
+
+    const styleEl = embedStyleEls[this.triggeringTarget_.id];
+
+    const transformString = styleEl.textContent.substring(
+        styleEl.textContent.indexOf('transform'),
+        styleEl.textContent.indexOf('margin'));
+
+    embedStyleEls[this.triggeringTarget_.id].textContent =
+      styleEl.textContent.replace(transformString,
+          `transform: scale(${styleEl.embedData.scale}) !important;`);
+  }
+
+  /**
    * Animates into expanded view. It calculates what the full-screen dimensions
    * of the element will be, and uses them to deduce the translateX/Y values
    * once the element reaches its full-screen size.
@@ -569,6 +584,7 @@ export class AmpStoryEmbeddedComponent {
    */
   animateExpanded_(target) {
     const state = {};
+    const storedStyle = embedStyleEls[target.id].embedData;
     this.resources_.measureMutateElement(target,
         /** measure */
         () => {
@@ -577,40 +593,32 @@ export class AmpStoryEmbeddedComponent {
           // having to call getBoundingClientRect().
           const pageRect = this.componentPage_./*OK*/getBoundingClientRect();
 
-          // Retrieve scale() previously set by prepareForAnimation() on the
-          // element.
-          this.scaleFactor_ =
-            parseFloat(getStyle(target, 'transform').split('scale(')[1]);
-          const fullScreenWidth = targetRect.width / this.scaleFactor_;
           // Gap on the left of the element between full-screen size and
           // current size.
-          const leftGap = (fullScreenWidth - targetRect.width) / 2;
+          const leftGap = (storedStyle.width - targetRect.width) / 2;
           // Distance from left of page to what will be the left of the
           // element in full-screen.
           const fullScreenLeft = targetRect.left - leftGap - pageRect.left;
-          const centeredLeft = pageRect.width / 2 - fullScreenWidth / 2;
+          const centeredLeft = pageRect.width / 2 - storedStyle.width / 2;
           state.translateX = centeredLeft - fullScreenLeft;
 
-          // Calculate what the height of the element will be in full-screen.
-          const fullScreenHeight = targetRect.height / this.scaleFactor_;
           // Gap on the top of the element between full-screen size and
           // current size.
-          const topGap = (fullScreenHeight - targetRect.height) / 2;
+          const topGap = (storedStyle.height - targetRect.height) / 2;
           // Distance from top of page to what will be the top of the element in
           // full-screen.
           const fullScreenTop = targetRect.top - topGap - pageRect.top;
-          const centeredTop = pageRect.height / 2 - fullScreenHeight / 2;
+          const centeredTop = pageRect.height / 2 - storedStyle.height / 2;
           state.translateY = centeredTop - fullScreenTop;
         },
         /** mutate */
         () => {
-          target.classList.add('i-amphtml-animate-expand-in');
           target.classList.toggle('i-amphtml-expanded-component', true);
-          setImportantStyles(dev().assertElement(target),
-              {
-                transform: `translate3d(${state.translateX}px,
-                  ${state.translateY}px, 0) scale(1)`,
-              });
+
+          const styleEl = embedStyleEls[target.id];
+          embedStyleEls[target.id].textContent = styleEl.textContent.split(
+              `scale(${storedStyle.scale})`).join(`scale(1)
+              translate3d(${state.translateX}px, ${state.translateY}px, 0)`);
         });
   }
 
@@ -624,6 +632,12 @@ export class AmpStoryEmbeddedComponent {
    * @param {!../../../src/service/resources-impl.Resources} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
+    // When a resize happens, we must prepare the animation again.
+    if (element.id && embedStyleEls[element.id]) {
+      embedStyleEls[element.id].textContent = '';
+      embedStyleEls[element.id].embedData = {};
+    }
+
     const state = {};
     resources.measureMutateElement(element,
         /** measure */
@@ -651,12 +665,37 @@ export class AmpStoryEmbeddedComponent {
         /** mutate */
         () => {
           element.classList.add('i-amphtml-embedded-component');
-          setImportantStyles(devAssert(element), {
-            width: px(state.newWidth),
-            height: px(state.newHeight),
-            transform: `scale(${state.scaleFactor})`,
-            margin: px(state.verticalMargin) + ' ' + px(state.horizontalMargin),
-          });
+
+          const newId = 'el' + Math.floor(89999999 * Math.random() + 10000000);
+          const styleTextContent = `#${element.id || newId} {
+            width: ${px(state.newWidth)} !important;
+            height: ${px(state.newHeight)} !important;
+            transform: scale(${state.scaleFactor}) !important;
+            margin: ${state.verticalMargin}px ${state.horizontalMargin}px
+                !important;
+            }`;
+
+          if (embedStyleEls[element.id]) { // Embed style already exists.
+            embedStyleEls[element.id].textContent = styleTextContent;
+          } else {
+            const html = htmlFor(pageEl);
+            const embedStyleEl = html`<style></style>`;
+
+            element.id = newId;
+            embedStyleEl.id = element.id;
+            embedStyleEl.textContent = styleTextContent;
+            pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
+            embedStyleEls[element.id] = embedStyleEl;
+            embedStyleEls[element.id].embedData = {};
+          }
+
+          embedStyleEls[element.id].embedData = {
+            width: state.newWidth,
+            height: state.newHeight,
+            scale: state.scaleFactor,
+            verticalMargin: state.verticalMargin,
+            horizontalMargin: state.horizontalMargin,
+          };
         });
   }
 

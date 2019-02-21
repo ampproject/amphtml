@@ -354,9 +354,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
 
 .i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
   z-index: 1 !important;
-}
-
-.i-amphtml-animate-expand-in {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 

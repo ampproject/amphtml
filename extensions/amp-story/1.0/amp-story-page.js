@@ -103,9 +103,6 @@ const EMBEDDED_COMPONENTS_SELECTORS =
 /** @private @const {number} */
 const RESIZE_TIMEOUT_MS = 350;
 
-/** @private @const {number} */
-const RESIZE_TIMEOUT_PRELOAD_MS = 500;
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
@@ -158,6 +155,25 @@ export const NavigationDirection = {
   NEXT: 'next',
   PREVIOUS: 'previous',
 };
+
+/**
+ * Prepares an embed for its expanded mode animation. Since this requires
+ * calculating the size of the embed, we debounce after each resize event to
+ * make sure we have the final size before doing the calculation for the
+ * animation.
+ * @param {!Window} win
+ * @param {!Element} page
+ * @param {!../../../src/service/resources-impl.Resources} resources
+ * @return {function(!Element, ?UnlistenDef)}
+ */
+function debounceEmbedResize(win, page, resources) {
+  return debounce(win, (el, unlisten) => {
+    AmpStoryEmbeddedComponent.prepareForAnimation(page, el, resources);
+    if (unlisten) {
+      unlisten();
+    }
+  }, RESIZE_TIMEOUT_MS);
+}
 
 /**
  * The <amp-story-page> custom element, which represents a single page of
@@ -372,7 +388,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.maybeStartAnimations();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
-      this.findAndPrepareEmbeddedComponents_(RESIZE_TIMEOUT_MS);
+      this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -385,12 +401,20 @@ export class AmpStoryPage extends AMP.BaseElement {
   layoutCallback() {
     upgradeBackgroundAudio(this.element);
     this.muteAllMedia();
-
+    this.getViewport().onResize(
+        debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS));
     return Promise.all([
       this.beforeVisible(),
       this.mediaLayoutPromise_,
       this.mediaPoolPromise_,
     ]);
+  }
+
+  /**
+   * @private
+   */
+  onResize_() {
+    this.findAndPrepareEmbeddedComponents_(true);
   }
 
   /** @return {!Promise} */
@@ -441,26 +465,23 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Finds embedded components in page and prepares them for their expanded view
    * animation.
-   * @param {number} timeout
+   * @param {boolean} forceResize
    * @private
    */
-  findAndPrepareEmbeddedComponents_(timeout) {
+  findAndPrepareEmbeddedComponents_(forceResize = false) {
     scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
-          if (!el.classList.contains('i-amphtml-embedded-component')) {
-            // Since the element might be doing multiple resizes at the
-            // beginning, we have to wait some time after each resize event
-            // to make sure we get the final size before we do the calculations
-            // for the animation.
-            const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
-              debouncedPrepareforAnimation();
-            });
+          const debouncePrepareForAnimation =
+            debounceEmbedResize(this.win, this.element, this.resources_);
 
-            const debouncedPrepareforAnimation = debounce(this.win, () => {
-              AmpStoryEmbeddedComponent.prepareForAnimation(this.element, el,
-                  this.resources_, this.storeService_);
-              unlisten();
-            }, timeout);
+          if (forceResize) {
+            debouncePrepareForAnimation(el);
+          } else if (!el.id) { // Element has not been prepared for its animation yet.
+            const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
+              debouncePrepareForAnimation(el, unlisten);
+            });
+            // Run in case target never changes size.
+            debouncePrepareForAnimation(el);
           }
         });
   }
@@ -705,7 +726,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('distance', distance);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
-      this.findAndPrepareEmbeddedComponents_(RESIZE_TIMEOUT_PRELOAD_MS);
+      this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_();
     }
   }
