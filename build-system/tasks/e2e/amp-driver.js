@@ -16,14 +16,14 @@
 
 
 /** @enum {string} */
-const Environments = {
+const Environment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
   SHADOW_DEMO: 'shadow-demo',
 };
 
 const AmpEnvironments = {
-  [Environments.SINGLE]: {
+  [Environment.SINGLE]: {
     ready(unusedController) {
       return Promise.resolve();
     },
@@ -33,7 +33,7 @@ const AmpEnvironments = {
     },
   },
 
-  [Environments.VIEWER_DEMO]: {
+  [Environment.VIEWER_DEMO]: {
     ready(controller) {
       return controller.findElement('#AMP_DOC_dynamic[data-loaded]')
           .then(frame => controller.switchToFrame(frame));
@@ -44,9 +44,10 @@ const AmpEnvironments = {
     },
   },
 
-  [Environments.SHADOW_DEMO]: {
+  [Environment.SHADOW_DEMO]: {
     async ready(controller) {
       // TODO(cvializ): this is a HACK
+      // There should be a better way to detect that the shadowdoc is ready.
       const shadowHost = await controller.findElement(
           '.amp-doc-host[style="visibility: visible;"]');
       await controller.switchToShadow(shadowHost);
@@ -82,12 +83,23 @@ class AmpDriver {
     }, name, toggle);
   }
 
+  /**
+   * Navigate the browser to a URL that will display the given url in the
+   * given environment.
+   * @param {Environment} environment
+   * @param {string} url
+   */
   async navigateToEnvironment(environment, url) {
     const ampEnv = AmpEnvironments[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
     await AmpEnvironments[environment].ready(this.controller_);
   }
 
+  /**
+   * Navigate the browser to the URL that will cause the demo server to
+   * serve the runtime and extensions in the given format.
+   * @param {string} mode one of 'cdn', 'compiled', 'default',
+   */
   async serveMode(mode) {
     await this.controller_.navigateTo(
         `http://localhost:8000/serve_mode=${mode}`);
@@ -96,5 +108,5 @@ class AmpDriver {
 
 module.exports = {
   AmpDriver,
-  Environments,
+  Environment,
 };

@@ -16,7 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
-const {AmpDriver, Environments} = require('./amp-driver');
+const {AmpDriver, Environment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
@@ -262,7 +262,7 @@ function toggleExperiments(ampDriver, fixture, experiments) {
   }
 
   const navigate =
-      ampDriver.navigateToEnvironment(Environments.SINGLE, fixture);
+      ampDriver.navigateToEnvironment(Environment.SINGLE, fixture);
   return navigate.then(() => {
     const togglePromises = experiments.map(experiment => {
       return ampDriver.toggleExperiment(experiment, true);
