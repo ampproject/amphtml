@@ -46,8 +46,8 @@ export function uzou(global, data) {
   const uzouInjector = {
     url: fixedEncodeURIComponent(
         widgetParams['url'] ||
-      global.context.sourceUrl ||
-      global.context.canonicalUrl
+      global.context.canonicalUrl ||
+      global.context.sourceUrl
     ),
     referer: widgetParams['referer'] || global.context.referrer,
   };
