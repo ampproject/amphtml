@@ -21,52 +21,48 @@ import {poll} from '../../testing/iframe';
 describes.integration('amp-recaptcha-input', {
   /* eslint-disable max-len */
   body: `
-    <div class="form-container">
-      <h2>amp-recaptcha-input Example</h2>
+    <form
+      method="POST"
+      action-xhr="/recaptcha/submit"
+      target="_top">
 
-      <form
-        method="post"
-        action-xhr="/recaptcha/submit"
-        target="_top">
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input name="submit-button" type="submit" value="Search">
+        <amp-recaptcha-input layout="nodisplay"
+          name="recaptcha-token"
+          data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
+          data-action="recaptcha-example">
+        </amp-recaptcha-input>
+      </fieldset>
 
-        <fieldset>
-          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
-          <label>
-            <span>Search for</span>
-            <input type="search" name="term" required>
-          </label>
-          <input name="submit-button" type="submit" value="Search">
-          <amp-recaptcha-input layout="nodisplay"
-            name="recaptcha-token"
-            data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
-            data-action="recaptcha-example">
-          </amp-recaptcha-input>
-        </fieldset>
-
-        <div class="loading-spinner">
-          <div class="donut">
-          </div>
+      <div class="loading-spinner">
+        <div class="donut">
         </div>
+      </div>
 
-        <div submit-success>
-          <template type="amp-mustache">
-            <div id="submit-success"></div>
-            <h1>You searched for: {{term}}</h1>
-            <p>message: {{message}}</p>
-            <p>recaptcha-token: {{recaptcha-token}}</p>
-          </template>
-        </div>
+      <div submit-success>
+        <template type="amp-mustache">
+          <div id="submit-success"></div>
+          <h1>You searched for: {{term}}</h1>
+          <p>message: {{message}}</p>
+          <p>recaptcha-token: {{recaptcha-token}}</p>
+        </template>
+      </div>
 
-        <div submit-error>
-          <template type="amp-mustache">
-            <div id="submit-error"></div>
-            <h1>Error! Please check the JS Console in your dev tools.</h1>
-            <p>{{error}}</p>
-          </template>
-        </div>
+      <div submit-error>
+        <template type="amp-mustache">
+          <div id="submit-error"></div>
+          <h1>Error! Please check the JS Console in your dev tools.</h1>
+          <p>{{error}}</p>
+        </template>
+      </div>
 
-      </form>
-    </div>
+    </form>
     `,
   css: `
       form.amp-form-submit-success [submit-success] {
@@ -158,13 +154,16 @@ describes.integration('amp-recaptcha-input', {
   });
 });
 
-const recaptchaRequestId = 'amp-recaptcha-input request bank';
-describes.integration('amp-recaptcha-input request bank', {
+const recaptchaRequestId = {
+  GET: 'amp-recaptcha-input request bank GET',
+  POST: 'amp-recaptcha-input request bank POST',
+};
+describes.integration(recaptchaRequestId.GET, {
   /* eslint-disable max-len */
   body: `
     <form
       method="GET"
-      action-xhr="${RequestBank.getUrl(recaptchaRequestId)}"
+      action-xhr="${RequestBank.getUrl(recaptchaRequestId.GET)}"
       target="_top">
 
       <fieldset>
@@ -195,9 +194,9 @@ describes.integration('amp-recaptcha-input request bank', {
     return browserController.waitForElementLayout('amp-recaptcha-input');
   });
 
-  it('should make a request to the specified endpoint', function() {
+  it('should make a request with correct parameters', function() {
     return submitForm(doc).then(() => {
-      return RequestBank.withdraw(recaptchaRequestId).then(req => {
+      return RequestBank.withdraw(recaptchaRequestId.GET).then(req => {
         expect(req.url)
             .to.include('term=recaptcha-search');
         expect(req.url)
@@ -207,6 +206,57 @@ describes.integration('amp-recaptcha-input request bank', {
     });
   });
 });
+
+describes.integration(recaptchaRequestId.POST, {
+  /* eslint-disable max-len */
+  body: `
+    <form
+      method="POST"
+      action-xhr="${RequestBank.getUrl(recaptchaRequestId.POST)}"
+      target="_top">
+
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input name="submit-button" type="submit" value="Search">
+        <amp-recaptcha-input layout="nodisplay"
+          name="recaptcha-token"
+          data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
+          data-action="recaptcha-example">
+        </amp-recaptcha-input>
+      </fieldset>
+    </form>
+  `,
+  /* eslint-enable max-len */
+  extensions: ['amp-recaptcha-input', 'amp-form'],
+  experiments: ['amp-recaptcha-input'],
+}, env => {
+  let doc;
+
+  beforeEach(() => {
+    doc = env.win.document;
+
+    const browserController = new BrowserController(env.win);
+    return browserController.waitForElementLayout('amp-recaptcha-input');
+  });
+
+  it('should make a request with correct parameters', function() {
+    return submitForm(doc).then(() => {
+      return RequestBank.withdraw(recaptchaRequestId.POST).then(req => {
+        expect(req.body).to.be.ok;
+        expect(req.body.term)
+            .to.be.equal('recaptcha-search');
+        expect(req.body['recaptcha-token'])
+            .to.be.equal('recaptcha-mock');
+        expect(req.headers.host).to.be.ok;
+      });
+    });
+  });
+});
+
 
 
 function waitForBootstrapFrameToBeCreated(doc) {
