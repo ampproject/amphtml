@@ -78,7 +78,7 @@
     "doctrine": "3.0.0",
     "envify": "4.1.0",
     "escodegen": "1.11.0",
-    "eslint": "5.11.1",
+    "eslint": "5.14.1",
     "eslint-plugin-amphtml-internal": "file:build-system/eslint-rules",
     "eslint-plugin-chai-expect": "1.2.0",
     "eslint-plugin-eslint-plugin": "2.0.1",
