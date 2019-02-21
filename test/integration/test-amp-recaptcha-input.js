@@ -295,7 +295,7 @@ function submitForm(doc) {
 
     return poll('Polling for hidden input', () => {
       return doc.querySelector('input[hidden]');
-    }, undefined, 5000);
+    }, undefined, 10000);
   }).then(() => {
     return doc.querySelector('input[hidden]');
   });
