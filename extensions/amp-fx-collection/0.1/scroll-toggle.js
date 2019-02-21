@@ -15,9 +15,11 @@
  */
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {devAssert, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
 import {px, setImportantStyles} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+
+const TAG = 'amp-fx';
 
 /** @enum {string} */
 export const ScrollTogglePosition = {
@@ -164,36 +166,35 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
 
 
 /**
- * @param {!Object<string, string>} computedStyle
  * @param {!Element} element
+ * @param {!Object<string, string>} computedStyle
+ * @return {boolean}
  */
-export function userAsertValidScrollToggleElement(computedStyle, element) {
-  userAssertComputedStyle(computedStyle, 'overflow', 'hidden', element);
-  userAssertComputedStyle(computedStyle, 'position', 'fixed', element);
+export function assertValidScrollToggleElement(element, computedStyle) {
+  return (
+    assertStyleOrWarn(computedStyle, 'overflow', 'hidden', element) &&
+    assertStyleOrWarn(computedStyle, 'position', 'fixed', element));
 }
 
 /**
  * @param {!Element} element
  * @param {string} type
  * @param {!Object<string, string>} computedStyle
- * @return {!ScrollTogglePosition}
+ * @return {?ScrollTogglePosition}
  */
 export function getScrollTogglePosition(element, type, computedStyle) {
-  const position = /** @type {!ScrollTogglePosition} */ (
-    type.replace(/^.*float\-in\-([^\s]+).*$/, '$1'));
+  const position = type.replace(/^float\-in\-([^\s]+)$/, '$1');
 
-  const withAmpFxType = `with amp-fx="${type}"`;
-  const zeroPx = px(0);
+  devAssert(position.length > 0);
 
-  if (position == ScrollTogglePosition.TOP) {
-    userAssertComputedStyle(
-        computedStyle, 'top', zeroPx, element, withAmpFxType);
-  } else {
-    userAssertComputedStyle(
-        computedStyle, 'bottom', zeroPx, element, withAmpFxType);
+  // naming convention win:
+  // position `top` should have `top: 0px` & `bottom` should have `bottom: 0px`
+  if (!assertStyleOrWarn(
+      computedStyle, position, px(0), element, `amp-fx=${type}`)) {
+    return null;
   }
 
-  return position;
+  return /** @type {!ScrollTogglePosition} */ (position);
 }
 
 /**
@@ -210,17 +211,19 @@ export function installScrollToggleStyles(element) {
  * @param {string} expected
  * @param {!Element} element
  * @param {string=} opt_suffix
+ * @return {boolean}
  */
-function userAssertComputedStyle(
+function assertStyleOrWarn(
   computed, prop, expected, element, opt_suffix) {
 
   if (computed[prop] == expected) {
-    return;
+    return true;
   }
   const suffix = opt_suffix ? ` ${opt_suffix}` : '';
-  userAssert(false, // not asserting direclty since elementShorthand is costly
-      'FX element must have `%s: %s` style [%s]%s.',
-      prop, expected, elementShorthand(element), suffix);
+  const shorthand = elementShorthand(element);
+  user().warn(TAG,
+      `FX element must have \`${prop}: ${expected}\` [${shorthand}]${suffix}.`);
+  return false;
 }
 
 

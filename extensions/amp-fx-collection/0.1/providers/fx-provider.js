@@ -21,11 +21,11 @@ import {Presets} from './amp-fx-presets';
 import {
   ScrollToggleDispatch,
   ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
   installScrollToggleStyles,
   scrollToggleFloatIn,
-  userAsertValidScrollToggleElement,
 } from '../scroll-toggle';
 import {Services} from '../../../../src/services';
 import {
@@ -64,19 +64,21 @@ export function installScrollToggledFx(ampdoc, element, type) {
   const resources = Services.resourcesForDoc(element);
   const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
-  let shouldMutate = false;
+  let shouldMutate = true;
 
   const measure = () => {
     const computed = computedStyle(ampdoc.win, element);
     const position = getScrollTogglePosition(element, type, computed);
+    const isValid = assertValidScrollToggleElement(element, computed);
 
-    userAsertValidScrollToggleElement(computed, element);
+    if (!position || !isValid) {
+      shouldMutate = false;
+      return;
+    }
 
     dispatch.observe(isShown => {
       scrollToggle(element, isShown, position);
     });
-
-    shouldMutate = true;
   };
 
   const mutate = () => {
