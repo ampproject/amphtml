@@ -687,3 +687,207 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     });
   });
 });
+
+describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
+  // A fake implementation of PerformanceObserver.
+  class PerformanceObserverImpl {
+    constructor(callback) {
+      this.options = {};
+      this.callback_ = callback;
+      this.isObserving = false;
+
+    }
+
+    observe(options) {
+      this.options = options;
+      this.isObserving = true;
+
+    }
+
+    disconnect() {
+      this.isObserving = false;
+    }
+
+    /**
+     * Trigger the Observer's callback.
+      * @param {!Array} entries
+      */
+    triggerCallback(entries) {
+      this.callback_(entries, this);
+    }
+  }
+
+  describe('should forward paint metrics for performance entries', () => {
+    it('created before performance service registered', () => {
+      // Pretend that the PaintTiming API exists.
+      env.win.PerformancePaintTiming = true;
+
+      const entries = [{
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
+      }];
+      const getEntriesByType = env.sandbox.stub();
+      getEntriesByType.withArgs('paint').returns(entries);
+      getEntriesByType.returns([]);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fp',
+            delta: 11,
+          },
+          {
+            label: 'fcp',
+            delta: 15,
+          });
+
+      delete env.win.PerformancePaintTiming;
+    });
+
+    it('created after performance service registered', () => {
+      // Pretend that the PaintTiming API exists.
+      env.win.PerformancePaintTiming = true;
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      let performanceObserver;
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      const entries = [{
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
+      }];
+      const list = {
+        getEntries() {
+          return entries;
+        },
+      };
+      // Fake a triggering of the firstInput event.
+      performanceObserver.triggerCallback(list);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fp',
+            delta: 11,
+          },
+          {
+            label: 'fcp',
+            delta: 15,
+          });
+      delete env.win.PerformanceEventTiming;
+    });
+  });
+
+  describe('should forward first input metrics for performance entries', () => {
+    it('created before performance service registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      const entries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const getEntriesByType = env.sandbox.stub();
+      getEntriesByType.withArgs('firstInput').returns(entries);
+      getEntriesByType.returns([]);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+
+      delete env.win.PerformanceEventTiming;
+    });
+
+    it('created after performance service registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      let performanceObserver;
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      const entries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const list = {
+        getEntries() {
+          return entries;
+        },
+      };
+      // Fake a triggering of the firstInput event.
+      performanceObserver.triggerCallback(list);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+      delete env.win.PerformanceEventTiming;
+    });
+  });
+});
+
+

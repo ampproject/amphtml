@@ -112,7 +112,7 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
-    this.registerPaintTimingObserver_();
+    this.registerPerformanceObserver_();
   }
 
   /**
@@ -176,13 +176,11 @@ export class Performance {
   }
 
   /**
-   * Reports first pain and first contentful paint timings.
+   * Reports performance metrics first paint, first contentful paint,
+   * and first input delay.
    * See https://github.com/WICG/paint-timing
    */
-  registerPaintTimingObserver_() {
-    if (!this.win.PerformancePaintTiming) {
-      return;
-    }
+  registerPerformanceObserver_() {
     // Chrome doesn't implement the buffered flag for PerformanceObserver.
     // That means we need to read existing entries and maintain state
     // as to whether we have reported a value yet, since in the future it may
@@ -190,6 +188,7 @@ export class Performance {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
+    let recordedFirstInputDelay = false;
     const processEntry = entry => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
@@ -200,17 +199,38 @@ export class Performance {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
       }
+      else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+        this.tickDelta('fid', entry.processingStart - entry.startTime);
+        recordedFirstInputDelay = true;
+      }
     };
+
+    const entryTypesToObserve = [];
+    if (this.win.PerformancePaintTiming) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('paint').forEach(processEntry);
+      entryTypesToObserve.push('paint');
+    }
+
+    if (this.win.PerformanceEventTiming) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
+      entryTypesToObserve.push('firstInput');
+    }
+
+    if (entryTypesToObserve.length === 0) {
+      return;
+    }
+
     const observer = new this.win.PerformanceObserver(list => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
-    // Programmatically read once as currently PerformanceObserver does not
-    // report past entries as of Chrome 61.
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-    this.win.performance.getEntriesByType('paint').forEach(processEntry);
-
-    observer.observe({entryTypes: ['paint']});
+    observer.observe({entryTypes: entryTypesToObserve});
   }
 
   /**
