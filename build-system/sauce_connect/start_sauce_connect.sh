@@ -38,6 +38,7 @@ LOG_PREFIX=$(YELLOW "start_sauce_connect.sh:")
 
 # Start a timer to track how long setup took
 START_TIME=$( date +%s )
+echo "$LOG_PREFIX Starting $(CYAN "start_sauce_connect.sh")..."
 
 # Check the status of the Sauce Labs service
 echo "$LOG_PREFIX Fetching current Sauce Labs service status from $(CYAN "$STATUS_URL")..."
@@ -88,6 +89,7 @@ else
   TUNNEL_IDENTIFIER="$TRAVIS_JOB_NUMBER"
 fi
 
+
 # Launch proxy and wait for a tunnel to be created.
 echo "$LOG_PREFIX Launching $(CYAN "$BINARY_FILE")"
 "$BINARY_FILE" --verbose --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" --logfile "$LOG_FILE" 1>"$OUTPUT_FILE" 2>&1 &
@@ -102,7 +104,7 @@ do
     echo "$LOG_PREFIX Sauce Connect Proxy with tunnel ID $(CYAN "$TUNNEL_ID") and identifier $(CYAN "$TUNNEL_IDENTIFIER") is now running as pid $(CYAN "$PID")"
     END_TIME=$( date +%s )
     TOTAL_TIME=$(( END_TIME - START_TIME ))
-    echo "$LOG_PREFIX Total startup time: $(CYAN "$TOTAL_TIME") seconds"
+    echo "$LOG_PREFIX Done running $(CYAN "start_sauce_connect.sh") Total time: $(CYAN "$TOTAL_TIME"s)"
     break
   else
     # Continue waiting.
