@@ -133,10 +133,10 @@ function findLocalizedString(localizedStringBundles, languageCodes,
 
   languageCodes.some(languageCode => {
     const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId] &&
-        localizedStringBundle[localizedStringId].string) {
-      localizedString = localizedStringBundle[localizedStringId].string;
-      return true;
+    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
+      localizedString = localizedStringBundle[localizedStringId].string ||
+          localizedStringBundle[localizedStringId].fallback;
+      return !!localizedString;
     }
 
     return false;
@@ -176,6 +176,8 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
+    pseudoLocaleStringBundle[localizedStringId].fallback =
+        localizationFn(localizedStringBundle[localizedStringId].fallback);
   });
 
   return pseudoLocaleStringBundle;
