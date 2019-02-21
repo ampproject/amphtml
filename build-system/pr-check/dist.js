@@ -38,6 +38,7 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting');
     uploadDistOutput(FILENAME);
   } else {
