@@ -33,8 +33,8 @@ import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
 import {
   AmpStoryEmbeddedComponent,
-  EXPANDABLE_COMPONENTS,
   EMBED_ID_ATTRIBUTE_NAME,
+  EXPANDABLE_COMPONENTS,
 } from './amp-story-embedded-component';
 import {
   AnimationManager,
@@ -169,7 +169,8 @@ export const NavigationDirection = {
  */
 function debounceEmbedResize(win, page, resources) {
   return debounce(win, (el, unlisten) => {
-    AmpStoryEmbeddedComponent.prepareForAnimation(page, el, resources);
+    AmpStoryEmbeddedComponent
+        .prepareForAnimation(page, /** @type {!Element} */ (el), resources);
     if (unlisten) {
       unlisten();
     }
@@ -415,7 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onResize_() {
-    this.findAndPrepareEmbeddedComponents_(true /* opt_forceResize */);
+    this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
   /** @return {!Promise} */
@@ -466,23 +467,23 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Finds embedded components in page and prepares them for their expanded view
    * animation.
-   * @param {boolean} opt_forceResize
+   * @param {boolean=} forceResize
    * @private
    */
-  findAndPrepareEmbeddedComponents_(opt_forceResize = false) {
+  findAndPrepareEmbeddedComponents_(forceResize = false) {
     scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
           const debouncePrepareForAnimation =
             debounceEmbedResize(this.win, this.element, this.resources_);
 
-          if (opt_forceResize) {
-            debouncePrepareForAnimation(el, null);
+          if (forceResize) {
+            debouncePrepareForAnimation(el, null /* unlisten */);
           } else if (!el.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // Element has not been prepared for its animation yet.
             const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
               debouncePrepareForAnimation(el, unlisten);
             });
             // Run in case target never changes size.
-            debouncePrepareForAnimation(el, null);
+            debouncePrepareForAnimation(el, null /* unlisten */);
           }
         });
   }
