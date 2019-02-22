@@ -32,6 +32,7 @@ const TAG = 'amp-fx-collection';
  */
 const FxType = {
   // Keep alphabetically sorted.
+  // Or don't. I'm just a sign, not a cop.
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
   FLOAT_IN_BOTTOM: 'float-in-bottom',
@@ -211,7 +212,8 @@ export class AmpFxCollection {
    */
   install_(element, type) {
     if (scrollToggledFxTypes[type]) {
-      return installScrollToggledFx(this.ampdoc_, element, type);
+      installScrollToggledFx(this.ampdoc_, element, type);
+      return;
     }
     installPositionBoundFx(this.ampdoc_, element, type);
   }
@@ -245,8 +247,8 @@ export function getFxTypes(element) {
 
 
 /**
- * Returns the array of fx types this component after checking that no clashing
- * fx types are present on the same element.
+ * Removes the conflicting types from an array of fx types. Removal is in-place.
+ * Kept by order.
  *
  * e.g.`amp-fx="parallax fade-in"
  *

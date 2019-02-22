@@ -38,7 +38,7 @@ describes.realWin('Creates the relevant fx presets correctly', {
     return ampFxCollection;
   }
 
-  // TODO(alanorozco): Actually write tests. These do nothing.
+  // TODO(alanorozco): Actually write tests. Like the goggles, these do nothing!
   it.skip('creates amp-fx components correctly', () => {
     let ampFx = createAmpFx('parallax', {
       'data-parallax-factor': 1.2,
