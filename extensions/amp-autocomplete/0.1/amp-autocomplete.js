@@ -16,6 +16,8 @@
 
 import {Layout} from '../../../src/layout';
 
+const TAG = 'amp-autocomplete';
+
 export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -42,6 +44,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return layout == Layout.RESPONSIVE;
   }
 }
-AMP.extension('amp-autocomplete', '0.1', AMP => {
-  AMP.registerElement('amp-autocomplete', AmpAutocomplete);
-});
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAutocomplete);
+}); 
