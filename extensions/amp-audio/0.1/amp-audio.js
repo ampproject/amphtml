@@ -23,7 +23,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementByTag} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -209,7 +209,7 @@ export class AmpAudio extends AMP.BaseElement {
    * @private
    */
   isStoryDescendant_() {
-    return closestAncestorElementByTag(this.element, 'AMP-STORY');
+    return closestAncestorElementBySelector(this.element, 'AMP-STORY');
   }
 
   /** @private */
