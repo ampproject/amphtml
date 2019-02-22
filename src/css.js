@@ -74,48 +74,36 @@ function testScopeSelector(el) {
 }
 
 
-/**
- * Finds the next non-backslash-escaped char in string, starting the search
- * after index.
- *
- * ```
- *   next('div, a, span', ',', 0);
- *   // => 3
- *   next('div, a, span', ',', 1);
- *   // => 3
- *   next('div, a, span', ',', 3);
- *   // => 6
- *   next('div\\, a, span', ',', 0);
- *   // => 7
- *   next('div\\\\, a, span', ',', 0);
- *   // => 5
- *   next('div\\\\\\, a, span', ',', 0);
- *   // => 9
- *   next('div\\\\\\\\, a, span', ',', 0);
- *   // => 7
- * ```
- *
- * @param {string} str
- * @param {string} char
- * @param {number} index
- * @return {number}
- */
-function next(str, char, index) {
-  while (index >= 0) {
-    index = str.indexOf(char, index + 1);
-    let i = index;
-    while (i > 0 && str[i - 1] === '\\') {
-      i--;
-    }
-    if ((index - i) % 2 === 0) {
-      return index;
-    }
-  }
-  return -1;
-}
+/* eslint-disable quotes, indent */
+const ATTRIBUTE_REGEX = new RegExp(
+  // Consume the opening bracket `[`
+  `\\[` +
+  // Consume everything up to the closing bracket, or up to the attribute value
+  // quotes.
+  `[^"'\\]]*` +
+  // Fork here.
+  `(?:` +
+    // Either there're no quotes and we're at the end of the attribute brackets
+    `(?=\\])|` +
+
+    // Or there are quotes. Consume them into Capture Group 1 (CG1)
+    `(["'])` +
+    // Consume everything that's not that quote char (CG1)
+    `(?:(?!\\1).)*` +
+    // Consume the end quote (CG1)
+    `\\1` +
+    // Consume everything up to the end of the attribute bracket
+    `[^\\]]*` +
+  `)`,
+  'g'
+);
+/* eslint-enable quotes, indent */
 
 /**
  * Parses selector to extract each individual selector.
+ *
+ * This DOES NOT validate the selector, and passing an invalid selector will
+ * have unexpected results.
  *
  * ```
  *   selectors('div')
@@ -134,21 +122,12 @@ function next(str, char, index) {
  * @return {!Array<string>}
  */
 export function selectors(selector) {
-  let brackets = 0;
   let parentheses = 0;
 
   const selectors = [];
   let start = 0;
   for (let i = 0; i < selector.length; i++) {
-    const char = selector[i];
-    switch (char) {
-      case '[':
-        brackets++;
-        break;
-      case ']':
-        brackets--;
-        break;
-
+    switch (selector[i]) {
       case '(':
         parentheses++;
         break;
@@ -156,13 +135,16 @@ export function selectors(selector) {
         parentheses--;
         break;
 
-      case '"':
-      case "'":
-        i = next(selector, char, i);
+      case '[':
+        ATTRIBUTE_REGEX.lastIndex = i;
+        // Despite looking useless, we depend on its lastIndex updating
+        // side-effect.
+        ATTRIBUTE_REGEX.test(selector);
+        i = ATTRIBUTE_REGEX.lastIndex;
         break;
 
       case ',':
-        if (brackets === 0 && parentheses === 0) {
+        if (parentheses === 0) {
           selectors.push(selector.substring(start, i).trim());
           start = i + 1;
         }
