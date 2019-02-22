@@ -38,7 +38,7 @@ const timedExecOrDie =
 
 function runSinglePassTest_() {
   timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
+  timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
 }
