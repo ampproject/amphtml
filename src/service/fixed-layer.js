@@ -33,7 +33,7 @@ import {
   matches,
 } from '../dom';
 import {dev, user} from '../log';
-import {endsWith, startsWith} from '../string';
+import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 import {toWin} from '../types';
