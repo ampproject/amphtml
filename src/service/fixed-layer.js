@@ -126,7 +126,10 @@ export class FixedLayer {
    *   UX completes e.g. open transition animation.
    */
   enterLightbox(opt_lightbox, opt_onComplete) {
-    this.getTransferLayer_().setLightboxMode(true);
+    const transferLayer = this.getTransferLayer_();
+    if (transferLayer) {
+      transferLayer.setLightboxMode(true);
+    }
 
     if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')
         && opt_lightbox && opt_onComplete) {
@@ -141,7 +144,10 @@ export class FixedLayer {
    * Reverses the actions performed by `enterLightbox()`.
    */
   leaveLightbox() {
-    this.getTransferLayer_().setLightboxMode(false);
+    const transferLayer = this.getTransferLayer_();
+    if (transferLayer) {
+      transferLayer.setLightboxMode(false);
+    }
 
     if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
       const fes = remove(this.elements_, fe => !!fe.lightboxed);
