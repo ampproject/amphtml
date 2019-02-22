@@ -61,7 +61,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == Layout.CONTAINER;
   }
 }
 
