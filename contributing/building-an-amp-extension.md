@@ -693,7 +693,8 @@ Class AmpMyElement extends AMP.BaseElement {
     if(!isExperimentOn(this.win, 'amp-my-element')) {
       user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
       return();
-    } // actually load your resource or render more expensive resources.
+    } 
+    // actually load your resource or render more expensive resources.
   }
 }
 
