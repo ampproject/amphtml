@@ -56,7 +56,7 @@ export function isActionableByTap(element) {
   }
   const action = Services.actionServiceForDoc(element);
   const hasTapAction = action.hasResolvableAction(element, 'tap',
-      dev().assertElement(element.parentElement))
+      dev().assertElement(element.parentElement));
   if (hasTapAction) {
     return true;
   }
@@ -64,7 +64,7 @@ export function isActionableByTap(element) {
   for (let i = 0; i < actionables.length; i++) {
     const actionable = actionables[i];
     const hasTapAction = action.hasResolvableAction(actionable, 'tap',
-        dev().assertElement(actionable.parentElement))
+        dev().assertElement(actionable.parentElement));
     if (hasTapAction) {
       return true;
     }
