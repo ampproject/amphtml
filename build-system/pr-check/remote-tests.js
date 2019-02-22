@@ -64,6 +64,7 @@ function main() {
       return 0;
     }
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||

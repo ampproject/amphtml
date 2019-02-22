@@ -958,6 +958,10 @@ export const adConfig = {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
+  'ucfunnel': {
+    renderStartImplemented: true,
+  },
+
   'uzou': {
     preconnect: [
       'https://speee-ad.akamaized.net',
