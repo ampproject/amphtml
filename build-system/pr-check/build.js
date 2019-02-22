@@ -65,15 +65,16 @@ function main() {
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('DEV_DASHBOARD') ||
-        buildTargets.has('FLAG_CONFIG')) {
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('VISUAL_DIFF')) {
 
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
       console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
-          'because this commit does not affect the runtime, ' +
-          'build system, test files, or the dev dashboard');
+          'because this commit does not affect the runtime, build system, ' +
+          'test files, visual diff files, or the dev dashboard');
     }
   }
 
