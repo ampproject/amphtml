@@ -223,16 +223,19 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
-    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(
+        child);
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
     expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
         .to.equal(element);
-    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(
+        element);
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
-    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(
+        parent);
   });
 
   it('closestNode should find nodes as well as elements', () => {

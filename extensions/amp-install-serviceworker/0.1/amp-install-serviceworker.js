@@ -15,7 +15,10 @@
  */
 
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector, removeElement} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  removeElement,
+} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';

@@ -198,7 +198,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.assertAndParseConfig_();
 
     const storyEl = closestAncestorElementBySelector(this.element, 'AMP-STORY');
-    const consentEl = closestAncestorElementBySelector(this.element, 'AMP-CONSENT');
+    const consentEl = closestAncestorElementBySelector(this.element,
+        'AMP-CONSENT');
     const consentId = consentEl.id;
     this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
 

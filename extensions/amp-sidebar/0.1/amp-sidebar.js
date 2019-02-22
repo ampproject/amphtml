@@ -19,7 +19,11 @@ import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
-import {closestAncestorElementBySelector, isRTL, tryFocus} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  isRTL,
+  tryFocus,
+} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
