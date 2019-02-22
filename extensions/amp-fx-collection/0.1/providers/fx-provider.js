@@ -58,6 +58,11 @@ import {
  * @param {string} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
+  // TODO(alanorozco): Surface FixedLayer APIs to make this work.
+  if (Services.viewerForDoc(element).isEmbedded()) {
+    return;
+  }
+
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
