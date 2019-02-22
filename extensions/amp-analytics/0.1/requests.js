@@ -24,7 +24,6 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
@@ -40,6 +39,7 @@ export class RequestHandler {
    */
   constructor(element, request, preconnect, transport, isSandbox) {
 
+    /** @const {!Element} */
     this.element_ = element;
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
