@@ -805,7 +805,7 @@ export class FixedLayer {
     const doc = this.ampdoc.win.document;
     this.transferLayer_ =
         doc.body.shadowRoot ?
-          new TransferLayerShadow(doc) :
+          new TransferLayerShadow(doc, this.vsync_) :
           new TransferLayerBody(doc, this.vsync_);
     return this.transferLayer_;
   }
@@ -1116,8 +1116,12 @@ const FIXED_LAYER_SLOT = 'i-amphtml-fixed';
 class TransferLayerShadow {
   /**
    * @param {!Document} doc
+   * @param {!./vsync-impl.Vsync} vsync
    */
-  constructor(doc) {
+  constructor(doc, vsync) {
+    /** @private @const {!./vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+
     /** @private @const {!Element} */
     this.layer_ = doc.createElement('div');
     this.layer_.id = 'i-amphtml-fixed-layer';
@@ -1144,8 +1148,10 @@ class TransferLayerShadow {
   }
 
   /** @override */
-  setLightboxMode(unusedOn) {
-    // Unimplemented.
+  setLightboxMode(on) {
+    this.vsync_.mutate(() => {
+      setStyle(this.getRoot(), 'visibility', on ? 'hidden' : 'visible');
+    });
   }
 
   /** @override */
