@@ -31,7 +31,7 @@ describes.realWin('amp-autocomplete', {
     element = win.document.createElement('amp-autocomplete');
     win.document.body.appendChild(element);
     toggleExperiment(win, 'amp-autocomplete', true);
-});
+  });
 
   it('should have hello world when built with experiment on', () => {
     element.build();
