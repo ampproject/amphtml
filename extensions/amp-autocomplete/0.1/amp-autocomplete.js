@@ -16,6 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
+import { user } from '../../../src/log';
 
 /** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
@@ -39,7 +40,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     if (!isExperimentOn(this.getWin(), 'amp-autocomplete')) {
-      console.warn('Experiment %s is not turned on.', EXPERIMENT);
+      user().warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
     this.container_ = this.element.ownerDocument.createElement('div');
@@ -51,7 +52,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!isExperimentOn(this.getWin(), 'amp-autocomplete')) {
-      console.warn('Experiment %s is not turned on.', EXPERIMENT);
+      user().warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
     // Actually load your resource or render more expensive resources.
