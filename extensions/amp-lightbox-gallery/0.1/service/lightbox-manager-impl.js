@@ -15,7 +15,10 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
+import {
+  AutoLightboxEvents,
+  isActionableByTap,
+} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
@@ -155,26 +158,6 @@ export class LightboxManager {
   }
 
   /**
-   * Decides whether an already lightboxable element should automatically get
-   * a tap handler to open in the lightbox.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  meetsHeuristicsForTap_(element) {
-    devAssert(element);
-    devAssert(element.hasAttribute('lightbox'));
-
-    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
-      return false;
-    }
-    const actions = Services.actionServiceForDoc(element);
-    if (actions.hasResolvableAction(element, 'tap')) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
    * Scans the document for lightboxable elements and updates `this.elements_`
    * accordingly.
    * @private
@@ -287,7 +270,7 @@ export class LightboxManager {
     }
 
     this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
-    if (!this.meetsHeuristicsForTap_(element)) {
+    if (isActionableByTap(element)) {
       return;
     }
     const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
