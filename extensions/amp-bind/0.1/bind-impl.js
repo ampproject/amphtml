@@ -188,6 +188,13 @@ export class Bind {
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
+    this.signals_.whenSignal('READY').then(() => this.onReady_());
+
+    /** @private {number} */
+    this.numberOfAmpStateElements_ = Number.POSITIVE_INFINITY;
+
+    /** @private {number} */
+    this.numberOfAmpStateInits_ = 0;
 
     // Install debug tools.
     const g = self.AMP;
@@ -214,10 +221,10 @@ export class Bind {
    * evaluation unless `opt_skipEval` is false.
    * @param {!JsonObject} state
    * @param {boolean=} opt_skipEval
-   * @param {boolean=} opt_isAmpStateMutation
+   * @param {boolean=} opt_skipAmpState
    * @return {!Promise}
    */
-  setState(state, opt_skipEval, opt_isAmpStateMutation) {
+  setState(state, opt_skipEval, opt_skipAmpState) {
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
@@ -227,12 +234,14 @@ export class Bind {
     dev().info(TAG, 'state:', this.state_);
 
     if (opt_skipEval) {
+      this.numberOfAmpStateInits_++;
+      this.checkReadiness_();
       return Promise.resolve();
     }
 
     const promise = this.initializePromise_
         .then(() => this.evaluate_())
-        .then(results => this.apply_(results, opt_isAmpStateMutation));
+        .then(results => this.apply_(results, opt_skipAmpState));
 
     if (getMode().test) {
       promise.then(() => {
@@ -267,7 +276,6 @@ export class Bind {
       this.maxNumberOfBindings_ = Math.min(2000,
           Math.max(1000, this.maxNumberOfBindings_ + 500));
 
-      // Signal first mutation (subsequent signals are harmless).
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
@@ -449,6 +457,8 @@ export class Bind {
   initialize_(root) {
     dev().info(TAG, 'init');
 
+    this.numberOfAmpStateElements_ = root.querySelectorAll('AMP-STATE').length;
+
     // Disallow URL property bindings in AMP4EMAIL.
     const allowUrlProperties = !this.isAmp4Email_();
     this.validator_ = new BindValidator(allowUrlProperties);
@@ -468,10 +478,28 @@ export class Bind {
       if (getMode().development) {
         return this.evaluate_().then(results => this.verify_(results));
       }
-    }).then(() => {
-      this.viewer_.sendMessage('bindReady', undefined);
-      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-    });
+    }).then(() => this.checkReadiness_());
+  }
+
+  /**
+   * Bind is "ready" when its initialization completes _and_ all <amp-state>
+   * elements' local data is parsed and processed (not remote data).
+   * @private
+   */
+  checkReadiness_() {
+    if (this.numberOfAmpStateInits_ <= this.numberOfAmpStateElements_) {
+      return;
+    }
+    // Use a signal to ensure that onReady_() is only invoked once.
+    this.initializePromise_.then(() => this.signals_.signal('READY'));
+  }
+
+  /**
+   * @private
+   */
+  onReady_() {
+    this.viewer_.sendMessage('bindReady', undefined);
+    this.dispatchEventForTesting_(BindEvents.INITIALIZE);
   }
 
   /**
@@ -994,16 +1022,15 @@ export class Bind {
   /**
    * Applies expression results to all elements in the document.
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {boolean=} opt_isAmpStateMutation
+   * @param {boolean=} opt_skipAmpState
    * @return {!Promise}
    * @private
    */
-  apply_(results, opt_isAmpStateMutation) {
+  apply_(results, opt_skipAmpState) {
     const promises = this.boundElements_.map(boundElement => {
-      // If this "apply" round is triggered by an <amp-state> mutation,
-      // ignore updates to <amp-state> element to prevent update cycles.
-      if (opt_isAmpStateMutation
-          && boundElement.element.tagName == 'AMP-STATE') {
+      // If this evaluation is triggered by an <amp-state> mutation, we must
+      // ignore updates to any <amp-state> element to prevent update cycles.
+      if (opt_skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
         return Promise.resolve();
       }
       return this.applyBoundElement_(results, boundElement);
