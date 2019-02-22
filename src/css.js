@@ -73,18 +73,120 @@ function testScopeSelector(el) {
   }
 }
 
+
+/**
+ * Finds the next non-backslash-escaped char in string, starting the search
+ * after index.
+ *
+ * ```
+ *   next('div, a, span', ',', 0);
+ *   // => 3
+ *   next('div, a, span', ',', 1);
+ *   // => 3
+ *   next('div, a, span', ',', 3);
+ *   // => 6
+ *   next('div\\, a, span', ',', 0);
+ *   // => 7
+ *   next('div\\\\, a, span', ',', 0);
+ *   // => 5
+ *   next('div\\\\\\, a, span', ',', 0);
+ *   // => 9
+ *   next('div\\\\\\\\, a, span', ',', 0);
+ *   // => 7
+ * ```
+ *
+ * @param {string} str
+ * @param {string} char
+ * @param {number} index
+ * @return {number}
+ */
+function next(str, char, index) {
+  while (index >= 0) {
+    index = str.indexOf(char, index + 1);
+    let i = index;
+    while (i > 0 && str[i - 1] === '\\') {
+      i--;
+    }
+    if ((index - i) % 2 === 0) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Parses selector to extract each individual selector.
+ *
+ * ```
+ *   selectors('div')
+ *   // => ['div']
+ *   selectors('div,ul')
+ *   // => ['div', 'ul']
+ *   selectors('div , ul')
+ *   // => ['div', 'ul']
+ *   selectors('div[attr="contains,comma"]')
+ *   // => ['div[attr="contains,comma"]']
+ *   selectors('div:is(.first, .second)')
+ *   // => ['div:is(.first, .second)']
+ * ```
+ *
+ * @param {string} selector
+ * @return {!Array<string>}
+ */
+export function selectors(selector) {
+  let brackets = 0;
+  let parentheses = 0;
+
+  const selectors = [];
+  let start = 0;
+  for (let i = 0; i < selector.length; i++) {
+    const char = selector[i];
+    switch (char) {
+      case '[':
+        brackets++;
+        break;
+      case ']':
+        brackets--;
+        break;
+
+      case '(':
+        parentheses++;
+        break;
+      case ')':
+        parentheses--;
+        break;
+
+      case '"':
+      case "'":
+        i = next(selector, char, i);
+        break;
+
+      case ',':
+        if (brackets === 0 && parentheses === 0) {
+          selectors.push(selector.substring(start, i).trim());
+          start = i + 1;
+        }
+    }
+  }
+  selectors.push(selector.substring(start).trim());
+
+  return selectors;
+}
+
 /**
  * Prefixes a selector for ancestor selection. Splits in subselectors and
  * applies prefix to each.
  *
  * e.g.
  * ```
- *   prependSelectorsWith('div', '.i-amphtml-scoped');
+ *   prependSelectorsWith('div', '.i-amphtml-scoped ');
  *   // => '.i-amphtml-scoped div'
- *   prependSelectorsWith('div, ul', ':scope');
+ *   prependSelectorsWith('div, ul', ':scope ');
  *   // => ':scope div, :scope ul'
- *   prependSelectorsWith('div, ul', 'article >');
+ *   prependSelectorsWith('div, ul', 'article > ');
  *   // => 'article > div, article > ul'
+ *   prependSelectorsWith('div, ul', 'no-space');
+ *   // => 'no-spacediv, no-spaceul'
  * ```
  *
  * @param {string} selector
@@ -92,7 +194,7 @@ function testScopeSelector(el) {
  * @return {string}
  */
 export function prependSelectorsWith(selector, distribute) {
-  return selector.replace(/^|,/g, `$&${distribute} `);
+  return selectors(selector).map(s => distribute + s).join(',');
 }
 
 /**

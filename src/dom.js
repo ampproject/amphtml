@@ -503,7 +503,7 @@ export function elementByTag(element, tagName) {
 function scopedQuerySelectionFallback(root, selector) {
   const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
-  const scopedSelector = prependSelectorsWith(selector, `.${unique}`);
+  const scopedSelector = prependSelectorsWith(selector, `.${unique} `);
   const elements = root./*OK*/querySelectorAll(scopedSelector);
   root.classList.remove(unique);
   return elements;
@@ -518,7 +518,7 @@ function scopedQuerySelectionFallback(root, selector) {
  */
 export function scopedQuerySelector(root, selector) {
   if (isScopeSelectorSupported(root)) {
-    return root./*OK*/querySelector(prependSelectorsWith(selector, ':scope'));
+    return root./*OK*/querySelector(prependSelectorsWith(selector, ':scope '));
   }
 
   // Only IE.
@@ -536,7 +536,7 @@ export function scopedQuerySelector(root, selector) {
 export function scopedQuerySelectorAll(root, selector) {
   if (isScopeSelectorSupported(root)) {
     return root./*OK*/querySelectorAll(
-        prependSelectorsWith(selector, ':scope'));
+        prependSelectorsWith(selector, ':scope '));
   }
 
   // Only IE.
