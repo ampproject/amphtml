@@ -153,10 +153,14 @@ describe('inabox', function() {
         `,
     }, env => {
       beforeEach(() => {
+        // TODO: This happens after the test page is fully rendered, so there's
+        // a split second where the test iframe is not yet resized; that's
+        // enough to trigger viewability on Safari. Fix this to unskip
         env.iframe.style.height = '100vh';
       });
 
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+      it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
+          'amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
       });
@@ -198,7 +202,7 @@ describe('inabox', function() {
       return testAmpComponents();
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.configure().skipSinglePass().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
@@ -236,7 +240,7 @@ describe('inabox', function() {
       return testAmpComponentsBTF(env.win);
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.configure().skipSinglePass().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
@@ -297,7 +301,8 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(0, 1000);
         });
 
-    it('should properly render ad in a safe frame with viewability pings',
+    it.configure().skipSinglePass().run(
+        'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
@@ -327,7 +332,7 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().run(
+    it.configure().skipSafari().skipSinglePass().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
@@ -365,7 +370,8 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(2000, 3000);
         });
 
-    it('should properly render ad in a safe frame with viewability pings',
+    it.configure().skipSinglePass().run(
+        'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
           return testVisibilityPings(2000, 3000);
