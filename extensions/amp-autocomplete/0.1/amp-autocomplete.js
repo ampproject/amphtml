@@ -15,12 +15,12 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {isExperimentOn} from '../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
-/** @const {!string} */
+/** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
 
-/** @const {!string} */
+/** @const {string} */
 const TAG = 'amp-autocomplete';
 
 export class AmpAutocomplete extends AMP.BaseElement {
@@ -38,8 +38,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
+    if (!isExperimentOn(this.getWin(), 'amp-autocomplete')) {
+      console.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
     this.container_ = this.element.ownerDocument.createElement('div');
@@ -47,11 +47,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
   }
-  
+
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
+    if (!isExperimentOn(this.getWin(), 'amp-autocomplete')) {
+      console.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
     // Actually load your resource or render more expensive resources.

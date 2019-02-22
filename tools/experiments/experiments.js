@@ -397,7 +397,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-autocomplete',
-    name: 'AMP Autocomplete provides a set of suggestions to complete a user query in an input field.',
+    name: 'AMP Autocomplete provides a set of suggestions to' +
+        ' complete a user query in an input field.',
     spec: 'https://github.com/ampproject/amphtml/issues/9785',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
   },
