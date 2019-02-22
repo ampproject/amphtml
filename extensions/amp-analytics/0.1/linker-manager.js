@@ -22,7 +22,6 @@ import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -119,7 +118,7 @@ export class LinkerManager {
     }
 
 
-    this.maybeEnableFormSupport_();
+    this.enableFormSupport_();
 
     return Promise.all(this.allLinkerPromises_);
   }
@@ -309,18 +308,6 @@ export class LinkerManager {
       }
     }
     return true;
-  }
-
-  /**
-   * Enable form support if experiment is on.
-   * TODO(ccordry): remove this method and use `enableFormSupport_` when fully
-   * launched.
-   * @private
-   */
-  maybeEnableFormSupport_() {
-    if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-      this.enableFormSupport_();
-    }
   }
 
   /**
