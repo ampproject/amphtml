@@ -105,6 +105,7 @@ const AD_STATE = {
 const ALLOWED_AD_TYPES = map({
   'custom': true,
   'doubleclick': true,
+  'fake': true,
 });
 
 /** @enum {boolean} */
