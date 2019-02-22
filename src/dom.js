@@ -494,7 +494,7 @@ export function elementByTag(element, tagName) {
  * @param {string} tagName
  */
 function assertIsTagName(tagName) {
-  devAssert(!/[^\w-]/.test(tagName));
+  devAssert(/^[\w-]+$/.test(tagName));
 }
 
 /**
