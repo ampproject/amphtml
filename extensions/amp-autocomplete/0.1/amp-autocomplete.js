@@ -16,6 +16,10 @@
 
 import {Layout} from '../../../src/layout';
 
+/** @const {!string} */
+const EXPERIMENT = 'amp-autocomplete';
+
+/** @const {!string} */
 const TAG = 'amp-autocomplete';
 
 export class AmpAutocomplete extends AMP.BaseElement {
@@ -38,10 +42,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
   }
+  
+  /** @override */
+  layoutCallback() {
+    // Actually load your resource or render more expensive resources.
+  }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout == Layout.FIXED;
   }
 }
 AMP.extension(TAG, '0.1', AMP => {
