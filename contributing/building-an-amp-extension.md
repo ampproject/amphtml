@@ -680,20 +680,20 @@ Class AmpMyElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if(!isExperimentOn(this.win, 'amp-my-element')) {
+    if (!isExperimentOn(this.win, 'amp-my-element')) {
       user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return();
-    } 
+      return;
+    }
     // get attributes, assertions of values, assign instance variables.
     // build lightweight dom and append to this.element.
   }
 
   /** @override */
   layoutCallback() {
-    if(!isExperimentOn(this.win, 'amp-my-element')) {
+    if (!isExperimentOn(this.win, 'amp-my-element')) {
       user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return();
-    } 
+      return;
+    }
     // actually load your resource or render more expensive resources.
   }
 }
