@@ -62,6 +62,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return layout == Layout.FIXED;
   }
 }
+
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAutocomplete);
 });

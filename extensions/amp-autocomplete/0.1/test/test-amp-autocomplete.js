@@ -16,6 +16,8 @@
 
 import '../amp-autocomplete';
 
+toggleExperiment('amp-autocomplete', true);
+
 describes.realWin('amp-autocomplete', {
   amp: {
     extensions: ['amp-autocomplete'],
