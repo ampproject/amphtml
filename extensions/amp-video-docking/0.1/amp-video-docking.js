@@ -386,6 +386,10 @@ export class VideoDocking {
 
   /** @private */
   registerAll_() {
+    if (!this.isEnabled_()) {
+      return;
+    }
+
     const ampdoc = this.ampdoc_;
 
     const dockableSelector =
@@ -408,6 +412,19 @@ export class VideoDocking {
         this.registerElement(target);
       }
     });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isEnabled_() {
+    // iOS is impossible in the viewer. See https://bit.ly/2BJcNjV
+    if (Services.platformFor(this.ampdoc_).isIos() &&
+        Services.viewerForDoc(this.ampdoc_).isEmbedded()) {
+      return false;
+    }
+    return true;
   }
 
   /**
