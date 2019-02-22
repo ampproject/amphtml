@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays an AddThis website tools embed.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-addthis"></a> `amp-addthis`
+# amp-addthis
+
+Displays an <a href="https://www.addthis.com">AddThis</a> website tools embed.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an <a href="https://www.addthis.com">AddThis</a> website tools embed.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-addthis" src="https://cdn.ampproject.org/v0/amp-addthis-0.1.js">&lt;/script></code></td>
@@ -35,7 +40,7 @@ limitations under the License.
 
 ## Why AddThis?
 
-The `amp-addthis` component provides beautiful, simple share buttons. Make it easy for your website visitors share content to over 200 social channels including Messenger, WhatsApp, Facebook, Twitter, Pinterest and many more. 
+The `amp-addthis` component provides beautiful, simple share buttons. Make it easy for your website visitors share content to over 200 social channels including Messenger, WhatsApp, Facebook, Twitter, Pinterest and many more.
 
 AddThis is trusted by over 15,000,000 websites with over 2 billion unique users, sharing content all over the world, in more than sixty languages.
 
@@ -46,7 +51,7 @@ Placed on the sides, top, or bottom of your page, following your reader as they 
 
 Example:
 ```html
-<!-- 
+<!--
   This example uses a placeholder pubId.
   Please replace the pubId value with your own after
   creating an account on https://www.addthis.com/dashboard.
@@ -66,7 +71,7 @@ Integrate share buttons into your content for a seamless sharing experience.
 
 Example:
 ```html
-<!-- 
+<!--
   This example uses a placeholder pubId.
   Please replace the pubId value with your own after
   creating an account on https://www.addthis.com/dashboard.
@@ -81,37 +86,41 @@ Example:
 ```
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>data-pub-id</strong></td>
+    <td>The AddThis publisher ID found in the URL in the <a href="https://addthis.com/dashboard">AddThis dashboard</a> after logging in. For example, in the URL <code>https://www.addthis.com/dashboard#gallery/pub/ra-5c191331410932ff</code>, <code>ra-5c191331410932ff</code> is the publisher ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-widget-id</strong></td>
+    <td>The AddThis widget ID for the tool to be displayed, also found on the <a href="https://addthis.com/dashboard">AddThis dashboard</a>. The widget Id for a specific tool can be found by opening that tool in the AddThis dashboard and copying the last part of the URL. For example, in the URL <code>https://www.addthis.com/dashboard#tool-config/pub/ra-5c191331410932ff/widgetId/957l</code>, <code>957l</code> is the widget Id.</td>
+  </tr>
+  <tr>
+     <td width="40%"><strong>data-widget-type</strong></td>
+     <td>Attribute that describes the type of widget.</p>
+<ul>
+  <li>Floating: `data-widget-type="floating"`</li>
+  <li>Inline: `data-widget-type="inline"`</li>
+</ul></td>
+   </tr>
+  <tr>
+    <td width="40%"><strong>data-title</strong></td>
+    <td>Optional. If set, this is the title that the AddThis tool will attempt to share when sharing occurs. If not set, the title of the document containing the <code>amp-addthis</code> tag will be used.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-url</strong></td>
+    <td>Optional. If set, this is the URL that the AddThis tool will attempt to share when sharing occurs. If not set, the <code>location.href</code> property of the document containing the <code>amp-addthis</code> tag will be used.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-media</strong></td>
+    <td>Optional. If set, this is an URL for a piece of media (e.g., image or video) that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-description</strong></td>
+    <td>Optional. If set, this is the description of the page that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</td>
+  </tr>
+</table>
 
-#####data-pub-id
-
-The AddThis publisher ID found in the URL in the [AddThis dashboard](https://addthis.com/dashboard) after logging in. For example, in the URL `https://www.addthis.com/dashboard#gallery/pub/ra-5c191331410932ff`, `ra-5c191331410932ff` is the publisher ID.
-
-#####data-widget-id
-
-The AddThis widget ID for the tool to be displayed, also found on the [AddThis dashboard](https://addthis.com/dashboard). The widget Id for a specific tool can be found by opening that tool in the AddThis dashboard and copying the last part of the URL. For example, in the URL `https://www.addthis.com/dashboard#tool-config/pub/ra-5c191331410932ff/widgetId/957l`, `957l` is the widget Id.
-
-#####data-widget-type
-
-Attribute that describes the type of widget.
-
-- Floating: `data-widget-type="floating"`
-- Inline: `data-widget-type="inline"` 
-
-#####data-title
-
-Optional. If set, this is the title that the AddThis tool will attempt to share when sharing occurs. If not set, the title of the document containing the amp-addthis tag will be used.
-
-#####data-url
-
-Optional. If set, this is the URL that the AddThis tool will attempt to share when sharing occurs. If not set, the `location.href` property of the document containing the amp-addthis tag will be used.
-
-#####data-media
-
-Optional. If set, this is an URL for a piece of media (e.g., image or video) that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.
-
-#####data-description
-
-Optional. If set, this is the description of the page that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined. 
 
 ## Implementation Documentation
 
@@ -120,10 +129,10 @@ Optional. If set, this is the description of the page that the AddThis tool will
 3. Customize your sharing buttons to your liking, then hit “activate tool”. This will redirect you to our Get The Code page.
 4. Last but not least, copy and paste the inline code into the body section of your page where you want the share buttons to appear. For the Floating Share Buttons, you can place this code anywhere in the body as it will automatically appear on either the left or right side of your screen, depending on where you’ve set it in the tool’s settings.
 
-And that’s it! You should see the share buttons appearing on your page! 
+And that’s it! You should see the share buttons appearing on your page!
 
-Check out our YouTube video for step-by-step instructions:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/BSkuAB4er2o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> 
+Check out our [YouTube video](https://www.youtube.com/watch?v=BSkuAB4er2o) for step-by-step instructions:
+<amp-youtube data-videoid="BSkuAB4er2o" layout="responsive" width="480" height="270"></amp-youtube>
 
 ## Validation
 

@@ -20,16 +20,13 @@
  *
  * Example:
  * <code>
- * <script async host-api="amp-mraid"
+ * <script async host-service="amp-mraid"
  *         fallback-on="mismatch"></script>
  * </code>
  *
  */
 
-import {
-  HostServiceError,
-  HostServices,
-} from '../../../src/inabox/host-services';
+import {HostServices} from '../../../src/inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -41,11 +38,11 @@ const FALLBACK_ON = 'fallback-on';
  * String representations of the HostServicesErrors that can be used in the
  * 'fallback-on' attribute.
  *
- * @const @enum {number}
+ * @const @enum {string}
  */
 const FallbackErrorNames = {
-  'mismatch': HostServiceError.MISMATCH,
-  'unsupported': HostServiceError.UNSUPPORTED,
+  MISMATCH: 'mismatch',
+  UNSUPPORTED: 'unsupported',
 };
 
 /**
@@ -60,17 +57,22 @@ export class MraidInitializer {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Array<number>} */
-    this.fallbackOn_ = [];
-
     /** @private {boolean} */
     this.registeredWithHostServices_ = false;
 
     /** @private */
     this.mraid_ = null;
 
+    /** @private {boolean} */
+    this.fallback_ = false;
+
+    if (getMode().runtime !== 'inabox') {
+      dev().error(TAG, 'Only supported with Inabox');
+      return;
+    }
+
     const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
-        'script[host-api="amp-mraid"]');
+        'script[host-service="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
       dev().error(TAG, 'Multiple amp-mraid scripts.');
       return;
@@ -79,25 +81,9 @@ export class MraidInitializer {
       return;
     }
     const element = ampMraidScripts[0];
-
-    if (getMode().runtime !== 'inabox') {
-      dev().error(TAG, 'Only supported with Inabox');
-      return;
-    }
-
-    this.fallbackOn_ = [];
-    const fallbackOnErrorNames =
-          (element.getAttribute(FALLBACK_ON) || '').split(' ');
-    for (let i = 0; i < fallbackOnErrorNames.length; i++) {
-      const errorName = fallbackOnErrorNames[i];
-      if (errorName) {
-        if (!(errorName in FallbackErrorNames)) {
-          dev().error(TAG, `Unknown ${FALLBACK_ON} "${errorName}"`);
-          return;
-        }
-        this.fallbackOn_.push(FallbackErrorNames[errorName]);
-      }
-    }
+    const fallbackOn =
+        (element.getAttribute(FALLBACK_ON) || '').split(' ');
+    this.fallback_ = fallbackOn.includes(FallbackErrorNames.MISMATCH);
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
@@ -109,21 +95,12 @@ export class MraidInitializer {
       this.mraidLoadSuccess_();
     });
     mraidJs.addEventListener('error', () => {
-      this.handleError_(HostServiceError.MISMATCH);
+      if (!this.registeredWithHostServices_) {
+        this.handleMismatch_();
+      }
     });
     const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraidJs);
-  }
-
-  /**
-   * @param {number} hostServiceError
-   */
-  handleError_(hostServiceError) {
-    if (!this.registeredWithHostServices_ &&
-        this.fallbackOn_.includes(hostServiceError)) {
-      this.declineService_();
-    }
-    // TODO: send error ping
   }
 
   /**
@@ -132,13 +109,29 @@ export class MraidInitializer {
   mraidReady_() {
     const mraidService = new MraidService(this.mraid_);
 
-    HostServices.installVisibilityServiceForDoc(
-        this.ampdoc_, () => mraidService);
-    HostServices.installFullscreenServiceForDoc(
-        this.ampdoc_, () => mraidService);
-    HostServices.installExitServiceForDoc(
-        this.ampdoc_, () => mraidService);
+    if (this.mraid_.addEventListener) {
+      HostServices.installVisibilityServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectVisibilityServiceForDoc(
+          this.ampdoc_, {fallback: false});
+    }
 
+    if (this.mraid_.expand && this.mraid_.close) {
+      HostServices.installFullscreenServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectFullscreenServiceForDoc(
+          this.ampdoc_, {fallback: false});
+    }
+
+    if (this.mraid_.open) {
+      HostServices.installExitServiceForDoc(
+          this.ampdoc_, () => mraidService);
+    } else {
+      HostServices.rejectExitServiceForDoc(
+          this.ampdoc_, {fallback: true}); // always fallback for exit service
+    }
     this.registeredWithHostServices_ = true;
   }
 
@@ -147,9 +140,8 @@ export class MraidInitializer {
    */
   mraidLoadSuccess_() {
     const mraid = window['mraid'];
-    if (!mraid || !mraid.getState || !mraid.addEventListener
-        || !mraid.close || !mraid.open || !mraid.expand) {
-      this.handleError_(HostServiceError.UNSUPPORTED);
+    if (!mraid || !mraid.getState) {
+      this.handleMismatch_();
       return;
     }
     this.mraid_ = mraid;
@@ -163,11 +155,15 @@ export class MraidInitializer {
   }
 
   /**
-   * Stub for handling the case when we want to allow fallback to the standard
-   * web way of doing things.
+   * Called when we determine that MRAID isn't available.
    */
-  declineService_() {
-    // Needs API change
+  handleMismatch_() {
+    HostServices.rejectVisibilityServiceForDoc(
+        this.ampdoc_, {fallback: this.fallback_});
+    HostServices.rejectExitServiceForDoc(
+        this.ampdoc_, {fallback: true}); // always fallback for exit service
+    HostServices.rejectFullscreenServiceForDoc(
+        this.ampdoc_, {fallback: this.fallback_});
   }
 }
 

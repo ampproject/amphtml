@@ -30,7 +30,7 @@ import {bezierCurve} from '../../../src/curve';
 import {
   childElementByTag,
   closest,
-  closestBySelector,
+  closestAncestorElementBySelector,
   elementByTag,
   escapeCssSelectorIdent,
   scopedQuerySelector,
@@ -55,7 +55,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
-    '.amp-carousel-slide-item, .i-amphtml-carousel-slotted';
+    '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -1163,9 +1163,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (target.isInViewport()) {
       return true;
     }
-    // Note that `<amp-carousel>` type='carousel' does not support goToSlide
-    const parentCarousel = closestBySelector(target,
-        'amp-carousel[type="slides"]');
+    const parentCarousel = this.getSourceElementParentCarousel_(target);
     if (parentCarousel && parentCarousel.isInViewport()) {
       return true;
     }
@@ -1184,7 +1182,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const {width, height} = imageViewer.getImageBoxWithOffset();
+          const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+
           // Check if our imageBox has a width or height. We may be in the
           // gallery view if not, and we do not want to animate.
           if (!width || !height) {
@@ -1240,6 +1239,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       // Prepare the actual image animation.
       imageAnimation = prepareImageAnimation({
         styleContainer: this.getAmpDoc().getHeadNode(),
+        transitionContainer: this.getAmpDoc().getBody(),
         srcImg,
         targetImg,
         srcImgRect: undefined,
@@ -1427,7 +1427,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const allSlides = toArray(
           scopedQuerySelectorAll(parentCarousel, SLIDE_ITEM_SELECTOR));
       const targetSlide = dev().assertElement(
-          closestBySelector(target, SLIDE_ITEM_SELECTOR));
+          closestAncestorElementBySelector(target, SLIDE_ITEM_SELECTOR));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       devAssert(parentCarousel).getImpl()
           .then(carousel => carousel.goToSlide(targetSlideIndex));
@@ -1773,5 +1773,5 @@ function lightboxManagerForDoc(element) {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
   AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
-  Services.extensionsFor(global).addDocFactory(installLightboxGallery);
+  Services.extensionsFor(AMP.win).addDocFactory(installLightboxGallery);
 });
