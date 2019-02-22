@@ -89,7 +89,10 @@ tags: {  # amp-autocomplete JSON
   spec_name: "amp-autocomplete JSON"
   requires_extension: "amp-autocomplete"
   mandatory_parent: "AMP-AUTOCOMPLETE"
-  attrs: { name: "nonce" }
+  attrs: { 
+    name: "nonce" 
+    disabled_by: "transformed",
+  }
   attrs: {
     name: "type"
     mandatory: true
