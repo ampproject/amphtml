@@ -318,7 +318,7 @@ export function ancestorElements(child, predicate) {
  * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
-  assertOnlyTagName(tagName);
+  assertIsTagName(tagName);
   tagName = tagName.toUpperCase();
   return ancestorElements(child, el => {
     return el.tagName == tagName;
@@ -402,7 +402,7 @@ export function childNodes(parent, callback) {
  */
 export function childElementByAttr(parent, attr) {
   // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertOnlyTagName(attr);
+  assertIsTagName(attr);
   return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -415,7 +415,7 @@ export function childElementByAttr(parent, attr) {
  */
 export function lastChildElementByAttr(parent, attr) {
   // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertOnlyTagName(attr);
+  assertIsTagName(attr);
   return lastChildElement(parent, el => {
     return el.hasAttribute(attr);
   });
@@ -430,7 +430,7 @@ export function lastChildElementByAttr(parent, attr) {
  */
 export function childElementsByAttr(parent, attr) {
   // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertOnlyTagName(attr);
+  assertIsTagName(attr);
   return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -442,7 +442,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  assertOnlyTagName(tagName);
+  assertIsTagName(tagName);
   return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -454,7 +454,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
-  assertOnlyTagName(tagName);
+  assertIsTagName(tagName);
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -483,7 +483,7 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  assertOnlyTagName(tagName);
+  assertIsTagName(tagName);
   return element./*OK*/querySelector(tagName);
 }
 
@@ -493,7 +493,7 @@ export function elementByTag(element, tagName) {
  * nor ids.
  * @param {string} tagName
  */
-function assertOnlyTagName(tagName) {
+function assertIsTagName(tagName) {
   devAssert(!/[^\w-]/.test(tagName));
 }
 
