@@ -40,9 +40,7 @@ describes.realWin('amp-autocomplete', {
 
   it('should not have hello world when built with experiment off', () => {
     AMP.toggleExperiment('amp-autocomplete', false);
-    allowConsoleError(() => {
-      element.build();
-      expect(element.querySelector('div')).to.be.null;
-    });
+    element.build();
+    expect(element.querySelector('div')).to.be.null;
   });
 });
