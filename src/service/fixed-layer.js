@@ -365,9 +365,6 @@ export class FixedLayer {
   removeElement(element) {
     const fes = this.tearDownElement_(element);
     this.returnFixedElements_(fes);
-    if (!this.elements_.length) {
-      this.unobserveHiddenMutations_();
-    }
   }
 
   /**
@@ -730,6 +727,9 @@ export class FixedLayer {
         removed.push(fe);
       }
     }
+    if (!this.elements_.length) {
+      this.unobserveHiddenMutations_();
+    }
     return removed;
   }
 
@@ -1012,7 +1012,7 @@ class TransferLayerBody {
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (name === 'style' || startsWith(name, 'i-amphtml-')
+      if (name === 'style' || name === 'i-amphtml-lightboxed'
           || body.hasAttribute(name)) {
         continue;
       }
