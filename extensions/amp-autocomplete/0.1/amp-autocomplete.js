@@ -51,7 +51,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, EXPERIMENT)) {
+    if (!isExperimentOn(this.win, 'amp-autocomplete')) {
       user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
       return;
     }
