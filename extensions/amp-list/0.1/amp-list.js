@@ -852,8 +852,6 @@ export class AmpList extends AMP.BaseElement {
           this.unlistenLoadMore_ = listen(
               this.loadMoreService_.getLoadMoreButtonClickable(),
               'click', () => this.loadMoreCallback_());
-        }).then(() => {
-          this.attemptToFit_(dev().assertElement(this.container_));
         });
       } else {
         return this.mutateElement(
