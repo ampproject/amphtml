@@ -80,7 +80,7 @@ exports.extensionBundles = [
     name: 'amp-autocomplete',
     version: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC
+    type: TYPES.MISC,
   },
   {name: 'amp-auto-lightbox', version: '0.1', type: TYPES.MISC},
   {name: 'amp-beopinion', version: '0.1', type: TYPES.MISC},
