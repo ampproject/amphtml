@@ -59,8 +59,12 @@ const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
-const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
+
+// Script snippets that execute inside the page.
+const WRAP_IN_IFRAME_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
+const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
+    path.resolve(__dirname, 'snippets/remove-amp-scripts.js'), 'utf8');
 
 let browser_;
 let webServerProcess_;
@@ -382,18 +386,27 @@ async function snapshotWebpages(percy, browser, webpages) {
             log('verbose', 'Navigation to page', colors.yellow(name),
                 'is done, verifying page');
 
+            // Visibility evaluations can only be performed on the active tab,
+            // even in the headless browser mode.
             await page.bringToFront();
 
+            // Perform visibility checks: wait for all AMP built-in loader dots
+            // to disappear (i.e., all visible components are finished being
+            // layed out and external resources such as images are loaded and
+            // displayed), then, depending on the test configurations, wait for
+            // invisibility/visibility of specific elements that match the
+            // configured CSS selectors.
             await waitForLoaderDots(page, name);
-            if (webpage.loading_incomplete_css) {
+            if (webpage.loading_incomplete_selectors) {
               await verifySelectorsInvisible(
-                  page, name, webpage.loading_incomplete_css);
+                  page, name, webpage.loading_incomplete_selectors);
             }
-            if (webpage.loading_complete_css) {
+            if (webpage.loading_complete_selectors) {
               await verifySelectorsVisible(
-                  page, name, webpage.loading_complete_css);
+                  page, name, webpage.loading_complete_selectors);
             }
 
+            // Based on test configuration, wait for a specific amount of time.
             if (webpage.loading_complete_delay_ms) {
               log('verbose', 'Waiting',
                   colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
@@ -401,32 +414,33 @@ async function snapshotWebpages(percy, browser, webpages) {
               await sleep(webpage.loading_complete_delay_ms);
             }
 
+            // Run any other custom code located in the test's interactive_tests
+            // file. If there is no interactive test, this defaults to an empty
+            // function.
             await testFunction(page, name);
 
-            const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
+            // Execute post-scripts that clean up the page's HTML and send
+            // prepare it for snapshotting on Percy. See comments inside the
+            // snippet files for description of each.
+            await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
+            // TODO(#20630): add a snippet to freeze form inputs
 
+            // Create a default set of snapshot options for Percy and modify
+            // them based on the test's configuration.
+            const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
             if (webpage.enable_percy_javascript) {
               snapshotOptions.enableJavaScript = true;
-              // Remove all scripts that have an external source, leaving only
-              // those scripts that are inlined in the page inside a <script>
-              // tag.
-              await page.evaluate(
-                  'document.head.querySelectorAll("script[src]").forEach(' +
-                  'node => node./*OK*/remove())');
             }
 
             if (viewport) {
               snapshotOptions.widths = [viewport.width];
               log('verbose', 'Wrapping viewport-constrained page in an iframe');
-              await page.evaluate(WRAP_IN_IFRAME_SCRIPT
+              await page.evaluate(WRAP_IN_IFRAME_SNIPPET
                   .replace(/__WIDTH__/g, viewport.width)
                   .replace(/__HEIGHT__/g, viewport.height));
-              await page.setViewport({
-                width: VIEWPORT_WIDTH,
-                height: VIEWPORT_HEIGHT,
-              });
             }
 
+            // Finally, send the snapshot to percy.
             await percy.snapshot(name, page, snapshotOptions);
             log('travis', colors.cyan('●'));
           })
