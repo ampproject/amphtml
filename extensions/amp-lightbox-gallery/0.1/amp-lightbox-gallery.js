@@ -1412,7 +1412,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   getSourceElementParentCarousel_(sourceElement) {
     // TODO(#13011): change to a tag selector after `<amp-carousel>`
     // type='carousel' starts supporting goToSlide.
-    return closestBySelector(sourceElement, 'amp-carousel[type="slides"]');
+    return closestAncestorElementBySelector(sourceElement, 'amp-carousel[type="slides"]');
   }
 
   /**

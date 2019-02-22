@@ -28,7 +28,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
-import {closestBySelector, elementByTag} from '../../../src/dom';
+import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -147,7 +147,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   onMeasureChanged() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+    if (closestAncestorElementBySelector(this.element, '[i-amp-scale-animation]')) {
       return;
     }
 
@@ -163,7 +163,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     }
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+    if (closestAncestorElementBySelector(this.element, '[i-amp-scale-animation]')) {
       return Promise.resolve();
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);

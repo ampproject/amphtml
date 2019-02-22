@@ -19,7 +19,7 @@ import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -279,7 +279,7 @@ export class AmpSlideScroll extends BaseSlides {
   layoutCallback() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+    if (closestAncestorElementBySelector(this.element, '[i-amp-scale-animation]')) {
       return Promise.resolve();
     }
 

@@ -23,7 +23,7 @@ import {
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -194,7 +194,7 @@ class AmpCarousel extends AMP.BaseElement {
   layoutCallback() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestBySelector(this.element, '[i-amp-scale-animation]')) {
+    if (closestAncestorElementBySelector(this.element, '[i-amp-scale-animation]')) {
       return Promise.resolve();
     }
 
