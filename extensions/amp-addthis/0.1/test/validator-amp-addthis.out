@@ -58,5 +58,49 @@ PASS
 |      data-share-description="This is the description that will be shared.">
 |    </amp-addthis>
 |
+|    <!-- AddThis WordPress Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5c1a9eed18daaf81"
+|      data-class-name="at-above-post"
+|      data-widget-id="g7wl">
+|    </amp-addthis>
+|    <!-- AddThis WordPress Mode does not render without class-name -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5c1a9eed18daaf81"
+|      data-class-name=""
+|      data-widget-id="g7wl">
+|    </amp-addthis>
+|
+|    <!-- Inline using Widget ID -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5f2869f63c7c"
+|      data-widget-id="1o1v">
+|    </amp-addthis>
+|
+|    <!-- Inline using Product Code -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5f2869f63c7c"
+|      data-product-code="shin">
+|    </amp-addthis>
+|
+|    <!-- Floating using Product Code -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5ec1cb6be565"
+|      data-widget-type="floating"
+|      data-product-code="shfs">
+|    </amp-addthis>
+|
+|
+|
 |  </body>
 |  </html>
