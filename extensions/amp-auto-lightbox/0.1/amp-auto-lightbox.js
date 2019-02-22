@@ -27,7 +27,11 @@ import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CarouselCriteria} from './carousel-criteria';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {resolveFalse, resolveTrue} from './utils/promise';
@@ -361,7 +365,8 @@ export class Mutation {
    * @return {!Promise}
    */
   static mutate(ampEl, mutator) {
-    return ampEl.getImpl().then(impl => impl.mutateElement(mutator));
+    return whenUpgradedToCustomElement(ampEl)
+        .then(ampEl => ampEl.getResources().mutateElement(ampEl, mutator));
   }
 }
 

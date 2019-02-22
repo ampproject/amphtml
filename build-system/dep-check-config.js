@@ -49,8 +49,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
-      // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
-      // Contact @choumx for questions.
+      // DEPRECATED: Use src/purifier.js instead. @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
     ],
   },
@@ -58,8 +57,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
-      'src/sanitizer.js->src/purifier.js',
-      'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
+      // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
       'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
       'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
     ],
@@ -368,6 +366,8 @@ exports.rules = [
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
       'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/origin-experiments-impl.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
             'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +

@@ -99,11 +99,8 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
-  [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
-    string: 'Compartir',
-  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Ampliar la ventana para ver esta experiencia',
+    fallback: 'Ampliar la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'Debe habilitar el experimento amp-story para ver este contenido',

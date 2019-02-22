@@ -55,6 +55,7 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 
 - The video can be docked to a default corner or to a custom fixed position.
 - The video can be dragged and repositioned by the user on a different corner.
+- The video can be flicked to be dismissed from its docked position.
 - Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
 ### <a id="support"></a> Support
@@ -63,6 +64,8 @@ This extension is used in conjunction with a [supported video player](../../spec
 Currently, the supported players are:
 
 - [`amp-brightcove`](https://www.ampproject.org/docs/reference/components/amp-brightcove)
+- [`amp-dailymotion`](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
+- [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
 - [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
 - [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
 - [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)

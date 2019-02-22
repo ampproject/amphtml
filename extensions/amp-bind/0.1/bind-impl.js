@@ -21,7 +21,10 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
-import {closestAncestorElementByTag, iterateCursor} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -33,7 +36,7 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/purifier';
+import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
@@ -1198,7 +1201,7 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const select = closestAncestorElementByTag(element, 'select');
+    const select = closestAncestorElementBySelector(element, 'select');
     if (!select) {
       return;
     }
