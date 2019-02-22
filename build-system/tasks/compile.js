@@ -119,6 +119,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
+    'build-system/event-timing.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -240,6 +241,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-consent/**/*.js',
       // Needed to access AmpGeo type for service locator
       'extensions/amp-geo/**/*.js',
+      // Needed for AmpViewerAssistanceService
+      'extensions/amp-viewer-assistance/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',

@@ -26,7 +26,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
-  closestAncestorElementByTag,
+  closestAncestorElementBySelector,
   escapeCssSelectorIdent,
   isRTL,
   iterateCursor,
@@ -832,7 +832,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return existingField;
     }
 
-    const form = closestAncestorElementByTag(this.element, 'form');
+    const form = closestAncestorElementBySelector(this.element, 'form');
     if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
