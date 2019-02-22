@@ -128,12 +128,12 @@
    *   "flaky": true
    * },
    *
-   * Each webpages (or, optionally, each of its tests in the interactive_tests
+   * Each webpage (or, optionally, each of its tests in the interactive_tests
    * file) is processed in a separate headless browser tab, with the test runner
    * performing these tasks in order:
    * - Load the page and waits for network activity to stop (or up to 3 secs)
    * - Wait for the built-in AMP loader dots to disappear from the page, meaning
-   *   all AMP components finished being layed out and all resources, such as
+   *   all AMP components finished being laid out and all resources, such as
    *   images, are displayed (or up to 5 secs)
    * - [if loading_incomplete_selectors is set] wait for all elements that match
    *   these CSS selectors to disappear from the page, i.e., either removed
