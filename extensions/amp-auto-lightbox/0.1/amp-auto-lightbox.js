@@ -148,28 +148,23 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSimpleCriteria(element) {
-    switch (element.tagName) {
-      case 'AMP-IMG':
-        return ImageCriteria.meetsSizingCriteria(element);
-      default:
-        return true;
+    if (element.tagName.toUpperCase() == 'AMP-IMG') {
+      return ImageCriteria.meetsSizingCriteria(element);
     }
+    return true;
   }
 
   /**
-   * Criteria that is "complex", ie takes longer to run quickly and discards
-   * elements after they're likely to be good candidates per previous
-   * conditions.
+   * Criteria that is "complex", ie takes longer to run and discards elements
+   * after they're likely to be good candidates per previous conditions.
    * @param {!Element} element
    * @return {!Promise<boolean>}
    */
   static meetsComplexCriteria(element) {
-    switch (element.tagName) {
-      case 'AMP-CAROUSEL':
-        return CarouselCriteria.meetsAll(element);
-      default:
-        return resolveTrue();
+    if (element.tagName.toUpperCase() == 'AMP-CAROUSEL') {
+      return CarouselCriteria.meetsAll(element);
     }
+    return resolveTrue();
   }
 
   /**
@@ -479,7 +474,6 @@ export function runCandidates(ampdoc, candidates) {
     whenLoaded(candidate).then(() => {
       return Criteria.meetsAll(candidate).then(meetsAll => {
         if (!meetsAll) {
-          dev().info(TAG, 'discarded', candidate);
           return;
         }
         dev().info(TAG, 'apply', candidate);

@@ -16,4 +16,4 @@
 import {tryResolve} from '../../../../src/utils/promise';
 
 export const resolveFalse = () => tryResolve(() => false);
-export const resolveTrue = () => tryResolve(() => false);
+export const resolveTrue = () => tryResolve(() => true);

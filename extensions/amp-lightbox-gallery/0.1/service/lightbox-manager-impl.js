@@ -42,10 +42,6 @@ const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,
 };
 
-export const ELIGIBLE_TAP_TAGS = {
-  'AMP-IMG': true,
-};
-
 export const VIDEO_TAGS = {
   'AMP-YOUTUBE': true,
   'AMP-VIDEO': true,
@@ -61,7 +57,8 @@ const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
  * @return {!Element}
  */
 function getBaseElementForSlide(slide) {
-  if (slide.tagName == 'AMP-IMG' || slide.tagName == 'FIGURE') {
+  const tagName = slide.tagName.toUpperCase();
+  if (tagName == 'AMP-IMG' || tagName == 'FIGURE') {
     return slide;
   }
   const figure = slide.querySelector('figure');
@@ -302,7 +299,7 @@ export class LightboxManager {
   /**
    * Get the description for single lightboxed item.
    * @param {!Element} element
-   * @return {string|null}
+   * @return {?tring}
    */
   getDescription(element) {
     // If the element in question is the descendant of a figure element
@@ -377,7 +374,7 @@ export class LightboxManager {
   /**
    * Get thumbnail srcset for single element.
    * @param {!Element} element
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    * @private
    */
   getThumbnailSrcset_(element) {
@@ -394,29 +391,28 @@ export class LightboxManager {
   /**
    * Get the srcset for the user-specified placeholder for each element
    * @param {!Element} element
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    * @private
    */
   getUserPlaceholderSrcset_(element) {
     if (element.tagName == 'AMP-IMG') {
       return srcsetFromElement(element);
-    } else if (element.tagName == 'AMP-VIDEO') {
+    }
+    if (element.tagName == 'AMP-VIDEO') {
       return this.getThumbnailSrcsetForVideo_(element);
       // TODO: process placeholder logic for other components as added
-    } else {
-      const placeholder = childElementByAttr(element, 'placeholder');
-      if (placeholder) {
-        return this.getUserPlaceholderSrcset_(placeholder);
-      } else {
-        return null;
-      }
     }
+    const placeholder = childElementByAttr(element, 'placeholder');
+    if (placeholder) {
+      return this.getUserPlaceholderSrcset_(placeholder);
+    }
+    return null;
   }
 
   /**
    * Given an amp video, returns the thumbnail srcset.
    * @param {!Element} ampVideo
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    */
   getThumbnailSrcsetForVideo_(ampVideo) {
     const poster = ampVideo.getAttribute('poster');
