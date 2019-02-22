@@ -30,6 +30,10 @@ addons:
   hosts:
     - ads.localhost
     - iframe.localhost
+    # CURLs amp subdomain for amp-recaptcha-input,
+    # integration tests. The hash is the
+    # CURLS subdomain for localhost:9876
+    - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
@@ -43,14 +47,14 @@ jobs:
       script:
         - node build-system/pr-check/build.js
     - stage: build
-      name: "Checks" 
-      script:        
+      name: "Checks"
+      script:
         - node build-system/pr-check/checks.js
     - stage: build
-      name: "Validator Tests"        
+      name: "Validator Tests"
       before_script:
         - pip install --user protobuf
-      script:        
+      script:
         - node build-system/pr-check/validator-tests.js
       addons:
         apt:
@@ -61,7 +65,7 @@ jobs:
       name: "Dist"
       if: type != pull_request
       script:
-        - node build-system/pr-check/dist.js      
+        - node build-system/pr-check/dist.js
     - stage: test
       name: "Dist, Bundle Size, Single Pass Tests"
       addons:
