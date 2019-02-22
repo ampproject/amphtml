@@ -43,12 +43,23 @@ limitations under the License.
 
 ## Behavior
 
+The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
+
 The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from the current viewport.
 
 Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
 
-By default, `<amp-container>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item
-elements rendered via the template.
+By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item elements rendered via the template.
+
+Example:
+```html
+  <amp-autocomplete filter="substring" id="myAutocomplete">
+    <input type="text">
+    <script type="application/json">
+      { items: ["a", "b", "c"] }
+    </script>
+  </amp-autocomplete>
+```
 
 ## Attributes
 
