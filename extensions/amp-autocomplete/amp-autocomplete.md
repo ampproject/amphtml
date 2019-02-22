@@ -16,6 +16,8 @@ limitations under the License.
 
 # `amp-autocomplete`
 
+**This feature is experimental and activated by the `amp-autocomplete` experiment.**
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
