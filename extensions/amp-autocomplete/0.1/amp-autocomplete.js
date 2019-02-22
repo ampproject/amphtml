@@ -42,5 +42,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return layout == Layout.RESPONSIVE;
   }
 }
-
-AMP.registerElement('amp-autocomplete', AmpAutocomplete);
+AMP.extension('amp-autocomplete', '0.1', AMP => {
+  AMP.registerElement('amp-autocomplete', AmpAutocomplete);
+});
