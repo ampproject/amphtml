@@ -42,6 +42,10 @@ const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,
 };
 
+export const ELIGIBLE_TAP_TAGS = {
+  'AMP-IMG': true,
+};
+
 export const VIDEO_TAGS = {
   'AMP-YOUTUBE': true,
   'AMP-VIDEO': true,
