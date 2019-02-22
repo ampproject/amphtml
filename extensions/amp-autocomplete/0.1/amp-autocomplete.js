@@ -16,7 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-import { user } from '../../../src/log';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
