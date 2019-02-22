@@ -35,8 +35,6 @@ FAIL
 |  <body>
 |    <!-- Valid: amp-component with static data and filter=prefix attribute -->
 |    <amp-autocomplete filter="prefix">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:36:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |      <input type="text">
 |      <script type="application/ld+json">
 |        { items: [ "a", "b", "c" ] }
@@ -45,8 +43,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:36:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and filter=token-prefix attribute -->
 |    <amp-autocomplete filter="token-prefix">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:44:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -55,8 +51,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:44:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and filter=substring attribute -->
 |    <amp-autocomplete filter="substring">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:52:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -65,8 +59,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:52:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and filter=fuzzy attribute -->
 |    <amp-autocomplete filter="fuzzy">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:60:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -75,8 +67,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:60:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and filter=none attribute -->
 |    <amp-autocomplete filter="none">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:68:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -85,8 +75,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:68:2 The implied layou
 |    
 |    <!-- Valid: amp-component with static data and filter=custom and filter-expr attribute -->
 |    <amp-autocomplete filter="custom" filter-expr="true">
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:76:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -95,8 +83,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:76:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and min-characters attribute -->
 |    <amp-autocomplete min-characters=3>
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:84:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -105,8 +91,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:84:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and max-entries attribute -->
 |    <amp-autocomplete max-entries=10>
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:92:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -115,8 +99,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:92:2 The implied layou
 |
 |    <!-- Valid: amp-component with static data and suggest-first attribute -->
 |    <amp-autocomplete suggest-first>
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:100:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -125,8 +107,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:100:2 The implied layo
 |
 |    <!-- Valid: amp-component with static data and submit-on-enter attribute -->
 |    <amp-autocomplete submit-on-enter>
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:108:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/ld+json">
 |          { items: [ "a", "b", "c" ] }
@@ -135,8 +115,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:108:2 The implied layo
 |
 |    <!-- Invalid: width is mistyped -->
 |    <amp-autocomplete widht=100>
->>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:116:2 The implied layout 'CONTAINER' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
 amp-autocomplete/0.1/test/validator-amp-autocomplete.html:116:2 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
