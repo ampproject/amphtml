@@ -420,7 +420,7 @@ export class VideoDocking {
    */
   isEnabled_() {
     // iOS is impossible in the viewer. See https://bit.ly/2BJcNjV
-    if (Services.platformFor(this.ampdoc_).isIos() &&
+    if (Services.platformFor(this.ampdoc_.win).isIos() &&
         Services.viewerForDoc(this.ampdoc_).isEmbedded()) {
       return false;
     }
