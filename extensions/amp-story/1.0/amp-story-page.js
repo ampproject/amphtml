@@ -34,6 +34,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {
   AmpStoryEmbeddedComponent,
   EXPANDABLE_COMPONENTS,
+  EMBED_ID_ATTRIBUTE_NAME,
 } from './amp-story-embedded-component';
 import {
   AnimationManager,
@@ -414,7 +415,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onResize_() {
-    this.findAndPrepareEmbeddedComponents_(true);
+    this.findAndPrepareEmbeddedComponents_(true /* opt_forceResize */);
   }
 
   /** @return {!Promise} */
@@ -465,23 +466,23 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Finds embedded components in page and prepares them for their expanded view
    * animation.
-   * @param {boolean} forceResize
+   * @param {boolean} opt_forceResize
    * @private
    */
-  findAndPrepareEmbeddedComponents_(forceResize = false) {
+  findAndPrepareEmbeddedComponents_(opt_forceResize = false) {
     scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
           const debouncePrepareForAnimation =
             debounceEmbedResize(this.win, this.element, this.resources_);
 
-          if (forceResize) {
-            debouncePrepareForAnimation(el);
-          } else if (!el.id) { // Element has not been prepared for its animation yet.
+          if (opt_forceResize) {
+            debouncePrepareForAnimation(el, null);
+          } else if (!el.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // Element has not been prepared for its animation yet.
             const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
               debouncePrepareForAnimation(el, unlisten);
             });
             // Run in case target never changes size.
-            debouncePrepareForAnimation(el);
+            debouncePrepareForAnimation(el, null);
           }
         });
   }

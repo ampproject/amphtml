@@ -137,6 +137,23 @@ export function embeddedComponentSelectors() {
 const embedStyleEls = dict();
 
 /**
+ * Generates ids for embedded component styles.
+ * @type {number}
+ */
+let embedIds = 0;
+
+/**
+ * Contains metadata about embedded components, found in <style> elements.
+ * @const {string}
+ */
+const AMP_EMBED_DATA = '__AMP_EMBED_DATA__';
+
+/**
+ * @const {string}
+ */
+export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
+
+/**
  * Builds expanded view overlay for expandable components.
  * @param {!Element} element
  * @return {!Element}
@@ -563,16 +580,18 @@ export class AmpStoryEmbeddedComponent {
   closeExpandedEl_() {
     this.triggeringTarget_.classList.toggle(
         'i-amphtml-expanded-component', false);
+    const embedId =
+      this.triggeringTarget_.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
 
-    const styleEl = embedStyleEls[this.triggeringTarget_.id];
+    const styleEl = embedStyleEls[embedId];
 
     const transformString = styleEl.textContent.substring(
         styleEl.textContent.indexOf('transform'),
         styleEl.textContent.indexOf('margin'));
 
-    embedStyleEls[this.triggeringTarget_.id].textContent =
+    embedStyleEls[embedId].textContent =
       styleEl.textContent.replace(transformString,
-          `transform: scale(${styleEl.embedData.scale}) !important;`);
+          `transform: scale(${styleEl[AMP_EMBED_DATA].scale}) !important;`);
   }
 
   /**
@@ -583,8 +602,9 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   animateExpanded_(target) {
+    const embedId = target.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
     const state = {};
-    const storedStyle = embedStyleEls[target.id].embedData;
+    const storedStyle = embedStyleEls[embedId][AMP_EMBED_DATA];
     this.resources_.measureMutateElement(target,
         /** measure */
         () => {
@@ -615,8 +635,8 @@ export class AmpStoryEmbeddedComponent {
         () => {
           target.classList.toggle('i-amphtml-expanded-component', true);
 
-          const styleEl = embedStyleEls[target.id];
-          embedStyleEls[target.id].textContent = styleEl.textContent.split(
+          const styleEl = embedStyleEls[embedId];
+          embedStyleEls[embedId].textContent = styleEl.textContent.split(
               `scale(${storedStyle.scale})`).join(`scale(1)
               translate3d(${state.translateX}px, ${state.translateY}px, 0)`);
         });
@@ -632,10 +652,14 @@ export class AmpStoryEmbeddedComponent {
    * @param {!../../../src/service/resources-impl.Resources} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
-    // When a resize happens, we must prepare the animation again.
-    if (element.id && embedStyleEls[element.id]) {
-      embedStyleEls[element.id].textContent = '';
-      embedStyleEls[element.id].embedData = {};
+    let elId = null;
+
+    // When a window resize happens, we must reset the styles and prepare the
+    // animation again.
+    if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
+      elId = element.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
+      embedStyleEls[elId].textContent = '';
+      embedStyleEls[elId][AMP_EMBED_DATA] = {};
     }
 
     const state = {};
@@ -666,8 +690,9 @@ export class AmpStoryEmbeddedComponent {
         () => {
           element.classList.add('i-amphtml-embedded-component');
 
-          const newId = 'el' + Math.floor(89999999 * Math.random() + 10000000);
-          const styleTextContent = `#${element.id || newId} {
+          elId = elId ? elId : ++embedIds;
+
+          const styleTextContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${elId}"] {
             width: ${px(state.newWidth)} !important;
             height: ${px(state.newHeight)} !important;
             transform: scale(${state.scaleFactor}) !important;
@@ -675,21 +700,20 @@ export class AmpStoryEmbeddedComponent {
                 !important;
             }`;
 
-          if (embedStyleEls[element.id]) { // Embed style already exists.
-            embedStyleEls[element.id].textContent = styleTextContent;
+          if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // Embed style already exists.
+            embedStyleEls[elId].textContent = styleTextContent;
           } else {
             const html = htmlFor(pageEl);
             const embedStyleEl = html`<style></style>`;
 
-            element.id = newId;
-            embedStyleEl.id = element.id;
+            element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
             embedStyleEl.textContent = styleTextContent;
             pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
-            embedStyleEls[element.id] = embedStyleEl;
-            embedStyleEls[element.id].embedData = {};
+            embedStyleEls[elId] = embedStyleEl;
+            embedStyleEls[elId][AMP_EMBED_DATA] = {};
           }
 
-          embedStyleEls[element.id].embedData = {
+          embedStyleEls[elId][AMP_EMBED_DATA] = {
             width: state.newWidth,
             height: state.newHeight,
             scale: state.scaleFactor,
