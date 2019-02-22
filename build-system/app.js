@@ -138,7 +138,7 @@ app.get('/proxy', (req, res) => {
  * out the recaptcha api.
  */
 app.get(
-    '/dist.3p/current*/recaptcha.*html',
+    '/dist.3p/*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
 app.use(
