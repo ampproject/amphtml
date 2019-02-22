@@ -113,7 +113,9 @@ class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', AMP => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### BaseElement callbacks
@@ -287,7 +289,9 @@ AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+AMP.extension('amp-carousel', '0.1', AMP => {
+  AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+});
 ```
 
 ## Actions and events
@@ -697,7 +701,9 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', AMP => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### Enabling and removing your experiment
