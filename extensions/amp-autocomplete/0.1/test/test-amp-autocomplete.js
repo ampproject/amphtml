@@ -15,8 +15,7 @@
  */
 
 import '../amp-autocomplete';
-
-AMP.toggleExperiment('amp-autocomplete', true);
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-autocomplete', {
   amp: {
@@ -31,7 +30,8 @@ describes.realWin('amp-autocomplete', {
     win = env.win;
     element = win.document.createElement('amp-autocomplete');
     win.document.body.appendChild(element);
-  });
+    toggleExperiment(win, 'amp-autocomplete', true);
+});
 
   it('should have hello world when built with experiment on', () => {
     element.build();
@@ -39,7 +39,7 @@ describes.realWin('amp-autocomplete', {
   });
 
   it('should not have hello world when built with experiment off', () => {
-    AMP.toggleExperiment('amp-autocomplete', false);
+    toggleExperiment(win, 'amp-autocomplete', false);
     element.build();
     expect(element.querySelector('div')).to.be.null;
   });
