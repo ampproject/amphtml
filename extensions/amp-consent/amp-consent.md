@@ -214,6 +214,7 @@ AMP also supports external consent UI flow with the usage of `<amp-iframe>`. Mor
 
 The `amp-story` extension provides a [default prompt UI](https://user-images.githubusercontent.com/1492044/40135514-8ab56d10-5913-11e8-95a2-72ac01ff31e0.png), that requires using a `<amp-story-consent>` component as the prompt UI. This component content requires a `title`, a `message`, and a list of `vendors`, and has to be specified in its own component configuration.
 The decline button can be hidden by adding an optional `onlyAccept` boolean parameter.
+Additionally, an optional templated external link to the privacy policy or settings can be configured, by adding `"externalLink": {"title": "Privacy Settings", "href": "https://example.com"}` to the consent configuration.
 
 *Example*: Displays a prompt user interface on an AMP Story
 
