@@ -200,13 +200,18 @@ async function launchBrowser() {
  * Opens a new browser tab, resizes its viewport, and returns a Page handler.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @param {JsonObject} viewport optional viewport size object with numeric
+ *     fields `width` and `height`.
  */
-async function newPage(browser) {
+async function newPage(browser, viewport = null) {
+  const width = viewport ? viewport.width : VIEWPORT_WIDTH;
+  const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
+
+  log('verbose', 'Creating new page with viewport size of',
+      colors.yellow(`${width}×${height}`));
+
   const page = await browser.newPage();
-  await page.setViewport({
-    width: VIEWPORT_WIDTH,
-    height: VIEWPORT_HEIGHT,
-  });
+  await page.setViewport({width, height});
   page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
   await page.setJavaScriptEnabled(true);
   return page;
@@ -356,18 +361,10 @@ async function snapshotWebpages(percy, browser, webpages) {
         await sleep(WAIT_FOR_TABS_MS);
       }
 
-      const page = await newPage(browser);
       const name = testName ? `${pageName} (${testName})` : pageName;
       log('verbose', 'Visual diff test', colors.yellow(name));
 
-      if (viewport) {
-        log('verbose', 'Setting explicit viewport size of',
-            colors.yellow(`${viewport.width}×${viewport.height}`));
-        await page.setViewport({
-          width: viewport.width,
-          height: viewport.height,
-        });
-      }
+      const page = await newPage(browser, viewport);
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Navigate to an empty page first to support different webpages that only
