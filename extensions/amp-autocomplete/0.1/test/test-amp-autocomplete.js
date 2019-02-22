@@ -16,7 +16,7 @@
 
 import '../amp-autocomplete';
 
-toggleExperiment('amp-autocomplete', true);
+AMP.toggleExperiment('amp-autocomplete');
 
 describes.realWin('amp-autocomplete', {
   amp: {
