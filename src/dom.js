@@ -15,9 +15,13 @@
  */
 
 import {Deferred} from './utils/promise';
+import {
+  assertIsName,
+  isScopeSelectorSupported,
+  prependSelectorsWith,
+} from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {isScopeSelectorSupported, prependSelectorsWith} from './css';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -301,7 +305,7 @@ export function ancestorElements(child, predicate) {
  * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
-  assertIsTagName(tagName);
+  assertIsName(tagName);
   tagName = tagName.toUpperCase();
   return ancestorElements(child, el => {
     return el.tagName == tagName;
@@ -384,8 +388,7 @@ export function childNodes(parent, callback) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertIsTagName(attr);
+  assertIsName(attr);
   return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -397,8 +400,7 @@ export function childElementByAttr(parent, attr) {
  * @return {?Element}
  */
 export function lastChildElementByAttr(parent, attr) {
-  // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertIsTagName(attr);
+  assertIsName(attr);
   return lastChildElement(parent, el => {
     return el.hasAttribute(attr);
   });
@@ -412,8 +414,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  // Yah, it's supposed to be an attr and not a tag name. But same code.
-  assertIsTagName(attr);
+  assertIsName(attr);
   return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -425,7 +426,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  assertIsTagName(tagName);
+  assertIsName(tagName);
   return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -437,7 +438,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
-  assertIsTagName(tagName);
+  assertIsName(tagName);
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -466,18 +467,8 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  assertIsTagName(tagName);
+  assertIsName(tagName);
   return element./*OK*/querySelector(tagName);
-}
-
-/**
- * Asserts that tagName is just an alphanumeric word, and does not contain
- * advanced CSS selector features like attributes, psuedo-classes, class names,
- * nor ids.
- * @param {string} tagName
- */
-function assertIsTagName(tagName) {
-  devAssert(/^[\w-]+$/.test(tagName));
 }
 
 /**

@@ -18,6 +18,17 @@ import {cssEscape} from '../third_party/css-escape/css-escape';
 import {devAssert} from './log';
 
 /**
+ * Asserts that name is just an alphanumeric word, and does not contain
+ * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * nor ids.
+ * @param {string} name
+ */
+export function assertIsName(name) {
+  devAssert(/^[\w-]+$/.test(name));
+}
+
+
+/**
  * @type {boolean|undefined}
  */
 let scopeSelectorSupported;
@@ -68,19 +79,19 @@ function testScopeSelector(el) {
  *
  * e.g.
  * ```
- *   prependSelectorsWith('.i-amphtml-scoped', 'div');
+ *   prependSelectorsWith('div', '.i-amphtml-scoped');
  *   // => '.i-amphtml-scoped div'
- *   prependSelectorsWith(':scope', 'div, ul');
+ *   prependSelectorsWith('div, ul', ':scope');
  *   // => ':scope div, :scope ul'
- *   prependSelectorsWith('article >', 'div, ul');
+ *   prependSelectorsWith('div, ul', 'article >');
  *   // => 'article > div, article > ul'
  * ```
  *
- * @param {string} distribute
  * @param {string} selector
+ * @param {string} distribute
  * @return {string}
  */
-export function prependSelectorsWith(distribute, selector) {
+export function prependSelectorsWith(selector, distribute) {
   return selector.replace(/^|,/g, `$&${distribute} `);
 }
 
