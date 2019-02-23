@@ -127,6 +127,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'canonicalPath': 'CANONICAL_PATH',
       'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
+      'consentState': 'CONSENT_STATE',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
       'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
