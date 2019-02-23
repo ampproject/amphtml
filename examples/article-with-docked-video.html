@@ -329,9 +329,12 @@
       `responsive`, the slot will expand to fill the aside's width while
       preserving aspect ratio.
 
-      Additionally, set the `on` attribute to specify the actions that
-      get executed on docking events. In this case, we'll start the `slideSidebarDown`
-      animation on `dock` and run it in reverse on `undock`.-->
+      You should also set the `on` attribute to specify the actions that get executed on docking events.
+      In this case, we'll start the `slideDown` animation on `dock` and run it in reverse on `undock`.
+
+      Note that we're seeting the action on the slot element. If we were to set
+      it in the video itself, it would be triggered for `minimize-to-corner` rather
+      than `minimize-to-slot`.-->
       <amp-layout
           layout="responsive"
           width="16"
