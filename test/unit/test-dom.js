@@ -886,13 +886,6 @@ describes.sandboxed('DOM', {}, env => {
     });
   });
 
-  describe('escapeCssSelectorIdent', () => {
-
-    it('should escape', () => {
-      expect(dom.escapeCssSelectorIdent('a b')).to.equal('a\\ b');
-    });
-  });
-
   describe('escapeHtml', () => {
     it('should tolerate empty string', () => {
       expect(dom.escapeHtml('')).to.equal('');
