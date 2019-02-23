@@ -169,7 +169,7 @@
     "request": "2.88.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
-    "rollup": "0.68.2",
+    "rollup": "1.2.3",
     "rollup-plugin-babel": "4.1.0",
     "rollup-plugin-commonjs": "9.2.0",
     "rollup-plugin-node-resolve": "4.0.0",
