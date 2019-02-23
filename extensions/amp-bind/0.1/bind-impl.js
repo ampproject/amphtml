@@ -567,7 +567,7 @@ export class Bind {
    * a premutate message from the viewer.
    * @param {string} key
    */
-  makeStateKeyOverridable(key) {
+  addOverridableKey(key) {
     this.overridableKeys_.push(key);
   }
 

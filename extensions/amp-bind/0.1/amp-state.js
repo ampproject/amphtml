@@ -54,7 +54,7 @@ export class AmpState extends AMP.BaseElement {
     if (element.hasAttribute('overridable')) {
       Services.bindForDocOrNull(element).then(bind => {
         devAssert(bind);
-        bind.makeStateKeyOverridable(element.getAttribute('id'));
+        bind.addOverridableKey(element.getAttribute('id'));
       });
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
@@ -164,7 +164,8 @@ export class AmpState extends AMP.BaseElement {
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
     Services.bindForDocOrNull(this.element).then(bind => {
       devAssert(bind);
-      const state = /** @type {!JsonObject} */ (map({[id]: json}));
+      const state = /** @type {!JsonObject} */ (map());
+      state[id] = json;
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must
       // skip <amp-state> evaluation to prevent update cycles.
