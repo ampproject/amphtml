@@ -17,13 +17,13 @@
 import {Services} from '../services';
 import {
   closestAncestorElementBySelector,
-  escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../utils/object';
+import {escapeCssSelectorIdent} from '../css';
 import {
   getExtraParamsUrl,
   shouldAppendExtraParams,
