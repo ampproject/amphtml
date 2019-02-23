@@ -27,7 +27,6 @@ import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
-  escapeCssSelectorIdent,
   isRTL,
   iterateCursor,
   scopedQuerySelector,
@@ -40,6 +39,7 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 

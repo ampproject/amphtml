@@ -24,11 +24,12 @@ import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
+import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {
   embeddedComponentSelectors,
 } from './amp-story-embedded-component';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 

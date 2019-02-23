@@ -146,7 +146,7 @@ module.exports = function(context) {
         context.report({
           node: expression,
           message: 'Each selector value must be escaped by ' +
-              'escapeCssSelectorIdent in src/dom.js',
+              'escapeCssSelectorIdent in src/css.js',
         });
       }
 

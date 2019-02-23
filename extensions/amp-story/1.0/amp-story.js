@@ -85,7 +85,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -99,6 +98,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
