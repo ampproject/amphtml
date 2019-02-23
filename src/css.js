@@ -76,21 +76,28 @@ function testScopeSelector(el) {
 
 /* eslint-disable quotes, indent */
 const ATTRIBUTE_REGEX = new RegExp(
-  // Consume the opening bracket `[`
+  // Consume the opening bracket ([)
   `\\[` +
   // Consume everything up to the closing bracket, or up to the attribute value
-  // quotes.
+  // quotes
   `[^"'\\]]*` +
-  // Fork here.
+  // Fork here:
   `(?:` +
     // Either there're no quotes and we're at the end of the attribute brackets
     `(?=\\])|` +
 
-    // Or there are quotes. Consume them into Capture Group 1 (CG1)
+    // Or there are quotes. Consume them into Capture Group 1
     `(["'])` +
-    // Consume everything that's not that quote char (CG1)
-    `(?:(?!\\1).)*` +
-    // Consume the end quote (CG1)
+    // Consume all of the following forks:
+    `(?:` +
+      // Consume either a double escapes (\\)
+      `\\\\\\\\|` +
+      // Or a single escape followed by the quote char CG1
+      `\\\\\\1|` +
+      // Or anything that's not the quote char CG1
+      `(?!\\1).` +
+    `)*` +
+    // Consume the end quote CG1
     `\\1` +
     // Consume everything up to the end of the attribute bracket
     `[^\\]]*` +
