@@ -25,11 +25,11 @@ import {
 import {
   childElementsByTag,
   closestNode,
-  escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
 } from './dom';
 import {dev, devAssert} from './log';
+import {escapeCssSelectorIdent} from './css';
 import {installCssTransformer} from './style-installer';
 import {setInitialDisplay, setStyle} from './style';
 import {toArray, toWin} from './types';

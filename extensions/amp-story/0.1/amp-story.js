@@ -75,7 +75,6 @@ import {
   childElementByTag,
   childElements,
   closest,
-  escapeCssSelectorIdent,
   matches,
   removeElement,
   scopedQuerySelectorAll,
@@ -89,6 +88,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';

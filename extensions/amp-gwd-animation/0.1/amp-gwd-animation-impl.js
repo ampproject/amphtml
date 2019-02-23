@@ -16,13 +16,13 @@
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {installServiceInEmbedScope} from '../../../src/service';
 import {
-  escapeCssSelectorIdent,
   scopedQuerySelector,
   waitForBodyPromise,
   waitForChild,
 } from '../../../src/dom';
-import {installServiceInEmbedScope} from '../../../src/service';
 import {toArray} from '../../../src/types';
 
 /**

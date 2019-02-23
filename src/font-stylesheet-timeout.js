@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from './dom';
+import {escapeCssSelectorIdent} from './css';
 import {isExperimentOn} from './experiments';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
