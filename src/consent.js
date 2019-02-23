@@ -24,10 +24,10 @@ import {user} from './log';
  * Returns a promise that resolve when all consent state the policy wait
  * for resolve. Or if consent service is not available.
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyState(element, policyId) {
+export function getConsentPolicyState(element, policyId = 'default') {
   return Services.consentPolicyServiceForDocOrNull(element)
       .then(consentPolicy => {
         if (!consentPolicy) {
