@@ -487,7 +487,7 @@ export class Bind {
    * @private
    */
   checkReadiness_() {
-    if (this.numberOfAmpStateInits_ <= this.numberOfAmpStateElements_) {
+    if (this.numberOfAmpStateInits_ < this.numberOfAmpStateElements_) {
       return;
     }
     // Use a signal to ensure that onReady_() is only invoked once.
