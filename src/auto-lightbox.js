@@ -45,7 +45,7 @@ export function installAutoLightboxExtension(ampdoc) {
 
 /**
  * @param {!Element} element
- * @return {false}
+ * @return {boolean}
  */
 export function isActionableByTap(element) {
   if (element.tagName.toLowerCase() == 'a' && element.hasAttribute('href')) {

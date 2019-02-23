@@ -303,7 +303,7 @@ export class LightboxManager {
   /**
    * Get the description for single lightboxed item.
    * @param {!Element} element
-   * @return {?tring}
+   * @return {?string}
    */
   getDescription(element) {
     // If the element in question is the descendant of a figure element
