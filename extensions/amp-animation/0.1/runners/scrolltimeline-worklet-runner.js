@@ -18,6 +18,7 @@ import {AnimationRunner} from './animation-runner';
 import {Services} from '../../../../src/services';
 import {
   assertDoesNotContainDisplay,
+  px,
   setStyles,
 } from '../../../../src/style';
 import {dev} from '../../../../src/log';
@@ -33,7 +34,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
   /**
    * @param {!Window} win
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
-   * @param {?Object=} viewportData
+   * @param {!JsonObject} viewportData
    */
   constructor(win, requests, viewportData) {
     super(requests);
@@ -77,8 +78,8 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
-          startScrollOffset: `${this.startScrollOffset_}px`,
-          endScrollOffset: `${this.endScrollOffset_}px`,
+          startScrollOffset: `${px(this.startScrollOffset_)}`,
+          endScrollOffset: `${px(this.endScrollOffset_)}`,
           timeRange: adjustedTimeRange,
           fill: 'both',
         });

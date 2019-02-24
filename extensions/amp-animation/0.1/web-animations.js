@@ -185,21 +185,20 @@ export class Builder {
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
-   * @param {?Object=} opt_viewportData
+   * @param {?JsonObject=} opt_positionObserverData
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
-  createRunner(spec, hasPositionObserver = false, opt_args,
-    opt_viewportData = null) {
+  createRunner(spec, opt_args,
+    opt_positionObserverData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return this.isAnimationWorkletSupported_() && hasPositionObserver ?
+        return this.isAnimationWorkletSupported_() && opt_positionObserverData ?
           new ScrollTimelineWorkletRunner(this.win_, requests,
-              opt_viewportData) :
+              opt_positionObserverData) :
           new NativeWebAnimationRunner(requests);
       });
     });

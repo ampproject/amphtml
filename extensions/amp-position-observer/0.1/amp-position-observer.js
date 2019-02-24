@@ -161,15 +161,20 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * This event is triggered only when position-observer triggers which is
    * at most every animation frame.
    *
-   * @param {?JsonObject} additionalViewportData additional viewport related data to send with the event.
    * @private
    */
-  triggerScroll_(additionalViewportData = null) {
+  triggerScroll_() {
+    const scrolltop = this.viewport_.getScrollTop();
+    const positionObserverData = dict({
+      'start-scroll-offset': scrolltop,
+      'end-scroll-offset': scrolltop + this.remainingScrollToExit_,
+      'initial-inview-percent': this.scrollProgress_,
+    });
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
         dict({
           'percent': this.scrollProgress_,
-          'additionalViewportData': additionalViewportData}
+          'positionObserverData': positionObserverData}
         ));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
     // TODO(nainar): We want to remove the position observer if the scroll
@@ -236,13 +241,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send scroll progress if visible.
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
-      const scrolltop = this.viewport_.getScrollTop();
-      const additionalViewportData = dict({
-        'start-scroll-offset': scrolltop,
-        'end-scroll-offset': scrolltop + this.remainingScrollToExit_,
-        'initial-inview-percent': this.scrollProgress_,
-      });
-      this.triggerScroll_(additionalViewportData);
+      this.triggerScroll_();
     }
   }
 
