@@ -214,7 +214,9 @@ export class ${className} extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('${name}', ${className});
+AMP.extension('${name}', '0.1', AMP => {
+  AMP.registerElement('${name}', ${className});
+});
 `;
 }
 
