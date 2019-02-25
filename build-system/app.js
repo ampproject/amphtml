@@ -122,7 +122,7 @@ app.get('/serve_mode_change', (req, res) => {
 //   - /proxy/?url=hello.com/canonical 👉 /proxy/s/hello.com/amp
 //
 // This passthrough is useful to generate the URL from <form> values,
-// (See ./app-index/proxy-fom.js)
+// (See ./app-index/proxy-form.js)
 app.get('/proxy', async(req, res, next) => {
   const {mode, url} = req.query;
   const urlSuffixClearPrefixReStr =
