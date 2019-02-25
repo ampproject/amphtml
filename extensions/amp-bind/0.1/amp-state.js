@@ -69,13 +69,15 @@ export class AmpState extends AMP.BaseElement {
     }
 
     this.registerAction('refresh', () => {
+      userAssert(this.element.hasAttribute('src'),
+          'Can\'t refresh <amp-state> without "src" attribute.');
       this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
     }, ActionTrust.HIGH);
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.element);
     if (!viewer.hasBeenVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
@@ -126,7 +128,6 @@ export class AmpState extends AMP.BaseElement {
    */
   fetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
-
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
@@ -147,7 +148,7 @@ export class AmpState extends AMP.BaseElement {
   fetchAndUpdate_(isInit, opt_refresh) {
     const ampdoc = this.getAmpDoc();
     // Don't fetch in prerender mode.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.element);
     return viewer.whenFirstVisible()
         .then(() => this.fetch_(ampdoc, this.element, isInit, opt_refresh))
         .then(json => this.updateState_(json, isInit));
