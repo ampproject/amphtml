@@ -16,7 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
@@ -39,10 +39,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, 'amp-autocomplete')) {
-      user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
@@ -51,10 +49,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, 'amp-autocomplete')) {
-      user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // Actually load your resource or render more expensive resources.
     return Promise.resolve();
   }
