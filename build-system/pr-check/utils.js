@@ -114,7 +114,7 @@ function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
   const executionTime = endTime - startTime;
   const mins = Math.floor(executionTime / 60000);
-  const secs = Math.floor((executionTime - mins * 60000) / 1000);
+  const secs = Math.floor(executionTime % 60000 / 1000);
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),
