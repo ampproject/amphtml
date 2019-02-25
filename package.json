@@ -168,7 +168,7 @@
     "regexp.escape": "1.0.2",
     "request": "2.88.0",
     "request-promise": "4.2.4",
-    "rimraf": "2.6.2",
+    "rimraf": "2.6.3",
     "rocambole": "0.7.0",
     "rollup": "1.2.3",
     "rollup-plugin-babel": "4.1.0",
