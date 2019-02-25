@@ -68,4 +68,26 @@ describes.endtoend('AMP list', {
     await controller.takeScreenshot('screenshots/amp-list-load-more.png');
   });
 
+  it('should load more items on click', async() => {
+    let listItems = await controller.findElements('.item');
+    expect(listItems.length).to.equal(2);
+    const seeMoreButton = await controller.findElement('[load-more-button]');
+
+    controller.click(seeMoreButton);
+
+    const fourthItem = await controller.findElement(
+        'div.item:nth-child(4)');
+    expect(fourthItem).to.be.not.null;
+    listItems = await controller.findElements('.item');
+    expect(listItems.length).to.equal(4);
+
+    controller.click(seeMoreButton);
+
+    const sixthItem = await controller.findElement(
+        'div.item:nth-child(6)');
+    expect(sixthItem).to.be.not.null;
+    listItems = await controller.findElements('.item');
+    expect(listItems.length).to.equal(6);
+  });
+
 });
