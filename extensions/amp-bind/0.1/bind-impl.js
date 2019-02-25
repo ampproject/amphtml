@@ -183,18 +183,15 @@ export class Bind {
           return this.initialize_(root);
         });
 
+    /** @private {?Node} */
+    this.rootNode_ = null;
+
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
     this.signals_.whenSignal('READY').then(() => this.onReady_());
-
-    /** @private {number} */
-    this.numberOfAmpStateElements_ = Number.POSITIVE_INFINITY;
-
-    /** @private {number} */
-    this.numberOfAmpStateInits_ = 0;
 
     // Install debug tools.
     const g = self.AMP;
@@ -234,7 +231,6 @@ export class Bind {
     dev().info(TAG, 'state:', this.state_);
 
     if (opt_skipEval) {
-      this.numberOfAmpStateInits_++;
       this.checkReadiness_();
       return Promise.resolve();
     }
@@ -455,9 +451,7 @@ export class Bind {
    * @private
    */
   initialize_(root) {
-    dev().info(TAG, 'init');
-
-    this.numberOfAmpStateElements_ = root.querySelectorAll('AMP-STATE').length;
+    this.rootNode_ = root;
 
     // Disallow URL property bindings in AMP4EMAIL.
     const allowUrlProperties = !this.isAmp4Email_();
@@ -487,7 +481,12 @@ export class Bind {
    * @private
    */
   checkReadiness_() {
-    if (this.numberOfAmpStateInits_ < this.numberOfAmpStateElements_) {
+    if (!this.rootNode_) {
+      return;
+    }
+    const unbuilt =
+        this.rootNode_.querySelectorAll('AMP-STATE.i-amphtml-notbuilt');
+    if (unbuilt.length > 0) {
       return;
     }
     // Use a signal to ensure that onReady_() is only invoked once.

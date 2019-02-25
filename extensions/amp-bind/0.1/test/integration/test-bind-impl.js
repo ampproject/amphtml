@@ -308,8 +308,9 @@ describe.configure().ifChrome().run('Bind', function() {
       });
     });
 
-    it('should not send "bindReady" until <amp-state> is initialized', () => {
-      createElement(env, container, '', 'amp-state', true);
+    it('should not send "bindReady" until all <amp-state> are built', () => {
+      const element = createElement(env, container, '', 'amp-state', true);
+      element.classList.add('i-amphtml-notbuilt');
 
       const signals = bind.signals();
       sandbox.spy(signals, 'signal');
@@ -320,7 +321,8 @@ describe.configure().ifChrome().run('Bind', function() {
       return onBindReady(env, bind).then(() => {
         expect(signals.signal).to.not.be.called;
 
-        // Simulate <amp-state> initialization.
+        // Simulate <amp-state> buildCallback().
+        element.classList.remove('i-amphtml-notbuilt');
         bind.setState({}, /* opt_skipEval */ true);
 
         return signals.whenSignal('READY');
