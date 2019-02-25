@@ -16,6 +16,7 @@
 
  .i-amphtml-image-viewer-image {
   position: absolute;
+  object-fit: contain;
 }
 
 .i-amphtml-image-viewer {
