@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {FakeMutationObserver} from '../../testing/fake-dom';
+import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
@@ -1167,14 +1167,25 @@ describes.sandboxed('FixedLayer', {}, () => {
   describe('with-transfer', () => {
     let fixedLayer;
 
+    const borderTop = 0;
+    const paddingTop = 11;
+    const transfer = true;
+
     beforeEach(() => {
-      fixedLayer = new FixedLayer(ampdoc, vsyncApi,
-          /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ true);
+      fixedLayer = new FixedLayer(ampdoc, vsyncApi, borderTop, paddingTop,
+          transfer);
       fixedLayer.setup();
     });
 
-    it('should initialize fixed layer to null', () => {
-      expect(fixedLayer.transfer_).to.be.true;
+    it('should not instantiate transfer layer on setup', () => {
+      const win = new FakeWindow();
+      const ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+
+      const fixedLayer = new FixedLayer(
+          ampdoc, vsyncApi, borderTop, paddingTop, transfer);
+      fixedLayer.setup();
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 

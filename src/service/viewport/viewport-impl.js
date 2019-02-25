@@ -695,17 +695,18 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
+   * @param {!Promise=} opt_onComplete Optional promise that's resolved when
+   *     the caller finishes opening the lightbox e.g. transition animations.
    * @return {!Promise}
    */
-  enterLightboxMode(opt_requestingElement) {
+  enterLightboxMode(opt_requestingElement, opt_onComplete) {
     this.viewer_.sendMessage(
         'requestFullOverlay', dict(), /* cancelUnsent */ true);
 
     this.enterOverlayMode();
-    this.hideFixedLayer();
+    this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
@@ -717,16 +718,15 @@ export class Viewport {
 
   /**
    * Instruct the viewport to leave lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
    * @return {!Promise}
    */
   leaveLightboxMode(opt_requestingElement) {
     this.viewer_.sendMessage(
         'cancelFullOverlay', dict(), /* cancelUnsent */ true);
 
-    this.showFixedLayer();
+    this.fixedLayer_.leaveLightbox();
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
@@ -882,20 +882,6 @@ export class Viewport {
    */
   hasScrolled() {
     return this.scrollCount_ > 0;
-  }
-
-  /**
-   * Hides the fixed layer.
-   */
-  hideFixedLayer() {
-    this.fixedLayer_.setVisible(false);
-  }
-
-  /**
-   * Shows the fixed layer.
-   */
-  showFixedLayer() {
-    this.fixedLayer_.setVisible(true);
   }
 
   /**
