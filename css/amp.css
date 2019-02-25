@@ -158,6 +158,26 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 
 
 /**
+ * Most transferred fixed elements are hidden when a lightbox is opened. This
+ * prevents fixed elements from being displayed on top of lightboxes.
+ */
+#i-amphtml-wrapper + body[i-amphtml-lightbox] {
+  visibility: hidden;
+}
+/**
+ * The exception to the above is descendants of lightboxes, which we only
+ * want to display when a lightbox is open (the opposite behavior!).
+ * See fixed-layer.js#enterLightbox() for details.
+ */
+#i-amphtml-wrapper + body .i-amphtml-lightbox-element {
+  visibility: hidden;
+}
+#i-amphtml-wrapper + body[i-amphtml-lightbox] .i-amphtml-lightbox-element {
+  visibility: visible;
+}
+
+
+/**
  * iOS-Embed Wrapper shadow root mode. The `body` children are distributed
  * inside a scrollable element inside the shadow root.
  */

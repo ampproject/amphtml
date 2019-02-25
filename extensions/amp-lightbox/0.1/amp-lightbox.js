@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
@@ -116,9 +117,6 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?Array<!Element>} */
-    this.componentDescendants_ = null;
-
     /** @private {number} */
     this.historyId_ = -1;
 
@@ -182,23 +180,18 @@ class AmpLightbox extends AMP.BaseElement {
    */
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
-    this.getComponentDescendants_(/* opt_refresh */ true).forEach(child => {
+    this.getComponentDescendants_().forEach(child => {
       this.setAsOwner(child);
     });
   }
 
   /**
    * Gets a list of all AMP element descendants.
-   * @param {boolean=} opt_refresh Whether to requery the descendants.
    * @return {!Array<!Element>}
    * @private
    */
-  getComponentDescendants_(opt_refresh) {
-    if (!this.componentDescendants_ || opt_refresh) {
-      this.componentDescendants_ = toArray(
-          this.element.getElementsByClassName('i-amphtml-element'));
-    }
-    return this.componentDescendants_;
+  getComponentDescendants_() {
+    return toArray(this.element.getElementsByClassName('i-amphtml-element'));
   }
 
   /**
@@ -266,8 +259,9 @@ class AmpLightbox extends AMP.BaseElement {
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
 
-    this.getViewport().enterLightboxMode(this.element)
-        .then(() => this.finalizeOpen_());
+    const {promise, resolve} = new Deferred();
+    this.getViewport().enterLightboxMode(this.element, promise)
+        .then(() => this.finalizeOpen_(resolve));
   }
 
   /** @override */
@@ -295,9 +289,10 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Function} callback Called when open animation completes.
    * @private
    */
-  finalizeOpen_() {
+  finalizeOpen_(callback) {
     const {element} = this;
 
     const {durationSeconds, openStyle, closedStyle} =
@@ -340,10 +335,16 @@ class AmpLightbox extends AMP.BaseElement {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
     }
+
+    const onAnimationEnd = () => {
+      this.boundReschedule_();
+      callback();
+    };
+    element.addEventListener('transitionend', onAnimationEnd);
+    element.addEventListener('animationend', onAnimationEnd);
+
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    element.addEventListener('transitionend', this.boundReschedule_);
-    element.addEventListener('animationend', this.boundReschedule_);
     this.scheduleLayout(container);
     this.scheduleResume(container);
     this.triggerEvent_(LightboxEvents.OPEN);
