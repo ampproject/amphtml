@@ -293,11 +293,42 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('should send "bindReady" to viewer on init', () => {
+      const signals = bind.signals();
+      sandbox.spy(signals, 'signal');
+
+      expect(signals.signal).to.not.be.called;
       expect(viewer.sendMessage).to.not.be.called;
+
       return onBindReady(env, bind).then(() => {
+        expect(signals.signal).to.be.calledWith('READY');
+        return signals.whenSignal('READY');
+      }).then(() => {
         expect(viewer.sendMessage).to.be.calledOnce;
-        expect(viewer.sendMessage)
-            .to.be.calledWithExactly('bindReady', undefined);
+        expect(viewer.sendMessage).to.be.calledWith('bindReady');
+      });
+    });
+
+    it('should not send "bindReady" until all <amp-state> are built', () => {
+      const element = createElement(env, container, '', 'amp-state', true);
+      element.classList.add('i-amphtml-notbuilt');
+
+      const signals = bind.signals();
+      sandbox.spy(signals, 'signal');
+
+      expect(signals.signal).to.not.be.called;
+      expect(viewer.sendMessage).to.not.be.called;
+
+      return onBindReady(env, bind).then(() => {
+        expect(signals.signal).to.not.be.called;
+
+        // Simulate <amp-state> buildCallback().
+        element.classList.remove('i-amphtml-notbuilt');
+        bind.setState({}, /* opt_skipEval */ true);
+
+        return signals.whenSignal('READY');
+      }).then(() => {
+        expect(viewer.sendMessage).to.be.calledOnce;
+        expect(viewer.sendMessage).to.be.calledWith('bindReady');
       });
     });
 
@@ -872,8 +903,9 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('should update premutate keys that are overridable', () => {
-      bind.makeStateKeyOverridable('foo');
-      bind.makeStateKeyOverridable('bar');
+      bind.addOverridableKey('foo');
+      bind.addOverridableKey('bar');
+
       const foo = createElement(env, container, '[text]="foo"');
       const bar = createElement(env, container, '[text]="bar"');
       const baz = createElement(env, container, '[text]="baz"');
