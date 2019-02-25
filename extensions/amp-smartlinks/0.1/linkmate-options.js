@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../../../src/log';
 
 /**
  * Get the config values from the tag on the amp page
@@ -39,8 +38,6 @@ export function getConfigOptions(element) {
  */
 function getNrtvAccountName_(element) {
   const nrtvSlug = element.getAttribute('nrtv-account-name');
-  userAssert(nrtvSlug,
-      'amp-smartlinks: nrtv-account-name is a required field');
 
   return nrtvSlug.toLowerCase();
 }
