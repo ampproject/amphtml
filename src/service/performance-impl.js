@@ -59,6 +59,20 @@ function incOrDef(obj, name) {
   }
 }
 
+/**
+ * Get the visibility state of the provided document.
+ *
+ * @param {Document} document
+ */
+function getVisibilityState(document) {
+  if (document.visibilityState === 'hidden') {
+    return 'hidden';
+  }
+  if (document.hasFocus()) {
+    return 'active';
+  }
+  return 'passive';
+}
 
 /**
  * Performance holds the mechanism to call `tick` to stamp out important
@@ -103,6 +117,14 @@ export class Performance {
     this.firstContentfulPaint_ = null;
     /** @private {number|null} */
     this.firstViewportReady_ = null;
+
+    /**
+     * The sum of all layout jank fractions triggered on the page from the
+     * Layout Jank API.
+     *
+     * @private {number}
+     */
+    this.aggregateJankScore_ = 0;
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -189,6 +211,7 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
+
     const processEntry = entry => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
@@ -202,6 +225,9 @@ export class Performance {
       else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
+      }
+      else if (entry.entryType === 'layoutJank') {
+        this.aggregateJankScore += entry.fraction;
       }
     };
 
@@ -222,6 +248,16 @@ export class Performance {
       entryTypesToObserve.push('firstInput');
     }
 
+    if (this.win.PerformanceLayoutJank) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('layoutJank').forEach(processEntry);
+      entryTypesToObserve.push('layoutJank');
+      this.registerLayoutJankHandler_();
+    }
+
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -231,6 +267,48 @@ export class Performance {
       this.flush();
     });
     observer.observe({entryTypes: entryTypesToObserve});
+  }
+
+  /**
+   * Bind to various page lifecycle events to capture visibility state changes.
+   * @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
+   */
+  registerLayoutJankHandler_() {
+    // The visibility state of the document.
+    let visibilityState = getVisibilityState(this.win.document);
+    // Whether the `lj` metric was sent.
+    let sentFirstJankScore = false;
+    // Whether the `lj-2` metric was sent.
+    let sentSecondJankScore = false;
+
+    const handleVisibilityStateChange = nextState => {
+      const previousState = visibilityState;
+      if (previousState === nextState) {
+        return;
+      }
+      visibilityState = nextState;
+
+      if (nextState !== 'hidden') {
+        return;
+      }
+
+      if (!sentFirstJankScore) {
+        this.tickDelta('lj', this.aggregateJankScore_);
+        this.flush();
+        sentFirstJankScore = true;
+        return;
+      }
+      if (!sentSecondJankScore) {
+        this.tickDelta('lj-2', this.aggregateJankScore_);
+        this.flush();
+        sentSecondJankScore = true;
+        return;
+      }
+    };
+
+    ['pageshow', 'focus', 'blur', 'visibilitychange', 'resume'].forEach(eventName => {
+      this.win.addEventListener(eventName, () => handleVisibilityStateChange(getVisibilityState(this.win.document)), {capture: true});
+    });
   }
 
   /**
