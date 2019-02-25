@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Teads
+# Torimochi
 
 ## Example
 
@@ -31,9 +31,11 @@ limitations under the License.
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
-
+### Required parameters
 - `data-adtype`
 - `data-area`
 - `data-wid`
+
+### Optional parameters
 - `data-tcid`
 - `data-extra`
