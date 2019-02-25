@@ -55,9 +55,16 @@ This component is experimental and under active development. For any issues, ple
 
 [TOC]
 
+## Version notes
+
+| Version | Description                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| 1.0     | Current version, since 2018-07-16.                                     |
+| 0.1     | Initial implementation.  Deprecated, and will be removed on 2019-03-19 |
+
 ## Migrating from 0.1 to 1.0
 
-We've added new capabilities and features to AMP stories that are available in v1.0 of amp-story. You should consider migrating your stories to v1.0 to take advantage of these new features.
+As of 2018-07-16, version 0.1 is considered deprecated, and will be removed on 2019-03-19.  This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0.  We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
 
 ### New bookend capabilities
 

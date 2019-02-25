@@ -38,7 +38,8 @@ const timedExecOrDie =
 
 function runSinglePassTest_() {
   timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
 }
@@ -56,6 +57,7 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {
+      timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --noextensions');
       timedExecOrDie('gulp bundle-size --on_pr_build');
       ranTests = true;
