@@ -75,7 +75,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();
