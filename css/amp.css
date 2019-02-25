@@ -882,7 +882,7 @@ amp-story .i-amphtml-loader {
 /**
  * Make amp-addthis tool floating if user give data-widget-type
  */
-@media only screen and (max-width: 980px) {
+@media only screen and (max-width: 979px) {
   amp-addthis[data-widget-type="floating"] {
     position: fixed !important;
     width: 100% !important;
@@ -890,11 +890,8 @@ amp-story .i-amphtml-loader {
     bottom: 0;
   }
 }
-@media only screen and (min-width: 981px) {
+@media only screen and (min-width: 980px) {
   amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 100% !important;
-    height: 300px!important;
-    top: 200px;
+    display:none;
   }
 }
