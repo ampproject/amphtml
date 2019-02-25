@@ -46,26 +46,22 @@ function getNrtvAccountName_(element) {
 }
 
 /**
- * Flag to specify if we are to run our Linkmate service.
+ * Flag to run the Linkmate service on an article.
  * @param {!Element} element
  * @return {boolean}
  * @private
  */
 function getLinkmateFlag_(element) {
-  const linkmateEnabled = element.getAttribute('linkmate');
-
-  return !!linkmateEnabled && linkmateEnabled.toLowerCase() === 'true';
+  return element.hasAttribute('linkmate');
 }
 
 /**
- * Flag to mark links as exlusive or not.
+ * Flag to mark links as exclusive.
  * @param {!Element} element
  * @return {boolean}
  */
 function getExclusiveLinksFlag_(element) {
-  const exclusiveLinks = element.getAttribute('exclusive-links');
-
-  return !!exclusiveLinks && exclusiveLinks.toLowerCase() === 'true';
+  return element.hasAttribute('exclusive-links');
 }
 
 /**

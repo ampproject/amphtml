@@ -60,7 +60,7 @@ In your AMP page you will have to add the following snippets:
     <amp-smartlinks
         layout="nodisplay"
         nrtv-account-name="supercoolpublisher"
-        linkmate="true">
+        linkmate>
     </amp-smartlinks>
     ...
 </body>
@@ -78,12 +78,12 @@ In your AMP page you will have to add the following snippets:
   <tr>
     <td class="col-fourty"><strong>linkmate</strong></td>
     <td><strong>Required</strong></td>
-    <td>Field to flag if you want Linkmate to run on an article. Expected values are <code>true</code> or <code>false</code>.</td>
+    <td>Flag to run our Linkmate service on an article. Inserting the attribute <code>linkmate</code> in the <code>amp-smartlinks</code> element will run our linkmate service.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>exclusive-links</strong></td>
     <td><strong>Optional</strong></td>
-    <td>Field to flag if you want exclusive links on an article. Expected values are <code>true</code> or <code>false</code>.</td>
+    <td>Flag to mark links as exclusive. Inserting the attribute <code>exclusive-links</code> in the <code>amp-smartlinks</code> element will generate exclusive links for the article.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>link-attribute</strong></td>

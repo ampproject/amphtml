@@ -30,8 +30,8 @@ PASS
 |      <amp-smartlinks
 |          layout="nodisplay"
 |          nrtv-account-name="examplepublisher"
-|          linkmate="true"
-|          exclusive-links=""
+|          linkmate
+|          exclusive-links
 |          link-attribute="href"
 |          link-selector="a"
 |      ></amp-smartlinks>
