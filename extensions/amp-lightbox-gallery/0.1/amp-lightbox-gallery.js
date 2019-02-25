@@ -25,7 +25,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {
   childElementByTag,
@@ -166,7 +166,7 @@ function lerp(start, end, percentage) {
  * milliseconds has elapsed after the animation has started. Simply waiting
  * for the desired duration may result in running code before an animation has
  * completed.
- * @param {Window} win A Window object.
+ * @param {!Window} win A Window object.
  * @param {number} duration How long to wait for.
  * @return {!Promise} A Promise that resolves after the specified duration.
  */
@@ -804,7 +804,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   carrySwipeMomentum_(scale, deltaX, deltaY, velocity) {
     const duration = velocity * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
 
-    setStyles(this.carousel_, {
+    setStyles(devAssert(this.carousel_), {
       transform: `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
       transition: `${duration}ms transform ${SWIPE_TO_CLOSE_MOMENTUM_TIMING}`,
     });
@@ -823,15 +823,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const duration = finalDistance * SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR;
 
     return this.mutateElement(() => {
-      setStyles(this.carousel_, {
+      setStyles(devAssert(this.carousel_), {
         transform: '',
         transition: `${duration}ms transform ease-out`,
       });
-      setStyles(this.mask_, {
+      setStyles(devAssert(this.mask_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
-      setStyles(this.controlsContainer_, {
+      setStyles(devAssert(this.controlsContainer_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
@@ -849,22 +849,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *    as `this.carousel_` will be null if this is called after the lightbox
    *    has been closed.
    * @param {string} carouselTransform How to transform the carousel.
-   * @param {number} maskOpacity The opacity for the mask element.
-   * @param {number} controlsOpacity The opacity for the controls container.
+   * @param {number|string} maskOpacity The opacity for the mask element.
+   * @param {number|string} controlsOpacity The opacity for the controls
+   *    container.
    * @private
    */
   adjustForSwipePosition_(
     carousel, carouselTransform, maskOpacity, controlsOpacity) {
-    const {controlsContainer_, mask_} = this;
     setStyles(carousel, {
       transform: carouselTransform,
       transition: '',
     });
-    setStyles(mask_, {
+    setStyles(devAssert(this.mask_), {
       opacity: maskOpacity,
       transition: '',
     });
-    setStyles(controlsContainer_, {
+    setStyles(devAssert(this.controlsContainer_), {
       opacity: controlsOpacity,
       transition: '',
     });
@@ -914,7 +914,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *  - Prevents a scroll event from the carousel during the swipe.
    *  - Hides the source element on the page.
    * This should be called in a mutate context.
-   * @param {Element} sourceElement
+   * @param {!Element} sourceElement
    * @private
    */
   startSwipeToDismiss_(sourceElement) {
@@ -924,7 +924,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // We do not want the user dragging around to make the carousel think that
     // a scroll happened.
     this.preventCarouselScrollUnlistener_ = listen(
-        this.carousel_, 'scroll', event => event.stopPropagation(), true);
+        devAssert(this.carousel_), 'scroll', event => {
+          event.stopPropagation();
+        }, {
+          capture: true,
+        });
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     this.element.setAttribute('i-amp-scale-animation', '');
@@ -935,7 +939,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Ends a drag swipe, cleaning up the effects from `startSwipeToDismiss_`.
    * This should be called in a mutate context.
-   * @param {Element} sourceElement
+   * @param {!Element} sourceElement
    * @private
    */
   endSwipeToDismiss_(sourceElement) {
@@ -954,7 +958,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   handleSwipeMove_(data) {
     const {deltaX, deltaY, first, last, velocityX, velocityY} = data;
     // Need to capture these as they will no longer be available after closing.
-    const {carousel_} = this;
+    const carousel = devAssert(this.carousel_);
     const {sourceElement} = this.getCurrentElement_();
     const distance = calculateDistance(0, 0, deltaX, deltaY);
     const releasePercentage = Math.min(distance / SWIPE_TO_CLOSE_DISTANCE, 1);
@@ -976,14 +980,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               // TODO(sparhami) These should be called in a `mutateElement`,
               // but we are already in an animationFrame, and waiting for the
               // next one will cause the UI to flicker.
-              this.adjustForSwipePosition_(carousel_, '', '', '');
+              this.adjustForSwipePosition_(carousel, '', '', '');
               this.endSwipeToDismiss_(sourceElement);
             });
         return;
       }
 
       this.adjustForSwipePosition_(
-          carousel_,
+          carousel,
           `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
           maskOpacity,
           controlsOpacity);
@@ -1324,7 +1328,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (fadeIn) {
-        toggle(this.carousel_, true);
+        toggle(devAssert(this.carousel_), true);
         toggle(this.element, true);
       }
 
@@ -1345,7 +1349,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           });
 
           if (!fadeIn) {
-            toggle(this.carousel_, false);
+            toggle(devAssert(this.carousel_), false);
             toggle(this.element, false);
           }
         });
