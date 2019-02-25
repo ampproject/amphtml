@@ -30,7 +30,6 @@ const helpersFactory = env => {
         ampTag.setAttribute(attr, extensionAttrs[attr]);
       }
       ampTag.getAmpDoc = () => env.ampdoc;
-
       return new AmpSmartlinks(ampTag);
     },
   };
@@ -59,8 +58,8 @@ describes.fakeWin('amp-smartlinks',
 
           const smartlinkOptions = {
             'nrtv-account-name': 'thisisnotapublisher',
-            'linkmate': true,
-            'exclusive-links': true,
+            'linkmate': '',
+            'exclusive-links': '',
             'link-attribute': 'href',
             'link-selector': 'a',
           };
@@ -72,8 +71,8 @@ describes.fakeWin('amp-smartlinks',
                 .true;
             expect(ampSmartlinks.linkmateOptions_).to.deep.equal({
               nrtvSlug: smartlinkOptions['nrtv-account-name'],
-              linkmateEnabled: smartlinkOptions['linkmate'],
-              exclusiveLinks: smartlinkOptions['exclusive-links'],
+              linkmateEnabled: true,
+              exclusiveLinks: true,
               linkAttribute: smartlinkOptions['link-attribute'],
               linkSelector: smartlinkOptions['link-selector'],
             });

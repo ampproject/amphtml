@@ -49,7 +49,7 @@ function getNrtvAccountName_(element) {
  * @private
  */
 function getLinkmateFlag_(element) {
-  return element.hasAttribute('linkmate');
+  return !!element.hasAttribute('linkmate');
 }
 
 /**
@@ -58,7 +58,7 @@ function getLinkmateFlag_(element) {
  * @return {boolean}
  */
 function getExclusiveLinksFlag_(element) {
-  return element.hasAttribute('exclusive-links');
+  return !!element.hasAttribute('exclusive-links');
 }
 
 /**
