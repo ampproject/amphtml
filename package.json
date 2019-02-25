@@ -63,7 +63,7 @@
     "babel-plugin-transform-react-jsx": "6.24.1",
     "babelify": "10.0.0",
     "baconipsum": "0.1.2",
-    "bluebird": "3.5.2",
+    "bluebird": "3.5.3",
     "body-parser": "1.18.3",
     "browserify": "16.2.3",
     "chai": "4.2.0",
