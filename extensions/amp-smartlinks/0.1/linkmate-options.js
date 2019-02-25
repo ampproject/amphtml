@@ -23,8 +23,8 @@
 export function getConfigOptions(element) {
   return {
     nrtvSlug: getNrtvAccountName_(element),
-    linkmateEnabled: getLinkmateFlag_(element),
-    exclusiveLinks: getExclusiveLinksFlag_(element),
+    linkmateEnabled: hasLinkmateFlag_(element),
+    exclusiveLinks: hasExclusiveLinksFlag_(element),
     linkAttribute: getLinkAttribute_(element),
     linkSelector: getLinkSelector_(element),
   };
@@ -48,7 +48,7 @@ function getNrtvAccountName_(element) {
  * @return {boolean}
  * @private
  */
-function getLinkmateFlag_(element) {
+function hasLinkmateFlag_(element) {
   return !!element.hasAttribute('linkmate');
 }
 
@@ -57,7 +57,7 @@ function getLinkmateFlag_(element) {
  * @param {!Element} element
  * @return {boolean}
  */
-function getExclusiveLinksFlag_(element) {
+function hasExclusiveLinksFlag_(element) {
   return !!element.hasAttribute('exclusive-links');
 }
 

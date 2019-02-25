@@ -77,7 +77,7 @@ In your AMP page you will have to add the following snippets:
   </tr>
   <tr>
     <td class="col-fourty"><strong>linkmate</strong></td>
-    <td><strong>Required</strong></td>
+    <td><strong>Optional</strong></td>
     <td>Flag to run our Linkmate service on an article. Inserting the attribute <code>linkmate</code> in the <code>amp-smartlinks</code> element will run our linkmate service.</td>
   </tr>
   <tr>
