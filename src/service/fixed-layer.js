@@ -190,7 +190,7 @@ export class FixedLayer {
           ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      // Don't dereference cssRules we need to avoid "Can't access rules"
+      // Don't dereference cssRules early to avoid "Cannot access rules"
       // DOMException due to reading a CORS stylesheet e.g. font.
       this.discoverSelectors_(stylesheet.cssRules);
     }
