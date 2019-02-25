@@ -396,6 +396,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
   {
+    id: 'fixed-elements-in-lightbox',
+    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
+    spec: 'https://github.com/ampproject/amphtml/issues/20964',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
+  },
+  {
     id: 'amp-autocomplete',
     name: 'AMP Autocomplete provides a set of suggestions to' +
         ' complete a user query in an input field.',

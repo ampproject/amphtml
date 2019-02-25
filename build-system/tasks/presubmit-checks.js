@@ -180,6 +180,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -416,6 +417,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'eval\\(': {
@@ -812,12 +814,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-access/0.1/access-expr-impl.js',
       'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
       'extensions/amp-bind/0.1/bind-expr-impl.js',
-    ],
-  },
-  'scopeSelectorForTesting': {
-    message: 'scopeSelector is not intended to be used outside of dom.js',
-    whitelist: [
-      'src/dom.js',
     ],
   },
   '[^.]loadPromise': {
