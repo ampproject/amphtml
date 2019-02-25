@@ -223,6 +223,7 @@ export class AmpList extends AMP.BaseElement {
           if (overflowElement) {
             toggle(overflowElement, false);
           }
+          this.element.warnOnMissingOverflow = false;
         }).then(() => {
           this.adjustContainerForLoadMoreButton_();
         });
@@ -851,8 +852,6 @@ export class AmpList extends AMP.BaseElement {
           this.unlistenLoadMore_ = listen(
               this.loadMoreService_.getLoadMoreButtonClickable(),
               'click', () => this.loadMoreCallback_());
-        }).then(() => {
-          this.attemptToFit_(dev().assertElement(this.container_));
         });
       } else {
         return this.mutateElement(
