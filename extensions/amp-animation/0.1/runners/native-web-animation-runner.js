@@ -180,7 +180,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    */
   seekToPercent(percent) {
     devAssert(percent >= 0 && percent <= 1);
-    const totalDuration = getTotalDuration(this.requests_);
+    const totalDuration = this.getTotalDuration_();
     const time = totalDuration * percent;
     this.seekTo(time);
   }
@@ -224,5 +224,12 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     }
   }
 
+  /**
+   * @return {number} total duration in milliseconds.
+   * @throws {Error} If timeline is infinite.
+   */
+  getTotalDuration_() {
+    return getTotalDuration(this.requests_);
+  }
 
 }
