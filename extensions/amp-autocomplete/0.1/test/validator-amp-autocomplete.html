@@ -110,6 +110,16 @@
       <script type="application/json">
         { items: [ "a", "b", "c" ] }
       </script>
+  </amp-autocomplete> 
+  
+  <!-- Valid: input tag only (no data source) -->
+  <amp-autocomplete>
+    <input type="text">
+  </amp-autocomplete>  
+
+  <!-- Valid: input tag with type="search" -->
+  <amp-autocomplete>
+    <input type="search">
   </amp-autocomplete>  
 
   <!-- Invalid: width is mistyped -->
@@ -126,6 +136,32 @@
       <script type="application/json">
         { items: [ "a", "b", "c" ] }
       </script>
+  </amp-autocomplete>  
+
+  <!-- Invalid: no children -->
+  <amp-autocomplete>
+  </amp-autocomplete>  
+  
+  <!-- Invalid: script tag present with input tag excluded -->
+  <amp-autocomplete>
+    <script type="application/json">
+      { items: [ "a", "b", "c" ] }
+    </script>
+  </amp-autocomplete>  
+
+  <!-- Invalid: input tag with type != "text" | "search" -->
+  <amp-autocomplete>
+    <input type="button">
+  </amp-autocomplete>  
+
+  <!-- Invalid: input tag with type != "text" | "search" -->
+  <amp-autocomplete>
+    <input type="checkbox">
+  </amp-autocomplete>  
+
+  <!-- Invalid: input tag with type != "text" | "search" -->
+  <amp-autocomplete>
+    <input type="submit">
   </amp-autocomplete>  
 
 </body>

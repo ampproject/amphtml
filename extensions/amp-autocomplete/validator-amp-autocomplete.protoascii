@@ -55,4 +55,46 @@ tags: {  # <amp-autocomplete>
   amp_layout: {
     supported_layouts: CONTAINER
   }
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "INPUT"
+    child_tag_name_oneof: "SCRIPT"
+  }
+  reference_points: {
+    tag_spec_name: "amp-autocomplete > input"
+  }
+  reference_points: {
+    tag_spec_name: "amp-autocomplete JSON"
+  }
+}
+tags: {  # <amp-autocomplete> > <input>
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "amp-autocomplete > input"
+  mandatory_parent: "AMP-AUTOCOMPLETE"
+  requires_extension: "amp-autocomplete"
+  requires_extension: "amp-form"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "text"
+    value_casei: "search"
+  }
+  child_tags: {
+    child_tag_name_oneof: "SCRIPT"
+  }
+}
+tags: {  # amp-autocomplete JSON
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-autocomplete JSON"
+  requires_extension: "amp-autocomplete"
+  mandatory_parent: "AMP-AUTOCOMPLETE"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
 }

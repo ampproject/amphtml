@@ -37,8 +37,6 @@ FAIL
 |    <amp-autocomplete filter="prefix">
 |      <input type="text">
 |      <script type="application/json">
->>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:38:4 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |        { items: [ "a", "b", "c" ] }
 |      </script>
 |    </amp-autocomplete>
@@ -47,8 +45,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:38:4 Custom JavaScript
 |    <amp-autocomplete filter="token-prefix">
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:46:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -57,8 +53,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:46:6 Custom JavaScript
 |    <amp-autocomplete filter="substring">
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:54:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -67,8 +61,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:54:6 Custom JavaScript
 |    <amp-autocomplete filter="fuzzy">
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:62:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -77,8 +69,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:62:6 Custom JavaScript
 |    <amp-autocomplete filter="none">
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:70:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -87,8 +77,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:70:6 Custom JavaScript
 |    <amp-autocomplete filter="custom" filter-expr="true">
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:78:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -97,8 +85,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:78:6 Custom JavaScript
 |    <amp-autocomplete min-characters=3>
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:86:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -107,8 +93,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:86:6 Custom JavaScript
 |    <amp-autocomplete max-entries=10>
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:94:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>
@@ -117,8 +101,6 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:94:6 Custom JavaScript
 |    <amp-autocomplete suggest-first>
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:102:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>  
@@ -127,20 +109,26 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:102:6 Custom JavaScrip
 |    <amp-autocomplete submit-on-enter>
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:110:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
+|    </amp-autocomplete> 
+|    
+|    <!-- Valid: input tag only (no data source) -->
+|    <amp-autocomplete>
+|      <input type="text">
+|    </amp-autocomplete>  
+|
+|    <!-- Valid: input tag with type="search" -->
+|    <amp-autocomplete>
+|      <input type="search">
 |    </amp-autocomplete>  
 |
 |    <!-- Invalid: width is mistyped -->
 |    <amp-autocomplete widht=100>
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:116:2 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:126:2 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:118:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
 |    </amp-autocomplete>  
@@ -148,13 +136,47 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:118:6 Custom JavaScrip
 |    <!-- Invalid: responsive layout is not supported -->
 |    <amp-autocomplete layout="responsive">
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:124:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:134:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |        <input type="text">
 |        <script type="application/json">
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:126:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |          { items: [ "a", "b", "c" ] }
 |        </script>
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: no children -->
+|    <amp-autocomplete>
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:142:2 Tag 'amp-autocomplete' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
+|    </amp-autocomplete>  
+|    
+|    <!-- Invalid: script tag present with input tag excluded -->
+|    <amp-autocomplete>
+|      <script type="application/json">
+|        { items: [ "a", "b", "c" ] }
+|      </script>
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: input tag with type != "text" | "search" -->
+|    <amp-autocomplete>
+|      <input type="button">
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:154:4 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:154:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: input tag with type != "text" | "search" -->
+|    <amp-autocomplete>
+|      <input type="checkbox">
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:159:4 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+|    </amp-autocomplete>  
+|
+|    <!-- Invalid: input tag with type != "text" | "search" -->
+|    <amp-autocomplete>
+|      <input type="submit">
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:164:4 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |    </amp-autocomplete>  
 |
 |  </body>
