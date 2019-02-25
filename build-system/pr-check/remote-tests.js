@@ -44,10 +44,13 @@ async function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
+    downloadBuildOutput(FILENAME);
     downloadDistOutput(FILENAME);
+
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -65,6 +68,7 @@ async function main() {
       return;
     }
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||

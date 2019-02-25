@@ -138,7 +138,7 @@ app.get('/proxy', (req, res) => {
  * out the recaptcha api.
  */
 app.get(
-    '/dist.3p/current*/recaptcha.*html',
+    '/dist.3p/*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
 app.use(
@@ -213,7 +213,6 @@ app.use('/api/echo/post', (req, res) => {
  * @type {RegExp}
  */
 const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^http://.+\.localhost:8000|' +
     '^https?://.+\.herokuapp\.com');
 
 /**
@@ -223,7 +222,6 @@ const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
  * @type {RegExp}
  */
 const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^http://.+\.localhost:8000|' +
     '^https?://.+\.herokuapp\.com');
 
 app.use('/form/html/post', (req, res) => {
