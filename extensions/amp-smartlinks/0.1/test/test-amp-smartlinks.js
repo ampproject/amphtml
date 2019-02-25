@@ -107,8 +107,8 @@ describes.fakeWin('amp-smartlinks',
         it('Should fetch Linkmate Options from API', () => {
           const options = {
             'nrtv-account-name': 'testingconfigpub',
-            'linkmate': true,
-            'exclusive-links': false,
+            'linkmate': '',
+            'exclusive-links': '',
           };
           ampSmartlinks = helpers.createAmpSmartlinks(options);
 
@@ -127,8 +127,8 @@ describes.fakeWin('amp-smartlinks',
         beforeEach(() => {
           const options = {
             'nrtv-account-name': 'thisisnotapublisher',
-            'linkmate': true,
-            'exclusive-links': false,
+            'linkmate': '',
+            'exclusive-links': '',
           };
 
           ampSmartlinks = helpers.createAmpSmartlinks(options);
@@ -165,8 +165,8 @@ describes.fakeWin('amp-smartlinks',
         beforeEach(() => {
           const options = {
             'nrtv-account-name': 'thisisnotapublisher',
-            'linkmate': true,
-            'exclusive-links': false,
+            'linkmate': '',
+            'exclusive-links': '',
           };
 
           ampSmartlinks = helpers.createAmpSmartlinks(options);
@@ -210,8 +210,8 @@ describes.fakeWin('amp-smartlinks',
         beforeEach(() => {
           const options = {
             'nrtv-account-name': 'thisisnotapublisher',
-            'linkmate': true,
-            'exclusive-links': false,
+            'linkmate': '',
+            'exclusive-links': '',
           };
 
           ampSmartlinks = helpers.createAmpSmartlinks(options);
