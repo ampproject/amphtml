@@ -91,7 +91,7 @@ tags: {  # amp-autocomplete JSON
   mandatory_parent: "AMP-AUTOCOMPLETE"
   attrs: { 
     name: "nonce" 
-    disabled_by: "transformed",
+    disabled_by: "transformed"
   }
   attrs: {
     name: "type"
