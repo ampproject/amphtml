@@ -194,7 +194,9 @@ class AmpCarousel extends AMP.BaseElement {
   layoutCallback() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    if (closestAncestorElementBySelector(this.element, '[i-amp-scale-animation]')) {
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amp-scale-animation]');
+    if (isScaled) {
       return Promise.resolve();
     }
 
