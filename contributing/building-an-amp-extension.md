@@ -656,7 +656,7 @@ And then protecting your code with a check `isExperimentOn(win,
 
 ```javascript
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';
@@ -680,20 +680,16 @@ Class AmpMyElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, 'amp-my-element')) {
-      user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // get attributes, assertions of values, assign instance variables.
     // build lightweight dom and append to this.element.
   }
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, 'amp-my-element')) {
-      user().warn(TAG, `Experiment ${EXPERIMENT} is not turned on.`);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // actually load your resource or render more expensive resources.
   }
 }
