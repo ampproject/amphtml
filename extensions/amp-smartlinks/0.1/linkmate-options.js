@@ -52,11 +52,9 @@ function getNrtvAccountName_(element) {
  * @private
  */
 function getLinkmateFlag_(element) {
-  const linkmateEnabled = element.getAttribute('linkmate').toLowerCase();
-  userAssert(linkmateEnabled,
-      'amp-smartlinks: linkmate is a required field');
+  const linkmateEnabled = element.getAttribute('linkmate');
 
-  return linkmateEnabled === 'true';
+  return !!linkmateEnabled && linkmateEnabled.toLowerCase() === 'true';
 }
 
 /**

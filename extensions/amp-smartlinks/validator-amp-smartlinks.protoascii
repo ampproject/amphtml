@@ -41,9 +41,7 @@ tags: {  # <amp-smartlinks>
   }
   attrs: {
     name: "linkmate"
-    mandatory: true
-    value: "false"
-    value: "true"
+    value: ""
   }
   attrs: {
     name: "nrtv-account-name"
