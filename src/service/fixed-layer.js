@@ -43,6 +43,9 @@ const TAG = 'FixedLayer';
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
+const LIGHTBOX_MODE_ATTR = 'i-amphtml-lightbox';
+const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
+
 /**
  * @param {!Element} el
  */
@@ -178,7 +181,7 @@ export class FixedLayer {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
         return;
       }
-      const {cssRules, disabled, ownerNode} = stylesheet;
+      const {disabled, ownerNode} = stylesheet;
       if (disabled ||
           !ownerNode ||
           ownerNode.tagName != 'STYLE' ||
@@ -187,7 +190,9 @@ export class FixedLayer {
           ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      this.discoverSelectors_(cssRules);
+      // Don't dereference cssRules early to avoid "Cannot access rules"
+      // DOMException due to reading a CORS stylesheet e.g. font.
+      this.discoverSelectors_(stylesheet.cssRules);
     }
 
     this.scanNode_(root);
@@ -978,9 +983,9 @@ class TransferLayerBody {
       const root = this.getRoot();
       if (this.isLightboxExperimentOn_) {
         if (on) {
-          root.setAttribute('i-amphtml-lightbox', '');
+          root.setAttribute(LIGHTBOX_MODE_ATTR, '');
         } else {
-          root.removeAttribute('i-amphtml-lightbox');
+          root.removeAttribute(LIGHTBOX_MODE_ATTR);
         }
       } else {
         // Legacy behavior is to hide transfer layer when entering lightbox
@@ -1012,7 +1017,7 @@ class TransferLayerBody {
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (name === 'style' || name === 'i-amphtml-lightboxed'
+      if (name === 'style' || name === LIGHTBOX_MODE_ATTR
           || body.hasAttribute(name)) {
         continue;
       }
@@ -1048,7 +1053,7 @@ class TransferLayerBody {
     // Identify lightboxed elements so they can be visible when the transfer
     // layer is "hidden", and hidden with the transfer layer is "visible".
     if (fe.lightboxed) {
-      element.classList.add('i-amphtml-lightbox-element');
+      element.classList.add(LIGHTBOX_ELEMENT_CLASS);
     }
 
     element.parentElement.replaceChild(fe.placeholder, element);
@@ -1076,7 +1081,7 @@ class TransferLayerBody {
     dev().fine(TAG, 'return from fixed:', fe.id, element);
 
     if (fe.lightboxed) {
-      element.classList.remove('i-amphtml-lightbox-element');
+      element.classList.remove(LIGHTBOX_ELEMENT_CLASS);
     }
 
     if (this.doc_.contains(element)) {

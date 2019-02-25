@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.44 */
+/** Version: 0.1.22.45 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1524,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.21';
+    this.version = '1.22';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -4392,7 +4392,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.44',
+    '_client': 'SwG 0.1.22.45',
   });
 }
 
