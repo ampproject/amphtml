@@ -15,7 +15,7 @@
  */
 
 
-describes.endtoend('AMP list', {
+describes.endtoend('AMP list load-more', {
 }, async env => {
   const pageWidth = 800;
   const pageHeight = 600;
@@ -88,6 +88,30 @@ describes.endtoend('AMP list', {
     expect(sixthItem).to.be.not.null;
     listItems = await controller.findElements('.item');
     expect(listItems.length).to.equal(6);
+  });
+
+
+  it('should show load-more-end when done', async() => {
+    const seeMoreButton = await controller.findElement('[load-more-button]');
+    controller.click(seeMoreButton);
+    await controller.findElement('div.item:nth-child(4)');
+    controller.click(seeMoreButton);
+    await controller.findElement('div.item:nth-child(6)');
+
+    const loadMoreEnd = await controller.findElement('[load-more-end]');
+    const loadEndDisplay = await controller.getElementCssValue(loadMoreEnd,
+        'display');
+    expect(loadEndDisplay).to.equal('block');
+
+    const seeMoreButtonDisplay = await controller.getElementCssValue(
+        seeMoreButton, 'display');
+    expect(seeMoreButtonDisplay).to.equal('none');
+
+    const loader = await controller.findElement('[load-more-loading]');
+    const loaderDisplay = await controller.getElementCssValue(loader,
+        'display');
+    expect(loaderDisplay).to.equal('none');
+
   });
 
 });

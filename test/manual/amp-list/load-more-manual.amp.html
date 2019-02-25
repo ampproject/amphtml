@@ -20,7 +20,7 @@
   <!-- Do not change this without editing the E2E test -->
   <amp-list width="auto" height="400"
     layout="fixed-height"
-    src="/infinite-scroll?items=2&left=20"
+    src="/infinite-scroll?items=2&left=2"
     [src]="data.url"
     load-more="manual"
     load-more-bookmark="next">
@@ -33,6 +33,9 @@
     <div fallback>
       FALLBACK
     </div>
+    <amp-list-load-more load-more-end>
+      The END
+    </amp-list-load-more>
   </amp-list>
 </article>
 </body>
