@@ -57,10 +57,11 @@ export class AmpState extends AMP.BaseElement {
         bind.addOverridableKey(element.getAttribute('id'));
       });
     }
-    // Parse child script tag and/or fetch JSON from endpoint at `src`
-    // attribute, with the latter taking priority.
+    // Parse child <script> tag and/or fetch JSON from `src` attribute.
+    // The latter is allowed to overwrite the former.
     const {children} = element;
     if (children.length > 0) {
+      // Bind relies on this happening synchronously in buildCallback().
       this.parseAndUpdate_();
     }
     if (this.element.hasAttribute('src')) {
