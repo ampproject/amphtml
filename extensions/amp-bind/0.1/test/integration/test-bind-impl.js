@@ -308,7 +308,7 @@ describe.configure().ifChrome().run('Bind', function() {
       });
     });
 
-    it.only('should not send "bindReady" until all <amp-state> are built', () => {
+    it('should not send "bindReady" until all <amp-state> are built', () => {
       const element = createElement(env, container, '', 'amp-state', true);
       let buildAmpState;
       const builtPromise = new Promise(resolve => {
