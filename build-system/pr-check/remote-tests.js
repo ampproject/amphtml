@@ -64,7 +64,6 @@ async function main() {
           'because this commit does not affect the runtime, ' +
           'build system, or integration test files.');
       stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 0;
       return;
     }
     downloadBuildOutput(FILENAME);
@@ -86,7 +85,6 @@ async function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  process.exitCode = 0;
 }
 
 main();
