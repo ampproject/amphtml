@@ -181,7 +181,7 @@ export class FixedLayer {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
         return;
       }
-      const {cssRules, disabled, ownerNode} = stylesheet;
+      const {disabled, ownerNode} = stylesheet;
       if (disabled ||
           !ownerNode ||
           ownerNode.tagName != 'STYLE' ||
@@ -190,7 +190,9 @@ export class FixedLayer {
           ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      this.discoverSelectors_(cssRules);
+      // Don't dereference cssRules we need to avoid "Can't access rules"
+      // DOMException due to reading a CORS stylesheet e.g. font.
+      this.discoverSelectors_(stylesheet.cssRules);
     }
 
     this.scanNode_(root);
