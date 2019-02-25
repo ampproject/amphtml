@@ -1554,6 +1554,12 @@ describes.sandboxed('FixedLayer', {}, () => {
       body.attributes.push(new FakeAttr('[class]', 'amp-bind'));
       fixedLayer.update();
       expect(layer.getAttribute('[class]')).to.equal('amp-bind');
+
+      // [i-amphtml-lightbox] is an exception and should be preserved.
+      layer.setAttribute('i-amphtml-lightbox', '');
+      fixedLayer.update();
+      expect(layer.hasAttribute('i-amphtml-lightbox')).to.be.true;
+      expect(body.hasAttribute('i-amphtml-lightbox')).to.be.false;
     });
 
     it('should sync invalid-named attributes to layer', () => {
