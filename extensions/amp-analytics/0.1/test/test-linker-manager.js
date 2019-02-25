@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import {LinkerManager, areFriendlyDomains} from '../linker-manager';
+import {
+  LinkerManager,
+  areFriendlyDomains,
+  isWildCardMatch,
+} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {
@@ -916,5 +920,51 @@ describe('areFriendlyDomains', () => {
     expect(areFriendlyDomains('amp.source.com', 'amp.google.com')).to.be.false;
     expect(areFriendlyDomains('web.amp.source.com', 'web.m.source.com'))
         .to.be.false;
+  });
+});
+
+describe('wildcard matching', () => {
+  const testCases = [
+    {
+      hostname: 'amp.foo.com',
+      domain: '*.foo.com',
+      result: true,
+    },
+    {
+      hostname: 'amp.foo.com.uk',
+      domain: '*.foo.com',
+      result: false,
+    },
+    {
+      hostname: 'amp.foo.com.uk',
+      domain: '*.foo.com*',
+      result: true,
+    },
+    {
+      hostname: 'foo.com',
+      domain: '*.foo.com',
+      result: false,
+    },
+    {
+      hostname: 'amp.foo.com',
+      domain: '*.foo.co*',
+      result: true,
+    },
+    {
+      hostname: 'me.foo.co.uk',
+      domain: '*.foo.co*',
+      result: true,
+    },
+    {
+      hostname: 'a.b.foo.com',
+      domain: '*.foo.co*',
+      result: true,
+    },
+  ];
+  testCases.forEach(test => {
+    const {hostname, domain, result} = test;
+    it(`wildcard test: ${hostname}, ${domain}, ${result}`, () => {
+      expect(isWildCardMatch(hostname, domain)).to.equal(result);
+    });
   });
 });

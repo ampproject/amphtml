@@ -293,8 +293,7 @@ export class LinkerManager {
           return true;
         }
         // Allow wildcard subdomain matching.
-        if (domain.indexOf('*') !== -1 &&
-            this.isWildCardMatch_(hostname, domain)) {
+        if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
           return true;
         }
       }
@@ -318,20 +317,6 @@ export class LinkerManager {
       return false;
     }
     return true;
-  }
-
-  /**
-   * Allows specified wildcard matching of domains.
-   * Example:
-   *    `*.foo.com` matches `amp.foo.com`
-   *    `*.foo.com*` matches `amp.foo.com.uk`
-   * @param {string} hostname
-   * @param {string} domain
-   */
-  isWildCardMatch_(hostname, domain) {
-    const escaped = regexEscape(domain);
-    const regex = escaped.replace(/\*/g, '.*');
-    return new RegExp('^' + regex + '$').test(hostname);
   }
 
   /**
@@ -455,4 +440,20 @@ function getBaseDomain(domain) {
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
+}
+
+/**
+   * Allows specified wildcard matching of domains.
+   * Example:
+   *    `*.foo.com` matches `amp.foo.com`
+   *    `*.foo.com*` matches `amp.foo.com.uk`
+   * @param {string} hostname
+   * @param {string} domain
+   * @return {boolean}
+   * @visibleForTesting
+   */
+export function isWildCardMatch(hostname, domain) {
+  const escaped = regexEscape(domain);
+  const regex = escaped.replace(/\*/g, '.*');
+  return new RegExp('^' + regex + '$').test(hostname);
 }
