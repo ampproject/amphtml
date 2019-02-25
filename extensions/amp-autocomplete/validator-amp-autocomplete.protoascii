@@ -56,16 +56,14 @@ tags: {  # <amp-autocomplete>
     supported_layouts: CONTAINER
   }
   mandatory_ancestor: "FORM"
-  child_tags: {
-    mandatory_min_num_child_tags: 1
-    child_tag_name_oneof: "INPUT"
-    child_tag_name_oneof: "SCRIPT"
-  }
   reference_points: {
     tag_spec_name: "amp-autocomplete > input"
+    mandatory: true
+    unique: true
   }
   reference_points: {
     tag_spec_name: "amp-autocomplete JSON"
+    unique: true
   }
 }
 tags: {  # <amp-autocomplete> > <input>
