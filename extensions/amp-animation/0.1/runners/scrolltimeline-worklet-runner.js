@@ -18,9 +18,11 @@ import {AnimationRunner} from './animation-runner';
 import {Services} from '../../../../src/services';
 import {
   assertDoesNotContainDisplay,
+  px,
   setStyles,
 } from '../../../../src/style';
 import {dev} from '../../../../src/log';
+import {getTotalDuration} from './utils';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;
@@ -32,7 +34,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
   /**
    * @param {!Window} win
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
-   * @param {?Object=} viewportData
+   * @param {!JsonObject} viewportData
    */
   constructor(win, requests, viewportData) {
     super(requests);
@@ -44,17 +46,13 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     this.players_ = [];
 
     /** @private {number} */
-    this.topRatio_ = viewportData['top-ratio'];
+    this.startScrollOffset_ = viewportData['start-scroll-offset'];
 
     /** @private {number} */
-    this.bottomRatio_ = viewportData['bottom-ratio'];
+    this.endScrollOffset_ = viewportData['end-scroll-offset'];
 
     /** @private {number} */
-    this.topMargin_ = viewportData['top-margin'];
-
-    /** @private {number} */
-    this.bottomMargin_ =
-      viewportData['bottom-margin'];
+    this.initialInViewPercent_ = viewportData['initial-inview-percent'];
   }
 
   /**
@@ -62,39 +60,35 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
   * Initializes the players but does not change the state.
    */
   init() {
+    const {documentElement} = this.win_.document;
+    const viewportService = Services.viewportForDoc(documentElement);
+    const scrollSource = viewportService.getScrollingElement();
+
+    const timeRange = getTotalDuration(this.requests_);
+    const adjustedTimeRange = (1 - this.initialInViewPercent_) * timeRange;
+    const initialElementOffset = this.initialInViewPercent_ * timeRange;
+
     this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target,
             assertDoesNotContainDisplay(request.vars));
       }
-      // TODO(nainar): This switches all animations to AnimationWorklet.
-      // Limit only to Scroll based animations for now.
       getOrAddWorkletModule(this.win_).then(() => {
-        const {documentElement} = this.win_.document;
-        const viewportService = Services.viewportForDoc(documentElement);
-
-        const scrollSource = viewportService.getScrollingElement();
-        const elementRect = request.target./*OK*/getBoundingClientRect();
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
-          timeRange: request.timing.duration,
-          startScrollOffset: `${this.topMargin_}px`,
-          endScrollOffset: `${this.bottomMargin_}px`,
-          fill: request.timing.fill,
+          startScrollOffset: `${px(this.startScrollOffset_)}`,
+          endScrollOffset: `${px(this.endScrollOffset_)}`,
+          timeRange: adjustedTimeRange,
+          fill: 'both',
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
         const player = new this.win_.WorkletAnimation(`${moduleName}`,
             [keyframeEffect],
             scrollTimeline, {
-              'time-range': request.timing.duration,
-              'start-offset': this.topMargin_,
-              'end-offset': this.bottomMargin_,
-              'top-ratio': this.topRatio_,
-              'bottom-ratio': this.bottomRatio_,
-              'element-height': elementRect.height,
+              'initial-element-offset': initialElementOffset,
             });
         player.play();
         this.players_.push(player);
@@ -140,46 +134,16 @@ function getOrAddWorkletModule(win) {
   const blob =
  `registerAnimator('${moduleName}', class {
     constructor(options = {
-      'time-range': 0,
-      'start-offset': 0,
-      'end-offset': 0,
-      'top-ratio': 0,
-      'bottom-ratio': 0,
-      'element-height': 0,
+      'current-element-offset': 0
     }) {
       console/*OK*/.info('Using animationWorklet ScrollTimeline');
-      this.timeRange = options['time-range'];
-      this.startOffset = options['start-offset'];
-      this.endOffset = options['end-offset'];
-      this.topRatio = options['top-ratio'];
-      this.bottomRatio = options['bottom-ratio'];
-      this.height = options['element-height'];
+      this.initialElementOffset_ = options['initial-element-offset'];
     }
     animate(currentTime, effect) {
       if (currentTime == NaN) {
         return;
       }
-       // This function mirrors updateVisibility_ in amp-position-observer
-      const currentScrollPos =
-      ((currentTime / this.timeRange) *
-      (this.endOffset - this.startOffset)) +
-      this.startOffset;
-      const halfViewport = (this.startOffset + this.endOffset) / 2;
-      const relativePositionTop = currentScrollPos > halfViewport;
-       const ratioToUse = relativePositionTop ?
-      this.topRatio : this.bottomRatio;
-      const offset = this.height * ratioToUse;
-      let isVisible = false;
-       if (relativePositionTop) {
-        isVisible =
-        currentScrollPos + this.height >= (this.startOffset + offset);
-      } else {
-        isVisible =
-        currentScrollPos <= (this.endOffset - offset);
-      }
-      if (isVisible) {
-        effect.localTime = currentTime;
-      }
+      effect.localTime = currentTime + this.initialElementOffset_;
     }
   });
   `;
