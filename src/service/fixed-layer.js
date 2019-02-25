@@ -1012,7 +1012,7 @@ class TransferLayerBody {
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (name === 'style' || name === 'i-amphtml-lightboxed'
+      if (name === 'style' || name === 'i-amphtml-lightbox'
           || body.hasAttribute(name)) {
         continue;
       }
