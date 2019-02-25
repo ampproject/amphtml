@@ -19,7 +19,6 @@ import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from
   '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
-import {SMARTLINKS_REWRITER_ID} from '../constants';
 import {Services} from '../../../../src/services';
 
 const helpersFactory = env => {
@@ -61,7 +60,7 @@ describes.fakeWin('amp-smartlinks',
           const smartlinkOptions = {
             'nrtv-account-name': 'thisisnotapublisher',
             'linkmate': true,
-            'exclusive-links': false,
+            'exclusive-links': true,
             'link-attribute': 'href',
             'link-selector': 'a',
           };
@@ -96,8 +95,8 @@ describes.fakeWin('amp-smartlinks',
             expect(LinkmateOptions.getConfigOptions.calledOnce).to.be.true;
             expect(ampSmartlinks.linkmateOptions_).to.deep.equal({
               nrtvSlug: 'alwaysastring',
-              linkmateEnabled: false,
-              exclusiveLinks: false,
+              linkmateEnabled: true,
+              exclusiveLinks: true,
               linkAttribute: 'href',
               linkSelector: 'a',
             });
@@ -238,7 +237,8 @@ describes.fakeWin('amp-smartlinks',
 
           expect(ampSmartlinks.linkRewriterService_.registerLinkRewriter
               .calledOnce).to.be.true;
-          expect(args[0]).to.equal(SMARTLINKS_REWRITER_ID);
+          // This is a constant value in amp-smartlinks.js
+          expect(args[0]).to.equal('amp-smartlinks');
           expect(args[1]).to.be.a('function');
           expect(args[2].linkSelector).to.equal('a');
         });

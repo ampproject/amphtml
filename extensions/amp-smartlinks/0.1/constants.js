@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/** @const {string} */
-export const SMARTLINKS_REWRITER_ID = 'amp-smartlinks';
-
 const BASE_API_URL = 'https://api.narrativ.com/api';
 /** @const @enum {string} */
 export const ENDPOINTS = {

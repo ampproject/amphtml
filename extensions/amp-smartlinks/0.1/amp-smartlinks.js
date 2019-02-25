@@ -20,11 +20,13 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 
-import {ENDPOINTS, SMARTLINKS_REWRITER_ID} from './constants';
+import {ENDPOINTS} from './constants';
 import {LinkRewriterManager} from
   '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
+
+const TAG = 'amp-smartlinks';
 
 
 export class AmpSmartlinks extends AMP.BaseElement {
@@ -173,7 +175,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     const options = {linkSelector: this.linkmateOptions_.linkSelector};
 
     return this.linkRewriterService_.registerLinkRewriter(
-        SMARTLINKS_REWRITER_ID,
+        TAG,
         anchorList => {
           return this.linkmate_.runLinkmate(anchorList);
         },
