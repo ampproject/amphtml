@@ -264,18 +264,14 @@ class AnimationRunner {
     this.playback_(PlaybackActivity.FINISH);
   }
 
-  /**
-   * Pauses the animation.
-   */
+  /** Pauses the animation. */
   pause() {
     if (this.runner_) {
       devAssert(this.runner_).pause();
     }
   }
 
-  /**
-   * Resumes the animation.
-   */
+  /** Resumes the animation. */
   resume() {
     if (this.runner_) {
       devAssert(this.runner_).resume();
