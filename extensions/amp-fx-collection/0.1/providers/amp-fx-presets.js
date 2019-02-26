@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {FxType} from '../fx-type';
 import {computedStyle, setStyles} from '../../../../src/style';
 import {devAssert, userAssert} from '../../../../src/log';
 
 export const Presets = {
-  'parallax': {
+  [FxType.PARALLAX]: {
     userAsserts(element) {
       const factorValue = userAssert(
           element.getAttribute('data-parallax-factor'),
@@ -53,7 +54,7 @@ export const Presets = {
             `translateY(${fxElement.getOffset().toFixed(0)}px)`});
     },
   },
-  'fly-in-bottom': {
+  [FxType.FLY_IN_BOTTOM]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -103,7 +104,7 @@ export const Presets = {
       });
     },
   },
-  'fly-in-left': {
+  [FxType.FLY_IN_LEFT]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -151,7 +152,7 @@ export const Presets = {
       });
     },
   },
-  'fly-in-right': {
+  [FxType.FLY_IN_RIGHT]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -199,7 +200,7 @@ export const Presets = {
       });
     },
   },
-  'fly-in-top': {
+  [FxType.FLY_IN_TOP]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -249,7 +250,7 @@ export const Presets = {
       });
     },
   },
-  'fade-in': {
+  [FxType.FADE_IN]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       if (!marginStart) {
@@ -278,7 +279,7 @@ export const Presets = {
       });
     },
   },
-  'fade-in-scroll': {
+  [FxType.FADE_IN_SCROLL]: {
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
       const marginEnd = parseFloat(element.getAttribute('data-margin-end'));
