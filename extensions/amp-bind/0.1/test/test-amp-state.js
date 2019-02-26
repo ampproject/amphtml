@@ -20,7 +20,7 @@ import {Services} from '../../../../src/services';
 
 describes.realWin('AmpState', {
   amp: {
-    runtimeOn: true,
+    runtimeOn: false,
     extensions: ['amp-bind:0.1'],
   },
 }, env => {
@@ -44,7 +44,9 @@ describes.realWin('AmpState', {
 
   beforeEach(() => {
     ({win, sandbox} = env);
+
     viewer = Services.viewerForDoc(win.document);
+
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisiblePromiseResolve = resolve;
     });
@@ -65,7 +67,6 @@ describes.realWin('AmpState', {
     element.build();
 
     // IMPORTANT: No CORS fetch should happen until viewer is visible.
-    expect(ampState.fetchAndUpdate_).to.not.have.been.called;
     expect(ampState.fetch_).to.not.have.been.called;
     expect(ampState.updateState_).to.not.have.been.called;
 
@@ -94,6 +95,7 @@ describes.realWin('AmpState', {
     sandbox.spy(ampState, 'registerAction');
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
+
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
       return ampState.executeAction({
@@ -107,20 +109,13 @@ describes.realWin('AmpState', {
   });
 
   it('should parse its child script', () => {
-    element.innerHTML = '<script type="application/json">' +
-        '{"foo": "bar"}</script>';
+    element.innerHTML =
+        '<script type="application/json">{"foo": "bar"}</script>';
     element.build();
 
-    // IMPORTANT: No parsing should happen until viewer is visible.
     expect(ampState.fetchAndUpdate_).to.not.have.been.called;
     expect(ampState.fetch_).to.not.have.been.called;
-    expect(ampState.updateState_).to.not.have.been.called;
-
-    whenFirstVisiblePromiseResolve();
-    return whenFirstVisiblePromise.then(() => {
-      expect(ampState.fetchAndUpdate_).to.not.have.been.called;
-      expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
-    });
+    expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
   });
 
   it('should parse child and fetch `src` if both provided', () => {
@@ -129,10 +124,8 @@ describes.realWin('AmpState', {
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
 
-    // IMPORTANT: No fetching or parsing should happen until viewer is visible.
-    expect(ampState.fetchAndUpdate_).to.not.have.been.called;
+    // IMPORTANT: No CORS fetch should happen until viewer is visible.
     expect(ampState.fetch_).to.not.have.been.called;
-    expect(ampState.updateState_).to.not.have.been.called;
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
@@ -145,23 +138,33 @@ describes.realWin('AmpState', {
   });
 
   it('should fetch json if `src` is mutated', () => {
+    sandbox.stub(viewer, 'hasBeenVisible').returns(false);
+
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
 
     // IMPORTANT: No CORS fetch should happen until viewer is visible.
-    const hasBeenVisibleStub = sandbox.stub(viewer, 'hasBeenVisible');
-    hasBeenVisibleStub.returns(false);
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
+    expect(ampState.fetch_).to.not.have.been.called;
+
     allowConsoleError(() => {
       element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
     });
-    expect(ampState.fetchAndUpdate_).to.not.have.been.called;
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
     expect(ampState.fetch_).to.not.have.been.called;
 
-    hasBeenVisibleStub.returns(true);
+    viewer.hasBeenVisible.returns(true);
     element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
-    expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ false);
-    return ampState.fetch_().then(() => {
-      expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
-    });
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledTwice;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    whenFirstVisiblePromiseResolve();
+    return whenFirstVisiblePromise
+        .then(() => ampState.fetch_())
+        .then(() => {
+          expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
+        });
   });
 });

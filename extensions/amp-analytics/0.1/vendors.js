@@ -96,6 +96,7 @@ import {
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
+import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
 
 /**
  * @const {!JsonObject}
@@ -127,6 +128,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'canonicalPath': 'CANONICAL_PATH',
       'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
+      'consentState': 'CONSENT_STATE',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
       'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
@@ -229,6 +231,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'quantcast': QUANTCAST_CONFIG,
   'retargetly': RETARGETLY_CONFIG,
   'rakam': RAKAM_CONFIG,
+  'reppublika': REPPUBLIKA_CONFIG,
   'segment': SEGMENT_CONFIG,
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,
