@@ -140,7 +140,9 @@ AMP ships with a local proxy for testing production AMP documents with the local
 
 For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
-You can access it with the local JS at
+You can access it with the local JS by using the form in
+[`http://localhost:8000`](http://localhost:8000) or by accessing the proxy URL
+directly:
 
 `http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
@@ -327,9 +329,9 @@ If you are only testing a single file, you can use `gulp firebase --file=path/to
 
 ## End-to-End Tests
 
-You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon. 
+You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
 
-Run all tests with: 
+Run all tests with:
 ```
 gulp e2e
 ```
