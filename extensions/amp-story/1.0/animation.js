@@ -265,18 +265,21 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * Pauses the animation.
    */
   pause() {
-    this.runner_.pause();
+    if (this.runner_) {
+      devAssert(this.runner_).pause();
+    }
   }
 
   /**
    * Resumes the animation.
    */
   resume() {
-    this.runner_.resume();
+    if (this.runner_) {
+      devAssert(this.runner_).resume();
+    }
   }
 
   /**
