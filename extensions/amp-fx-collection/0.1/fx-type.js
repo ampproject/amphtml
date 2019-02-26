@@ -133,7 +133,7 @@ export const FxBindings = {
   },
   [FxType.PARALLAX]: {
     observes: FxObservesSignal.POSITION,
-    translates: {y: true, x: false},
+    translates: {y: true},
   },
 };
 
