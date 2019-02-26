@@ -947,6 +947,10 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'torimochi': {
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
