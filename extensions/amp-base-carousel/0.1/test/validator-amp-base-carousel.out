@@ -156,6 +156,5 @@ amp-base-carousel/0.1/test/validator-amp-base-carousel.html:114:4 The attribute 
 amp-base-carousel/0.1/test/validator-amp-base-carousel.html:127:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px)true, false'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |    </section>
-|    
 |  </body>
 |  </html>
