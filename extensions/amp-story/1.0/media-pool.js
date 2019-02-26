@@ -30,15 +30,13 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
-import {
-  VideoServiceSignals,
-} from '../../../src/service/video-service-interface';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {userInteractedWith} from '../../../src/video-interface';
 
 
 /** @const @enum {string} */
@@ -864,9 +862,7 @@ export class MediaPool {
 
     const blessPromises = [];
 
-    (this.ampElementsToBless_ || []).forEach(ampEl => {
-      ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
-    });
+    (this.ampElementsToBless_ || []).forEach(userInteractedWith);
 
     this.ampElementsToBless_ = null; // GC
 
@@ -874,13 +870,11 @@ export class MediaPool {
       blessPromises.push(this.bless_(mediaEl));
     });
 
-    return Promise.all(blessPromises)
-        .then(() => {
-          this.blessed_ = true;
-        }).catch(reason => {
-          dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
-              reason);
-        });
+    return Promise.all(blessPromises).then(() => {
+      this.blessed_ = true;
+    }, reason => {
+      dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
+    });
   }
 
 

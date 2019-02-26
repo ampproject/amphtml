@@ -89,6 +89,7 @@ describes.repeated('amp-list', {
       ssrTemplateHelper = {
         isSupported: () => false,
         fetchAndRenderTemplate: () => Promise.resolve(),
+        renderTemplate: sandbox.stub(),
         verifySsrResponse: () => Promise.resolve(),
       };
 
@@ -146,7 +147,7 @@ describes.repeated('amp-list', {
       } else if (opts.maxItems > 0) {
         itemsToRender = fetched[opts.expr].slice(0, opts.maxItems);
       }
-      templates.findAndRenderTemplateArray
+      ssrTemplateHelper.renderTemplate
           .withArgs(element, itemsToRender)
           .returns(Promise.resolve(rendered));
 
@@ -258,6 +259,14 @@ describes.repeated('amp-list', {
             type: AmpEvents.DOM_UPDATE,
             bubbles: true,
           });
+        });
+      });
+
+      it('should resize with viewport', () => {
+        const resize = sandbox.spy(list, 'attemptToFit_');
+        list.layoutCallback().then(() => {
+          list.viewport_.resize_();
+          expect(resize).to.have.been.called;
         });
       });
 
@@ -406,7 +415,7 @@ describes.repeated('amp-list', {
 
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
-          templates.findAndRenderTemplateArray
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -425,7 +434,7 @@ describes.repeated('amp-list', {
           const newFetched = [{title: 'Title2'}];
           const newItemElement = doc.createElement('div');
           newItemElement.setAttribute('i-amphtml-key', '2');
-          templates.findAndRenderTemplateArray
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, newFetched)
               .returns(Promise.resolve([newItemElement]));
           yield list.mutatedAttributesCallback({src: newFetched});
@@ -456,21 +465,24 @@ describes.repeated('amp-list', {
 
           listMock.expects('toggleLoading').withExactArgs(false).once();
 
-          return expect(list.layoutCallback()).to.eventually.be.rejected;
+          return expect(list.layoutCallback()).to.eventually.be
+              .rejectedWith(/Expected response with format/);
         });
 
         it('should delegate template rendering to viewer', function*() {
+          const rendered = doc.createElement('p');
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
               .returns(Promise.resolve({html: '<p>foo</p>'}));
-          sandbox.spy(list, 'updateBindings_');
-
+          ssrTemplateHelper.renderTemplate
+              .returns(Promise.resolve('<p>foo</p>'));
+          sandbox.stub(list, 'updateBindings_')
+              .returns(Promise.resolve([rendered]));
 
           // Expects mutate/measure and hiding of loading/placeholder
           // indicators.
           expectRender();
 
-          const rendered = doc.createElement('p');
-          templates.findAndSetHtmlForTemplate
+          ssrTemplateHelper.renderTemplate
               .withArgs(element, '<p>foo</p>')
               .returns(Promise.resolve(rendered));
 
@@ -513,7 +525,7 @@ describes.repeated('amp-list', {
         it('should hide fallback element on fetch success', () => {
           // Stub fetch and render to succeed.
           listMock.expects('fetch_').returns(Promise.resolve([])).once();
-          templates.findAndRenderTemplateArray.returns(Promise.resolve([]));
+          templates.findAndRenderTemplate.returns(Promise.resolve([]));
           // Act as if a fallback is already displayed.
           sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
 

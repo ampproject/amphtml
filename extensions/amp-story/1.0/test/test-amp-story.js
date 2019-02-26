@@ -187,19 +187,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should not prerender/load the share menu on desktop', () => {
-    createPages(story.element, 2);
-
-    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-
-    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildShareMenuStub).to.not.have.been.called;
-        });
-  });
-
   it('should return a valid page index', () => {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
@@ -1454,6 +1441,47 @@ describes.realWin('amp-story', {
                     new MouseEvent('click', {clientX: 0}));
 
                 expect(story.activePage_.element.id).to.equal('cover');
+              });
+        });
+
+    it('should correctly mark goToPage pages are distance 1', () => {
+      createPages(
+          story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.element.setAttribute('id', 'story');
+
+            const actionButton = createElementWithAttributes(
+                win.document,
+                'button',
+                {'id': 'actionButton',
+                  'on': 'tap:story.goToPage(id=page-2)'});
+
+            story.element.querySelector('#cover').appendChild(actionButton);
+
+            const distanceGraph = story.getPagesByDistance_();
+            expect(distanceGraph[1].includes('page-2')).to.be.true;
+          });
+    });
+
+    it('should correctly mark previous pages in the stack as distance 1',
+        () => {
+          createPages(
+              story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+          return story.layoutCallback()
+              .then(() => {
+                story.getPageById('cover')
+                    .element.setAttribute('advance-to', 'page-3');
+
+                story.activePage_.element.dispatchEvent(
+                    new MouseEvent('click', {clientX: 200}));
+
+                const distanceGraph = story.getPagesByDistance_();
+                expect(distanceGraph[1].includes('cover')).to.be.true;
+
               });
         });
   });

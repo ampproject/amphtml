@@ -17,15 +17,16 @@
 import {simulateKeyboardInteraction} from './utils';
 
 const config = describe.configure().retryOnSaucelabs().ifChrome();
-config.run('amp-inputmask', () => {
+config.skip('amp-inputmask', () => {
+  const {testServerPort} = window.ampTestRuntimeConfig;
+
   describes.integration('attributes', {
     body: `
-    <form method="post" action-xhr="http://localhost:8081/form/post" target="_blank">
+    <form method="post" action-xhr="http://localhost:${testServerPort}/form/post" target="_blank">
       <input name="birthday" mask="date-mm-dd-yyyy" value="02/29">
     </form>
   `,
     extensions: ['amp-form', 'amp-inputmask'],
-    experiments: ['amp-inputmask'],
   }, env => {
     let win, doc;
 

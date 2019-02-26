@@ -1226,11 +1226,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
     });
 
-    it('should signal size-changed when size changed', () => {
+    it('should dispatch custom event size-changed when size changed', () => {
       const element = new ElementClass();
+      const spyDispatchEvent = sandbox.spy(element, 'dispatchCustomEvent');
+
       element.changeSize();
-      expect(element.signals().get(CommonSignals.CHANGE_SIZE_END)).to.be.ok;
-      return element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END);
+
+      expect(spyDispatchEvent).to.be.calledWith(AmpEvents.SIZE_CHANGED);
     });
 
     describe('unlayoutCallback', () => {
