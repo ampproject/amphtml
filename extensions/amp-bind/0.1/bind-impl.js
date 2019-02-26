@@ -186,15 +186,11 @@ export class Bind {
           return this.initialize_(root);
         });
 
-    /** @private {?Node} */
-    this.rootNode_ = null;
-
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
-    this.signals_.whenSignal('READY').then(() => this.onReady_());
 
     // Install debug tools.
     const g = self.AMP;
@@ -234,7 +230,6 @@ export class Bind {
     dev().info(TAG, 'state:', this.state_);
 
     if (opt_skipEval) {
-      this.checkReadiness_();
       return Promise.resolve();
     }
 
@@ -454,8 +449,6 @@ export class Bind {
    * @private
    */
   initialize_(root) {
-    this.rootNode_ = root;
-
     // Disallow URL property bindings in AMP4EMAIL.
     const allowUrlProperties = !this.isAmp4Email_();
     this.validator_ = new BindValidator(allowUrlProperties);
@@ -475,25 +468,23 @@ export class Bind {
       if (getMode().development) {
         return this.evaluate_().then(results => this.verify_(results));
       }
-    }).then(() => this.checkReadiness_());
+    }).then(() => this.checkReadiness_(root));
   }
 
   /**
    * Bind is "ready" when its initialization completes _and_ all <amp-state>
    * elements' local data is parsed and processed (not remote data).
+   * @param {!Node} root
    * @private
    */
-  checkReadiness_() {
-    if (!this.rootNode_) {
-      return;
+  checkReadiness_(root) {
+    const ampStates = root.querySelectorAll('AMP-STATE');
+    if (ampStates.length > 0) {
+      const whenBuilt = toArray(ampStates).map(el => el.whenBuilt());
+      Promise.all(whenBuilt).then(() => this.onReady_());
+    } else {
+      this.onReady_();
     }
-    const unbuilt =
-        this.rootNode_.querySelectorAll('AMP-STATE.i-amphtml-notbuilt');
-    if (unbuilt.length > 0) {
-      return;
-    }
-    // Use a signal to ensure that onReady_() is only invoked once.
-    this.initializePromise_.then(() => this.signals_.signal('READY'));
   }
 
   /**
