@@ -15,7 +15,7 @@
  */
 
 
-describes.endtoend('AMP list load-more', {
+describes.endtoend('AMP list load-more=manual', {
 }, async env => {
   const pageWidth = 800;
   const pageHeight = 600;
