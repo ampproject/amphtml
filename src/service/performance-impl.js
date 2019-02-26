@@ -237,7 +237,7 @@ export class Performance {
     try {
       observer.observe({entryTypes: entryTypesToObserve});
     } catch(err) {
-      console.warn(err);
+      console/*OK*/.warn(err);
     }
   }
 
