@@ -39,7 +39,10 @@ tags: {  # <amp-state> (json)
   spec_name: "amp-bind extension .json script"
   requires_extension: "amp-bind"
   mandatory_parent: "AMP-STATE"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -65,10 +68,6 @@ tags: {  # <amp-state>
     name: "credentials"
   }
   attrs: {
-    name: "id"
-    mandatory: true
-  }
-  attrs: {
     name: "overridable"
   }
   attrs: {
@@ -79,6 +78,7 @@ tags: {  # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
@@ -98,11 +98,8 @@ tags: {  # <amp-state>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attr_lists: "mandatory-id-attr"
   attr_lists: "optional-src-amp4email"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
@@ -122,10 +119,6 @@ tags: { # <amp-state>
     value: "amp-viewer-auth-token-via-post"
   }
   attrs: {
-    name: "id"
-    mandatory: true
-  }
-  attrs: {
     name: "overridable"
   }
   attrs: {
@@ -136,6 +129,7 @@ tags: { # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
@@ -155,9 +149,6 @@ tags: {  # <amp-bind-macro>
     name: "expression"
     mandatory: true
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }

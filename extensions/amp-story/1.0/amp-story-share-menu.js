@@ -237,9 +237,9 @@ export class ShareMenu {
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP_FULLBLEED ?
-        this.element_.setAttribute('desktop-fullbleed', '') :
-        this.element_.removeAttribute('desktop-fullbleed');
+      uiState !== UIType.MOBILE ?
+        this.element_.setAttribute('desktop', '') :
+        this.element_.removeAttribute('desktop');
     });
   }
 

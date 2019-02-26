@@ -63,6 +63,10 @@ amp-story {
   touch-action: manipulation !important;
 }
 
+html.i-amphtml-story-standalone {
+  font-size: calc(2 * var(--i-amphtml-story-vmax, 8px));
+}
+
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
   font-size: calc(2 * var(--i-amphtml-story-vh, 8px));
@@ -77,28 +81,28 @@ html.i-amphtml-story-standalone body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
-amp-story p,
-amp-story h4 {
+p,
+h4 {
   font-size: 1rem;
 }
 
-amp-story h1 {
+h1 {
   font-size: 2rem;
 }
 
-amp-story h2 {
+h2 {
   font-size: 1.5rem;
 }
 
-amp-story h3 {
+h3 {
   font-size: 1.17rem;
 }
 
-amp-story h5 {
+h5 {
   font-size: 0.83rem;
 }
 
-amp-story h6 {
+h6 {
   font-size: 0.67rem;
 }
 
@@ -178,17 +182,16 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-story amp-sidebar[side][open] {
-  background-color: #ffffff !important;
+.i-amphtml-story-sidebar[open] {
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-sidebar[side][open]{
+[desktop] .i-amphtml-story-sidebar[open] {
   max-width: 320px !important;
 }
 
-amp-story amp-sidebar[side] {
+.i-amphtml-story-sidebar {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
@@ -260,15 +263,17 @@ amp-story-page[distance="2"] {
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
-  z-index: 100001 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  visibility: visible;
+  z-index: 100003 !important;
+  transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-opacity-mask[hidden] {
   opacity: 0 !important;
   pointer-events: none !important;
   display: block !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) reverse !important;
+  visibility: hidden;
+  transition: visibility 0.2s, opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 .i-amphtml-sidebar-mask {
@@ -318,6 +323,11 @@ amp-story-grid-layer {
 
 amp-story-grid-layer > * {
   pointer-events: auto !important;
+}
+
+/** Ensure clicks inside anchor tags are handled by the tooltip. */
+amp-story-grid-layer a * {
+  pointer-events: none !important;
 }
 
 /** Apply click shield on embedded components on initial load. */

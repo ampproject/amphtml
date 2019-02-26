@@ -50,9 +50,9 @@ describe('A4A', function() {
         expect(queries).to.include({
           title: 'AMP TEST', // ${title},
           cid: '', // ${clientId(a)}
-          adNavTiming: '0', // ${adNavTiming(requestStart,requestStart)}
-          adNavType: '0', // ${adNavType}
-          adRedirectCount: '0', // ${adRedirectCount}
+          navTiming: '0', // ${navTiming(requestStart,requestStart)}
+          navType: '0', // ${navType}
+          navRedirectCount: '0', // ${navRedirectCount}
         });
         expect(queries['ampdocUrl']).to.contain('http://localhost:9876/amp4test/compose-doc?');
         expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');

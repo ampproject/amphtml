@@ -20,8 +20,8 @@ import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {
-  ancestorElementsByTag,
   childElementByTag,
+  closestAncestorElementBySelector,
   removeChildren,
 } from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
@@ -211,7 +211,7 @@ export class AmpAdCustom extends AMP.BaseElement {
 
       // Get the parent body of this amp-ad element. It could be the body of
       // the main document, or it could be an enclosing iframe.
-      const body = ancestorElementsByTag(this.element, 'BODY')[0];
+      const body = closestAncestorElementBySelector(this.element, 'BODY');
       const elements = body.querySelectorAll('amp-ad[type=custom]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];

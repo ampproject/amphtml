@@ -18,7 +18,7 @@ import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  dereferenceExprsInArgs,
+  dereferenceArgsVariables,
   parseActionMap,
 } from '../../src/service/action-impl';
 import {
@@ -30,7 +30,9 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
+import {htmlFor} from '../../src/static-template';
 import {setParentWindow} from '../../src/service';
+import {whenCalled} from '../../testing/test-helper.js';
 
 
 /**
@@ -320,45 +322,55 @@ describe('ActionService parseAction', () => {
 
   it('should return null for undefined references in dereferenced arg', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceExprsInArgs(a.args, null)).to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {})).to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: null}))
+    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {})).to.deep.equal({key1: null});
+    expect(dereferenceArgsVariables(a.args, {foo: null}))
         .to.deep.equal({key1: null});
   });
 
   it('should return null for non-primitives in dereferenced args', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: undefined}}))
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: undefined}}))
         .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: {}}}))
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: {}}}))
         .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: []}}))
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: []}}))
         .to.deep.equal({key1: null});
-    expect(dereferenceExprsInArgs(a.args, {foo: {bar: () => {}}}))
+    expect(dereferenceArgsVariables(a.args, {foo: {bar: () => {}}}))
         .to.deep.equal({key1: null});
+  });
+
+  it('should support event data and opt_args', () => {
+    const a = parseAction('e:t.m(key1=foo,key2=x)');
+    const event = createCustomEvent(window, 'MyEvent');
+    expect(dereferenceArgsVariables(a.args, event, {x: 'bar'}))
+        .to.deep.equal({key1: 'foo', key2: 'bar'});
   });
 
   it('evaluated args should be proto-less objects', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceExprsInArgs(a.args, null).__proto__).to.be.undefined;
-    expect(dereferenceExprsInArgs(a.args, null).constructor).to.be.undefined;
+    expect(dereferenceArgsVariables(a.args, null).__proto__).to.be.undefined;
+    expect(dereferenceArgsVariables(a.args, null).constructor).to.be.undefined;
   });
 
   it('should dereference arg expressions', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceExprsInArgs(a.args, null)).to.deep.equal({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, null))
+        .to.deep.equal({key1: 'foo'});
   });
 
   it('should dereference arg expressions with an event without data', () => {
     const a = parseAction('e:t.m(key1=foo)');
     const event = createCustomEvent(window, 'MyEvent');
-    expect(dereferenceExprsInArgs(a.args, event)).to.deep.equal({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, {event}))
+        .to.deep.equal({key1: 'foo'});
   });
 
   it('should dereference arg expressions with an event with data', () => {
     const a = parseAction('e:t.m(key1=event.foo)');
     const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
-    expect(dereferenceExprsInArgs(a.args, event)).to.deep.equal({key1: 'bar'});
+    expect(dereferenceArgsVariables(a.args, event))
+        .to.deep.equal({key1: 'bar'});
   });
 
   it('should parse empty to null', () => {
@@ -642,11 +654,61 @@ describe('Action hasAction', () => {
 
 });
 
+describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
+  let action;
+  let html;
+
+  beforeEach(() => {
+    html = htmlFor(env.win.document);
+    action = new ActionService(env.ampdoc, env.win.document);
+
+    // Insert element for valid actions to be resolved.
+    env.win.document.body.appendChild(html`<div id="valid-target"></div>`);
+  });
+
+  it('returns true if the target element exists (single)', () => {
+    const element = html`<div on="event1: valid-target"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns true if the target element exists (action up the tree)', () => {
+    const wrapper = html`<div on="event1: valid-target"></div>`;
+    const child = html`<div></div>`;
+    wrapper.appendChild(child);
+    expect(action.hasResolvableAction(child, 'event1')).to.equal(true);
+  });
+
+  it('returns true if the target element exists (one amongst many)', () => {
+    const element =
+      html`<div on="event1: i-dont-exist, valid-target, i-dont-exist-either">
+      </div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns false if the target element does not exist (one)', () => {
+    const element = html`<div on="event1: i-do-not-exist"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(false);
+  });
+
+  it('returns false if the target element does not exist (multiple)', () => {
+    const element =
+      html`<div on="event1: i-do-not-exist, i-dont-exist-either"></div>`;
+    expect(action.hasResolvableAction(element, 'event1')).to.equal(false);
+  });
+
+  it('returns false if target element does not have the target action', () => {
+    const element = html`<div on="event1: valid-target"></div>`;
+    expect(action.hasResolvableAction(element, 'event2')).to.equal(false);
+  });
+
+});
+
 
 describe('Action method', () => {
   let sandbox;
   let action;
   let getDefaultActionAlias;
+  let id;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
@@ -656,7 +718,7 @@ describe('Action method', () => {
     onEnqueue = sandbox.spy();
     getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
-    const id = ('E' + Math.random()).replace('.', '');
+    id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
     parent = document.createElement('parent');
     child = document.createElement('child');
@@ -672,7 +734,6 @@ describe('Action method', () => {
     document.body.removeChild(parent);
     sandbox.restore();
   });
-
 
   it('should invoke on the AMP element', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', /* args */ null,
@@ -734,6 +795,47 @@ describe('Action method', () => {
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
+  });
+
+  describe('macros', () => {
+    let ampActionMacro;
+
+    beforeEach(() => {
+      // A caller that references an action macro.
+      targetElement.setAttribute('on', 'tap:action-macro-id.execute(arg1=2)');
+      ampActionMacro = document.createElement('amp-action-macro');
+      ampActionMacro.setAttribute('id', id);
+      ampActionMacro.setAttribute(
+          'execute', 'action-macro-id.method(realArgName=arg1)');
+      ampActionMacro.setAttribute('arguments', 'arg1');
+      document.body.appendChild(ampActionMacro);
+    });
+
+    it('should invoke proper action', () => {
+      // Given that an amp action macro is triggered.
+      const invoke_ = sandbox.stub(action, 'invoke_');
+      sandbox.stub(action.root_, 'getElementById')
+          .withArgs('action-macro-id').returns(ampActionMacro);
+      action.trigger(ampActionMacro, 'tap', null, ActionTrust.HIGH,
+          /* opt_args */ {arg1: 'realArgValue'});
+
+      return whenCalled(invoke_).then(() => {
+        expect(action.invoke_).to.have.been.calledOnce;
+        const invocation = action.invoke_.getCall(0).args[0];
+        const {actionEventType, args, method, node, source, caller, event,
+          tagOrTarget, trust} = invocation;
+        expect(node).to.equal(ampActionMacro);
+        expect(caller).to.equal(ampActionMacro);
+        expect(event).to.be.null;
+        expect(method).to.equal('method');
+        expect(actionEventType).to.equal('tap');
+        expect(args).to.deep.equal({realArgName: 'realArgValue'});
+        expect(trust).to.equal(100);
+        expect(tagOrTarget).to.equal('AMP-ACTION-MACRO');
+        expect(actionEventType).to.equal('tap');
+        expect(source).to.equal(ampActionMacro);
+      });
+    });
   });
 });
 
