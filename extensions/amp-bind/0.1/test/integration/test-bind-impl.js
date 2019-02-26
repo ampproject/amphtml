@@ -293,16 +293,9 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('should send "bindReady" to viewer on init', () => {
-      const signals = bind.signals();
-      sandbox.spy(signals, 'signal');
-
-      expect(signals.signal).to.not.be.called;
       expect(viewer.sendMessage).to.not.be.called;
 
       return onBindReady(env, bind).then(() => {
-        expect(signals.signal).to.be.calledWith('READY');
-        return signals.whenSignal('READY');
-      }).then(() => {
         expect(viewer.sendMessage).to.be.calledOnce;
         expect(viewer.sendMessage).to.be.calledWith('bindReady');
       });
@@ -310,22 +303,16 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should not send "bindReady" until all <amp-state> are built', () => {
       const element = createElement(env, container, '', 'amp-state', true);
-      element.classList.add('i-amphtml-notbuilt');
-
-      const signals = bind.signals();
-      sandbox.spy(signals, 'signal');
-
-      expect(signals.signal).to.not.be.called;
-      expect(viewer.sendMessage).to.not.be.called;
+      let buildAmpState;
+      const builtPromise = new Promise(resolve => {
+        buildAmpState = resolve;
+      });
+      element.whenBuilt = () => builtPromise;
 
       return onBindReady(env, bind).then(() => {
-        expect(signals.signal).to.not.be.called;
-
-        // Simulate <amp-state> buildCallback().
-        element.classList.remove('i-amphtml-notbuilt');
-        bind.setState({}, /* opt_skipEval */ true);
-
-        return signals.whenSignal('READY');
+        expect(viewer.sendMessage).to.not.be.called;
+        buildAmpState();
+        return element.whenBuilt();
       }).then(() => {
         expect(viewer.sendMessage).to.be.calledOnce;
         expect(viewer.sendMessage).to.be.calledWith('bindReady');
@@ -778,7 +765,9 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
+      element.whenBuilt = () => Promise.resolve();
       expect(element.getAttribute('src')).to.be.null;
+
       const promise = onBindReadyAndSetState(env, bind,
           {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
       return promise.then(() => {
