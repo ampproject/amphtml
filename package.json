@@ -158,7 +158,7 @@
     "path": "0.12.7",
     "plugin-error": "1.0.1",
     "postcss": "7.0.14",
-    "postcss-import": "12.0.0",
+    "postcss-import": "12.0.1",
     "pretty-bytes": "5.1.0",
     "pumpify": "1.5.1",
     "react": "16.7.0",
