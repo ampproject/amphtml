@@ -28,7 +28,6 @@ tags: {  # <amp-autocomplete>
   html_format: AMP
   tag_name: "AMP-AUTOCOMPLETE"
   requires_extension: "amp-autocomplete"
-  requires_extension: "amp-form"
   attrs: {
     name: "filter"
     value_casei: "substring"
