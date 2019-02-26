@@ -1037,10 +1037,8 @@ export class Viewport {
    * @param {!IndependentOffsetCallbackDef} callback
    */
   setIndependentFixedOffset(element, callback) {
-    this.fixedLayer_.addElement(element).then(() => {
-      this.fixedLayer_.setIsIndependent(element);
-      this.independentOffsets_.push({element, callback});
-    });
+    this.fixedLayer_.setIsIndependent(element);
+    this.independentOffsets_.push({element, callback});
   }
 
   /**

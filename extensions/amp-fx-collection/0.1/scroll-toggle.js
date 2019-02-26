@@ -215,7 +215,7 @@ export function assertValidScrollToggleElement(element, type, computedStyle) {
 export function getScrollTogglePosition(element, type, computedStyle) {
   const position = type.replace(/^float\-in\-([^\s]+)$/, '$1');
 
-  devAssert(position.length > 0);
+  devAssert(position == 'top' || position == 'bottom');
 
   // naming convention win:
   // position `top` should have `top: 0` and `bottom` should have `bottom: 0`

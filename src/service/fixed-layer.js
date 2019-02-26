@@ -689,7 +689,7 @@ export class FixedLayer {
       for (
         let j = 0;
         j < elements.length &&
-          (!opt_limit || this.elements_.length > opt_limit);
+          (!opt_limit || this.elements_.length <= opt_limit);
         j++) {
         this.setupElement_(elements[j], selectors[i], position,
             /* opt_forceTransfer */ undefined, opt_lightboxMode);
