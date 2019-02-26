@@ -32,9 +32,7 @@ let PositionObserverEntryDef;
 /** @typedef {function(this:./fx-provider.FxElement, ?PositionObserverEntryDef)} */
 let FxUpdateDef;
 
-/**
- * @typedef {{userAsserts: function(!Element):*, update: !FxUpdateDef}}
- */
+/** @typedef {{userAsserts: function(!Element):*, update: !FxUpdateDef}} */
 let FxPresetDef;
 
 /**
