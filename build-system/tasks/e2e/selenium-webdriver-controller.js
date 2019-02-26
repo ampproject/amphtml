@@ -18,7 +18,6 @@ const fs = require('fs');
 const {By, Condition, Key} = require('selenium-webdriver');
 const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
 const {expect} = require('chai');
-const {queryXpath} = require('./driver/query-xpath');
 
 const ELEMENT_WAIT_TIMEOUT = 5000;
 
@@ -153,10 +152,13 @@ class SeleniumWebDriverController {
   async findElementXPath(xpath) {
     await this.maybeInstallXpath_();
 
-    const webElement = await this.driver.wait(new Condition('', async() => {
+    const label = 'for element to be located ' + xpath;
+    const webElement = await this.driver.wait(new Condition(label, async() => {
       try {
         const root = await this.getRoot_();
-        const results = await this.evaluate(queryXpath, xpath, root);
+        const results = await this.evaluate((xpath, root) => {
+          return window.queryXpath(xpath, root);
+        }, xpath, root);
         return results[0];
       } catch (nse) {
         return null;
@@ -172,11 +174,13 @@ class SeleniumWebDriverController {
    */
   async findElementsXPath(xpath) {
     await this.maybeInstallXpath_();
-
-    const webElements = await this.driver.wait(new Condition('', async() => {
+    const label = 'for at least one element to be located ' + xpath;
+    const webElements = await this.driver.wait(new Condition(label, async() => {
       try {
         const root = await this.getRoot_();
-        const results = await this.evaluate(queryXpath, xpath, root);
+        const results = await this.evaluate((xpath, root) => {
+          return window.queryXpath(xpath, root);
+        }, xpath, root);
         return results;
       } catch (nse) {
         return null;
@@ -195,8 +199,11 @@ class SeleniumWebDriverController {
     }
     this.isXpathInstalled_ = true;
 
-    const script = fs.readFileSync('third_party/wgxpath/wgxpath.js', 'utf8');
-    await this.driver.executeScript(script);
+    const scripts = await Promise.all([
+      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+    ]);
+    await this.driver.executeScript(scripts.join('\n\n'));
   }
 
   /**
