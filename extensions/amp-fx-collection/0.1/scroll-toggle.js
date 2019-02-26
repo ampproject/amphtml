@@ -230,7 +230,7 @@ function assertStyleOrWarn(
 /**
  * Creates a human-readable shorthand for an element similar to a CSS selector.
  * e.g.
- * ```
+ *
  * elementShorthand(anElementWithId);
  *   // gives '#my-element-id'
  *
@@ -248,7 +248,7 @@ function assertStyleOrWarn(
  *
  * elementShorthand(detachedDivOnlyInTestsProlly);
  *   // gives 'div (detached)'
- * ```
+ *
  * @param {!Element} element
  * @param {number=} depth
  * @return {string}
