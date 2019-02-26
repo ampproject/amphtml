@@ -350,7 +350,7 @@
 	  "host": "https://t5.mindtake.com",
 	  "basePrefix": "/tag/cid/",
 	  "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
-	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gifService=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
+	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",
