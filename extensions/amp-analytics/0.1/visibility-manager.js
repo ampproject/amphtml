@@ -304,7 +304,6 @@ export class VisibilityManager {
         unlisteners.forEach(unlistener => unlistener());
       };
     }
-
     const model = new VisibilityModel(spec, calcVisibility);
     return this.listen_(model, spec, readyPromise,
         createReportPromiseFunc, callback, opt_element);

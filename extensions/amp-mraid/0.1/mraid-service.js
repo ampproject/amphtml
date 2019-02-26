@@ -20,6 +20,7 @@ import {
   VisibilityDataDef,
   VisibilityInterface,
 } from '../../../src/inabox/host-services';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 
 /**
  * Translates between the AMP HostServices APIs and MRAID.
@@ -86,9 +87,22 @@ export class MraidService {
         (exposedPercentage,
           visibleRectangle,
           unusedOcclusionRectangles) => {
-          callback({visibleRect: visibleRectangle,
-            visibleRatio: exposedPercentage});
+          // AMP handles intersectionRatio from 0.0 to 1.0
+          callback({
+            // Need to convert x/y to the AMP runtime used left/top
+            visibleRect: layoutRectLtwh(
+                visibleRectangle && visibleRectangle.x ? visibleRectangle.x : 0,
+                visibleRectangle && visibleRectangle.y ? visibleRectangle.y : 0,
+                visibleRectangle && visibleRectangle.width ?
+                  visibleRectangle.width : 0,
+                visibleRectangle && visibleRectangle.height ?
+                  visibleRectangle.height : 0
+            ),
+            // AMP handles intersectionRatio from 0.0 to 1.0
+            visibleRatio: exposedPercentage / 100,
+          });
         });
+    // TODO: Return unlistener
   }
 
   /**
