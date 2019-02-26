@@ -22,13 +22,13 @@ import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   sanitizer,
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-script';
