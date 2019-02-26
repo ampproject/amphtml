@@ -513,7 +513,7 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
-    }).on('browsers_ready', function() {
+    }).once('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
     }).on('browser_complete', function(browser) {
