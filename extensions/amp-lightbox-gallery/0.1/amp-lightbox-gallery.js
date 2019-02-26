@@ -139,6 +139,7 @@ let LightboxElementMetadataDef;
 
 /**
  * Calculates the distance between two points in two dimensions.
+ * TODO(#21104) Refactor.
  * @param {number} x1 The x coordinate of the first point.
  * @param {number} y1 The y coordinate of the first point.
  * @param {number} x2 The x coordinate of the second point.
@@ -151,6 +152,7 @@ function calculateDistance(x1, y1, x2, y2) {
 
 /**
  * A linear interpolation.
+ * TODO(#21104) Refactor.
  * @param {number} start
  * @param {number} end
  * @param {number} percentage
@@ -837,8 +839,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       });
     }).then(() => {
       return delayAfterDeferringToEventLoop(this.win, duration);
-    }).then(() => {
-      return this.mutateElement(() => {});
     });
   }
 
@@ -855,7 +855,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   adjustForSwipePosition_(
-    carousel, carouselTransform, maskOpacity, controlsOpacity) {
+    carousel, carouselTransform = '', maskOpacity = '', controlsOpacity = '') {
     setStyles(carousel, {
       transform: carouselTransform,
       transition: '',
@@ -880,7 +880,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {number} velocityY The Y velocity when the swipe was released.
    * @param {number} deltaX The x distance when the swipe was released.
    * @param {number} deltaY The y distance when the swipe was released.
-   * @return {Promise} A Promise that resolves once the release is completed,
+   * @return {!Promise} A Promise that resolves once the release is completed,
    *    either snapping back to the start or closing the carousel.
    * @private
    */
@@ -931,7 +931,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         });
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
-    this.element.setAttribute('i-amp-scale-animation', '');
+    this.element.setAttribute('i-amphtml-scale-animation', '');
     // Need to clear this so that we can control the opacity as the user drags.
     setStyle(this.controlsContainer_, 'animationFillMode', 'none');
   }
@@ -947,7 +947,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const hiddenElement = parentCarousel || sourceElement;
     hiddenElement.classList.remove('i-amphtml-ghost');
     this.preventCarouselScrollUnlistener_();
-    this.element.removeAttribute('i-amp-scale-animation');
+    this.element.removeAttribute('i-amphtml-scale-animation');
     setStyle(this.controlsContainer_, 'animationFillMode', '');
   }
 
@@ -980,7 +980,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               // TODO(sparhami) These should be called in a `mutateElement`,
               // but we are already in an animationFrame, and waiting for the
               // next one will cause the UI to flicker.
-              this.adjustForSwipePosition_(carousel, '', '', '');
+              this.adjustForSwipePosition_(carousel);
               this.endSwipeToDismiss_(sourceElement);
             });
         return;
