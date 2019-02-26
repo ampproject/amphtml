@@ -23,10 +23,8 @@ import {
   ScrollToggleDispatch,
   ScrollTogglePosition, // eslint-disable-line no-unused-vars
   assertValidScrollToggleElement,
-  getScrollToggleFloatInOffset,
   getScrollTogglePosition,
-  installScrollToggleStyles,
-  scrollToggleFloatIn,
+  installScrollToggleFloatIn,
 } from '../scroll-toggle';
 import {Services} from '../../../../src/services';
 import {
@@ -59,10 +57,6 @@ import {
  * @param {!FxType} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
-  // TODO(alanorozco): Surface FixedLayer APIs to make this work.
-  if (Services.viewerForDoc(element).isEmbedded()) {
-    return;
-  }
 
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
@@ -72,50 +66,28 @@ export function installScrollToggledFx(ampdoc, element, type) {
   const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   let shouldMutate = true;
+  let position = ScrollTogglePosition.TOP;
 
   const measure = () => {
     const computed = computedStyle(ampdoc.win, element);
-    const position = getScrollTogglePosition(element, type, computed);
-    const isValid = assertValidScrollToggleElement(element, computed);
+    const isValid = assertValidScrollToggleElement(element, type, computed);
+
+    position = devAssert(getScrollTogglePosition(element, type, computed));
 
     if (!position || !isValid) {
       shouldMutate = false;
       return;
     }
-
-    dispatch.observe(isShown => {
-      scrollToggle(element, isShown, devAssert(position));
-    });
   };
 
   const mutate = () => {
     if (!shouldMutate) {
       return;
     }
-    installScrollToggleStyles(element);
+    installScrollToggleFloatIn(dispatch, element, position);
   };
 
   resources.measureMutateElement(element, measure, mutate);
-}
-
-/**
- * @param {!Element} element
- * @param {boolean} isShown
- * @param {!ScrollTogglePosition} position
- */
-function scrollToggle(element, isShown, position) {
-  let offset = 0;
-
-  const measure = () => {
-    offset = getScrollToggleFloatInOffset(element, isShown, position);
-  };
-
-  const mutate = () => {
-    scrollToggleFloatIn(element, offset);
-  };
-
-  Services.resourcesForDoc(element)
-      .measureMutateElement(element, measure, mutate);
 }
 
 /**

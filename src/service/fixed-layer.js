@@ -21,6 +21,7 @@ import {
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
+  px,
   setImportantStyles,
   setInitialDisplay,
   setStyle,
@@ -32,7 +33,7 @@ import {
   domOrderComparator,
   matches,
 } from '../dom';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
@@ -308,35 +309,67 @@ export class FixedLayer {
   /**
    * Apply or reset transform style to fixed elements. The existing transition,
    * if any, is disabled when custom transform is supplied.
-   * @param {?string} transform
+   * @param {string=} opt_transform
+   * @param {!Element=} opt_element
    */
-  transformMutate(transform) {
+  transformMutate(opt_transform, opt_element) {
+    // Apply transform style to all fixed elements, unless specified.
+    // Ignores `independent` elements unless specified.
     // Unfortunately, we can't do anything with sticky elements here. Updating
     // `top` in animation frames causes reflow on all platforms and we can't
     // determine whether an element is currently docked to apply transform.
-    if (transform) {
-      // Apply transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyle(e.element, 'transition', 'none');
-          if (e.transform && e.transform != 'none') {
-            setStyle(e.element, 'transform', e.transform + ' ' + transform);
-          } else {
-            setStyle(e.element, 'transform', transform);
-          }
-        }
+    this.elements_.forEach(({
+      top,
+      fixedNow,
+      element,
+      transform,
+      independent,
+    }) => {
+      if (!fixedNow || (!top && !independent)) {
+        return;
+      }
+      if (independent && !opt_element) {
+        return;
+      }
+      if (opt_element && opt_element != element) {
+        return;
+      }
+      const combinedTransform =
+        opt_transform && transform && transform != 'none' ?
+          `${transform} ${opt_transform}` :
+          opt_transform || '';
+      setStyles(element, {
+        transform: combinedTransform,
+        transition: '',
       });
-    } else {
-      // Reset transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyles(e.element, {
-            transform: '',
-            transition: '',
-          });
-        }
-      });
+    });
+  }
+
+  /**
+   * Specifies that an element is "independent", that is, it responds to
+   * `paddingTop` changes with its own set of offset rules.
+   *
+   * Offset definition is brokered through the viewport service.
+   * @param {!Element} element
+   */
+  setIsIndependent(element) {
+    devAssert(this.getFe_(element, 'fixed')).independent = true;
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} position 'sticky' or 'fixed'
+   * @return {?ElementDef}
+   * @private
+   */
+  getFe_(element, position) {
+    for (let i = 0; i < this.elements_.length; i++) {
+      const fe = this.elements_[i];
+      if (fe.element == element && fe.position == position) {
+        return fe;
+      }
     }
+    return null;
   }
 
   /**
@@ -450,11 +483,14 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          setImportantStyles(elements[i].element, {
-            top: '',
-            bottom: '-9999vh',
-            transition: 'none',
-          });
+          const fe = elements[i];
+          if (!fe.independent) {
+            setImportantStyles(fe.element, {
+              top: '',
+              bottom: '-9999vh',
+              transition: 'none',
+            });
+          }
         }
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
@@ -464,7 +500,10 @@ export class FixedLayer {
         }
         // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
+          const fe = elements[i];
+          if (!fe.independent) {
+            setStyle(fe.element, 'bottom', '');
+          }
         }
 
         for (let i = 0; i < elements.length; i++) {
@@ -565,7 +604,7 @@ export class FixedLayer {
           // make the transition active.
           setStyle(fe.element, 'transition', '');
 
-          if (feState) {
+          if (feState && !fe.independent) {
             this.mutateElement_(fe, i, feState);
           }
         }
@@ -573,6 +612,27 @@ export class FixedLayer {
     }, {}).catch(error => {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
+    });
+  }
+
+  /**
+   * Updates the `top` of an element with independently managed offset.
+   * See `setIsIndependent()`.
+   * @param {!Element} element
+   * @param {number} top
+   * @param {string} position
+   */
+  updateIndependent(element, top, position) {
+    devAssert(position == 'fixed');
+
+    const fe = this.getFe_(element, position);
+
+    devAssert(fe.independent);
+
+    fe.top = px(top);
+
+    return this.vsync_.mutatePromise(() => {
+      setStyle(element, 'top', fe.top);
     });
   }
 
@@ -586,8 +646,7 @@ export class FixedLayer {
    * @param {boolean=} opt_lightboxMode
    * @private
    */
-  trySetupSelectorsNoInline(root, opt_lightboxMode
-  ) {
+  trySetupSelectorsNoInline(root, opt_lightboxMode) {
     try {
       this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {
@@ -604,23 +663,35 @@ export class FixedLayer {
    * @private
    */
   setupSelectors_(root, opt_lightboxMode) {
+    const fixedLimit = 10;
+    this.setupSelectorsByType_(
+        root, this.fixedSelectors_, 'fixed', opt_lightboxMode, fixedLimit);
+
+    this.setupSelectorsByType_(
+        root, this.stickySelectors_, 'sticky', opt_lightboxMode);
+  }
+
+  /**
+   * @param {!Node} root
+   * @param {!Array<string>} selectors
+   * @param {string} position 'fixed' or 'sticky'
+   * @param {boolean=} opt_lightboxMode
+   * @param {number=} opt_limit
+   * @private
+   */
+  setupSelectorsByType_(
+    root, selectors, position, opt_lightboxMode, opt_limit) {
+
+    devAssert(position == 'fixed' || position == 'sticky');
+
     for (let i = 0; i < this.fixedSelectors_.length; i++) {
-      const fixedSelector = this.fixedSelectors_[i];
-      const elements = root.querySelectorAll(fixedSelector);
-      for (let j = 0; j < elements.length; j++) {
-        if (this.elements_.length > 10) {
-          // We shouldn't have too many of `fixed` elements.
-          break;
-        }
-        this.setupElement_(elements[j], fixedSelector, 'fixed',
-            /* opt_forceTransfer */ undefined, opt_lightboxMode);
-      }
-    }
-    for (let i = 0; i < this.stickySelectors_.length; i++) {
-      const stickySelector = this.stickySelectors_[i];
-      const elements = root.querySelectorAll(stickySelector);
-      for (let j = 0; j < elements.length; j++) {
-        this.setupElement_(elements[j], stickySelector, 'sticky',
+      const elements = root.querySelectorAll(selectors[i]);
+      for (
+        let j = 0;
+        j < elements.length &&
+          (!opt_limit || this.elements_.length > opt_limit);
+        j++) {
+        this.setupElement_(elements[j], selectors[i], position,
             /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
     }
@@ -672,14 +743,7 @@ export class FixedLayer {
       return;
     }
 
-    let fe = null;
-    for (let i = 0; i < this.elements_.length; i++) {
-      const el = this.elements_[i];
-      if (el.element == element && el.position == position) {
-        fe = el;
-        break;
-      }
-    }
+    let fe = this.getFe_(element, position);
     const isFixed = position == 'fixed';
     if (fe) {
       if (!fe.selectors.includes(selector)) {
@@ -859,6 +923,7 @@ export class FixedLayer {
  *   transform: (string|undefined),
  *   forceTransfer: (boolean|undefined),
  *   lightboxed: (boolean|undefined),
+ *   independent: (boolean|undefined),
  * }}
  */
 let ElementDef;

@@ -45,11 +45,14 @@ export class ScrollToggleDispatch {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private @const {!Observable<boolean>} */
-    this.observable_ = new Observable();
-
     /** @private @const {function()} */
     this.initOnce_ = once(() => this.init_());
+
+    /** @private {?Observable<boolean>} */
+    this.observable_ = new Observable();
+
+    /** @private {?UnlistenDef} */
+    this.unlistener_ = null;
 
     /**
      * The last scroll position at which the header was shown or hidden.
@@ -62,6 +65,9 @@ export class ScrollToggleDispatch {
 
     /** @private {boolean} */
     this.isShown_ = true;
+
+    /** @private {boolean} */
+    this.isEnabled_ = true;
   }
 
   /** @param {function(boolean)} handler Takes whether the element is shown. */
@@ -73,7 +79,10 @@ export class ScrollToggleDispatch {
   /** @private */
   init_() {
     const viewport = Services.viewportForDoc(this.ampdoc_);
-    viewport.onScroll(() => {
+    this.unlistener_ = viewport.onScroll(() => {
+      if (!this.isEnabled_) {
+        return;
+      }
       this.onScroll_(viewport.getScrollTop());
     });
   }
@@ -126,13 +135,33 @@ export class ScrollToggleDispatch {
    * @private
    */
   toggle_(isShown) {
+    if (!this.isEnabled_) {
+      return;
+    }
     if (this.isShown_ == isShown) {
       return;
     }
     this.isShown_ = isShown;
-    this.observable_.fire(isShown);
+    devAssert(this.observable_).fire(isShown);
+  }
+
+  /**
+   * This is final.
+   */
+  disable() {
+    if (!this.isEnabled_) {
+      return;
+    }
+    if (this.unlistener_) {
+      this.unlistener_();
+    }
+    this.isEnabled_ = false;
+    this.observable_ = null; // GC
+    this.unlistener_ = null; // GC
   }
 }
+
+const withAmpFxType = type => `with amp-fx=${type}`;
 
 /**
  * MUST be done inside mutate phase.
@@ -164,16 +193,17 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
   return offset;
 }
 
-
 /**
  * @param {!Element} element
+ * @param {string} type
  * @param {!Object<string, string>} computedStyle
  * @return {boolean}
  */
-export function assertValidScrollToggleElement(element, computedStyle) {
+export function assertValidScrollToggleElement(element, type, computedStyle) {
+  const suffix = withAmpFxType(type);
   return (
-    assertStyleOrWarn(computedStyle, 'overflow', 'hidden', element) &&
-    assertStyleOrWarn(computedStyle, 'position', 'fixed', element));
+    assertStyleOrWarn(computedStyle, 'overflow', 'hidden', element, suffix) &&
+    assertStyleOrWarn(computedStyle, 'position', 'fixed', element, suffix));
 }
 
 /**
@@ -190,7 +220,7 @@ export function getScrollTogglePosition(element, type, computedStyle) {
   // naming convention win:
   // position `top` should have `top: 0` and `bottom` should have `bottom: 0`
   if (!assertStyleOrWarn(
-      computedStyle, position, px(0), element, `amp-fx=${type}`)) {
+      computedStyle, position, px(0), element, withAmpFxType(type))) {
     return null;
   }
 
@@ -206,6 +236,84 @@ export function installScrollToggleStyles(element) {
 }
 
 /**
+ * @param {!Element} element
+ * @param {boolean} isShown
+ * @param {!ScrollTogglePosition} position
+ */
+function scrollToggle(element, isShown, position) {
+  let offset = 0;
+
+  const measure = () => {
+    offset = getScrollToggleFloatInOffset(element, isShown, position);
+  };
+
+  const mutate = () => {
+    scrollToggleFloatIn(element, offset);
+  };
+
+  Services.resourcesForDoc(element)
+      .measureMutateElement(element, measure, mutate);
+}
+
+/**
+ * MUST be done inside mutate phase.
+ * @param {!ScrollToggleDispatch} dispatch
+ * @param {!Element} element
+ * @param {!ScrollTogglePosition} position
+ */
+export function installScrollToggleFloatIn(dispatch, element, position) {
+  installScrollToggleStyles(element);
+
+  const viewport = Services.viewportForDoc(element);
+
+  if (viewport.getPaddingTop() <= 0) {
+    dispatch.observe(isShown => {
+      scrollToggle(element, isShown, position);
+    });
+  }
+
+  viewport.setIndependentFixedOffset(element, (prevTop, top) => {
+    return calculateFloatInViewportOffset(
+        dispatch, element, position, prevTop, top);
+  });
+}
+
+/**
+ * MUST be done inside measure phase.
+ * @param {!ScrollToggleDispatch} dispatch
+ * @param {!Element} element
+ * @param {!ScrollTogglePosition} position
+ * @param {number} prevTop
+ * @param {number} top
+ * @return {!../../../src/service/viewport/viewport-impl.IndependentOffsetDef}
+ */
+function calculateFloatInViewportOffset(
+  dispatch, element, position, prevTop, top) {
+
+  const isShown = top > 0;
+
+  // Disable scroll-dispatch logic to depend on the viewport service brokering
+  // padding top changes.
+  if (isShown) {
+    dispatch.disable();
+  }
+
+  const {height} = element./*OK*/getBoundingClientRect();
+
+  if (position == ScrollTogglePosition.TOP) {
+    if (isShown) {
+      return {top, animOffset: -(height + top)};
+    }
+    return {top: -height, animOffset: prevTop + height};
+  }
+
+  if (isShown) {
+    return {bottom: 0, animOffset: height};
+  }
+  return {bottom: -height, animOffset: -height};
+}
+
+/**
  * @param {!Object<string, string>} computed
  * @param {string} prop
  * @param {string} expected
@@ -213,70 +321,13 @@ export function installScrollToggleStyles(element) {
  * @param {string=} opt_suffix
  * @return {boolean}
  */
-function assertStyleOrWarn(
-  computed, prop, expected, element, opt_suffix) {
-
+function assertStyleOrWarn(computed, prop, expected, element, opt_suffix) {
   if (computed[prop] == expected) {
     return true;
   }
-  const suffix = opt_suffix ? ` ${opt_suffix}` : '';
-  const shorthand = elementShorthand(element);
+  const elementSuffix = opt_suffix ? ` ${opt_suffix}` : '';
   user().warn(TAG,
-      `FX element must have \`${prop}: ${expected}\` [${shorthand}]${suffix}.`);
+      'Element%s must have `%s: %s` style. %s',
+      elementSuffix, prop, expected, element);
   return false;
-}
-
-
-/**
- * Creates a human-readable shorthand for an element similar to a CSS selector.
- * e.g.
- *
- * elementShorthand(anElementWithId);
- *   // gives '#my-element-id'
- *
- * elementShorthand(divWithClassInAnotherDiv);
- *   // gives 'div > div.my-class'
- *
- * elementShorthand(divWithMultipleClassesInAnotherDiv);
- *   // gives 'div > div.my-class...'
- *
- * elementShorthand(firstChildH1InHeaderNoClassesOrIds);
- *   // gives 'header > h1:first-child'
- *
- * elementShorthand(onlyDivInBodyWithouIdOrClass);
- *   // gives 'body:last-child > div'
- *
- * elementShorthand(detachedDivOnlyInTestsProlly);
- *   // gives 'div (detached)'
- *
- * @param {!Element} element
- * @param {number=} depth
- * @return {string}
- */
-function elementShorthand(element, depth = 0) {
-  const {tagName, id, classList, parentElement} = element;
-  if (id) {
-    return `#${id}`;
-  }
-  const tagNameLower = tagName.toLowerCase();
-  let suffix = tagNameLower;
-  if (classList.length > 0) {
-    const ellipsis = classList.length > 1 ? '...' : '';
-    suffix += `.${classList[0]}${ellipsis}`;
-  }
-  if (!parentElement) {
-    return `${suffix} (detached)`;
-  }
-  const {firstElementChild, lastElementChild} = parentElement;
-  if (!(element == firstElementChild && element == lastElementChild)) {
-    if (element == firstElementChild) {
-      suffix += ':first-child';
-    } else if (element == lastElementChild) {
-      suffix += ':last-child';
-    }
-  }
-  if (depth > 0) {
-    return suffix;
-  }
-  return `${elementShorthand(parentElement, depth + 1)} > ${suffix}`;
 }
