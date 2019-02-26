@@ -173,7 +173,7 @@
     "rocambole": "0.7.0",
     "rollup": "1.2.3",
     "rollup-plugin-babel": "4.3.2",
-    "rollup-plugin-commonjs": "9.2.0",
+    "rollup-plugin-commonjs": "9.2.1",
     "rollup-plugin-node-resolve": "4.0.0",
     "sinon": "7.2.4",
     "sinon-chai": "3.3.0",
