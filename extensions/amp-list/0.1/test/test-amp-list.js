@@ -585,6 +585,34 @@ describes.repeated('amp-list', {
         });
       });
 
+      it('should fetch with viewer auth token if \'cross-origin='
+          + 'amp-viewer-auth-token-via-post\' attribute is present', () => {
+        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+            Promise.resolve({
+              getIdTokenPromise: (() => Promise.resolve('idToken')),
+            }));
+        element.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
+        const fetched = {items: DEFAULT_ITEMS};
+        const foo = doc.createElement('div');
+        const rendered = [foo];
+        const opts = DEFAULT_LIST_OPTS;
+
+        listMock.expects('fetch_')
+          .withExactArgs(!!opts.refresh, 'idToken')
+          .returns(Promise.resolve(fetched))
+          .atLeast(1);
+
+        // Stub the rendering of the template.
+        let itemsToRender = fetched[opts.expr];
+        ssrTemplateHelper.renderTemplate
+            .withArgs(element, itemsToRender)
+            .returns(Promise.resolve(rendered));
+
+        expectRender();
+
+        return list.layoutCallback().then(() => Promise.resolve());
+      });
+
       it('should reset if `reset-on-refresh` is set (new URL)', () => {
         element.setAttribute('reset-on-refresh', '');
         const foo = doc.createElement('div');

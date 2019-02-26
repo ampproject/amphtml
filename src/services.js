@@ -579,6 +579,17 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
+   */
+  static viewerAssistanceForDocOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
+      (getElementServiceIfAvailable(win, 'amp-viewer-assistance',
+          'amp-viewer-assistance', true)));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewer-impl.Viewer}
    */

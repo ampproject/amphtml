@@ -165,6 +165,9 @@ export class AmpForm {
         TAG, this.viewer_, this.templates_);
 
     /** @const @private {string} */
+    this.crossOrigin_ = this.form_.getAttribute('cross-origin');
+
+    /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
 
     /** @const @private {string} */
@@ -244,7 +247,7 @@ export class AmpForm {
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
    * @param {!Array<string>=} opt_fieldBlacklist
-   * @return {!FetchRequestDef}
+   * @return {!Promise<!FetchRequestDef>}
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
@@ -275,7 +278,8 @@ export class AmpForm {
         body.append(key, opt_extraFields[key]);
       }
     }
-    return {
+
+    const request = {
       xhrUrl,
       fetchOpt: dict({
         'body': body,
@@ -284,6 +288,27 @@ export class AmpForm {
         'headers': dict({'Accept': 'application/json'}),
       }),
     };
+
+    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
+    // the viewer will make a remote xhr POST request with an auth token in the
+    // request body. Requires amp-viewer-assistance extension for auth token.
+    if (this.crossOrigin_ &&
+        this.crossOrigin_.includes('amp-viewer-auth-token-via-post')) {
+      userAssert(request.fetchOpt.method == 'POST',
+          'Cannot attach auth token with GET request.');
+      return Services.viewerAssistanceForDocOrNull(this.win_)
+          .then(viewerAssistance => {
+            userAssert(viewerAssistance,
+                'Viewer Assistance service cannot be found.');
+            return viewerAssistance.getIdTokenPromise();
+          })
+          .then(token => {
+            body.append('ampViewerAuthToken', token);
+            return request;
+          });
+    }
+
+    return Promise.resolve(request);
   }
 
   /**
@@ -657,12 +682,12 @@ export class AmpForm {
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-        .then(() => {
-          this.actions_.trigger(
-              this.form_, FormEvents.SUBMIT, /* event */ null, trust);
-        }).then(() => {
-          request = this.requestForFormFetch(
-              dev().assertString(this.xhrAction_), this.method_);
+        .then(() => this.actions_.trigger(
+            this.form_, FormEvents.SUBMIT, /* event */ null, trust))
+        .then(() => this.requestForFormFetch(
+            dev().assertString(this.xhrAction_), this.method_))
+        .then(formRequest => {
+          request = formRequest;
           request.fetchOpt = setupInit(request.fetchOpt);
           request.fetchOpt = setupAMPCors(
               this.win_, request.xhrUrl, request.fetchOpt);
@@ -812,9 +837,9 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const request = this.requestForFormFetch(
-        url, method, opt_extraFields, opt_fieldBlacklist);
-    return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
+    return this.requestForFormFetch(
+        url, method, opt_extraFields, opt_fieldBlacklist)
+        .then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
   /**

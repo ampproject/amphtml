@@ -17,6 +17,7 @@
 import '../amp-bind';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 describes.realWin('AmpState', {
   amp: {
@@ -26,6 +27,7 @@ describes.realWin('AmpState', {
 }, env => {
   let win;
   let sandbox;
+  let fetchStub;
 
   let element;
   let ampState;
@@ -57,8 +59,9 @@ describes.realWin('AmpState', {
     ampState = element.implementation_;
 
     sandbox.spy(ampState, 'fetchAndUpdate_');
+    sandbox.spy(ampState, 'prepareAndSendFetch_');
     sandbox.stub(ampState, 'updateState_');
-    sandbox.stub(ampState, 'fetch_')
+    fetchStub = sandbox.stub(ampState, 'fetch_')
         .returns(Promise.resolve({baz: 'qux'}));
   });
 
@@ -164,6 +167,48 @@ describes.realWin('AmpState', {
     return whenFirstVisiblePromise
         .then(() => ampState.fetch_())
         .then(() => {
+          expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
+        });
+  });
+
+  it('should fetch with auth token if `cross-origin` attribute exists'
+      + ' with `amp-viewer-auth-token-via-post`', () => {
+    const viewerAssistanceMock = mockServiceForDoc(
+        env.sandbox,
+        env.ampdoc,
+        'amp-viewer-assistance',
+        [ 'getIdTokenPromise', ]);
+    viewerAssistanceMock.getIdTokenPromise.returns(Promise.resolve('idToken'));
+
+    sandbox.stub(viewer, 'hasBeenVisible').returns(false);
+
+    element.setAttribute('src', 'https://foo.com/bar?baz=1');
+    element.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
+    element.build();
+
+    // IMPORTANT: No CORS fetch should happen until viewer is visible.
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    allowConsoleError(() => {
+      element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+    });
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    viewer.hasBeenVisible.returns(true);
+    element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledTwice;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    whenFirstVisiblePromiseResolve();
+    return whenFirstVisiblePromise
+        .then(() => ampState.prepareAndSendFetch_({win}, element))
+        .then(() => {
+          expect(fetchStub).to.have.been.called;
+          expect(fetchStub.firstCall.args.slice(-1).pop()).to.be.equal('idToken');
           expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
         });
   });

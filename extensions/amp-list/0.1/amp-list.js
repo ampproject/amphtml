@@ -403,7 +403,7 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      fetch = this.fetch_(opt_refresh).then(data => {
+      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
         let items = data;
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
@@ -903,15 +903,15 @@ export class AmpList extends AMP.BaseElement {
         });
   }
 
-
   /**
-   * @param {boolean} opt_refresh
-   * @return {!Promise<(!Array<JsonObject>|!JsonObject)>}
+   * @param {boolean=} opt_refresh
+   * @param {string=} token
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(opt_refresh = false) {
-    return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, '.', this.getPolicy_(), opt_refresh);
+  fetch_(opt_refresh = false, token = undefined) {
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, '.',
+        this.getPolicy_(), opt_refresh, token);
   }
 
   /**
@@ -941,6 +941,29 @@ export class AmpList extends AMP.BaseElement {
           }
         });
 
+  }
+
+  /**
+   * @param {boolean=} opt_refresh
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
+   */
+  prepareAndSendFetch_(opt_refresh = false) {
+    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
+    // the viewer will make a remote xhr POST request with an auth token in the
+    // request body. Requires amp-viewer-assistance extension for auth token.
+    const crossOriginElement = this.element.getAttribute('cross-origin');
+    if (crossOriginElement
+        && crossOriginElement.includes('amp-viewer-auth-token-via-post')) {
+      return Services.viewerAssistanceForDocOrNull(this.win)
+          .then(viewerAssistance => {
+            devAssert(viewerAssistance,
+                'Viewer Assistance service can not be found');
+            return viewerAssistance.getIdTokenPromise();
+          })
+          .then(token => this.fetch_(opt_refresh, token));
+    }
+    return this.fetch_(opt_refresh);
   }
 
   /**

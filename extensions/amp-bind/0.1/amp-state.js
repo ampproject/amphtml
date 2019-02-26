@@ -122,11 +122,26 @@ export class AmpState extends AMP.BaseElement {
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {!UrlReplacementPolicy} policy
+   * @param {boolean=} opt_refresh
+   * @param {string=} token
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
+   */
+  fetch_(ampdoc, element, policy, opt_refresh, token = undefined) {
+    return batchFetchJsonFor(ampdoc, element, /* opt_expr */ undefined, policy,
+        opt_refresh, token);
+  }
+
+  /**
+   * Transforms and prepares the fetch request.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    */
-  fetch_(ampdoc, element, isInit, opt_refresh) {
+  prepareAndSendFetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
@@ -135,14 +150,30 @@ export class AmpState extends AMP.BaseElement {
       (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(
-        ampdoc, element, /* opt_expr */ undefined, policy, opt_refresh);
+
+    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
+    // the viewer will make a remote xhr POST request with an auth token in the
+    // request body. Requires amp-viewer-assistance extension for auth token.
+    const crossOriginElement = element.getAttribute('cross-origin');
+    if (crossOriginElement
+        && crossOriginElement.includes('amp-viewer-auth-token-via-post')) {
+      return Services.viewerAssistanceForDocOrNull(ampdoc.win)
+          .then(viewerAssistance => {
+            devAssert(viewerAssistance,
+                'Viewer Assistance service can not be found');
+            return viewerAssistance.getIdTokenPromise();
+          })
+          .then(token => this.fetch_(
+              ampdoc, element, policy, opt_refresh, token));
+    }
+
+    return this.fetch_(ampdoc, element, policy, opt_refresh);
   }
 
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<undefined>}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
@@ -150,7 +181,8 @@ export class AmpState extends AMP.BaseElement {
     // Don't fetch in prerender mode.
     const viewer = Services.viewerForDoc(this.element);
     return viewer.whenFirstVisible()
-        .then(() => this.fetch_(ampdoc, this.element, isInit, opt_refresh))
+        .then(() => this.prepareAndSendFetch_(
+            ampdoc, this.element, isInit, opt_refresh))
         .then(json => this.updateState_(json, isInit));
   }
 
