@@ -298,8 +298,12 @@ a.underlined::before {
   margin: 20px 0 0;
   font-size: 12px;
   text-align: right;
+  color: #888;
 }
-.form-info a {
+.form-info > span + a {
+  margin-left: 8px;
+}
+.form-info > a {
   font-weight: bold;
 }
 header {
