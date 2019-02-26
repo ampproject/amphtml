@@ -82,7 +82,7 @@ describes.endtoend('AMP carousel mixed length slides', {
       const slides = await getSlides(controller);
 
       await controller.scrollBy(el, {left: 10});
-      await expect(controller.getElementRect(slides[0])).to.include({x: -10});
+      await controller.waitForElementRect(slides[0], {x: -10});
     });
   });
 
@@ -101,14 +101,16 @@ describes.endtoend('AMP carousel mixed length slides', {
       const slides = await getSlides(controller);
 
       // First slide has width 75%, and viewport is 600 pixels wide
-      await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
-      await expect(controller.getElementRect(slides[0])).to.include({
+      await controller.waitForElementProperty(slides[0], 'offsetWidth',
+          slideOneWidth);
+      await controller.waitForElementRect(slides[0], {
         x: (pageWidth - slideOneWidth) / 2,
       });
       await assertSpacerWidth(0, slideOneWidth);
       // Second slide has width 50%, and viewport is 400 pixels wide
-      await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
-      await expect(controller.getElementRect(slides[1])).to.include({
+      await controller.waitForElementProperty(slides[1], 'offsetWidth',
+          slideTwoWidth);
+      await controller.waitForElementRect(slides[1], {
         x: slideOneWidth + (pageWidth - slideOneWidth) / 2,
       });
       await assertSpacerWidth(1, slideTwoWidth);
@@ -120,7 +122,7 @@ describes.endtoend('AMP carousel mixed length slides', {
       const scrollAmount = 1 + (slideOneWidth + slideTwoWidth) / 2;
 
       await controller.scrollBy(el, {left: scrollAmount});
-      await expect(controller.getElementRect(slides[1])).to.include({
+      await controller.waitForElementRect(slides[1], {
         x: (pageWidth - slideTwoWidth) / 2,
       });
     });

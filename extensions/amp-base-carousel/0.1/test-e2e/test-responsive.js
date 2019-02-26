@@ -42,8 +42,7 @@ describes.endtoend('AMP Carousel responsive attributes', {
       width: 1000,
       height: 600,
     });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/responsive.amp.html');
+    await controller.refresh();
   });
 
   it('should layout correctly initially', async() => {
@@ -90,7 +89,7 @@ describes.endtoend('AMP Carousel responsive attributes', {
     const firstSlide = await getSlide(controller, 0);
 
     // 3 slides width width 1000 = 333 width per slide.
-    await expect(controller.getElementRect(firstSlide)).to.include({
+    await controller.waitForElementRect(firstSlide, {
       width: 333,
       x: 0,
     });
@@ -98,7 +97,7 @@ describes.endtoend('AMP Carousel responsive attributes', {
     const btn = await controller.findElement('#responsive-5-4');
     await controller.click(btn);
     // 5 slides width width 1000 = 200 width per slide
-    await expect(controller.getElementRect(firstSlide)).to.include({
+    await controller.waitForElementRect(firstSlide, {
       width: 200,
       x: 0,
     });
@@ -108,7 +107,7 @@ describes.endtoend('AMP Carousel responsive attributes', {
       height: 600,
     });
     // 4 slides width width 600 = 150 width per slide.
-    await expect(controller.getElementRect(firstSlide)).to.include({
+    await controller.waitForElementRect(firstSlide, {
       width: 150,
       x: 0,
     });
