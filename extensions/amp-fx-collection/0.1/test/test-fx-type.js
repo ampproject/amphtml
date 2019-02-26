@@ -17,11 +17,13 @@
 import {
   FxBindings,
   FxType,
+  getFxTypes,
   isValidTypeCombination,
+  sanitizeFxTypes,
   validFxTypes,
 } from '../fx-type';
 
-describes.fakeWin('amp-fx types', {amp: false}, unusedEnv => {
+describes.fakeWin('amp-fx types', {amp: false}, env => {
 
   function expectNoFalseDefinitions(objOrDef, id) {
     const msg =
@@ -65,7 +67,7 @@ describes.fakeWin('amp-fx types', {amp: false}, unusedEnv => {
 
   });
 
-  describe(' isValidTypeCombination', () => {
+  describe('isValidTypeCombination', () => {
     it('allows', () => {
       expect(isValidTypeCombination('parallax', 'fade-in')).to.be.true;
       expect(isValidTypeCombination('fly-in-top', 'fade-in')).to.be.true;
@@ -89,6 +91,130 @@ describes.fakeWin('amp-fx types', {amp: false}, unusedEnv => {
       expect(isValidTypeCombination('fade-in', 'float-in-bottom')).to.be.false;
       expect(isValidTypeCombination('fly-in-left', 'float-in-bottom'))
           .to.be.false;
+    });
+  });
+
+  describe('sanitizeFxTypes', () => {
+    it('leaves valid sets as-is', () => {
+      [
+        ['parallax'],
+        ['fade-in'],
+        ['float-in-top'],
+        ['float-in-bottom'],
+        ['fly-in-left'],
+        ['parallax', 'fade-in'],
+        ['fly-in-top', 'fade-in'],
+        ['fly-in-bottom', 'fly-in-right', 'fade-in-scroll'],
+        ['fly-in-top', 'fly-in-left', 'fade-in'],
+      ].forEach(validSet => {
+        expect(sanitizeFxTypes(validSet)).to.deep.equal(validSet);
+      });
+    });
+
+    it('purges invalid fx kept by order', () => {
+      [
+        // two items, by order
+        {
+          invalid: ['parallax', 'float-in-top'],
+          sanitized: ['parallax'],
+        },
+        {
+          invalid: ['fly-in-top', 'parallax'],
+          sanitized: ['fly-in-top'],
+        },
+        // three items, by order
+        {
+          invalid: ['float-in-top', 'fly-in-top', 'fly-in-left'],
+          sanitized: ['float-in-top'],
+        },
+        {
+          invalid: ['fly-in-top', 'float-in-top', 'fly-in-left'],
+          sanitized: ['fly-in-top', 'fly-in-left'],
+        },
+        {
+          invalid: ['fly-in-top', 'fly-in-left', 'float-in-top'],
+          sanitized: ['fly-in-top', 'fly-in-left'],
+        },
+        // removes dupes
+        {
+          invalid: ['fly-in-top', 'fly-in-top', 'fly-in-top'],
+          sanitized: ['fly-in-top'],
+        },
+      ].forEach(({invalid, sanitized}) => {
+        expect(sanitizeFxTypes(invalid)).to.deep.equal(sanitized);
+      });
+    });
+  });
+
+  describe('getFxTypes', () => {
+
+    function randomWhitespaceChar() {
+      const chars = ['\n', ' ', '\t'];
+      return chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    function randomWhitespace(min = 0) {
+      const amount = Math.round(min + Math.random() * 5);
+      return Array(amount).fill(null).map(randomWhitespaceChar).join('');
+    }
+
+    function elementWithTypesRandomWhitespace(types) {
+      const element = env.win.document.createElement('div');
+      element.setAttribute('amp-fx', types.reduce(
+          (acc, type, i) => acc + randomWhitespace(Math.min(i, 1)) + type, ''));
+      return element;
+    }
+
+    it('returns valid sets as-is', () => {
+      [
+        ['parallax'],
+        ['fade-in'],
+        ['float-in-top'],
+        ['float-in-bottom'],
+        ['fly-in-left'],
+        ['parallax', 'fade-in'],
+        ['fly-in-top', 'fade-in'],
+        ['fly-in-bottom', 'fly-in-right', 'fade-in-scroll'],
+        ['fly-in-top', 'fly-in-left', 'fade-in'],
+      ].forEach(validSet => {
+        expect(getFxTypes(elementWithTypesRandomWhitespace(validSet)))
+            .to.deep.equal(validSet);
+      });
+    });
+
+    it('purges invalid fx kept by order', () => {
+      [
+        // two items, by order
+        {
+          invalid: ['parallax', 'float-in-top'],
+          sanitized: ['parallax'],
+        },
+        {
+          invalid: ['fly-in-top', 'parallax'],
+          sanitized: ['fly-in-top'],
+        },
+        // three items, by order
+        {
+          invalid: ['float-in-top', 'fly-in-top', 'fly-in-left'],
+          sanitized: ['float-in-top'],
+        },
+        {
+          invalid: ['fly-in-top', 'float-in-top', 'fly-in-left'],
+          sanitized: ['fly-in-top', 'fly-in-left'],
+        },
+        {
+          invalid: ['fly-in-top', 'fly-in-left', 'float-in-top'],
+          sanitized: ['fly-in-top', 'fly-in-left'],
+        },
+        // removes dupes
+        {
+          invalid: ['fly-in-top', 'fly-in-top', 'fly-in-top'],
+          sanitized: ['fly-in-top'],
+        },
+      ].forEach(({invalid, sanitized}) => {
+        expect(getFxTypes(elementWithTypesRandomWhitespace(invalid)))
+            .to.deep.equal(sanitized);
+      });
     });
   });
 
