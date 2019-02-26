@@ -934,13 +934,36 @@ To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story
   <amp-story-page id="cover">
     ...
   </amp-story-page>
-  <!-- `src` and `layout=display` are required. -->
+  <!-- `layout=display` is required. -->
   <amp-story-bookend src="bookendv1.json" layout=nodisplay>
   </amp-story-bookend>
 <amp-story>
 ```
 
-Next, you must create a JSON file where you can customize the bookend. The overall structure of the config looks like so:
+If you don't want to fetch the bookend config from a source, you can also specify it inline:
+
+```html
+<amp-story standalone>
+  <amp-story-page id="cover">
+    ...
+  </amp-story-page>
+  <amp-story-bookend layout=nodisplay>
+    <script type="application/json">
+      {
+        "bookendVersion": "v1.0",
+        "shareProviders": [
+          ...
+        ],
+        "components": [
+          ...
+        ]
+     }
+    </script>
+  </amp-story-bookend>
+<amp-story>
+```
+
+Next, you must fill in the JSON configuration. This is where you customize the bookend. The overall structure of the config looks like so:
 
 ```text
 {
