@@ -283,7 +283,7 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
+   * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
    */
   finishWhenReady_(runner) {
