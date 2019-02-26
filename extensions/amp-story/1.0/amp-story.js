@@ -85,7 +85,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -99,6 +98,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
@@ -497,7 +497,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
-    if (!this.activePage_) {
+    if (!this.activePage_ || !this.isStandalone_()) {
       return;
     }
 
@@ -509,7 +509,7 @@ export class AmpStory extends AMP.BaseElement {
         state.vmax = Math.max(state.vh, state.vw);
       },
       mutate: state => {
-        this.element.setAttribute('style',
+        this.win.document.documentElement.setAttribute('style',
             `--i-amphtml-story-vh: ${px(state.vh)};` +
             `--i-amphtml-story-vw: ${px(state.vw)};` +
             `--i-amphtml-story-vmin: ${px(state.vmin)};` +

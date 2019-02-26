@@ -39,7 +39,7 @@ const timedExecOrDie =
 function runSinglePassTest_() {
   timedExecOrDie('gulp clean');
   timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
+  timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
 }
@@ -82,7 +82,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

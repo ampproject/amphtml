@@ -86,7 +86,7 @@ exports.rules = [
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'extensions/amp-viz-vega/**->third_party/d3/d3.js',
-      'src/dom.js->third_party/css-escape/css-escape.js',
+      'src/css.js->third_party/css-escape/css-escape.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/timeagojs/timeago.js->' +
           'third_party/timeagojs/timeago-locales.js',

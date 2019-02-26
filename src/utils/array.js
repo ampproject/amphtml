@@ -41,23 +41,27 @@ export function areEqualOrdered(arr1, arr2) {
  *
  * @param {!Array<T>} array
  * @param {function(T, number, !Array<T>):boolean} shouldRemove
+ * @return {!Array<T>}
  * @template T
  */
 export function remove(array, shouldRemove) {
+  const removed = [];
   let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (!shouldRemove(item, i, array)) {
+    if (shouldRemove(item, i, array)) {
+      removed.push(item);
+    } else {
       if (index < i) {
         array[index] = item;
       }
       index++;
     }
   }
-
   if (index < array.length) {
     array.length = index;
   }
+  return removed;
 }
 
 /**
