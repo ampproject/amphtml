@@ -927,36 +927,33 @@ The `amp-story-bookend` is the last screen of the story. It contains related lin
   </amp-anim>
 </figure>
 
-To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attribute `layout=nodisplay`.
+You can then specify the JSON configuration in a separate file and import it through the `src` attribute, or you can place it inline.
+
+Importing the JSON configuration through the `src` attribute:
 
 ```html
 <amp-story standalone>
   <amp-story-page id="cover">
     ...
   </amp-story-page>
-  <!-- `layout=display` is required. -->
+  <!-- `layout=nodisplay` is required. -->
   <amp-story-bookend src="bookendv1.json" layout=nodisplay>
   </amp-story-bookend>
 <amp-story>
 ```
 
-If you don't want to fetch the bookend config from a source, you can also specify it inline:
+If you don't want to fetch the bookend configuration from a server, you can also specify it inline:
 
 ```html
 <amp-story standalone>
-  <amp-story-page id="cover">
-    ...
-  </amp-story-page>
+  ...
   <amp-story-bookend layout=nodisplay>
     <script type="application/json">
       {
         "bookendVersion": "v1.0",
-        "shareProviders": [
-          ...
-        ],
-        "components": [
-          ...
-        ]
+        "shareProviders": [ ... ],
+        "components": [ ... ]
      }
     </script>
   </amp-story-bookend>
