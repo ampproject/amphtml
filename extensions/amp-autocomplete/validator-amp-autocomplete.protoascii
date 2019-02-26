@@ -95,4 +95,10 @@ tags: {  # amp-autocomplete JSON
     value: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
 }
