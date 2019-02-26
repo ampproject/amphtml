@@ -157,6 +157,20 @@ In the below example, the animation is fully dependent on scroll and the `<div>`
   </div>
 ```
 
+### float-in-top, float-in-bottom
+
+The `float-in` effects slide a [`position: fixed`](https://developer.mozilla.org/en-US/docs/Web/CSS/position) element in-and-out of view as the document is scrolled up or down.
+
+An element with `amp-fx="float-in-top"` or `...bottom` must have the following CSS properties:
+
+- `position: fixed`
+- `overflow: hidden`
+- **if it's `top`**, `top: 0`
+- **if it's `bottom`**, `bottom: 0`
+
+If any of these is not set, the effect will not be applied and a warning will be
+thrown in [development mode.](https://www.ampproject.org/docs/fundamentals/validate#browser-developer-console)
+
 ### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top
 
 The `fly-in` effects allow an element's position to be translated by a specified amount once it is in the viewport.
