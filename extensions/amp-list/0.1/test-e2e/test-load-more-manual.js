@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 describes.endtoend('AMP list load-more=manual', {
 }, async env => {
   const pageWidth = 800;
@@ -43,7 +42,7 @@ describes.endtoend('AMP list load-more=manual', {
     const seeMoreButton = await controller.findElement('[load-more-button]');
 
     // Can we assert its CSS be visible and display block?
-    expect(seeMoreButton).to.not.be.null;
+    expect(seeMoreButton).to.be.ok;
 
     const visibility = await controller.getElementCssValue(seeMoreButton,
         'visibility', 'visible');
@@ -53,14 +52,14 @@ describes.endtoend('AMP list load-more=manual', {
     expect(display).to.equal('block');
 
     const loader = await controller.findElement('[load-more-loading]');
-    expect(loader).to.not.be.null;
+    expect(loader).to.be.ok;
 
     const loaderDisplay = await controller.getElementCssValue(loader,
         'display');
     expect(loaderDisplay).to.equal('none');
 
     const failedIndicator = await controller.findElement('[load-more-failed]');
-    expect(failedIndicator).to.not.be.null;
+    expect(failedIndicator).to.be.ok;
     const failedIndicatorDisplay = await controller.getElementCssValue(
         failedIndicator, 'display');
     expect(failedIndicatorDisplay).to.equal('none');
@@ -77,7 +76,7 @@ describes.endtoend('AMP list load-more=manual', {
 
     const fourthItem = await controller.findElement(
         'div.item:nth-child(4)');
-    expect(fourthItem).to.be.not.null;
+    expect(fourthItem).to.be.ok;
     listItems = await controller.findElements('.item');
     expect(listItems).to.have.length(4);
 
@@ -85,7 +84,7 @@ describes.endtoend('AMP list load-more=manual', {
 
     const sixthItem = await controller.findElement(
         'div.item:nth-child(6)');
-    expect(sixthItem).to.be.not.null;
+    expect(sixthItem).to.be.ok;
     listItems = await controller.findElements('.item');
     expect(listItems).to.have.length(6);
   });

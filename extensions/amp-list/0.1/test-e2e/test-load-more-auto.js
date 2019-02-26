@@ -42,20 +42,20 @@ describes.endtoend('AMP list load-more=auto', {
     expect(listItems).to.have.length(2);
 
     const loader = await controller.findElement('[load-more-loading]');
-    expect(loader).to.not.be.null;
+    expect(loader).to.be.ok;
 
     const loaderDisplay = await controller.getElementCssValue(loader,
         'display');
     expect(loaderDisplay).to.equal('none');
 
     const failedIndicator = await controller.findElement('[load-more-failed]');
-    expect(failedIndicator).to.not.be.null;
+    expect(failedIndicator).to.be.ok;
     const failedIndicatorDisplay = await controller.getElementCssValue(
         failedIndicator, 'display');
     expect(failedIndicatorDisplay).to.equal('none');
 
     const seeMoreButton = await controller.findElement('[load-more-button]');
-    expect(seeMoreButton).to.not.be.null;
+    expect(seeMoreButton).to.be.ok;
     const visibility = await controller.getElementCssValue(seeMoreButton,
         'visibility', 'visible');
     expect(visibility).to.equal('visible');
@@ -75,7 +75,7 @@ describes.endtoend('AMP list load-more=auto', {
 
     const fourthItem = await controller.findElement(
         'div.item:nth-child(4)');
-    expect(fourthItem).to.be.not.null;
+    expect(fourthItem).to.be.ok;
     listItems = await controller.findElements('.item');
     expect(listItems).to.have.length(4);
   });
