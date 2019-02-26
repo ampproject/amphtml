@@ -26,7 +26,7 @@ export function caaja(global, data) {
     sspCode: data['sspCode'],
   });
 
-  let url = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
+  const url = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
   loadScript(global,url);
 
 }
