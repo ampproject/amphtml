@@ -77,7 +77,7 @@ Gfycat allows many aspect ratios.
 To specify the width and height in the code, copy it from the embed URL:
 
 1. Go to [https://gfycat.com/](https://gfycat.com/)`name`, where name is the Gfycat ID.
-2. Click the embed link icon (</>).
+2. Click the embed link icon (`</>`).
 3. Copy the width and height specified in the "Fixed iFRAME" field.
 
 Example: Finding the actual width and height
