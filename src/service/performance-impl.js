@@ -113,6 +113,7 @@ export class Performance {
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
+    this.registerFirstInputDelayPolyfillListener_();
   }
 
   /**
@@ -231,6 +232,20 @@ export class Performance {
       this.flush();
     });
     observer.observe({entryTypes: entryTypesToObserve});
+  }
+
+  /**
+   * Reports the first input delay value calculated by a polyfill, if present.
+   * @see https://github.com/GoogleChromeLabs/first-input-delay
+   */
+  registerFirstInputDelayPolyfillListener_() {
+    if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
+      return;
+    }
+    this.win.perfMetrics.onFirstInputDelay((delay, evt) => {
+      this.tickDelta('fid-polyfill', delay);
+      this.flush();
+    });
   }
 
   /**

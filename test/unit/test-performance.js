@@ -892,6 +892,39 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       delete env.win.PerformanceEventTiming;
     });
   });
+
+  it('forwards first-input-delay polyfill metric', () => {
+    const previousPerfMetrics = env.win.perfMetrics;
+    // Fake window to pretend that the polyfill exists.
+    env.win.perfMetrics = env.win.perfMetrics || {};
+    const callbacks = [];
+    env.win.perfMetrics.onFirstInputDelay = env.sandbox.stub();
+    env.win.perfMetrics.onFirstInputDelay.callsFake(callback => {
+      callbacks.push(callback);
+    });
+
+    installPerformanceService(env.win);
+    const perf = Services.performanceFor(env.win);
+
+    // Send a fake TouchEvent through the polyfill.
+    const delay = 30;
+    const evt = new TouchEvent('touchstart');
+    callbacks.forEach(callback => {
+      callback(delay, evt);
+    });
+
+    expect(perf.events_.length).to.equal(1);
+    expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid-polyfill',
+            delta: 30,
+          });
+
+    // Restore previous window value.
+    if (previousPerfMetrics === 'undefined') {
+      env.win.perfMetrics = previousPerfMetrics;
+    } else {
+      delete env.win.perfMetrics;
+    }
+  });
 });
-
-
