@@ -17,7 +17,6 @@
 const fs = require('fs');
 const {By, Condition, Key, until} = require('selenium-webdriver');
 const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
-const {expect} = require('chai');
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -55,6 +54,12 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
       .then(result => result.value); // Unbox the value.
 }
 
+function hasMatchingProperties(actual, expected) {
+  return Object.keys(expected).every(key => {
+    return actual[key] === expected[key];
+  });
+}
+
 /** @implements {FunctionalTestController} */
 class SeleniumWebDriverController {
   /**
@@ -64,6 +69,9 @@ class SeleniumWebDriverController {
     this.driver = driver;
   }
 
+  logError_(e) {
+    throw new Error(e.message);
+  }
   /**
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
@@ -82,6 +90,29 @@ class SeleniumWebDriverController {
     };
   }
 
+  async waitForElementProperty(handle, property, value) {
+    value = value.toString();
+    const element = handle.getElement();
+    await this.driver.wait(async() => {
+      let actualValue = await element.getAttribute(property);
+      // certain attributes will return true or null, and
+      // others will return a string
+      //https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebElement.html#getAttribute
+      actualValue = actualValue != null ? actualValue.toString() : null;
+      return actualValue === value;
+    }, 10000, `Error waiting for element property '${property}'` +
+      ` to be ${value}`);
+  }
+
+  async waitForElementRect(handle, rect) {
+    const element = handle.getElement();
+    await this.driver.wait(() => {
+      return element.getRect().then(actualRect => {
+        return hasMatchingProperties(actualRect, rect);
+      });
+    }, 10000, `Error waiting for element rect to be ${JSON.stringify(rect)}`);
+  }
+
   /**
    * @param {string} selector
    * @return {!Promise<!ElementHandle<!WebElement>>}
@@ -90,8 +121,8 @@ class SeleniumWebDriverController {
   async findElement(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
-    const webElement = await this.driver.findElement(bySelector);
+    const webElement = await this.driver.wait(until.elementLocated(bySelector),
+        10000, 'Could not find element by css');
     return new ElementHandle(webElement, this);
   }
 
@@ -103,7 +134,8 @@ class SeleniumWebDriverController {
   async findElements(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
+    await this.driver.wait(until.elementLocated(bySelector),
+        10000, 'Coud not find elements by css');
     const webElements = await this.driver.findElements(bySelector);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
@@ -115,9 +147,8 @@ class SeleniumWebDriverController {
    */
   async findElementXPath(xpath) {
     const byXpath = By.xpath(xpath);
-
-    await this.driver.wait(until.elementLocated(byXpath));
-    const webElement = await this.driver.findElement(byXpath);
+    const webElement = await this.driver.wait(until.elementLocated(byXpath),
+        10000, 'Could not find element by XPath');
     return new ElementHandle(webElement, this);
   }
 
@@ -128,8 +159,8 @@ class SeleniumWebDriverController {
    */
   async findElementsXPath(xpath) {
     const byXpath = By.xpath(xpath);
-
-    await this.driver.wait(until.elementLocated(byXpath));
+    await this.driver.wait(until.elementLocated(byXpath),
+        10000, 'Could not find elements by XPath');
     const webElements = await this.driver.findElements(byXpath);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
@@ -286,15 +317,16 @@ class SeleniumWebDriverController {
     ]);
     const resultWidth = Number(updatedHtmlElementSizes[0]);
     const resultHeight = Number(updatedHtmlElementSizes[1]);
-    // TODO(sparhami) These are throwing errors, but are not causing the test
-    // to fail immediately,.Figure out why, we want the test to fail here
-    // instead of continuing.
-    expect(resultWidth).to.equal(
-        width,
-        'Failed to resize the window to the requested width.');
-    expect(resultHeight).to.equal(
-        height,
-        'Failed to resize the window to the requested height.');
+
+    if (resultWidth != width || resultHeight != height) {
+      this.logError_(new Error(
+          'Failed to resize window. ' +
+          `Expected: {height: ${height}, ` +
+          `width: ${width}}. ` +
+          `Actual: {height: ${resultHeight}, ` +
+          `width: ${resultWidth}}.`
+      ));
+    }
   }
 
   /**
@@ -318,6 +350,14 @@ class SeleniumWebDriverController {
    */
   async click(handle) {
     return await handle.getElement().click();
+  }
+
+  /**
+   * @return {!Promise<void>}
+   */
+  refresh() {
+    return this.driver.navigate().refresh()
+        .catch(e => {this.logError_(e);});
   }
 
   /**

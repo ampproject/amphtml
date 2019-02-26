@@ -26,14 +26,6 @@ describes.endtoend('AMP carousel max-swipe', {
   let controller;
   let ampDriver;
 
-  function prop(el, name) {
-    return controller.getElementProperty(el, name);
-  }
-
-  function rect(el) {
-    return controller.getElementRect(el);
-  }
-
   beforeEach(async() => {
     controller = env.controller;
     ampDriver = env.ampDriver;
@@ -42,6 +34,7 @@ describes.endtoend('AMP carousel max-swipe', {
         'http://localhost:8000/test/manual/amp-base-carousel/max-swipe-one.amp.html');
     await ampDriver.toggleExperiment('layers', true);
     await ampDriver.toggleExperiment('amp-base-carousel', true);
+    await controller.refresh();
 
     await controller.setWindowRect({
       width: pageWidth,
@@ -50,26 +43,21 @@ describes.endtoend('AMP carousel max-swipe', {
   });
 
   describe('looping', () => {
-    beforeEach(async() => {
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/max-swipe-one.amp.html');
-    });
-
     it('should only show one slide on each side initially', async() => {
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
 
-      await expect(prop(el, 'scrollLeft')).to.equal(pageWidth);
+      await controller.waitForElementProperty(el, 'scrollLeft', pageWidth);
       // Verify the scroll width to make sure no unexpected spacers are
       // increasing the width,
-      await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * 3);
-      await expect(rect(slides[0])).to.include({x: 0});
-      await expect(rect(slides[1])).to.include({x: pageWidth});
-      await expect(rect(slides[slides.length - 1])).to.include({
-        x: -pageWidth,
-      });
-      await expect(prop(slides[2], 'hidden')).to.equal(true);
-      await expect(prop(slides[slides.length - 2], 'hidden')).to.equal(true);
+      await controller.waitForElementProperty(el, 'scrollWidth', pageWidth * 3);
+      await controller.waitForElementRect(slides[0], {x: 0});
+      await controller.waitForElementRect(slides[1], {x: pageWidth});
+      await controller.waitForElementRect(slides[slides.length - 1],
+          {x: -pageWidth});
+      await controller.waitForElementProperty(slides[2], 'hidden', true);
+      await controller.waitForElementProperty(slides[slides.length - 2],
+          'hidden', true);
     });
 
     it('should show the correct slides after moving right', async() => {
@@ -79,37 +67,38 @@ describes.endtoend('AMP carousel max-swipe', {
       // Move right by 1 slide.
       await controller.scrollBy(el, {left: pageWidth});
       // Wait for scroll position to be reset.
-      await expect(prop(el, 'scrollLeft')).to.equal(pageWidth);
+      await controller.waitForElementProperty(el, 'scrollLeft', pageWidth);
+
       // Verify the scroll width to make sure no unexpected spacers are
       // increasing the width,
-      await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * 3);
-      await expect(rect(slides[0])).to.include({x: -pageWidth});
-      await expect(rect(slides[1])).to.include({x: 0});
-      await expect(rect(slides[2])).to.include({x: pageWidth});
-      await expect(prop(slides[slides.length - 1], 'hidden')).to.equal(true);
-      await expect(prop(slides[3], 'hidden')).to.equal(true);
+      await controller.waitForElementProperty(el, 'scrollWidth', pageWidth * 3);
+      await controller.waitForElementRect(slides[0], {x: -pageWidth});
+      await controller.waitForElementRect(slides[1], {x: 0});
+      await controller.waitForElementRect(slides[2], {x: pageWidth});
+      await controller.waitForElementProperty(slides[slides.length - 1],
+          'hidden', true);
+      await controller.waitForElementProperty(slides[3], 'hidden', true);
     });
 
     it('should show the correct slides after moving left', async() => {
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
-
       // Move left by 1 slide.
       await controller.scrollBy(el, {left: -pageWidth});
+
       // Wait for scroll position to be reset.
-      await expect(prop(el, 'scrollLeft')).to.equal(pageWidth);
+      await controller.waitForElementProperty(el, 'scrollLeft', pageWidth);
+
       // Verify the scroll width to make sure no unexpected spacers are
       // increasing the width,
-      await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * 3);
-      await expect(rect(slides[slides.length - 2])).to.include({
-        x: -pageWidth,
-      });
-      await expect(rect(slides[slides.length - 1])).to.include({
-        x: 0,
-      });
-      await expect(rect(slides[0])).to.include({x: pageWidth});
-      await expect(prop(slides[slides.length - 3], 'hidden')).to.equal(true);
-      await expect(prop(slides[1], 'hidden')).to.equal(true);
+      await controller.waitForElementProperty(el, 'scrollWidth', pageWidth * 3);
+      await controller.waitForElementRect(slides[slides.length - 2],
+          {x: -pageWidth});
+      await controller.waitForElementRect(slides[slides.length - 1], {x: 0});
+      await controller.waitForElementRect(slides[0], {x: pageWidth});
+      await controller.waitForElementProperty(slides[slides.length - 3],
+          'hidden', true);
+      await controller.waitForElementProperty(slides[1], 'hidden', true);
     });
   });
 });
