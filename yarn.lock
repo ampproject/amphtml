@@ -7,12 +7,12 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.1.2.tgz#88b034c5f2a9a41d90722885966d2d67629ce522"
   integrity sha512-B+BgrRHJLnNr8pkSfZB3aOitHmtgZSZnioV3ixym3ZAr6VDpvUw4u7tzWgHwG3X03ohHQBdau843pnQOf2oXhA==
 
-"@ampproject/worker-dom@0.2.17":
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.17.tgz#1f7ebace5645a969b1573ec637fb57c21a61d7e4"
-  integrity sha512-2pVwWl15ZFDT4Yj6/k0pIAbJ6BVnNXTbY8r/fGM7yBEs+v0+nuw5gNbjdmAqOk4IDxmcjpFK4j1ljnJX+VWnvg==
+"@ampproject/worker-dom@0.2.18":
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.18.tgz#2b9ebf912c4a9ef4c523786d4ad955c8e4c93b56"
+  integrity sha512-2Api6EDzFy9hEQcJk1AlAm9/UIZaILsDmIXHeQuPjwQtqBW/WwTem+ThB3rFWpkYfOdvLSV97GcIvjQmuDO5nQ==
   dependencies:
-    dompurify "1.0.8"
+    dompurify "1.0.10"
 
 "@ava/babel-plugin-throws-helper@^3.0.0":
   version "3.0.0"
@@ -4501,11 +4501,6 @@ dompurify@1.0.10:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.10.tgz#18d7353631c86ee25049e38fbca8c6b2c5a2af87"
   integrity sha512-huhl3DSWX5LaA7jDtnj3XQdJgWW1wYouNW7N0drGzQa4vEUSVWyeFN+Atx6HP4r5cang6oQytMom6I4yhGJj5g==
-
-dompurify@1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.8.tgz#3fa0d91fde3827d6509d83b43444da56a2796795"
-  integrity sha512-vetRFbN1SXSPfP3ClIiYnxTrXquSqakBEOoB5JESn0SVcSYzpu6ougjakpKnskGctYdlNpwf+riUHSkG7d4XUw==
 
 domutils@^1.7.0:
   version "1.7.0"
