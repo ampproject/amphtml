@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
 import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
@@ -55,7 +56,7 @@ import {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {string} type
+ * @param {!FxType} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
   // TODO(alanorozco): Surface FixedLayer APIs to make this work.
@@ -120,7 +121,7 @@ function scrollToggle(element, isShown, position) {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {string} type
+ * @param {!FxType} type
  */
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
@@ -136,9 +137,12 @@ export class FxElement {
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element The element to give a preset effect.
-   * @param {string} fxType
+   * @param {!FxType} fxType
    */
   constructor(ampdoc, element, fxType) {
+
+    /** @public @const  {!Window} */
+    this.win = ampdoc.win;
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
@@ -149,57 +153,61 @@ export class FxElement {
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(element);
 
-    /** @type {?number} */
-    this.viewportHeight = null;
+    /** @type {number} */
+    this.viewportHeight = this.viewport_.getHeight();
 
     /** @type {?number} */
     this.adjustedViewportHeight = null;
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @public @const {!Element} */
+    this.element = element;
 
-    /** @private {number} */
-    this.offset_ = 0;
+    /** @public {number} */
+    this.offset = 0;
 
-    /** @private @string */
+    /** @private @const {!FxType} */
     this.fxType_ = fxType;
 
-    /** @private @const  {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    Presets[fxType].userAsserts(element);
 
-    Presets[this.fxType_].userAsserts(element);
+    /** @public @const {number} */
+    this.factor = parseFloat(element.getAttribute('data-parallax-factor'));
 
-    /** @private {number} */
-    this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
-
-    /** @private {number} */
-    this.marginStart_ = element.hasAttribute('data-margin-start') ?
+    /** @public @const {number} */
+    this.marginStart = element.hasAttribute('data-margin-start') ?
       /** @type {number} */
       (resolvePercentageToNumber(element.getAttribute('data-margin-start'))) :
-      defaultMarginValues(this.fxType_)['start'];
+      defaultMarginValues(fxType)['start'];
 
-    /** @private {number} */
-    this.marginEnd_ = element.hasAttribute('data-margin-end') ?
+    /** @public @const {number} */
+    this.marginEnd = element.hasAttribute('data-margin-end') ?
       /** @type {number} */
       (resolvePercentageToNumber(element.getAttribute('data-margin-end'))) :
-      defaultMarginValues(this.fxType_)['end'];
+      defaultMarginValues(fxType)['end'];
 
-    /** @private {string} */
-    this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
-      element.getAttribute('data-easing') : defaultEasingValues(this.fxType_));
+    /** @public @const {string} */
+    this.easing = convertEasingKeyword(element.hasAttribute('data-easing') ?
+      element.getAttribute('data-easing') : defaultEasingValues(fxType));
 
-    /** @private {string} */
-    this.duration_ = element.hasAttribute('data-duration') ?
+    /** @public @const {string} */
+    this.duration = element.hasAttribute('data-duration') ?
       element.getAttribute('data-duration') :
-      defaultDurationValues(this.ampdoc_, this.fxType_);
+      defaultDurationValues(ampdoc, fxType);
 
-    /** @private {number} */
-    this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
+    /** @public @const {number} */
+    this.flyInDistance = element.hasAttribute('data-fly-in-distance') ?
       parseFloat(element.getAttribute('data-fly-in-distance')) :
-      defaultFlyInDistanceValues(this.ampdoc_, this.fxType_);
+      defaultFlyInDistanceValues(ampdoc, fxType);
 
-    /** @private {boolean} */
-    this.hasRepeat_ = element.hasAttribute('data-repeat');
+    /**
+     * Boolean dictating whether or not the amp-fx preset has the `repeat`
+     * attribute set. The `repeat` attribute allows the animation to be fully
+     * dependent on scroll.
+     *
+     * Applies only for `fade-in-scroll`.
+     * @public @const {boolean}
+     */
+    this.hasRepeat = element.hasAttribute('data-repeat');
 
     /** @public {boolean} */
     this.initialTrigger = false;
@@ -211,38 +219,21 @@ export class FxElement {
       this.observePositionChanges_();
     });
 
-    this.getViewportHeight_().then(viewportHeight => {
-      this.viewportHeight = viewportHeight;
-    });
-
   }
 
   /**
    * @private
    */
   observePositionChanges_() {
-    this.positionObserver_.observe(this.element_, PositionObserverFidelity.HIGH,
+    this.positionObserver_.observe(this.element, PositionObserverFidelity.HIGH,
         Presets[this.fxType_].update.bind(this)
     );
 
     this.viewport_.onResize(() => {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
         this.adjustedViewportHeight = adjustedViewportHeight;
+        this.viewportHeight = this.viewport_.getHeight();
       });
-      this.getViewportHeight_().then(viewportHeight => {
-        this.viewportHeight = viewportHeight;
-      });
-    });
-  }
-
-  /**
-   * Returns the current viewport height.
-   * @return {!Promise<number>}
-   * @private
-   */
-  getViewportHeight_() {
-    return this.resources_.measureElement(() => {
-      return this.viewport_.getHeight();
     });
   }
 
@@ -261,98 +252,12 @@ export class FxElement {
       const viewportHeight = this.viewport_.getHeight();
 
       let offsetTop = 0;
-      for (let node = this.element_; node; node = node./*OK*/offsetParent) {
+      for (let node = this.element; node; node = node./*OK*/offsetParent) {
         offsetTop += node./*OK*/offsetTop;
       }
       const aboveTheFold = (offsetTop < viewportHeight);
 
       return aboveTheFold ? offsetTop : viewportHeight;
     });
-  }
-
-  /** @return {!../../../../src/service/ampdoc-impl.AmpDoc} */
-  getAmpDoc() {
-    return this.ampdoc_;
-  }
-
-
-  /**
-   * @return {number}
-   */
-  getFactor() {
-    return this.factor_;
-  }
-
-  /**
-   * @return {string}
-   */
-  getDuration() {
-    return this.duration_;
-  }
-
-  /**
-   * @return {number}
-   */
-  getMarginStart() {
-    return this.marginStart_;
-  }
-
-  /**
-   * @return {number}
-   */
-  getMarginEnd() {
-    return this.marginEnd_;
-  }
-
-  /**
-   * @return {number}
-   */
-  getFlyInDistance() {
-    return this.flyInDistance_;
-  }
-
-  /**
-   * @return {string}
-   */
-  getEasing() {
-    return this.easing_;
-  }
-
-  /**
-   * @return {Element}
-   */
-  getElement() {
-    return this.element_;
-  }
-
-  /**
-   * @return {!../../../../src/service/resources-impl.Resources}
-   */
-  getResources() {
-    return this.resources_;
-  }
-
-  /**
-   * @return {number}
-   */
-  getOffset() {
-    return this.offset_;
-  }
-
-  /**
-   * @param {number} offset
-   */
-  setOffset(offset) {
-    this.offset_ = offset;
-  }
-
-  /**
-   * Boolean dictating whether or not the amp-fx preset has the `repeat`
-   * attribute set. The `repeat` attribute allows the animation to be fully
-   * dependent on scroll.
-   * @return {boolean}
-   */
-  hasRepeat() {
-    return this.hasRepeat_;
   }
 }

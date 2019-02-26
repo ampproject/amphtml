@@ -233,7 +233,7 @@ export function sanitizeFxTypes(types) {
         user().warn(TAG,
             '%s preset can\'t be combined with %s preset as the resulting ' +
             'animation isn\'t valid.', fxTypeA, fxTypeB);
-        types.splice(j, 1);
+        types.splice(j--, 1);
       }
     }
   }
