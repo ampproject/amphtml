@@ -39,7 +39,7 @@ describes.endtoend('AMP list load-more=auto', {
 
   it('should render correctly', async() => {
     const listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(2);
+    expect(listItems).to.have.length(2);
 
     const loader = await controller.findElement('[load-more-loading]');
     expect(loader).to.not.be.null;
@@ -68,16 +68,16 @@ describes.endtoend('AMP list load-more=auto', {
 
   it('should load more items on scroll', async() => {
     let listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(2);
+    expect(listItems).to.have.length(2);
 
     const article = await controller.findElement('article');
     await controller.scroll(article, {top: 10});
 
-    const sixthItem = await controller.findElement(
+    const fourthItem = await controller.findElement(
         'div.item:nth-child(4)');
-    expect(sixthItem).to.be.not.null;
+    expect(fourthItem).to.be.not.null;
     listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(4);
+    expect(listItems).to.have.length(4);
   });
 
 });

@@ -39,7 +39,7 @@ describes.endtoend('AMP list load-more=manual', {
 
   it('should render correctly', async() => {
     const listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(2);
+    expect(listItems).to.have.length(2);
     const seeMoreButton = await controller.findElement('[load-more-button]');
 
     // Can we assert its CSS be visible and display block?
@@ -70,7 +70,7 @@ describes.endtoend('AMP list load-more=manual', {
 
   it('should load more items on click', async() => {
     let listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(2);
+    expect(listItems).to.have.length(2);
     const seeMoreButton = await controller.findElement('[load-more-button]');
 
     controller.click(seeMoreButton);
@@ -79,7 +79,7 @@ describes.endtoend('AMP list load-more=manual', {
         'div.item:nth-child(4)');
     expect(fourthItem).to.be.not.null;
     listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(4);
+    expect(listItems).to.have.length(4);
 
     controller.click(seeMoreButton);
 
@@ -87,7 +87,7 @@ describes.endtoend('AMP list load-more=manual', {
         'div.item:nth-child(6)');
     expect(sixthItem).to.be.not.null;
     listItems = await controller.findElements('.item');
-    expect(listItems.length).to.equal(6);
+    expect(listItems).to.have.length(6);
   });
 
 
@@ -111,7 +111,5 @@ describes.endtoend('AMP list load-more=manual', {
     const loaderDisplay = await controller.getElementCssValue(loader,
         'display');
     expect(loaderDisplay).to.equal('none');
-
   });
-
 });
