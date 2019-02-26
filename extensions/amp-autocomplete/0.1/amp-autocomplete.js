@@ -49,8 +49,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
-        `Experiment ${EXPERIMENT} is not turned on.`);
     // Actually load your resource or render more expensive resources.
     return Promise.resolve();
   }
