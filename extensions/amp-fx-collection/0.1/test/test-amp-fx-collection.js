@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpFxCollection} from '../amp-fx-collection';
+import {AmpFxCollection, isCombinationValid} from '../amp-fx-collection';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('Creates the relevant fx presets correctly', {
+describes.realWin('amp-fx-collection', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-fx-collection'],
@@ -37,6 +37,33 @@ describes.realWin('Creates the relevant fx presets correctly', {
     const ampFxCollection = new AmpFxCollection(ampdoc);
     return ampFxCollection;
   }
+
+  describe('FX definitions sanity', () => {
+
+  });
+
+  describe('isCombinationValid', () => {
+    it('allows', () => {
+      expect(isCombinationValid('parallax', 'fade-in')).to.be.true;
+      expect(isCombinationValid('fly-in-top', 'fade-in')).to.be.true;
+      expect(isCombinationValid('fly-in-bottom', 'fade-in-scroll')).to.be.true;
+    });
+    it('restricts', () => {
+      // dupes
+      expect(isCombinationValid('foo', 'foo')).to.be.false;
+
+      // translating along the same axis
+      expect(isCombinationValid('parallax', 'fly-in-top')).to.be.false;
+      expect(isCombinationValid('float-in-top', 'float-in-bottom')).to.be.false;
+
+      // both change opacity
+      expect(isCombinationValid('fade-in', 'fade-in-scroll')).to.be.false;
+
+      // different signal types
+      expect(isCombinationValid('fade-in', 'float-in-bottom')).to.be.false;
+      expect(isCombinationValid('fly-in-left', 'float-in-bottom')).to.be.false;
+    });
+  });
 
   // TODO(alanorozco): Actually write tests. Like the goggles, these do nothing!
   it.skip('creates amp-fx components correctly', () => {

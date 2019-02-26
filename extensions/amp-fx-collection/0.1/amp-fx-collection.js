@@ -28,6 +28,7 @@ const TAG = 'amp-fx-collection';
 
 /**
  * Enum for list of supported visual effects.
+ * Make sure to also define each respective binding set below (FxBindings).
  * @enum {string}
  */
 const FxType = {
@@ -44,79 +45,82 @@ const FxType = {
   PARALLAX: 'parallax',
 };
 
-/** @const {!Object<!FxType, boolean>} */
-const scrollToggledFxTypes = {
-  [FxType.FLOAT_IN_BOTTOM]: true,
-  [FxType.FLOAT_IN_TOP]: true,
+/**
+ * FX observes:
+ *  - POSITION: a PositionObserver
+ *  - SCROLL_TOGGLE: a toggling mechanism on scroll similar to browser UI
+ *
+ * Different observation mechanisms have different implementations and internal
+ * APIs. See AmpFxCollection.install_().
+ * @enum {number}
+ */
+const FxObservesSignal = {
+  POSITION: 0,
+  SCROLL_TOGGLE: 1,
 };
 
 /**
- * Symmetric matrix normalized alphabetically, don't repeat mirror side.
- * Keep symmetric properties!
+ * Defines the aspects an FX is bound to.
+ *  - `observes` either POSITION or SCROLL_TOGGLE.
+ *  - `translates` the ax(i|e)s this FX translates elements on. Optional.
+ *  - `opacity` whether this FX changes opacity. Optional.
  *
- * For comparison, a full table would look like this: https://git.io/fhFvT
- *
- * If you need to update this table this may help you: https://git.io/fhdh3
- * Copy that table into a spreadsheet and add a column and row for the new
- * type in the alphabetical position. Gray out invalid/repeated cells like in
- * the example above. Add the restricted cells, and then include them here.
- *
- * e.g.
- * ```
- *  1. Initial matrix
- *
- *        A   B   D
- *    A  ///      X
- *    B  /// ///
- *    D  /// /// ///
- *
- *  2. Add "C" in its alphabetical position and its restrictions.
- *               👇
- *        A   B   C   D
- *    A  ///      X   X
- *    B  /// ///  X
- * 👉 C  /// /// ///
- *    D  /// /// /// ///
- *
- * 3. Add the example restrictions (A, C) and (B, C) to this object. The
- *    mirrored restrictions (C, A) and (C, B) DO NOT need to be included.
- *
- * You can also just sort every restriction tuple you need to add alphabetically
- * and add each unique resulting tuple here.
- * ```
- * @private @const {!Object<!FxType, !Array<!FxType>>}
+ * Two FX are compatible and therefore combinable IFF:
+ *  1. both observe the same signal
+ *  2. neither translates along the same axis
+ *  3. only one or none of them changes opacity
+ * @typedef {{
+ *  observes: !FxObservesSignal,
+ *  opacity: (boolean|undefined)
+ *  translates: ({
+ *    x: (boolean|undefined),
+ *    y: (boolean|undefined),
+ *  }|undefined),
+ * }}
  */
-const restrictedFxTypes = {
-  [FxType.FADE_IN]: [
-    FxType.FADE_IN_SCROLL,
-    // scroll-toggled is not compatible with position-bound fx
-    FxType.FLOAT_IN_BOTTOM,
-    FxType.FLOAT_IN_TOP,
-  ],
-  [FxType.FADE_IN_SCROLL]: [
-    FxType.FLOAT_IN_BOTTOM,
-    FxType.FLOAT_IN_TOP,
-  ],
-  [FxType.FLOAT_IN_BOTTOM]: [
-    FxType.FLOAT_IN_TOP,
-    // scroll-toggled is not compatible with position-bound fx
-    FxType.FLY_IN_BOTTOM,
-    FxType.FLY_IN_LEFT,
-    FxType.FLY_IN_RIGHT,
-    FxType.FLY_IN_TOP,
-    FxType.PARALLAX,
-  ],
-  [FxType.FLOAT_IN_TOP]: [
-    // scroll-toggled is not compatible with position-bound fx
-    FxType.FLY_IN_BOTTOM,
-    FxType.FLY_IN_LEFT,
-    FxType.FLY_IN_RIGHT,
-    FxType.FLY_IN_TOP,
-    FxType.PARALLAX,
-  ],
-  [FxType.FLY_IN_BOTTOM]: [FxType.FLY_IN_TOP, FxType.PARALLAX],
-  [FxType.FLY_IN_LEFT]: [FxType.FLY_IN_RIGHT],
-  [FxType.FLY_IN_TOP]: [FxType.PARALLAX],
+let FxBindingDef;
+
+/**
+ * Include respective `FxType`s here.
+ * @private @const {!Object<!FxType, !FxBindingDef>}
+ */
+const FxBindings = {
+  [FxType.FADE_IN]: {
+    observes: FxObservesSignal.POSITION,
+    opacity: true,
+  },
+  [FxType.FADE_IN_SCROLL]: {
+    observes: FxObservesSignal.POSITION,
+    opacity: true,
+  },
+  [FxType.FLOAT_IN_BOTTOM]: {
+    observes: FxObservesSignal.SCROLL_TOGGLE,
+    translates: {y: true},
+  },
+  [FxType.FLOAT_IN_TOP]: {
+    observes: FxObservesSignal.SCROLL_TOGGLE,
+    translates: {y: true},
+  },
+  [FxType.FLY_IN_BOTTOM]: {
+    observes: FxObservesSignal.POSITION,
+    translates: {y: true},
+  },
+  [FxType.FLY_IN_LEFT]: {
+    observes: FxObservesSignal.POSITION,
+    translates: {x: true},
+  },
+  [FxType.FLY_IN_RIGHT]: {
+    observes: FxObservesSignal.POSITION,
+    translates: {x: true},
+  },
+  [FxType.FLY_IN_TOP]: {
+    observes: FxObservesSignal.POSITION,
+    translates: {y: true},
+  },
+  [FxType.PARALLAX]: {
+    observes: FxObservesSignal.POSITION,
+    translates: {y: true},
+  },
 };
 
 /**
@@ -125,15 +129,44 @@ const restrictedFxTypes = {
  * @return {boolean}
  * @private
  */
-function isFxTupleRestricted(fxTypeA, fxTypeB) {
-  // Normalize alphabetically to check symmetric matrix.
-  const aLowerThanB = fxTypeA < fxTypeB;
+export function isCombinationValid(fxTypeA, fxTypeB) {
+  if (fxTypeA == fxTypeB) {
+    return false;
+  }
 
-  const normalA = aLowerThanB ? fxTypeA : fxTypeB;
-  const normalB = aLowerThanB ? fxTypeB : fxTypeA;
+  const {
+    observes: observesA,
+    translates: translatesA,
+    opacity: opacityA,
+  } = FxBindings[fxTypeA];
 
-  const restricted = restrictedFxTypes[normalA];
-  return restricted && restricted.indexOf(normalB) > -1;
+  const {
+    observes: observesB,
+    translates: translatesB,
+    opacity: opacityB,
+  } = FxBindings[fxTypeB];
+
+  // If they observe different signals, they're restricted.
+  if (observesA !== observesB) {
+    return false;
+  }
+
+  // If they both change opacity, they're restricted.
+  if (opacityA && opacityB) {
+    return false;
+  }
+
+  // If they translate along the same axis, they're restricted.
+  if (translatesA && translatesB) {
+    if (translatesA.x && translatesB.x) {
+      return false;
+    }
+    if (translatesA.y && translatesB.y) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -211,7 +244,8 @@ export class AmpFxCollection {
    * @private
    */
   install_(element, type) {
-    if (scrollToggledFxTypes[type]) {
+    const {observes} = devAssert(FxBindings[type]);
+    if (observes == FxObservesSignal.SCROLL_TOGGLE) {
       installScrollToggledFx(this.ampdoc_, element, type);
       return;
     }
@@ -247,10 +281,10 @@ export function getFxTypes(element) {
 
 
 /**
- * Removes the conflicting types from an array of fx types. Removal is in-place.
+ * Removes the conflicting types from an array of fx types.
  * Kept by order.
  *
- * e.g.`amp-fx="parallax fade-in"
+ * e.g. `['parallax', 'fly-in-left'] -> ['parallax']`
  *
  * This will modify the array in place.
  *
@@ -260,15 +294,13 @@ export function getFxTypes(element) {
 function sanitizeFxTypes(types) {
   for (let i = 0; i < types.length; i++) {
     const fxTypeA = types[i];
-    if (fxTypeA in restrictedFxTypes) {
-      for (let j = i + 1; j < types.length; j++) {
-        const fxTypeB = types[j];
-        if (isFxTupleRestricted(fxTypeA, fxTypeB)) {
-          user().warn(TAG,
-              '%s preset can\'t be combined with %s preset as the ' +
-              'resulting animation isn\'t valid.', fxTypeA, fxTypeB);
-          types.splice(j, 1);
-        }
+    for (let j = i + 1; j < types.length; j++) {
+      const fxTypeB = types[j];
+      if (!isCombinationValid(fxTypeA, fxTypeB)) {
+        user().warn(TAG,
+            '%s preset can\'t be combined with %s preset as the resulting ' +
+            'animation isn\'t valid.', fxTypeA, fxTypeB);
+        types.splice(j, 1);
       }
     }
   }
