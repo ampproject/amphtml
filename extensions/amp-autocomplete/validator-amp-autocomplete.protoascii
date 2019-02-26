@@ -79,9 +79,6 @@ tags: {  # <amp-autocomplete> > <input>
     value_casei: "text"
     value_casei: "search"
   }
-  child_tags: {
-    child_tag_name_oneof: "SCRIPT"
-  }
 }
 tags: {  # amp-autocomplete JSON
   html_format: AMP
