@@ -100,7 +100,7 @@
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20181125.1.0",
     "gulp": "3.9.1",
-    "gulp-ava": "0.19.0",
+    "gulp-ava": "1.0.0",
     "gulp-closure-compiler": "0.4.0",
     "gulp-eslint": "5.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
