@@ -188,21 +188,21 @@ export class AmpImg extends BaseElement {
     }
     const generatedSizes = entry + defaultSize;
 
-    if (this.shouldSetSizes_()) {
+    if (this.shouldSetSizes_(width)) {
       this.img_.setAttribute('sizes', generatedSizes);
       this.sizesWidth_ = width;
     }
   }
 
   /**
+   * @param {number} newWidth
    * @private
    */
-  shouldSetSizes_() {
+  shouldSetSizes_(newWidth) {
     if (!this.img_.hasAttribute('sizes')) {
       return true;
     }
-
-    return this.getLayoutWidth() > this.sizesWidth_;
+    return newWidth > this.sizesWidth_;
   }
 
   /** @override */
