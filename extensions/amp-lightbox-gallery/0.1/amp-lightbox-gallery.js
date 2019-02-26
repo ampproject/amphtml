@@ -33,13 +33,13 @@ import {
   closest,
   closestAncestorElementBySelector,
   elementByTag,
-  escapeCssSelectorIdent,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,

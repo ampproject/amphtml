@@ -44,9 +44,11 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
-  'src/dom': [
+  'src/css': [
     'escapeCssSelectorIdent',
     'escapeCssSelectorNth',
+  ],
+  'src/dom': [
     'scopedQuerySelector',
     'scopedQuerySelectorAll',
   ],

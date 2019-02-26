@@ -45,13 +45,15 @@ function main() {
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   if (!isYarnLockFileInSync(FILENAME) ||
       !isYarnLockFileProperlyUpdated(FILENAME)) {
-    return 1;
+    process.exitCode = 1;
+    return;
   }
 
   const buildTargets = determineBuildTargets();
   if (!areValidBuildTargets(buildTargets, FILENAME)) {
     stopTimer(FILENAME, FILENAME, startTime);
-    return 1;
+    process.exitCode = 1;
+    return;
   }
 
   if (!isTravisPullRequestBuild()) {
@@ -79,8 +81,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
-
+main();
