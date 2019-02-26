@@ -598,12 +598,12 @@ describes.repeated('amp-list', {
         const opts = DEFAULT_LIST_OPTS;
 
         listMock.expects('fetch_')
-          .withExactArgs(!!opts.refresh, 'idToken')
-          .returns(Promise.resolve(fetched))
-          .atLeast(1);
+            .withExactArgs(!!opts.refresh, 'idToken')
+            .returns(Promise.resolve(fetched))
+            .atLeast(1);
 
         // Stub the rendering of the template.
-        let itemsToRender = fetched[opts.expr];
+        const itemsToRender = fetched[opts.expr];
         ssrTemplateHelper.renderTemplate
             .withArgs(element, itemsToRender)
             .returns(Promise.resolve(rendered));

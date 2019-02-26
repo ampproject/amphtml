@@ -177,7 +177,7 @@ describes.realWin('AmpState', {
         env.sandbox,
         env.ampdoc,
         'amp-viewer-assistance',
-        [ 'getIdTokenPromise', ]);
+        ['getIdTokenPromise']);
     viewerAssistanceMock.getIdTokenPromise.returns(Promise.resolve('idToken'));
 
     sandbox.stub(viewer, 'hasBeenVisible').returns(false);
@@ -208,7 +208,8 @@ describes.realWin('AmpState', {
         .then(() => ampState.prepareAndSendFetch_({win}, element))
         .then(() => {
           expect(fetchStub).to.have.been.called;
-          expect(fetchStub.firstCall.args.slice(-1).pop()).to.be.equal('idToken');
+          expect(fetchStub.firstCall.args.slice(-1).pop())
+              .to.be.equal('idToken');
           expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
         });
   });

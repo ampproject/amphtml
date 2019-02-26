@@ -116,12 +116,12 @@ describe('batchFetchJsonFor', () => {
       const all = UrlReplacementPolicy.ALL;
 
       urlReplacements.expandUrlAsync
-            .withArgs('https://data.com')
-            .returns(Promise.resolve('https://data.com'));
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
 
       const expectedRequest = {
-        'body': { 'ampViewerAuthToken': 'idtoken' },
-        'headers': { 
+        'body': {'ampViewerAuthToken': 'idtoken'},
+        'headers': {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         'method': 'POST',
@@ -142,12 +142,12 @@ describe('batchFetchJsonFor', () => {
       const all = UrlReplacementPolicy.ALL;
 
       urlReplacements.expandUrlAsync
-            .withArgs('https://data.com')
-            .returns(Promise.resolve('https://data.com'));
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
 
       const expectedRequest = {
-        'body': { 'ampViewerAuthToken': '' },
-        'headers': { 
+        'body': {'ampViewerAuthToken': ''},
+        'headers': {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         'method': 'POST',

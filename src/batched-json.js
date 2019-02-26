@@ -64,7 +64,7 @@ export function batchFetchJsonFor(
             'Content-Type': 'application/x-www-form-urlencoded',
           };
           data.fetchOpt.body = {
-            'ampViewerAuthToken': opt_token ? opt_token : ''
+            'ampViewerAuthToken': opt_token ? opt_token : '',
           };
         }
         return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
