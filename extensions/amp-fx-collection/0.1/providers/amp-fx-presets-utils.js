@@ -188,7 +188,7 @@ export function defaultMarginValues(fxType) {
 export function defaultEasingValues(fxType) {
   switch (fxType) {
     case FxType.FADE_IN:
-      return 'ease_IN';
+      return 'ease-in';
     case FxType.FLY_IN_RIGHT:
     case FxType.FLY_IN_LEFT:
     case FxType.FLY_IN_TOP:
