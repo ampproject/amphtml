@@ -88,6 +88,3 @@ Suggest the first entry in the list of results by marking it active; only possib
 
 ### submit-on-enter (optional)
 The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
-
-## Validation
-See [amp-autocomplete rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-autocomplete/validator-amp-autocomplete.protoascii) in the AMP validator specification.
