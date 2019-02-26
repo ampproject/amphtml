@@ -27,7 +27,7 @@ const useHttps = argv.https != undefined;
 const quiet = argv.quiet != undefined;
 const sendCachingHeaders = argv.cache != undefined;
 const noCachingExtensions = argv.noCachingExtensions != undefined;
-const disableDevDashboardCache = argv.disable_dev_dashboard_cache || false;
+const enableDevDashboardCache = argv.enable_dev_dashboard_cache || false;
 
 /**
  * Starts a simple http server at the repository root
@@ -61,7 +61,7 @@ function serve() {
       'SERVE_QUIET': quiet,
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
       'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
-      'DISABLE_DEV_DASHBOARD_CACHE': disableDevDashboardCache,
+      'ENABLE_DEV_DASHBOARD_CACHE': enableDevDashboardCache,
     },
     stdout: !quiet,
   };
@@ -96,7 +96,7 @@ gulp.task(
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
         'inspect': '  Run nodemon in `inspect` mode',
-        'disable_dev_dashboard_cache': 'Disables the dev dashboard cache',
+        'enable_dev_dashboard_cache': '  Enables the dev dashboard cache',
       },
     }
 );

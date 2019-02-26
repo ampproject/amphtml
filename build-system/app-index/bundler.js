@@ -16,9 +16,14 @@
 'use strict';
 
 const babel = require('rollup-plugin-babel');
+const colors = require('ansi-colors');
 const commonjs = require('rollup-plugin-commonjs');
+const log = require('fancy-log');
+const path = require('path');
 const resolve = require('rollup-plugin-node-resolve');
 const rollup = require('rollup');
+
+const rootDir = path.dirname(path.dirname(__dirname));
 
 const plugins = [
   resolve(),
@@ -43,16 +48,11 @@ const outputOptions = {
 
 module.exports = {
   bundleComponent: async componentEntryFile => {
-
-    console/*OK*/.log('Generating bundle for: ' + componentEntryFile);
-
     inputOptions.input = componentEntryFile;
-
     const bundle = await rollup.rollup(inputOptions);
     const {code} = await bundle.generate(outputOptions);
-
-    console/*OK*/.log('Generated bundle for: ' + componentEntryFile);
-
+    log('Generated bundle for',
+        colors.cyan(path.relative(rootDir, componentEntryFile)));
     return code;
   },
 };
