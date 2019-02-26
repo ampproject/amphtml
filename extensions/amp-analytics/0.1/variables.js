@@ -29,10 +29,10 @@ const TAG = 'amp-analytics/variables';
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
 
 const EXTERNAL_CONSENT_POLICY_STATE_STRING = {
-  1: 'accepted',
-  2: 'rejected',
-  3: 'unknown_not_required',
-  4: 'dismissed',
+  1: 'sufficient',
+  2: 'insufficient',
+  3: 'not_required',
+  4: 'unknown',
 };
 
 /** @typedef {{name: string, argList: string}} */
