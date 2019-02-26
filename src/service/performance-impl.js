@@ -242,7 +242,7 @@ export class Performance {
     if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
       return;
     }
-    this.win.perfMetrics.onFirstInputDelay((delay, evt) => {
+    this.win.perfMetrics.onFirstInputDelay(delay => {
       this.tickDelta('fid-polyfill', delay);
       this.flush();
     });
