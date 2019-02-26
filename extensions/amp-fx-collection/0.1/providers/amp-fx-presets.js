@@ -46,7 +46,6 @@ function flyIn(fxElement, axis, coeff) {
   devAssert(axis == 'top' || axis == 'left');
   devAssert(Math.abs(coeff) == 1);
 
-
   const element = dev().assertElement(fxElement.element);
   const flyInDistance = coeff * fxElement.flyInDistance;
 
