@@ -170,40 +170,48 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:158:4 The mandatory re
 |        </script>
 |      </amp-autocomplete>  
 |
+|      <!-- Invalid: two input tags -->
+|      <amp-autocomplete>
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:165:4 The reference point 'amp-autocomplete > input' for 'amp-autocomplete' must be unique but a duplicate was encountered. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+|          <input type="text">
+|          <input type="text">
+|      </amp-autocomplete>  
+|
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:165:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:171:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="button">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:166:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:172:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:166:6 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:172:6 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:170:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:176:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="checkbox">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:171:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:177:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:175:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:181:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="submit">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:176:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:182:6 The tag 'input', a child tag of 'amp-autocomplete', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      </amp-autocomplete>  
 |    </form>
 |
 |    <!-- Invalid: amp-component without FORM ancestor -->
 |    <amp-autocomplete>
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:181:2 The tag 'amp-autocomplete' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:187:2 The tag 'amp-autocomplete' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      <input type="text">
 |    </amp-autocomplete>
 |
