@@ -147,7 +147,7 @@ export function selectors(selector) {
         // Despite looking useless, we depend on its lastIndex updating
         // side-effect.
         ATTRIBUTE_REGEX.test(selector);
-        i = ATTRIBUTE_REGEX.lastIndex;
+        i = Math.max(i, ATTRIBUTE_REGEX.lastIndex);
         break;
 
       case ',':
