@@ -230,7 +230,15 @@ export class Performance {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
-    observer.observe({entryTypes: entryTypesToObserve});
+
+    // Wrap observer.observe() in a try statement for testing, because
+    // Webkit throws an error if the entry types to observe are not natively
+    // supported.
+    try {
+      observer.observe({entryTypes: entryTypesToObserve});
+    } catch(err) {
+      console.warn(err);
+    }
   }
 
   /**
