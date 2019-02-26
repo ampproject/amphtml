@@ -396,6 +396,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
   {
+    id: 'amp-auto-lightbox-carousel',
+    name: 'Automatically detects carousels to group in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
+  {
     id: 'fixed-elements-in-lightbox',
     name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
     spec: 'https://github.com/ampproject/amphtml/issues/20964',
