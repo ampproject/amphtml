@@ -359,6 +359,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Swoop](../../ads/swoop.md)
 - [TcsEmotion](../../ads/tcsemotion.md)
 - [Teads](../../ads/teads.md)
+- [torimochi](../../ads/torimochi.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
