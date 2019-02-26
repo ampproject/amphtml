@@ -71,7 +71,7 @@ const FxObservesSignal = {
  *  3. only one or none of them changes opacity
  * @typedef {{
  *  observes: !FxObservesSignal,
- *  opacity: (boolean|undefined)
+ *  opacity: (boolean|undefined),
  *  translates: ({
  *    x: (boolean|undefined),
  *    y: (boolean|undefined),
