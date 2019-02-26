@@ -49,7 +49,7 @@ module.exports = {
     }
     if (isCommonJsModule) {
       pluginsToApply = pluginsToApply.concat([
-        [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
+        [require.resolve('babel-plugin-transform-es2015-modules-commonjs')],
       ]);
     }
     if (!isForTesting) {

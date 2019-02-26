@@ -1142,9 +1142,9 @@ acorn@^4.0.3:
   integrity sha1-EFSVrlNh1pe9GVyCUZLhrX8lN4c=
 
 acorn@^6.0.1, acorn@^6.0.2, acorn@^6.0.4, acorn@^6.0.7, acorn@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.0.tgz#b0a3be31752c97a0f7013c5f4903b71a05db6818"
-  integrity sha512-MW/FjM+IvU9CgBzjO3UIPCE2pyEwUsoFl+VGdczOPEdxfGFjuKny/gN54mOuX7Qxmb9Rg9MCn2oKiSUeW+pjrw==
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.1.tgz#7d25ae05bb8ad1f9b699108e1094ecd7884adc1f"
+  integrity sha512-jPTiwtOxaHNaAPg/dmrJ/beuzLRnXtB0kQPQ8JpotKJgTB6rX6c8mlf315941pyjBSaPg8NHXS9fhP4u17DpGA==
 
 active-x-obfuscator@0.0.1:
   version "0.0.1"
@@ -1888,11 +1888,6 @@ babel-plugin-syntax-object-rest-spread@^6.13.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz#fd6536f2bce13836ffa3a5458c4903a597bb3bf5"
   integrity sha1-/WU28rzhODb/o6VFjEkDpZe7O/U=
-
-babel-plugin-transform-commonjs-es2015-modules@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-transform-commonjs-es2015-modules/-/babel-plugin-transform-commonjs-es2015-modules-4.0.1.tgz#06cc33d655ac2b263ca6e4ec4393672013bf20d6"
-  integrity sha512-8h493ia3xNH5oQmckkQKl/Owtgk+wT6fCT0ZNAjos60YBNDu64UCAtd0mCWJg6N4lGvnmP++CIxWblxaJBdPwg==
 
 babel-plugin-transform-es2015-modules-commonjs@6.26.2:
   version "6.26.2"
