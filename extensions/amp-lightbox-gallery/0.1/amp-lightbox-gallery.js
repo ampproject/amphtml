@@ -975,7 +975,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           keyframesNamespace: undefined,
           curve: TRANSITION_CURVE,
         });
-      } catch(e) {
+      } catch (e) {
         reportError(e);
       }
     };
