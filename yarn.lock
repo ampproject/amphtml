@@ -4888,10 +4888,10 @@ escope@^3.6.0:
 "eslint-plugin-amphtml-internal@file:build-system/eslint-rules":
   version "0.1.0"
 
-eslint-plugin-chai-expect@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-1.2.0.tgz#7ab64d91d05fa29ee3260597e4eb2413f228daa2"
-  integrity sha512-UfoqOzGBY3AU0VoNwIzJ0tpJgs5pD6QRFwcrDbqY00fk+JvIHXyZnj42Xgk/gfsWhhx+w0U4my22EegpSn2odQ==
+eslint-plugin-chai-expect@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.0.1.tgz#0f9267745feafa723b8ec1bb151c073df5558f60"
+  integrity sha512-HiFoh9F9grVdVQEIwADwPA7SlcGZcsm9gdzZGDoH2SeUoUmYrUuq1cQmfjyOfqRpFOL6qlhcz5nZW2ppTH9ZlQ==
 
 eslint-plugin-eslint-plugin@2.0.1:
   version "2.0.1"
