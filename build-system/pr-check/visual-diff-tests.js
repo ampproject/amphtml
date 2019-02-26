@@ -22,6 +22,7 @@
  */
 
 const atob = require('atob');
+const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
   printChangeSummary,
@@ -32,19 +33,21 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'visual-diff-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
+    printChangeSummary(FILENAME);
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST') ||
@@ -52,18 +55,18 @@ function main() {
         buildTargets.has('FLAG_CONFIG')) {
 
       downloadBuildOutput(FILENAME);
-      process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
-      console.log('Skipping visual diff tests because this commit does ' +
-        'not affect the runtime, build system, integration test files, ' +
-        'visual diff test files, or flag config files.');
+      console.log(
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Visual Diff Tests ') +
+          'because this commit does not affect the ' +
+          'runtime, build system, integration test files, ' +
+          'visual diff test files, or flag config files.');
     }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

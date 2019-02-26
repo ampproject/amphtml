@@ -88,18 +88,21 @@ describe('remove', function() {
   });
 
   it('should remove elements that return true', () => {
-    remove(array, i => i > 2);
+    const removed = remove(array, i => i > 2);
     expect(array).to.deep.equal([1, 2]);
+    expect(removed).to.deep.equal([3, 4, 5]);
   });
 
   it('handles no removals', () => {
-    remove(array, () => false);
+    const removed = remove(array, () => false);
     expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+    expect(removed).to.deep.equal([]);
   });
 
   it('handles consecutive removals', () => {
-    remove(array, () => true);
+    const removed = remove(array, () => true);
     expect(array).to.deep.equal([]);
+    expect(removed).to.deep.equal([1, 2, 3, 4, 5]);
   });
 });
 

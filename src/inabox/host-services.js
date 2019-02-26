@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
+  rejectServicePromiseForDoc,
 } from '../service';
 
 const ServiceNames = {
@@ -26,18 +27,33 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
-export const HostServiceError = {
-  // The host service doesn't match its environment.  For example, a SafeFrame
-  // host service when run in something that isn't a SafeFrame.  The
-  // implementation should consider falling back to its default implementation
-  // on the regular web.
-  MISMATCH: 1,
-  // The host service is correct for its environment, but not able to function.
-  // For example, a SafeFrame host service running inside a SafeFrame
-  // implementation that is incomplete or out of date.
-  UNSUPPORTED: 2,
-};
+/**
+ * Error object for various host services. It is passed around in case
+ * of host service failures for proper error handling.
+ *
+ * - fallback: if the caller should fallback to other impl
+ *
+ * @typedef {{
+ *   fallback: boolean
+ * }}
+ */
+export let HostServiceError;
 
+/**
+ * A set of service interfaces that is used when the AMP document is loaded
+ * in an environment that does not provide regular web APIs for things like
+ * - open URL
+ * - scroll events, IntersectionObserver
+ * - expand to fullscreen
+ *
+ * The consumers of those services should get the service by calling
+ * XXXForDoc(), which returns a Promise that resolves to the service Object,
+ * or gets rejected with an error Object. (See HostServiceError)
+ *
+ * The providers of those services should install the service by calling
+ * installXXXServiceForDoc() when it's available, or
+ * rejectXXXServiceForDoc() when there is a failure.
+ */
 export class HostServices {
 
   /**
@@ -69,6 +85,14 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectVisibilityServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY, error);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
@@ -87,6 +111,14 @@ export class HostServices {
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectFullscreenServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN, error);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
@@ -101,6 +133,14 @@ export class HostServices {
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
     registerServiceBuilderForDoc(elementOrAmpDoc,
         ServiceNames.EXIT, impl, /* opt_instantiate */ true);
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectExitServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT, error);
   }
 }
 

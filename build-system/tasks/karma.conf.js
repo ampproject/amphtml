@@ -18,6 +18,8 @@
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
+const TEST_SERVER_PORT = 8081;
+
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
@@ -245,6 +247,7 @@ module.exports = {
     },
     captureConsole: false,
     verboseLogging: false,
+    testServerPort: TEST_SERVER_PORT,
   },
 
   singleRun: true,
@@ -262,7 +265,6 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',
@@ -275,6 +277,7 @@ module.exports = {
     'karma-sauce-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',
+    'karma-source-map-support',
     'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {

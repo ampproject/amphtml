@@ -59,7 +59,6 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: '14',
   AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: '15',
   AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: '16',
-  AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
   AMP_STORY_TOOLTIP_EXPAND_TWEET: '36',
   AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT: '37',
   AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: '18',
@@ -70,6 +69,7 @@ export const LocalizedStringId = {
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
+  // DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
 };
 
 
@@ -133,10 +133,10 @@ function findLocalizedString(localizedStringBundles, languageCodes,
 
   languageCodes.some(languageCode => {
     const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId] &&
-        localizedStringBundle[localizedStringId].string) {
-      localizedString = localizedStringBundle[localizedStringId].string;
-      return true;
+    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
+      localizedString = localizedStringBundle[localizedStringId].string ||
+          localizedStringBundle[localizedStringId].fallback;
+      return !!localizedString;
     }
 
     return false;
@@ -176,6 +176,8 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
+    pseudoLocaleStringBundle[localizedStringId].fallback =
+        localizationFn(localizedStringBundle[localizedStringId].fallback);
   });
 
   return pseudoLocaleStringBundle;

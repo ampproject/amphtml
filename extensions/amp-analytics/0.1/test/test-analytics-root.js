@@ -24,11 +24,15 @@ import {
 import {
   CustomEventTracker,
 } from '../events';
+import {
+  HostServices,
+} from '../../../../src/inabox/host-services';
 import {ScrollManager} from '../scroll-manager';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
+import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
@@ -37,6 +41,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let resources, viewport;
   let root;
   let body, target, child, other;
+  let mockVisibilityInterface;
 
   beforeEach(() => {
     win = env.win;
@@ -60,6 +65,10 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     other.id = 'other';
     other.className = 'other';
     body.appendChild(other);
+
+    mockVisibilityInterface = {
+      onVisibilityChange: () => {},
+    };
   });
 
   it('should initialize correctly', () => {
@@ -138,6 +147,30 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     expect(visibilityManager.parent).to.be.null;
     // Ensure the instance is reused.
     expect(root.getVisibilityManager()).to.equal(visibilityManager);
+  });
+
+  it('should create correct visiblityManager', () => {
+    sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
+    sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
+      return Promise.resolve(mockVisibilityInterface);
+    });
+    return root.isUsingHostAPI().then(() => {
+      const visibilityManager = root.getVisibilityManager();
+      expect(visibilityManager).to.be.instanceOf(VisibilityManagerForMApp);
+    });
+  });
+
+  it('should fallback to correct visibilityManager', () => {
+    sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
+    sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
+      return Promise.reject({
+        fallback: true,
+      });
+    });
+    return root.isUsingHostAPI().then(() => {
+      const visibilityManager = root.getVisibilityManager();
+      expect(visibilityManager).to.be.instanceOf(VisibilityManagerForDoc);
+    });
   });
 
   it('should create scroll manager', () => {

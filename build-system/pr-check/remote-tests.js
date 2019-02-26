@@ -21,8 +21,10 @@
  * This is run during the CI stage = test; job = remote tests.
  */
 
+const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -33,47 +35,56 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
-  downloadBuildOutput(FILENAME);
-  startSauceConnect(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
+    downloadBuildOutput(FILENAME);
+    downloadDistOutput(FILENAME);
+
+    await startSauceConnect(FILENAME);
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+
+    stopSauceConnect(FILENAME);
   } else {
-    let ranTests = false;
+    printChangeSummary(FILENAME);
+    if (!(buildTargets.has('RUNTIME') ||
+          buildTargets.has('BUILD_SYSTEM') ||
+          buildTargets.has('UNIT_TEST') ||
+          buildTargets.has('INTEGRATION_TEST'))) {
+      console.log(
+          `${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Remote (Sauce Labs) Tests ') +
+          'because this commit does not affect the runtime, ' +
+          'build system, or integration test files.');
+      stopTimer(FILENAME, FILENAME, startTime);
+      return;
+    }
+    downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-      ranTests = true;
     }
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
       timedExecOrDie('gulp test --integration --nobuild --saucelabs');
-      ranTests = true;
     }
-
-    if (!ranTests) {
-      console.log('Skipping Sauce Labs unit and integration tests because ' +
-      'this commit does not affect the runtime, build system, ' +
-      'or integration test files.');
-    }
+    stopSauceConnect(FILENAME);
   }
 
-  stopSauceConnect(FILENAME);
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

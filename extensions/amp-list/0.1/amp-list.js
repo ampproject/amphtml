@@ -210,11 +210,9 @@ export class AmpList extends AMP.BaseElement {
       this.attemptToFit_(placeholder);
     }
 
-    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
-      this.viewport_.onResize(() => {
-        this.attemptToFit_(dev().assertElement(this.container_));
-      });
-    }
+    this.viewport_.onResize(() => {
+      this.attemptToFit_(dev().assertElement(this.container_));
+    });
 
     this.loadMoreEnabledPromise_.then(enabled => {
       if (enabled) {
@@ -225,6 +223,7 @@ export class AmpList extends AMP.BaseElement {
           if (overflowElement) {
             toggle(overflowElement, false);
           }
+          this.element.warnOnMissingOverflow = false;
         }).then(() => {
           this.adjustContainerForLoadMoreButton_();
         });
@@ -853,8 +852,6 @@ export class AmpList extends AMP.BaseElement {
           this.unlistenLoadMore_ = listen(
               this.loadMoreService_.getLoadMoreButtonClickable(),
               'click', () => this.loadMoreCallback_());
-        }).then(() => {
-          this.attemptToFit_(dev().assertElement(this.container_));
         });
       } else {
         return this.mutateElement(

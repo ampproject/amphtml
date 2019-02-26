@@ -37,7 +37,6 @@ const timedExecOrDie =
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
 
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp presubmit');
@@ -51,6 +50,7 @@ function main() {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
+    printChangeSummary(FILENAME);
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
 
@@ -75,7 +75,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();
