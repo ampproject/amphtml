@@ -188,7 +188,7 @@ export function isValidTypeCombination(fxTypeA, fxTypeB) {
  * @return {boolean}
  */
 export function userAssertIsValidType(type) {
-  return user().assert(validFxTypes.indexOf(type) > -1,
+  return userAssert(validFxTypes.indexOf(type) > -1,
       'Invalid amp-fx type `%s`', type);
 }
 
