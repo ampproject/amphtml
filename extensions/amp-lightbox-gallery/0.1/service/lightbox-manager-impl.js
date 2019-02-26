@@ -26,7 +26,7 @@ import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
-  closestByTag,
+  closestAncestorElementBySelector,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
@@ -149,7 +149,8 @@ export class LightboxManager {
     if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
-    if (element.hasAttribute('on')) {
+    const actions = Services.actionServiceForDoc(element);
+    if (actions.hasResolvableAction(element, 'tap')) {
       return false;
     }
     return true;
@@ -302,7 +303,7 @@ export class LightboxManager {
   getDescription(element) {
     // If the element in question is the descendant of a figure element
     // try using the figure caption as the lightbox description.
-    const figureParent = closestByTag(element, 'figure');
+    const figureParent = closestAncestorElementBySelector(element, 'figure');
     if (figureParent) {
       const figCaption = elementByTag(figureParent, 'figcaption');
       if (figCaption) {

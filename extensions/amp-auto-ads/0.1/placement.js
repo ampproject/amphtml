@@ -21,7 +21,7 @@ import {
 import {Services} from '../../../src/services';
 import {clamp} from '../../../src/utils/math';
 import {
-  closestByTag,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
@@ -425,7 +425,7 @@ function isPositionValid(anchorElement, position) {
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
   return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
-    if (closestByTag(elementToCheck, tagName)) {
+    if (closestAncestorElementBySelector(elementToCheck, tagName)) {
       user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
       return true;
     }

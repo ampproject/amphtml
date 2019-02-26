@@ -23,7 +23,7 @@ import {Services} from '../../../src/services';
 import {Timeout} from './timeout';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
-import {closestBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -429,7 +429,7 @@ export class Controls {
    */
   isControlsTarget_(target) {
     return target == this.overlay ||
-      !!closestBySelector(target, '.amp-video-docked-controls');
+      !!closestAncestorElementBySelector(target, '.amp-video-docked-controls');
   }
 
   /**
