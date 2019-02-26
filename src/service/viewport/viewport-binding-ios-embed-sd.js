@@ -402,11 +402,11 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // of its first child, and this is _not_ accounted for in `rect.height`.
     // This "top gap" causes smaller than expected contentHeight, so calculate
     // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements, and the "bottom gap" remains unaddressed.
-    const topGap = rect.top + this.getScrollTop();
+    // on ancestor elements and the scroller's border-top. The "bottom gap"
+    // remains unaddressed.
+    const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
     return rect.height
-        + topGap
-        + this.getBorderTop()
+        + topGapPlusPaddingAndBorder
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }
