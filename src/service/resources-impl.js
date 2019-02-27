@@ -173,10 +173,12 @@ export class Resources {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ = isExperimentOn(this.win,
+        'layers-prioritization');
+
     let boundScorer;
-    // TODO(jridgewell): Temporarily disabling layers prioritization code to
-    // determine if it causes the metrics regression.
-    if (false && this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       boundScorer = this.calcTaskScoreLayers_.bind(this);
     } else {
       boundScorer = this.calcTaskScore_.bind(this);
