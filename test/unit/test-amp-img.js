@@ -477,13 +477,7 @@ describe('amp-img', () => {
       impl.getAmpDoc = function() {
         return iframe;
       };
-      impl.getVsync = function() {
-        return {
-          mutate(fn) {
-            fn();
-          },
-        };
-      };
+      impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
           getWidth: () => windowWidth,

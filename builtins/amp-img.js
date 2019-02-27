@@ -164,13 +164,13 @@ export class AmpImg extends BaseElement {
     }
     // No need to generate sizes if already present.
     const sizes = this.element.getAttribute('sizes');
-    if (sizes && sizes !== 'auto') {
+    if (sizes) {
       return;
     }
     // Sizes is useless without the srcset attribute or if the srcset
     // attribute uses the x descriptor.
     const srcset = this.element.getAttribute('srcset');
-    if (!srcset || RegExp('[0-9]+x,.*|[0-9]+x$').test(srcset)) {
+    if (!srcset || /[0-9]+x(?:,|$)/.test(srcset)) {
       return;
     }
 
@@ -178,18 +178,19 @@ export class AmpImg extends BaseElement {
     const viewportWidth = this.getViewport().getWidth();
 
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
-    const ratio = Math.round(width * 100 / viewportWidth);
-
     let defaultSize = width + 'px';
 
     if (this.getLayout() !== Layout.FIXED) {
-      defaultSize = ratio > 100 ?
-        ratio + 'vw' : '100vw';
+      const ratio = Math.round(width * 100 / viewportWidth);
+      defaultSize = Math.max(ratio, 100) + 'vw';
     }
+
     const generatedSizes = entry + defaultSize;
 
     if (this.shouldSetSizes_(width)) {
-      this.img_.setAttribute('sizes', generatedSizes);
+      this.mutateElement(() => {
+        this.img_.setAttribute('sizes', generatedSizes);
+      });
       this.sizesWidth_ = width;
     }
   }
