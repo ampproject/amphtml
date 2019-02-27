@@ -66,7 +66,6 @@ function main() {
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('DEV_DASHBOARD') ||
         buildTargets.has('FLAG_CONFIG') ||
         buildTargets.has('VISUAL_DIFF')) {
 
@@ -76,7 +75,7 @@ function main() {
     } else {
       console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
           'because this commit does not affect the runtime, build system, ' +
-          'test files, visual diff files, or the dev dashboard');
+          'test files, or visual diff files');
     }
   }
 
