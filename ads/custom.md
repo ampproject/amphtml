@@ -180,7 +180,7 @@ AMP-Access-Control-Allow-Source-Origin:https://my-ad-server.com
 
 ## Analytics
 
-To get analytics of how your ads are performing, use the [amp-analyics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
 
 Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
 that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).
