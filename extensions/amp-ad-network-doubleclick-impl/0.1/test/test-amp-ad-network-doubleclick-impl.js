@@ -818,7 +818,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
         expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(=|,?)21063174(,?|&|$)/);
+        expect(url).to.match(/(=|,?)21063174(,|&|$)/);
       });
     });
 
@@ -829,7 +829,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
         expect(url).to.not.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(=|,?)21063173(,?|&|$)/);
+        expect(url).to.match(/(=|,?)21063173(,|&|$)/);
       });
     });
 

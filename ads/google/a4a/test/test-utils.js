@@ -44,7 +44,6 @@ import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getComputedStyle} from '../../../../src/style';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
@@ -998,7 +997,8 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     doc = win.document;
   });
 
-  function createResource(config, layout, tagName = 'amp-ad', parent = doc.body) {
+  function createResource(
+    config, layout, tagName = 'amp-ad', parent = doc.body) {
     config['layout'] = layout;
     const element = createElementWithAttributes(doc, tagName, config);
     parent.appendChild(element);
@@ -1048,11 +1048,12 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
-  it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
-    const element = createResource({height: 300}, 'fixed-height');
-    element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
-  });
+  it('should return the max-width, if present, for FIXED_HEIGHT layout',
+      () => {
+        const element = createResource({height: 300}, 'fixed-height');
+        element.style.maxWidth = '250px';
+        expect(getContainerWidth(win, element)).to.equal(250);
+      });
 
   it('should return parent\'s fixed width for FIXED_HEIGHT layout', () => {
     const parent = document.createElement('div');

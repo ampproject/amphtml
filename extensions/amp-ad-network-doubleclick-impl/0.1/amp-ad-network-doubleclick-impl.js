@@ -510,10 +510,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': this.sendFlexibleAdSlotParams_ ?
-          `${getContainerWidth(this.win, this.element)}x-1` : null,
+        `${getContainerWidth(this.win, this.element)}x-1` : null,
       'psz': this.sendFlexibleAdSlotParams_ ?
-          `${getContainerWidth(this.win, this.element.parentElement)}x-1` :
-          null,
+        `${getContainerWidth(this.win, this.element.parentElement)}x-1` :
+        null,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting &&

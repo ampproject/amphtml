@@ -19,6 +19,7 @@ import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
+import {computedStyle} from '../../../src/style';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -26,7 +27,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {computedStyle} from '../../../src/style';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -967,43 +967,46 @@ export function getAmpRuntimeTypeParameter(win) {
  * Returns the fixed size of the given element, or the fixed size of its nearest
  * ancestor that has a fixed size, if the given element has none.
  * @param {!Window} win
- * @param {!Element} element
+ * @param {?Element} element
  * @return {number} The width of the given element, or of the nearest ancestor
  *    with a fixed size, if the given element has none.
  */
 export function getContainerWidth(win, element) {
-  let parent = element;
+  let el = element;
   let maxDepth = 100;
   // Find the first ancestor with a fixed size
-  while (parent && maxDepth--) {
-    const layout = parent.getAttribute('layout');
+  while (el && maxDepth--) {
+    const layout = el.getAttribute('layout');
     switch (layout) {
       case Layout.FIXED:
-        return parseInt(parent.getAttribute('width'), 10) || 0;
+        return parseInt(el.getAttribute('width'), 10) || 0;
       case Layout.RESPONSIVE:
       case Layout.FILL:
       case Layout.FIXED_HEIGHT:
       case Layout.FLUID:
         // The above layouts determine the width of the element by the
         // containing element, or by CSS max-width property.
-        const maxWidth = parseInt(computedStyle(win, parent).maxWidth, 10);
+        const maxWidth = parseInt(computedStyle(win, el).maxWidth, 10);
         if (maxWidth || maxWidth == 0) {
           return maxWidth;
         }
-        parent = parent.parentElement;
+        el = el.parentElement;
         break;
       case Layout.CONTAINER:
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
         // viewport.
-        const viewport = Services.viewportForDoc(element);
+        const viewport = Services.viewportForDoc(
+            // Typecast is safe as we would not be inside this loop if element
+            // was null.
+            /** @type {!Element} */ (element));
         return viewport.getSize().width;
       case Layout.NODISPLAY:
       case Layout.FLEX_ITEM:
         return 0;
       default:
         // If no layout is provided, we must use getComputedStyle.
-        const width = parseInt(computedStyle(win, parent).width, 10) || 0;
+        const width = parseInt(computedStyle(win, el).width, 10) || 0;
         return width;
     }
   }
