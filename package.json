@@ -198,7 +198,9 @@
       "/node_modules/"
     ],
     "testEnvironment": "node",
-    "setupTestFrameworkScriptFile": "./build-system/babel-plugins/testSetupFile.js",
+    "setupFilesAfterEnv": [
+      "./build-system/babel-plugins/testSetupFile.js"
+    ],
     "transformIgnorePatterns": [
       "/node_modules/"
     ],
