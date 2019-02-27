@@ -62,7 +62,7 @@ const middleware = [];
 if (!quiet) {
   middleware.push(morgan('dev'));
 }
-middleware.push(app.middleware);
+middleware.push(app);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
