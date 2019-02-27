@@ -927,4 +927,104 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       env.win.perfMetrics = previousPerfMetrics;
     }
   });
+
+  it('forwards layout jank metric', () => {
+    // Fake the window object so we can control the state
+    // of window.document.visibilityState later on.
+    const fakeWin = {
+      addEventListener: env.sandbox.stub(),
+      removeEventListener: env.win.removeEventListener,
+      dispatchEvent: env.win.dispatchEvent,
+      Date: env.win.Date,
+      location: env.win.location,
+      document: {
+        // Note: the document starts in a visible state.
+        visibilityState: 'visible',
+      },
+      PerformanceLayoutJank: true,
+      PerformanceObserver: env.sandbox.stub(),
+      performance: {
+        getEntriesByType: env.sandbox.stub(),
+      },
+    };
+
+    // Fake the PerformanceObserver implementation so we can send
+    // fake PerformanceEntry objects to listeners.
+    let performanceObserver;
+    fakeWin.PerformanceObserver.callsFake(callback => {
+      performanceObserver = new PerformanceObserverImpl(callback);
+      return performanceObserver;
+    });
+
+    // Fake addEventListener so we can trigger fake `visibilitychange` events.
+    const callbacks = [];
+    fakeWin.addEventListener.callsFake((eventType, callback) => {
+      if (eventType === 'visibilitychange') {
+        callbacks.push(callback);
+      }
+    });
+
+    // Fake layoutJank that occured before the Performance service is started.
+    const entries = [{
+      entryType: 'layoutJank',
+      fraction: 0.25,
+    },
+    {
+      entryType: 'layoutJank',
+      fraction: 0.3,
+    },
+    ];
+    fakeWin.performance.getEntriesByType.withArgs('layoutJank')
+        .returns(entries);
+
+    installPerformanceService(fakeWin);
+    const perf = Services.performanceFor(fakeWin);
+
+    // The document has become hidden, e.g. via the user switching tabs.
+    fakeWin.document.visibilityState = 'hidden';
+    const firstEvent = new Event('visibilitychange');
+    callbacks.forEach(callback => callback(firstEvent));
+
+    expect(perf.events_.length).to.equal(1);
+    expect(perf.events_[0])
+        .to.be.jsonEqual({
+          label: 'lj',
+          delta: 0.55,
+        });
+
+    // The user returns to the tab, and more layout jank occurs.
+    fakeWin.document.visibilityState = 'visible';
+    const list = {
+      getEntries() {
+        return [{
+          entryType: 'layoutJank',
+          fraction: 1,
+        }, {
+          entryType: 'layoutJank',
+          fraction: 0.0001,
+
+        }];
+      },
+    };
+    performanceObserver.triggerCallback(list);
+
+    // The document has become hidden again.
+    fakeWin.document.visibilityState = 'hidden';
+    const secondEvent = new Event('visibilitychange');
+    callbacks.forEach(callback => callback(secondEvent));
+    expect(perf.events_.length).to.equal(2);
+    expect(perf.events_[1])
+        .to.be.jsonEqual({
+          label: 'lj-2',
+          delta: 1.5501,
+        });
+
+    // Any more layout jank shouldn't be reported.
+    fakeWin.document.visibilityState = 'visible';
+    performanceObserver.triggerCallback(list);
+    fakeWin.document.visibilityState = 'hidden';
+    const thirdEvent = new Event('visibilitychange');
+    callbacks.forEach(callback => callback(thirdEvent));
+    expect(perf.events_.length).to.equal(2);
+  });
 });

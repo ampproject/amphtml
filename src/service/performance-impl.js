@@ -60,21 +60,6 @@ function incOrDef(obj, name) {
 }
 
 /**
- * Get the visibility state of the provided document.
- *
- * @param {Document} document
- */
-function getVisibilityState(document) {
-  if (document.visibilityState === 'hidden') {
-    return 'hidden';
-  }
-  if (document.hasFocus()) {
-    return 'active';
-  }
-  return 'passive';
-}
-
-/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
@@ -117,6 +102,20 @@ export class Performance {
     this.firstContentfulPaint_ = null;
     /** @private {number|null} */
     this.firstViewportReady_ = null;
+
+    /**
+     * Whether the `lj` metric was ticked.
+     *
+     * @private {boolean}
+     */
+    this.tickedFirstJankScore_ = false;
+
+    /**
+     * Whether the `lj-2` metric was ticked.
+     *
+     * @private {boolean}
+     */
+    this.tickedSecondJankScore_ = false;
 
     /**
      * The sum of all layout jank fractions triggered on the page from the
@@ -174,6 +173,16 @@ export class Performance {
       return Promise.resolve();
     }
 
+    if (this.win.PerformanceLayoutJank) {
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener('beforeunload', this.onPageHidden_);
+      }
+    }
+
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
@@ -212,7 +221,6 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-
     const processEntry = entry => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
@@ -228,7 +236,7 @@ export class Performance {
         recordedFirstInputDelay = true;
       }
       else if (entry.entryType === 'layoutJank') {
-        this.aggregateJankScore += entry.fraction;
+        this.aggregateJankScore_ += entry.fraction;
       }
     };
 
@@ -255,9 +263,16 @@ export class Performance {
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('layoutJank').forEach(processEntry);
       entryTypesToObserve.push('layoutJank');
-      this.registerLayoutJankHandler_();
-    }
 
+      // Register a handler to record the layout jank metric when the page
+      // enters the hidden lifecycle state.
+      // @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
+      this.win.addEventListener(
+          'visibilitychange',
+          this.onVisibilityChange_.bind(this),
+          {capture: true}
+      );
+    }
 
     if (entryTypesToObserve.length === 0) {
       return;
@@ -268,48 +283,6 @@ export class Performance {
       this.flush();
     });
     observer.observe({entryTypes: entryTypesToObserve});
-  }
-
-  /**
-   * Bind to various page lifecycle events to capture visibility state changes.
-   * @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
-   */
-  registerLayoutJankHandler_() {
-    // The visibility state of the document.
-    let visibilityState = getVisibilityState(this.win.document);
-    // Whether the `lj` metric was sent.
-    let sentFirstJankScore = false;
-    // Whether the `lj-2` metric was sent.
-    let sentSecondJankScore = false;
-
-    const handleVisibilityStateChange = nextState => {
-      const previousState = visibilityState;
-      if (previousState === nextState) {
-        return;
-      }
-      visibilityState = nextState;
-
-      if (nextState !== 'hidden') {
-        return;
-      }
-
-      if (!sentFirstJankScore) {
-        this.tickDelta('lj', this.aggregateJankScore_);
-        this.flush();
-        sentFirstJankScore = true;
-        return;
-      }
-      if (!sentSecondJankScore) {
-        this.tickDelta('lj-2', this.aggregateJankScore_);
-        this.flush();
-        sentSecondJankScore = true;
-        return;
-      }
-    };
-
-    ['pageshow', 'focus', 'blur', 'visibilitychange', 'resume'].forEach(eventName => {
-      this.win.addEventListener(eventName, () => handleVisibilityStateChange(getVisibilityState(this.win.document)), {capture: true});
-    });
   }
 
   /**
@@ -324,6 +297,53 @@ export class Performance {
       this.tickDelta('fid-polyfill', delay);
       this.flush();
     });
+  }
+
+  /**
+   * When the visibility state of the document changes to hidden,
+   * send the layout jank score.
+   */
+  onVisibilityChange_() {
+    if (this.win.document.visibilityState !== 'hidden') {
+      return;
+    }
+    this.tickLayoutJankScore_();
+  }
+
+  /**
+   * Tick the layout jank score metric.
+   *
+   * A value of the metric is recorded in under two names, `lj` and `lj-2`,
+   * for the first two times the page transitions into a hidden lifecycle state
+   * (when the page is navigated a way from, the tab is backgrounded for
+   * another tab, or the user backgrounds the browser application).
+   *
+   * Since we can't reliably detect when a page session finally ends,
+   * recording the value for these first two events should provide a fair
+   * amount of visibility into this metric.
+   */
+  tickLayoutJankScore_() {
+    if (!this.tickedFirstJankScore_) {
+      this.tickDelta('lj', this.aggregateJankScore_);
+      this.flush();
+      this.tickedFirstJankScore_ = true;
+      return;
+    }
+    if (!this.tickedSecondJankScore_) {
+      this.tickDelta('lj-2', this.aggregateJankScore_);
+      this.flush();
+      this.tickedSecondJankScore_ = true;
+
+      this.win.removeEventListener(
+          'visibilitychange',
+          this.onVisibilityChange_,
+          {capture: true}
+      );
+      // const platform = Services.platformFor(this.win);
+      // if (platform.isSafari()) {
+      //   this.win.removeEventListener('beforeunload', this.onPageHidden_);
+      // }
+    }
   }
 
   /**
