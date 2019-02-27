@@ -26,6 +26,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {computedStyle} from '../../../src/style';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -965,11 +966,12 @@ export function getAmpRuntimeTypeParameter(win) {
 /**
  * Returns the fixed size of the given element, or the fixed size of its nearest
  * ancestor that has a fixed size, if the given element has none.
+ * @param {!Window} win
  * @param {!Element} element
  * @return {number} The width of the given element, or of the nearest ancestor
  *    with a fixed size, if the given element has none.
  */
-export function getContainerWidth(element) {
+export function getContainerWidth(win, element) {
   let parent = element;
   let maxDepth = 100;
   // Find the first ancestor with a fixed size
@@ -984,18 +986,24 @@ export function getContainerWidth(element) {
       case Layout.FLUID:
         // The above layouts determine the width of the element by the
         // containing element, or by CSS max-width property.
-        if (parent.style.maxWdith) {
-          return parseInt(parent.style.maxWidth, 10) || 0;
+        const maxWidth = parseInt(computedStyle(win, parent).maxWidth, 10);
+        if (maxWidth || maxWidth == 0) {
+          return maxWidth;
         }
         parent = parent.parentElement;
+        break;
       case Layout.CONTAINER:
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
         // viewport.
         const viewport = Services.viewportForDoc(element);
         return viewport.getSize().width;
-      default:
+      case Layout.NODISPLAY:
+      case Layout.FLEX_ITEM:
         return 0;
+      default:
+        // If no layout is provided, we must use getComputedStyle.
+        return parseInt(computedStyle(win, element).width, 10) || 0;
     }
   }
   return 0;

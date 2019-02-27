@@ -374,7 +374,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         },
         [FLEXIBLE_AD_SLOTS_EXP]: {
           isTrafficEligible: () => true,
-          branches: Object(FLEXIBLE_AD_SLOTS_BRANCHES).values(),
+          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -490,6 +490,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element.getPageLayoutBox() : null;
     // TODO: Set up actual experiment
     const sendFlexibleAdSlotParams = true;
+    debugger;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -505,9 +506,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
-      'msz': this.sendFlexibleAdSlotParams ?
+      'msz': sendFlexibleAdSlotParams ?
           `${getContainerWidth(this.element)}x-1` : null,
-      'psz': this.sendFlexibleAdSlotParams ?
+      'psz': sendFlexibleAdSlotParams ?
           `${getContainerWidth(this.element.parentElement)}x-1` : null,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
@@ -1411,6 +1412,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   isFluidRequest() {
     return this.isFluidRequest_;
   }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);

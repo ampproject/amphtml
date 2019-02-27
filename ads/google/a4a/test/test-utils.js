@@ -44,6 +44,7 @@ import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
+import {getComputedStyle} from '../../../../src/style';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
@@ -1006,36 +1007,36 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
 
   it('should return the fixed the width for FIXED layout', () => {
     const element = createResource({width: 300, height: 250}, 'fixed');
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return 0 for FIXED layout and invalid width', () => {
     allowConsoleError(() => {
       const element = createResource({width: 'auto', height: 250}, 'fixed');
-      expect(getContainerWidth(element)).to.equal(0);
+      expect(getContainerWidth(win, element)).to.equal(0);
     });
   });
 
   it('should return 0 for NODISPLAY layout', () => {
     const element = createResource({width: 500}, 'nodisplay');
-    expect(getContainerWidth(element)).to.equal(0);
+    expect(getContainerWidth(win, element)).to.equal(0);
   });
 
   it('should return 0 for FLEX_ITEM layout', () => {
     const element = createResource({width: 500}, 'flex-item');
-    expect(getContainerWidth(element)).to.equal(0);
+    expect(getContainerWidth(win, element)).to.equal(0);
   });
 
   it('should return 0 for invalid layout', () => {
     allowConsoleError(() => {
       const element = createResource({width: 500}, 'qwerty');
-      expect(getContainerWidth(element)).to.equal(0);
+      expect(getContainerWidth(win, element)).to.equal(0);
     });
   });
 
   it('should return the max-width, if present, for FILL layout', () => {
     const element = createResource({maxWidth: 300}, 'fill');
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return parent\'s fixed width for FILL layout', () => {
@@ -1044,13 +1045,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource({} /* config */, 'fill', 'amp-ad', parent);
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
-    const element = createResource(
-        {maxWidth: 300, height: 250}, 'fixed-height');
-    expect(getContainerWidth(element)).to.equal(300);
+    const element = createResource({height: 300}, 'fixed-height');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
   });
 
   it('should return parent\'s fixed width for FIXED_HEIGHT layout', () => {
@@ -1060,12 +1061,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     doc.body.appendChild(parent);
     const element = createResource(
         {height: 250}, 'fixed-height', 'amp-ad', parent);
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return the max-width, if present, for FLUID layout', () => {
-    const element = createResource({maxWidth: 300, height: 250}, 'fluid');
-    expect(getContainerWidth(element)).to.equal(300);
+    const element = createResource({height: 300}, 'fluid');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
   });
 
   it('should return parent\'s fixed width for FLUID layout', () => {
@@ -1075,13 +1077,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     doc.body.appendChild(parent);
     const element = createResource(
         {height: 250}, 'fluid', 'amp-ad', parent);
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return the max-width, if present, for RESPONSIVE layout', () => {
-    const element = createResource(
-        {maxWidth: 300, height: 250, width: 250}, 'responsive');
-    expect(getContainerWidth(element)).to.equal(300);
+    const element = createResource({height: 200, width: 200}, 'responsive');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
   });
 
   it('should return parent\'s fixed width for RESPONSIVE layout', () => {
@@ -1091,13 +1093,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     doc.body.appendChild(parent);
     const element = createResource(
         {height: 250, width: 250}, 'responsive', 'amp-ad', parent);
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return the viewport width for CONTAINER layout', () => {
     const element = createResource({} /* config */, 'container');
     sandbox.stub(Services.viewportForDoc(element), 'getSize')
         .returns({width: 300});
-    expect(getContainerWidth(element)).to.equal(300);
+    expect(getContainerWidth(win, element)).to.equal(300);
   });
 });
