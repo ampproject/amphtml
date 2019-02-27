@@ -15,45 +15,51 @@
  */
 'use strict';
 
-const babel = require('rollup-plugin-babel');
-const colors = require('ansi-colors');
-const commonjs = require('rollup-plugin-commonjs');
-const log = require('fancy-log');
-const path = require('path');
-const resolve = require('rollup-plugin-node-resolve');
-const rollup = require('rollup');
+// Unused for now.
+// const babel = require('rollup-plugin-babel');
+// const colors = require('ansi-colors');
+// const commonjs = require('rollup-plugin-commonjs');
+// const log = require('fancy-log');
+// const path = require('path');
+// const rollup = require('rollup');
 
-const rootDir = path.dirname(path.dirname(__dirname));
+// Unused for now.
+// const rootDir = path.dirname(path.dirname(__dirname));
 
-const plugins = [
-  resolve(),
-  babel({
-    exclude: '**/node_modules/**',
-    plugins: [
-      ['@babel/plugin-transform-react-jsx', {'pragma': 'h'}],
-      ['@babel/plugin-proposal-class-properties'],
-    ],
-    presets: [['@babel/preset-env', {modules: false}]],
-  }),
-  commonjs(),
-];
+// Unused for now.
+// const resolve = require('rollup-plugin-node-resolve');
 
-const inputOptions = {
-  plugins,
+// Unused for now.
+// const plugins = [
+//   resolve(),
+//   babel({
+//     exclude: '**/node_modules/**',
+//     plugins: [
+//       Unused for now.
+//       ['@babel/plugin-transform-react-jsx', {'pragma': 'h'}],
+//       ['@babel/plugin-proposal-class-properties'],
+//     ],
+//     presets: [['@babel/preset-env', {modules: false}]],
+//   }),
+//   commonjs(),
+// ];
+
+const unusedInputOptions = { // eslint-disable-line no-unused-vars
+  // plugins,
 };
 
-const outputOptions = {
+const unusedOutputOptions = { // eslint-disable-line no-unused-vars
   format: 'iife',
 };
 
 module.exports = {
-  bundleComponent: async componentEntryFile => {
-    inputOptions.input = componentEntryFile;
-    const bundle = await rollup.rollup(inputOptions);
-    const {code} = await bundle.generate(outputOptions);
-    log('Generated bundle for',
-        colors.cyan(path.relative(rootDir, componentEntryFile)));
-    return code;
+  bundleComponent: async unusedComponentEntryFile => {
+    return ''; // for now.
+    // inputOptions.input = componentEntryFile;
+    // const bundle = await rollup.rollup(inputOptions);
+    // const {code} = await bundle.generate(outputOptions);
+    // log('Generated bundle for',
+    //     colors.cyan(path.relative(rootDir, componentEntryFile)));
+    // return code;
   },
 };
-
