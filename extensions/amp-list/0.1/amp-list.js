@@ -557,7 +557,7 @@ export class AmpList extends AMP.BaseElement {
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data)
-        .then(result => this.updateBindings_(result))
+        .then(result => this.updateBindings_(toArray(result.childNodes)))
         .then(element => this.render_(element, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
@@ -609,14 +609,11 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>|!Element} elementOrElements
+   * @param {!Array<!Element>} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elementOrElements) {
-    const elements = /** @type {!Array<!Element>} */
-      (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
-
+  updateBindings_(elements) {
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
@@ -661,6 +658,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
+      // Don't apply DOM diffing to ssr templates.
       if (diffing && container.hasChildNodes()) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);

@@ -64,7 +64,7 @@ export class SsrTemplateHelper {
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
       if (htmlElement.hasAttribute('allow-viewer-render-template')) {
-        return this.viewer_.hasCapability('viewerRenderTemplate');
+        return true;
       }
     }
     return false;
