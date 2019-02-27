@@ -47,6 +47,7 @@ exports.extensionBundles = [
   },
   {name: 'amp-access-poool', version: '0.1', type: TYPES.MISC},
   {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-action-macro', version: '0.1', type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
   {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adsense-impl', version: '0.1', type: TYPES.AD},
@@ -76,6 +77,12 @@ exports.extensionBundles = [
   {name: 'amp-audio', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-auto-ads', version: '0.1', type: TYPES.AD},
   {name: 'amp-auto-lightbox', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-base-carousel',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {name: 'amp-beopinion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-bind', version: '0.1', type: TYPES.MISC},
   {
@@ -101,7 +108,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: ['0.1', '0.2'],
+    version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
@@ -394,6 +401,7 @@ exports.extensionBundles = [
     ],
   },
   {name: 'amp-google-vrview-image', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-viewer-assistance', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-viewer-integration',
     version: '0.1',
@@ -421,18 +429,6 @@ exports.extensionBundles = [
     name: 'amp-video-iframe',
     version: '0.1',
     type: TYPES.MEDIA,
-  },
-  {
-    name: 'amp-video-service',
-    version: '0.1',
-    options: {
-      // `amp-video-service` provides analytics and autoplay for all videos. We
-      // need those to be available asap. This service replaces a runtime-level
-      // provider, so loadPriority is set to high in lieu of delivering it as
-      // part of the core binary.
-      loadPriority: 'high',
-    },
-    type: TYPES.MISC,
   },
   {name: 'amp-viqeo-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-vk', version: '0.1', type: TYPES.MISC},

@@ -18,6 +18,7 @@ import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
+import {setScopeSelectorSupportedForTesting} from '../../src/css';
 import {toArray} from '../../src/types';
 
 
@@ -30,29 +31,8 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   afterEach(() => {
-    dom.setScopeSelectorSupportedForTesting(undefined);
+    setScopeSelectorSupportedForTesting(undefined);
     sandbox.restore();
-  });
-
-  describe('scopeSelector', () => {
-
-    const {scopeSelectorForTesting: scopeSelector} = dom;
-
-    it('concats simple', () => {
-      expect(scopeSelector('.i-amphtml-scoped', 'div'))
-          .to.equal('.i-amphtml-scoped div');
-    });
-
-    it('concats multiple selectors (2)', () => {
-      expect(scopeSelector(':scope', 'div,ul'))
-          .to.equal(':scope div,:scope ul');
-    });
-
-    it('concats multiple selectors (4)', () => {
-      expect(scopeSelector('div >', 'div,ul,ol,section'))
-          .to.equal('div > div,div > ul,div > ol,div > section');
-    });
-
   });
 
   it('should remove all children', () => {
@@ -187,8 +167,8 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, () => true)).to.equal(child);
     expect(dom.closestNode(child, () => true)).to.equal(child);
-    expect(dom.closestByTag(child, 'div')).to.equal(child);
-    expect(dom.closestByTag(child, 'DIV')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'div')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'DIV')).to.equal(child);
   });
 
   it('closest should stop search at opt_stopAt', () => {
@@ -223,16 +203,19 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
-    expect(dom.closestByTag(child, 'child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(
+        child);
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
     expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
         .to.equal(element);
-    expect(dom.closestByTag(child, 'element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(
+        element);
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
-    expect(dom.closestByTag(child, 'parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(
+        parent);
   });
 
   it('closestNode should find nodes as well as elements', () => {
@@ -249,7 +232,7 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closestBySelector should find first match', () => {
+  it('closestAncestorElementBySelector should find first match', () => {
     const parent = document.createElement('parent');
     parent.className = 'parent';
     parent.id = 'parent';
@@ -264,17 +247,26 @@ describes.sandboxed('DOM', {}, env => {
     child.className = 'child';
     element.appendChild(child);
 
-    expect(dom.closestBySelector(child, 'child')).to.equal(child);
-    expect(dom.closestBySelector(child, '.child')).to.equal(child);
-    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '.child'))
+        .to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, '#child'))
+        .to.equal(child);
 
-    expect(dom.closestBySelector(child, 'element')).to.equal(element);
-    expect(dom.closestBySelector(child, '.element')).to.equal(element);
-    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '.element'))
+        .to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, '#element'))
+        .to.equal(element);
 
-    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '.parent'))
+        .to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, '#parent'))
+        .to.equal(parent);
   });
 
   it('elementByTag should find first match', () => {
@@ -366,7 +358,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementByTag should find first match', testChildElementByTag);
 
   it('childElementByTag should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementByTag();
   });
 
@@ -393,7 +385,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementsByTag should find first match', testChildElementsByTag);
 
   it('childElementsByTag should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementsByTag();
   });
 
@@ -424,7 +416,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementByAttr should find first match', testChildElementByAttr);
 
   it('childElementByAttr should find first match', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementByAttr();
   });
 
@@ -455,7 +447,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementsByAttr should find all matches', testChildElementsByAttr);
 
   it('childElementsByAttr should find all matches', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementsByAttr();
   });
 
@@ -549,7 +541,7 @@ describes.sandboxed('DOM', {}, env => {
   it('scopedQuerySelector should find first match', testScopedQuerySelector);
 
   it('scopedQuerySelector should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testScopedQuerySelector();
   });
 
@@ -576,7 +568,7 @@ describes.sandboxed('DOM', {}, env => {
       testScopedQuerySelectorAll);
 
   it('scopedQuerySelectorAll should find all matches (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testScopedQuerySelectorAll();
   });
 
@@ -891,13 +883,6 @@ describes.sandboxed('DOM', {}, env => {
       const element = document.createElement('div');
       element.setAttribute('type', 'application/json');
       expect(dom.isJsonScriptTag(element)).to.be.false;
-    });
-  });
-
-  describe('escapeCssSelectorIdent', () => {
-
-    it('should escape', () => {
-      expect(dom.escapeCssSelectorIdent('a b')).to.equal('a\\ b');
     });
   });
 

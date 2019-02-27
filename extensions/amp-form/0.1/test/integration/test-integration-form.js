@@ -36,7 +36,8 @@ describes.realWin('AmpForm Integration', {
   },
   mockFetch: false,
 }, env => {
-  const baseUrl = 'http://localhost:8081';
+  const {testServerPort} = window.ampTestRuntimeConfig;
+  const baseUrl = `http://localhost:${testServerPort}`;
   let doc;
   let sandbox;
 

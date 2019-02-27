@@ -15,7 +15,10 @@
  */
 
 import {Services} from '../../../src/services';
-import {closestByTag, removeElement} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  removeElement,
+} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -267,7 +270,8 @@ class UrlRewriter_ {
     if (event.defaultPrevented) {
       return;
     }
-    const target = closestByTag(dev().assertElement(event.target), 'A');
+    const target =
+      closestAncestorElementBySelector(dev().assertElement(event.target), 'A');
     if (!target || !target.href) {
       return;
     }
