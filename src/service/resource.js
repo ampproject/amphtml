@@ -709,7 +709,9 @@ export class Resource {
 
   /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
-    if (this.useLayers_) {
+    // TODO(jridgewell): Temporarily disabling layers prioritization code to
+    // determine if it causes the metrics regression.
+    if (false && this.useLayers_) {
       const {element} = this;
       return {
         distance: element.getLayers().iterateAncestry(element,
@@ -767,7 +769,9 @@ export class Resource {
     }
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_) {
+    // TODO(jridgewell): Temporarily disabling layers prioritization code to
+    // determine if it causes the metrics regression.
+    if (false && this.useLayers_) {
       return dev().assertNumber(distance) < multiplier;
     }
     if (typeof distance == 'boolean') {

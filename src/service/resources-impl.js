@@ -174,7 +174,9 @@ export class Resources {
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     let boundScorer;
-    if (this.useLayers_) {
+    // TODO(jridgewell): Temporarily disabling layers prioritization code to
+    // determine if it causes the metrics regression.
+    if (false && this.useLayers_) {
       boundScorer = this.calcTaskScoreLayers_.bind(this);
     } else {
       boundScorer = this.calcTaskScore_.bind(this);
@@ -239,10 +241,6 @@ export class Resources {
 
       /** @private @const {!./layers-impl.LayoutLayers} */
       this.layers_ = layers;
-
-      layers.onScroll((/* elements */) => {
-        this.schedulePass();
-      });
 
       /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
