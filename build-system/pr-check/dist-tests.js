@@ -49,6 +49,7 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
     downloadDistOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();

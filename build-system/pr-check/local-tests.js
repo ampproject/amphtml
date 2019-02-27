@@ -43,7 +43,7 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp test --integration --nobuild --coverage');
+    timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
     //TODO(estherkim): turn on when stabilized :)
     //timedExecOrDie('gulp e2e --nobuild');
