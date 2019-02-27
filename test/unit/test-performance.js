@@ -906,9 +906,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     installPerformanceService(env.win);
     const perf = Services.performanceFor(env.win);
 
-    // Send a fake TouchEvent through the polyfill.
+    // Send a fake first input event.
     const delay = 30;
-    const evt = new TouchEvent('touchstart');
+    const evt = new Event('touchstart');
     callbacks.forEach(callback => {
       callback(delay, evt);
     });
