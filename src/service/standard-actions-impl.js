@@ -93,28 +93,26 @@ export class StandardActions {
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget_.bind(this));
 
-    // All standard actions require high trust.
-    // This is already the default in addGlobalMethodHandler, specifying only
-    // for *emphasis* and safety. 🔒
-    const highTrust = ActionTrust.HIGH;
+    // All standard actions require high trust by default via
+    // addGlobalMethodHandler.
 
     actionService.addGlobalMethodHandler(
-        'hide', this.handleHide_.bind(this), highTrust);
+        'hide', this.handleHide_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'show', this.handleShow_.bind(this), highTrust);
+        'show', this.handleShow_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'toggleVisibility', this.handleToggle_.bind(this), highTrust);
+        'toggleVisibility', this.handleToggle_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'scrollTo', this.handleScrollTo_.bind(this), highTrust);
+        'scrollTo', this.handleScrollTo_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'focus', this.handleFocus_.bind(this), highTrust);
+        'focus', this.handleFocus_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'toggleClass', this.handleToggleClass_.bind(this), highTrust);
+        'toggleClass', this.handleToggleClass_.bind(this));
   }
 
   /**
