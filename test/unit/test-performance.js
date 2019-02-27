@@ -921,10 +921,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         });
 
     // Restore previous window value.
-    if (previousPerfMetrics === 'undefined') {
-      env.win.perfMetrics = previousPerfMetrics;
-    } else {
+    if (typeof previousPerfMetrics === 'undefined') {
       delete env.win.perfMetrics;
+    } else {
+      env.win.perfMetrics = previousPerfMetrics;
     }
   });
 });
