@@ -40,7 +40,7 @@ const mainComponent = join(__dirname, '/components/main.js');
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
 
-let shouldCache = true;
+let shouldCache = false;
 function setCacheStatus(cacheStatus) {
   shouldCache = cacheStatus;
 }
