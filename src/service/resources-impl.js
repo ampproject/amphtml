@@ -1040,6 +1040,7 @@ export class Resources {
    * @param {!Element} element
    */
   dirtyElement(element) {
+    let relayoutAll = false;
     if (this.useLayers_) {
       this.layers_.dirty(element);
     } else {
@@ -1047,9 +1048,11 @@ export class Resources {
       if (isAmpElement) {
         const r = Resource.forElement(element);
         this.setRelayoutTop_(r.getLayoutBox().top);
+      } else {
+        relayoutAll = true;
       }
-      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
     }
+    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
 
 
@@ -1085,8 +1088,7 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
-      // TODO setRelayoutTop_ is being deprecated.
-      this.setRelayoutTop_(box.top);
+      this.dirtyElement(element);
     }
     resource.completeCollapse();
     this.schedulePass(FOUR_FRAME_DELAY_);
@@ -1276,6 +1278,7 @@ export class Resources {
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
+      const dirtySet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -1382,6 +1385,9 @@ export class Resources {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
+          if (this.useLayers_) {
+            dirtySet.push(request.resource.element);
+          }
           request.resource./*OK*/changeSize(
               request.newHeight, request.newWidth, newMargins);
           request.resource.overflowCallback(/* overflown */ false,
@@ -1394,7 +1400,11 @@ export class Resources {
         }
       }
 
-      if (minTop != -1) {
+      if (this.useLayers_) {
+        dirtySet.forEach(request => {
+          this.dirtyElement(request.resource.element);
+        });
+      } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
       }
 
@@ -1417,7 +1427,11 @@ export class Resources {
                 request.callback(/* hasSizeChanged */true);
               }
             });
-            if (minTop != -1) {
+            if (this.useLayers_) {
+              scrollAdjSet.forEach(request => {
+                this.dirtyElement(request.resource.element);
+              });
+            } else if (minTop != -1) {
               this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
