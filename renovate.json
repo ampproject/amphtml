@@ -11,7 +11,18 @@
   "ignoreDeps": [
     "babel-polyfill",
     "document-register-element",
+    "moment-with-locales",
+    "moment",
+    "preact-compat",
+    "preact",
     "promise-pjs",
+    "prop-types",
+    "react-addons-shallow-compare",
+    "react-dates",
+    "react-dom",
+    "react-externs",
+    "react-with-direction",
+    "react",
     "web-activities",
     "web-animations-js"
   ],
