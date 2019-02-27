@@ -161,8 +161,8 @@ describe('preconnect', () => {
         expect(open).to.be.calledOnce;
         expect(send).to.be.calledOnce;
         expect(open.args[0][1]).to.equal(
-            'https://s.preconnect.com/amp_preconnect_polyfill_404_or' +
-            '_other_error_expected._Do_not_worry_about_it' +
+            'https://s.preconnect.com/robots.txt?_AMP_safari_' +
+            'preconnect_polyfill_cachebust=' +
             '?1485531180000');
       });
     });
