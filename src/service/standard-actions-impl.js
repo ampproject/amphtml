@@ -22,8 +22,8 @@ import {dev, user, userAssert} from '../log';
 import {
   getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
 } from '../service';
+import {isFiniteNumber, toWin} from '../types';
 import {startsWith} from '../string';
-import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
 /**
@@ -48,9 +48,6 @@ export function getAutofocusElementForShowAction(element) {
 
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
-
-/** @const {Array<string>} */
-const PERMITTED_POSITIONS = ['top','bottom','center'];
 
 
 /**
@@ -97,16 +94,16 @@ export class StandardActions {
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
 
-    actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
-    actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
-    actionService.addGlobalMethodHandler(
-        'toggleVisibility', this.handleToggle.bind(this));
-    actionService.addGlobalMethodHandler(
-        'scrollTo', this.handleScrollTo.bind(this));
-    actionService.addGlobalMethodHandler(
-        'focus', this.handleFocus.bind(this));
-    actionService.addGlobalMethodHandler(
-        'toggleClass', this.handleToggleClass.bind(this));
+    const addGlobalMethodHandler = (action, unboundMethod) => {
+      actionService.addGlobalMethodHandler('hide', unboundMethod.bind(this));
+    };
+
+    addGlobalMethodHandler('hide', this.handleHide);
+    addGlobalMethodHandler('show', this.handleShow);
+    addGlobalMethodHandler('toggleVisibility', this.handleToggle);
+    addGlobalMethodHandler('scrollTo', this.handleScrollTo);
+    addGlobalMethodHandler('focus', this.handleFocus);
+    addGlobalMethodHandler('toggleClass', this.handleToggleClass);
   }
 
   /**
@@ -229,7 +226,7 @@ export class StandardActions {
   }
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to
-   * it with the given animation duraiton
+   * it with the given animation duration.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    */
@@ -238,22 +235,26 @@ export class StandardActions {
       return null;
     }
     const node = dev().assertElement(invocation.node);
+    const {args} = invocation;
 
-    // Duration for scroll animation
-    const duration = invocation.args
-                     && invocation.args['duration']
-                     && invocation.args['duration'] >= 0 ?
-      invocation.args['duration'] : 500;
+    // Duration and position are optional.
+    // Default values are set by the viewport service, so they're passed through
+    // when undefined or invalid.
+    let posOrUndef = args && args['position'];
+    let durationOrUndef = args && args['duration'];
 
-    // Position in the viewport at the end
-    const pos = (invocation.args
-                && invocation.args['position']
-                && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
-      invocation.args['position'] : 'top';
+    if (posOrUndef && !['top', 'bottom', 'center'].includes(posOrUndef)) {
+      posOrUndef = undefined;
+    }
+
+    if (!isFiniteNumber(durationOrUndef)) {
+      durationOrUndef = undefined;
+    }
 
     // Animate the scroll
     // Should return a promise instead of null
-    return this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
+    return this.viewport_.animateScrollIntoView(
+        node, posOrUndef, durationOrUndef);
   }
 
   /**
