@@ -35,3 +35,4 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | First paint time | `fp` | The time on the first non-blank paint of the page. |
 | First contentful paint time | `fcp` | First paint with content. See https://github.com/WICG/paint-timing |
 | First input delay | `fid` | Millisecond delay in handling the first user input on the page. See https://github.com/WICG/event-timing |
+| First input delay, polyfill value | `fid-polyfill` | Millisecond delay in handling the first user input on the page, reported by [a polyfill](https://github.com/GoogleChromeLabs/first-input-delay) |
