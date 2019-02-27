@@ -1002,7 +1002,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         }, {
           entryType: 'layoutJank',
           fraction: 0.0001,
-
         }];
       },
     };
