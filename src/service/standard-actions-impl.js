@@ -94,8 +94,8 @@ export class StandardActions {
   installActions_(actionService) {
     actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
 
-    const addGlobalMethodHandler = (action, unboundMethod) => {
-      actionService.addGlobalMethodHandler('hide', unboundMethod.bind(this));
+    const addGlobalMethodHandler = (action, unboundHandler) => {
+      actionService.addGlobalMethodHandler(action, unboundHandler.bind(this));
     };
 
     addGlobalMethodHandler('hide', this.handleHide);
