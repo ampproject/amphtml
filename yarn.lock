@@ -7,12 +7,12 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.1.2.tgz#88b034c5f2a9a41d90722885966d2d67629ce522"
   integrity sha512-B+BgrRHJLnNr8pkSfZB3aOitHmtgZSZnioV3ixym3ZAr6VDpvUw4u7tzWgHwG3X03ohHQBdau843pnQOf2oXhA==
 
-"@ampproject/worker-dom@0.2.17":
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.17.tgz#1f7ebace5645a969b1573ec637fb57c21a61d7e4"
-  integrity sha512-2pVwWl15ZFDT4Yj6/k0pIAbJ6BVnNXTbY8r/fGM7yBEs+v0+nuw5gNbjdmAqOk4IDxmcjpFK4j1ljnJX+VWnvg==
+"@ampproject/worker-dom@0.2.18":
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.18.tgz#2b9ebf912c4a9ef4c523786d4ad955c8e4c93b56"
+  integrity sha512-2Api6EDzFy9hEQcJk1AlAm9/UIZaILsDmIXHeQuPjwQtqBW/WwTem+ThB3rFWpkYfOdvLSV97GcIvjQmuDO5nQ==
   dependencies:
-    dompurify "1.0.8"
+    dompurify "1.0.10"
 
 "@ava/babel-plugin-throws-helper@^3.0.0":
   version "3.0.0"
@@ -101,6 +101,14 @@
   dependencies:
     "@babel/helper-explode-assignable-expression" "^7.1.0"
     "@babel/types" "^7.0.0"
+
+"@babel/helper-builder-react-jsx@^7.3.0":
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/@babel/helper-builder-react-jsx/-/helper-builder-react-jsx-7.3.0.tgz#a1ac95a5d2b3e88ae5e54846bf462eeb81b318a4"
+  integrity sha512-MjA9KgwCuPEkQd9ncSXvSyJ5y+j2sICHyrI0M3L+6fnS4wMSNDc1ARXsbTfbb2cXHn17VisSnU/sHFTCxVxSMw==
+  dependencies:
+    "@babel/types" "^7.3.0"
+    esutils "^2.0.0"
 
 "@babel/helper-call-delegate@^7.1.0":
   version "7.1.0"
@@ -527,6 +535,13 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
+"@babel/plugin-syntax-jsx@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-jsx/-/plugin-syntax-jsx-7.2.0.tgz#0b85a3b4bc7cdf4cc4b8bf236335b907ca22e7c7"
+  integrity sha512-VyN4QANJkRW6lDBmENzRszvZf3/4AXaj9YR7GwrWeeN9tEBPuXbmDYVU9bYBN0D70zCWVwUy0HWq2553VCb6Hw==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.0.0"
+
 "@babel/plugin-syntax-logical-assignment-operators@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-logical-assignment-operators/-/plugin-syntax-logical-assignment-operators-7.2.0.tgz#fcab7388530e96c6f277ce494c55caa6c141fcfb"
@@ -752,6 +767,15 @@
     "@babel/helper-get-function-arity" "^7.0.0"
     "@babel/helper-plugin-utils" "^7.0.0"
 
+"@babel/plugin-transform-react-jsx@7.3.0":
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-react-jsx/-/plugin-transform-react-jsx-7.3.0.tgz#f2cab99026631c767e2745a5368b331cfe8f5290"
+  integrity sha512-a/+aRb7R06WcKvQLOu4/TpjKOdvVEKRLWFpKcNuHhiREPgGRB4TQJxq07+EZLS8LFVYpfq1a5lDUnuMdcCpBKg==
+  dependencies:
+    "@babel/helper-builder-react-jsx" "^7.3.0"
+    "@babel/helper-plugin-utils" "^7.0.0"
+    "@babel/plugin-syntax-jsx" "^7.2.0"
+
 "@babel/plugin-transform-regenerator@^7.3.4":
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-regenerator/-/plugin-transform-regenerator-7.3.4.tgz#1601655c362f5b38eead6a52631f5106b29fa46a"
@@ -941,10 +965,10 @@
     node-fetch "^2.3.0"
     universal-user-agent "^2.0.1"
 
-"@octokit/rest@16.16.0":
-  version "16.16.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.16.0.tgz#b686407d34c756c3463f8a7b1e42aa035a504306"
-  integrity sha512-Q6L5OwQJrdJ188gLVmUHLKNXBoeCU0DynKPYW8iZQQoGNGws2hkP/CePVNlzzDgmjuv7o8dCrJgecvDcIHccTA==
+"@octokit/rest@16.16.2":
+  version "16.16.2"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.16.2.tgz#2a08a83dfa2b2286b866825e8a4a92afc8e10ce9"
+  integrity sha512-sNOIcYEzEQD9ovDyOnDmFyZZvU+3ytgrBG/BtCSxJ0e9/j9BKIGH/zyG6py/5DzImcj/U/PA77OqcBrPH3vaQg==
   dependencies:
     "@octokit/request" "2.3.0"
     before-after-hook "^1.2.0"
@@ -1834,15 +1858,6 @@ babel-generator@^6.18.0, babel-generator@^6.26.0:
     source-map "^0.5.7"
     trim-right "^1.0.1"
 
-babel-helper-builder-react-jsx@^6.24.1:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/babel-helper-builder-react-jsx/-/babel-helper-builder-react-jsx-6.26.0.tgz#39ff8313b75c8b65dceff1f31d383e0ff2a408a0"
-  integrity sha1-Of+DE7dci2Xc7/HzHTg+D/KkCKA=
-  dependencies:
-    babel-runtime "^6.26.0"
-    babel-types "^6.26.0"
-    esutils "^2.0.2"
-
 babel-helpers@^6.24.1:
   version "6.24.1"
   resolved "https://registry.yarnpkg.com/babel-helpers/-/babel-helpers-6.24.1.tgz#3471de9caec388e5c850e597e58a26ddf37602b2"
@@ -1926,11 +1941,6 @@ babel-plugin-jest-hoist@^24.1.0:
   resolved "https://registry.yarnpkg.com/babel-plugin-jest-hoist/-/babel-plugin-jest-hoist-24.1.0.tgz#dfecc491fb15e2668abbd690a697a8fd1411a7f8"
   integrity sha512-gljYrZz8w1b6fJzKcsfKsipSru2DU2DmQ39aB6nV3xQ0DDv3zpIzKGortA5gknrhNnPN8DweaEgrnZdmbGmhnw==
 
-babel-plugin-syntax-jsx@^6.8.0:
-  version "6.18.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-syntax-jsx/-/babel-plugin-syntax-jsx-6.18.0.tgz#0af32a9a6e13ca7a3fd5069e62d7b0f58d0d8946"
-  integrity sha1-CvMqmm4Tyno/1QaeYtew9Y0NiUY=
-
 babel-plugin-syntax-object-rest-spread@^6.13.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz#fd6536f2bce13836ffa3a5458c4903a597bb3bf5"
@@ -1950,15 +1960,6 @@ babel-plugin-transform-es2015-modules-commonjs@6.26.2:
     babel-runtime "^6.26.0"
     babel-template "^6.26.0"
     babel-types "^6.26.0"
-
-babel-plugin-transform-react-jsx@6.24.1:
-  version "6.24.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-jsx/-/babel-plugin-transform-react-jsx-6.24.1.tgz#840a028e7df460dfc3a2d29f0c0d91f6376e66a3"
-  integrity sha1-hAoCjn30YN/DotKfDA2R9jduZqM=
-  dependencies:
-    babel-helper-builder-react-jsx "^6.24.1"
-    babel-plugin-syntax-jsx "^6.8.0"
-    babel-runtime "^6.22.0"
 
 babel-plugin-transform-strict-mode@^6.24.1:
   version "6.24.1"
@@ -4220,11 +4221,6 @@ dompurify@1.0.10:
   resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.10.tgz#18d7353631c86ee25049e38fbca8c6b2c5a2af87"
   integrity sha512-huhl3DSWX5LaA7jDtnj3XQdJgWW1wYouNW7N0drGzQa4vEUSVWyeFN+Atx6HP4r5cang6oQytMom6I4yhGJj5g==
 
-dompurify@1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.8.tgz#3fa0d91fde3827d6509d83b43444da56a2796795"
-  integrity sha512-vetRFbN1SXSPfP3ClIiYnxTrXquSqakBEOoB5JESn0SVcSYzpu6ougjakpKnskGctYdlNpwf+riUHSkG7d4XUw==
-
 domutils@1.5:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/domutils/-/domutils-1.5.1.tgz#dcd8488a26f563d61079e48c9f7b7e32373682cf"
@@ -4874,7 +4870,7 @@ estree-walker@^0.6.0:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-0.6.0.tgz#5d865327c44a618dde5699f763891ae31f257dae"
   integrity sha512-peq1RfVAVzr3PU/jL31RaOjUKLoZJpObQWJJ+LgfcxDUifyLZ1RjPQZTl0pzj2uJ45b7A7XpyppXvxdEqzo4rw==
 
-esutils@^2.0.2:
+esutils@^2.0.0, esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
   integrity sha1-Cr9PHKpbyx96nYrMbepPqqBLrJs=
