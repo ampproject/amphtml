@@ -33,7 +33,7 @@ export async function waitForCarouselImg(controller, n) {
   // container. We query all the imgs upfront, since they might not have
   // laid out yet.
   const el = await controller.findElementXPath(
-      `//${TAG_NAME}//div[contains(@class, "${SLOTTED_CLASS}")][${n + 1}]` +
+      `//${TAG_NAME}//*[contains(@class, "${SLOTTED_CLASS}")][${n + 1}]` +
       '//img');
   return await waitForImgLoad(controller, el);
 }

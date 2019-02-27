@@ -22,7 +22,7 @@ import {
 
 describes.endtoend('AMP carousel', {
   fixture: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
-  experiments: ['amp-carousel-v2'],
+  experiments: ['amp-base-carousel'],
   environment: 'shadow-demo',
 }, async env => {
   /** The total number of slides in the carousel */
