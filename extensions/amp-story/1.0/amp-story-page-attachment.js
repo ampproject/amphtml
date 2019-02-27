@@ -24,6 +24,7 @@ import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {
   HistoryState,
   createShadowRootWithStyle,
+  setHistoryState,
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -497,5 +498,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       setTimeout(
           () => toggle(dev().assertElement(this.containerEl_), false), 250);
     });
+
+    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
   }
 }
