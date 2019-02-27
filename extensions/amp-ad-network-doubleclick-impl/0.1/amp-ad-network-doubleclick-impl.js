@@ -493,7 +493,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
-    // TODO: Set up actual experiment
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
