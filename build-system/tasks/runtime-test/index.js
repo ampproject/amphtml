@@ -99,14 +99,14 @@ function getConfig() {
         //'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
-        // 'SL_Safari_11',
+        //'SL_Safari_11',
         //'SL_Edge_17',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
-        //'SL_IE_11',
+        'SL_IE_11',
         'SL_Chrome_Beta',
         'SL_Firefox_Beta',
       ] : [
