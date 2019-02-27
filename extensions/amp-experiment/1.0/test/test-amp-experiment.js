@@ -22,7 +22,7 @@ import {hasOwn} from '../../../../src/utils/object';
 
 describes.realWin('amp-experiment', {
   amp: {
-    extensions: ['amp-experiment'],
+    extensions: ['amp-experiment:1.0'],
   },
 }, env => {
 
