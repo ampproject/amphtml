@@ -17,8 +17,6 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   - pip install urllib3[secure]
   - pip install gsutil --user
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
 branches:
   only:
     - master
