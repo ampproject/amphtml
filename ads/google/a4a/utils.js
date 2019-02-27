@@ -996,10 +996,7 @@ export function getContainerWidth(win, element) {
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
         // viewport.
-        const viewport = Services.viewportForDoc(
-            // Typecast is safe as we would not be inside this loop if element
-            // was null.
-            /** @type {!Element} */ (element));
+        const viewport = Services.viewportForDoc(dev().assertElement(element));
         return viewport.getSize().width;
       case Layout.NODISPLAY:
       case Layout.FLEX_ITEM:
