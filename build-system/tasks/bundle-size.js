@@ -20,7 +20,7 @@ const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const octokit = require('@octokit/rest')();
+const Octokit = require('@octokit/rest');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
@@ -95,9 +95,8 @@ function storeBundleSize() {
     path: path.join('bundle-size', commitHash),
   });
 
-  octokit.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
+  const octokit = new Octokit({
+    auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
   });
 
   return octokit.repos.getContents(githubApiCallOptions).then(() => {
