@@ -232,7 +232,7 @@ export class Viewport {
   /** @private */
   updateVisibility_() {
     const visible = this.viewer_.isVisible();
-    if (visible == this.visible_) {
+    if (visible != this.visible_) {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
