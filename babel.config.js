@@ -42,7 +42,7 @@ module.exports = function(api) {
         'loose': true,
         'targets': {
           'browsers': isTravisBuild() ?
-            ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
+            ['Last 2 versions', 'safari >= 9', "ie 11"] : ['Last 2 versions'],
         },
       }],
     ],
