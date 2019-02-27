@@ -1003,7 +1003,8 @@ export function getContainerWidth(win, element) {
         return 0;
       default:
         // If no layout is provided, we must use getComputedStyle.
-        return parseInt(computedStyle(win, element).width, 10) || 0;
+        const width = parseInt(computedStyle(win, parent).width, 10) || 0;
+        return width;
     }
   }
   return 0;
