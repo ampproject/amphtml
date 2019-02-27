@@ -69,16 +69,15 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(context);
-
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    this.installActions_(this.actions_);
+    // Explicitly not setting `Action` as a member to scope installation to one
+    // method and for bundle size savings. 💰
+    this.installActions_(Services.actionServiceForDoc(context));
   }
 
   /** @override @nocollapse */
@@ -92,18 +91,30 @@ export class StandardActions {
    * @private
    */
   installActions_(actionService) {
-    actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
+    actionService.addGlobalTarget('AMP', this.handleAmpTarget_.bind(this));
 
-    const addGlobalMethodHandler = (action, unboundHandler) => {
-      actionService.addGlobalMethodHandler(action, unboundHandler.bind(this));
-    };
+    // All standard actions require high trust.
+    // This is already the default in addGlobalMethodHandler, specifying only
+    // for *emphasis* and safety. 🔒
+    const highTrust = ActionTrust.HIGH;
 
-    addGlobalMethodHandler('hide', this.handleHide);
-    addGlobalMethodHandler('show', this.handleShow);
-    addGlobalMethodHandler('toggleVisibility', this.handleToggle);
-    addGlobalMethodHandler('scrollTo', this.handleScrollTo);
-    addGlobalMethodHandler('focus', this.handleFocus);
-    addGlobalMethodHandler('toggleClass', this.handleToggleClass);
+    actionService.addGlobalMethodHandler(
+        'hide', this.handleHide_.bind(this), highTrust);
+
+    actionService.addGlobalMethodHandler(
+        'show', this.handleShow_.bind(this), highTrust);
+
+    actionService.addGlobalMethodHandler(
+        'toggleVisibility', this.handleToggle_.bind(this), highTrust);
+
+    actionService.addGlobalMethodHandler(
+        'scrollTo', this.handleScrollTo_.bind(this), highTrust);
+
+    actionService.addGlobalMethodHandler(
+        'focus', this.handleFocus_.bind(this), highTrust);
+
+    actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass_.bind(this), highTrust);
   }
 
   /**
@@ -112,8 +123,9 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @throws If the invocation method is unrecognized.
+   * @private Visible to tests only.
    */
-  handleAmpTarget(invocation) {
+  handleAmpTarget_(invocation) {
     // All global `AMP` actions require high trust.
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
@@ -131,10 +143,10 @@ export class StandardActions {
         });
 
       case 'navigateTo':
-        return this.handleNavigateTo(invocation);
+        return this.handleNavigateTo_(invocation);
 
       case 'closeOrNavigateTo':
-        return this.handleCloseOrNavigateTo(invocation);
+        return this.handleCloseOrNavigateTo_(invocation);
 
       case 'scrollTo':
         userAssert(args['id'],
@@ -143,7 +155,7 @@ export class StandardActions {
             getAmpdoc(node).getElementById(args['id']),
             'scrollTo element ID must exist on page'
         );
-        return this.handleScrollTo(invocation);
+        return this.handleScrollTo_(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -167,8 +179,9 @@ export class StandardActions {
    * Handles the `navigateTo` action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {!Promise}
+   * @private Visible to tests only.
    */
-  handleNavigateTo(invocation) {
+  handleNavigateTo_(invocation) {
     const {node, caller, method, args} = invocation;
     const win = (node.ownerDocument || node).defaultView;
     // Some components have additional constraints on allowing navigation.
@@ -190,7 +203,7 @@ export class StandardActions {
   }
 
   /**
-   * Handles the `handleCloseOrNavigateTo` action.
+   * Handles the `handleCloseOrNavigateTo_` action.
    * This action tries to close the requesting window if allowed, otherwise
    * navigates the window.
    *
@@ -198,8 +211,9 @@ export class StandardActions {
    * Without an opener or if embedded, it will deny the close method.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {!Promise}
+   * @private Visible to tests only.
    */
-  handleCloseOrNavigateTo(invocation) {
+  handleCloseOrNavigateTo_(invocation) {
     const {node} = invocation;
     const win = (node.ownerDocument || node).defaultView;
 
@@ -219,7 +233,7 @@ export class StandardActions {
     }
 
     if (!wasClosed) {
-      return this.handleNavigateTo(invocation);
+      return this.handleNavigateTo_(invocation);
     }
 
     return Promise.resolve();
@@ -229,11 +243,9 @@ export class StandardActions {
    * it with the given animation duration.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleScrollTo(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
+  handleScrollTo_(invocation) {
     const node = dev().assertElement(invocation.node);
     const {args} = invocation;
 
@@ -261,11 +273,9 @@ export class StandardActions {
    * Handles the `focus` action where given an element, we give it focus
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleFocus(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
+  handleFocus_(invocation) {
     const node = dev().assertElement(invocation.node);
 
     // Set focus
@@ -279,8 +289,9 @@ export class StandardActions {
    * is applied to the target element.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleHide(invocation) {
+  handleHide_(invocation) {
     const target = dev().assertElement(invocation.node);
 
     this.resources_.mutateElement(target, () => {
@@ -299,8 +310,9 @@ export class StandardActions {
    * is removed from the target element.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleShow({node}) {
+  handleShow_({node}) {
     const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
@@ -312,7 +324,7 @@ export class StandardActions {
       return null;
     }
 
-    Services.vsyncFor(ownerWindow).measure(() => {
+    this.resources_.measureElement(() => {
       if (computedStyle(ownerWindow, target).display == 'none' &&
           !isShowable(target)) {
 
@@ -341,7 +353,7 @@ export class StandardActions {
   /**
    * @param {!Element} target
    * @param {?Element} autofocusElOrNull
-   * @private
+   * @private Visible to tests only.
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
@@ -358,25 +370,22 @@ export class StandardActions {
    * Handles "toggle" action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleToggle(invocation) {
+  handleToggle_(invocation) {
     if (isShowable(dev().assertElement(invocation.node))) {
-      return this.handleShow(invocation);
-    } else {
-      return this.handleHide(invocation);
+      return this.handleShow_(invocation);
     }
+    return this.handleHide_(invocation);
   }
 
   /**
    * Handles "toggleClass" action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleToggleClass(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-
+  handleToggleClass_(invocation) {
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
     const className = user().assertString(args['class'],

@@ -87,6 +87,8 @@ export class Viewport {
    * @param {!../viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, binding, viewer) {
+    const {win} = ampdoc;
+
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -132,10 +134,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!../timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private {!../vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -159,21 +161,21 @@ export class Viewport {
     this.originalViewportMetaString_ = undefined;
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
-      installLayersServiceForDoc(this.ampdoc,
+      installLayersServiceForDoc(ampdoc,
           this.binding_.getScrollingElement(),
           this.binding_.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
-        this.ampdoc,
+        ampdoc,
         this.vsync_,
         this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
-    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -192,26 +194,25 @@ export class Viewport {
     this.updateVisibility_();
 
     // Top-level mode classes.
-    const {documentElement} = this.globalDoc_;
-    if (this.ampdoc.isSingleDoc()) {
-      documentElement.classList.add('i-amphtml-singledoc');
+    const globalDocElement = this.globalDoc_.documentElement;
+    if (ampdoc.isSingleDoc()) {
+      globalDocElement.classList.add('i-amphtml-singledoc');
     }
     if (viewer.isEmbedded()) {
-      documentElement.classList.add('i-amphtml-embedded');
+      globalDocElement.classList.add('i-amphtml-embedded');
     } else {
-      documentElement.classList.add('i-amphtml-standalone');
+      globalDocElement.classList.add('i-amphtml-standalone');
     }
-    if (isIframed(this.ampdoc.win)) {
-      documentElement.classList.add('i-amphtml-iframed');
+    if (isIframed(win)) {
+      globalDocElement.classList.add('i-amphtml-iframed');
     }
     if (viewer.getParam('webview') === '1') {
-      documentElement.classList.add('i-amphtml-webview');
+      globalDocElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
-    if (isIframed(this.ampdoc.win) &&
-        ('scrollRestoration' in this.ampdoc.win.history)) {
-      this.ampdoc.win.history.scrollRestoration = 'manual';
+    if (isIframed(win) && ('scrollRestoration' in win.history)) {
+      win.history.scrollRestoration = 'manual';
     }
   }
 
@@ -231,7 +232,7 @@ export class Viewport {
   /** @private */
   updateVisibility_() {
     const visible = this.viewer_.isVisible();
-    if (visible != this.visible_) {
+    if (visible == this.visible_) {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
@@ -1243,16 +1244,17 @@ function getDefaultScrollAnimationDuration(scrollTopA, scrollTopB, max = 500) {
  */
 function createViewport(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
+  const {win} = ampdoc;
   let binding;
   if (ampdoc.isSingleDoc() &&
-      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
-        ampdoc.win.Element.prototype.attachShadow &&
+      getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
+    if (isExperimentOn(win, 'ios-embed-sd') &&
+        win.Element.prototype.attachShadow &&
         // Even though iOS 10 supports Shadow DOM, the support is buggy.
-        Services.platformFor(ampdoc.win).getMajorVersion() >= 11) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
+        Services.platformFor(win).getMajorVersion() >= 11) {
+      binding = new ViewportBindingIosEmbedShadowRoot_(win);
     } else {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+      binding = new ViewportBindingIosEmbedWrapper_(win);
     }
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
