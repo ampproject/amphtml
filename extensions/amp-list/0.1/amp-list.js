@@ -658,7 +658,6 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      // Don't apply DOM diffing to ssr templates.
       if (diffing && container.hasChildNodes()) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);

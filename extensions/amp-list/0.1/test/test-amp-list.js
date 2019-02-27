@@ -472,7 +472,7 @@ describes.repeated('amp-list', {
         it('should delegate template rendering to viewer', function*() {
           const rendered = doc.createElement('p');
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
-              .returns(Promise.resolve({html: '<div <p>foo</p>'}));
+              .returns(Promise.resolve({html: '<p>foo</p>'}));
           ssrTemplateHelper.renderTemplate
               .returns(Promise.resolve('<p>foo</p>'));
           sandbox.stub(list, 'updateBindings_')
