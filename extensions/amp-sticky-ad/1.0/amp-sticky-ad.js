@@ -193,12 +193,9 @@ class AmpStickyAd extends AMP.BaseElement {
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
     const signals = ad.signals();
-    let renderStartImplemented = false;
     return this.ad_.getImpl().then(impl => {
-      renderStartImplemented = !!(impl.config || {}).renderStartImplemented;
-    }).then(() => {
       const promises = [signals.whenSignal(CommonSignals.RENDER_START)];
-      if (!renderStartImplemented) {
+      if (!(impl.config || {}).renderStartImplemented) {
         promises.push(signals.whenSignal(CommonSignals.LOAD_END));
       }
       return Promise.race(promises);
