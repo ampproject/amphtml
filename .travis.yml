@@ -21,6 +21,9 @@ before_install:
   - pip install --user urllib3[secure]
   - pip install --user gsutil
   - pip install --user protobuf
+  # Xenial uses Java 11 by default (github.com/travis-ci/travis-ci/issues/10290)
+  - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+  - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 branches:
   only:
     - master
