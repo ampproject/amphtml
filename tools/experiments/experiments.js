@@ -414,6 +414,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9785',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
   },
+  {
+    id: 'inabox-viewport-friendly',
+    name: 'Inabox viewport measures the host window directly if ' +
+        'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
 ];
 
 if (getMode().localDev) {
