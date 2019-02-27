@@ -131,7 +131,7 @@ exports.extensionBundles = [
   {name: 'amp-google-document-embed', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dynamic-css-classes', version: '0.1', type: TYPES.MISC},
   {name: 'amp-embedly-card', version: '0.1', type: TYPES.MISC},
-  {name: 'amp-experiment', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-experiment', version: ['0.1', '1.0'], type: TYPES.MISC},
   {name: 'amp-facebook', version: '0.1', type: TYPES.MISC},
   {name: 'amp-facebook-comments', version: '0.1', type: TYPES.MISC},
   {name: 'amp-facebook-like', version: '0.1', type: TYPES.MISC},
