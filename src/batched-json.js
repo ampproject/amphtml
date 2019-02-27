@@ -57,13 +57,13 @@ export function batchFetchJsonFor(
   return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
       .then(data => {
         const crossOriginAttr = element.getAttribute('cross-origin');
-        if (crossOriginAttr
-            && crossOriginAttr.includes('amp-viewer-auth-token-via-post')) {
-          data.fetchOpt.method = 'POST';
-          data.fetchOpt.headers = {
+        if (crossOriginAttr &&
+            crossOriginAttr.indexOf('amp-viewer-auth-token-via-post') >= 0) {
+          data.fetchOpt['method'] = 'POST';
+          data.fetchOpt['headers'] = {
             'Content-Type': 'application/x-www-form-urlencoded',
           };
-          data.fetchOpt.body = {
+          data.fetchOpt['body'] = {
             'ampViewerAuthToken': opt_token ? opt_token : '',
           };
         }

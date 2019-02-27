@@ -279,6 +279,7 @@ export class AmpForm {
       }
     }
 
+    /** @type {!FetchRequestDef}*/
     const request = {
       xhrUrl,
       fetchOpt: dict({
@@ -293,8 +294,8 @@ export class AmpForm {
     // the viewer will make a remote xhr POST request with an auth token in the
     // request body. Requires amp-viewer-assistance extension for auth token.
     if (this.crossOrigin_ &&
-        this.crossOrigin_.includes('amp-viewer-auth-token-via-post')) {
-      userAssert(request.fetchOpt.method == 'POST',
+        this.crossOrigin_.indexOf('amp-viewer-auth-token-via-post') >= 0) {
+      userAssert(request.fetchOpt['method'] == 'POST',
           'Cannot attach auth token with GET request.');
       return Services.viewerAssistanceForDocOrNull(this.win_)
           .then(viewerAssistance => {

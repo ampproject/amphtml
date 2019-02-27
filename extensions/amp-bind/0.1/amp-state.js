@@ -154,9 +154,9 @@ export class AmpState extends AMP.BaseElement {
     // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
     // the viewer will make a remote xhr POST request with an auth token in the
     // request body. Requires amp-viewer-assistance extension for auth token.
-    const crossOriginElement = element.getAttribute('cross-origin');
-    if (crossOriginElement
-        && crossOriginElement.includes('amp-viewer-auth-token-via-post')) {
+    const crossOriginAttr = element.getAttribute('cross-origin');
+    if (crossOriginAttr &&
+        crossOriginAttr.indexOf('amp-viewer-auth-token-via-post') >= 0) {
       return Services.viewerAssistanceForDocOrNull(ampdoc.win)
           .then(viewerAssistance => {
             devAssert(viewerAssistance,
