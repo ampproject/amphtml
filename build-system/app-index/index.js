@@ -36,10 +36,6 @@ const root = path.join(__dirname, '../../');
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
 
-function setCacheStatus(unusedCacheStatus) {
-  // NOOP.
-}
-
 async function serveIndex({url}, res, next) {
   const mappedPath = basepathMappings[url] || url;
   const fileSet = await getListing(root, mappedPath);
@@ -70,10 +66,8 @@ function installExpressMiddleware(app) {
   app.get(['/', '/*'], serveIndex);
 }
 
-
 module.exports = {
   installExpressMiddleware,
-  setCacheStatus,
 
   // To be tested but not be exported for use.
   serveIndexForTesting: serveIndex,
