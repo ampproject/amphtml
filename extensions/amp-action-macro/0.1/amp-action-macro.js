@@ -75,9 +75,13 @@ export class AmpActionMacro extends AMP.BaseElement {
             arg, this.element);
       }
     }
+    if (invocation.caller.tagName.toLowerCase() === TAG) {
+      userAssert(this.isValidMacroReference_(
+          invocation.caller),
+      'Action macro with ID "%s" cannot reference itself or macros defined '
+          + 'after it', this.element.getAttribute('id'));
+    }
     // Trigger the macro's action.
-    // TODO(alabiaga): Only allow triggering macros defined beforehand to
-    // prevent possibility of cyclic triggering of macros.
     this.actions_.trigger(
         this.element, `${actionEventType}`, event, trust, args);
   }
@@ -86,6 +90,18 @@ export class AmpActionMacro extends AMP.BaseElement {
   renderOutsideViewport() {
     // We want the macro to be available wherever it is in the document.
     return true;
+  }
+
+  /**
+   * Checks if the invoking element is defined after the action being invoked.
+   * This constraint is to prevent possible recursive calls.
+   * @param {!Element} invokingElement
+   * @return {boolean}
+   * @private
+   */
+  isValidMacroReference_(invokingElement) {
+    return !!(this.element.compareDocumentPosition(invokingElement)
+        & Node.DOCUMENT_POSITION_FOLLOWING);
   }
 }
 
