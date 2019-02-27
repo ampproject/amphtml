@@ -23,8 +23,7 @@
   position: absolute !important;
 }
 
-.i-amphtml-story-focused-state-layer.i-amphtml-hidden,
-.i-amphtml-story-focused-state-layer.i-amphtml-hidden::before {
+.i-amphtml-story-focused-state-layer.i-amphtml-hidden {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity 0.1s cubic-bezier(0.4, 0.0, 1, 1) !important;
