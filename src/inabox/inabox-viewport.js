@@ -16,9 +16,11 @@
 
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
+import {PositionObserver} from '../../ads/inabox/position-observer';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
@@ -149,33 +151,72 @@ export class ViewportBindingInabox {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private {?../../ads/inabox/position-observer.PositionObserver} */
+    this.topWindowPositionObserver_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveFunction_ = null;
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
   connect() {
-    this.listenForPosition_();
+    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+        canInspectWindow(this.win.top)) {
+      this.listenForPositionSameDomain();
+    } else {
+      this.listenForPosition_();
+    }
   }
 
   /** @private */
   listenForPosition_() {
-
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
-          const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data['viewportRect'];
-
-          this.updateBoxRect_(data['targetRect']);
-
-          if (isResized(this.viewportRect_, oldViewportRect)) {
-            this.resizeObservable_.fire();
-          }
-          if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.fireScrollThrottle_();
-          }
+          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
         });
+  }
+
+  /** @visibleForTesting */
+  listenForPositionSameDomain() {
+    // Set up listener but only after the resources service is properly
+    // registered (since it's registered after the inabox services so it won't
+    // be available immediately).
+    // TODO(lannka): Investigate why this is the case.
+    if (this.topWindowPositionObserver_) {
+      return Promise.resolve();
+    }
+    return Services.resourcesPromiseForDoc(this.win.document.documentElement)
+        .then(() => {
+          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
+          this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
+              /** @type {!HTMLIFrameElement} */(this.win.frameElement),
+              data => {
+                this.updateLayoutRects_(
+                    data['viewportRect'],
+                    data['targetRect']);
+              });
+        });
+  }
+
+  /**
+   * @private
+   * @param {!../layout-rect.LayoutRectDef} viewportRect
+   * @param {!../layout-rect.LayoutRectDef} targetRect
+   */
+  updateLayoutRects_(viewportRect, targetRect) {
+    const oldViewportRect = this.viewportRect_;
+    this.viewportRect_ = viewportRect;
+    this.updateBoxRect_(targetRect);
+    if (isResized(this.viewportRect_, oldViewportRect)) {
+      this.resizeObservable_.fire();
+    }
+    if (isMoved(this.viewportRect_, oldViewportRect)) {
+      this.fireScrollThrottle_();
+    }
   }
 
   /** @override */
@@ -283,6 +324,13 @@ export class ViewportBindingInabox {
 
   /** @override */
   getRootClientRectAsync() {
+    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+        canInspectWindow(this.win.top)) {
+      // Set up the listener if we haven't already.
+      return this.listenForPositionSameDomain().then(() =>
+        this.topWindowPositionObserver_.getTargetRect(
+            /** @type {!HTMLIFrameElement} */(this.win.frameElement)));
+    }
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.requestOnce(
@@ -378,7 +426,13 @@ export class ViewportBindingInabox {
     return dev().assertElement(this.win.document.body);
   }
 
-  /** @override */ disconnect() {/* no-op */}
+  /** @override */
+  disconnect() {
+    if (this.unobserveFunction_) {
+      this.unobserveFunction_();
+    }
+  }
+
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}

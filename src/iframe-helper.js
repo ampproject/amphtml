@@ -546,3 +546,25 @@ export function disableScrollingOnIframe(iframe) {
 
   return iframe;
 }
+
+/**
+ * Returns true if win's properties can be accessed and win is defined.
+ * This functioned is used to determine if a window is cross-domained
+ * from the perspective of the current window.
+ * @param {!Window} win
+ * @return {boolean}
+ * @private
+ */
+export function canInspectWindow(win) {
+  // TODO: this is not reliable.  The compiler assumes that property reads are
+  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
+  // but since we're not using the closure library I'm not sure how to do this.
+  // See https://github.com/google/closure-compiler/issues/3156
+  try {
+    // win['test'] could be truthy but not true the compiler shouldn't be able
+    // to optimize this check away.
+    return !!win.location.href && (win['test'] || true);
+  } catch (unusedErr) { // eslint-disable-line no-unused-vars
+    return false;
+  }
+}

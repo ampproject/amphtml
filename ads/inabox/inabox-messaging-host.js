@@ -21,6 +21,7 @@ import {
   serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {PositionObserver} from './position-observer';
+import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
@@ -300,7 +301,7 @@ export class InaboxMessagingHost {
     // this loop breaks immediately.
     let topXDomainWin;
     for (let j = 0, tempWin = win;
-      j < 10 && tempWin != tempWin.top && !canInspectWindow_(tempWin);
+      j < 10 && tempWin != tempWin.top && !canInspectWindow(tempWin);
       j++, topXDomainWin = tempWin, tempWin = tempWin.parent) {}
     // If topXDomainWin exists, we know that the frame we want to measure
     // is a x-domain frame. Unfortunately, you can not access properties
@@ -345,27 +346,5 @@ export class InaboxMessagingHost {
         delete this.iframeMap_[sentinel];
       }
     }
-  }
-}
-
-/**
- * Returns true if win's properties can be accessed and win is defined.
- * This functioned is used to determine if a window is cross-domained
- * from the perspective of the current window.
- * @param {!Window} win
- * @return {boolean}
- * @private
- */
-function canInspectWindow_(win) {
-  // TODO: this is not reliable.  The compiler assumes that property reads are
-  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
-  // but since we're not using the closure library I'm not sure how to do this.
-  // See https://github.com/google/closure-compiler/issues/3156
-  try {
-    // win['test'] could be truthy but not true the compiler shouldn't be able
-    // to optimize this check away.
-    return !!win.location.href && (win['test'] || true);
-  } catch (unusedErr) { // eslint-disable-line no-unused-vars
-    return false;
   }
 }

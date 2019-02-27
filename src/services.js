@@ -327,6 +327,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/resources-impl.Resources>}
+   */
+  static resourcesPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'resources'));
+  }
+
+  /**
    * @param {!Window} win
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
