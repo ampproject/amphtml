@@ -15,13 +15,14 @@
  */
 'use strict';
 
-const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 const clearLocalStorage = async (page) => {
   await page.evaluate(() => {
     localStorage.clear();
   });
-  await page.reload({waitUntil: 'networkidle0'});
+  page.setDefaultNavigationTimeout(5000);
+  await page.reload({waitUntil: 'domcontentloaded'});
 }
 
 module.exports = {
@@ -31,10 +32,7 @@ module.exports = {
 
     await page.tap('#consent-ui #accept');
 
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
+    await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img',
         'amp-img[data-block-on-consent="_till_accepted"] img',
         'amp-img[data-block-on-consent="default"] img',
@@ -51,10 +49,7 @@ module.exports = {
       document.querySelector('#consent-ui #reject').click();
     });
 
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
+    await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img'
     ]);
   },
@@ -65,10 +60,7 @@ module.exports = {
     // Accept the consent
     await page.tap('#consent-ui #accept');
 
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
+    await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img',
         'amp-img[data-block-on-consent="_till_accepted"] img',
         'amp-img[data-block-on-consent="default"] img',
@@ -97,10 +89,7 @@ module.exports = {
       });
     }, localStorageJson);
 
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ [
+    await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img',
         'amp-img[data-block-on-consent="_till_accepted"] img',
         'amp-img[data-block-on-consent="default"] img',
