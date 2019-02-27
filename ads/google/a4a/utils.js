@@ -16,6 +16,7 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert} from '../../../src/log';
@@ -969,40 +970,34 @@ export function getAmpRuntimeTypeParameter(win) {
  *    with a fixed size, if the given element has none.
  */
 export function getContainerWidth(element) {
-    let parent = element;
-    let maxDepth = 100;
-    // Find the first ancestor with a fixed size
-    while (parent && maxDepth--) {
-      const layout = parent.getAttribute('layout');
-      switch (layout) {
-        case Layout.NODISPLAY:
-          return 0;
-        case Layout.FIXED:
-          return parseInt(parent.getAttribute('width'), 10) || 0;
-        case Layout.RESPONSIVE:
-        case Layout.FILL:
-        case Layout.FIXED_HEIGHT:
-        case Layout.FLUID:
-          // The above layouts determine the width of the element by the
-          // containing element, or by CSS max-width property.
-          if (parent.style.maxWdith) {
-            return parseInt(parent.style.maxWidth, 10) || 0;
-          }
-          parent = parent.parentElement;
-        case Layout.CONTAINER:
-          // Container layout allows the container's size to be determined by
-          // the children within it, so in principle we can grow as large as the
-          // viewport.
-          const viewport = Services.viewportForDoc(element);
-          return viewport.getSize().width;
-        case Layout.FLEX_ITEM:
-          // Width is determined in part by sibling elements. This is usually
-          // used for carousel-type constructs, and is unreasonably difficult to
-          // compute the actual available width.
-        default:
-          return 0;
-      }
+  let parent = element;
+  let maxDepth = 100;
+  // Find the first ancestor with a fixed size
+  while (parent && maxDepth--) {
+    const layout = parent.getAttribute('layout');
+    switch (layout) {
+      case Layout.FIXED:
+        return parseInt(parent.getAttribute('width'), 10) || 0;
+      case Layout.RESPONSIVE:
+      case Layout.FILL:
+      case Layout.FIXED_HEIGHT:
+      case Layout.FLUID:
+        // The above layouts determine the width of the element by the
+        // containing element, or by CSS max-width property.
+        if (parent.style.maxWdith) {
+          return parseInt(parent.style.maxWidth, 10) || 0;
+        }
+        parent = parent.parentElement;
+      case Layout.CONTAINER:
+        // Container layout allows the container's size to be determined by
+        // the children within it, so in principle we can grow as large as the
+        // viewport.
+        const viewport = Services.viewportForDoc(element);
+        return viewport.getSize().width;
+      default:
+        return 0;
     }
-    return 0;
   }
+  return 0;
 }
+
