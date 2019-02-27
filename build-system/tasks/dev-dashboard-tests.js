@@ -19,7 +19,6 @@ const config = require('../config');
 const deglob = require('globs-to-files');
 const gulp = require('gulp-help')(require('gulp'));
 const Mocha = require('mocha');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {isTravisBuild} = require('../travis');
 
 
@@ -39,9 +38,6 @@ function runDevDashboardTests() {
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
 
-  // Listen for Ctrl + C to cancel testing
-  const handlerProcess = createCtrlcHandler('test');
-
   // Run the tests.
   mocha.run(function(failures) {
     if (failures) {
@@ -49,9 +45,9 @@ function runDevDashboardTests() {
     }
     resolver();
   });
-  return deferred.then(() => exitCtrlcHandler(handlerProcess));
+  return deferred;
 }
 
 
-gulp.task('dev-dashboard', 'Runs all the dev dashboard tests',
+gulp.task('dev-dashboard-tests', 'Runs all the dev dashboard tests',
     runDevDashboardTests);

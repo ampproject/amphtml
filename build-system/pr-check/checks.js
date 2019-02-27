@@ -49,7 +49,7 @@ function main() {
     timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
-    timedExecOrDie('gulp dev_dashboard');
+    timedExecOrDie('gulp dev-dashboard-tests');
   } else {
     printChangeSummary(FILENAME);
     if (buildTargets.has('RUNTIME') ||
@@ -75,7 +75,7 @@ function main() {
     }
 
     if (buildTargets.has('DEV_DASHBOARD')) {
-      timedExecOrDie('gulp dev_dashboard');
+      timedExecOrDie('gulp dev-dashboard-tests');
     }
   }
 

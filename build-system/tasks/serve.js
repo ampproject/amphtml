@@ -96,7 +96,8 @@ gulp.task(
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
         'inspect': '  Run nodemon in `inspect` mode',
-        'enable_dev_dashboard_cache': '  Enables the dev dashboard cache',
+        'enable_dev_dashboard_cache':
+            '  Enables the dev dashboard cache (default: false)',
       },
     }
 );
