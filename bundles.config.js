@@ -76,7 +76,19 @@ exports.extensionBundles = [
   },
   {name: 'amp-audio', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-auto-ads', version: '0.1', type: TYPES.AD},
+  {
+    name: 'amp-autocomplete',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {name: 'amp-auto-lightbox', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-base-carousel',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {name: 'amp-beopinion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-bind', version: '0.1', type: TYPES.MISC},
   {
@@ -102,7 +114,7 @@ exports.extensionBundles = [
   {name: 'amp-call-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-carousel',
-    version: ['0.1', '0.2'],
+    version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
