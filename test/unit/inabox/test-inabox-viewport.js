@@ -113,9 +113,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     let viewportRect;
     let targetRect;
 
-    beforeEach(() => {
-    });
-
     it('cross domain', () => {
       sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(false);
       stubIframeClientMakeRequest(
@@ -379,6 +376,17 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         .returns(layoutRectLtwh(10, 20, 100, 100));
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
+    });
+  });
+
+  it('should disconnect friendly listener', () => {
+    sandbox.stub(PositionObserver.prototype, 'observe')
+        .returns(sandbox.spy());
+    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
+    return binding.listenForPositionSameDomain().then(() => {
+      expect(binding.unobserveFunction_).to.not.be.called;
+      binding.disconnect();
+      expect(binding.unobserveFunction_).to.be.called;
     });
   });
 });

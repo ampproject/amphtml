@@ -154,6 +154,9 @@ export class ViewportBindingInabox {
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.unobserveFunction_ = null;
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -182,13 +185,14 @@ export class ViewportBindingInabox {
     // Set up listener but only after the resources service is properly
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
+    // TODO(lannka): Investigate why this is the case.
     if (this.topWindowPositionObserver_) {
       return Promise.resolve();
     }
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
         .then(() => {
           this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
-          this.topWindowPositionObserver_.observe(
+          this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
               /** @type {!HTMLIFrameElement} */(this.win.frameElement),
               data => {
                 this.updateLayoutRects_(
@@ -422,7 +426,13 @@ export class ViewportBindingInabox {
     return dev().assertElement(this.win.document.body);
   }
 
-  /** @override */ disconnect() {/* no-op */}
+  /** @override */
+  disconnect() {
+    if (this.unobserveFunction_) {
+      this.unobserveFunction_();
+    }
+  }
+
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}
