@@ -11,7 +11,7 @@ The GitHub issue for a given week's design review will have links to the designs
 
 To join a design review, follow the link for the video conference in the Design Review issue.
 
-You can optionally join the [design review Google Group](https://groups.google.com/a/ampproject.org/forum/#!forum/amp-design-review) the video conference; otherwise when you click on the video conference link you may have to wait a bit for someone in the meeting to accept your request to join.
+You can optionally join the [design review Google Group](https://groups.google.com/a/ampproject.org/forum/#!forum/amp-design-review) to be able to join the video conference automatically; otherwise when you click on the video conference link you may have to wait a bit for someone in the meeting to accept your request to join.
 
 **When attending a design review please read through the designs _before_ the review starts.**
 
