@@ -837,6 +837,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
         expect(url).to.not.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.not.match(/(=|,?)2106317(3|4)(,|&|$)/);
       });
     });
   });
