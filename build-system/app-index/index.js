@@ -18,7 +18,6 @@
 const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
 const BBPromise = require('bluebird');
-const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
 const path = require('path');
 const {
@@ -34,30 +33,12 @@ const pc = process;
 // Sitting on /build-system/app-index, so we go back twice for the repo root.
 const root = path.join(__dirname, '../../');
 
-// JS Component
-const mainComponent = join(__dirname, '/components/main.js');
-
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
 
-let shouldCache = false;
-function setCacheStatus(cacheStatus) {
-  shouldCache = cacheStatus;
+function setCacheStatus(unusedCacheStatus) {
+  // NOOP.
 }
-
-
-let mainBundleCache;
-async function bundleMain() {
-  if (shouldCache && mainBundleCache) {
-    return mainBundleCache;
-  }
-  const bundle = await bundler.bundleComponent(mainComponent);
-  if (shouldCache) {
-    mainBundleCache = bundle;
-  }
-  return bundle;
-}
-
 
 async function serveIndex({url}, res, next) {
   const mappedPath = basepathMappings[url] || url;
@@ -83,15 +64,6 @@ async function serveIndex({url}, res, next) {
   return renderedHtml; // for testing
 }
 
-
-// Promises to run before serving
-async function beforeServeTasks() {
-  if (shouldCache) {
-    await bundleMain();
-  }
-}
-
-
 function installExpressMiddleware(app) {
   api.installExpressMiddleware(app);
 
@@ -100,7 +72,6 @@ function installExpressMiddleware(app) {
 
 
 module.exports = {
-  beforeServeTasks,
   installExpressMiddleware,
   setCacheStatus,
 
