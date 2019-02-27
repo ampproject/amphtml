@@ -83,7 +83,7 @@
     "eslint-plugin-google-camelcase": "0.0.2",
     "eslint-plugin-jasmine": "2.10.1",
     "eslint-plugin-jsdoc": "4.1.1",
-    "eslint-plugin-sort-imports-es6-autofix": "0.3.0",
+    "eslint-plugin-sort-imports-es6-autofix": "0.4.0",
     "eslint-plugin-sort-requires": "2.1.0",
     "event-stream": "4.0.1",
     "express": "4.16.4",
