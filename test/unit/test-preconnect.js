@@ -163,7 +163,7 @@ describe('preconnect', () => {
         expect(open.args[0][1]).to.equal(
             'https://s.preconnect.com/robots.txt?_AMP_safari_' +
             'preconnect_polyfill_cachebust=' +
-            '?1485531180000');
+            '1485531180000');
       });
     });
   });
