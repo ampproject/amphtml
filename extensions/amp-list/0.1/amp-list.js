@@ -557,7 +557,12 @@ export class AmpList extends AMP.BaseElement {
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data)
-        .then(result => this.updateBindings_(toArray(result.childNodes)))
+        // For SSR, the result will be the container node that contains the
+        // list items. Just pass in the list items when updating the bindings
+        // and rendering else the sanitizer will strip out the class attribute
+        // from the container.
+        .then(result => this.updateBindings_(
+            isSSR ? toArray(result.childNodes) : result))
         .then(element => this.render_(element, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
