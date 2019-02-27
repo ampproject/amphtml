@@ -120,7 +120,7 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlotsExp';
+const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
 
 /** @const @enum{string} */
 const FLEXIBLE_AD_SLOTS_BRANCHES = {
@@ -276,6 +276,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.shouldSandbox_ = false;
+
+    /** @private {boolean} */
+    this.sendFlexibleAdSlotParams_ = false;
   }
 
   /**
@@ -380,7 +383,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
-    if (isExperimentOn(this.win, 'flexAdSlots')) {
+    if (setExps[FLEXIBLE_AD_SLOTS_EXP] &&
+        setExps[FLEXIBLE_AD_SLOTS_EXP] ==
+        FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT) {
       this.sendFlexibleAdSlotParams_ = true;
     }
   }
@@ -489,8 +494,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
     // TODO: Set up actual experiment
-    const sendFlexibleAdSlotParams = true;
-    debugger;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -506,9 +509,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
-      'msz': sendFlexibleAdSlotParams ?
+      'msz': this.sendFlexibleAdSlotParams_ ?
           `${getContainerWidth(this.win, this.element)}x-1` : null,
-      'psz': sendFlexibleAdSlotParams ?
+      'psz': this.sendFlexibleAdSlotParams_ ?
           `${getContainerWidth(this.win, this.element.parentElement)}x-1` :
           null,
       'scp': serializeTargeting(
