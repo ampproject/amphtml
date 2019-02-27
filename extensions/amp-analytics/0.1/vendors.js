@@ -96,6 +96,8 @@ import {
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
+import {NAVEGG_CONFIG} from './vendors/navegg';
+
 
 /**
  * @const {!JsonObject}
@@ -242,6 +244,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
+  'navegg': NAVEGG_CONFIG,
 });
 
 if (getMode().test || getMode().localDev) {
