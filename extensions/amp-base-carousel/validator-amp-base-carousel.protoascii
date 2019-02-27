@@ -16,13 +16,12 @@
 
 tags: {  # amp-base-carousel
   html_format: AMP
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-base-carousel"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -100,49 +99,24 @@ attr_lists: {
   }
 
   # amp-bind
-  attrs: {
-    name: "[advance-count]"
-  }
-  attrs: {
-    name: "[auto-advance]"
-  }
-  attrs: {
-    name: "[auto-advance-count]"
-  }
-  attrs: {
-    name: "[auto-advance-interval]"
-  }
-  attrs: {
-    name: "[auto-advance-loops]"
-  }
-  attrs: {
-    name: "[horizontal]"
-  }
-  attrs: {
-    name: "[loop]"
-  }
-  attrs: {
-    name: "[mixed-length]"
-  }
-  attrs: {
-    name: "[slide]"
-  }
-  attrs: {
-    name: "[snap]"
-  }
-  attrs: {
-    name: "[snap-align]"
-  }
-  attrs: {
-    name: "[snap-by]"
-  }
-  attrs: {
-    name: "[visible-count]"
-  }
+  attrs: { name: "[advance-count]" }
+  attrs: { name: "[auto-advance]" }
+  attrs: { name: "[auto-advance-count]" }
+  attrs: { name: "[auto-advance-interval]" }
+  attrs: { name: "[auto-advance-loops]" }
+  attrs: { name: "[horizontal]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[mixed-length]" }
+  attrs: { name: "[slide]" }
+  attrs: { name: "[snap]" }
+  attrs: { name: "[snap-align]" }
+  attrs: { name: "[snap-by]" }
+  attrs: { name: "[visible-count]" }
 }
 
 tags: {  # <amp-base-carousel>
   html_format: AMP
+  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   requires_extension: "amp-base-carousel"
   attr_lists: "amp-base-carousel-common"
@@ -161,6 +135,7 @@ tags: {  # <amp-base-carousel>
 
 tags: {  # <amp-base-carousel lightbox>
   html_format: AMP
+  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   spec_name: "AMP-BASE-CAROUSEL [lightbox]"
   requires_extension: "amp-base-carousel"
@@ -191,6 +166,7 @@ tags: {  # <amp-base-carousel lightbox>
 
 tags: {
   html_format: AMP
+  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -200,6 +176,7 @@ tags: {
 }
 tags: {
   html_format: AMP
+  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
   attrs: {
