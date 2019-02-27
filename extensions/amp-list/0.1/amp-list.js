@@ -728,8 +728,10 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElements_(targetHeight, height) {
-    const loadMoreHeight = this.loadMoreService_
-        .getLoadMoreButton()./*OK*/offsetHeight;
+    const loadMoreElement = !!this.loadMoreSrc_ ?
+      this.loadMoreService_.getLoadMoreButton() :
+      this.loadMoreService_.getLoadMoreEndElement();
+    const loadMoreHeight = loadMoreElement./*OK*/offsetHeight;
     if (targetHeight + loadMoreHeight > height) {
       this.attemptChangeHeight(targetHeight + loadMoreHeight)
           .then(() => {
