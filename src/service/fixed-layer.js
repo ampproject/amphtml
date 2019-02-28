@@ -63,11 +63,10 @@ function combineTransforms(opt_initialTransform, opt_addedTransform) {
   if (!opt_addedTransform || opt_addedTransform == 'none') {
     return opt_initialTransform || '';
   }
-  const addedTransformOrEmpty = opt_addedTransform || ''; // lgtm [js/trivial-conditional]
   if (!opt_initialTransform || opt_initialTransform == 'none') {
-    return addedTransformOrEmpty;
+    return opt_addedTransform;
   }
-  return `${opt_initialTransform} ${addedTransformOrEmpty}`;
+  return `${opt_initialTransform} ${opt_addedTransform}`;
 }
 
 /**
@@ -356,7 +355,7 @@ export class FixedLayer {
           // Don't update element if target element is defined and unequal.
           return;
         }
-        devAssert(independent, 'Can\'t transform a dependent element direcly.');
+        devAssert(independent, "Can't transform a dependent element direcly.");
       }
 
       // Don't update independent elements when a transform is applied to all.
@@ -710,20 +709,19 @@ export class FixedLayer {
    * @param {!Array<string>} selectors
    * @param {string} position 'fixed' or 'sticky'
    * @param {boolean=} opt_lightboxMode
-   * @param {number=} opt_limit
+   * @param {number=} limit
    * @private
    */
   setupSelectorsByType_(
-    root, selectors, position, opt_lightboxMode, opt_limit) {
+    root, selectors, position, opt_lightboxMode, limit = Infinity) {
 
     devAssert(position == 'fixed' || position == 'sticky');
 
-    for (let i = 0; i < this.fixedSelectors_.length; i++) {
+    for (let i = 0; i < selectors.length; i++) {
       const elements = root.querySelectorAll(selectors[i]);
       for (
         let j = 0;
-        j < elements.length &&
-          (!opt_limit || this.elements_.length <= opt_limit);
+        j < elements.length && this.elements_.length <= limit;
         j++) {
         this.setupElement_(elements[j], selectors[i], position,
             /* opt_forceTransfer */ undefined, opt_lightboxMode);
