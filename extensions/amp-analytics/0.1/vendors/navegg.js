@@ -25,7 +25,7 @@ export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
       '&tit=${title}' +
       '&lan=${browserLanguage}',
     'pageview':
-      'https://${host}/${path}?${params}&acc=${account}&v=10',
+      'https://${host}/${path}?${params}&acc=${account}&v=7',
   },
   'triggers': {
     'trackpageview': {
