@@ -48,8 +48,9 @@ export function handleAutoscroll(ampdoc, container) {
     return;
   }
 
+  const duration = 0;
   const viewport = Services.viewportForDoc(ampdoc);
-  viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
+  viewport.animateScrollWithinParent(elem, container, 'center', duration);
 }
 
 
