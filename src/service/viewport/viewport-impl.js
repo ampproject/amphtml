@@ -1033,7 +1033,7 @@ export class Viewport {
    * Specifies a callback for measuring an element's fixed positioning when the
    * viewport's padding top changes.
    *
-   * `callback` runs in a measure phase and takes:
+   * `measure` runs in a measure phase and takes:
    *  - afterAnimation, a promise that resolves after a running translation is
    *    finished.
    *  - lastPaddingTop
