@@ -931,22 +931,22 @@
     universal-user-agent "^2.0.1"
     url-template "^2.0.8"
 
-"@octokit/request@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-2.3.0.tgz#da2672308bcf0b9376ef66f51bddbe5eb87cc00a"
-  integrity sha512-5YRqYNZOAaL7+nt7w3Scp6Sz4P2g7wKFP9npx1xdExMomk8/M/ICXVLYVam2wzxeY0cIc6wcKpjC5KI4jiNbGw==
+"@octokit/request@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-2.4.0.tgz#729fc5ea7654ab7cb74e0ae1935f69462a33b5e6"
+  integrity sha512-Bm2P0duVRUeKhyepNyFg5GX+yhCK71fqdtpsw5Rz+PQPjSha8HYwPMF5QfpzpD8b6/Xl3xhTgu3V90W362gZ1A==
   dependencies:
     "@octokit/endpoint" "^3.1.1"
     is-plain-object "^2.0.4"
     node-fetch "^2.3.0"
     universal-user-agent "^2.0.1"
 
-"@octokit/rest@16.16.2":
-  version "16.16.2"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.16.2.tgz#2a08a83dfa2b2286b866825e8a4a92afc8e10ce9"
-  integrity sha512-sNOIcYEzEQD9ovDyOnDmFyZZvU+3ytgrBG/BtCSxJ0e9/j9BKIGH/zyG6py/5DzImcj/U/PA77OqcBrPH3vaQg==
+"@octokit/rest@16.16.3":
+  version "16.16.3"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.16.3.tgz#89b64b1f5ed1f85cfd1925f0c4b968c403b895db"
+  integrity sha512-8v5xyqXZwQbQ1WsTLU3G25nAlcKYEgIXzDeqLgTFpbzzJXcey0C8Mcs/LZiAgU8dDINZtO2dAPgd1cVKgK9DQw==
   dependencies:
-    "@octokit/request" "2.3.0"
+    "@octokit/request" "2.4.0"
     before-after-hook "^1.2.0"
     btoa-lite "^1.0.0"
     lodash.get "^4.4.2"
