@@ -947,6 +947,10 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'torimochi': {
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
@@ -956,6 +960,10 @@ export const adConfig = {
 
   'uas': {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
+  },
+
+  'ucfunnel': {
+    renderStartImplemented: true,
   },
 
   'uzou': {

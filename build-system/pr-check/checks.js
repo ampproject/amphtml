@@ -49,6 +49,7 @@ function main() {
     timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
+    timedExecOrDie('gulp dev-dashboard-tests');
   } else {
     printChangeSummary(FILENAME);
     if (buildTargets.has('RUNTIME') ||
@@ -72,10 +73,13 @@ function main() {
     if (buildTargets.has('DOCS')) {
       timedExecOrDie('gulp check-links');
     }
+
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      timedExecOrDie('gulp dev-dashboard-tests');
+    }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

@@ -16,14 +16,14 @@
 
 import {Services} from '../services';
 import {
-  closestAncestorElementByTag,
-  escapeCssSelectorIdent,
+  closestAncestorElementBySelector,
   isIframed,
   openWindowDialog,
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../utils/object';
+import {escapeCssSelectorIdent} from '../css';
 import {
   getExtraParamsUrl,
   shouldAppendExtraParams,
@@ -311,7 +311,7 @@ export class Navigation {
       return;
     }
     const element = dev().assertElement(e.target);
-    const target = closestAncestorElementByTag(element, 'A');
+    const target = closestAncestorElementBySelector(element, 'A');
     if (!target || !target.href) {
       return;
     }
@@ -601,7 +601,7 @@ export class Navigation {
  */
 function maybeExpandUrlParams(ampdoc, e) {
   const target =
-    closestAncestorElementByTag(dev().assertElement(e.target), 'A');
+    closestAncestorElementBySelector(dev().assertElement(e.target), 'A');
   if (!target || !target.href) {
     // Not a click on a link.
     return;
