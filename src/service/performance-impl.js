@@ -181,7 +181,7 @@ export class Performance {
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
-        this.win.addEventListener('beforeunload', this.onPageHidden_);
+        this.win.addEventListener('beforeunload', this.onVisibilityChange_);
       }
     }
 
@@ -343,7 +343,7 @@ export class Performance {
       );
       // const platform = Services.platformFor(this.win);
       // if (platform.isSafari()) {
-      //   this.win.removeEventListener('beforeunload', this.onPageHidden_);
+      //   this.win.removeEventListener('beforeunload', this.onVisibilityChange_);
       // }
     }
   }
