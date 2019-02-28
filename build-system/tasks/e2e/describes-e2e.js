@@ -29,7 +29,9 @@ const TIMEOUT = 20000;
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
- *  fixtures: (!Array<string>|undefined),
+ *  environments: (!Array<string>|undefined),
+ *  serveMode: (string|undefined),
+ *  testUrl: string,
  * }}
  */
 let TestSpec;
@@ -41,6 +43,21 @@ const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
   // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
+
+/**
+ * Maps an environment enum value to a `describes.repeated` variant object.
+ */
+const EnvironmentVariantMap = {
+  [Environment.SINGLE]:
+      {name: 'Standalone environment', value: {environment: 'single'}},
+  [Environment.VIEWER_DEMO]:
+      {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
+  [Environment.SHADOW_DEMO]:
+      {name: 'Shadow environment', value: {environment: 'shadow-demo'}},
+};
+
+const defaultEnvironments =
+    [Environment.SINGLE, Environment.VIEWER_DEMO, Environment.SHADOW_DEMO];
 
 /**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
@@ -62,8 +79,25 @@ function describeEnv(factory) {
         fixtures.push(fixture);
       }
     });
+
+    const environments = spec.environments || defaultEnvironments;
+    const variants = Object.create(null);
+    environments.forEach(environment => {
+      const o = EnvironmentVariantMap[environment];
+      variants[o.name] = o.value;
+    });
+
     return describeFunc(name, function() {
-      const env = Object.create(null);
+      for (const name in variants) {
+        describe(name ? ` ${name} ` : SUB, function() {
+          doTemplate.call(this, name, variants[name]);
+        });
+      }
+    });
+
+    function doTemplate(name, variant) {
+      // describeFunc(name, function() {
+      const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(() => {
@@ -115,7 +149,8 @@ function describeEnv(factory) {
         }, this.timeout() - 1);
         fn.call(this, env);
       });
-    });
+      // });
+    }
   };
 
   /**
@@ -170,9 +205,6 @@ class AmpPageFixture {
     /** @const */
     this.spec = spec;
 
-    // /** @private @const {!Array<string>} */
-    // this.browsers_ = this.spec.browsers || ['chrome'];
-
     /** @private @const */
     this.driver_ = null;
   }
@@ -213,15 +245,24 @@ class AmpPageFixture {
     this.driver_ = driver;
 
     const {
-      fixture,
+      testUrl,
       experiments,
-      environment,
       serveMode,
     } = this.spec;
+    const {
+      environment,
+      // TODO(estherkim): browser
+    } = env;
 
-    await setServeMode(ampDriver, serveMode);
-    await toggleExperiments(ampDriver, fixture, experiments);
-    await ampDriver.navigateToEnvironment(environment, fixture);
+    if (serveMode) {
+      await setServeMode(ampDriver, serveMode);
+    }
+
+    if (Array.isArray(experiments)) {
+      await toggleExperiments(ampDriver, testUrl, experiments);
+    }
+
+    await ampDriver.navigateToEnvironment(environment, testUrl);
   }
 
   /** @override */
@@ -243,33 +284,23 @@ class AmpPageFixture {
  * @param {string} serveMode cdn, compiled, uncompiled
  * @return {!Promise}
  */
-function setServeMode(ampDriver, serveMode) {
-  if (!serveMode) {
-    return Promise.resolve();
-  }
-
-  return ampDriver.serveMode(serveMode);
+async function setServeMode(ampDriver, serveMode) {
+  await ampDriver.serveMode(serveMode);
 }
 
 /**
- * Toggle the given experiments for the given fixture URL domain.
+ * Toggle the given experiments for the given test URL domain.
  * @param {!AmpDriver} ampDriver
- * @param {string} fixture
+ * @param {string} testUrl
  * @param {!Array<string>} experiments
+ * @return {!Promise}
  */
-function toggleExperiments(ampDriver, fixture, experiments) {
-  if (!Array.isArray(experiments)) {
-    return Promise.resolve();
-  }
+async function toggleExperiments(ampDriver, testUrl, experiments) {
+  await ampDriver.navigateToEnvironment(Environment.SINGLE, testUrl);
 
-  const navigate =
-      ampDriver.navigateToEnvironment(Environment.SINGLE, fixture);
-  return navigate.then(() => {
-    const togglePromises = experiments.map(experiment => {
-      return ampDriver.toggleExperiment(experiment, true);
-    });
-    return Promise.all(togglePromises);
-  });
+  for (let i = 0; i < experiments.length; i++) {
+    await ampDriver.toggleExperiment(experiments[i], true);
+  }
 }
 
 module.exports = {
