@@ -55,6 +55,22 @@ function isLightbox(el) {
 }
 
 /**
+ * @param {string=} opt_initialTransform matrix string, 'none', '' or undefined
+ * @param {string=} opt_addedTransform matrix string, 'none', '' or undefined
+ * @return {string}
+ */
+function combineTransforms(opt_initialTransform, opt_addedTransform) {
+  if (!opt_addedTransform || opt_addedTransform == 'none') {
+    return opt_initialTransform || '';
+  }
+  const addedTransformOrEmpty = opt_addedTransform || '';
+  if (!opt_initialTransform || opt_initialTransform == 'none') {
+    return addedTransformOrEmpty;
+  }
+  return `${opt_initialTransform} ${addedTransformOrEmpty}`;
+}
+
+/**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
  * child of documentElement. It's used to manage the `position:fixed` and
  * `position:sticky` elements in iOS-iframe case due to the
@@ -307,39 +323,49 @@ export class FixedLayer {
   }
 
   /**
-   * Apply or reset transform style to fixed elements. The existing transition,
-   * if any, is disabled when custom transform is supplied.
-   * @param {string=} opt_transform
-   * @param {!Element=} opt_element
+   * Apply transform style to all fixed elements, unless specified.
+   *
+   * Ignores `independent` elements when a transform is specified but an
+   * element is not. Resets all when neither is specified.
+   *
+   * @param {string=} opt_addedTransform undefined to reset.
+   * @param {!Element=} opt_element undefined to go through all.
    */
-  transformMutate(opt_transform, opt_element) {
-    // Apply transform style to all fixed elements, unless specified.
-    // Ignores `independent` elements unless specified.
-    // Unfortunately, we can't do anything with sticky elements here. Updating
-    // `top` in animation frames causes reflow on all platforms and we can't
-    // determine whether an element is currently docked to apply transform.
-    this.elements_.forEach(({
-      top,
-      fixedNow,
-      element,
-      transform,
-      independent,
-    }) => {
-      if (!fixedNow || (!top && !independent)) {
+  transformMutate(opt_addedTransform, opt_element) {
+    // TODO(alanorozco): Tracking elements by fixedid would simplify this.
+    this.elements_.forEach(fe => {
+      const {element, independent} = fe;
+
+      // Unfortunately, we can't do anything with sticky elements here. Updating
+      // `top` in animation frames causes reflow on all platforms and we can't
+      // determine whether an element is currently docked to apply transform.
+      if (!fe.fixedNow) {
         return;
       }
-      if (independent && !opt_element) {
+
+      // If an element has default positioning (ie is not independent), it only
+      // needs to be transformed for top offset. If it's independent, its
+      // translation offset might be based on bottom, so we need to update it or
+      // clean it up either way.
+      if (!fe.top && !independent) {
         return;
       }
-      if (opt_element && opt_element != element) {
+
+      if (opt_element) {
+        if (element != opt_element) {
+          // Don't update element if target element is defined and unequal.
+          return;
+        }
+        devAssert(independent, 'Can\'t transform a dependent element direcly.');
+      }
+
+      // Don't update independent elements when a transform is applied to all.
+      if (!opt_element && opt_addedTransform && independent) {
         return;
       }
-      const combinedTransform =
-        opt_transform && transform && transform != 'none' ?
-          `${transform} ${opt_transform}` :
-          opt_transform || '';
+
       setStyles(element, {
-        transform: combinedTransform,
+        transform: combineTransforms(fe.transform, opt_addedTransform),
         transition: '',
       });
     });
@@ -353,7 +379,10 @@ export class FixedLayer {
    * @param {!Element} element
    */
   setIsIndependent(element) {
-    devAssert(this.getFe_(element, 'fixed')).independent = true;
+    const fe = devAssert(this.getFe_(element, 'fixed'),
+        'Element not `position: fixed` or not transferred to fixed layer.',
+        element);
+    fe.independent = true;
   }
 
   /**
@@ -619,20 +648,25 @@ export class FixedLayer {
    * Updates the `top` of an element with independently managed offset.
    * See `setIsIndependent()`.
    * @param {!Element} element
-   * @param {number} top
-   * @param {string} position
+   * @param {string} edge 'top' or 'bottom'
+   * @param {number} amount
+   * @return {!Promise}
    */
-  updateIndependent(element, top, position) {
-    devAssert(position == 'fixed');
+  updateIndependent(element, edge, amount) {
+    devAssert(edge == 'top' || edge == 'bottom');
 
-    const fe = this.getFe_(element, position);
+    const fe = devAssert(this.getFe_(element, 'fixed'));
 
     devAssert(fe.independent);
 
-    fe.top = px(top);
-
     return this.vsync_.mutatePromise(() => {
-      setStyle(element, 'top', fe.top);
+      const amountPx = px(amount);
+      if (edge == 'top') {
+        fe.top = amountPx;
+        setStyle(element, 'top', amountPx);
+      } else {
+        setStyle(element, 'bottom', amountPx);
+      }
     });
   }
 
