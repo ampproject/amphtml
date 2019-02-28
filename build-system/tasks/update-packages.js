@@ -138,7 +138,10 @@ function transformEs6Packages() {
   const rootPackageJsonFile = 'package.json';
   const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
   const rootPackageJson = JSON.parse(rootPackageJsonContents);
-  const es6Packages = Object.keys(rootPackageJson['dependencies']);
+  const es6Packages = Array.prototype.concat(
+      Object.keys(rootPackageJson['dependencies']),
+      Object.keys(rootPackageJson['devDependencies'])
+  );
   es6Packages.forEach(es6Package => {
     const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
     const packageJsonContents = fs.readFileSync(packageJsonFile, 'utf8');
