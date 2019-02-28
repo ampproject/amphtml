@@ -18,6 +18,7 @@ import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {toggleExperiment} from '../../src/experiments';
 
 /**
  * Returns a promise that fetches the content of the AMP ad at the amp4test url.
@@ -324,9 +325,9 @@ describe('inabox with a complex image ad', function() {
       iframe = document.createElement('iframe');
     });
 
-    it.configure().skipSafari().run(
-        'should properly render ad in a friendly iframe with viewability pings',
+    it('should properly render ad in a friendly iframe with viewability pings',
         () => {
+          toggleExperiment(env.win, "inabox-viewport-friendly", true);
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(0, 1000);
         });
