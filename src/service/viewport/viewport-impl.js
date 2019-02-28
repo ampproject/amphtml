@@ -15,6 +15,7 @@
  */
 
 import {Animation} from '../../animation';
+import {Deferred, tryResolve} from '../../utils/promise';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
@@ -45,7 +46,6 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {px, setStyle} from '../../style';
-import {tryResolve} from '../../utils/promise';
 
 
 const TAG_ = 'Viewport';
@@ -86,12 +86,15 @@ export let IndependentOffsetDef;
 
 /**
  * Params:
- *  - lastPaddingTop
- *  - paddingTop
+ *  - afterAnimation. Promise
+ *  - lastPaddingTop in px.
+ *  - paddingTop in px.
+ *
  * Returns the offset definition.
- * @typedef {function(number, number):!IndependentOffsetDef}
+ *
+ * @typedef {function(!Promise, number, number):!IndependentOffsetDef}
  */
-export let IndependentOffsetCallbackDef;
+export let MeasureIndependentOffsetFnDef;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -178,8 +181,8 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    /** @private {!Array<{element: !Element, callback: !IndependentOffsetCallbackDef}>} */
-    this.independentOffsets_ = [];
+    /** @private {!Array<{element: !Element, measure: !MeasureIndependentOffsetFnDef}>} */
+    this.fixedMeasurers_ = [];
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
@@ -997,16 +1000,16 @@ export class Viewport {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise = this.translateFixedElements_(duration, curve, transient);
+    const animPromise =
+        this.maybeAnimateFixedElements_(duration, curve, transient);
 
     if (paddingTop < this.lastPaddingTop_) {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-    } else {
-      animPromise.then(() => {
-        this.binding_.showViewerHeader(transient, paddingTop);
-      });
+      return;
     }
-
+    animPromise.then(() => {
+      this.binding_.showViewerHeader(transient, paddingTop);
+    });
   }
 
   /**
@@ -1022,10 +1025,12 @@ export class Viewport {
   }
 
   /**
-   * Specifies that an element is "independent", that is, it responds to
-   * `paddingTop` changes with its own set of offset rules.
+   * Specifies a callback for measuring an element's fixed positioning when the
+   * viewport's padding top changes.
    *
    * `callback` runs in a measure phase and takes:
+   *  - afterAnimation, a promise that resolves after a running translation is
+   *    finished.
    *  - lastPaddingTop
    *  - paddingTop
    *
@@ -1033,12 +1038,13 @@ export class Viewport {
    *  - animOffset: offset at start of animation. end will always be 0.
    *  - top (optional): the final `top` of this element after transition
    *  - bottom (optional): the final `bottom` of this element after transition
+   *
    * @param {!Element} element
-   * @param {!IndependentOffsetCallbackDef} callback
+   * @param {!MeasureIndependentOffsetFnDef} measure
    */
-  setIndependentFixedOffset(element, callback) {
+  setFixedElementMeasurer(element, measure) {
     this.fixedLayer_.setIsIndependent(element);
-    this.independentOffsets_.push({element, callback});
+    this.fixedMeasurers_.push({element, measure});
   }
 
   /**
@@ -1048,60 +1054,83 @@ export class Viewport {
    * @return {!Promise}
    * @private
    */
-  translateFixedElements_(duration, curve, transient) {
+  maybeAnimateFixedElements_(duration, curve, transient) {
     const isAnimated = duration > 0;
-    const {paddingTop_, lastPaddingTop_} = this;
+    const {paddingTop_: paddingTop, lastPaddingTop_: lastPaddingTop} = this;
 
-    this.fixedLayer_.updatePaddingTop(paddingTop_, transient);
+    this.fixedLayer_.updatePaddingTop(paddingTop, transient);
 
-    // Calculate independent animation offsets and translate by that amount.
-    const promises = this.independentOffsets_.map(({element, callback}) => {
-      const callbackPromise = this.vsync_.measurePromise(() =>
-        callback(lastPaddingTop_, paddingTop_));
-      return callbackPromise.then(({top, bottom, animOffset}) => {
-        if (top !== undefined) {
-          this.fixedLayer_.updateIndependent(element, top, 'fixed');
-        }
-        if (bottom !== undefined) {
-          this.vsync_.mutate(() => {
-            setStyle(element, 'bottom', px(bottom));
-          });
-        }
+    let doneDeferred;
+
+    if (this.fixedMeasurers_.length > 0) {
+      doneDeferred = new Deferred();
+    }
+
+    return this.vsync_.measurePromise(() => {
+      return this.fixedMeasurers_.map(({element, measure}) => {
+        const afterAnimation = devAssert(doneDeferred).promise;
+        const result = measure(afterAnimation, lastPaddingTop, paddingTop);
+        return Object.assign(result, {element});
+      });
+    }).then(measures => {
+      const interpolationDefs = [];
+
+      for (let i = 0; i < measures.length; i++) {
+        const measure = measures[i];
+        const {element} = measure;
+        const maybeUpdate = (edge, amount) => {
+          if (amount === undefined) {
+            return;
+          }
+          this.fixedLayer_.updateIndependent(element, edge, amount);
+        };
+        maybeUpdate('top', measure.top);
+        maybeUpdate('bottom', measure.bottom);
         if (!isAnimated) {
           return;
         }
-        return this.animateTopOffset_(animOffset, duration, curve, element);
-      });
+        interpolationDefs.push({
+          element,
+          interpolation: numeric(measure.animOffset, 0),
+        });
+      }
+
+      if (!isAnimated) {
+        return;
+      }
+
+      const defaultAnimOffset = lastPaddingTop - paddingTop;
+      const defaultInterpolation = numeric(defaultAnimOffset, 0);
+
+      return Animation.animate(this.ampdoc.getRootNode(), time => {
+        // Translate all dependent elements.
+        this.fixedLayerTranslateY_(defaultInterpolation(time));
+
+        // Translate independent elements that have their own animation offset
+        // definition.
+        for (let j = 0; j < interpolationDefs.length; j++) {
+          const def = interpolationDefs[j];
+          this.fixedLayerTranslateY_(def.interpolation(time), def.element);
+        }
+      }, duration, curve);
+    }).then(() => {
+      if (isAnimated) {
+        this.fixedLayer_.transformMutate(); // reset all transforms.
+      }
+      if (doneDeferred) {
+        doneDeferred.resolve();
+        doneDeferred = null; // GC
+      }
     });
-
-    if (!isAnimated) {
-      return Promise.resolve();
-    }
-
-    // Animate all other fixed elements.
-    const animOffset = lastPaddingTop_ - paddingTop_;
-    promises.push(this.animateTopOffset_(animOffset, duration, curve));
-
-    return Promise.all(promises);
   }
 
   /**
-   * @param {number} offset
-   * @param {number} duration
-   * @param {string} curve
+   * @param {number} offsetY
    * @param {!Element=} opt_element
-   * @return {!Promise}
    * @private
    */
-  animateTopOffset_(offset, duration, curve, opt_element) {
-    const tr = numeric(offset, 0);
-    return Animation.animate(this.ampdoc.getRootNode(), time => {
-      const offsetY = px(tr(time));
-      this.fixedLayer_.transformMutate(`translateY(${offsetY})`, opt_element);
-    }, duration, curve).thenAlways(() => {
-      // Reset transform
-      this.fixedLayer_.transformMutate(/* transition */ undefined, opt_element);
-    });
+  fixedLayerTranslateY_(offsetY, opt_element) {
+    this.fixedLayer_.transformMutate(`translateY(${offsetY}px)`, opt_element);
   }
 
   /**
