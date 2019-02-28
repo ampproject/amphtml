@@ -264,6 +264,20 @@ class AnimationRunner {
     this.playback_(PlaybackActivity.FINISH);
   }
 
+  /** Pauses the animation. */
+  pause() {
+    if (this.runner_) {
+      devAssert(this.runner_).pause();
+    }
+  }
+
+  /** Resumes the animation. */
+  resume() {
+    if (this.runner_) {
+      devAssert(this.runner_).resume();
+    }
+  }
+
   /**
    * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
@@ -443,6 +457,22 @@ export class AnimationManager {
       return;
     }
     this.getRunners_().forEach(runner => runner.cancel());
+  }
+
+  /** Pauses all animations in the page. */
+  pauseAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.pause());
+  }
+
+  /** Resumes all animations in the page. */
+  resumeAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.resume());
   }
 
   /** Determines if there is an entrance animation running. */
