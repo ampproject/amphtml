@@ -20,7 +20,7 @@
         <fieldset>
             <label>
                 <span>Your name</span>
-                <amp-autocomplete filter="substring">
+                <amp-autocomplete filter="substring" min-characters="0">
                     <input type="text" name="name" required>
                     <script type="application/json">
                     { "items" : ["hello a", "hello b", "hello c"] }
@@ -29,7 +29,7 @@
             </label>
             <label>
                 <span>Your email</span>
-                <amp-autocomplete filter="prefix">
+                <amp-autocomplete filter="prefix" min-characters="3">
                     <input type="text" name="email" required>
                     <script type="application/json">
                         { "items" : ["apple", "pineapple", "coconut", "pine apple"] }

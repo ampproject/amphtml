@@ -56,6 +56,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.filter_ = null;
 
     /**
+     * The value of the "min-characters" attribute on <autocomplete>.
+     * @private {?number}
+     */
+    this.minChars = null;
+
+    /**
      * The index of the active suggested item.
      * @private (!number)
      */
@@ -87,6 +93,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_ = inputElements[0];
 
     this.filter_ = this.element.getAttribute('filter');
+    this.minChars = this.element.hasAttribute('min-characters') ?
+      parseInt(this.element.getAttribute('min-characters')) : 1;
+
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
   }
@@ -181,8 +190,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   renderResults_() {
     const userInput = this.inputElement_.value;
-    const filteredData = this.filterData_(this.inlineData_, userInput);
     this.clearAllItems();
+    if (userInput.length < this.minChars) {
+      return;
+    }
+    const filteredData = this.filterData_(this.inlineData_, userInput);
     filteredData.forEach(item => {
       this.container_.appendChild(this.createElementFromItem_(item));
     });
