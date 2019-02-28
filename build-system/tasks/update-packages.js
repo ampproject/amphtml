@@ -144,8 +144,10 @@ function transformEs6Packages() {
   //     Object.keys(rootPackageJson['dependencies']),
   //     Object.keys(rootPackageJson['devDependencies'])
   // );
-  const nodePackages = glob.sync('node_modules/*/package.json',
-      {ignore: 'node_modules/eslint-plugin-amphtml-internal/package.json'});
+  const nodePackages = glob.sync('node_modules/*/package.json',{ignore: [
+    'node_modules/eslint-plugin-amphtml-internal/package.json',
+    'node_modules/document-register-element/package.json',
+  ]});
   nodePackages.forEach(packageJsonFile => {
     //const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
     const packageJsonContents = fs.readFileSync(packageJsonFile, 'utf8');
