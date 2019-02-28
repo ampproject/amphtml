@@ -96,7 +96,6 @@ function describeEnv(factory) {
     });
 
     function doTemplate(name, variant) {
-      // describeFunc(name, function() {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
@@ -149,7 +148,6 @@ function describeEnv(factory) {
         }, this.timeout() - 1);
         fn.call(this, env);
       });
-      // });
     }
   };
 
@@ -298,8 +296,8 @@ async function setServeMode(ampDriver, serveMode) {
 async function toggleExperiments(ampDriver, testUrl, experiments) {
   await ampDriver.navigateToEnvironment(Environment.SINGLE, testUrl);
 
-  for (let i = 0; i < experiments.length; i++) {
-    await ampDriver.toggleExperiment(experiments[i], true);
+  for (const experiment of experiments) {
+    await ampDriver.toggleExperiment(experiment, true);
   }
 }
 

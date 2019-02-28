@@ -154,8 +154,8 @@ function* createCommonIterator(iterator, nextProperty) {
 function* createIndexedInterator(iter) {
   let index = 0;
   for (const item of iter) {
-    index++;
     yield {item, index};
+    index++;
   }
 }
 

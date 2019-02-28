@@ -111,8 +111,7 @@ class SeleniumWebDriverController {
     const condition = new Condition(label, async() => {
       try {
         const root = await this.getRoot_();
-        const result = await root.findElement(bySelector);
-        return result;
+        return await root.findElement(bySelector);
       } catch (e) {
         // WebElement.prototype.findElement differs from
         // WebDriver.prototype.findElement in that the WebElement method will
