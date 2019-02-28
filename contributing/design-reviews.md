@@ -1,15 +1,25 @@
 # Design Reviews
 
-The AMP Project community holds weekly public design reviews via [video conference](https://hangouts.google.com/hangouts/_/google.com/amp-eng-desrev).  We encourage everyone in the community to attend these design reviews to discuss the design challenges being faced by the community.
+The AMP Project community holds weekly public design reviews via video conference.  We encourage everyone in the community to attend these design reviews to discuss the design challenges being faced by the community.
 
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
 
-Because AMP contributors are located all over the world we rotate the design review times to accomodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.  If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
+The GitHub issue for a given week's design review will have links to the designs being discussed that week.  When the design review is over notes from the discussion will be posted to the GitHub issue.
 
-The GitHub issue for a given week's design review will have links to the designs being discussed that week.  When the design review is over the GitHub issue will include notes from the design review discussion.
+## Attending a design review
+
+To join a design review, follow the link for the video conference in the Design Review issue.
+
+You can optionally join the [design review Google Group](https://groups.google.com/a/ampproject.org/forum/#!forum/amp-design-review) to be able to join the video conference automatically; otherwise when you click on the video conference link you may have to wait a bit for someone in the meeting to accept your request to join.
 
 **When attending a design review please read through the designs _before_ the review starts.**
+
+## Design reviews are global
+
+Because AMP contributors are located all over the world we rotate the design review times to accomodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.
+
+If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
 
 ## Bringing your design to a design review
 
