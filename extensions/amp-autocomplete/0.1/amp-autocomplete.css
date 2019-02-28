@@ -13,3 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.i-amphtml-autocomplete {   
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+ }
+
+.i-amphtml-autocomplete-input {
+    padding: 4px;
+ }
+
+ .i-amphtml-autocomplete-results {
+    margin-top: 4px;
+ }
+
+ .i-amphtml-autocomplete-item {   
+    background-color: white;
+    border: 1px solid black;
+    padding: 4px;
+    position: relative;
+ }
