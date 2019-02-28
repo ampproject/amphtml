@@ -17,6 +17,7 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
+const glob = require('glob');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {exec, execOrDie, getStderr} = require('../exec');
@@ -135,15 +136,18 @@ function patchWorkerDom() {
  * See https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
  */
 function transformEs6Packages() {
-  const rootPackageJsonFile = 'package.json';
-  const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
-  const rootPackageJson = JSON.parse(rootPackageJsonContents);
-  const es6Packages = Array.prototype.concat(
-      Object.keys(rootPackageJson['dependencies']),
-      Object.keys(rootPackageJson['devDependencies'])
-  );
-  es6Packages.forEach(es6Package => {
-    const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
+  // const rootPackageJsonFile = 'package.json';
+  // const rootPackageJsonContents =
+  // fs.readFileSync(rootPackageJsonFile, 'utf8');
+  // const rootPackageJson = JSON.parse(rootPackageJsonContents);
+  // const es6Packages = Array.prototype.concat(
+  //     Object.keys(rootPackageJson['dependencies']),
+  //     Object.keys(rootPackageJson['devDependencies'])
+  // );
+  const nodePackages = glob.sync('node_modules/*/package.json',
+      {ignore: 'node_modules/eslint-plugin-amphtml-internal/package.json'});
+  nodePackages.forEach(packageJsonFile => {
+    //const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
     const packageJsonContents = fs.readFileSync(packageJsonFile, 'utf8');
     const packageJson = JSON.parse(packageJsonContents);
     if (!packageJson['browserify']) {
@@ -152,7 +156,7 @@ function transformEs6Packages() {
       fs.writeFileSync(packageJsonFile, updatedPackageJson, 'utf8');
       if (!isTravisBuild()) {
         log(colors.green('Enabled ES6 transforms for runtime dependency'),
-            colors.cyan(es6Package));
+            colors.cyan(packageJsonFile));
       }
     }
   });
