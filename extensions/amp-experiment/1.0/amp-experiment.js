@@ -15,7 +15,12 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
+import {
+  Variants,
+  VARIANT_VERSION,
+  getVariantVersion,
+  allocateVariant
+} from './variant';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
@@ -49,7 +54,7 @@ export class AmpExperiment extends AMP.BaseElement {
             /** @private @const {!Promise<!Object<string, ?string>>} */
             const experimentVariants = Promise.all(variants)
                 .then(() => results)
-                .then(this.addToBody_.bind(this));
+              .then(this.applyExperimentVariants_.bind(this, config));
 
             variantsService.init(experimentVariants);
           } catch (e) {
@@ -75,23 +80,74 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /**
-   * Adds the given experiment and variant pairs to body element as attributes
-   * and values. Experiment with no variant assigned (null) will be skipped.
+   * Passes the given experiment and variant pairs to the correct handler,
+   * to apply the experiment to the document.
+   * Experiment with no variant assigned (null) will be skipped.
+   * @param {!JsonObject} config
    * @param {!Object<string, ?string>} experiments
    * @return {!Promise<!Object<string, ?string>>} a promise of the original
    *     param passed in
    * @private
    */
-  addToBody_(experiments) {
-    const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(body => {
-      for (const name in experiments) {
-        if (experiments[name]) {
-          body.setAttribute(ATTR_PREFIX + name,
-              dev().assertString(experiments[name]));
+  applyExperimentVariants_(config, experiments) {
+    console.log('experiments', experiments);
+
+    const appliedExperimentVariantPromises = [];
+
+    for (const name in experiments) {
+      if (experiments[name]) {
+        const variant = config[name]['variants'][experiments[name]];
+        const variantVersion = getVariantVersion(variant);
+
+        if (variantVersion === VARIANT_VERSION['0.1']) {
+          appliedExperimentVariantPromises.push(
+            this.addToBody_(name, experiments[name])
+          );
+        } else if (variantVersion === VARIANT_VERSION['1.0']) {
+          appliedExperimentVariantPromises.push(
+            this.applyMutations__(name, experiments[name])
+          );
         }
       }
-      return experiments;
+    }
+
+    return Promise.all(appliedExperimentVariantPromises)
+      .then(() => experiments);
+  }
+
+  /**
+   * Adds the given experimentName and variantName pairs
+   * to body element as attributes and values.
+   * @param {!string} experimentName
+   * @param {!string} variantName
+   * @return {!Promise}
+   * @private
+   */
+  addToBody_(experimentName, variantName) {
+    const doc = this.getAmpDoc();
+    return doc.whenBodyAvailable().then(body => {
+      body.setAttribute(ATTR_PREFIX + experimentName,
+        dev().assertString(variantName));
+    });
+  }
+
+  /**
+   * Passes the given experimentName and variantObject pairs
+   * to the mutation service to be applied to the document.
+   * @param {!string} experimentName
+   * @param {!string} variantName
+   * @return {!Promise}
+   * @private
+   */
+  applyMutations(experimentName, variantObject) {
+
+    // TODO (torch2424): Use a mutation service,
+    // to validate our mutations
+
+    const doc = this.getAmpDoc();
+    return doc.whenBodyAvailable().then(body => {
+      // TODO (torch2424): Use a mutation service,
+      // and apply mutations
     });
   }
 }

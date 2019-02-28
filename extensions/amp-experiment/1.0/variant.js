@@ -23,6 +23,11 @@ import {isObject} from '../../../src/types';
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
 
+export const VARIANT_VERSION = {
+  '0.1': '0.1',
+  '1.0': '1.0'
+};
+
 
 /**
  * Variants service provides VARIANT variables for the experiment config.
@@ -46,7 +51,10 @@ export class Variants {
    * @restricted
    */
   init(variants) {
-    this.variantsDeferred_.resolve(variants);
+    setTimeout(() => {
+      console.log('resolving...');
+      this.variantsDeferred_.resolve(variants);
+    }, 1000);
   }
 
   /**
@@ -58,7 +66,6 @@ export class Variants {
   }
 }
 
-
 /**
  * Allocates the current page view to an experiment variant based on the given
  * experiment config.
@@ -69,7 +76,7 @@ export class Variants {
  */
 export function allocateVariant(ampdoc, experimentName, config) {
   assertName(experimentName);
-  validateConfig(config);
+  validateConfig(experimentName, config);
 
   // Variant can be overridden from URL fragment.
   const viewer = Services.viewerForDoc(ampdoc);
@@ -119,27 +126,61 @@ export function allocateVariant(ampdoc, experimentName, config) {
 }
 
 /**
+ * Function to parse and determine the version
+ * of the experiment in the config.
+ * Find if we are a 0.1 design (body attributes),
+ * or 1.0 design (mutation objects)
+ * @param {!JsonObject} config
+ * @return string
+ */
+export function getVariantVersion(variant) {
+  if (typeof variant === 'number') {
+    return VARIANT_VERSION['0.1']
+  } else {
+    return VARIANT_VERSION['1.0']
+  }
+}
+
+/**
  * Validates an experiment config.
+ * @param {string} experimentName
  * @param {!JsonObject} config
  * @throws {!Error}
  */
-function validateConfig(config) {
+function validateConfig(experimentName, config) {
   const variants = config['variants'];
   userAssert(isObject(variants) && Object.keys(variants).length > 0,
       'Missing experiment variants config.');
   if (config['group']) {
     assertName(config['group']);
   }
+
   let totalPercentage = 0;
   for (const variantName in variants) {
     if (hasOwn(variants, variantName)) {
       assertName(variantName);
-      const percentage = variants[variantName];
+
+      const variant = variants[variantName];
+      assertVariant(
+        variant,
+        experimentName,
+        variantName
+      );
+
+      const variantVersion = getVariantVersion(variant);
+
+      let percentage = null;
+      if (variantVersion === VARIANT_VERSION['0.1']) {
+        percentage = variant;
+      } else if(variantVersion === VARIANT_VERSION['1.0']) {
+        percentage = variant.weight;
+      }
+
       userAssert(
-          typeof percentage === 'number' && percentage > 0 && percentage < 100,
-          'Invalid percentage %s:%s.'
-              + ' Has to be greater than 0 and less than 100',
-          variantName, percentage);
+        percentage && percentage > 0 && percentage < 100,
+        'Invalid percentage %s:%s.'
+        + ' Has to be greater than 0 and less than 100',
+        variantName, percentage);
       totalPercentage += percentage;
     }
   }
@@ -180,3 +221,34 @@ function assertName(name) {
   userAssert(nameValidator.test(name),
       'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].', name);
 }
+
+/**
+ * Validates the variant schema of a config.
+ * @param {!JsonObject} variant
+ * @param {!string} experimentName
+ * @param {!string} variantName
+ * @throws {!Error}
+ */
+function assertVariant(variant, experimentName, variantName) {
+
+  if (typeof variant === 'number') {
+    return;
+  }
+
+  // Assert that the variant is an object
+  userAssert(
+    isObject(variant),
+    `${experimentName}.${variantName} must be an object.`);
+
+  // Assert the variant weight
+  userAssert(
+    variant.weight !== undefined &&
+    typeof variant.weight === 'number',
+    `${experimentName}.${variantName} must have a weight.`);
+
+  // Assert the variant mutations
+  userAssert(
+    isArray(variant.mutations),
+    `${experimentName}.${variantName} must have a mutations array.`);
+}
+
