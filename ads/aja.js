@@ -22,7 +22,7 @@ import {writeScript} from '../3p/3p';
  */
 export function aja(global, data) {
 
-  (global._caaja = global._caaja || {
+  (global._aja = global._aja || {
     sspCode: data['sspCode'],
   });
 
