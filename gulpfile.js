@@ -1696,8 +1696,6 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         extensions_from: '  Watches and builds only the extensions from the ' +
             'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
-        enable_dev_dashboard_cache:
-            '  Enables the dev dashboard cache (default: false)',
       },
     });
 gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {

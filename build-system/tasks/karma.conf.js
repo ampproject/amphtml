@@ -281,7 +281,7 @@ module.exports = {
     'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
-        return require(require.resolve('../app.js')).middleware;
+        return require(require.resolve('../app.js'));
       }],
     },
   ],
