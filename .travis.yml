@@ -102,6 +102,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-  pip: true
-  bundler: true
+    - $HOME/.cache/pip
   yarn: true
