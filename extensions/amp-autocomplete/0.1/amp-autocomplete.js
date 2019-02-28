@@ -62,6 +62,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.minChars = null;
 
     /**
+     * The value of the "max-entries" attribute on <autocomplete>.
+     * @private {?number}
+     */
+    this.maxEntries = null;
+
+    /**
      * The index of the active suggested item.
      * @private (!number)
      */
@@ -94,7 +100,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.filter_ = this.element.getAttribute('filter');
     this.minChars = this.element.hasAttribute('min-characters') ?
-      parseInt(this.element.getAttribute('min-characters')) : 1;
+      parseInt(this.element.getAttribute('min-characters'), 10) : 1;
+    this.maxEntries = parseInt(this.element.getAttribute('max-entries'), 10);
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -208,7 +215,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   filterData_(data, input) {
-    return data.filter(item => {
+    let filteredData = data.filter(item => {
       switch (this.filter_) {
         case 'substring':
           return item.includes(input);
@@ -235,6 +242,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
+    // Truncate to max-entries.
+    if (this.maxEntries && this.maxEntries < filteredData.length) {
+      filteredData = filteredData.slice(0, this.maxEntries);
+    }
+    return filteredData;
   }
 
   /** Set container_ visibility to visible. */
