@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-const {expect} = require('chai');
-const {serveIndexForTesting} = require('../index');
-
-const NOOP = () => {};
-
-describe('devdash', () => {
-
-  describe('express middleware', () => {
-
-    it('renders HTML', async() => {
-      const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
-      expect(renderedHtml).to.be.ok;
-    });
-
-  });
-});
+const BASE_API_URL = 'https://api.narrativ.com/api';
+/** @const @enum {string} */
+export const ENDPOINTS = {
+  PAGE_IMPRESSION_ENDPOINT:
+    `${BASE_API_URL}/v1/events/impressions/page_impression/`,
+  NRTV_CONFIG_ENDPOINT:
+    `${BASE_API_URL}/v0/publishers/.nrtv_slug./amp_config/`,
+  LINKMATE_ENDPOINT:
+    `${BASE_API_URL}/v1/publishers/.pub_id./linkmate/smart_links/`,
+};
