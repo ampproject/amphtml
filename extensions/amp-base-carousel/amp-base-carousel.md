@@ -69,12 +69,9 @@ The media queries are evaluated from left to right, with the first matching medi
 
 ### Configuration Options
 
+#### Number of Visible Slides
+
 <table>
-  <tr>
-    <td colspan="2">
-      Number of Visible Slides
-    </td>
-  </tr>
   <tr>
     <td width="40%"><strong><code>mixed-length</code></strong></td>
     <td>Either <code>true</code> or <code>false</code>, defaults to <code>false</code>. When true, uses the existing width (or height when horizontal) for each of the slides. This allows for a carousel with slides of different widths to be used.
@@ -87,12 +84,11 @@ The media queries are evaluated from left to right, with the first matching medi
     <td width="40%"><strong><code>advance-count</code></strong></td>
     <td>A number, defaults to <code>1</code>. Determines how many slides the carousel will advance when advancing using the previous or next arrows. This is useful when specifying the <code>visible-count</code> attribute.
   </tr>
+</table>
 
-  <tr>
-    <td colspan="2">
-      Auto Advance
-    </td>
-  </tr>
+#### Auto Advance
+
+<table>
   <tr>
     <td width="40%"><strong><code>auto-advance</code></strong></td>
     <td>Either <code>true</code> or <code>false</code>, defaults to <code>false</code>. Automatically advances the carousel to the next slide based on a delay. If the user manually changes slides, then the auto advance is stopped. Note that if <code>loop</code> is not enabled, when reaching the last item, the auto advance will move backwards to the first item.
@@ -109,12 +105,11 @@ The media queries are evaluated from left to right, with the first matching medi
     <td width="40%"><strong><code>auto-advance-loops</code></strong></td>
     <td>A number, defaults to <code>∞</code>. The number of times the carousel should advance through the slides before stopping.
   </tr>
+</table>
 
-  <tr>
-    <td colspan="2">
-      Snapping
-    </td>
-  </tr>
+#### Snapping
+
+<table>
   <tr>
     <td width="40%"><strong><code>snap</code></strong></td>
     <td>Either <code>true</code> or <code>false</code>, defaults to <code>true</code>. Determines whether or not the carousel should snap on slides when scrolling.
@@ -128,12 +123,11 @@ The media queries are evaluated from left to right, with the first matching medi
     <td>A number, defaults to <code>1</code>. This determines the granularity of snapping and is useful when using
     <code>visible-count</code>. This 
   </tr>
+</table>
 
-  <tr>
-    <td colspan="2">
-      Misc
-    </td>
-  </tr>
+#### Miscellaneous
+
+<table>
   <tr>
     <td width="40%"><strong><code>slide</code></strong></td>
     <td>A number, defaults to <code>0</code>. This determines the initial slide shown in the carousel. This may be used with <code>amp-bind</code> to control which slide is currently showing.
@@ -156,7 +150,7 @@ The media queries are evaluated from left to right, with the first matching medi
 <table>
   <tr>
     <td width="40%"><strong><code>slideChange</code></strong></td>
-    <td>This event is triggered when the index displayed by the carousel has changed. The new index is available via <code>event.index</code></td>
+    <td>This event is triggered when the index displayed by the carousel has changed. The new index is available via <code>event.index</code>.</td>
   </tr>
 </table>
 
