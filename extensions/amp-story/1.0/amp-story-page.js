@@ -305,6 +305,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
           this.playAllMedia_();
+          if (this.animationManager_) {
+            this.animationManager_.resumeAll();
+          }
         }
 
         this.state_ = state;
@@ -312,6 +315,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.PAUSED:
         this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
+        if (this.animationManager_) {
+          this.animationManager_.pauseAll();
+        }
         this.state_ = state;
         break;
       default:
