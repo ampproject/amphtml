@@ -40,7 +40,7 @@ const AmpEnvironments = {
     },
 
     url(url) {
-      return `http://localhost:8000/examples/viewer.html?${url}`;
+      return `http://localhost:8000/examples/viewer.html#href=${url}`;
     },
   },
 

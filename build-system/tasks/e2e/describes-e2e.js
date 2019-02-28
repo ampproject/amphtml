@@ -241,6 +241,7 @@ class AmpPageFixture {
  * Set the serve mode on the AMP dev server
  * @param {!AmpDriver} ampDriver
  * @param {string} serveMode cdn, compiled, uncompiled
+ * @return {!Promise}
  */
 function setServeMode(ampDriver, serveMode) {
   if (!serveMode) {
