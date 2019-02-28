@@ -4,7 +4,8 @@
     "amp-next-page",
     "ampdoc-shell",
     "disable-amp-story-desktop",
-    "linker-meta-opt-in"
+    "linker-meta-opt-in",
+    "inabox-viewport-friendly"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
