@@ -49,8 +49,7 @@ function writeFriendlyFrame(doc, iframe, adContent) {
 function writeSafeFrame(doc, iframe, adContent) {
   const {testServerPort} = window.ampTestRuntimeConfig;
   iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src = 'http://localhost:' + testServerPort +
-      '/test/fixtures/served/iframe-safeframe.html';
+  iframe.src = '//iframe.localhost:9876/test/fixtures/served/iframe-safeframe.html';
   doc.body.appendChild(iframe);
 }
 
@@ -202,7 +201,7 @@ describe('inabox', function() {
       return testAmpComponents();
     });
 
-    it.configure().skipSinglePass().run('should layout amp-img, amp-pixel, ' +
+    it.configure().skipFirefox().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponents();
@@ -240,7 +239,7 @@ describe('inabox', function() {
       return testAmpComponentsBTF(env.win);
     });
 
-    it.configure().skipSinglePass().run('should layout amp-img, amp-pixel, ' +
+    it.configure().skipFirefox().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
@@ -301,7 +300,7 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSinglePass().run(
+    it.configure().skipFirefox().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
@@ -332,7 +331,7 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().skipSinglePass().run(
+    it.configure().skipSafari().skipFirefox().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
@@ -370,7 +369,7 @@ describe('inabox with a complex image ad', function() {
           return testVisibilityPings(2000, 3000);
         });
 
-    it.configure().skipSinglePass().run(
+    it.configure().skipFirefox().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
