@@ -84,7 +84,9 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
-extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
+extensionBundles.forEach(c => {
+  declareExtension(c.name, c.version, c.latestVersion, c.options);
+});
 aliasBundles.forEach(c => {
   declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
 });
@@ -126,15 +128,19 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 /**
  * @param {string} name
- * @param {string|!Array<string>} version E.g. 0.1
+ * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
+ * @param {string} latestVersion E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
  */
-function declareExtension(name, version, options) {
+function declareExtension(name, version, latestVersion, options) {
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach(v => {
-    extensions[`${name}-${v}`] =
-        Object.assign({name, version: v}, defaultOptions, options);
+    extensions[`${name}-${v}`] = Object.assign(
+        {name, version: v, latestVersion},
+        defaultOptions,
+        options
+    );
   });
   if (name.startsWith('amp-ad-network-')) {
     // Get the ad network name. All ad network extensions are named
@@ -151,7 +157,7 @@ function declareExtension(name, version, options) {
  * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {string} latestVersion
+ * @param {string} latestVersion E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
  */
 function declareExtensionVersionAlias(name, version, latestVersion, options) {
@@ -221,7 +227,14 @@ function buildExtensions(options) {
     const e = extensions[key];
     let o = Object.assign({}, options);
     o = Object.assign(o, e);
-    results.push(buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs));
+    results.push(buildExtension(
+        e.name,
+        e.version,
+        e.latestVersion,
+        e.hasCss,
+        o,
+        e.extraGlobs
+    ));
   }
   return Promise.all(results);
 }
@@ -624,12 +637,14 @@ function copyCss() {
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
+ * @param {string} latestVersion Latest version of the extension.
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} opt_extraGlobs
  * @return {!Promise}
  */
-function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
+function buildExtension(
+  name, version, latestVersion, hasCss, options, opt_extraGlobs) {
   options = options || {};
   options.extraGlobs = opt_extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
@@ -655,7 +670,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     const copy = Object.create(options);
     copy.watch = false;
     $$.watch(path + '/*', function() {
-      buildExtension(name, version, hasCss, copy);
+      buildExtension(name, version, latestVersion, hasCss, copy);
     });
   }
   let promise = Promise.resolve();
@@ -674,7 +689,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      return buildExtensionJs(path, name, version, options);
+      return buildExtensionJs(path, name, version, latestVersion, options);
     }
   });
 }
@@ -721,15 +736,16 @@ function buildExtensionCss(path, name, version, options) {
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
+ * @param {string} latestVersion Latest version of the extension.
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionJs(path, name, version, options) {
+function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
-    latestName: `${name}-latest.js`,
+    latestName: version === latestVersion ? `${name}-latest.js` : '',
     // Wrapper that either registers the extension or schedules it for
     // execution after the main binary comes back.
     // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -1201,7 +1217,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
           }
         })
         .then(() => {
-          endBuildStep('Minified', options.minifiedName, startTime);
+          let name = options.minifiedName;
+          if (options.latestName) {
+            name = `${name} → ${options.latestName}`;
+          }
+          endBuildStep('Minified', name, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
