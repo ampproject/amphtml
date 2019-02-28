@@ -1115,9 +1115,6 @@ export class AutoFullscreenManager {
     const {element} = video;
     const viewport = this.getViewport_();
 
-    const duration = 300;
-    const curve = 'ease-in';
-
     return this.onceOrientationChanges_().then(() => {
       const {boundingClientRect} = element.getIntersectionChangeEntry();
       const {top, bottom} = boundingClientRect;
@@ -1128,7 +1125,7 @@ export class AutoFullscreenManager {
       }
       const pos = optPos ? dev().assertString(optPos) :
         bottom > vh ? 'bottom' : 'top';
-      return viewport.animateScrollIntoView(element, duration, curve, pos);
+      return viewport.animateScrollIntoView(element, pos);
     });
   }
 
