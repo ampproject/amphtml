@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,20 +22,10 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function aja(global, data) {
 
-  // ensure we have valid widgetIds value
-  validateData(data, ['widgetids']);
-
-  (global._aja = global._aja || {
-    viewId: global.context.pageViewId,
-    widgetIds: data['widgetids'],
-    htmlURL: data['htmlurl'] || global.context.canonicalUrl,
-    ampURL: data['ampurl'] || global.context.sourceUrl,
-    fbk: data['fbk'] || '',
-    testMode: data['testmode'] || 'false',
-    styleFile: data['stylefile'] || '',
-    referrer: data['referrer'] || global.context.referrer,
+  (global._caaja = global._caaja || {
+    sspCode: data['sspCode'],
   });
 
-  // load the Aja AMP JS file
-  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js');
+  const url = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
+  writeScript(global,url);
 }
