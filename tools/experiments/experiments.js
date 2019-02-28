@@ -407,6 +407,20 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20964',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
   },
+  {
+    id: 'amp-autocomplete',
+    name: 'AMP Autocomplete provides a set of suggestions to' +
+        ' complete a user query in an input field.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9785',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
+  },
+  {
+    id: 'inabox-viewport-friendly',
+    name: 'Inabox viewport measures the host window directly if ' +
+        'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
 ];
 
 if (getMode().localDev) {

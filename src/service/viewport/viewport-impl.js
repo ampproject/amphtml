@@ -28,6 +28,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {clamp} from '../../utils/math';
 import {closestAncestorElementBySelector, isIframed} from '../../dom';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
@@ -110,6 +111,8 @@ export class Viewport {
    * @param {!../viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, binding, viewer) {
+    const {win} = ampdoc;
+
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -155,10 +158,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!../timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private {!../vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -185,21 +188,21 @@ export class Viewport {
     this.fixedMeasurers_ = [];
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
-      installLayersServiceForDoc(this.ampdoc,
+      installLayersServiceForDoc(ampdoc,
           this.binding_.getScrollingElement(),
           this.binding_.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
-        this.ampdoc,
+        ampdoc,
         this.vsync_,
         this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
-    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -218,26 +221,25 @@ export class Viewport {
     this.updateVisibility_();
 
     // Top-level mode classes.
-    const {documentElement} = this.globalDoc_;
-    if (this.ampdoc.isSingleDoc()) {
-      documentElement.classList.add('i-amphtml-singledoc');
+    const globalDocElement = this.globalDoc_.documentElement;
+    if (ampdoc.isSingleDoc()) {
+      globalDocElement.classList.add('i-amphtml-singledoc');
     }
     if (viewer.isEmbedded()) {
-      documentElement.classList.add('i-amphtml-embedded');
+      globalDocElement.classList.add('i-amphtml-embedded');
     } else {
-      documentElement.classList.add('i-amphtml-standalone');
+      globalDocElement.classList.add('i-amphtml-standalone');
     }
-    if (isIframed(this.ampdoc.win)) {
-      documentElement.classList.add('i-amphtml-iframed');
+    if (isIframed(win)) {
+      globalDocElement.classList.add('i-amphtml-iframed');
     }
     if (viewer.getParam('webview') === '1') {
-      documentElement.classList.add('i-amphtml-webview');
+      globalDocElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
-    if (isIframed(this.ampdoc.win) &&
-        ('scrollRestoration' in this.ampdoc.win.history)) {
-      this.ampdoc.win.history.scrollRestoration = 'manual';
+    if (isIframed(win) && ('scrollRestoration' in win.history)) {
+      win.history.scrollRestoration = 'manual';
     }
   }
 
@@ -546,34 +548,36 @@ export class Viewport {
    * transition.
    *
    * @param {!Element} element
-   * @param {number=} duration
-   * @param {string=} curve
    * @param {string=} pos (takes one of 'top', 'bottom', 'center')
+   * @param {number=} opt_duration
+   * @param {string=} opt_curve
    * @return {!Promise}
    */
-  animateScrollIntoView(element,
-    duration = 500,
-    curve = 'ease-in',
-    pos = 'top') {
+  animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
+    devAssert(!opt_curve || opt_duration !== undefined,
+        'Curve without duration doesn\'t make sense.');
 
     return this.getScrollingContainerFor_(element).then(parent =>
       this.animateScrollWithinParent(
           element,
           parent,
-          dev().assertNumber(duration),
-          dev().assertString(curve),
-          dev().assertString(pos)));
+          dev().assertString(pos),
+          opt_duration,
+          opt_curve));
   }
 
   /**
    * @param {!Element} element
    * @param {!Element} parent Should be scrollable.
-   * @param {number} duration
-   * @param {string} curve
    * @param {string} pos (takes one of 'top', 'bottom', 'center')
+   * @param {number=} opt_duration
+   * @param {string=} opt_curve
    * @return {!Promise}
    */
-  animateScrollWithinParent(element, parent, duration, curve, pos) {
+  animateScrollWithinParent(element, parent, pos, opt_duration, opt_curve) {
+    devAssert(!opt_curve || opt_duration !== undefined,
+        'Curve without duration doesn\'t make sense.');
+
     const elementRect = this.binding_.getLayoutRect(element);
 
     const {height: parentHeight} = this.isScrollingElement_(parent) ?
@@ -605,7 +609,7 @@ export class Viewport {
         return;
       }
       return this.interpolateScrollIntoView_(
-          parent, curScrollTop, newScrollTop, duration, curve);
+          parent, curScrollTop, newScrollTop, opt_duration, opt_curve);
     });
   }
 
@@ -613,19 +617,19 @@ export class Viewport {
    * @param {!Element} parent
    * @param {number} curScrollTop
    * @param {number} newScrollTop
-   * @param {number} duration
-   * @param {string} curve
+   * @param {number=} opt_duration
+   * @param {string=} curve
    * @private
    */
   interpolateScrollIntoView_(
-    parent, curScrollTop, newScrollTop, duration, curve) {
+    parent, curScrollTop, newScrollTop, opt_duration, curve = 'ease-in') {
+
+    const duration = opt_duration !== undefined ?
+      dev().assertNumber(opt_duration) :
+      getDefaultScrollAnimationDuration(curScrollTop, newScrollTop);
 
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-
-    // TODO(aghassemi, #10463): the duration should not be a constant and
-    // should be proportional to the distance to be scrolled for better
-    // transition experience when things are closer vs farther.
     return Animation.animate(parent, position => {
       this.setElementScrollTop_(parent, interpolate(position));
     }, duration, curve).thenAlways(() => {
@@ -1007,6 +1011,7 @@ export class Viewport {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
       return;
     }
+
     animPromise.then(() => {
       this.binding_.showViewerHeader(transient, paddingTop);
     });
@@ -1337,6 +1342,17 @@ export function updateViewportMetaString(currentValue, updateParams) {
   return stringifyViewportMeta(params);
 }
 
+/**
+ * Calculates a default duration for a scrollTop animation.
+ * @param {number} scrollTopA commutative with b.
+ * @param {number} scrollTopB commutative with a.
+ * @param {number=} max in ms. default 500ms.
+ * @return {number}
+ */
+function getDefaultScrollAnimationDuration(scrollTopA, scrollTopB, max = 500) {
+  // 65% of scroll Δ to ms, eg 1000px -> 650ms, integer between 0 and max
+  return Math.floor(clamp(0.65 * Math.abs(scrollTopA - scrollTopB), 0, max));
+}
 
 /**
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
@@ -1345,16 +1361,17 @@ export function updateViewportMetaString(currentValue, updateParams) {
  */
 function createViewport(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
+  const {win} = ampdoc;
   let binding;
   if (ampdoc.isSingleDoc() &&
-      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
-        ampdoc.win.Element.prototype.attachShadow &&
+      getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
+    if (isExperimentOn(win, 'ios-embed-sd') &&
+        win.Element.prototype.attachShadow &&
         // Even though iOS 10 supports Shadow DOM, the support is buggy.
-        Services.platformFor(ampdoc.win).getMajorVersion() >= 11) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
+        Services.platformFor(win).getMajorVersion() >= 11) {
+      binding = new ViewportBindingIosEmbedShadowRoot_(win);
     } else {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+      binding = new ViewportBindingIosEmbedWrapper_(win);
     }
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
