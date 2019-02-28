@@ -16,6 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const requestPromise = require('request-promise');
 const {
   gitBranchName,
   gitDiffCommitLog,
@@ -24,7 +25,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
-const {execOrDie, exec, getStdout} = require('../exec');
+const {execOrDie, exec} = require('../exec');
 const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
 const BUILD_OUTPUT_FILE =
@@ -65,10 +66,10 @@ function printChangeSummary(fileName) {
  * Starts connection to Sauce Labs after getting account credentials
  * @param {string} functionName
  */
-function startSauceConnect(functionName) {
+async function startSauceConnect(functionName) {
   process.env['SAUCE_USERNAME'] = 'amphtml';
-  process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
-      'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
+  const response = await requestPromise('https://amphtml-sauce-token-dealer.appspot.com/getJwtToken');
+  process.env['SAUCE_ACCESS_KEY'] = response.trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   console.log('\n' + fileLogPrefix,
@@ -111,9 +112,9 @@ function startTimer(functionName, fileName) {
  */
 function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
-  const executionTime = new Date(endTime - startTime);
-  const mins = executionTime.getMinutes();
-  const secs = executionTime.getSeconds();
+  const executionTime = endTime - startTime;
+  const mins = Math.floor(executionTime / 60000);
+  const secs = Math.floor(executionTime % 60000 / 1000);
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),

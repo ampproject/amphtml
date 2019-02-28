@@ -78,11 +78,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
-      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
-    devDashboard.setCacheStatus(false);
-  }
-
+  // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
 
@@ -119,18 +115,63 @@ app.get('/serve_mode_change', (req, res) => {
 //   - /proxy/?url=hello.com?mode=/shadow/ 👉 /shadow/proxy/s/hello.com
 //   - /proxy/?url=https://hello.com 👉 /proxy/s/hello.com
 //   - /proxy/?url=https://www.google.com/amp/s/hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=hello.com/canonical 👉 /proxy/s/hello.com/amp
 //
 // This passthrough is useful to generate the URL from <form> values,
-// (See ./app-index/proxy-fom.js)
-app.get('/proxy', (req, res) => {
+// (See ./app-index/proxy-form.js)
+app.get('/proxy', async(req, res, next) => {
   const {mode, url} = req.query;
-  const prefix = (mode || '').replace(/\/$/, '');
-  const sufixClearPrefixReStr =
-      '^http(s?)://' +
+  const urlSuffixClearPrefixReStr =
+      '^https?://' +
       '((www\.)?google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)/amp/s/)?';
-  const sufix = url.replace(new RegExp(sufixClearPrefixReStr, 'i'), '');
-  res.redirect(`${prefix}/proxy/s/${sufix}`);
+  const urlSuffix = url.replace(new RegExp(urlSuffixClearPrefixReStr, 'i'), '');
+
+  try {
+    const ampdocUrl = await requestAmphtmlDocUrl(urlSuffix);
+    const ampdocUrlSuffix = ampdocUrl.replace(/^https?:\/\//, '');
+    const modePrefix = (mode || '').replace(/\/$/, '');
+    const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
+    res.redirect(proxyUrl);
+  } catch ({message}) {
+    console.log(`ERROR: ${message}`);
+    next();
+  }
 });
+
+
+/**
+ * Resolves an AMPHTML URL from a canonical URL. If AMPHTML is canonical, same
+ * URL is returned.
+ * @param {string} urlSuffix URL without protocol or google.com/amp/s/...
+ * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
+ * @return {!Promise<string>}
+ */
+function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+  const defaultUrl = `${protocol}://${urlSuffix}`;
+  console.log(`Fetching URL: ${defaultUrl}`);
+  return new Promise((resolve, reject) => {
+    request(defaultUrl, (error, response, body) => {
+      if (error || (response && (
+        response.statusCode < 200 || response.statusCode >= 300))) {
+
+        if (protocol == 'https') {
+          return requestAmphtmlDocUrl(urlSuffix, 'http');
+        }
+        return reject(new Error(error || `Status: ${response.statusCode}`));
+      }
+      const {window} = new jsdom.JSDOM(body);
+      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+      if (!linkRelAmphtml) {
+        return resolve(defaultUrl);
+      }
+      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
+      if (!amphtmlUrl) {
+        return resolve(defaultUrl);
+      }
+      return resolve(amphtmlUrl);
+    });
+  });
+}
 
 /*
  * Intercept Recaptcha frame for,
@@ -1449,7 +1490,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = {
-  middleware: app,
-  beforeServeTasks: devDashboard.beforeServeTasks,
-};
+module.exports = app;

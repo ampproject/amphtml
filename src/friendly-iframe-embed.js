@@ -627,5 +627,6 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
  * @return {boolean}
  */
 export function isInFie(element) {
-  return !!closestAncestorElementBySelector(element, '.i-amphtml-fie');
+  return element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie');
 }

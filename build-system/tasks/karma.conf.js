@@ -265,7 +265,6 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',
@@ -278,10 +277,11 @@ module.exports = {
     'karma-sauce-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',
+    'karma-source-map-support',
     'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
-        return require(require.resolve('../app.js')).middleware;
+        return require(require.resolve('../app.js'));
       }],
     },
   ],

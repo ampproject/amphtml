@@ -35,7 +35,6 @@ import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {
   ScrollTimelineWorkletRunner,
 } from './runners/scrolltimeline-worklet-runner';
-import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestAncestorElementBySelector, matches} from '../../../src/dom';
 import {
@@ -48,6 +47,7 @@ import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -179,33 +179,26 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
-
-    /** @private {boolean} */
-    this.useAnimationWorklet_ =
-      Services.platformFor(this.win_).isChrome() &&
-      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
-      'animationWorklet' in CSS;
   }
 
   /**
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
-   * @param {?Object=} opt_viewportData
+   * @param {?JsonObject=} opt_positionObserverData
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
-  createRunner(spec, hasPositionObserver = false, opt_args,
-    opt_viewportData = null) {
+  createRunner(spec, opt_args,
+    opt_positionObserverData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return this.useAnimationWorklet_ && hasPositionObserver ?
+        return this.isAnimationWorkletSupported_() && opt_positionObserverData ?
           new ScrollTimelineWorkletRunner(this.win_, requests,
-              opt_viewportData) :
+              opt_positionObserverData) :
           new NativeWebAnimationRunner(requests);
       });
     });
@@ -251,6 +244,17 @@ export class Builder {
   createScanner_(path, target, index, vars, timing) {
     return new MeasureScanner(this, this.css_, path,
         target, index, vars, timing);
+  }
+
+  /**
+   * @return {boolean} Whether animationWorklet can be used.
+   * @private
+   */
+  isAnimationWorkletSupported_() {
+    return isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+    'animationWorklet' in CSS &&
+    getMode(this.win_).runtime != 'inabox' &&
+    !isInFie(this.win_.document.documentElement);
   }
 }
 

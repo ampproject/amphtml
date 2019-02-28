@@ -32,7 +32,8 @@ import {
   assertDoesNotContainDisplay,
   setStyles,
 } from '../../../../src/style';
-import {devAssert, userAssert} from '../../../../src/log';
+import {devAssert} from '../../../../src/log';
+import {getTotalDuration} from './utils';
 
 /**
  */
@@ -228,23 +229,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {
-    let maxTotalDuration = 0;
-    for (let i = 0; i < this.requests_.length; i++) {
-      const {timing} = this.requests_[i];
-
-      userAssert(isFinite(timing.iterations), 'Animation has infinite ' +
-      'timeline, we can not seek to a relative position within an infinite ' +
-      'timeline. Use "time" for seekTo or remove infinite iterations');
-
-      const iteration = timing.iterations - timing.iterationStart;
-      const totalDuration = (timing.duration * iteration) +
-          timing.delay + timing.endDelay;
-
-      if (totalDuration > maxTotalDuration) {
-        maxTotalDuration = totalDuration;
-      }
-    }
-
-    return maxTotalDuration;
+    return getTotalDuration(this.requests_);
   }
+
 }

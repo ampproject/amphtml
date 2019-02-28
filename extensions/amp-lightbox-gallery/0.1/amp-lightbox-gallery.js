@@ -47,6 +47,7 @@ import {htmlFor} from '../../../src/static-template';
 import {
   prepareImageAnimation,
 } from '@ampproject/animations/dist/animations.mjs';
+import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -1241,21 +1242,25 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       duration = this.getTransitionDurationFromElements_(srcImg, targetImg);
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
-      imageAnimation = prepareImageAnimation({
-        styleContainer: this.getAmpDoc().getHeadNode(),
-        transitionContainer: this.getAmpDoc().getBody(),
-        srcImg,
-        targetImg,
-        srcImgRect: undefined,
-        targetImgRect: undefined,
-        styles: {
-          'animationDuration': `${motionDuration}ms`,
-          // Matches z-index for `.i-amphtml-lbg`.
-          'zIndex': 2147483642,
-        },
-        keyframesNamespace: undefined,
-        curve: TRANSITION_CURVE,
-      });
+      try {
+        imageAnimation = prepareImageAnimation({
+          styleContainer: this.getAmpDoc().getHeadNode(),
+          transitionContainer: this.getAmpDoc().getBody(),
+          srcImg,
+          targetImg,
+          srcImgRect: undefined,
+          targetImgRect: undefined,
+          styles: {
+            'animationDuration': `${motionDuration}ms`,
+            // Matches z-index for `.i-amphtml-lbg`.
+            'zIndex': 2147483642,
+          },
+          keyframesNamespace: undefined,
+          curve: TRANSITION_CURVE,
+        });
+      } catch (e) {
+        reportError(e);
+      }
     };
 
     const mutate = () => {
@@ -1279,7 +1284,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       srcImg.classList.add('i-amphtml-ghost');
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
-      imageAnimation.applyAnimation();
+      if (imageAnimation) {
+        imageAnimation.applyAnimation();
+      }
     };
 
     const cleanup = () => {
@@ -1288,7 +1295,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
-      imageAnimation.cleanupAnimation();
+      if (imageAnimation) {
+        imageAnimation.cleanupAnimation();
+      }
     };
 
     return this.measureMutateElement(measure, mutate)

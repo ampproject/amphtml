@@ -49,6 +49,7 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
     downloadDistOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
@@ -82,7 +83,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();
