@@ -20,6 +20,7 @@ import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
@@ -53,6 +54,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?string}
      */
     this.filter_ = null;
+
+    /**
+     * The index of the active suggested item.
+     * @private (!number)
+     */
+    this.activeIndex_ = -1;
+
+    /**
+     * The reference to the <div> of the active suggested item.
+     * @private (!number)
+     */
+    this.activeElement_ = null;
 
     /**
      * The reference to the <div> that contains template-rendered children.
@@ -125,7 +138,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.inputElement_.addEventListener('input',
-        this.renderResults_.bind(this));
+        this.inputHandler_.bind(this));
+    this.inputElement_.addEventListener('keydown',
+        this.keyDownHandler_.bind(this));
     this.inputElement_.addEventListener('focus', this.showResults.bind(this));
     this.inputElement_.addEventListener('blur', this.hideResults.bind(this));
     this.renderResults_();
@@ -142,20 +157,29 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.addEventListener('mousedown', this.selectItem.bind(this));
+    element.addEventListener('mousedown', this.selectItemHandler.bind(this));
     element.textContent = item;
     return element;
   }
 
-  /** 
-   * Render filtered results on the current input and update the container_.
-   * @param {?event} event
-   * @private
-   */
-  renderResults_(event) {
-    if (event && event.inputType === 'deleteContentBackward') {
+  /**
+  * Handle rendering results on user input.
+  * @param {?event} event
+  * @private
+  */
+  inputHandler_(event) {
+    if (event.inputType === 'deleteContentBackward') {
       // Explore options for caching results to avoid repetitive queries.
     }
+    this.renderResults_();
+    this.showResults();
+  }
+
+  /**
+   * Render filtered results on the current input and update the container_.
+   * @private
+   */
+  renderResults_() {
     const userInput = this.inputElement_.value;
     const filteredData = this.filterData_(this.inlineData_, userInput);
     this.clearAllItems();
@@ -164,7 +188,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
   }
 
-  /** 
+  /**
    * Apply the filter to the given data based on the given input.
    * @param {!Array<string>} data
    * @param {string} input
@@ -189,7 +213,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Filter not yet supported: ${this.filter_}`);
           break;
         case 'custom':
-          throw new Error(`Filter not yet supported: ${this.filter_}`);          
+          throw new Error(`Filter not yet supported: ${this.filter_}`);
           break;
         case 'none':
           // Query server endpoint.
@@ -209,20 +233,89 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** Set container_ visibility to hidden. */
   hideResults() {
     setStyle(this.container_, 'visibility', 'hidden');
+    this.resetActiveElement_();
+    this.activeIndex_ = -1;
   }
 
-  /** 
-   * Writes the selected value into the input field.
-   * @param {?event} event
+  /**
+   * Selects the target of the event.
+   * @param {!event} event
    */
-  selectItem(event) {
-    this.inputElement_.value = event.target.textContent;
+  selectItemHandler(event) {
+    this.selectItem(event.target);
+  }
+
+  /**
+   * Writes the selected value into the input field.
+   * @param {?HTMLElement} element
+   */
+  selectItem(element) {
+    this.inputElement_.value = element.textContent;
     this.clearAllItems();
+  }
+
+  /**
+   * Given a delta between the current active item and the desired active item,
+   * marks the desired active item as active. Loops to the beginning.
+   * @param {number} delta
+   * @private
+   */
+  updateActiveItem_(delta) {
+    if (delta === 0) {
+      return;
+    }
+    if (this.activeElement_ !== null) {
+      this.resetActiveElement_();
+    }
+    const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
+    const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
+    this.activeIndex_ = mod(index, this.container_.children.length);
+    this.activeElement_ = this.container_.children[this.activeIndex_];
+    this.activeElement_.classList
+        .add('i-amphtml-autocomplete-item-active');
+  }
+
+  /**
+   * Resets the activeElement_ and removes its 'active' class.
+   * @private
+   */
+  resetActiveElement_() {
+    if (!this.activeElement_) {
+      return;
+    }
+    this.activeElement_.classList.remove('i-amphtml-autocomplete-item-active');
+    this.activeElement_ = null;
   }
 
   /** Delete all children to the container_ */
   clearAllItems() {
     removeChildren(dev().assertElement(this.container_));
+  }
+
+  /**
+   * Handles keyboard events.
+   * @param {!event} event
+   * @private
+   */
+  keyDownHandler_(event) {
+    switch (event.key) {
+      case 'ArrowDown':
+        this.updateActiveItem_(1);
+        break;
+      case 'ArrowUp':
+        this.updateActiveItem_(-1);
+        break;
+      case 'Enter':
+        if (this.activeElement_) {
+          event.preventDefault();
+          this.selectItem(this.activeElement_);
+          this.resetActiveElement_();
+        }
+        break;
+      case 'Escape':
+        this.hideResults();
+      default:
+    }
   }
 
   /** @override */
