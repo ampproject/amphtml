@@ -46,7 +46,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {px, setStyle} from '../../style';
+import {setStyle} from '../../style';
 
 
 const TAG_ = 'Viewport';
