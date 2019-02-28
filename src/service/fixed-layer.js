@@ -63,7 +63,7 @@ function combineTransforms(opt_initialTransform, opt_addedTransform) {
   if (!opt_addedTransform || opt_addedTransform == 'none') {
     return opt_initialTransform || '';
   }
-  const addedTransformOrEmpty = opt_addedTransform || '';
+  const addedTransformOrEmpty = opt_addedTransform || ''; // lgtm [js/trivial-conditional]
   if (!opt_initialTransform || opt_initialTransform == 'none') {
     return addedTransformOrEmpty;
   }
