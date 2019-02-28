@@ -15,7 +15,13 @@
  */
 
 const fs = require('fs');
-const {By, Condition, Key} = require('selenium-webdriver');
+const {
+  By,
+  Condition,
+  Key,
+  error,
+} = require('selenium-webdriver');
+const {NoSuchElementError} = error;
 const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
 const {expect} = require('chai');
 
@@ -107,12 +113,15 @@ class SeleniumWebDriverController {
         const root = await this.getRoot_();
         const result = await root.findElement(bySelector);
         return result;
-      } catch (nse) {
+      } catch (e) {
         // WebElement.prototype.findElement differs from
         // WebDriver.prototype.findElement in that the WebElement method will
-        // throw a NoSuchElementException if the element is not found, and does
+        // throw a NoSuchElementError if the element is not found, and does
         // not wait for the element to appear in the document.
-        return null;
+        if (e instanceof NoSuchElementError) {
+          return null;
+        }
+        throw e;
       }
     });
     const webElement = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
@@ -136,8 +145,11 @@ class SeleniumWebDriverController {
         const root = await this.getRoot_();
         const elements = await root.findElements(bySelector);
         return elements.length ? elements : null;
-      } catch (nse) {
-        return null;
+      } catch (e) {
+        if (e instanceof NoSuchElementError) {
+          return null;
+        }
+        throw e;
       }
     });
     const webElements = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
@@ -154,15 +166,11 @@ class SeleniumWebDriverController {
 
     const label = 'for element to be located ' + xpath;
     const webElement = await this.driver.wait(new Condition(label, async() => {
-      try {
-        const root = await this.getRoot_();
-        const results = await this.evaluate((xpath, root) => {
-          return window.queryXpath(xpath, root);
-        }, xpath, root);
-        return results[0];
-      } catch (nse) {
-        return null;
-      }
+      const root = await this.getRoot_();
+      const results = await this.evaluate((xpath, root) => {
+        return window.queryXpath(xpath, root);
+      }, xpath, root);
+      return results[0];
     }), ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
@@ -176,15 +184,11 @@ class SeleniumWebDriverController {
     await this.maybeInstallXpath_();
     const label = 'for at least one element to be located ' + xpath;
     const webElements = await this.driver.wait(new Condition(label, async() => {
-      try {
-        const root = await this.getRoot_();
-        const results = await this.evaluate((xpath, root) => {
-          return window.queryXpath(xpath, root);
-        }, xpath, root);
-        return results;
-      } catch (nse) {
-        return null;
-      }
+      const root = await this.getRoot_();
+      const results = await this.evaluate((xpath, root) => {
+        return window.queryXpath(xpath, root);
+      }, xpath, root);
+      return results;
     }), ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
