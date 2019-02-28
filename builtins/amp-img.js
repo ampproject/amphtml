@@ -51,6 +51,9 @@ export class AmpImg extends BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
 
+    /** @private {boolean} */
+    this.autoGenerateSizes_ = false;
+
     /**
      * The current width used by the automatically generated sizes attribute
      * @private {number}
@@ -71,7 +74,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
+    if (this.autoGenerateSizes_) {
       this.maybeGenerateSizes_();
     }
   }
@@ -145,7 +148,9 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    if (isExperimentOn(this.getAmpDoc().win, 'amp-img-auto-sizes')) {
+    this.autoGenerateSizes_ = isExperimentOn(this.getAmpDoc().win,
+        'amp-img-auto-sizes');
+    if (this.autoGenerateSizes_) {
       this.maybeGenerateSizes_();
     }
     this.applyFillContent(this.img_, true);
@@ -175,6 +180,10 @@ export class AmpImg extends BaseElement {
     }
 
     const width = this.getLayoutWidth();
+    if (!this.shouldSetSizes_(width)) {
+      return;
+    }
+
     const viewportWidth = this.getViewport().getWidth();
 
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
@@ -187,12 +196,10 @@ export class AmpImg extends BaseElement {
 
     const generatedSizes = entry + defaultSize;
 
-    if (this.shouldSetSizes_(width)) {
-      this.mutateElement(() => {
-        this.img_.setAttribute('sizes', generatedSizes);
-      });
-      this.sizesWidth_ = width;
-    }
+    this.mutateElement(() => {
+      this.img_.setAttribute('sizes', generatedSizes);
+    });
+    this.sizesWidth_ = width;
   }
 
   /**
