@@ -125,6 +125,8 @@ export class Performance {
      */
     this.aggregateJankScore_ = 0;
 
+    this.onVisibilityChange_ = this.onVisibilityChange_.bind(this);
+
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
@@ -269,7 +271,7 @@ export class Performance {
       // @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
       this.win.addEventListener(
           'visibilitychange',
-          this.onVisibilityChange_.bind(this),
+          this.onVisibilityChange_,
           {capture: true}
       );
     }
