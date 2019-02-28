@@ -145,10 +145,22 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 const MIN_VERTICAL_SPACE = 48;
 
 /**
- * Padding between tooltip and edges of screen.
+ * Padding between tooltip and vertical edges of screen.
  * @const {number}
  */
-const EDGE_PADDING = 8;
+const VERTICAL_EDGE_PADDING = 24;
+
+/**
+ * Padding between tooltip and horizontal edges of screen.
+ * @const {number}
+ */
+const HORIZONTAL_EDGE_PADDING = 32;
+
+/**
+ * Padding between tooltip arrow and right edge of the tooltip.
+ * @const {number}
+ */
+const TOOLTIP_ARROW_RIGHT_PADDING = 24;
 
 /**
  * Blank icon when no data-tooltip-icon src is specified.
@@ -656,7 +668,7 @@ export class AmpStoryEmbeddedComponent {
    */
   verticalPositioning_(component, pageRect, state) {
     const tooltipHeight = this.tooltip_./*OK*/offsetHeight;
-    const verticalOffset = EDGE_PADDING * 3;
+    const verticalOffset = VERTICAL_EDGE_PADDING ;
 
     state.tooltipTop = component.clientY - tooltipHeight - verticalOffset;
     if (state.tooltipTop < pageRect.top + MIN_VERTICAL_SPACE) {
@@ -677,22 +689,21 @@ export class AmpStoryEmbeddedComponent {
   horizontalPositioning_(component, pageRect, state) {
     const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
     state.tooltipLeft = component.clientX - (tooltipWidth / 2);
-    const maxHorizontalLeft = pageRect.left + pageRect.width -
-      tooltipWidth - EDGE_PADDING;
+    const maxLeft =
+      pageRect.left + pageRect.width - HORIZONTAL_EDGE_PADDING - tooltipWidth;
+    const minLeft = pageRect.left + HORIZONTAL_EDGE_PADDING;
 
     // Make sure tooltip is inside bounds of the page.
-    state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
-    state.tooltipLeft = Math.max(state.tooltipLeft,
-        pageRect.left + EDGE_PADDING);
+    state.tooltipLeft = Math.min(state.tooltipLeft, maxLeft);
+    state.tooltipLeft = Math.max(state.tooltipLeft, minLeft);
 
     state.arrowLeftOffset = Math.abs(component.clientX - state.tooltipLeft -
         this.tooltipArrow_./*OK*/offsetWidth / 2);
 
     // Make sure tooltip arrow is inside bounds of the tooltip.
-    state.arrowLeftOffset =
-      Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
-    state.arrowLeftOffset =
-      Math.max(state.arrowLeftOffset, 0);
+    state.arrowLeftOffset = Math.min(state.arrowLeftOffset,
+        tooltipWidth - TOOLTIP_ARROW_RIGHT_PADDING);
+    state.arrowLeftOffset = Math.max(state.arrowLeftOffset, 0);
   }
 
   /**
@@ -736,7 +747,8 @@ export class AmpStoryEmbeddedComponent {
     const html = htmlFor(doc);
     const tooltipOverlay =
         html`
-        <section class="i-amphtml-story-focused-state-layer i-amphtml-hidden">
+        <section class="i-amphtml-story-focused-state-layer
+            i-amphtml-story-system-reset i-amphtml-hidden">
           <div class="i-amphtml-story-focused-state-layer-nav-button-container
               i-amphtml-story-tooltip-nav-button-left">
             <button role="button" ref="buttonLeft"
