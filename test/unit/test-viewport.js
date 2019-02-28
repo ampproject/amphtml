@@ -836,7 +836,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  it('scrolls with animateScrollIntoView respecting padding', function* () {
+  it('scrolls with animateScrollIntoView respecting padding', async() => {
     const element = document.createElement('div');
 
     // animateScrollIntoView traverses up the DOM tree, so it needs the node to
@@ -862,14 +862,14 @@ describes.fakeWin('Viewport', {}, env => {
     stubVsyncMeasure();
 
     const duration = 1000;
-
-    const animatePromise = viewport.animateScrollIntoView(element, duration);
+    const pos = 'top';
+    const promise = viewport.animateScrollIntoView(element, pos, duration);
 
     clock.tick(duration);
 
     runVsync();
 
-    yield animatePromise;
+    await promise;
 
     bindingMock.verify();
 
@@ -890,7 +890,9 @@ describes.fakeWin('Viewport', {}, env => {
     sandbox.stub(viewport, 'getScrollTop').returns(111);
     bindingMock.expects('setScrollTop').withArgs(111).never();
     const duration = 1000;
-    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+    const pos = 'top';
+    const promise = viewport.animateScrollIntoView(element, pos, 1000);
+    promise.then(() => {
       bindingMock.verify();
     });
     clock.tick(duration);
