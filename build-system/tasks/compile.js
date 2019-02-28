@@ -245,6 +245,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-viewer-assistance/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
+      // Needed for amp-smartlinks dep on amp-skimlinks
+      'extensions/amp-skimlinks/0.1/**/*.js',
       'src/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
