@@ -13,10 +13,6 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  # Yarn is outdated on Travis (github.com/travis-ci/travis-ci/issues/9445)
-  - curl -o- -L https://yarnpkg.com/install.sh | bash
-  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-  # Python dependencies
   - pip install --user urllib3[secure]
   - pip install --user gsutil
   - pip install --user protobuf
