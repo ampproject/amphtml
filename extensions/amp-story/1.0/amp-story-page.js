@@ -170,7 +170,7 @@ export const NavigationDirection = {
 function debounceEmbedResize(win, page, resources) {
   return debounce(win, (el, unlisten) => {
     AmpStoryEmbeddedComponent
-        .prepareForAnimation(page, /** @type {!Element} */ (el), resources);
+        .prepareForAnimation(page, dev().assertElement(el), resources);
     if (unlisten) {
       unlisten();
     }
