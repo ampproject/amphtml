@@ -26,6 +26,7 @@ import {tryParseJson} from './json';
 export const SandboxOptions = {
   ALLOW_SCRIPTS: 'allow-scripts',
   ALLOW_SAME_ORIGIN: 'allow-same-origin',
+  ALLOW_POPUPS: 'allow-popups',
   ALLOW_POPUPS_TO_ESCAPE_SANDBOX: 'allow-popups-to-escape-sandbox',
   ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION:
     'allow-top-navigation-by-user-activation',
