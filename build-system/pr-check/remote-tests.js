@@ -44,8 +44,8 @@ async function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    downloadBuildOutput(FILENAME);
     downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
 
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
