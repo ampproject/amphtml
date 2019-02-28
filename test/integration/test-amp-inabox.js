@@ -47,9 +47,9 @@ function writeFriendlyFrame(doc, iframe, adContent) {
  * then add it to the document.
  */
 function writeSafeFrame(doc, iframe, adContent) {
-  const {testServerPort} = window.ampTestRuntimeConfig;
   iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src = '//iframe.localhost:9876/test/fixtures/served/iframe-safeframe.html';
+  iframe.src =
+      '//iframe.localhost:9876/test/fixtures/served/iframe-safeframe.html';
   doc.body.appendChild(iframe);
 }
 
