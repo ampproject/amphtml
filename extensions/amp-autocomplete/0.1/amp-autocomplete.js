@@ -157,7 +157,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       // Explore options for caching results to avoid repetitive queries.
     }
     const userInput = this.inputElement_.value;
-    const filteredData = this.filter_(this.inlineData_, userInput);
+    const filteredData = this.filterData_(this.inlineData_, userInput);
     this.clearAllItems();
     filteredData.forEach(item => {
       this.container_.appendChild(this.createElementFromItem_(item));
@@ -171,7 +171,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @return {!Array<string>}
    * @private
    */
-  filter_(data, input) {
+  filterData_(data, input) {
     return data.filter(item => {
       switch (this.filter_) {
         case 'substring':
