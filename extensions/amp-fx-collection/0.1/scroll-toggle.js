@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
+import {
+  Services,
+  resourcesMeasureMutateElement,
+  resourcesMutateElement,
+} from '../../../src/services';
 import {devAssert, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
 import {px, setImportantStyles} from '../../../src/style';
@@ -67,7 +71,7 @@ export class ScrollToggleDispatch {
     this.isShown_ = true;
 
     /** @private {boolean} */
-    this.isEnabled_ = true;
+    this.isEnabled_ = false;
   }
 
   /** @param {function(boolean)} handler Takes whether the element is shown. */
@@ -78,7 +82,10 @@ export class ScrollToggleDispatch {
 
   /** @private */
   init_() {
+    devAssert(!this.isEnabled_);
+
     const viewport = Services.viewportForDoc(this.ampdoc_);
+    this.isEnabled_ = true;
     this.unlistener_ = viewport.onScroll(() => {
       if (!this.isEnabled_) {
         return;
@@ -215,7 +222,7 @@ export function assertValidScrollToggleElement(element, type, computedStyle) {
 export function getScrollTogglePosition(element, type, computedStyle) {
   const position = type.replace(/^float\-in\-([^\s]+)$/, '$1');
 
-  devAssert(position == 'top' || position == 'bottom');
+  devAssert(position.length > 0);
 
   // naming convention win:
   // position `top` should have `top: 0` and `bottom` should have `bottom: 0`
@@ -232,7 +239,9 @@ export function getScrollTogglePosition(element, type, computedStyle) {
  * @param {!Element} element
  */
 export function installScrollToggleStyles(element) {
-  setImportantStyles(element, {'will-change': 'transform'});
+  setImportantStyles(element, {
+    'will-change': 'transform,opacity,pointer-events',
+  });
 }
 
 /**
@@ -242,17 +251,11 @@ export function installScrollToggleStyles(element) {
  */
 function scrollToggle(element, isShown, position) {
   let offset = 0;
-
-  const measure = () => {
+  resourcesMeasureMutateElement(element, () => {
     offset = getScrollToggleFloatInOffset(element, isShown, position);
-  };
-
-  const mutate = () => {
+  }, () => {
     scrollToggleFloatIn(element, offset);
-  };
-
-  Services.resourcesForDoc(element)
-      .measureMutateElement(element, measure, mutate);
+  });
 }
 
 /**
@@ -272,32 +275,50 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
     });
   }
 
-  viewport.setIndependentFixedOffset(element, (prevTop, top) => {
-    return calculateFloatInViewportOffset(
-        dispatch, element, position, prevTop, top);
+  // Use viewport's "padding top" as a proxy signal for whether there's a
+  // viewer header displayed. If displayed, we display float-in-* elements as
+  // well.
+  viewport.setFixedElementMeasurer(element, (afterAnimation, prevTop, top) => {
+    const isShown = top > 0;
+
+    // Disable scroll dispatch to rely on viewport instead.
+    if (isShown) {
+      dispatch.disable();
+    }
+
+    (isShown ? Promise.resolve() : afterAnimation).then(() => {
+      resourcesMutateElement(element, () => {
+        setVisibilityStyles(element, isShown);
+      });
+    });
+
+    return calculateFloatInViewportOffset(element, position, prevTop, top);
+  });
+}
+
+// TODO(alanorozco): Use the following for scroll-dispatched transition.
+/**
+ * MUST be done inside mutate phase.
+ * @param {!Element} element
+ * @param {boolean} isHidden
+ */
+function setVisibilityStyles(element, isHidden) {
+  setImportantStyles(element, {
+    'pointer-events': isHidden ? 'none' : '',
+    'opacity': isHidden ? 0 : '',
   });
 }
 
 /**
  * MUST be done inside measure phase.
- * @param {!ScrollToggleDispatch} dispatch
  * @param {!Element} element
  * @param {!ScrollTogglePosition} position
  * @param {number} prevTop
  * @param {number} top
  * @return {!../../../src/service/viewport/viewport-impl.IndependentOffsetDef}
  */
-function calculateFloatInViewportOffset(
-  dispatch, element, position, prevTop, top) {
-
+function calculateFloatInViewportOffset(element, position, prevTop, top) {
   const isShown = top > 0;
-
-  // Disable scroll-dispatch logic to depend on the viewport service brokering
-  // padding top changes.
-  if (isShown) {
-    dispatch.disable();
-  }
-
   const {height} = element./*OK*/getBoundingClientRect();
 
   if (position == ScrollTogglePosition.TOP) {
