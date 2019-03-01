@@ -218,10 +218,6 @@ describe('amp-img', () => {
       errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       toggleSpy = sandbox.spy(impl, 'toggleFallback');
 
-      impl.getAmpDoc = function() {
-        return iframe;
-      };
-
       impl.getVsync = function() {
         return {
           mutate(fn) {
@@ -412,9 +408,6 @@ describe('amp-img', () => {
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
-      impl.getAmpDoc = function() {
-        return iframe;
-      };
       sandbox.stub(impl, 'getLayoutWidth').returns(200);
       impl.togglePlaceholder = sandbox.stub();
       return impl;
@@ -474,9 +467,6 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
-      impl.getAmpDoc = function() {
-        return iframe;
-      };
       impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
@@ -487,12 +477,12 @@ describe('amp-img', () => {
     }
 
     beforeEach(() => {
-      toggleExperiment(iframe.win, 'amp-img-auto-sizes', true, true);
+      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
     });
 
     it('should not generate sizes for amp-imgs that already have sizes', () => {
       let impl;
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,
@@ -511,7 +501,7 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs without srcset', () => {
       let impl;
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         width: 300,
@@ -528,7 +518,7 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs with x descriptors', () => {
       let impl;
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
@@ -544,7 +534,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed', () => {
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FIXED,
         src: 'test.jpg',
@@ -561,7 +551,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout responsive', () => {
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.RESPONSIVE,
         src: 'test.jpg',
@@ -578,7 +568,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed-height', () => {
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FIXED_HEIGHT,
         src: 'test.jpg',
@@ -595,7 +585,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fill', () => {
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FILL,
         src: 'test.jpg',
@@ -612,7 +602,7 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout flex-item', () => {
-      expect(isExperimentOn(iframe.win, 'amp-img-auto-sizes')).to.be.true;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg({
         layout: Layout.FLEX_ITEM,
         src: 'test.jpg',
