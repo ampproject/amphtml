@@ -21,10 +21,10 @@ import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
+import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {tryParseJson} from '../../../src/json';
-import {isEnumValue} from '../../../src/types';
 
 /** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
@@ -43,7 +43,7 @@ export const FilterType = {
   FUZZY: 'fuzzy',
   CUSTOM: 'custom',
   NONE: 'none',
-}
+};
 
 export class AmpAutocomplete extends AMP.BaseElement {
 
@@ -114,9 +114,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_ = inputElements[0];
 
     this.filter_ = userAssert(this.element.getAttribute('filter'),
-      `${TAG} requires "filter" attribute.`);
-    userAssert(isEnumValue(FilterType, this.filter_), 
-      `Unexpected filter: ${this.filter}`);
+        `${TAG} requires "filter" attribute.`);
+    userAssert(isEnumValue(FilterType, this.filter_),
+        `Unexpected filter: ${this.filter}`);
 
     this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
