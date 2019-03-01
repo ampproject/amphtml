@@ -878,7 +878,7 @@ Use these two attributes to further specify the parameters of your zoom-in and z
 
 ##### translate-x [optional, only works with `pan-left` & `pan-right` animations]
 
-Use this attribute specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan width of the specified image.
+Use this attribute to specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole width of the specified image.
 
 *Example*: An image panning 200px to the left over 10 seconds.
 
@@ -889,7 +889,7 @@ Use this attribute specify the horizontal panning of your image in a pan-left/pa
 
 ##### translate-y [optional, only works with `pan-up` & `pan-down` animations]
 
-Use this attribute specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
+Use this attribute to specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
 
 *Example*: An image panning 50px down over 15 seconds.
 
