@@ -178,7 +178,7 @@ function updateEmbedStyleEl(embedStyleEl, embedData, expanding) {
       width: ${px(embedData.width)} !important;
       height: ${px(embedData.height)} !important;
       transform: ${expanding ? 'translate3d(' + embedData.translateX + 'px, ' +
-        embedData.translateY + ' px, 0)' : ''}
+        embedData.translateY + 'px, 0)' : ''}
         scale(${embedData.scale}) !important;
       margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px
           !important;
