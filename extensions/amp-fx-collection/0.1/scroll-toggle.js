@@ -267,7 +267,7 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
   viewport.setFixedElementMeasurer(element,
       (afterAnimation, prevPaddingTop, paddingTop) => {
         const resources = Services.resourcesForDoc(element);
-        const isShown = paddingTop > 0;
+        const isShown = isShownPerViewportPaddingTop(paddingTop);
 
         // Disable scroll dispatch to rely on viewport instead.
         if (isShown) {
@@ -313,23 +313,25 @@ function setVisibilityStyles(element, isShown) {
  * MUST be done inside measure phase.
  * @param {!Element} element
  * @param {!ScrollTogglePosition} position
- * @param {number} prevTop
- * @param {number} top
+ * @param {number} prevPaddingTop
+ * @param {number} paddingTop
  * @return {{
  *   top: (number|undefined),
  *   bottom: (number|undefined),
  *   animOffset: number,
  * }}
  */
-function measureFloatInFromViewport(element, position, prevTop, top) {
-  const isShown = top > 0;
+function measureFloatInFromViewport(
+  element, position, prevPaddingTop, paddingTop) {
+
+  const isShown = isShownPerViewportPaddingTop(paddingTop);
   const {height} = element./*OK*/getBoundingClientRect();
 
   if (position == ScrollTogglePosition.TOP) {
     if (isShown) {
-      return {top, animOffset: -(height + top)};
+      return {top, animOffset: -(height + paddingTop)};
     }
-    return {top: -height, animOffset: prevTop + height};
+    return {top: -height, animOffset: prevPaddingTop + height};
   }
 
   if (isShown) {
@@ -355,4 +357,15 @@ function assertStyleOrWarn(computed, prop, expected, element, opt_suffix) {
       'Element%s must have `%s: %s` style. %s',
       elementSuffix, prop, expected, element);
   return false;
+}
+
+/**
+ * Use viewport's "padding top" as a proxy signal for whether an element should
+ * be displayed on toggle. If the viewer's header is displayed, then this
+ * returns true.
+ * @param {number} paddingTop
+ * @return {boolean}
+ */
+function isShownPerViewportPaddingTop(paddingTop) {
+  return paddingTop > 0;
 }
