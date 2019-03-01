@@ -52,6 +52,8 @@ export const MessageType = {
   CANCEL_FULL_OVERLAY_FRAME_RESPONSE: 'cancel-full-overlay-frame-response',
 
   // For amp-inabox
+  HOST_BROADCAST: 'host-broadcast',
+  HOST_RESPONSE: 'host-response',
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
 

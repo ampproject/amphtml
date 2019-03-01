@@ -15,16 +15,18 @@
  */
 
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
-import {getService, registerServiceBuilder} from '../service';
+import {MessageType} from '../../src/3p-frame-messaging';
+import {dict} from '../../src/utils/object';
+import {getServicePromise, registerServiceBuilder} from '../service';
 import {tryParseJson} from '../json';
 
 /**
  * @param {!Window} win
- * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
+ * @return {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */(
-    getService(win, 'iframeMessagingClient'));
+  return /** @type {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */(
+    getServicePromise(win, 'iframeMessagingClient'));
 }
 
 /**
@@ -39,7 +41,7 @@ export function installIframeMessagingClient(win) {
 
 /**
  * @param {!Window} win
- * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
+ * @return {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>}
  */
 function createIframeMessagingClient(win) {
   const iframeClient = new IframeMessagingClient(win);
@@ -51,13 +53,24 @@ function createIframeMessagingClient(win) {
   }
   iframeClient.setSentinel(sentinel || getRandom(win));
 
-  // Bet the top window is the scrollable window and loads host script.
-  // TODO(lannka,#9120):
-  // 1) check window ancestor origin, if the top window is in same origin,
-  // don't bother to use post messages.
-  // 2) broadcast the request
-  iframeClient.setHostWindow(win.top);
-  return iframeClient;
+  iframeClient.setBroadcastMode(true);
+  return new Promise(resolve => {
+    const wins = {};
+    let hostWin = win;
+    let j = 0;
+    iframeClient.registerCallback(MessageType.HOST_RESPONSE, message => {
+      iframeClient.setBroadcastMode(false);
+      iframeClient.setHostWindow(wins[message['id']]);
+      resolve(iframeClient);
+    });
+    do {
+      hostWin = hostWin.parent;
+      wins[j] = hostWin;
+      iframeClient.setHostWindow(hostWin);
+      iframeClient.sendMessage(MessageType.HOST_BROADCAST, dict({'id': j}));
+      j++;
+    } while (hostWin != win.top && j < 10);
+  });
 }
 
 /**

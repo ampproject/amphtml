@@ -137,7 +137,7 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
+    /** @private @const {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
     /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
@@ -172,12 +172,12 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-    this.iframeClient_.makeRequest(
+    return this.iframeClient_.then(client => client.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        });
+        }));
   }
 
   /** @visibleForTesting */
@@ -332,16 +332,15 @@ export class ViewportBindingInabox {
             /** @type {!HTMLIFrameElement} */(this.win.frameElement)));
     }
     if (!this.requestPositionPromise_) {
-      this.requestPositionPromise_ = new Promise(resolve => {
-        this.iframeClient_.requestOnce(
-            MessageType.SEND_POSITIONS, MessageType.POSITION,
-            data => {
-              this.requestPositionPromise_ = null;
-              devAssert(data.targetRect, 'Host should send targetRect');
-              resolve(data.targetRect);
-            }
-        );
-      });
+      this.requestPositionPromise_ =
+        this.iframeClient_.then(client => new Promise(resolve =>
+          client.requestOnce(
+              MessageType.SEND_POSITIONS, MessageType.POSITION,
+              data => {
+                this.requestPositionPromise_ = null;
+                devAssert(data.targetRect, 'Host should send targetRect');
+                resolve(data.targetRect);
+              })));
     }
     return this.requestPositionPromise_;
   }
@@ -388,20 +387,18 @@ export class ViewportBindingInabox {
    * @private
    */
   requestFullOverlayFrame_() {
-    return new Promise((resolve, reject) => {
-      const unlisten = this.iframeClient_.makeRequest(
+    return this.iframeClient_.then(client => new Promise((resolve, reject) =>
+      client.requestOnce(
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
-            unlisten();
             if (response['success']) {
               this.updateBoxRect_(response['boxRect']);
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');
             }
-          });
-    });
+          })));
   }
 
   /**
@@ -409,16 +406,14 @@ export class ViewportBindingInabox {
    * @private
    */
   requestCancelFullOverlayFrame_() {
-    return new Promise(resolve => {
-      const unlisten = this.iframeClient_.makeRequest(
+    return this.iframeClient_.then(client => new Promise(resolve =>
+      client.requestOnce(
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           response => {
-            unlisten();
             this.updateBoxRect_(response['boxRect']);
             resolve();
-          });
-    });
+          })));
   }
 
   /** @visibleForTesting */

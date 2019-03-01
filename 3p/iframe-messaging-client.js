@@ -48,6 +48,8 @@ export class IframeMessagingClient {
      */
     this.observableFor_ = map();
     this.setupEventListener_();
+    /** @private {boolean} */
+    this.broadcastMode_ = false;
   }
 
   /**
@@ -145,7 +147,7 @@ export class IframeMessagingClient {
   setupEventListener_() {
     listen(this.win_, 'message', event => {
       // Does it look a message from AMP?
-      if (event.source != this.hostWindow_) {
+      if (!this.broadcastMode_ && event.source != this.hostWindow_) {
         return;
       }
 
@@ -193,5 +195,12 @@ export class IframeMessagingClient {
     if (messageType in this.observableFor_) {
       this.observableFor_[messageType].fire(message);
     }
+  }
+
+  /**
+   * @param {boolean} mode
+   */
+  setBroadcastMode(mode) {
+    this.broadcastMode_ = mode;
   }
 }

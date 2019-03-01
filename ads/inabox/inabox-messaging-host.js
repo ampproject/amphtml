@@ -98,6 +98,9 @@ export class InaboxMessagingHost {
         MessageType.SEND_POSITIONS, this.handleSendPositions_);
 
     this.msgObservable_.listen(
+        MessageType.HOST_BROADCAST, this.handleHostBroadcast_);
+
+    this.msgObservable_.listen(
         MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
 
     this.msgObservable_.listen(
@@ -228,6 +231,21 @@ export class InaboxMessagingHost {
               })),
           origin);
     });
+
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleHostBroadcast_(iframe, request, source, origin) {
+    source./*OK*/postMessage(
+        serializeMessage(MessageType.HOST_RESPONSE, request.sentinel,
+            dict({'id': request.id})), origin);
 
     return true;
   }
