@@ -341,22 +341,6 @@ export class FixedLayer {
   }
 
   /**
-   * @param {!Element} element
-   * @param {string} position 'sticky' or 'fixed'
-   * @return {?ElementDef}
-   * @private
-   */
-  getFe_(element, position) {
-    for (let i = 0; i < this.elements_.length; i++) {
-      const fe = this.elements_[i];
-      if (fe.element == element && fe.position == position) {
-        return fe;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Adds the element directly into the fixed/sticky layer, bypassing discovery.
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true, then the element needs
@@ -706,7 +690,14 @@ export class FixedLayer {
       return;
     }
 
-    let fe = this.getFe_(element, position);
+    let fe = null;
+    for (let i = 0; i < this.elements_.length; i++) {
+      const el = this.elements_[i];
+      if (el.element == element && el.position == position) {
+        fe = el;
+        break;
+      }
+    }
     const isFixed = position == 'fixed';
     if (fe) {
       if (!fe.selectors.includes(selector)) {
