@@ -24,12 +24,26 @@ import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {tryParseJson} from '../../../src/json';
+import {isEnumValue} from '../../../src/types';
 
 /** @const {string} */
 const EXPERIMENT = 'amp-autocomplete';
 
 /** @const {string} */
 const TAG = 'amp-autocomplete';
+
+/**
+ * Different filtering options.
+ * @const @enum {string}
+ */
+export const FilterType = {
+  SUBSTRING: 'substring',
+  PREFIX: 'prefix',
+  TOKEN_PREFIX: 'token-prefix',
+  FUZZY: 'fuzzy',
+  CUSTOM: 'custom',
+  NONE: 'none',
+}
 
 export class AmpAutocomplete extends AMP.BaseElement {
 
@@ -99,8 +113,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = inputElements[0];
 
-    this.filter_ = userAssert(this.element.getAttribute('filter')
-        , `${TAG} requires "filter" attribute.`);
+    this.filter_ = userAssert(this.element.getAttribute('filter'),
+      `${TAG} requires "filter" attribute.`);
+    userAssert(isEnumValue(FilterType, this.filter_), 
+      `Unexpected filter: ${this.filter}`);
+
     this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
     this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
@@ -222,24 +239,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterData_(data, input) {
     let filteredData = data.filter(item => {
       switch (this.filter_) {
-        case 'substring':
+        case FilterType.SUBSTRING:
           return item.includes(input);
           break;
-        case 'prefix':
+        case FilterType.PREFIX:
           return item.startsWith(input);
           break;
-        case 'token-prefix':
+        case FilterType.TOKEN_PREFIX:
           return item.split(' ').some(token => {
             return token.startsWith(input);
           });
           break;
-        case 'fuzzy':
+        case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
           break;
-        case 'custom':
+        case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
           break;
-        case 'none':
+        case FilterType.NONE:
           // Query server endpoint.
           throw new Error(`Filter not yet supported: ${this.filter_}`);
           break;
