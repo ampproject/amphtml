@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
-import {getStyle, setStyle} from '../../../src/style';
+import {getStyle, toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
@@ -156,7 +156,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const container = this.element.ownerDocument.createElement('div');
     container.classList.add('i-amphtml-autocomplete-results');
     container.setAttribute('role', 'list');
-    setStyle(container, 'visibility', 'hidden');
+    toggle(container, false);
     this.applyFillContent(container, /* replacedContent */ true);
     return container;
   }
@@ -275,12 +275,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** Set container_ visibility to visible. */
   showResults() {
-    setStyle(this.container_, 'visibility', 'visible');
+    toggle(this.container_, true);
   }
 
   /** Set container_ visibility to hidden. */
   hideResults() {
-    setStyle(this.container_, 'visibility', 'hidden');
+    toggle(this.container_, false);    
     this.resetActiveElement_();
     this.activeIndex_ = -1;
   }
@@ -365,6 +365,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         break;
       case Keys.ENTER:
         if (this.activeElement_) {
+          // Only prevent if submit-on-enter === false.
           event.preventDefault();
           this.selectItem(this.activeElement_);
           this.resetActiveElement_();
