@@ -161,7 +161,7 @@ function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
-  this.decryptTravisKey();
+  decryptTravisKey_();
   execOrDie(`gsutil signurl -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
