@@ -15,7 +15,7 @@
  */
 
 import {
-  RenderDelayingService
+  RenderDelayingService,
 } from '../../../src/render-delaying-services';
 import {Services} from '../../../src/services';
 
@@ -153,6 +153,9 @@ function addRuntimeClasses(ampdoc) {
 }
 
 class AmpDynamicCssClasses extends RenderDelayingService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
     super();
     addRuntimeClasses(ampdoc);

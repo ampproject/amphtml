@@ -15,10 +15,10 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
 import {
-  RenderDelayingService
+  RenderDelayingService,
 } from '../../../src/render-delaying-services';
+import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';

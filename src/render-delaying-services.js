@@ -47,7 +47,7 @@ const SERVICES = {
  * is properly handled
  */
 export class RenderDelayingService {
-
+  /** Class Constructor */
   constructor() {}
 
   /**
@@ -56,7 +56,7 @@ export class RenderDelayingService {
    * NOTE: This should be overriden if your
    * service need to perform any logic after being
    * registered.
-   * @returns !Promise
+   * @return {!Promise}
    */
   getPostRegisterRenderDelayPromise() {
     return Promise.resolve();
@@ -89,16 +89,18 @@ export function waitForServices(win) {
     return Services.timerFor(win).timeoutPromise(
         LOAD_TIMEOUT,
         getServicePromise(win, service),
-        `Render timeout waiting for service ${service} to be ready.`
+        `Render timeout waiting for service ${service} ` +
+      'to be ready.'
     );
-  })
+  });
   return Promise.all(promises).then(services => {
     const postInstallPromises = services.map(service => {
       if (service.getPostRegisterRenderDelayPromise) {
         return Services.timerFor(win).timeoutPromise(
-          POST_REGISTER_TIMEOUT,
-          service.getPostRegisterRenderDelayPromise(),
-          `Render timeout waiting for service ${service} to finish postInstall.`
+            POST_REGISTER_TIMEOUT,
+            service.getPostRegisterRenderDelayPromise(),
+            `Render timeout waiting for service ${service} ` +
+          'to finish postInstall.'
         );
       }
       return Promise.resolve();
