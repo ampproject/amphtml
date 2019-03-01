@@ -304,7 +304,7 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
  */
 function setVisibilityStyles(element, isShown) {
   setImportantStyles(element, {
-    'pointer-events': isShown ? '': 'none',
+    'pointer-events': isShown ? '' : 'none',
     'opacity': isShown ? '' : 0,
   });
 }
