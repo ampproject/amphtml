@@ -165,6 +165,27 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
       </span>
     </div>`;
 
+
+/**
+ * Updates embed's corresponding <style> element with embedData.
+ * @param {!Element} embedStyleEl
+ * @param {!Object} embedData
+ * @param {boolean} expanding
+ */
+function updateEmbedStyleEl(embedStyleEl, embedData, expanding) {
+  const embedId = embedData.id;
+
+  embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"] {
+      width: ${px(embedData.width)} !important;
+      height: ${px(embedData.height)} !important;
+      transform: ${expanding ? 'translate3d(' + embedData.translateX + 'px, ' +
+        embedData.translateY + ' px, 0)' : ''}
+        scale(${embedData.scale}) !important;
+      margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px
+          !important;
+      }`;
+}
+
 /**
  * Minimum vertical space needed to position tooltip.
  * @const {number}
@@ -583,15 +604,11 @@ export class AmpStoryEmbeddedComponent {
     const embedId =
       this.triggeringTarget_.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
 
-    const styleEl = embedStyleEls[embedId];
+    const embedStyleEl = dev().assertElement(embedStyleEls[embedId],
+        `Failed to look up embed style element with ID ${embedId}`);
 
-    const transformString = styleEl.textContent.substring(
-        styleEl.textContent.indexOf('transform'),
-        styleEl.textContent.indexOf('margin'));
-
-    embedStyleEls[embedId].textContent =
-      styleEl.textContent.replace(transformString,
-          `transform: scale(${styleEl[AMP_EMBED_DATA].scale}) !important;`);
+    updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA],
+        false /* expanding */);
   }
 
   /**
@@ -604,7 +621,9 @@ export class AmpStoryEmbeddedComponent {
   animateExpanded_(target) {
     const embedId = target.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
     const state = {};
-    const storedStyle = embedStyleEls[embedId][AMP_EMBED_DATA];
+    const embedStyleEl = dev().assertElement(embedStyleEls[embedId],
+        `Failed to look up embed style element with ID ${embedId}`);
+    const embedData = embedStyleEl[AMP_EMBED_DATA];
     this.resources_.measureMutateElement(target,
         /** measure */
         () => {
@@ -615,30 +634,33 @@ export class AmpStoryEmbeddedComponent {
 
           // Gap on the left of the element between full-screen size and
           // current size.
-          const leftGap = (storedStyle.width - targetRect.width) / 2;
+          const leftGap = (embedData.width - targetRect.width) / 2;
           // Distance from left of page to what will be the left of the
           // element in full-screen.
           const fullScreenLeft = targetRect.left - leftGap - pageRect.left;
-          const centeredLeft = pageRect.width / 2 - storedStyle.width / 2;
+          const centeredLeft = pageRect.width / 2 - embedData.width / 2;
           state.translateX = centeredLeft - fullScreenLeft;
 
           // Gap on the top of the element between full-screen size and
           // current size.
-          const topGap = (storedStyle.height - targetRect.height) / 2;
+          const topGap = (embedData.height - targetRect.height) / 2;
           // Distance from top of page to what will be the top of the element in
           // full-screen.
           const fullScreenTop = targetRect.top - topGap - pageRect.top;
-          const centeredTop = pageRect.height / 2 - storedStyle.height / 2;
+          const centeredTop = pageRect.height / 2 - embedData.height / 2;
           state.translateY = centeredTop - fullScreenTop;
         },
         /** mutate */
         () => {
           target.classList.toggle('i-amphtml-expanded-component', true);
 
-          const styleEl = embedStyleEls[embedId];
-          embedStyleEls[embedId].textContent = styleEl.textContent.split(
-              `scale(${storedStyle.scale})`).join(`scale(1)
-              translate3d(${state.translateX}px, ${state.translateY}px, 0)`);
+          const expandingData = Object.assign({}, embedData);
+          expandingData.translateX = state.translateX;
+          expandingData.translateY = state.translateY;
+          expandingData.scale = 1;
+
+          updateEmbedStyleEl(embedStyleEl, expandingData,
+              true /* expanding */);
         });
   }
 
@@ -658,8 +680,10 @@ export class AmpStoryEmbeddedComponent {
     // animation again.
     if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
       elId = element.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
-      embedStyleEls[elId].textContent = '';
-      embedStyleEls[elId][AMP_EMBED_DATA] = {};
+      const embedStyleEl = dev().assertElement(embedStyleEls[elId],
+          `Failed to look up embed style element with ID ${elId}`);
+      embedStyleEl.textContent = '';
+      embedStyleEl[AMP_EMBED_DATA] = {};
     }
 
     const state = {};
@@ -691,35 +715,29 @@ export class AmpStoryEmbeddedComponent {
           element.classList.add('i-amphtml-embedded-component');
 
           elId = elId ? elId : ++embedIds;
-
-          const styleTextContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${elId}"] {
-            width: ${px(state.newWidth)} !important;
-            height: ${px(state.newHeight)} !important;
-            transform: scale(${state.scaleFactor}) !important;
-            margin: ${state.verticalMargin}px ${state.horizontalMargin}px
-                !important;
-            }`;
-
-          if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // Embed style already exists.
-            embedStyleEls[elId].textContent = styleTextContent;
-          } else {
+          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating embed style element.
             const html = htmlFor(pageEl);
             const embedStyleEl = html`<style></style>`;
 
             element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
-            embedStyleEl.textContent = styleTextContent;
             pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
             embedStyleEls[elId] = embedStyleEl;
             embedStyleEls[elId][AMP_EMBED_DATA] = {};
           }
 
           embedStyleEls[elId][AMP_EMBED_DATA] = {
+            id: elId,
             width: state.newWidth,
             height: state.newHeight,
             scale: state.scaleFactor,
             verticalMargin: state.verticalMargin,
             horizontalMargin: state.horizontalMargin,
           };
+
+          const embedStyleEl = dev().assertElement(embedStyleEls[elId],
+              `Failed to look up embed style element with ID ${elId}`);
+          updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA],
+              false /* expanding */);
         });
   }
 
