@@ -216,6 +216,10 @@ export class Resource {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
+
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ = isExperimentOn(this.hostWin,
+        'layers-prioritization');
   }
 
   /**
@@ -709,7 +713,7 @@ export class Resource {
 
   /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
-    if (this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       const {element} = this;
       return {
         distance: element.getLayers().iterateAncestry(element,
@@ -767,7 +771,7 @@ export class Resource {
     }
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       return dev().assertNumber(distance) < multiplier;
     }
     if (typeof distance == 'boolean') {

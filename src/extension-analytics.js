@@ -151,6 +151,13 @@ export class CustomEventReporterBuilder {
   }
 
   /**
+   * @param {!JsonObject} extraUrlParamsConfig
+   */
+  setExtraUrlParams(extraUrlParamsConfig) {
+    this.config_['extraUrlParams'] = extraUrlParamsConfig;
+  }
+
+  /**
    * The #track() method takes in a unique custom-event name, and the
    * corresponding request url (or an array of request urls). One can call
    * #track() multiple times with different eventType name (order doesn't

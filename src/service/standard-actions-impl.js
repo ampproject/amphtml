@@ -22,8 +22,8 @@ import {dev, user, userAssert} from '../log';
 import {
   getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
 } from '../service';
+import {isFiniteNumber, toWin} from '../types';
 import {startsWith} from '../string';
-import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
 /**
@@ -49,9 +49,6 @@ export function getAutofocusElementForShowAction(element) {
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
 
-/** @const {Array<string>} */
-const PERMITTED_POSITIONS = ['top','bottom','center'];
-
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -72,16 +69,15 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(context);
-
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    this.installActions_(this.actions_);
+    // Explicitly not setting `Action` as a member to scope installation to one
+    // method and for bundle size savings. 💰
+    this.installActions_(Services.actionServiceForDoc(context));
   }
 
   /** @override @nocollapse */
@@ -95,18 +91,28 @@ export class StandardActions {
    * @private
    */
   installActions_(actionService) {
-    actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
+    actionService.addGlobalTarget('AMP', this.handleAmpTarget_.bind(this));
 
-    actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
-    actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
+    // All standard actions require high trust by default via
+    // addGlobalMethodHandler.
+
     actionService.addGlobalMethodHandler(
-        'toggleVisibility', this.handleToggle.bind(this));
+        'hide', this.handleHide_.bind(this));
+
     actionService.addGlobalMethodHandler(
-        'scrollTo', this.handleScrollTo.bind(this));
+        'show', this.handleShow_.bind(this));
+
     actionService.addGlobalMethodHandler(
-        'focus', this.handleFocus.bind(this));
+        'toggleVisibility', this.handleToggle_.bind(this));
+
     actionService.addGlobalMethodHandler(
-        'toggleClass', this.handleToggleClass.bind(this));
+        'scrollTo', this.handleScrollTo_.bind(this));
+
+    actionService.addGlobalMethodHandler(
+        'focus', this.handleFocus_.bind(this));
+
+    actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass_.bind(this));
   }
 
   /**
@@ -115,8 +121,9 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @throws If the invocation method is unrecognized.
+   * @private Visible to tests only.
    */
-  handleAmpTarget(invocation) {
+  handleAmpTarget_(invocation) {
     // All global `AMP` actions require high trust.
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
@@ -134,10 +141,10 @@ export class StandardActions {
         });
 
       case 'navigateTo':
-        return this.handleNavigateTo(invocation);
+        return this.handleNavigateTo_(invocation);
 
       case 'closeOrNavigateTo':
-        return this.handleCloseOrNavigateTo(invocation);
+        return this.handleCloseOrNavigateTo_(invocation);
 
       case 'scrollTo':
         userAssert(args['id'],
@@ -146,7 +153,7 @@ export class StandardActions {
             getAmpdoc(node).getElementById(args['id']),
             'scrollTo element ID must exist on page'
         );
-        return this.handleScrollTo(invocation);
+        return this.handleScrollTo_(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -170,8 +177,9 @@ export class StandardActions {
    * Handles the `navigateTo` action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {!Promise}
+   * @private Visible to tests only.
    */
-  handleNavigateTo(invocation) {
+  handleNavigateTo_(invocation) {
     const {node, caller, method, args} = invocation;
     const win = (node.ownerDocument || node).defaultView;
     // Some components have additional constraints on allowing navigation.
@@ -193,7 +201,7 @@ export class StandardActions {
   }
 
   /**
-   * Handles the `handleCloseOrNavigateTo` action.
+   * Handles the `handleCloseOrNavigateTo_` action.
    * This action tries to close the requesting window if allowed, otherwise
    * navigates the window.
    *
@@ -201,8 +209,9 @@ export class StandardActions {
    * Without an opener or if embedded, it will deny the close method.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {!Promise}
+   * @private Visible to tests only.
    */
-  handleCloseOrNavigateTo(invocation) {
+  handleCloseOrNavigateTo_(invocation) {
     const {node} = invocation;
     const win = (node.ownerDocument || node).defaultView;
 
@@ -222,49 +231,49 @@ export class StandardActions {
     }
 
     if (!wasClosed) {
-      return this.handleNavigateTo(invocation);
+      return this.handleNavigateTo_(invocation);
     }
 
     return Promise.resolve();
   }
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to
-   * it with the given animation duraiton
+   * it with the given animation duration.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleScrollTo(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
+  handleScrollTo_(invocation) {
     const node = dev().assertElement(invocation.node);
+    const {args} = invocation;
 
-    // Duration for scroll animation
-    const duration = invocation.args
-                     && invocation.args['duration']
-                     && invocation.args['duration'] >= 0 ?
-      invocation.args['duration'] : 500;
+    // Duration and position are optional.
+    // Default values are set by the viewport service, so they're passed through
+    // when undefined or invalid.
+    let posOrUndef = args && args['position'];
+    let durationOrUndef = args && args['duration'];
 
-    // Position in the viewport at the end
-    const pos = (invocation.args
-                && invocation.args['position']
-                && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
-      invocation.args['position'] : 'top';
+    if (posOrUndef && !['top', 'bottom', 'center'].includes(posOrUndef)) {
+      posOrUndef = undefined;
+    }
+
+    if (!isFiniteNumber(durationOrUndef)) {
+      durationOrUndef = undefined;
+    }
 
     // Animate the scroll
     // Should return a promise instead of null
-    return this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
+    return this.viewport_.animateScrollIntoView(
+        node, posOrUndef, durationOrUndef);
   }
 
   /**
    * Handles the `focus` action where given an element, we give it focus
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleFocus(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
+  handleFocus_(invocation) {
     const node = dev().assertElement(invocation.node);
 
     // Set focus
@@ -278,8 +287,9 @@ export class StandardActions {
    * is applied to the target element.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleHide(invocation) {
+  handleHide_(invocation) {
     const target = dev().assertElement(invocation.node);
 
     this.resources_.mutateElement(target, () => {
@@ -298,8 +308,9 @@ export class StandardActions {
    * is removed from the target element.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleShow({node}) {
+  handleShow_({node}) {
     const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
@@ -311,7 +322,7 @@ export class StandardActions {
       return null;
     }
 
-    Services.vsyncFor(ownerWindow).measure(() => {
+    this.resources_.measureElement(() => {
       if (computedStyle(ownerWindow, target).display == 'none' &&
           !isShowable(target)) {
 
@@ -340,7 +351,7 @@ export class StandardActions {
   /**
    * @param {!Element} target
    * @param {?Element} autofocusElOrNull
-   * @private
+   * @private Visible to tests only.
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
@@ -357,25 +368,22 @@ export class StandardActions {
    * Handles "toggle" action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleToggle(invocation) {
+  handleToggle_(invocation) {
     if (isShowable(dev().assertElement(invocation.node))) {
-      return this.handleShow(invocation);
-    } else {
-      return this.handleHide(invocation);
+      return this.handleShow_(invocation);
     }
+    return this.handleHide_(invocation);
   }
 
   /**
    * Handles "toggleClass" action.
    * @param {!./action-impl.ActionInvocation} invocation
    * @return {?Promise}
+   * @private Visible to tests only.
    */
-  handleToggleClass(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
-
+  handleToggleClass_(invocation) {
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
     const className = user().assertString(args['class'],
