@@ -408,6 +408,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
   },
   {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
+  },
+  {
     id: 'amp-autocomplete',
     name: 'AMP Autocomplete provides a set of suggestions to' +
         ' complete a user query in an input field.',
