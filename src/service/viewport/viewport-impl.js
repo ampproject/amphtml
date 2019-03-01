@@ -178,33 +178,33 @@ export class Viewport {
     this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
       installLayersServiceForDoc(ampdoc,
-          this.binding_.getScrollingElement(),
-          this.binding_.getScrollingElementScrollsLikeViewport());
+          binding.getScrollingElement(),
+          binding.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
         ampdoc,
         this.vsync_,
-        this.binding_.getBorderTop(),
+        binding.getBorderTop(),
         this.paddingTop_,
-        this.binding_.requiresFixedLayerTransfer());
+        binding.requiresFixedLayerTransfer());
     ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
-    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
-    this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
-    this.viewer_.onMessage(
+    viewer.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
+    viewer.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
+    viewer.onMessage(
         'disableScroll', this.disableScrollEventHandler_.bind(this));
-    this.binding_.updatePaddingTop(this.paddingTop_);
+    binding.updatePaddingTop(this.paddingTop_);
 
-    this.binding_.onScroll(this.scroll_.bind(this));
-    this.binding_.onResize(this.resize_.bind(this));
+    binding.onScroll(this.scroll_.bind(this));
+    binding.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
 
     /** @private {boolean} */
     this.visible_ = false;
-    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    viewer.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
     // Top-level mode classes.
@@ -571,27 +571,22 @@ export class Viewport {
       this.getSize() :
       this.getLayoutRect(parent);
 
-    let offset;
-    switch (pos) {
-      case 'bottom':
-        offset = -parentHeight + elementRect.height;
-        break;
-      case 'center':
-        offset = (-parentHeight / 2) + (elementRect.height / 2);
-        break;
-      default:
-        offset = 0;
-        break;
+    let offset = 0;
+    if (pos == 'bottom') {
+      offset = -parentHeight + elementRect.height;
+    }
+    if (pos == 'center') {
+      offset = (-parentHeight / 2) + (elementRect.height / 2);
     }
 
     return this.getElementScrollTop_(parent).then(curScrollTop => {
       let newScrollTop;
       if (this.useLayers_) {
-        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
+        newScrollTop = elementRect.top + offset + curScrollTop;
       } else {
-        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-        newScrollTop = Math.max(0, calculatedScrollTop);
+        newScrollTop = elementRect.top - this.paddingTop_ + offset;
       }
+      newScrollTop = Math.max(0, newScrollTop);
       if (newScrollTop == curScrollTop) {
         return;
       }

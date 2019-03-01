@@ -456,24 +456,23 @@ export class FixedLayer {
         // 1. Unset top from previous mutates and set bottom to an extremely
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        elements.forEach(fe => {
           setImportantStyles(fe.element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
           });
-        }
+        });
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
         // regardless of bottom.
-        for (let i = 0; i < elements.length; i++) {
-          autoTops.push(computedStyle(win, elements[i].element).top);
-        }
+        elements.forEach(fe => {
+          autoTops.push(computedStyle(win, fe.element).top);
+        });
         // 3. Cleanup the `style.bottom`.
-        for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
-        }
+        elements.forEach(fe => {
+          setStyle(fe.element, 'bottom', '');
+        });
 
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
@@ -504,7 +503,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            continue;
+            return;
           }
 
           if (top === 'auto' || autoTops[i] !== top) {
@@ -558,9 +557,7 @@ export class FixedLayer {
         if (hasTransferables && this.transfer_) {
           this.getTransferLayer_().update();
         }
-        const elements = this.elements_;
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        this.elements_.forEach(fe => {
           const feState = state[fe.id];
 
           // Fix a bug with Safari. For some reason, you cannot unset
@@ -576,7 +573,7 @@ export class FixedLayer {
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        }
+        });
       },
     }, {}).catch(error => {
       // Fail silently.
