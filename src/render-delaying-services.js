@@ -95,7 +95,7 @@ export function waitForServices(win) {
   });
   return Promise.all(promises).then(services => {
     const postInstallPromises = services.map(service => {
-      if (service.getPostRegisterRenderDelayPromise) {
+      if (service && service.getPostRegisterRenderDelayPromise) {
         return Services.timerFor(win).timeoutPromise(
             POST_REGISTER_TIMEOUT,
             service.getPostRegisterRenderDelayPromise(),

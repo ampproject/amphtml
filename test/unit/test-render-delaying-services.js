@@ -30,13 +30,25 @@ describe('waitForServices', () => {
   let dynamicCssResolve;
   let experimentResolve;
   let variantResolve;
+  let variantService;
+  let variantStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
     const getService = sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
-    variantResolve = waitForService(getService, 'variant');
+
+    variantService = {
+      getPostRegisterRenderDelayPromise: () => {
+        throw new Error('getPostRegisterRenderDelayPromise should be stubbed');
+      },
+    };
+    variantResolve = waitForService(getService, 'variant', variantService);
+    variantStub = sandbox.stub(
+        variantService,
+        'getPostRegisterRenderDelayPromise'
+    ).returns(Promise.resolve());
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
@@ -81,12 +93,39 @@ describe('waitForServices', () => {
 
     return expect(promise).to.eventually.have.lengthOf(2);
   });
+
+  it('should resolve if no getPostRegisterRenderDelayPromise', () => {
+    addExtensionScript(win, 'amp-dynamic-css-classes');
+    expect(hasRenderDelayingServices(win)).to.be.true;
+    addExtensionScript(win, 'non-blocking-extension');
+
+    const promise = waitForServices(win);
+    dynamicCssResolve();
+
+    return expect(promise).to.eventually.have.lengthOf(1);
+  });
+
+  it('should wait for getPostRegisterRenderDelayPromise', () => {
+    addExtensionScript(win, 'amp-dynamic-css-classes');
+    win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
+    addExtensionScript(win, 'non-blocking-extension');
+
+    const promise = waitForServices(win);
+    dynamicCssResolve();
+    variantResolve(); // this unblocks 'amp-experiment'
+
+    return promise.then(services => {
+      expect(services.length).to.be.equal(2);
+      expect(variantStub).to.be.calledOnce;
+    });
+  });
 });
 
-function waitForService(getService, serviceId) {
+function waitForService(getService, serviceId, service) {
   let resolve = null;
   getService.withArgs(sinon.match.any, serviceId).returns(new Promise(r => {
-    resolve = r;
+    resolve = r.bind(this, service);
   }));
   return resolve;
 }
