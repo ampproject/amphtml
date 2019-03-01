@@ -26,15 +26,15 @@ import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {tryParseJson} from '../../../src/json';
 
-/** @const {string} */
+/** @const */
 const EXPERIMENT = 'amp-autocomplete';
 
-/** @const {string} */
+/** @const */
 const TAG = 'amp-autocomplete';
 
 /**
  * Different filtering options.
- * @const @enum {string}
+ * @enum {string}
  */
 export const FilterType = {
   SUBSTRING: 'substring',
@@ -54,7 +54,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /**
      * The data extracted from the <script> tag optionally provided
      * as a child. For use with static data.
-     * @private {?string}
+     * @private {?Array}
      */
     this.inlineData_ = null;
 
@@ -66,15 +66,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The value of the "filter" attribute on <autocomplete>.
-     * @private {?string}
+     * @private {string}
      */
-    this.filter_ = null;
+    this.filter_ = '';
 
     /**
      * The value of the "min-characters" attribute on <autocomplete>.
-     * @private {?number}
+     * @private {number}
      */
-    this.minChars_ = null;
+    this.minChars_ = 1;
 
     /**
      * The value of the "max-entries" attribute on <autocomplete>.
@@ -84,13 +84,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The index of the active suggested item.
-     * @private (!number)
+     * @private {number}
      */
     this.activeIndex_ = -1;
 
     /**
      * The reference to the <div> of the active suggested item.
-     * @private (!number)
+     * @private {?HTMLElement}
      */
     this.activeElement_ = null;
 
