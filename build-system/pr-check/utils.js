@@ -34,6 +34,7 @@ const DIST_OUTPUT_FILE =
     isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -160,6 +161,8 @@ function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
+  execOrDie(`gsutil signurl -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
@@ -196,6 +199,8 @@ function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
+  execOrDie(`gsutil signurl -m PUT -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil -m cp -r ${outputFileName} ` +
       `${OUTPUT_STORAGE_LOCATION}`);
   exec('echo travis_fold:end:upload_results');
