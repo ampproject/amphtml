@@ -38,7 +38,7 @@ import {
   defaultEasingValues,
   defaultFlyInDistanceValues,
   defaultMarginValues,
-  installStyles,
+  getDefaultStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 import {devAssert} from '../../../../src/log';
@@ -57,7 +57,6 @@ import {
  * @param {!FxType} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
-
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
@@ -84,6 +83,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
     if (!shouldMutate) {
       return;
     }
+    installStyles(element, type);
     installScrollToggleFloatIn(dispatch, element, position);
   };
 
@@ -98,8 +98,16 @@ export function installScrollToggledFx(ampdoc, element, type) {
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
   new FxElement(ampdoc, element, type);
+  installStyles(element, type);
+}
+
+/**
+ * @param {!Element} element
+ * @param {!FxType} type
+ */
+function installStyles(element, type) {
   setStyles(element,
-      assertDoesNotContainDisplay(installStyles(element, type)));
+      assertDoesNotContainDisplay(getDefaultStyles(element, type)));
 }
 
 /**

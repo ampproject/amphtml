@@ -21,7 +21,6 @@ import {
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
-  px,
   setImportantStyles,
   setInitialDisplay,
   setStyle,
@@ -55,8 +54,8 @@ function isLightbox(el) {
 }
 
 /**
- * @param {string=} opt_initialTransform matrix string, 'none', '' or undefined
- * @param {string=} opt_addedTransform matrix string, 'none', '' or undefined
+ * @param {string=} opt_initialTransform matrix string, 'none', '' or undefined.
+ * @param {string=} opt_addedTransform matrix string, 'none', '' or undefined.
  * @return {string}
  */
 function combineTransforms(opt_initialTransform, opt_addedTransform) {
@@ -322,66 +321,23 @@ export class FixedLayer {
   }
 
   /**
-   * Apply transform style to all fixed elements, unless specified.
-   *
-   * Ignores `independent` elements when a transform is specified but an
-   * element is not. Resets all when neither is specified.
-   *
-   * @param {string=} opt_addedTransform undefined to reset.
-   * @param {!Element=} opt_element undefined to go through all.
+   * Apply transform style to all fixed elements.
+   * @param {string=} opt_transform undefined to reset.
    */
-  transformMutate(opt_addedTransform, opt_element) {
-    // TODO(alanorozco): Tracking elements by fixedid would simplify this.
+  transformMutate(opt_transform) {
     this.elements_.forEach(fe => {
-      const {element, independent} = fe;
-
       // Unfortunately, we can't do anything with sticky elements here. Updating
       // `top` in animation frames causes reflow on all platforms and we can't
       // determine whether an element is currently docked to apply transform.
-      if (!fe.fixedNow) {
+      if (!fe.fixedNow || !fe.top) {
         return;
       }
-
-      // If an element has default positioning (ie is not independent), it only
-      // needs to be transformed for top offset. If it's independent, its
-      // translation offset might be based on bottom, so we need to update it or
-      // clean it up either way.
-      if (!fe.top && !independent) {
-        return;
-      }
-
-      if (opt_element) {
-        if (element != opt_element) {
-          // Don't update element if target element is defined and unequal.
-          return;
-        }
-        devAssert(independent, "Can't transform a dependent element direcly.");
-      }
-
-      // Don't update independent elements when a transform is applied to all.
-      if (!opt_element && opt_addedTransform && independent) {
-        return;
-      }
-
-      setStyles(element, {
-        transform: combineTransforms(fe.transform, opt_addedTransform),
-        transition: '',
-      });
+      const transform = opt_transform ?
+        combineTransforms(fe.transform, opt_transform) :
+        ''; // reset
+      const transition = opt_transform ? 'none' : '';
+      setStyles(fe.element, {transform, transition});
     });
-  }
-
-  /**
-   * Specifies that an element is "independent", that is, it responds to
-   * `paddingTop` changes with its own set of offset rules.
-   *
-   * Offset definition is brokered through the viewport service.
-   * @param {!Element} element
-   */
-  setIsIndependent(element) {
-    const fe = devAssert(this.getFe_(element, 'fixed'),
-        'Element not `position: fixed` or not transferred to fixed layer.',
-        element);
-    fe.independent = true;
   }
 
   /**
@@ -427,9 +383,15 @@ export class FixedLayer {
   /**
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
+   * @param {boolean=} transferBack Returns the element from the transfer layer.
+   *   True by default. If not transferred back, the element will stay in the
+   *   transfer layer but won't be tracked here.
    */
-  removeElement(element) {
+  removeElement(element, transferBack = true) {
     const fes = this.tearDownElement_(element);
+    if (!transferBack) {
+      return;
+    }
     this.returnFixedElements_(fes);
   }
 
@@ -512,13 +474,11 @@ export class FixedLayer {
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
-          if (!fe.independent) {
-            setImportantStyles(fe.element, {
-              top: '',
-              bottom: '-9999vh',
-              transition: 'none',
-            });
-          }
+          setImportantStyles(fe.element, {
+            top: '',
+            bottom: '-9999vh',
+            transition: 'none',
+          });
         }
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
@@ -528,10 +488,7 @@ export class FixedLayer {
         }
         // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
-          if (!fe.independent) {
-            setStyle(fe.element, 'bottom', '');
-          }
+          setStyle(elements[i].element, 'bottom', '');
         }
 
         for (let i = 0; i < elements.length; i++) {
@@ -632,7 +589,7 @@ export class FixedLayer {
           // make the transition active.
           setStyle(fe.element, 'transition', '');
 
-          if (feState && !fe.independent) {
+          if (feState) {
             this.mutateElement_(fe, i, feState);
           }
         }
@@ -640,32 +597,6 @@ export class FixedLayer {
     }, {}).catch(error => {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
-    });
-  }
-
-  /**
-   * Updates the `top` of an element with independently managed offset.
-   * See `setIsIndependent()`.
-   * @param {!Element} element
-   * @param {string} edge 'top' or 'bottom'
-   * @param {number} amount
-   * @return {!Promise}
-   */
-  updateIndependent(element, edge, amount) {
-    devAssert(edge == 'top' || edge == 'bottom');
-
-    const fe = devAssert(this.getFe_(element, 'fixed'));
-
-    devAssert(fe.independent);
-
-    return this.vsync_.mutatePromise(() => {
-      const amountPx = px(amount);
-      if (edge == 'top') {
-        fe.top = amountPx;
-        setStyle(element, 'top', amountPx);
-      } else {
-        setStyle(element, 'bottom', amountPx);
-      }
     });
   }
 
@@ -955,7 +886,6 @@ export class FixedLayer {
  *   transform: (string|undefined),
  *   forceTransfer: (boolean|undefined),
  *   lightboxed: (boolean|undefined),
- *   independent: (boolean|undefined),
  * }}
  */
 let ElementDef;

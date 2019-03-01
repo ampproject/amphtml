@@ -634,21 +634,3 @@ export class Services {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
   }
 }
-
-/**
- * @param {!Element} element
- * @param {function()} mutator
- */
-export function resourcesMutateElement(element, mutator) {
-  return Services.resourcesForDoc(element).mutateElement(element, mutator);
-}
-
-/**
- * @param {!Element} element
- * @param {function()} measurer
- * @param {function()} mutator
- */
-export function resourcesMeasureMutateElement(element, measurer, mutator) {
-  return Services.resourcesForDoc(element)
-      .measureMutateElement(element, measurer, mutator);
-}
