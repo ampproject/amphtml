@@ -17,18 +17,18 @@
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+// TODO(choumx): Avoid bundling an extra copy of DOMPurify here.
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
-import {
-  callbacks,
-  sanitizer,
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
+import {
+  sanitizer,
+  upgrade,
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -62,20 +62,6 @@ export class AmpScript extends AMP.BaseElement {
         user().warn(TAG, 'Node was sanitized:', node);
       },
     });
-    // Configure callbacks.
-    callbacks.onCreateWorker = data => {
-      dev().info(TAG, 'Create worker:', data);
-    };
-    callbacks.onHydration = () => {
-      dev().info(TAG, 'Hydrated!');
-      this.element.classList.add('i-amphtml-hydrated');
-    };
-    callbacks.onSendMessage = data => {
-      dev().info(TAG, 'To worker:', data);
-    };
-    callbacks.onReceiveMessage = data => {
-      dev().info(TAG, 'From worker:', data);
-    };
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
@@ -96,7 +82,24 @@ export class AmpScript extends AMP.BaseElement {
         return [];
       }
       return [workerScript, authorScript, authorUrl];
-    }));
+    }),
+    // Configure callbacks.
+    {
+      onCreateWorker: data => {
+        dev().info(TAG, 'Create worker:', data);
+      },
+      onHydration: () => {
+        dev().info(TAG, 'Hydrated!');
+        this.element.classList.add('i-amphtml-hydrated');
+      },
+      onSendMessage: data => {
+        dev().info(TAG, 'To worker:', data);
+      },
+      onReceiveMessage: data => {
+        dev().info(TAG, 'From worker:', data);
+      },
+    },
+    /* debug */ true);
     return Promise.resolve();
   }
 

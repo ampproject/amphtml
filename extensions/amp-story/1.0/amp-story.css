@@ -49,6 +49,7 @@ amp-consent {
   margin: 0 !important;
   padding: 0 !important;
   text-align: start !important;
+  text-shadow: none !important;
   width: auto !important;
 }
 
@@ -61,6 +62,10 @@ amp-story {
   width: 100% !important;
   /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
   touch-action: manipulation !important;
+}
+
+html.i-amphtml-story-standalone {
+  font-size: calc(2 * var(--i-amphtml-story-vmax, 8px));
 }
 
 html.i-amphtml-story-standalone,
@@ -77,28 +82,28 @@ html.i-amphtml-story-standalone body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
-amp-story p,
-amp-story h4 {
+p,
+h4 {
   font-size: 1rem;
 }
 
-amp-story h1 {
+h1 {
   font-size: 2rem;
 }
 
-amp-story h2 {
+h2 {
   font-size: 1.5rem;
 }
 
-amp-story h3 {
+h3 {
   font-size: 1.17rem;
 }
 
-amp-story h5 {
+h5 {
   font-size: 0.83rem;
 }
 
-amp-story h6 {
+h6 {
   font-size: 0.67rem;
 }
 

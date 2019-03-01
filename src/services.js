@@ -327,6 +327,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/resources-impl.Resources>}
+   */
+  static resourcesPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'resources'));
+  }
+
+  /**
    * @param {!Window} win
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
@@ -571,12 +580,11 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/video-service-interface.VideoServiceInterface}
+   * @return {!./service/video-manager-impl.VideoManager}
    */
   static videoManagerForDoc(elementOrAmpDoc) {
-    return (
-      /** @type {!./service/video-service-interface.VideoServiceInterface} */ (
-        getServiceForDoc(elementOrAmpDoc, 'video-manager')));
+    return (/** @type {!./service/video-manager-impl.VideoManager} */ (
+      getServiceForDoc(elementOrAmpDoc, 'video-manager')));
   }
 
   /**

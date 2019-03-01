@@ -31,15 +31,15 @@ import {bezierCurve} from '../../../src/curve';
 import {
   childElementByTag,
   closest,
-  closestBySelector,
+  closestAncestorElementBySelector,
   elementByTag,
-  escapeCssSelectorIdent,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
@@ -52,6 +52,7 @@ import {
 import {
   prepareImageAnimation,
 } from '@ampproject/animations/dist/animations.mjs';
+import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -883,7 +884,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return true;
     }
     // Note that `<amp-carousel>` type='carousel' does not support goToSlide
-    const parentCarousel = closestBySelector(target,
+    const parentCarousel = closestAncestorElementBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel && parentCarousel.isInViewport()) {
       return true;
@@ -903,7 +904,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const {width, height} = imageViewer.getImageBoxWithOffset();
+          const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+
           // Check if our imageBox has a width or height. We may be in the
           // gallery view if not, and we do not want to animate.
           if (!width || !height) {
@@ -957,21 +959,25 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       duration = this.getTransitionDurationFromElements_(srcImg, targetImg);
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
-      imageAnimation = prepareImageAnimation({
-        styleContainer: this.getAmpDoc().getHeadNode(),
-        transitionContainer: this.getAmpDoc().getBody(),
-        srcImg,
-        targetImg,
-        srcImgRect: undefined,
-        targetImgRect: undefined,
-        styles: {
-          'animationDuration': `${motionDuration}ms`,
-          // Matches z-index for `.i-amphtml-lbg`.
-          'zIndex': 2147483642,
-        },
-        keyframesNamespace: undefined,
-        curve: TRANSITION_CURVE,
-      });
+      try {
+        imageAnimation = prepareImageAnimation({
+          styleContainer: this.getAmpDoc().getHeadNode(),
+          transitionContainer: this.getAmpDoc().getBody(),
+          srcImg,
+          targetImg,
+          srcImgRect: undefined,
+          targetImgRect: undefined,
+          styles: {
+            'animationDuration': `${motionDuration}ms`,
+            // Matches z-index for `.i-amphtml-lbg`.
+            'zIndex': 2147483642,
+          },
+          keyframesNamespace: undefined,
+          curve: TRANSITION_CURVE,
+        });
+      } catch (e) {
+        reportError(e);
+      }
     };
 
     const mutate = () => {
@@ -995,7 +1001,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       srcImg.classList.add('i-amphtml-ghost');
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
-      imageAnimation.applyAnimation();
+      if (imageAnimation) {
+        imageAnimation.applyAnimation();
+      }
     };
 
     const cleanup = () => {
@@ -1004,7 +1012,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       setStyle(carousel, 'animationName', '');
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
-      imageAnimation.cleanupAnimation();
+      if (imageAnimation) {
+        imageAnimation.cleanupAnimation();
+      }
     };
 
     return this.measureMutateElement(measure, mutate)
@@ -1128,13 +1138,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const target = this.getCurrentElement_().sourceElement;
     // TODO(#13011): change to a tag selector after `<amp-carousel>`
     // type='carousel' starts supporting goToSlide.
-    const parentCarousel = closestBySelector(target,
+    const parentCarousel = closestAncestorElementBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel) {
       const allSlides = toArray(
           scopedQuerySelectorAll(parentCarousel, SLIDE_ITEM_SELECTOR));
       const targetSlide = dev().assertElement(
-          closestBySelector(target, SLIDE_ITEM_SELECTOR));
+          closestAncestorElementBySelector(target, SLIDE_ITEM_SELECTOR));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       devAssert(parentCarousel).getImpl()
           .then(carousel => carousel.goToSlide(targetSlideIndex));

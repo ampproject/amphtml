@@ -53,6 +53,7 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 const SANDBOX = [
   SandboxOptions.ALLOW_SCRIPTS,
   SandboxOptions.ALLOW_SAME_ORIGIN,
+  SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
@@ -78,6 +79,18 @@ const ALLOWED_EVENTS = [
  */
 const getAnalyticsEventTypePrefixRegex = once(() =>
   new RegExp(`^${ANALYTICS_EVENT_TYPE_PREFIX}`));
+
+
+/**
+ * @param {string} src
+ * @return {string}
+ */
+function maybeAddAmpFragment(src) {
+  if (src.indexOf('#') > -1) {
+    return src;
+  }
+  return `${src}#amp=1`;
+}
 
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -181,8 +194,8 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const poster =
-        htmlFor(element)`<amp-img layout=fill placeholder></amp-img>`;
+    const html = htmlFor(element);
+    const poster = html`<amp-img layout=fill placeholder></amp-img>`;
 
     poster.setAttribute('src',
         this.user().assertString(element.getAttribute('poster')));
@@ -226,7 +239,7 @@ class AmpVideoIframe extends AMP.BaseElement {
           element);
     }
 
-    return src;
+    return maybeAddAmpFragment(src);
   }
 
   /**

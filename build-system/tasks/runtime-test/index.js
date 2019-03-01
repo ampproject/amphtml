@@ -19,12 +19,10 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const colors = require('ansi-colors');
 const config = require('../../config');
-const deglob = require('globs-to-files');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
 const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
-const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
@@ -32,6 +30,7 @@ const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
 
@@ -145,7 +144,6 @@ function printArgvMessages() {
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Prerequisite: ' +
         cyan('gulp build'),
-    'dev_dashboard': 'Only running tests for the Dev Dashboard.',
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -160,13 +158,13 @@ function printArgvMessages() {
     log(green('Launching'), cyan(chromeBase), green('with flags'),
         cyan(formattedFlagList));
   }
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
     log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
-        !argv['local-changes'] && !argv.dev_dashboard) {
+        !argv['local-changes']) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
@@ -197,34 +195,6 @@ function printArgvMessages() {
  * Runs all the tests.
  */
 async function runTests() {
-
-  if (argv.dev_dashboard) {
-
-    const mocha = new Mocha();
-
-    // Add our files
-    const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
-    allDevDashboardTests.forEach(file => {
-      mocha.addFile(file);
-    });
-
-    // Create our deffered
-    let resolver;
-    const deferred = new Promise(resolverIn => {resolver = resolverIn;});
-
-    // Listen for Ctrl + C to cancel testing
-    const handlerProcess = createCtrlcHandler('test');
-
-    // Run the tests.
-    mocha.run(function(failures) {
-      if (failures) {
-        process.exit(1);
-      }
-      resolver();
-    });
-    return deferred.then(() => exitCtrlcHandler(handlerProcess));
-  }
-
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
@@ -247,7 +217,7 @@ async function runTests() {
     c.client.verboseLogging = true;
   }
 
-  if (!process.env.TRAVIS && (argv.testnames || argv['local-changes'])) {
+  if (!isTravisBuild() && (argv.testnames || argv['local-changes'])) {
     c.reporters = ['mocha'];
   }
 
@@ -313,6 +283,7 @@ async function runTests() {
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
+    testServerPort: c.client.testServerPort,
   };
 
   if (argv.compiled) {
@@ -347,20 +318,21 @@ async function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: process.env.TRAVIS ? ['lcov'] : ['html', 'text', 'text-summary'],
+      reports: isTravisBuild() ? ['lcov'] : ['html', 'text', 'text-summary'],
     };
   }
 
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
-    port: 8081,
+    port: karmaDefault.client.testServerPort,
     host: 'localhost',
     directoryListing: true,
     middleware: [app],
   }).on('kill', function() {
-    log(yellow('Shutting down test responses server on localhost:8081'));
+    log(yellow('Shutting down test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
   }));
-  log(yellow(
-      'Started test responses server on localhost:8081'));
+  log(yellow('Started test responses server on '
+        + `localhost:${karmaDefault.client.testServerPort}`));
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
@@ -376,7 +348,7 @@ async function runTests() {
 
   // Exit tests
   // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-  if (process.env.TRAVIS) {
+  if (isTravisBuild()) {
     setTimeout(() => {
       process.exit(processExitCode);
     }, 5000);
@@ -474,7 +446,7 @@ async function runTests() {
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
-        if (process.env.TRAVIS) {
+        if (isTravisBuild()) {
           const codecovCmd =
               './node_modules/.bin/codecov --file=test/coverage/lcov.info';
           let flags = '';
@@ -567,8 +539,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
       'Uses the given flags to launch Chrome',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
-    'dev_dashboard': ' Run only the dev dashboard tests. ' +
-        'Reccomend using with --nobuild',
     'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
     'grep': '  Runs tests that match the pattern',

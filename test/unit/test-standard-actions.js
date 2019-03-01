@@ -149,14 +149,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element', () => {
       const element = createElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleHide(invocation);
+      standardActions.handleHide_(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleHide(invocation);
+      standardActions.handleHide_(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
   });
@@ -166,7 +166,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       toggle(element, false);
       const invocation = trustedInvocation({node: element});
-      standardActions.handleShow(invocation);
+      standardActions.handleShow_(invocation);
       expectElementToHaveBeenShown(element);
     });
 
@@ -174,7 +174,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       element.setAttribute('hidden', '');
       const invocation = trustedInvocation({node: element});
-      standardActions.handleShow(invocation);
+      standardActions.handleShow_(invocation);
       expectElementToHaveBeenShown(element);
     });
 
@@ -182,7 +182,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createAmpElement();
       toggle(element, false);
       const invocation = trustedInvocation({node: element});
-      standardActions.handleShow(invocation);
+      standardActions.handleShow_(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
@@ -190,7 +190,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createAmpElement();
       element.setAttribute('hidden', '');
       const invocation = trustedInvocation({node: element});
-      standardActions.handleShow(invocation);
+      standardActions.handleShow_(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
@@ -204,25 +204,25 @@ describes.sandboxed('StandardActions', {}, () => {
 
       it('executes asynchronously when no autofocus (wrapped)', () => {
         const node = html`<div><div><input></div></div>`;
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ false);
       });
 
       it('executes asynchronously when no autofocus (direct)', () => {
         const node = html`<input>`;
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ false);
       });
 
       it('executes synchronously when autofocus (wrapped)', () => {
         const node = html`<div><div><input autofocus></div></div>`;
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ true);
       });
 
       it('executes synchronously when autofocus (direct)', () => {
         const node = html`<input autofocus>`;
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ true);
       });
 
@@ -245,7 +245,7 @@ describes.sandboxed('StandardActions', {}, () => {
           const node = html`<input autofocus>`;
           node.focus = sandbox.spy();
 
-          standardActions.handleShow(trustedInvocation({node}));
+          standardActions.handleShow_(trustedInvocation({node}));
 
           expect(mutateElementStub).to.not.have.been.called;
           expect(node.focus).to.have.been.calledOnce;
@@ -257,7 +257,7 @@ describes.sandboxed('StandardActions', {}, () => {
           node.focus = sandbox.spy();
 
           wrapper.firstElementChild.appendChild(node);
-          standardActions.handleShow(trustedInvocation({node: wrapper}));
+          standardActions.handleShow_(trustedInvocation({node: wrapper}));
 
           expect(mutateElementStub).to.not.have.been.called;
           expect(node.focus).to.have.been.calledOnce;
@@ -267,7 +267,7 @@ describes.sandboxed('StandardActions', {}, () => {
           const node = html`<input>`;
           node.focus = sandbox.spy();
 
-          standardActions.handleShow(trustedInvocation({node}));
+          standardActions.handleShow_(trustedInvocation({node}));
 
           expectElementMutatedAsync(node);
           expect(node.focus).to.not.have.been.called;
@@ -281,7 +281,7 @@ describes.sandboxed('StandardActions', {}, () => {
         const node = html`<input autofocus>`;
         node.focus = sandbox.spy();
 
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
 
         expectElementMutatedAsync(node);
         expect(node.focus).to.have.been.calledOnce;
@@ -295,7 +295,7 @@ describes.sandboxed('StandardActions', {}, () => {
         node.focus = sandbox.spy();
 
         wrapper.firstElementChild.appendChild(node);
-        standardActions.handleShow(trustedInvocation({node: wrapper}));
+        standardActions.handleShow_(trustedInvocation({node: wrapper}));
 
         expectElementMutatedAsync(wrapper);
         expect(node.focus).to.have.been.calledOnce;
@@ -305,7 +305,7 @@ describes.sandboxed('StandardActions', {}, () => {
         const node = html`<input>`;
         node.focus = sandbox.spy();
 
-        standardActions.handleShow(trustedInvocation({node}));
+        standardActions.handleShow_(trustedInvocation({node}));
 
         expectElementMutatedAsync(node);
         expect(node.focus).to.not.have.been.called;
@@ -320,7 +320,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       toggle(element, false);
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectElementToHaveBeenShown(element);
     });
 
@@ -328,14 +328,14 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       element.setAttribute('hidden', '');
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
@@ -343,7 +343,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createAmpElement();
       toggle(element, false);
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
@@ -351,14 +351,14 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createAmpElement();
       element.setAttribute('hidden', '');
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleToggle(invocation);
+      standardActions.handleToggle_(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
   });
@@ -374,7 +374,7 @@ describes.sandboxed('StandardActions', {}, () => {
         args: {
           'class': dummyClass,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToHaveClass(element, dummyClass);
     });
 
@@ -387,7 +387,7 @@ describes.sandboxed('StandardActions', {}, () => {
         args: {
           'class': dummyClass,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
     });
 
@@ -400,7 +400,7 @@ describes.sandboxed('StandardActions', {}, () => {
           'class': dummyClass,
           'force': true,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToHaveClass(element, dummyClass);
     });
 
@@ -414,7 +414,7 @@ describes.sandboxed('StandardActions', {}, () => {
           'class': dummyClass,
           'force': true,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToHaveClass(element, dummyClass);
     });
 
@@ -427,7 +427,7 @@ describes.sandboxed('StandardActions', {}, () => {
           'class': dummyClass,
           'force': false,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
     });
 
@@ -441,7 +441,7 @@ describes.sandboxed('StandardActions', {}, () => {
           'class': dummyClass,
           'force': false,
         }};
-      standardActions.handleToggleClass(invocation);
+      standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
     });
   });
@@ -450,14 +450,14 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element', () => {
       const element = createElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleScrollTo(invocation);
+      standardActions.handleScrollTo_(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
       const invocation = trustedInvocation({node: element});
-      standardActions.handleScrollTo(invocation);
+      standardActions.handleScrollTo_(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
   });
@@ -467,7 +467,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       const invocation = trustedInvocation({node: element});
       const focusStub = sandbox.stub(element, 'focus');
-      standardActions.handleFocus(invocation);
+      standardActions.handleFocus_(invocation);
       expect(focusStub).to.be.calledOnce;
     });
 
@@ -475,7 +475,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createAmpElement();
       const invocation = trustedInvocation({node: element});
       const focusStub = sandbox.stub(element, 'focus');
-      standardActions.handleFocus(invocation);
+      standardActions.handleFocus_(invocation);
       expect(focusStub).to.be.calledOnce;
     });
   });
@@ -516,12 +516,12 @@ describes.sandboxed('StandardActions', {}, () => {
       it('should be implemented', () => {
         // Should check trust and fail.
         invocation.satisfiesTrust = () => false;
-        standardActions.handleAmpTarget(invocation);
+        standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.not.called;
 
         // Should succeed.
         invocation.satisfiesTrust = () => true;
-        return standardActions.handleAmpTarget(invocation).then(() => {
+        return standardActions.handleAmpTarget_(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
               win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
@@ -532,7 +532,7 @@ describes.sandboxed('StandardActions', {}, () => {
         invocation.caller.tagName = 'AMP-FOO';
         invocation.caller.getImpl = () => Promise.resolve({});
 
-        return standardActions.handleAmpTarget(invocation).then(() => {
+        return standardActions.handleAmpTarget_(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
               win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
@@ -546,7 +546,7 @@ describes.sandboxed('StandardActions', {}, () => {
         invocation.args['target'] = '_blank';
         invocation.args['opener'] = true;
 
-        return standardActions.handleAmpTarget(invocation).then(() => {
+        return standardActions.handleAmpTarget_(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
               win, 'http://bar.com', 'AMP.navigateTo', {target: '_blank', opener: true});
@@ -560,7 +560,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
         // Should succeed if throwIfCannotNavigate() is not implemented.
         invocation.caller.getImpl = () => Promise.resolve({});
-        yield standardActions.handleAmpTarget(invocation);
+        yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledOnce;
         expect(navigator.navigateTo).to.be.calledWithExactly(
             win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
@@ -569,7 +569,7 @@ describes.sandboxed('StandardActions', {}, () => {
         invocation.caller.getImpl = () => Promise.resolve({
           throwIfCannotNavigate: () => null,
         });
-        yield standardActions.handleAmpTarget(invocation);
+        yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
             win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
@@ -578,7 +578,7 @@ describes.sandboxed('StandardActions', {}, () => {
         invocation.caller.getImpl = () => Promise.resolve({
           throwIfCannotNavigate: () => { throw new Error('Fake error.'); },
         });
-        yield standardActions.handleAmpTarget(invocation);
+        yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(userError).to.be.calledWith('STANDARD-ACTIONS',
             'Fake error.');
@@ -591,11 +591,11 @@ describes.sandboxed('StandardActions', {}, () => {
       let winCloseStub;
 
       beforeEach(() => {
-        navigateToStub = sandbox.stub(standardActions, 'handleNavigateTo')
+        navigateToStub = sandbox.stub(standardActions, 'handleNavigateTo_')
             .returns(Promise.resolve());
 
         closeOrNavigateToSpy = sandbox.spy(standardActions,
-            'handleCloseOrNavigateTo');
+            'handleCloseOrNavigateTo_');
 
         winCloseStub = sandbox.stub(win, 'close');
         winCloseStub.callsFake(() => {
@@ -610,7 +610,7 @@ describes.sandboxed('StandardActions', {}, () => {
       });
 
       it('should be implemented', async() => {
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(closeOrNavigateToSpy).to.be.calledOnce;
         expect(closeOrNavigateToSpy).to.be.calledWithExactly(invocation);
       });
@@ -618,7 +618,7 @@ describes.sandboxed('StandardActions', {}, () => {
       it('should close window if allowed', async() => {
         win.opener = {};
         win.parent = win;
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(winCloseStub).to.be.calledOnce;
         expect(navigateToStub).to.be.not.called;
 
@@ -627,14 +627,14 @@ describes.sandboxed('StandardActions', {}, () => {
       it('should NOT close if no opener', async() => {
         win.opener = null;
         win.parent = win;
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(winCloseStub).to.be.not.called;
       });
 
       it('should NOT close if has a parent', async() => {
         win.opener = {};
         win.parent = {};
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(winCloseStub).to.be.not.called;
       });
 
@@ -642,7 +642,7 @@ describes.sandboxed('StandardActions', {}, () => {
         win.opener = {};
         win.parent = win;
         sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(winCloseStub).to.be.not.called;
 
       });
@@ -651,7 +651,7 @@ describes.sandboxed('StandardActions', {}, () => {
         win.opener = null;
         win.parent = win;
         sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(winCloseStub).to.be.not.called;
         expect(navigateToStub).to.be.called;
       });
@@ -662,7 +662,7 @@ describes.sandboxed('StandardActions', {}, () => {
         winCloseStub.callsFake(() => {
           win.closed = false;
         });
-        await standardActions.handleAmpTarget(invocation);
+        await standardActions.handleAmpTarget_(invocation);
         expect(navigateToStub).to.be.called;
       });
     });
@@ -672,7 +672,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
       invocation.method = 'goBack';
-      standardActions.handleAmpTarget(invocation);
+      standardActions.handleAmpTarget_(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
 
@@ -681,7 +681,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const cid = cidServiceForDocForTesting(ampdoc);
       const optoutStub = sandbox.stub(cid, 'optOut');
       invocation.method = 'optoutOfCid';
-      standardActions.handleAmpTarget(invocation);
+      standardActions.handleAmpTarget_(invocation);
       yield macroTask();
       expect(optoutStub).to.be.calledOnce;
     });
@@ -702,7 +702,7 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then(result => {
         expect(result).to.equal('set-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -725,7 +725,7 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then(result => {
         expect(result).to.equal('push-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -744,7 +744,7 @@ describes.sandboxed('StandardActions', {}, () => {
           defaultView: windowApi,
         },
       };
-      standardActions.handleAmpTarget(invocation);
+      standardActions.handleAmpTarget_(invocation);
       expect(printStub).to.be.calledOnce;
     });
 
@@ -757,9 +757,9 @@ describes.sandboxed('StandardActions', {}, () => {
       const element = createElement();
       const elStub = sandbox.stub(ampdoc, 'getElementById')
           .returns(element);
-      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo')
+      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo_')
           .returns('scrollToResponsePromise');
-      const result = standardActions.handleAmpTarget(invocation);
+      const result = standardActions.handleAmpTarget_(invocation);
       expect(elStub).to.be.calledWith('testIdElement');
       invocation.node = element;
       expect(scrollStub).to.be.calledWith(invocation);
