@@ -17,7 +17,10 @@
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {
+  installPerformanceService,
+  isSafari,
+} from '../../src/service/performance-impl';
 
 
 describes.realWin('performance', {amp: true}, env => {
@@ -928,102 +931,209 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     }
   });
 
-  it('forwards layout jank metric', () => {
-    // Fake the window object so we can control the state
-    // of window.document.visibilityState later on.
-    const fakeWin = {
-      addEventListener: env.sandbox.stub(),
-      removeEventListener: env.win.removeEventListener,
-      dispatchEvent: env.win.dispatchEvent,
-      Date: env.win.Date,
-      location: env.win.location,
-      document: {
-        // Note: the document starts in a visible state.
-        visibilityState: 'visible',
-      },
-      PerformanceLayoutJank: true,
-      PerformanceObserver: env.sandbox.stub(),
-      performance: {
-        getEntriesByType: env.sandbox.stub(),
-      },
-    };
+  describe('forwards layout jank metric', () => {
+    it('for browsers that support the visibilitychange event', () => {
+      // Fake the window object so we can control the state
+      // of window.document.visibilityState later on.
+      const fakeWin = {
+        addEventListener: env.sandbox.stub(),
+        removeEventListener: env.win.removeEventListener,
+        dispatchEvent: env.win.dispatchEvent,
+        Date: env.win.Date,
+        location: env.win.location,
+        document: {
+          // Note: the document starts in a visible state.
+          visibilityState: 'visible',
+        },
+        PerformanceLayoutJank: true,
+        PerformanceObserver: env.sandbox.stub(),
+        performance: {
+          getEntriesByType: env.sandbox.stub(),
+        },
+        navigator: {
+          // Note: specify an Android Chrome user agent, which supports
+          // the visibilitychange event.
+          userAgent: 'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL ' +
+          'Build/OPR6.170623.011) AppleWebKit/537.36 (KHTML, like Gecko) ' +
+          'Chrome/61.0.3163.98 Mobile Safari/537.36',
+        },
+      };
 
-    // Fake the PerformanceObserver implementation so we can send
-    // fake PerformanceEntry objects to listeners.
-    let performanceObserver;
-    fakeWin.PerformanceObserver.callsFake(callback => {
-      performanceObserver = new PerformanceObserverImpl(callback);
-      return performanceObserver;
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      let performanceObserver;
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+
+      // Fake addEventListener so we can trigger fake `visibilitychange` events.
+      const callbacks = [];
+      fakeWin.addEventListener.callsFake((eventType, callback) => {
+        if (eventType === 'visibilitychange') {
+          callbacks.push(callback);
+        }
+      });
+
+      // Fake layoutJank that occured before the Performance service is started.
+      const entries = [{
+        entryType: 'layoutJank',
+        fraction: 0.25,
+      },
+      {
+        entryType: 'layoutJank',
+        fraction: 0.3,
+      },
+      ];
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
+          .returns(entries);
+
+      installPerformanceService(fakeWin);
+      const perf = Services.performanceFor(fakeWin);
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      fakeWin.document.visibilityState = 'hidden';
+      const firstEvent = new Event('visibilitychange');
+      callbacks.forEach(callback => callback(firstEvent));
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'lj',
+            delta: 0.55,
+          });
+
+      // The user returns to the tab, and more layout jank occurs.
+      fakeWin.document.visibilityState = 'visible';
+      const list = {
+        getEntries() {
+          return [{
+            entryType: 'layoutJank',
+            fraction: 1,
+          }, {
+            entryType: 'layoutJank',
+            fraction: 0.0001,
+          }];
+        },
+      };
+      performanceObserver.triggerCallback(list);
+
+      // The document has become hidden again.
+      fakeWin.document.visibilityState = 'hidden';
+      const secondEvent = new Event('visibilitychange');
+      callbacks.forEach(callback => callback(secondEvent));
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1])
+          .to.be.jsonEqual({
+            label: 'lj-2',
+            delta: 1.5501,
+          });
+
+      // Any more layout jank shouldn't be reported.
+      fakeWin.document.visibilityState = 'visible';
+      performanceObserver.triggerCallback(list);
+      fakeWin.document.visibilityState = 'hidden';
+      const thirdEvent = new Event('visibilitychange');
+      callbacks.forEach(callback => callback(thirdEvent));
+      expect(perf.events_.length).to.equal(2);
     });
+    it('for browsers that don\'t support the visibilitychange event', () => {
+      // Fake the window object so we can control the state
+      // of window.document.visibilityState later on.
+      const fakeWin = {
+        addEventListener: env.sandbox.stub(),
+        removeEventListener: env.win.removeEventListener,
+        dispatchEvent: env.win.dispatchEvent,
+        Date: env.win.Date,
+        location: env.win.location,
+        document: {
+          // Note: the document starts in a visible state.
+          visibilityState: 'visible',
+        },
+        PerformanceLayoutJank: true,
+        PerformanceObserver: env.sandbox.stub(),
+        performance: {
+          getEntriesByType: env.sandbox.stub(),
+        },
+        navigator: {
+          // Note: specify an iPhone Safari user agent, which does not support
+          // the visibilitychange event.
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+          ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
+          ' Mobile/13E230 Safari/601.1',
+        },
+      };
 
-    // Fake addEventListener so we can trigger fake `visibilitychange` events.
-    const callbacks = [];
-    fakeWin.addEventListener.callsFake((eventType, callback) => {
-      if (eventType === 'visibilitychange') {
-        callbacks.push(callback);
-      }
-    });
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      let performanceObserver;
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
 
-    // Fake layoutJank that occured before the Performance service is started.
-    const entries = [{
-      entryType: 'layoutJank',
-      fraction: 0.25,
-    },
-    {
-      entryType: 'layoutJank',
-      fraction: 0.3,
-    },
-    ];
-    fakeWin.performance.getEntriesByType.withArgs('layoutJank')
-        .returns(entries);
+      // Fake addEventListener so we can trigger fake `beforeunload` events.
+      const callbacks = [];
+      fakeWin.addEventListener.callsFake((eventType, callback) => {
+        if (eventType === 'beforeunload') {
+          callbacks.push(callback);
+        }
+      });
 
-    installPerformanceService(fakeWin);
-    const perf = Services.performanceFor(fakeWin);
-
-    // The document has become hidden, e.g. via the user switching tabs.
-    fakeWin.document.visibilityState = 'hidden';
-    const firstEvent = new Event('visibilitychange');
-    callbacks.forEach(callback => callback(firstEvent));
-
-    expect(perf.events_.length).to.equal(1);
-    expect(perf.events_[0])
-        .to.be.jsonEqual({
-          label: 'lj',
-          delta: 0.55,
-        });
-
-    // The user returns to the tab, and more layout jank occurs.
-    fakeWin.document.visibilityState = 'visible';
-    const list = {
-      getEntries() {
-        return [{
-          entryType: 'layoutJank',
-          fraction: 1,
-        }, {
-          entryType: 'layoutJank',
-          fraction: 0.0001,
-        }];
+      // Fake layoutJank that occured before the Performance service is started.
+      const entries = [{
+        entryType: 'layoutJank',
+        fraction: 0.25,
       },
-    };
-    performanceObserver.triggerCallback(list);
+      {
+        entryType: 'layoutJank',
+        fraction: 0.3,
+      },
+      ];
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
+          .returns(entries);
 
-    // The document has become hidden again.
-    fakeWin.document.visibilityState = 'hidden';
-    const secondEvent = new Event('visibilitychange');
-    callbacks.forEach(callback => callback(secondEvent));
-    expect(perf.events_.length).to.equal(2);
-    expect(perf.events_[1])
-        .to.be.jsonEqual({
-          label: 'lj-2',
-          delta: 1.5501,
-        });
+      installPerformanceService(fakeWin);
+      const perf = Services.performanceFor(fakeWin);
 
-    // Any more layout jank shouldn't be reported.
-    fakeWin.document.visibilityState = 'visible';
-    performanceObserver.triggerCallback(list);
-    fakeWin.document.visibilityState = 'hidden';
-    const thirdEvent = new Event('visibilitychange');
-    callbacks.forEach(callback => callback(thirdEvent));
-    expect(perf.events_.length).to.equal(2);
+      // The document has become hidden, e.g. via the user switching tabs.
+      fakeWin.document.visibilityState = 'hidden';
+      const firstEvent = new Event('beforeunload');
+      callbacks.forEach(callback => callback(firstEvent));
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'lj',
+            delta: 0.55,
+          });
+    });
   });
+
+  it('checks useragent appropriately for Safari', () => {
+    const iPhone6SafariUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 ' +
+      'like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko)' +
+      ' Mobile/13E230 Safari/601.1';
+    expect(isSafari(iPhone6SafariUserAgent)).to.be.true;
+
+    const desktopSafariUserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X ' +
+      '10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 ' +
+      'Safari/7046A194A';
+    expect(isSafari(desktopSafariUserAgent)).to.be.true;
+
+    const androidChromeUserAgent = 'Mozilla/5.0 (Linux; Android 8.0.0; ' +
+      'Pixel XL Build/OPR6.170623.011) AppleWebKit/537.36 (KHTML, like ' +
+      'Gecko) Chrome/61.0.3163.98 Mobile Safari/537.36';
+    expect(isSafari(androidChromeUserAgent)).to.be.false;
+
+    const ieUserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
+      ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)';
+    expect(isSafari(ieUserAgent)).to.be.false;
+
+    const androidOperaUserAgent = 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus ' +
+      '5X Build/MTC19T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/' +
+      '55.0.2883.91 Mobile Safari/537.36 OPR/42.7.2246.114996';
+    expect(isSafari(androidOperaUserAgent)).to.be.false;
+  });
+
 });

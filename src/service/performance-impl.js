@@ -60,6 +60,20 @@ function incOrDef(obj, name) {
 }
 
 /**
+ * Confirm whether the provided userAgent represents a Safari browser.
+ *
+ * @param {string} userAgent
+ */
+export function isSafari(userAgent) {
+  const isEdge = /Edge/i.test(userAgent);
+  const isOpera = /OPR\/|Opera|OPiOS/i.test(userAgent);
+  const isChrome = /Chrome|CriOS/i.test(userAgent) && !isEdge && !isOpera;
+  const isFirefox = /Firefox|FxiOS/i.test(userAgent) && !isEdge;
+  const isIe = /Trident|MSIE|IEMobile/i.test(userAgent);
+  return /Safari/i.test(userAgent) && !isChrome && !isIe && !isEdge && !isFirefox && !isOpera;
+}
+
+/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
@@ -175,16 +189,6 @@ export class Performance {
       return Promise.resolve();
     }
 
-    if (this.win.PerformanceLayoutJank) {
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        this.win.addEventListener('beforeunload', this.onVisibilityChange_);
-      }
-    }
-
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
@@ -274,6 +278,13 @@ export class Performance {
           this.onVisibilityChange_,
           {capture: true}
       );
+
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      if (isSafari(this.win.navigator.userAgent)) {
+        this.win.addEventListener('beforeunload', this.onVisibilityChange_);
+      }
     }
 
     if (entryTypesToObserve.length === 0) {
@@ -341,10 +352,9 @@ export class Performance {
           this.onVisibilityChange_,
           {capture: true}
       );
-      // const platform = Services.platformFor(this.win);
-      // if (platform.isSafari()) {
-      //   this.win.removeEventListener('beforeunload', this.onVisibilityChange_);
-      // }
+      if (isSafari(this.win.navigator)) {
+        this.win.removeEventListener('beforeunload', this.onVisibilityChange_);
+      }
     }
   }
 
