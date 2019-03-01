@@ -308,8 +308,14 @@ async function generateSnapshots(percy, webpages) {
       '': async() => {},
     };
     if (webpage.interactive_tests) {
-      Object.assign(webpage.tests_,
-          require(path.resolve(ROOT_DIR, webpage.interactive_tests)));
+      try {
+        Object.assign(webpage.tests_,
+            require(path.resolve(ROOT_DIR, webpage.interactive_tests)));
+      } catch (error) {
+        log('fatal', 'Failed to load interactive test',
+            colors.cyan(webpage.interactive_tests), 'for test',
+            colors.cyan(webpage.name), '\nError:', error);
+      }
     }
   }
 
