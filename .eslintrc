@@ -7,6 +7,7 @@
     "google-camelcase",
     "jsdoc",
     "notice",
+    "prettier",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -151,6 +152,7 @@
     }],
     "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
+    "prettier/prettier": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "require-jsdoc": [2, {
