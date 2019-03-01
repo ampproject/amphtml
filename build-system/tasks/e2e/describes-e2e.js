@@ -31,6 +31,7 @@ const TIMEOUT = 20000;
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string,
+ *  initialRect: ({{width: number, height:number}}|undefined)
  * }}
  */
 let TestSpec;
@@ -245,6 +246,7 @@ class AmpPageFixture {
       testUrl,
       experiments,
       serveMode,
+      initialRect,
     } = this.spec;
     const {
       environment,
@@ -257,6 +259,11 @@ class AmpPageFixture {
 
     if (Array.isArray(experiments)) {
       await toggleExperiments(ampDriver, testUrl, experiments);
+    }
+
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
     }
 
     await ampDriver.navigateToEnvironment(environment, testUrl);
