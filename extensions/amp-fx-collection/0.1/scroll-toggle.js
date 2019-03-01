@@ -329,7 +329,7 @@ function measureFloatInFromViewport(
 
   if (position == ScrollTogglePosition.TOP) {
     if (isShown) {
-      return {top, animOffset: -(height + paddingTop)};
+      return {top: paddingTop, animOffset: -(height + paddingTop)};
     }
     return {top: -height, animOffset: prevPaddingTop + height};
   }
