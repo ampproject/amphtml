@@ -149,6 +149,19 @@ let embedIds = 0;
 const AMP_EMBED_DATA = '__AMP_EMBED_DATA__';
 
 /**
+ * @typedef {{
+ *  id: number,
+ *  width: number,
+ *  height: number,
+ *  scaleFactor: number,
+ *  transform: string,
+ *  verticalMargin: number,
+ *  horizontalMargin: number,
+ * }}
+ */
+let EmbedDataDef;
+
+/**
  * @const {string}
  */
 export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
@@ -168,7 +181,7 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 /**
  * Updates embed's corresponding <style> element with embedData.
  * @param {!Element} embedStyleEl
- * @param {!Object} embedData
+ * @param {!EmbedDataDef} embedData
  */
 function updateEmbedStyleEl(embedStyleEl, embedData) {
   const embedId = embedData.id;
@@ -603,11 +616,9 @@ export class AmpStoryEmbeddedComponent {
     const embedStyleEl = dev().assertElement(embedStyleEls[embedId],
         `Failed to look up embed style element with ID ${embedId}`);
 
-    const dataForExitExpandedMode = Object.assign({},
-        embedStyleEl[AMP_EMBED_DATA],
-        {transform: `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`}
-    );
-    updateEmbedStyleEl(embedStyleEl, dataForExitExpandedMode);
+    embedStyleEl[AMP_EMBED_DATA].transform =
+      `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
+    updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
   }
 
   /**
@@ -653,11 +664,10 @@ export class AmpStoryEmbeddedComponent {
         () => {
           target.classList.toggle('i-amphtml-expanded-component', true);
 
-          const dataForExpandedMode = Object.assign({}, embedData, {
-            transform: `translate3d(${state.translateX}px,
-              ${state.translateY}px, 0) scale(1)`,
-          });
-          updateEmbedStyleEl(embedStyleEl, dataForExpandedMode);
+          embedData.transform = `translate3d(${state.translateX}px,
+            ${state.translateY}px, 0) scale(1)`;
+
+          updateEmbedStyleEl(embedStyleEl, embedData);
         });
   }
 
