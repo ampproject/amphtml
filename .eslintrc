@@ -89,12 +89,6 @@
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
     "jsdoc/require-returns-type": 2,
-    "max-len": [2, 80, 4, {
-      "ignoreTrailingComments": true,
-      "ignoreRegExpLiterals": true,
-      "ignorePattern": "^} from.*;|= require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
-      "ignoreUrls": true
-    }],
     "no-alert": 2,
     "no-cond-assign": 2,
     "no-debugger": 2,
