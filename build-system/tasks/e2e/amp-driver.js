@@ -16,14 +16,14 @@
 
 
 /** @enum {string} */
-const Environment = {
+const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
   SHADOW_DEMO: 'shadow-demo',
 };
 
-const AmpEnvironments = {
-  [Environment.SINGLE]: {
+const EnvironmentBehaviorMap = {
+  [AmpdocEnvironment.SINGLE]: {
     ready(unusedController) {
       return Promise.resolve();
     },
@@ -33,18 +33,19 @@ const AmpEnvironments = {
     },
   },
 
-  [Environment.VIEWER_DEMO]: {
+  [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
       return controller.findElement('#AMP_DOC_dynamic[data-loaded]')
           .then(frame => controller.switchToFrame(frame));
     },
 
     url(url) {
+      // TODO(estherkim): somehow allow non-8000 port and domain
       return `http://localhost:8000/examples/viewer.html#href=${url}`;
     },
   },
 
-  [Environment.SHADOW_DEMO]: {
+  [AmpdocEnvironment.SHADOW_DEMO]: {
     async ready(controller) {
       // TODO(cvializ): this is a HACK
       // There should be a better way to detect that the shadowdoc is ready.
@@ -54,6 +55,7 @@ const AmpEnvironments = {
     },
 
     url(url) {
+      // TODO(estherkim): somehow allow non-8000 port and domain
       return `http://localhost:8000/pwa#href=${url}`;
     },
   },
@@ -86,13 +88,13 @@ class AmpDriver {
   /**
    * Navigate the browser to a URL that will display the given url in the
    * given environment.
-   * @param {Environment} environment
+   * @param {!AmpdocEnvironment} environment
    * @param {string} url
    */
   async navigateToEnvironment(environment, url) {
-    const ampEnv = AmpEnvironments[environment];
+    const ampEnv = EnvironmentBehaviorMap[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
-    await AmpEnvironments[environment].ready(this.controller_);
+    await ampEnv.ready(this.controller_);
   }
 
   /**
@@ -108,5 +110,5 @@ class AmpDriver {
 
 module.exports = {
   AmpDriver,
-  Environment,
+  AmpdocEnvironment,
 };

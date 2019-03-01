@@ -16,7 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
-const {AmpDriver, Environment} = require('./amp-driver');
+const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
@@ -29,7 +29,7 @@ const TIMEOUT = 20000;
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
- *  environments: (!Array<string>|undefined),
+ *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  serveMode: (string|undefined),
  *  testUrl: string,
  * }}
@@ -48,16 +48,19 @@ const endtoend = describeEnv(spec => [
  * Maps an environment enum value to a `describes.repeated` variant object.
  */
 const EnvironmentVariantMap = {
-  [Environment.SINGLE]:
+  [AmpdocEnvironment.SINGLE]:
       {name: 'Standalone environment', value: {environment: 'single'}},
-  [Environment.VIEWER_DEMO]:
+  [AmpdocEnvironment.VIEWER_DEMO]:
       {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
-  [Environment.SHADOW_DEMO]:
+  [AmpdocEnvironment.SHADOW_DEMO]:
       {name: 'Shadow environment', value: {environment: 'shadow-demo'}},
 };
 
-const defaultEnvironments =
-    [Environment.SINGLE, Environment.VIEWER_DEMO, Environment.SHADOW_DEMO];
+const defaultEnvironments = [
+  AmpdocEnvironment.SINGLE,
+  AmpdocEnvironment.VIEWER_DEMO,
+  AmpdocEnvironment.SHADOW_DEMO,
+];
 
 /**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
@@ -294,7 +297,7 @@ async function setServeMode(ampDriver, serveMode) {
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  await ampDriver.navigateToEnvironment(Environment.SINGLE, testUrl);
+  await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
