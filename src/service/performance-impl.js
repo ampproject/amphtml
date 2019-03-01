@@ -352,7 +352,7 @@ export class Performance {
           this.onVisibilityChange_,
           {capture: true}
       );
-      if (isSafari(this.win.navigator)) {
+      if (isSafari(this.win.navigator.userAgent)) {
         this.win.removeEventListener('beforeunload', this.onVisibilityChange_);
       }
     }
