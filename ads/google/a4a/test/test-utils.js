@@ -1005,7 +1005,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     return element;
   }
 
-  it('should return the fixed the width for FIXED layout', () => {
+  it('should return the fixed width for FIXED layout', () => {
     const element = createResource({width: 300, height: 250}, 'fixed');
     expect(getContainerWidth(win, element)).to.equal(300);
   });
