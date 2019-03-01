@@ -244,12 +244,12 @@ function uploadDistOutput(functionName) {
  * Decrypts key used by storage service account
  */
 function decryptTravisKey_() {
-  execOrDie('echo $PWD');
   execOrDie(`openssl aes-256-cbc -k ${process.env.GCP_TOKEN} -in ` +
       `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {
+  decryptTravisKey_,
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
