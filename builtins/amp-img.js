@@ -52,7 +52,7 @@ export class AmpImg extends BaseElement {
     this.unlistenError_ = null;
 
     /** @private {boolean} */
-    this.autoGenerateSizes_ = false;
+    this.autoGenerateSizes_ = isExperimentOn(this.win, 'amp-img-auto-sizes');
 
     /**
      * The current width used by the automatically generated sizes attribute
@@ -148,8 +148,6 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    this.autoGenerateSizes_ = isExperimentOn(this.getAmpDoc().win,
-        'amp-img-auto-sizes');
     if (this.autoGenerateSizes_) {
       this.maybeGenerateSizes_();
     }
