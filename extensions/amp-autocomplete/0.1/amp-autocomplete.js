@@ -280,7 +280,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** Set container_ visibility to hidden. */
   hideResults() {
-    toggle(this.container_, false);    
+    toggle(this.container_, false);
     this.resetActiveElement_();
     this.activeIndex_ = -1;
   }
@@ -293,10 +293,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Returns true if the given element is a suggested item.
-   * @param {HTMLElement} element 
+   * @param {HTMLElement} element
    */
   isItemElement(element) {
-    return element.classList.contains("i-amphtml-autocomplete-item");
+    return element.classList.contains('i-amphtml-autocomplete-item');
   }
 
   /**
