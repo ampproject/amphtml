@@ -15,13 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
+import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
+import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
-import {setStyle, getStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
@@ -59,13 +60,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * The value of the "min-characters" attribute on <autocomplete>.
      * @private {?number}
      */
-    this.minChars = null;
+    this.minChars_ = null;
 
     /**
      * The value of the "max-entries" attribute on <autocomplete>.
      * @private {?number}
      */
-    this.maxEntries = null;
+    this.maxEntries_ = null;
 
     /**
      * The index of the active suggested item.
@@ -98,10 +99,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = inputElements[0];
 
-    this.filter_ = this.element.getAttribute('filter');
-    this.minChars = this.element.hasAttribute('min-characters') ?
+    this.filter_ = userAssert(this.element.getAttribute('filter')
+        , `${TAG} requires "filter" attribute.`);
+    this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
-    this.maxEntries = parseInt(this.element.getAttribute('max-entries'), 10);
+    this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -146,6 +148,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   layoutCallback() {
     this.element.classList.add('i-amphtml-autocomplete');
     this.inputElement_.classList.add('i-amphtml-autocomplete-input');
+
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
@@ -153,6 +156,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (!this.inlineData_) {
       return Promise.resolve();
     }
+
+    // Register event handlers.
     this.inputElement_.addEventListener('input',
         this.inputHandler_.bind(this));
     this.inputElement_.addEventListener('keydown',
@@ -173,7 +178,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.addEventListener('mousedown', this.selectItemHandler.bind(this));
+    element.addEventListener('mousedown', this.mousedownHandler_.bind(this));
     element.textContent = item;
     return element;
   }
@@ -198,7 +203,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   renderResults_() {
     const userInput = this.inputElement_.value;
     this.clearAllItems();
-    if (userInput.length < this.minChars) {
+    if (userInput.length < this.minChars_) {
       return;
     }
     const filteredData = this.filterData_(this.inlineData_, userInput);
@@ -242,10 +247,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
+
     // Truncate to max-entries.
-    if (this.maxEntries && this.maxEntries < filteredData.length) {
-      filteredData = filteredData.slice(0, this.maxEntries);
+    if (this.maxEntries_ && this.maxEntries_ < filteredData.length) {
+      filteredData = filteredData.slice(0, this.maxEntries_);
     }
+
     return filteredData;
   }
 
@@ -261,16 +268,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.activeIndex_ = -1;
   }
 
+  /** Returns true if the results are visible and has items. */
   resultsShowing() {
-    return getStyle(this.container_, 'visibility') === 'visible' && 
+    return getStyle(this.container_, 'visibility') === 'visible' &&
       this.container_.children.length;
   }
 
   /**
-   * Selects the target of the event.
+   * Selects the target of the mousedown event.
    * @param {!event} event
    */
-  selectItemHandler(event) {
+  mousedownHandler_(event) {
     this.selectItem(event.target);
   }
 
@@ -328,24 +336,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case 'ArrowDown':
+      case Keys.DOWN_ARROW:
         if (this.resultsShowing()) {
           this.updateActiveItem_(1);
         }
         break;
-      case 'ArrowUp':
+      case Keys.UP_ARROW:
         if (this.resultsShowing()) {
           this.updateActiveItem_(-1);
         }
         break;
-      case 'Enter':
+      case Keys.ENTER:
         if (this.activeElement_) {
           event.preventDefault();
           this.selectItem(this.activeElement_);
           this.resetActiveElement_();
         }
         break;
-      case 'Escape':
+      case Keys.ESCAPE:
         this.hideResults();
       default:
     }
