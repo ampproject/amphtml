@@ -1405,8 +1405,8 @@ export class Resources {
       }
 
       if (this.useLayers_) {
-        dirtySet.forEach(request => {
-          this.dirtyElement(request.resource.element);
+        dirtySet.forEach(element => {
+          this.dirtyElement(element);
         });
       } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
