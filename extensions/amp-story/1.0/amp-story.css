@@ -332,7 +332,7 @@ amp-story-grid-layer a * {
 }
 
 /** Apply click shield on embedded components on initial load. */
-amp-story-grid-layer amp-twitter::after {
+amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -341,7 +341,7 @@ amp-story-grid-layer amp-twitter::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter::after {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
   height: 0px !important;
   width: 0px !important;
 }
@@ -352,11 +352,8 @@ amp-story-grid-layer amp-twitter::after {
   z-index: auto !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
   z-index: 1 !important;
-}
-
-.i-amphtml-animate-expand-in {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
@@ -755,10 +752,10 @@ amp-story .amp-video-eq,
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  margin: 8px !important;
+  margin: 12px !important;
   height: 24px !important;
   width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.7)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
   cursor: pointer !important;
   text-align: center !important;
 }
