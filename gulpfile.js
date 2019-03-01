@@ -679,7 +679,7 @@ function buildExtension(
     mkdirSync('build/css');
     const startTime = Date.now();
     promise = buildExtensionCss(path, name, version, options).then(() => {
-      endBuildStep('Recompiled CSS in', name, startTime);
+      endBuildStep('Recompiled CSS in', `${name}/${version}`, startTime);
     });
     if (options.compileOnlyCss) {
       return promise;
@@ -1234,7 +1234,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify)
       .once('transform', () => {
-        endBuildStep('Transformed', srcFilename, startTime);
+        let name = srcFilename;
+        if (options.name && options.version) {
+          name = `${options.name}-${options.version}.js`;
+        }
+        endBuildStep('Transformed', name, startTime);
       });
   if (options.watch) {
     bundler = watchify(bundler);
@@ -1297,7 +1301,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               }
             }))
         .then(() => {
-          endBuildStep('Compiled', destFilename, startTime);
+          let name = destFilename;
+          if (options.latestName) {
+            const latestMaxName =
+                options.latestName.split('.js')[0] + '.max.js';
+            name = `${name} → ${latestMaxName}`;
+          }
+          endBuildStep('Compiled', name, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
