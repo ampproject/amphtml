@@ -307,8 +307,8 @@ firebase deploy
 * When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 - "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
 - "What do you want to use as your public directory?" enter `firebase`.
-- "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]`
-  - Note: You will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done with this step in order to deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
+- "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
 - "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 
@@ -331,7 +331,7 @@ If you are only testing a single file, you can use `gulp firebase --file=path/to
 
 After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
 
-Additionally, you can create multiple projects and switch between them in the CLI using the same `firebase use your-project-name` command mentioned above.
+Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
 
 ## End-to-End Tests
 
