@@ -8,6 +8,7 @@
     ]
   },
   "statusCheckVerify": true,
+  "commitMessagePrefix": "📦",
   "ignoreDeps": [
     "babel-polyfill",
     "document-register-element",
