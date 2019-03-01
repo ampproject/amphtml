@@ -503,7 +503,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            return;
+            continue;
           }
 
           if (top === 'auto' || autoTops[i] !== top) {
