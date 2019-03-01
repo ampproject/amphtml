@@ -244,12 +244,14 @@ function uploadDistOutput(functionName) {
  * Decrypts key used by storage service account
  */
 function decryptTravisKey_() {
+  // -md sha256 is required due to encryption differences between
+  // openssl 1.1.1a, which was used to encrypt the key, and
+  // openssl 1.0.2g, which is used by Travis to decrypt.
   execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
       `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {
-  decryptTravisKey_,
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,

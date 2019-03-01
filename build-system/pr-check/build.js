@@ -29,7 +29,6 @@ const {
   isYarnLockFileInSync,
   isYarnLockFileProperlyUpdated} = require('./yarn-checks');
 const {
-  decryptTravisKey_,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -43,43 +42,42 @@ const timedExecOrDie =
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  decryptTravisKey_();
   // Make sure package.json and yarn.lock are in sync and up-to-date.
-  // if (!isYarnLockFileInSync(FILENAME) ||
-  //     !isYarnLockFileProperlyUpdated(FILENAME)) {
-  //   process.exitCode = 1;
-  //   return;
-  // }
+  if (!isYarnLockFileInSync(FILENAME) ||
+      !isYarnLockFileProperlyUpdated(FILENAME)) {
+    process.exitCode = 1;
+    return;
+  }
 
-  // const buildTargets = determineBuildTargets();
-  // if (!areValidBuildTargets(buildTargets, FILENAME)) {
-  //   stopTimer(FILENAME, FILENAME, startTime);
-  //   process.exitCode = 1;
-  //   return;
-  // }
+  const buildTargets = determineBuildTargets();
+  if (!areValidBuildTargets(buildTargets, FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
-  // if (!isTravisPullRequestBuild()) {
-  //   timedExecOrDie('gulp update-packages');
-  //   timedExecOrDie('gulp build --fortesting');
-  //   uploadBuildOutput(FILENAME);
-  // } else {
-  //   printChangeSummary(FILENAME);
-  //   if (buildTargets.has('RUNTIME') ||
-  //       buildTargets.has('UNIT_TEST') ||
-  //       buildTargets.has('INTEGRATION_TEST') ||
-  //       buildTargets.has('BUILD_SYSTEM') ||
-  //       buildTargets.has('FLAG_CONFIG') ||
-  //       buildTargets.has('VISUAL_DIFF')) {
+  if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp build --fortesting');
+    uploadBuildOutput(FILENAME);
+  } else {
+    printChangeSummary(FILENAME);
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('VISUAL_DIFF')) {
 
-  //     timedExecOrDie('gulp update-packages');
-  //     timedExecOrDie('gulp build --fortesting');
-  //     uploadBuildOutput(FILENAME);
-  //   } else {
-  //     console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
-  //         'because this commit does not affect the runtime, build system, ' +
-  //         'test files, or visual diff files');
-  //   }
-  // }
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie('gulp build --fortesting');
+      uploadBuildOutput(FILENAME);
+    } else {
+      console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'test files, or visual diff files');
+    }
+  }
 
   stopTimer(FILENAME, FILENAME, startTime);
 }
