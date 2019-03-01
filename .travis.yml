@@ -17,7 +17,7 @@ before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64  
-  - openssl aes-256-cbc -k GCP_TOKEN_ENCODED -in build-system/sa-travis-key.json.enc -out sa-travis-key.json -d
+  - openssl aes-256-cbc -k $GCP_TOKEN_ENCODED -in build-system/sa-travis-key.json.enc -out sa-travis-key.json -d
 branches:
   only:
     - master
