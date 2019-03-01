@@ -244,8 +244,7 @@ function uploadDistOutput(functionName) {
  * Decrypts key used by storage service account
  */
 function decryptTravisKey_() {
-  execOrDie(`echo ${process.env.GCP_TOKEN}`);
-  execOrDie('openssl aes-256-cbc -k eeheikaix6aiWaelaiki -in ' +
+  execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
       `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
