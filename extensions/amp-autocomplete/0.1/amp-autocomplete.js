@@ -241,25 +241,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       switch (this.filter_) {
         case FilterType.SUBSTRING:
           return item.includes(input);
-          break;
         case FilterType.PREFIX:
           return item.startsWith(input);
-          break;
         case FilterType.TOKEN_PREFIX:
           return item.split(' ').some(token => {
             return token.startsWith(input);
           });
-          break;
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
-          break;
         case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
-          break;
         case FilterType.NONE:
           // Query server endpoint.
           throw new Error(`Filter not yet supported: ${this.filter_}`);
-          break;
         default:
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
