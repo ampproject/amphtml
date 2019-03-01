@@ -21,11 +21,11 @@ limitations under the License.
 ### Basic
 
 ```html
-  <amp-embed width="100" height="100"
+  <amp-ad width="100" height="100"
              type="aja"
              layout="responsive"
              data-media-id="ZZZZZ">
-  </amp-embed>
+  </amp-ad>
 ```
 
 The above code must be accompanied by AMP-enabled widgets delivered by Aja’s Account Management Team,
