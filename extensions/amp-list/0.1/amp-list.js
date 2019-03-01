@@ -903,7 +903,6 @@ export class AmpList extends AMP.BaseElement {
                 this.attemptToFitLoadMoreElement_(
                     this.loadMoreService_.getLoadMoreFailedElement(),
                     dev().assertElement(this.container_));
-              }).then(() => {
                 const loadMoreFailedClickable = this.loadMoreService_
                     .getLoadMoreFailedClickable();
                 this.unlistenLoadMore_ = listen(
