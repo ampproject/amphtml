@@ -36,8 +36,8 @@ const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function runCommonChecks() {
-  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
+  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp ava');
   timedExecOrDie('node node_modules/jest/bin/jest.js');
   timedExecOrDie('gulp caches-json');
