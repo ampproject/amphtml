@@ -632,7 +632,7 @@ exports.extensionBundles = [
   {
     name: 'amp-story',
     version: '0.1',
-    latestVersion: '0.1',
+    latestVersion: '1.0',
     options:
     {
       hasCss: true,
@@ -938,6 +938,11 @@ exports.extensionBundles.forEach(c => {
   console./*OK*/assert('version' in c, 'version key must exist. ' +
       `Found ${strRep}.`);
   console./*OK*/assert('latestVersion' in c, 'latestVersion key must exist. ' +
+      `Found ${strRep}.`);
+  const duplicates = exports.extensionBundles.filter(d => d.name === c.name);
+  console./*OK*/assert(
+      duplicates.every(d => d.latestVersion === c.latestVersion),
+      'latestVersion must be the same for all versions of an extension. ' +
       `Found ${strRep}.`);
   console./*OK*/assert('type' in c, `type key must exist. Found ${strRep}.`);
   const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
