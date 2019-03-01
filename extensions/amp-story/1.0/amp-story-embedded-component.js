@@ -169,17 +169,14 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
  * Updates embed's corresponding <style> element with embedData.
  * @param {!Element} embedStyleEl
  * @param {!Object} embedData
- * @param {boolean} expanding
  */
-function updateEmbedStyleEl(embedStyleEl, embedData, expanding) {
+function updateEmbedStyleEl(embedStyleEl, embedData) {
   const embedId = embedData.id;
 
   embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"] {
       width: ${px(embedData.width)} !important;
       height: ${px(embedData.height)} !important;
-      transform: ${expanding ? 'translate3d(' + embedData.translateX + 'px, ' +
-        embedData.translateY + 'px, 0)' : ''}
-        scale(${embedData.scale}) !important;
+      transform: ${embedData.transform} !important;
       margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px
           !important;
       }`;
@@ -606,8 +603,11 @@ export class AmpStoryEmbeddedComponent {
     const embedStyleEl = dev().assertElement(embedStyleEls[embedId],
         `Failed to look up embed style element with ID ${embedId}`);
 
-    updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA],
-        false /* expanding */);
+    const dataForExitExpandedMode = Object.assign({},
+        embedStyleEl[AMP_EMBED_DATA],
+        {transform: `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`}
+    );
+    updateEmbedStyleEl(embedStyleEl, dataForExitExpandedMode);
   }
 
   /**
@@ -653,13 +653,11 @@ export class AmpStoryEmbeddedComponent {
         () => {
           target.classList.toggle('i-amphtml-expanded-component', true);
 
-          const expandingData = Object.assign({}, embedData);
-          expandingData.translateX = state.translateX;
-          expandingData.translateY = state.translateY;
-          expandingData.scale = 1;
-
-          updateEmbedStyleEl(embedStyleEl, expandingData,
-              true /* expanding */);
+          const dataForExpandedMode = Object.assign({}, embedData, {
+            transform: `translate3d(${state.translateX}px,
+              ${state.translateY}px, 0) scale(1)`,
+          });
+          updateEmbedStyleEl(embedStyleEl, dataForExpandedMode);
         });
   }
 
@@ -721,22 +719,21 @@ export class AmpStoryEmbeddedComponent {
             element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
             pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
             embedStyleEls[elId] = embedStyleEl;
-            embedStyleEls[elId][AMP_EMBED_DATA] = {};
           }
 
-          embedStyleEls[elId][AMP_EMBED_DATA] = {
+          embedStyleEls[elId][AMP_EMBED_DATA] = Object.assign({}, {
             id: elId,
             width: state.newWidth,
             height: state.newHeight,
-            scale: state.scaleFactor,
+            scaleFactor: state.scaleFactor,
+            transform: `scale(${state.scaleFactor})`,
             verticalMargin: state.verticalMargin,
             horizontalMargin: state.horizontalMargin,
-          };
+          });
 
           const embedStyleEl = dev().assertElement(embedStyleEls[elId],
               `Failed to look up embed style element with ID ${elId}`);
-          updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA],
-              false /* expanding */);
+          updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
         });
   }
 
