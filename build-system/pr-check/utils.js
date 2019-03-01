@@ -161,6 +161,7 @@ function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
+  this.decryptTravisKey();
   execOrDie(`gsutil signurl -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
@@ -199,6 +200,7 @@ function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
+  decryptTravisKey_();
   execOrDie(`gsutil signurl -m PUT -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil -m cp -r ${outputFileName} ` +
@@ -236,6 +238,14 @@ function uploadBuildOutput(functionName) {
  */
 function uploadDistOutput(functionName) {
   uploadOutput_(functionName, DIST_OUTPUT_FILE);
+}
+
+/**
+ * Decrypts key used by storage service account
+ */
+function decryptTravisKey_() {
+  execOrDie(`openssl aes-256-cbc -k ${process.env.GCP_TOKEN} ` +
+      `build-system/sa-travis-key.json.ec -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {
