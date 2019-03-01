@@ -16,6 +16,9 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {
+  RenderDelayingService
+} from '../../../src/render-delaying-services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';
@@ -27,12 +30,13 @@ const nameValidator = /^[\w-]+$/;
 /**
  * Variants service provides VARIANT variables for the experiment config.
  */
-export class Variants {
+export class Variants extends RenderDelayingService {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    super();
     /** @const */
     this.ampdoc = ampdoc;
 
@@ -54,6 +58,13 @@ export class Variants {
    * @return {!Promise<!Object<string, ?string>>}
    */
   getVariants() {
+    return this.variantsDeferred_.promise;
+  }
+
+  /**
+   * @override
+   */
+  getPostInstallRenderDelayPromise() {
     return this.variantsDeferred_.promise;
   }
 }

@@ -39,14 +39,43 @@ import {getServicePromise} from './service';
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
-  'amp-story': 'amp-story[standalone]',
 };
+
+/**
+ * Base class for render delaying services.
+ * This should be extended to ensure the service
+ * is properly handled
+ */
+export class RenderDelayingService {
+
+  constructor() {}
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render.
+   * NOTE: This should be overriden if your
+   * service need to perform any logic after being
+   * registered.
+   * @returns !Promise
+   */
+  getPostInstallRenderDelayPromise() {
+    return Promise.resolve();
+  }
+}
 
 /**
  * Maximum milliseconds to wait for all extensions to load before erroring.
  * @const
  */
 const LOAD_TIMEOUT = 3000;
+
+/**
+ * Maximum milliseconds to wait for all extensions to perform postInstall
+ * tasks before erroring.
+ * @const
+ */
+const POST_INSTALL_TIMEOUT = 1000;
+
 
 /**
  * Detects any render delaying services that are required on the page, and
@@ -62,8 +91,21 @@ export function waitForServices(win) {
         getServicePromise(win, service),
         `Render timeout waiting for service ${service} to be ready.`
     );
+  })
+  return Promise.all(promises).then(services => {
+    const postInstallPromises = services.map(service => {
+      if (service.getPostInstallRenderDelayPromise) {
+        return Services.timerFor(win).timeoutPromise(
+          POST_INSTALL_TIMEOUT,
+          service.getPostInstallRenderDelayPromise(),
+          `Render timeout waiting for service ${service} to finish postInstall.`
+        );
+      }
+      return Promise.resolve();
+    });
+
+    return Promise.all(postInstallPromises);
   });
-  return Promise.all(promises);
 }
 
 /**

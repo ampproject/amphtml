@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  RenderDelayingService
+} from '../../../src/render-delaying-services';
 import {Services} from '../../../src/services';
-
 
 /**
  * Strips everything but the domain from referrer string.
@@ -150,13 +152,16 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
+class AmpDynamicCssClasses extends RenderDelayingService {
+  constructor(ampdoc) {
+    super();
+    addRuntimeClasses(ampdoc);
+  }
+}
 
 // Register doc-service factory.
 AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
   AMP.registerServiceForDoc(
       'amp-dynamic-css-classes',
-      function(ampdoc) {
-        addRuntimeClasses(ampdoc);
-        return {};
-      });
+      AmpDynamicCssClasses);
 });
