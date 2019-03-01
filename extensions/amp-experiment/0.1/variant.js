@@ -64,7 +64,7 @@ export class Variants extends RenderDelayingService {
   /**
    * @override
    */
-  getPostInstallRenderDelayPromise() {
+  getPostRegisterRenderDelayPromise() {
     return this.variantsDeferred_.promise;
   }
 }

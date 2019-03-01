@@ -58,7 +58,7 @@ export class RenderDelayingService {
    * registered.
    * @returns !Promise
    */
-  getPostInstallRenderDelayPromise() {
+  getPostRegisterRenderDelayPromise() {
     return Promise.resolve();
   }
 }
@@ -74,7 +74,7 @@ const LOAD_TIMEOUT = 3000;
  * tasks before erroring.
  * @const
  */
-const POST_INSTALL_TIMEOUT = 1000;
+const POST_REGISTER_TIMEOUT = 1000;
 
 
 /**
@@ -94,10 +94,10 @@ export function waitForServices(win) {
   })
   return Promise.all(promises).then(services => {
     const postInstallPromises = services.map(service => {
-      if (service.getPostInstallRenderDelayPromise) {
+      if (service.getPostRegisterRenderDelayPromise) {
         return Services.timerFor(win).timeoutPromise(
-          POST_INSTALL_TIMEOUT,
-          service.getPostInstallRenderDelayPromise(),
+          POST_REGISTER_TIMEOUT,
+          service.getPostRegisterRenderDelayPromise(),
           `Render timeout waiting for service ${service} to finish postInstall.`
         );
       }
