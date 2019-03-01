@@ -557,7 +557,7 @@ export class FixedLayer {
         if (hasTransferables && this.transfer_) {
           this.getTransferLayer_().update();
         }
-        this.elements_.forEach(fe => {
+        this.elements_.forEach((fe, i) => {
           const feState = state[fe.id];
 
           // Fix a bug with Safari. For some reason, you cannot unset

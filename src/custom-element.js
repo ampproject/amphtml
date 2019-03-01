@@ -1597,9 +1597,10 @@ function createBaseCustomElementClass(win) {
         const doc = this.ownerDocument;
         devAssert(doc);
 
-        const container = htmlFor(doc)`
-            <div class="i-amphtml-loading-container i-amphtml-fill-content
-              amp-hidden"></div>`;
+        const html = htmlFor(doc);
+        const container =
+          html`<div class="i-amphtml-loading-container i-amphtml-fill-content
+            amp-hidden"></div>`;
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
