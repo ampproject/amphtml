@@ -993,7 +993,7 @@ export class Viewport {
     this.paddingTop_ = paddingTop;
 
     const animPromise =
-        this.maybeAnimateFixedElements_(duration, curve, transient);
+        this.updateFixedElementsOffset_(duration, curve, transient);
 
     if (paddingTop < this.lastPaddingTop_) {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
@@ -1018,7 +1018,7 @@ export class Viewport {
   }
 
   /**
-   * Specifies a callback for measuring an element's fixed positioning when the
+   * Specifies a callback for measuring an element's fixed offset when the
    * viewport's padding top changes.
    *
    * `measure` runs in a measure phase and takes:
@@ -1027,10 +1027,10 @@ export class Viewport {
    *  - lastPaddingTop in px.
    *  - paddingTop in px.
    *
-   * and returns an offset at start of animation. end will always be 0.
+   * And returns a vertical offset at start of animation. End will always be 0.
    *
    * This removes the element from the fixed layer (but NOT the transfer layer),
-   * so its positioning needs to be independently managed subsequently.
+   * so its positioning needs to be managed independently afterwards.
    *
    * @param {!Element} element
    * @param {!FixedElementMeasureFnDef} measure
@@ -1047,7 +1047,7 @@ export class Viewport {
    * @return {!Promise}
    * @private
    */
-  maybeAnimateFixedElements_(duration, curve, transient) {
+  updateFixedElementsOffset_(duration, curve, transient) {
     const isAnimated = duration > 0;
     const {paddingTop_: paddingTop, lastPaddingTop_: lastPaddingTop} = this;
 
