@@ -65,6 +65,8 @@ const WRAP_IN_IFRAME_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/remove-amp-scripts.js'), 'utf8');
+const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
+    path.resolve(__dirname, 'snippets/freeze-form-values.js'), 'utf8');
 
 let browser_;
 let webServerProcess_;
@@ -420,7 +422,7 @@ async function snapshotWebpages(percy, browser, webpages) {
             // prepare it for snapshotting on Percy. See comments inside the
             // snippet files for description of each.
             await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
-            // TODO(#20630): add a snippet to freeze form inputs
+            await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
 
             // Create a default set of snapshot options for Percy and modify
             // them based on the test's configuration.
