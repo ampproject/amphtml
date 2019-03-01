@@ -181,6 +181,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.keyDownHandler_.bind(this));
     this.inputElement_.addEventListener('focus', this.showResults.bind(this));
     this.inputElement_.addEventListener('blur', this.hideResults.bind(this));
+    this.container_.addEventListener('mousedown', e => {
+      if (!this.isItemElement(e.target)) {
+        return;
+      }
+      this.selectItem(e.target);
+    });
+
     this.renderResults_();
     return Promise.resolve();
   }
@@ -195,7 +202,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.addEventListener('mousedown', this.mousedownHandler_.bind(this));
     element.textContent = item;
     return element;
   }
@@ -286,16 +292,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Selects the target of the mousedown event.
-   * @param {!event} event
+   * Returns true if the given element is a suggested item.
+   * @param {HTMLElement} element 
    */
-  mousedownHandler_(event) {
-    this.selectItem(event.target);
+  isItemElement(element) {
+    return element.classList.contains("i-amphtml-autocomplete-item");
   }
 
   /**
    * Writes the selected value into the input field.
-   * @param {?HTMLElement} element
+   * @param {HTMLElement} element
    */
   selectItem(element) {
     this.inputElement_.value = element.textContent;
