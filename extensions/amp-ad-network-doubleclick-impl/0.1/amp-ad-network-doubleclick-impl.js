@@ -124,8 +124,8 @@ const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
 
 /** @const @enum{string} */
 const FLEXIBLE_AD_SLOTS_BRANCHES = {
-  EXPERIMENT: '21063174',
   CONTROL: '21063173',
+  EXPERIMENT: '21063174',
 };
 
 /**
@@ -508,6 +508,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
+      // Both msz/psz send a height of -1 because height expansion is
+      // disallowed in AMP.
       'msz': this.sendFlexibleAdSlotParams_ ?
         `${getContainerWidth(this.win, this.element)}x-1` : null,
       'psz': this.sendFlexibleAdSlotParams_ ?

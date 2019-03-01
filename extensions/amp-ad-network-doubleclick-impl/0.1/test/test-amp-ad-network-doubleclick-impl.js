@@ -827,16 +827,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           {flexAdSlots: '21063173'});
       impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
-        expect(url).to.not.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.not.match(/(\?|&)msz=/);
+        expect(url).to.not.match(/(\?|&)psz=/);
         expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
       });
     });
 
     it('should not include msz/psz if not in flexAdSlots experiment', () => {
       return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
-        expect(url).to.not.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.not.match(/(\?|&)msz=/);
+        expect(url).to.not.match(/(\?|&)psz=/);
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });

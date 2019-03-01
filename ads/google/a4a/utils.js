@@ -974,7 +974,7 @@ export function getAmpRuntimeTypeParameter(win) {
 export function getContainerWidth(win, element) {
   let el = element;
   let maxDepth = 100;
-  // Find the first ancestor with a fixed size
+  // Find the first ancestor with a fixed size.
   while (el && maxDepth--) {
     const layout = el.getAttribute('layout');
     switch (layout) {
