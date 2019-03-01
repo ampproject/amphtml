@@ -1042,6 +1042,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         matchMedia.withArgs('(min-width: 1111111px)').returns(
             {matches: false});
         element2 = new ElementClass();
+        element2.ampdoc_ = env.ampdoc;
       });
 
       it('should apply media condition', () => {
