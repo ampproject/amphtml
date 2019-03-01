@@ -19,7 +19,6 @@
 const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
-  SHADOW_DEMO: 'shadow-demo',
 };
 
 const EnvironmentBehaviorMap = {
@@ -42,21 +41,6 @@ const EnvironmentBehaviorMap = {
     url(url) {
       // TODO(estherkim): somehow allow non-8000 port and domain
       return `http://localhost:8000/examples/viewer.html#href=${url}`;
-    },
-  },
-
-  [AmpdocEnvironment.SHADOW_DEMO]: {
-    async ready(controller) {
-      // TODO(cvializ): this is a HACK
-      // There should be a better way to detect that the shadowdoc is ready.
-      const shadowHost = await controller.findElement(
-          '.amp-doc-host[style="visibility: visible;"]');
-      await controller.switchToShadow(shadowHost);
-    },
-
-    url(url) {
-      // TODO(estherkim): somehow allow non-8000 port and domain
-      return `http://localhost:8000/pwa#href=${url}`;
     },
   },
 };
@@ -95,16 +79,6 @@ class AmpDriver {
     const ampEnv = EnvironmentBehaviorMap[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
     await ampEnv.ready(this.controller_);
-  }
-
-  /**
-   * Navigate the browser to the URL that will cause the demo server to
-   * serve the runtime and extensions in the given format.
-   * @param {string} mode one of 'cdn', 'compiled', 'default',
-   */
-  async serveMode(mode) {
-    await this.controller_.navigateTo(
-        `http://localhost:8000/serve_mode=${mode}`);
   }
 }
 
