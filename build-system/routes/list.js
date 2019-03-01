@@ -100,7 +100,7 @@ const generateResults = (category, count = 2) => {
 
   r.items = items;
   r['load-more-src'] =
-      `/infinite-scroll-random/${category}?${randInt(10000)}`;
+      `/list/infinite-scroll-random/${category}?${randInt(10000)}`;
 
   return r;
 };
@@ -115,7 +115,7 @@ router.get('/infinite-scroll-faulty', function(req, res) {
   const {query} = req;
   const code = query['code'];
   const items = generateJson(12);
-  let next = '/infinite-scroll-error';
+  let next = '/list/infinite-scroll-error';
   if (code) {
     next += '?code=' + code;
   }
@@ -137,7 +137,7 @@ router.get('/infinite-scroll', function(req, res) {
 
   const items = generateJson(numberOfItems);
 
-  const nextUrl = '/infinite-scroll?items=' +
+  const nextUrl = '/list/infinite-scroll?items=' +
     numberOfItems + '&left=' + (pagesLeft - 1) +
     '&latency=' + latency;
 

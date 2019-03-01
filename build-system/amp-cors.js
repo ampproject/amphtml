@@ -102,4 +102,4 @@ function getUrlPrefix(req) {
 
 module.exports = {
   enableCors, assertCors,
-}
+};
