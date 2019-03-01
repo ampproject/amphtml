@@ -165,7 +165,6 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
       </span>
     </div>`;
 
-
 /**
  * Updates embed's corresponding <style> element with embedData.
  * @param {!Element} embedStyleEl
