@@ -1301,7 +1301,6 @@ export function updateViewportMetaString(currentValue, updateParams) {
   return stringifyViewportMeta(params);
 }
 
-
 /**
  * Calculates a default duration for a scrollTop animation.
  * @param {number} scrollTopA commutative with b.
