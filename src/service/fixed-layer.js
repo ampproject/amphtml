@@ -683,15 +683,16 @@ export class FixedLayer {
     }
 
     let fe = null;
-    this.elements_.forEach(el => {
+    for (let i = 0; i < this.elements_.length; i++) {
+      const el = this.elements_[i];
       if (el.element == element && el.position == position) {
         fe = el;
         return;
       }
-    });
+    }
     const isFixed = position == 'fixed';
     if (fe) {
-      if (!fe.selectors.includes(selector)) {
+      if (fe.selectors.indexOf(selector) < 0) {
         // Already seen.
         fe.selectors.push(selector);
       }
@@ -830,7 +831,8 @@ export class FixedLayer {
    * @private
    */
   discoverSelectors_(rules) {
-    rules.forEach(rule => {
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
       if (rule.type == /* CSSMediaRule */ 4 ||
           rule.type == /* CSSSupportsRule */ 12) {
         this.discoverSelectors_(rule.cssRules);
@@ -849,7 +851,7 @@ export class FixedLayer {
           this.stickySelectors_.push(selectorText);
         }
       }
-    });
+    }
   }
 }
 
@@ -1013,7 +1015,8 @@ class TransferLayerBody {
     const layer = this.layer_;
     const bodyAttrs = body.attributes;
     const layerAttrs = layer.attributes;
-    bodyAttrs.forEach(attr => {
+    for (let i = 0; i < bodyAttrs.length; i++) {
+      const attr = bodyAttrs[i];
       // Style is not copied because the fixed-layer must have very precise
       // styles to enable smooth scrolling.
       if (attr.name === 'style') {
@@ -1021,7 +1024,7 @@ class TransferLayerBody {
       }
       // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
       layerAttrs.setNamedItem(attr.cloneNode(false));
-    });
+    }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
       if (name === 'style' || name === LIGHTBOX_MODE_ATTR
