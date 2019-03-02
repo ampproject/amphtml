@@ -687,7 +687,7 @@ export class FixedLayer {
       const el = this.elements_[i];
       if (el.element == element && el.position == position) {
         fe = el;
-        return;
+        break;
       }
     }
     const isFixed = position == 'fixed';
@@ -836,14 +836,14 @@ export class FixedLayer {
       if (rule.type == /* CSSMediaRule */ 4 ||
           rule.type == /* CSSSupportsRule */ 12) {
         this.discoverSelectors_(rule.cssRules);
-        return;
+        continue;
       }
 
       if (rule.type == /* CSSStyleRule */ 1) {
         const {selectorText} = rule;
         const {position} = rule.style;
         if (selectorText === '*' || !position) {
-          return;
+          continue;
         }
         if (position === 'fixed') {
           this.fixedSelectors_.push(selectorText);
@@ -1020,7 +1020,7 @@ class TransferLayerBody {
       // Style is not copied because the fixed-layer must have very precise
       // styles to enable smooth scrolling.
       if (attr.name === 'style') {
-        return;
+        continue;
       }
       // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
       layerAttrs.setNamedItem(attr.cloneNode(false));
