@@ -1045,48 +1045,46 @@ export class Viewport {
    */
   updateFixedElementsOffset_(duration, curve, transient) {
     const isAnimated = duration > 0;
-    const {paddingTop_: paddingTop, lastPaddingTop_: lastPaddingTop} = this;
+    const {
+      fixedMeasurers_: fixedMeasurers,
+      paddingTop_: paddingTop,
+      lastPaddingTop_: lastPaddingTop,
+    } = this;
 
     this.fixedLayer_.updatePaddingTop(paddingTop, transient);
 
     let doneDeferred;
 
-    if (this.fixedMeasurers_.length > 0) {
+    if (fixedMeasurers.length > 0) {
       doneDeferred = new Deferred();
     }
 
     return this.vsync_.measurePromise(() => {
-      return this.fixedMeasurers_.map(({element, measure}) => {
+      return fixedMeasurers.map(def => {
         const afterAnimation = devAssert(doneDeferred).promise;
-        return {
-          element,
-          animOffset: measure(afterAnimation, lastPaddingTop, paddingTop),
-        };
+        return def.measure(afterAnimation, lastPaddingTop, paddingTop);
       });
-    }).then(measures => {
+    }).then(animOffsets => {
       if (!isAnimated) {
         return;
       }
 
-      const interpolationDefs = measures.map(measure => ({
-        element: measure.element,
-        interpolation: numeric(measure.animOffset, 0),
-      }));
+      const interpolations =
+          animOffsets.map(animOffset => numeric(animOffset, 0));
 
       const defaultAnimOffset = lastPaddingTop - paddingTop;
       const defaultInterpolation = numeric(defaultAnimOffset, 0);
 
       return Animation.animate(this.ampdoc.getRootNode(), time => {
-        const offsetY = defaultInterpolation(time);
-        this.fixedLayer_.transformMutate(`translateY(${offsetY}px)`);
+        this.fixedLayer_.transformMutate(
+            `translateY(${defaultInterpolation(time)}px)`);
 
         // Translate independent elements that have their own animation offset
         // definition.
-        for (let j = 0; j < measures.length; j++) {
-          const def = interpolationDefs[j];
-          const offsetY = def.interpolation(time);
-          setStyle(def.element, 'transform', `translateY(${offsetY}px)`);
-        }
+        interpolations.forEach((interpolation, i) => {
+          setStyle(fixedMeasurers[i].element, 'transform',
+              `translateY(${interpolation(time)}px)`);
+        });
       }, duration, curve);
     }).then(() => {
       if (isAnimated) {

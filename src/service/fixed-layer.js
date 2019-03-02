@@ -385,12 +385,11 @@ export class FixedLayer {
   returnFixedElements_(fes) {
     if (fes.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        for (let i = 0; i < fes.length; i++) {
-          const fe = fes[i];
+        fes.forEach(fe => {
           if (fe.position == 'fixed') {
             this.transferLayer_.returnFrom(fe);
           }
-        }
+        });
       });
     }
   }
@@ -443,7 +442,6 @@ export class FixedLayer {
     return this.vsync_.runPromise({
       measure: state => {
         const elements = this.elements_;
-        const autoTops = [];
         const {win} = this.ampdoc;
 
         // Notice that this code intentionally breaks vsync contract.
@@ -461,19 +459,18 @@ export class FixedLayer {
             transition: 'none',
           });
         });
+
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
         // regardless of bottom.
-        elements.forEach(fe => {
-          autoTops.push(computedStyle(win, fe.element).top);
-        });
+        const autoTops = elements.map(fe => computedStyle(win, fe.element).top);
+
         // 3. Cleanup the `style.bottom`.
         elements.forEach(fe => {
           setStyle(fe.element, 'bottom', '');
         });
 
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        elements.forEach((fe, i) => {
           const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
@@ -501,7 +498,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            continue;
+            return;
           }
 
           if (top === 'auto' || autoTops[i] !== top) {
@@ -549,7 +546,7 @@ export class FixedLayer {
             zIndex,
             transform,
           };
-        }
+        });
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
@@ -627,16 +624,16 @@ export class FixedLayer {
 
     devAssert(position == 'fixed' || position == 'sticky');
 
-    for (let i = 0; i < selectors.length; i++) {
-      const elements = root.querySelectorAll(selectors[i]);
+    selectors.forEach(selector => {
+      const elements = root.querySelectorAll(selector);
       for (
-        let j = 0;
-        j < elements.length && this.elements_.length <= limit;
-        j++) {
-        this.setupElement_(elements[j], selectors[i], position,
+        let i = 0;
+        i < elements.length && this.elements_.length <= limit;
+        i++) {
+        this.setupElement_(elements[i], selector, position,
             /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
-    }
+    });
   }
 
   /**
@@ -686,13 +683,12 @@ export class FixedLayer {
     }
 
     let fe = null;
-    for (let i = 0; i < this.elements_.length; i++) {
-      const el = this.elements_[i];
+    this.elements_.forEach(el => {
       if (el.element == element && el.position == position) {
         fe = el;
-        break;
+        return;
       }
-    }
+    });
     const isFixed = position == 'fixed';
     if (fe) {
       if (!fe.selectors.includes(selector)) {
@@ -834,19 +830,18 @@ export class FixedLayer {
    * @private
    */
   discoverSelectors_(rules) {
-    for (let i = 0; i < rules.length; i++) {
-      const rule = rules[i];
+    rules.forEach(rule => {
       if (rule.type == /* CSSMediaRule */ 4 ||
           rule.type == /* CSSSupportsRule */ 12) {
         this.discoverSelectors_(rule.cssRules);
-        continue;
+        return;
       }
 
       if (rule.type == /* CSSStyleRule */ 1) {
         const {selectorText} = rule;
         const {position} = rule.style;
         if (selectorText === '*' || !position) {
-          continue;
+          return;
         }
         if (position === 'fixed') {
           this.fixedSelectors_.push(selectorText);
@@ -854,7 +849,7 @@ export class FixedLayer {
           this.stickySelectors_.push(selectorText);
         }
       }
-    }
+    });
   }
 }
 
@@ -1018,16 +1013,15 @@ class TransferLayerBody {
     const layer = this.layer_;
     const bodyAttrs = body.attributes;
     const layerAttrs = layer.attributes;
-    for (let i = 0; i < bodyAttrs.length; i++) {
-      const attr = bodyAttrs[i];
+    bodyAttrs.forEach(attr => {
       // Style is not copied because the fixed-layer must have very precise
       // styles to enable smooth scrolling.
       if (attr.name === 'style') {
-        continue;
+        return;
       }
       // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
       layerAttrs.setNamedItem(attr.cloneNode(false));
-    }
+    });
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
       if (name === 'style' || name === LIGHTBOX_MODE_ATTR
