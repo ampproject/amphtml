@@ -266,7 +266,7 @@ export class ConsentUI {
       if (this.elementWithFocusBeforeShowing_) {
         this.elementWithFocusBeforeShowing_./*OK*/focus();
         this.elementWithFocusBeforeShowing_ = null;
-      } else if(this.win_.document.body.children.length > 0) {
+      } else if (this.win_.document.body.children.length > 0) {
         // TODO (torch2424): Find if the first child can not be
         // focusable due to styling.
         this.win_.document.body.children[0]./*OK*/focus();
