@@ -692,7 +692,7 @@ export class FixedLayer {
     }
     const isFixed = position == 'fixed';
     if (fe) {
-      if (fe.selectors.indexOf(selector) < 0) {
+      if (!fe.selectors.includes(selector)) {
         // Already seen.
         fe.selectors.push(selector);
       }
