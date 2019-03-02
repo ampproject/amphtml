@@ -15,9 +15,6 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
-import {
-  RenderDelayingService,
-} from '../../../src/render-delaying-services';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
@@ -29,14 +26,14 @@ const nameValidator = /^[\w-]+$/;
 
 /**
  * Variants service provides VARIANT variables for the experiment config.
+ * @implements {../../../src/render-delaying-services.RenderDelayingService}
  */
-export class Variants extends RenderDelayingService {
+export class Variants {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    super();
     /** @const */
     this.ampdoc = ampdoc;
 
@@ -62,9 +59,12 @@ export class Variants extends RenderDelayingService {
   }
 
   /**
-   * @override
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
    */
-  getPostRegisterRenderDelayPromise() {
+  whenReady() {
     return this.variantsDeferred_.promise;
   }
 }

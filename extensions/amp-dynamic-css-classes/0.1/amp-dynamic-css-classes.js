@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  RenderDelayingService,
-} from '../../../src/render-delaying-services';
 import {Services} from '../../../src/services';
 
 /**
@@ -152,13 +149,23 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
-class AmpDynamicCssClasses extends RenderDelayingService {
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpDynamicCssClasses {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    super();
     addRuntimeClasses(ampdoc);
+  }
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return Promise.resolve();
   }
 }
 

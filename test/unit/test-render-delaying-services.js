@@ -21,6 +21,7 @@ import {
   hasRenderDelayingServices,
   waitForServices,
 } from '../../src/render-delaying-services';
+import {macroTask} from '../../testing/yield';
 
 describe('waitForServices', () => {
 
@@ -40,14 +41,14 @@ describe('waitForServices', () => {
     experimentResolve = waitForService(getService, 'amp-experiment');
 
     variantService = {
-      getPostRegisterRenderDelayPromise: () => {
-        throw new Error('getPostRegisterRenderDelayPromise should be stubbed');
+      whenReady: () => {
+        throw new Error('whenReady should be stubbed');
       },
     };
     variantResolve = waitForService(getService, 'variant', variantService);
     variantStub = sandbox.stub(
         variantService,
-        'getPostRegisterRenderDelayPromise'
+        'whenReady'
     ).returns(Promise.resolve());
 
     return createIframePromise().then(iframe => {
@@ -68,7 +69,7 @@ describe('waitForServices', () => {
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
-  it('should timeout if some blocking services are missing', () => {
+  it('should timeout if some blocking services are missing', function* () {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;
@@ -77,6 +78,11 @@ describe('waitForServices', () => {
     const promise = waitForServices(win);
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
+
+    // Push ourselves back on the event queue,
+    // to allow the dynamic-css service.whenReady
+    // to resolve
+    yield macroTask();
     clock.tick(3000);
     return expect(promise).to.eventually.be.rejectedWith('variant');
   });
@@ -94,7 +100,7 @@ describe('waitForServices', () => {
     return expect(promise).to.eventually.have.lengthOf(2);
   });
 
-  it('should resolve if no getPostRegisterRenderDelayPromise', () => {
+  it('should resolve if no service.whenReady', () => {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     expect(hasRenderDelayingServices(win)).to.be.true;
     addExtensionScript(win, 'non-blocking-extension');
@@ -105,7 +111,7 @@ describe('waitForServices', () => {
     return expect(promise).to.eventually.have.lengthOf(1);
   });
 
-  it('should wait for getPostRegisterRenderDelayPromise', () => {
+  it('should wait to resolve for service.whenReady', () => {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;

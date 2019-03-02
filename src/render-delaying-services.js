@@ -45,22 +45,20 @@ const SERVICES = {
  * Base class for render delaying services.
  * This should be extended to ensure the service
  * is properly handled
+ *
+ * @interface
  */
 export class RenderDelayingService {
-  /** Class Constructor */
-  constructor() {}
 
   /**
    * Function to return a promise for when
-   * it is finished delaying render.
-   * NOTE: This should be overriden if your
-   * service need to perform any logic after being
-   * registered.
+   * it is finished delaying render, and is ready.
+   * NOTE: This should simply return Promise.resolve,
+   * if your service does not need to perform any logic
+   * after being registered.
    * @return {!Promise}
    */
-  getPostRegisterRenderDelayPromise() {
-    return Promise.resolve();
-  }
+  whenReady() {}
 }
 
 /**
@@ -68,13 +66,6 @@ export class RenderDelayingService {
  * @const
  */
 const LOAD_TIMEOUT = 3000;
-
-/**
- * Maximum milliseconds to wait for all extensions to perform postInstall
- * tasks before erroring.
- * @const
- */
-const POST_REGISTER_TIMEOUT = 1000;
 
 
 /**
@@ -85,29 +76,28 @@ const POST_REGISTER_TIMEOUT = 1000;
  *     as the detected render delaying services
  */
 export function waitForServices(win) {
-  const promises = includedServices(win).map(service => {
-    return Services.timerFor(win).timeoutPromise(
-        LOAD_TIMEOUT,
-        getServicePromise(win, service),
-        `Render timeout waiting for service ${service} ` +
-      'to be ready.'
-    );
-  });
-  return Promise.all(promises).then(services => {
-    const postInstallPromises = services.map(service => {
-      if (service && service.getPostRegisterRenderDelayPromise) {
-        return Services.timerFor(win).timeoutPromise(
-            POST_REGISTER_TIMEOUT,
-            service.getPostRegisterRenderDelayPromise(),
-            `Render timeout waiting for service ${service} ` +
-          'to finish postInstall.'
-        );
+  const promises = includedServices(win).map(serviceId => {
+
+    const serviceReadyPromise = getServicePromise(
+        win,
+        serviceId
+    ).then(service => {
+      if (service && service.whenReady) {
+        return service.whenReady().then(() => {
+          return service;
+        });
       }
-      return Promise.resolve();
+      return Promise.resolve(service);
     });
 
-    return Promise.all(postInstallPromises);
+    return Services.timerFor(win).timeoutPromise(
+        LOAD_TIMEOUT,
+        serviceReadyPromise,
+        `Render timeout waiting for service ${serviceId} ` +
+        'to be ready.'
+    );
   });
+  return Promise.all(promises);
 }
 
 /**
