@@ -709,7 +709,7 @@ export class GlobalVariableSource extends VariableSource {
           Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
-      userAssertExtensionConfigured(fragments, expr, 'amp-geo');
+      userAssertExtensionConfigured(fragments, expr, 'amp-share-tracking');
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
