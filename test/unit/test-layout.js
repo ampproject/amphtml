@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Layout, VALID_LAYOUTS, applyStaticLayout,
+import {Layout, VALID_LAYOUTS, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
   isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
 
