@@ -920,9 +920,10 @@ export class Viewport {
    * Removes the element from the fixed layer.
    * @param {!Element} element
    * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeFromFixedLayer(element, opt_onlyTearDown) {
-    this.fixedLayer_.removeElement(element, opt_onlyTearDown);
+  removeFromFixedLayer(element, opt_onlyTearDown, opt_keepOffset) {
+    this.fixedLayer_.removeElement(element, opt_onlyTearDown, opt_keepOffset);
   }
 
   /**
@@ -1030,9 +1031,11 @@ export class Viewport {
    *
    * @param {!Element} element
    * @param {!FixedElementMeasureFnDef} measure
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  setFixedElementMeasurer(element, measure) {
-    this.removeFromFixedLayer(element, /* onlyTearDown */ true);
+  setFixedElementMeasurer(element, measure, opt_keepOffset) {
+    this.removeFromFixedLayer(
+        element, /* onlyTearDown */ true, opt_keepOffset);
     this.fixedMeasurers_.push({element, measure});
   }
 

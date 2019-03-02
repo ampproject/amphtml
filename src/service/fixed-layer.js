@@ -368,9 +368,10 @@ export class FixedLayer {
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
    * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeElement(element, opt_onlyTearDown) {
-    const fes = this.tearDownElement_(element);
+  removeElement(element, opt_onlyTearDown, opt_keepOffset) {
+    const fes = this.tearDownElement_(element, opt_keepOffset);
     if (opt_onlyTearDown) {
       return;
     }
@@ -725,15 +726,16 @@ export class FixedLayer {
    * Does _not_ return the element from the transfer layer.
    *
    * @param {!Element} element
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    * @return {!Array<!ElementDef>}
    * @private
    */
-  tearDownElement_(element) {
+  tearDownElement_(element, opt_keepOffset) {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
       if (fe.element === element) {
-        if (!fe.lightboxed) {
+        if (!fe.lightboxed && !opt_keepOffset) {
           this.vsync_.mutate(() => {
             setStyle(element, 'top', '');
           });

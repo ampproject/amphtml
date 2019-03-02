@@ -261,11 +261,15 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
     });
   }
 
+  let lastEvent = 0;
+
   // Use viewport's "padding top" as a proxy signal for whether there's a
   // viewer header displayed. If displayed, we display float-in-* elements as
   // well.
   viewport.setFixedElementMeasurer(element,
       (afterAnimation, prevPaddingTop, paddingTop) => {
+        const curEvent = ++lastEvent;
+
         const resources = Services.resourcesForDoc(element);
         const isShown = isShownPerViewportPaddingTop(paddingTop);
 
@@ -276,6 +280,9 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
 
         (isShown ? Promise.resolve() : afterAnimation).then(() => {
           resources.mutateElement(element, () => {
+            if (lastEvent != curEvent) {
+              return;
+            }
             setVisibilityStyles(element, isShown);
           });
         });
@@ -293,7 +300,7 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
         });
 
         return animOffset;
-      });
+      }, /* keepOffset */ true);
 }
 
 // TODO(alanorozco): Use the following for scroll-dispatched transition.
