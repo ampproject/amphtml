@@ -367,13 +367,11 @@ export class FixedLayer {
   /**
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
-   * @param {boolean=} transferBack Returns the element from the transfer layer.
-   *   True by default. If not transferred back, the element will stay in the
-   *   transfer layer but won't be tracked here.
+   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
    */
-  removeElement(element, transferBack = true) {
+  removeElement(element, opt_onlyTearDown) {
     const fes = this.tearDownElement_(element);
-    if (!transferBack) {
+    if (opt_onlyTearDown) {
       return;
     }
     this.returnFixedElements_(fes);

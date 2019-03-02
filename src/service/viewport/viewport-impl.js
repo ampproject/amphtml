@@ -919,10 +919,10 @@ export class Viewport {
   /**
    * Removes the element from the fixed layer.
    * @param {!Element} element
-   * @param {boolean=} opt_transferBack Return from transfer. True by default.
+   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
    */
-  removeFromFixedLayer(element, opt_transferBack) {
-    this.fixedLayer_.removeElement(element, opt_transferBack);
+  removeFromFixedLayer(element, opt_onlyTearDown) {
+    this.fixedLayer_.removeElement(element, opt_onlyTearDown);
   }
 
   /**
@@ -1024,14 +1024,15 @@ export class Viewport {
    *
    * And returns a vertical offset at start of animation. End will always be 0.
    *
-   * This removes the element from the fixed layer (but NOT the transfer layer),
-   * so its positioning needs to be managed independently afterwards.
+   * This tears down the element from the fixed layer (but does NOT remove from
+   * the transfer layer), so its offset needs to be managed independently
+   * afterwards.
    *
    * @param {!Element} element
    * @param {!FixedElementMeasureFnDef} measure
    */
   setFixedElementMeasurer(element, measure) {
-    this.removeFromFixedLayer(element, /* transferBack */ false);
+    this.removeFromFixedLayer(element, /* onlyTearDown */ true);
     this.fixedMeasurers_.push({element, measure});
   }
 
