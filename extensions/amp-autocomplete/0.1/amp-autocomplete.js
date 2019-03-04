@@ -143,7 +143,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isJsonScriptTag(scriptElement),
         `${TAG} should be inside a <script> tag with type="application/json"`);
     const json = tryParseJson(scriptElement.textContent,
-        error => {user().error((TAG, 'failed to parse inline data', error));});
+        error => {
+          user().error(`${TAG} failed to parse inline data: ${error}`);
+        });
     return json.items;
   }
 
