@@ -66,6 +66,8 @@ function unregisterIframe(frame) {
   }
 }
 
+// TODO: Unskip the cross domain tests on Firefox, which broke because localhost
+// subdomains no longer work on version 65.
 describe('inabox', function() {
 
   function testAmpComponents() {
