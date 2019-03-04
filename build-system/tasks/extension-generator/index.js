@@ -86,7 +86,7 @@ function getMarkdownExtensionFile(name) {
   And then remove this comment! (no empty lines before "---")
 -->
 ---
-$category: media
+$category: presentation
 formats:
   - websites
   - email
