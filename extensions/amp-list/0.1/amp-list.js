@@ -761,42 +761,40 @@ export class AmpList extends AMP.BaseElement {
    * @param {string} previousLayout
    */
   undoPreviousLayout_(previousLayout) {
-    switch (previousLayout) {
-      case Layout.RESPONSIVE:
-        this.element.classList.remove('i-amphtml-layout-responsive');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FLEX_ITEM:
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FIXED:
-        this.element.classList.remove('i-amphtml-layout-fixed');
-        setStyles(this.element, {
-          height: '',
-        });
-        break;
-      case Layout.FIXED_HEIGHT:
-        this.element.classList.remove('i-amphtml-layout-fixed-height');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.INTRINSIC:
-        this.element.classList.remove('i-amphtml-layout-intrinsic');
-        break;
-      default:
-        // fall through, always remove sizer and size-defined class
+    const {element} = this;
+    if (previousLayout == Layout.RESPONSIVE) {
+      element.classList.remove('i-amphtml-layout-responsive');
+      setStyles(element, {
+        height: '',
+        width: '',
+      });
     }
+    if (previousLayout == Layout.FLEX_ITEM) {
+      setStyles(element, {
+        height: '',
+        width: '',
+      });
+    }
+    if (previousLayout == Layout.FIXED) {
+      element.classList.remove('i-amphtml-layout-fixed');
+      setStyles(element, {
+        height: '',
+      });
+    }
+    if (previousLayout == Layout.FIXED_HEIGHT) {
+      element.classList.remove('i-amphtml-layout-fixed-height');
+      setStyles(element, {
+        height: '',
+        width: '',
+      });
+    }
+    if (previousLayout == Layout.INTRINSIC) {
+      element.classList.remove('i-amphtml-layout-intrinsic');
+    }
+    // Always remove sizer and size-defined class
     // The changeSize() call removes the sizer element.
-    this.element./*OK*/changeSize();
-    this.element.classList.remove('i-amphtml-layout-size-defined');
+    element./*OK*/changeSize();
+    element.classList.remove('i-amphtml-layout-size-defined');
   }
 
   /**

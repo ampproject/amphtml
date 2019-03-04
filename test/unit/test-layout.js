@@ -33,21 +33,21 @@ describe('Layout', () => {
     it('has matching `Layout` field for each of `LAYOUTS`', () => {
       expect(Object.keys(Layout)).to.have.length(LAYOUTS.length);
 
-      LAYOUTS.forEach(layout => {
-        expect(Layout).to.include({[expectedKey(layout)]: layout});
+      LAYOUTS.forEach((layout, i) => {
+        expect(Layout).to.include({[expectedKey(layout)]: i});
       });
     });
 
   });
 
   it('parseLayout', () => {
-    expect(parseLayout('nodisplay')).to.equal('nodisplay');
-    expect(parseLayout('fixed')).to.equal('fixed');
-    expect(parseLayout('fixed-height')).to.equal('fixed-height');
-    expect(parseLayout('responsive')).to.equal('responsive');
-    expect(parseLayout('container')).to.equal('container');
-    expect(parseLayout('fill')).to.equal('fill');
-    expect(parseLayout('fluid')).to.equal('fluid');
+    expect(parseLayout('nodisplay')).to.equal(Layout.NODISPLAY);
+    expect(parseLayout('fixed')).to.equal(Layout.FIXED);
+    expect(parseLayout('fixed-height')).to.equal(Layout.FIXED_HEIGHT);
+    expect(parseLayout('responsive')).to.equal(Layout.RESPONSIVE);
+    expect(parseLayout('container')).to.equal(Layout.CONTAINER);
+    expect(parseLayout('fill')).to.equal(Layout.FILL);
+    expect(parseLayout('fluid')).to.equal(Layout.FLUID);
   });
 
   it('are loading components allowed', () => {

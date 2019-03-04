@@ -44,19 +44,20 @@ export const LAYOUTS = [
 ];
 
 /**
- * @enum {string}
+ * @enum {number}
  */
 export const Layout = {
-  // Naming convention enforced via tests.
-  NODISPLAY: 'nodisplay',
-  FIXED: 'fixed',
-  FIXED_HEIGHT: 'fixed-height',
-  RESPONSIVE: 'responsive',
-  CONTAINER: 'container',
-  FILL: 'fill',
-  FLEX_ITEM: 'flex-item',
-  FLUID: 'fluid',
-  INTRINSIC: 'intrinsic',
+  // Values should match indices of `LAYOUTS`.
+  // Naming convention and indices enforced via tests.
+  NODISPLAY: 0,
+  FIXED: 1,
+  FIXED_HEIGHT: 2,
+  RESPONSIVE: 3,
+  CONTAINER: 4,
+  FILL: 5,
+  FLEX_ITEM: 6,
+  FLUID: 7,
+  INTRINSIC: 8,
 };
 
 
@@ -151,10 +152,11 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  *   the layout string.
  */
 export function parseLayout(s) {
-  if (LAYOUTS.includes(s)) {
-    return /** @type {!Layout} */ (s);
+  const index = LAYOUTS.indexOf(s);
+  if (index < 0) {
+    return undefined;
   }
-  return undefined;
+  return /** @type {!Layout} */ (index);
 }
 
 
@@ -163,7 +165,7 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return 'i-amphtml-layout-' + layout;
+  return `i-amphtml-layout-${LAYOUTS[layout]}`;
 }
 
 
@@ -391,7 +393,7 @@ export function applyStaticLayout(element) {
   const heightsAttr = element.getAttribute('heights');
 
   // Input layout attributes.
-  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  const inputLayout = parseLayout(layoutAttr);
   userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
@@ -530,6 +532,6 @@ export function applyStaticLayout(element) {
   }
   // Mark the element as having completed static layout, in case it is cloned
   // in the future.
-  element.setAttribute('i-amphtml-layout', layout);
+  element.setAttribute('i-amphtml-layout', layoutAttr);
   return layout;
 }
