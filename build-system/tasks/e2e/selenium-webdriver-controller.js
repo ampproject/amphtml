@@ -390,9 +390,8 @@ class SeleniumWebDriverController {
   /**
    * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise}
-   * @private
    */
-  async switchToFrame_(handle) {
+  async switchToFrame(handle) {
     // TODO(estherkim): add 'id' parameter, to select element inside 'handle'
     // use case: testing x-origin iframes like amp-mathml, amp-ima-video
 
@@ -404,9 +403,8 @@ class SeleniumWebDriverController {
 
   /**
    * @return {!Promise}
-   * @private
    */
-  async switchToParent_() {
+  async switchToParent() {
     // await this.driver.switchTo().parentFrame();
     await this.driver.switchTo().defaultContent();
   }

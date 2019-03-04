@@ -14,6 +14,37 @@
  * limitations under the License.
  */
 
+
+/** @enum {string} */
+const AmpdocEnvironment = {
+  SINGLE: 'single',
+  VIEWER_DEMO: 'viewer-demo',
+};
+
+const EnvironmentBehaviorMap = {
+  [AmpdocEnvironment.SINGLE]: {
+    ready(unusedController) {
+      return Promise.resolve();
+    },
+
+    url(url) {
+      return url;
+    },
+  },
+
+  [AmpdocEnvironment.VIEWER_DEMO]: {
+    ready(controller) {
+      return controller.findElement('#AMP_DOC_dynamic[data-loaded]')
+          .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      // TODO(estherkim): somehow allow non-8000 port and domain
+      return `http://localhost:8000/examples/viewer.html#href=${url}`;
+    },
+  },
+};
+
 /**
  * Provides AMP-related utilities for E2E Functional Tests.
  */
@@ -37,8 +68,21 @@ class AmpDriver {
       window.AMP.toggleExperiment(name, toggle);
     }, name, toggle);
   }
+
+  /**
+   * Navigate the browser to a URL that will display the given url in the
+   * given environment.
+   * @param {!AmpdocEnvironment} environment
+   * @param {string} url
+   */
+  async navigateToEnvironment(environment, url) {
+    const ampEnv = EnvironmentBehaviorMap[environment];
+    await this.controller_.navigateTo(ampEnv.url(url));
+    await ampEnv.ready(this.controller_);
+  }
 }
 
 module.exports = {
   AmpDriver,
+  AmpdocEnvironment,
 };

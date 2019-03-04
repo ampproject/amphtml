@@ -20,14 +20,18 @@ import {
   waitForCarouselImg,
 } from './helpers';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('Non-looping AMP carousel', {
+  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+      'non-looping.amp.html',
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
-  const pageWidth = 800;
-  const pageHeight = 600;
   let controller;
-  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -35,18 +39,6 @@ describes.endtoend('Non-looping AMP carousel', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html');
   });
 
   it('should render correctly', async() => {
