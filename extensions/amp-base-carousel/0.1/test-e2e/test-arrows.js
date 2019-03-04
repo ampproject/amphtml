@@ -28,7 +28,7 @@ const SLIDE_COUNT = 7;
 const pageWidth = 600;
 const pageHeight = 600;
 
-describes.endtoend('when non-looping', {
+describes.endtoend('AMP carousel arrows when non-looping', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
   experiments: ['amp-base-carousel'],
   initialRect: {width: pageWidth, height: pageHeight},
@@ -51,27 +51,27 @@ describes.endtoend('when non-looping', {
   });
 
   it('should have the arrows in the correct initial state', async() => {
-    await expect(css(controller, prevArrowSlot, 'opacity')).to.equal('0');
-    await expect(css(controller, nextArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(prevArrowSlot, 'opacity')).to.equal('0');
+    await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
   });
 
   it('should show the prev arrow when going to the first slide', async() => {
     await controller.click(nextArrow);
-    await expect(css(controller, prevArrowSlot, 'opacity')).to.equal('1');
-    await expect(css(controller, nextArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
   });
 
   it('should hide the next arrow when going to the end', async() => {
     const el = await getScrollingElement(controller);
     await controller.scrollBy(el, {left: SLIDE_COUNT * pageWidth});
 
-    await expect(css(controller, prevArrowSlot, 'opacity')).to.equal('1');
-    await expect(css(controller, nextArrowSlot, 'opacity')).to.equal('0');
+    await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(nextArrowSlot, 'opacity')).to.equal('0');
   });
 });
 
 
-describes.endtoend('with custom arrows', {
+describes.endtoend('AMP carousel arrows with custom arrows', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
   experiments: ['amp-base-carousel'],
 }, async function(env) {
