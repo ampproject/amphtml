@@ -498,7 +498,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Store the cta-type as an accesible var for any further pings.
     this.analyticsData_[this.adPagesCreated_][Vars.CTA_TYPE] = ctaType;
 
-    const ctaText = CTA_TYPES[ctaType];
+    const ctaLocalizedStringId = CTA_TYPES[ctaType];
+    const ctaText =
+        this.localizationService_.getLocalizedString(ctaLocalizedStringId);
     if (!ctaType) {
       user().error(TAG, 'invalid "CTA Type" in ad response');
       return false;
