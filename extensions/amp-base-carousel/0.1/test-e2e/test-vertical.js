@@ -26,7 +26,7 @@ const pageHeight = 600;
 describes.endtoend('Vertical AMP carousel', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
       'vertical.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   /** The total number of slides in the carousel */

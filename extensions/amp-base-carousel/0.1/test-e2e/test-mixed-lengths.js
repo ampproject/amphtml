@@ -26,7 +26,7 @@ const pageHeight = 600;
 describes.endtoend('AMP carousel mixed length slides', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
       'mixed-lengths-no-snap.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
@@ -82,7 +82,7 @@ const mixedpageHeight = 600;
 describes.endtoend('AMP carousel mixed length slides', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
       'mixed-lengths.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: mixedPageWidth, height: mixedpageHeight},
 }, async env => {
   let controller;

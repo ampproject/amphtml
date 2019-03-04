@@ -23,7 +23,7 @@ const pageHeight = 600;
 
 describes.endtoend('AMP carousel autoadvance', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/autoadvance.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;

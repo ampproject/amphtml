@@ -30,7 +30,7 @@ const pageHeight = 600;
 
 describes.endtoend('AMP carousel arrows when non-looping', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
@@ -73,7 +73,7 @@ describes.endtoend('AMP carousel arrows when non-looping', {
 
 describes.endtoend('AMP carousel arrows with custom arrows', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
 }, async function(env) {
   let controller;
   let prevArrow;
