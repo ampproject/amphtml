@@ -20,10 +20,16 @@ import {
   waitForCarouselImg,
 } from './helpers';
 
+const pageWidth = 1000;
+const pageHeight = 600;
+
 describes.endtoend('AMP Carousel responsive attributes', {
+  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+      'responsive.amp.html',
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
-  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -31,19 +37,6 @@ describes.endtoend('AMP Carousel responsive attributes', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/responsive.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
-
-    await controller.setWindowRect({
-      width: 1000,
-      height: 600,
-    });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/responsive.amp.html');
   });
 
   it('should layout correctly initially', async() => {

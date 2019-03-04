@@ -19,13 +19,17 @@ import {
   getSlides,
 } from './helpers';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('AMP carousel grouping', {
+  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+      'grouping-move-by-2.amp.html',
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
-  const pageWidth = 800;
-  const pageHeight = 600;
   const slideWidth = pageWidth / 2;
   let controller;
-  let ampDriver;
 
   function rect(el) {
     return controller.getElementRect(el);
@@ -33,18 +37,6 @@ describes.endtoend('AMP carousel grouping', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/grouping-move-by-2.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/grouping-move-by-2.amp.html');
   });
 
   describe('snapping', () => {

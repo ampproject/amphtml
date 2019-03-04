@@ -146,6 +146,27 @@ class FunctionalTestController {
   async usingFrame(unusedHandle, unusedFn) {}
 
   /**
+   * Selects the current top-level browsing context or a child browsing context
+   * of the current browsing context to use as the current browsing context for
+   * subsequent commands.
+   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToFrame(unusedHandle) {}
+
+  /**
+   * Selects the current top-level browsing context or a child browsing context
+   * of the current browsing context to use as the current browsing context for
+   * subsequent commands.
+   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
+   *
+   * @return {!Promise}
+   */
+  async switchToParent() {}
+
+  /**
    * Gets the active element of the current browsing context’s document element.
    * {@link https://www.w3.org/TR/webdriver1/#get-active-element}
    *
