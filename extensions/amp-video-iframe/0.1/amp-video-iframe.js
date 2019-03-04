@@ -53,6 +53,7 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 const SANDBOX = [
   SandboxOptions.ALLOW_SCRIPTS,
   SandboxOptions.ALLOW_SAME_ORIGIN,
+  SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
