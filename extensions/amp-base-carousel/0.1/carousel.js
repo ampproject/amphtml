@@ -721,8 +721,7 @@ export class Carousel {
     });
 
     this.allSpacers_ = this.beforeSpacers_
-        .concat(this.replacementSpacers_)
-        .concat(this.afterSpacers_);
+        .concat(this.replacementSpacers_, this.afterSpacers_);
   }
 
   /**
