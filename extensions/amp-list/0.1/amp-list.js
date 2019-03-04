@@ -704,7 +704,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+    if (this.getAttribute() == Layout.CONTAINER) {
       return;
     }
     this.loadMoreEnabledPromise_.then(enabled => {
@@ -808,7 +808,7 @@ export class AmpList extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
         'Experiment amp-list-resizable-children is disabled');
 
-    const previousLayout = this.element.getAttribute('layout');
+    const previousLayout = this.getLayout();
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
       return Promise.resolve();
