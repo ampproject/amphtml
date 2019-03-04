@@ -20,7 +20,7 @@ import {
   LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
-} from './localization';
+} from '../../../src/services/localization';
 import {Services} from '../../../src/services';
 import {
   StateChangeEventDef,
