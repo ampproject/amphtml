@@ -32,7 +32,7 @@ import {
   domOrderComparator,
   matches,
 } from '../dom';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
@@ -51,6 +51,21 @@ const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
  */
 function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
+}
+
+/**
+ * @param {string=} opt_initialTransform matrix string, 'none', '' or undefined.
+ * @param {string=} opt_addedTransform matrix string, 'none', '' or undefined.
+ * @return {string}
+ */
+function combineTransforms(opt_initialTransform, opt_addedTransform) {
+  if (!opt_addedTransform || opt_addedTransform == 'none') {
+    return opt_initialTransform || '';
+  }
+  if (!opt_initialTransform || opt_initialTransform == 'none') {
+    return opt_addedTransform;
+  }
+  return `${opt_initialTransform} ${opt_addedTransform}`;
 }
 
 /**
@@ -306,37 +321,23 @@ export class FixedLayer {
   }
 
   /**
-   * Apply or reset transform style to fixed elements. The existing transition,
-   * if any, is disabled when custom transform is supplied.
-   * @param {?string} transform
+   * Apply transform style to all fixed elements.
+   * @param {string=} opt_transform undefined to reset.
    */
-  transformMutate(transform) {
-    // Unfortunately, we can't do anything with sticky elements here. Updating
-    // `top` in animation frames causes reflow on all platforms and we can't
-    // determine whether an element is currently docked to apply transform.
-    if (transform) {
-      // Apply transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyle(e.element, 'transition', 'none');
-          if (e.transform && e.transform != 'none') {
-            setStyle(e.element, 'transform', e.transform + ' ' + transform);
-          } else {
-            setStyle(e.element, 'transform', transform);
-          }
-        }
-      });
-    } else {
-      // Reset transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyles(e.element, {
-            transform: '',
-            transition: '',
-          });
-        }
-      });
-    }
+  transformMutate(opt_transform) {
+    this.elements_.forEach(fe => {
+      // Unfortunately, we can't do anything with sticky elements here. Updating
+      // `top` in animation frames causes reflow on all platforms and we can't
+      // determine whether an element is currently docked to apply transform.
+      if (!fe.fixedNow || !fe.top) {
+        return;
+      }
+      const transform = opt_transform ?
+        combineTransforms(fe.transform, opt_transform) :
+        ''; // reset
+      const transition = opt_transform ? 'none' : '';
+      setStyles(fe.element, {transform, transition});
+    });
   }
 
   /**
@@ -366,9 +367,14 @@ export class FixedLayer {
   /**
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
+   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeElement(element) {
-    const fes = this.tearDownElement_(element);
+  removeElement(element, opt_onlyTearDown, opt_keepOffset) {
+    const fes = this.tearDownElement_(element, opt_keepOffset);
+    if (opt_onlyTearDown) {
+      return;
+    }
     this.returnFixedElements_(fes);
   }
 
@@ -380,12 +386,11 @@ export class FixedLayer {
   returnFixedElements_(fes) {
     if (fes.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        for (let i = 0; i < fes.length; i++) {
-          const fe = fes[i];
+        fes.forEach(fe => {
           if (fe.position == 'fixed') {
             this.transferLayer_.returnFrom(fe);
           }
-        }
+        });
       });
     }
   }
@@ -438,7 +443,6 @@ export class FixedLayer {
     return this.vsync_.runPromise({
       measure: state => {
         const elements = this.elements_;
-        const autoTops = [];
         const {win} = this.ampdoc;
 
         // Notice that this code intentionally breaks vsync contract.
@@ -449,26 +453,25 @@ export class FixedLayer {
         // 1. Unset top from previous mutates and set bottom to an extremely
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
-        for (let i = 0; i < elements.length; i++) {
-          setImportantStyles(elements[i].element, {
+        elements.forEach(fe => {
+          setImportantStyles(fe.element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
           });
-        }
+        });
+
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
         // regardless of bottom.
-        for (let i = 0; i < elements.length; i++) {
-          autoTops.push(computedStyle(win, elements[i].element).top);
-        }
-        // 3. Cleanup the `style.bottom`.
-        for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
-        }
+        const autoTops = elements.map(fe => computedStyle(win, fe.element).top);
 
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        // 3. Cleanup the `style.bottom`.
+        elements.forEach(fe => {
+          setStyle(fe.element, 'bottom', '');
+        });
+
+        elements.forEach((fe, i) => {
           const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
@@ -496,7 +499,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            continue;
+            return;
           }
 
           if (top === 'auto' || autoTops[i] !== top) {
@@ -544,15 +547,13 @@ export class FixedLayer {
             zIndex,
             transform,
           };
-        }
+        });
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
           this.getTransferLayer_().update();
         }
-        const elements = this.elements_;
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        this.elements_.forEach((fe, i) => {
           const feState = state[fe.id];
 
           // Fix a bug with Safari. For some reason, you cannot unset
@@ -568,7 +569,7 @@ export class FixedLayer {
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        }
+        });
       },
     }, {}).catch(error => {
       // Fail silently.
@@ -586,8 +587,7 @@ export class FixedLayer {
    * @param {boolean=} opt_lightboxMode
    * @private
    */
-  trySetupSelectorsNoInline(root, opt_lightboxMode
-  ) {
+  trySetupSelectorsNoInline(root, opt_lightboxMode) {
     try {
       this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {
@@ -604,26 +604,37 @@ export class FixedLayer {
    * @private
    */
   setupSelectors_(root, opt_lightboxMode) {
-    for (let i = 0; i < this.fixedSelectors_.length; i++) {
-      const fixedSelector = this.fixedSelectors_[i];
-      const elements = root.querySelectorAll(fixedSelector);
-      for (let j = 0; j < elements.length; j++) {
-        if (this.elements_.length > 10) {
-          // We shouldn't have too many of `fixed` elements.
-          break;
-        }
-        this.setupElement_(elements[j], fixedSelector, 'fixed',
+    const fixedLimit = 10;
+    this.setupSelectorsByType_(
+        root, this.fixedSelectors_, 'fixed', opt_lightboxMode, fixedLimit);
+
+    this.setupSelectorsByType_(
+        root, this.stickySelectors_, 'sticky', opt_lightboxMode);
+  }
+
+  /**
+   * @param {!Node} root
+   * @param {!Array<string>} selectors
+   * @param {string} position 'fixed' or 'sticky'
+   * @param {boolean=} opt_lightboxMode
+   * @param {number=} limit
+   * @private
+   */
+  setupSelectorsByType_(
+    root, selectors, position, opt_lightboxMode, limit = Infinity) {
+
+    devAssert(position == 'fixed' || position == 'sticky');
+
+    selectors.forEach(selector => {
+      const elements = root.querySelectorAll(selector);
+      for (
+        let i = 0;
+        i < elements.length && this.elements_.length <= limit;
+        i++) {
+        this.setupElement_(elements[i], selector, position,
             /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
-    }
-    for (let i = 0; i < this.stickySelectors_.length; i++) {
-      const stickySelector = this.stickySelectors_[i];
-      const elements = root.querySelectorAll(stickySelector);
-      for (let j = 0; j < elements.length; j++) {
-        this.setupElement_(elements[j], stickySelector, 'sticky',
-            /* opt_forceTransfer */ undefined, opt_lightboxMode);
-      }
-    }
+    });
   }
 
   /**
@@ -715,15 +726,16 @@ export class FixedLayer {
    * Does _not_ return the element from the transfer layer.
    *
    * @param {!Element} element
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    * @return {!Array<!ElementDef>}
    * @private
    */
-  tearDownElement_(element) {
+  tearDownElement_(element, opt_keepOffset) {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
       if (fe.element === element) {
-        if (!fe.lightboxed) {
+        if (!fe.lightboxed && !opt_keepOffset) {
           this.vsync_.mutate(() => {
             setStyle(element, 'top', '');
           });

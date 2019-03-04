@@ -71,8 +71,13 @@ export function resolvePercentageToNumber(val) {
  * @param {string} fxType
  * @return {!Object<string, string>}
  */
-export function installStyles(element, fxType) {
+export function getDefaultStyles(element, fxType) {
   switch (fxType) {
+    case FxType.FLOAT_IN_TOP:
+    case FxType.FLOAT_IN_BOTTOM:
+      return {
+        'will-change': 'transform,opacity,pointer-events',
+      };
     case FxType.PARALLAX:
       return {
         'will-change': 'transform',
