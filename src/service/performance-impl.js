@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../log';
 import {Services} from '../services';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
