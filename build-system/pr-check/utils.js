@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const fs = require('fs');
 const requestPromise = require('request-promise');
 const {
   gitBranchName,
@@ -26,7 +25,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
-const {execOrDie, exec, getStdout} = require('../exec');
+const {execOrDie, exec} = require('../exec');
 const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
 const BUILD_OUTPUT_FILE =
