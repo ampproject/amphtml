@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, applyStaticLayout,
+import {LAYOUTS, Layout, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
   isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
 
@@ -24,6 +24,20 @@ describe('Layout', () => {
 
   beforeEach(() => {
     div = document.createElement('div');
+  });
+
+  describe('Layout definition sanity-check', () => {
+
+    const expectedKey = type => type.replace(/\-/g, '_').toUpperCase();
+
+    it('has matching `Layout` field for each of `LAYOUTS`', () => {
+      expect(Object.keys(Layout)).to.have.length(LAYOUTS.length);
+
+      LAYOUTS.forEach(layout => {
+        expect(Layout).to.include({[expectedKey(layout)]: layout});
+      });
+    });
+
   });
 
   it('parseLayout', () => {

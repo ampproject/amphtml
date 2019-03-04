@@ -383,21 +383,20 @@ export class StandardActions {
    * @return {?Promise}
    * @private Visible to tests only.
    */
-  handleToggleClass_(invocation) {
-    const target = dev().assertElement(invocation.node);
-    const {args} = invocation;
+  handleToggleClass_({node, args}) {
+    const target = dev().assertElement(node);
     const className = user().assertString(args['class'],
         "Argument 'class' must be a string.");
 
     this.resources_.mutateElement(target, () => {
-      if (args['force'] !== undefined) {
+      const forceArg = args['force'];
+      const forceOrUndef = forceArg === undefined
+        ? forceArg
         // must be boolean, won't do type conversion
-        const shouldForce = user().assertBoolean(args['force'],
+        : user().assertBoolean(forceArg,
             "Optional argument 'force' must be a boolean.");
-        target.classList.toggle(className, shouldForce);
-      } else {
-        target.classList.toggle(className);
-      }
+
+      target.classList.toggle(className, forceOrUndef);
     });
 
     return null;
