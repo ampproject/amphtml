@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getCookie} from './cookies';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -110,7 +111,8 @@ function getMode_(win) {
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    log: hashQuery['log'],
+    // Prioritize the hashQuery defined log level then the cookie.
+    log: hashQuery['log'] || getCookie(win, 'log'),
     version,
     rtvVersion,
     singlePassType,

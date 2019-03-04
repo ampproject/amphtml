@@ -427,6 +427,31 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
   },
+  {
+    id: 'log',
+    name: 'Log level ERROR. Note that log level set via hash query #log '
+       + 'will take precedence over this cookie.',
+    value: '1',
+  },
+  {
+    id: 'log',
+    name: 'Log level WARN. Note that log level set via hash query #log'
+        + 'will take precedence over this cookie.',
+    value: '2',
+  },
+  {
+    id: 'log',
+    name: 'Log level INFO. Note that log level set via hash query #log'
+        + 'will take precedence over this cookie.',
+    value: '3',
+  },
+  {
+    id: 'log',
+    name: 'Log level FINE. Note that log level set via hash query #log'
+        + 'will take precedence over this cookie.',
+    value: '4',
+  },
+
 ];
 
 if (getMode().localDev) {
@@ -442,9 +467,11 @@ if (getMode().localDev) {
  */
 function build() {
   const table = document.getElementById('experiments-table');
+  const experiments = document.createDocumentFragment();
   EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+    experiments.appendChild(buildExperimentRow(experiment));
   });
+  table.appendChild(experiments);
 }
 
 
@@ -488,7 +515,7 @@ function buildExperimentRow(experiment) {
   button.appendChild(buttonOff);
 
   button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
-      experiment.name, undefined));
+      experiment.name, undefined, experiment.value));
 
   return tr;
 }
@@ -578,8 +605,9 @@ function setAmpCanaryCookie_(cookieState) {
  * @param {string} id
  * @param {string} name
  * @param {boolean=} opt_on
+ * @param {string=} opt_value
  */
-function toggleExperiment_(id, name, opt_on) {
+function toggleExperiment_(id, name, opt_on, opt_value) {
   const currentlyOn = isExperimentOn_(id);
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
@@ -595,7 +623,7 @@ function toggleExperiment_(id, name, opt_on) {
       setAmpCanaryCookie_(
           on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED);
     } else {
-      toggleExperiment(window, id, on);
+      toggleExperiment(window, id, on, opt_value);
     }
     update();
   });

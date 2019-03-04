@@ -85,19 +85,20 @@ export function isExperimentOn(win, experimentId) {
  *     experiment state "transiently" (i.e., for this page load only) or
  *     durably (by saving the experiment IDs to the cookie after toggling).
  *     Default: false (save durably).
+ * @param {string=} opt_value The value to use for the cookie.
  * @return {boolean} New state for experimentId.
  */
 export function toggleExperiment(win, experimentId, opt_on,
-  opt_transientExperiment) {
+  opt_transientExperiment, opt_value) {
   const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
-    toggles[experimentId] = on;
+    toggles[experimentId] = on || opt_value;
 
     if (!opt_transientExperiment) {
       const cookieToggles = getExperimentTogglesFromCookie(win);
-      cookieToggles[experimentId] = on;
+      cookieToggles[experimentId] = on || opt_value;
       saveExperimentTogglesToCookie(win, cookieToggles);
     }
   }

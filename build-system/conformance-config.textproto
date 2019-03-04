@@ -289,6 +289,7 @@ requirement: {
   value: 'module$src$cookies.setCookie'
   whitelist: 'src/cookies.js'
   whitelist: 'src/experiments.js'
+  whitelist: 'src/mode.js'
   whitelist: 'src/service/cid-api.js'
   whitelist: 'src/service/cid-impl.js'
   whitelist: 'extensions/amp-analytics/0.1/cookie-writer.js'

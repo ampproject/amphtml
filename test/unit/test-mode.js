@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as cookies from '../../src/cookies';
 import {
   getMode,
   getRtvVersionForTesting,
@@ -21,14 +22,14 @@ import {
 } from '../../src/mode';
 import {parseUrlDeprecated} from '../../src/url';
 
-describe('getMode', () => {
-  function getWin(url) {
-    const win = {
-      location: parseUrlDeprecated(url),
-    };
-    return win;
-  }
+function getWin(url) {
+  const win = {
+    location: parseUrlDeprecated(url),
+  };
+  return win;
+}
 
+describe('getMode', () => {
   it('CDN - lite mode on', () => {
     const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
     const mode = getMode(getWin(url));
@@ -51,6 +52,27 @@ describe('getMode', () => {
     const url = 'https://www.example.com/amp.html';
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
+  });
+});
+
+describe('log level', () => {
+  it('should use hash query defined log level', () => {
+    const mode = getMode(getWin('https://amp-site.org#log=1'));
+    expect(mode.log).to.equal('1');
+  });
+
+  it('should use hash query log level over cookie defined log level', () => {
+    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'log')
+        .returns('1');
+    const mode = getMode(getWin('https://amp-site.org#log=2'));
+    expect(mode.log).to.equal('2');
+  });
+
+  it('should use cookie defined log level if hash query is absent', () => {
+    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'log')
+        .returns('1');
+    const mode = getMode(getWin('https://amp-site.org'));
+    expect(mode.log).to.equal('1');
   });
 });
 

@@ -157,7 +157,7 @@ export class Log {
       return LogLevel.FINE;
     }
 
-    // LocalDev by default allows INFO level, unless overriden by `#log`.
+    // LocalDev by default allows INFO level, unless overridden by `#log`.
     if (getMode().localDev && !getMode().log) {
       return LogLevel.INFO;
     }
@@ -611,7 +611,7 @@ export function resetLogConstructorForTesting() {
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
- *     enabled via `#log=D` where D >= 1.
+ *     enabled via hash query `#log=D` or cookie 'log=D' where D >= 1.
  *  3. AMP.setLogLevel(D) is called, where D >= 1.
  *
  * @param {!Element=} opt_element
