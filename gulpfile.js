@@ -35,11 +35,11 @@ const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('./build-system/compile-wrappers');
+const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('./bundles.config');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
-const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {isTravisBuild} = require('./build-system/travis');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
@@ -83,13 +83,6 @@ const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
-
-extensionBundles.forEach(c => {
-  declareExtension(c.name, c.version, c.latestVersion, c.options);
-});
-aliasBundles.forEach(c => {
-  declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
-});
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -211,6 +204,21 @@ function endBuildStep(stepName, targetName, startTime) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
+  if (Object.keys(extensions).length === 0) {
+    verifyExtensionBundles();
+    extensionBundles.forEach(c => {
+      declareExtension(c.name, c.version, c.latestVersion, c.options);
+    });
+  }
+
+  if (Object.keys(extensionAliasFilePath).length === 0) {
+    verifyExtensionAliasBundles();
+    aliasBundles.forEach(c => {
+      declareExtensionVersionAlias(
+          c.name, c.version, c.latestVersion, c.options);
+    });
+  }
+
   if (!!argv.noextensions && !options.compileAll) {
     return Promise.resolve();
   }
