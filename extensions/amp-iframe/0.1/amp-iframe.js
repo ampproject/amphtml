@@ -388,7 +388,7 @@ export class AmpIframe extends AMP.BaseElement {
     // If this is still here in May 2019, please ping @aghassemi
     // See https://github.com/ampproject/amphtml/issues/21242 for details.
     // TODO(aghassemi, #21247)
-    let allowVal = iframe.getAttribute('allow');
+    let allowVal = iframe.getAttribute('allow') || '';
     // allow syntax is complex, not worth parsing for temp code.
     allowVal = allowVal.replace('autoplay', 'autoplay-disabled');
     iframe.setAttribute('allow', allowVal);
