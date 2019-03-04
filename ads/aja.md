@@ -24,7 +24,7 @@ limitations under the License.
   <amp-ad width="100" height="100"
              type="aja"
              layout="responsive"
-             data-media-id="ZZZZZ">
+             data-ssp-code="ZZZZZ">
   </amp-ad>
 ```
 
