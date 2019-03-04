@@ -930,8 +930,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
   describe('forwards layout jank metric', () => {
     it('for browsers that support the visibilitychange event', () => {
-      // Fake the window object so we can control the state
-      // of window.document.visibilityState later on.
+      // Fake the window object so we can trigger visibilitychange events on the
+      // document later on.
       const fakeWin = {
         Date: env.win.Date,
         PerformanceLayoutJank: true,
@@ -943,23 +943,16 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           hidden: false,
           readyState: 'complete',
           removeEventListener: env.sandbox.stub(),
-          // Note: the document starts in a visible state.
           visibilityState: 'visible',
         },
         location: env.win.location,
-        navigator: {
-          // Note: specify an Android Chrome user agent, which supports
-          // the visibilitychange event.
-          userAgent: 'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL ' +
-          'Build/OPR6.170623.011) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-          'Chrome/61.0.3163.98 Mobile Safari/537.36',
-        },
         performance: {
           getEntriesByType: env.sandbox.stub(),
         },
         removeEventListener: env.win.removeEventListener,
       };
 
+      // Fake the document event bus, so we can trigger custom events.
       const docEventListeners = {};
       fakeWin.document.addEventListener.callsFake((eventType, handler) => {
         if (!docEventListeners[eventType]) {
@@ -976,6 +969,21 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         return performanceObserver;
       });
 
+      // Install services on fakeWin so some behaviors can be stubbed.
+      installRuntimeServices(fakeWin);
+
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Stub the visibilityState of the document, and control the value
+      // with isHidden.
+      let isHidden = false;
+      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
+          .callsFake(() => isHidden);
+
       // Fake layoutJank that occured before the Performance service is started.
       const entries = [{
         entryType: 'layoutJank',
@@ -988,13 +996,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       ];
       fakeWin.performance.getEntriesByType.withArgs('layoutJank')
           .returns(entries);
-
-      installRuntimeServices(fakeWin);
       installPerformanceService(fakeWin);
       const perf = Services.performanceFor(fakeWin);
 
       // The document has become hidden, e.g. via the user switching tabs.
-      fakeWin.document.visibilityState = 'hidden';
+      isHidden = true;
       const firstEvent = new Event('visibilitychange');
       if (docEventListeners['visibilitychange']) {
         docEventListeners['visibilitychange']
@@ -1009,7 +1015,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           });
 
       // The user returns to the tab, and more layout jank occurs.
-      fakeWin.document.visibilityState = 'visible';
+      isHidden = false;
       const list = {
         getEntries() {
           return [{
@@ -1024,7 +1030,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       performanceObserver.triggerCallback(list);
 
       // The document has become hidden again.
-      fakeWin.document.visibilityState = 'hidden';
+      isHidden = true;
       const secondEvent = new Event('visibilitychange');
       if (docEventListeners['visibilitychange']) {
         docEventListeners['visibilitychange']
@@ -1038,9 +1044,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           });
 
       // Any more layout jank shouldn't be reported.
-      fakeWin.document.visibilityState = 'visible';
+      isHidden = false;
       performanceObserver.triggerCallback(list);
-      fakeWin.document.visibilityState = 'hidden';
+      isHidden = true;
       const thirdEvent = new Event('visibilitychange');
       if (docEventListeners['visibilitychange']) {
         docEventListeners['visibilitychange']
@@ -1063,28 +1069,13 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           hidden: false,
           readyState: 'complete',
           removeEventListener: env.sandbox.stub(),
-          // Note: the document starts in a visible state.
           visibilityState: 'visible',
         },
         location: env.win.location,
-        navigator: {
-          // Note: specify an iPhone Safari user agent, which does not support
-          // the visibilitychange event.
-          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
-          ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
-          ' Mobile/13E230 Safari/601.1',
-        },
         performance: {
           getEntriesByType: env.sandbox.stub(),
         },
       };
-      const docEventListeners = {};
-      fakeWin.document.addEventListener.callsFake((eventType, handler) => {
-        if (!docEventListeners[eventType]) {
-          docEventListeners[eventType] = [];
-        }
-        docEventListeners[eventType].push(handler);
-      });
 
       // Fake the PerformanceObserver implementation so we can send
       // fake PerformanceEntry objects to listeners.
@@ -1103,6 +1094,18 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         windowEventListeners[eventType].push(handler);
       });
 
+      // Install services on fakeWin so some behaviors can be stubbed.
+      installRuntimeServices(fakeWin);
+      // Specify an iPhone Safari user agent, which does not support
+      // the visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
+
+      // Stub the visibilityState of the document, and control the value
+      // with isHidden.
+      let isHidden = false;
+      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
+          .callsFake(() => isHidden);
+
       // Fake layoutJank that occured before the Performance service is started.
       const entries = [{
         entryType: 'layoutJank',
@@ -1115,13 +1118,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       ];
       fakeWin.performance.getEntriesByType.withArgs('layoutJank')
           .returns(entries);
-
-      installRuntimeServices(fakeWin);
       installPerformanceService(fakeWin);
       const perf = Services.performanceFor(fakeWin);
 
       // The document has become hidden, e.g. via the user switching tabs.
-      fakeWin.document.visibilityState = 'hidden';
+      isHidden = true;
       const firstEvent = new Event('beforeunload');
       if (windowEventListeners['beforeunload']) {
         windowEventListeners['beforeunload']

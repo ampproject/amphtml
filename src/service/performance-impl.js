@@ -104,18 +104,11 @@ export class Performance {
     this.firstViewportReady_ = null;
 
     /**
-     * Whether the `lj` metric was ticked.
+     * How many times a layout jank metric has been ticked.
      *
-     * @private {boolean}
+     * @private {number}
      */
-    this.tickedFirstJankScore_ = false;
-
-    /**
-     * Whether the `lj-2` metric was ticked.
-     *
-     * @private {boolean}
-     */
-    this.tickedSecondJankScore_ = false;
+    this.jankScoresTicked_ = 0;
 
     /**
      * The sum of all layout jank fractions triggered on the page from the
@@ -125,8 +118,8 @@ export class Performance {
      */
     this.aggregateJankScore_ = 0;
 
-    this.onVisibilityChange_ = this.onVisibilityChange_.bind(this);
-    this.tickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
+    this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
+    this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -261,14 +254,17 @@ export class Performance {
       // enters the hidden lifecycle state.
       // @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
       Services.documentStateFor(this.win)
-          .onVisibilityChanged(this.onVisibilityChange_);
+          .onVisibilityChanged(this.boundOnVisibilityChange_);
 
       // Safari does not reliably fire the `pagehide` or `visibilitychange`
       // events when closing a tab, so we have to use `beforeunload`.
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
-        this.win.addEventListener('beforeunload', this.tickLayoutJankScore_);
+        this.win.addEventListener(
+            'beforeunload',
+            this.boundTickLayoutJankScore_
+        );
       }
     }
 
@@ -302,7 +298,7 @@ export class Performance {
    * send the layout jank score.
    */
   onVisibilityChange_() {
-    if (this.win.document.visibilityState !== 'hidden') {
+    if (!Services.documentStateFor(this.win).isHidden()) {
       return;
     }
     this.tickLayoutJankScore_();
@@ -321,20 +317,27 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickLayoutJankScore_() {
-    if (!this.tickedFirstJankScore_) {
+    if (this.jankScoresTicked_ === 0) {
       this.tickDelta('lj', this.aggregateJankScore_);
       this.flush();
-      this.tickedFirstJankScore_ = true;
+      this.jankScoresTicked_ = 1;
       return;
     }
-    if (!this.tickedSecondJankScore_) {
+    if (this.jankScoresTicked_ === 1) {
       this.tickDelta('lj-2', this.aggregateJankScore_);
       this.flush();
-      this.tickedSecondJankScore_ = true;
+      this.jankScoresTicked_ = 2;
+
+      // TODO(chmoux) - add the ability to remove a visibilityobservable handler
+      // in the DocumentState Service, and remove the handler
+      // this.boundOnVisibilityChange_ here.
 
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
-        this.win.removeEventListener('beforeunload', this.tickLayoutJankScore_);
+        this.win.removeEventListener(
+            'beforeunload',
+            this.boundTickLayoutJankScore_
+        );
       }
     }
   }
