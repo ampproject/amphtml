@@ -27,10 +27,6 @@ Dynamically inserts ads into a Story.
 
 <table>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
@@ -48,7 +44,7 @@ If you are interested in creating an ad for the AMP Story platform, [refer to ou
 
 ## Behavior
 `amp-story-auto-ads` extension dynamically inserts ads (implemented as `amp-ad`)
-into the story while content is being consumed by the user.
+into the story while content is being consumed by the user. The current algorithm expects at least a story containing 7 pages.
 
 Each `amp-ad` is inserted as a full screen story page. To prevent showing
 blank/unloaded ads, the ad is pre-rendered completely in the background before
