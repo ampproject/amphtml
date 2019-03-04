@@ -780,7 +780,7 @@ The `<amp-story-page-attachment>` element must be the last child of `<amp-story-
 
 ### Allowed content and components
 
-Story page attachments allow the same HTML elements as AMP Story, but also allow most other AMP components that usually can't be used in a story page, such as third party video players or social media embeds. This means you can create any experience: providing more text content, displaying various longer YouTube videos (with video controls!), tweets, Instagram posts...
+Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This mean you can add additional content that is too verbose or disallowed in an AMP Story page.
 
 <details>
   <summary>List of allowed AMP components in a page attachment</summary>
