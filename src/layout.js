@@ -151,7 +151,7 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  *   the layout string.
  */
 export function parseLayout(s) {
-  if (LAYOUTS.includes(s)) {
+  if (LAYOUTS.indexOf(s) >= 0) {
     return /** @type {!Layout} */ (s);
   }
   return undefined;
