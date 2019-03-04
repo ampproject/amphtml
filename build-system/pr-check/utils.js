@@ -16,6 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const fs = require('fs');
 const requestPromise = require('request-promise');
 const {
   gitBranchName,
@@ -25,7 +26,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
-const {execOrDie, exec} = require('../exec');
+const {execOrDie, exec, getStdout} = require('../exec');
 const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
 const BUILD_OUTPUT_FILE =
@@ -152,7 +153,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
  * @param {string} outputFileName
  * @private
  */
-function downloadOutput_(functionName, outputFileName) {
+async function downloadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl =
     `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
@@ -162,9 +163,12 @@ function downloadOutput_(functionName, outputFileName) {
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
   decryptTravisKey_();
-  execOrDie(`gsutil signurl -d 3m -r us ${OUTPUT_STORAGE_KEY_FILE} ` +
+  const downloadUrl = getStdout('gsutil signurl -d 3m -r us ' +
+      `-c application/zip ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
+
+  await requestPromise.get(downloadUrl)
+      .pipe(fs.createWriteStream(outputFileName));
   exec('echo travis_fold:end:download_results');
 
   console.log(
@@ -185,7 +189,7 @@ function downloadOutput_(functionName, outputFileName) {
  * @param {string} outputFileName
  * @private
  */
-function uploadOutput_(functionName, outputFileName) {
+async function uploadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
@@ -201,10 +205,19 @@ function uploadOutput_(functionName, outputFileName) {
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
   decryptTravisKey_();
-  execOrDie(`gsutil signurl -m PUT -d 3m -r us ${OUTPUT_STORAGE_KEY_FILE} ` +
-      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
-  execOrDie(`gsutil -m cp -r ${outputFileName} ` +
-      `${OUTPUT_STORAGE_LOCATION}`);
+  const uploadUrl = getStdout('gsutil signurl -m PUT -d 3m -r us ' +
+      `-c application/zip ${OUTPUT_STORAGE_KEY_FILE} ` +
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName})`);
+  await requestPromise.put(uploadUrl, {
+    formData: {
+      file: {
+        value: fs.createReadStream(outputFileName),
+        options: {
+          filename: outputFileName,
+          contentType: 'application/zip',
+        },
+      },
+    }});
   exec('echo travis_fold:end:upload_results');
 }
 
