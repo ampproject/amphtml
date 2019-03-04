@@ -20,7 +20,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest} from '../../../src/dom';
@@ -58,7 +58,7 @@ export class InfoDialog {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    /** @private @const {!./localization.LocalizationService} */
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = Services.localizationService(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */

@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
@@ -84,7 +84,7 @@ export class ViewportWarningLayer {
     // TODO: at this point the localization service is not registered yet. We
     // should refactor the way it is registered it so it works like the store
     // and analytics services.
-    /** @private {?./localization.LocalizationService} */
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
     /** @private {?Element} */

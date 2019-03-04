@@ -25,7 +25,7 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';

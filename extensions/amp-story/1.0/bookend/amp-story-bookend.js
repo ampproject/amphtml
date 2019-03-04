@@ -30,7 +30,7 @@ import {
 } from '../amp-story-share';
 import {EventType, dispatch} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizedStringId} from '../localization';
+import {LocalizedStringId} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';

@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-0.1.css';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';

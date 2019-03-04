@@ -24,7 +24,7 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';

@@ -58,7 +58,7 @@ import {
   LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
-} from './localization';
+} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';

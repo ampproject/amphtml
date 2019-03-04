@@ -67,7 +67,7 @@ import {Layout} from '../../../src/layout';
 import {
   LocalizationService,
   createPseudoLocale,
-} from './localization';
+} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';

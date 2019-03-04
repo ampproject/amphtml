@@ -21,7 +21,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/service/localization';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
