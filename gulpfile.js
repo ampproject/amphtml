@@ -198,12 +198,9 @@ function endBuildStep(stepName, targetName, startTime) {
 }
 
 /**
- * Build all the AMP extensions
- *
- * @param {!Object} options
- * @return {!Promise}
+ * Initializes all extensions from bundles.config.js if not already done.
  */
-function buildExtensions(options) {
+function maybeInitializeExtensions() {
   if (Object.keys(extensions).length === 0) {
     verifyExtensionBundles();
     extensionBundles.forEach(c => {
@@ -218,7 +215,16 @@ function buildExtensions(options) {
           c.name, c.version, c.latestVersion, c.options);
     });
   }
+}
 
+/**
+ * Build all the AMP extensions
+ *
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+function buildExtensions(options) {
+  maybeInitializeExtensions();
   if (!!argv.noextensions && !options.compileAll) {
     return Promise.resolve();
   }
@@ -1025,6 +1031,7 @@ function checkTypes() {
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
+  maybeInitializeExtensions();
   // Disabled to improve type check performance, since this provides
   // little incremental value.
   /*buildExperiments({
