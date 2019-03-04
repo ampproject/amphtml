@@ -276,7 +276,8 @@ function candidateSelector(tagName) {
  * @return {!Promise<!Element>}
  */
 function whenLoaded(element) {
-  return element.signals().whenSignal(CommonSignals.LOAD_END);
+  return whenUpgradedToCustomElement(element).then(element =>
+    element.signals().whenSignal(CommonSignals.LOAD_END));
 }
 
 
