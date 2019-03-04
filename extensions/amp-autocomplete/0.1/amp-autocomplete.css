@@ -15,24 +15,26 @@
  */
 
 .i-amphtml-autocomplete {   
-    display: inline-flex;
-    flex-direction: column;
-    align-items: stretch;
+   position: relative;
+   display: inline-block;
  }
 
 .i-amphtml-autocomplete-input {
-    padding: 4px;
+   padding: 4px;
  }
 
  .i-amphtml-autocomplete-results {
-    margin-top: 4px;
+   position: absolute;
+   top: 100%;
+   width: 100%;
+   margin-top: 4px;
  }
 
  .i-amphtml-autocomplete-item {   
-    background-color: white;
-    border: 1px solid black;
-    padding: 4px;
-    position: relative;
+   background-color: white;
+   border: 1px solid black;
+   padding: 4px;
+   position: relative;
  }
 
  .i-amphtml-autocomplete-item:hover {   
@@ -40,5 +42,5 @@
 }
 
  .i-amphtml-autocomplete-item-active {
-    background-color: #d3d3d3;
+   background-color: #d3d3d3;
  }
