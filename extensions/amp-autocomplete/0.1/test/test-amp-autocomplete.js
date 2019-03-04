@@ -31,7 +31,8 @@ describes.realWin('amp-autocomplete', {
     toggleExperiment(win, 'amp-autocomplete', true);
   });
 
-  function getAutocomplete(attributes) {
+  function getAutocomplete(attributes,
+    json = '{ "items" : ["apple", "banana", "orange"] }') {
     win.sessionStorage.clear();
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
@@ -45,7 +46,7 @@ describes.realWin('amp-autocomplete', {
 
     const script = win.document.createElement('script');
     script.setAttribute('type', 'application/json');
-    script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
+    script.innerHTML = json;
     ampAutocomplete.appendChild(script);
 
     doc.body.appendChild(ampAutocomplete);
@@ -112,6 +113,24 @@ describes.realWin('amp-autocomplete', {
     return allowConsoleError(() => {
       return expect(getAutocomplete({})).to.be.rejectedWith(
           'Experiment amp-autocomplete is not turned on.');
+    });
+  });
+
+  it('should error with invalid JSON script', () => {
+    expectAsyncConsoleError('Unexpected token o in JSON at position'
+      + ' 32 [object HTMLElement]');
+    return expect(getAutocomplete({
+      'filter': 'substring',
+    }, '{ "items" : ["apple", "banana", orange] }')).to.be.rejectedWith(
+        'Unexpected token o in JSON at position 32');
+  });
+
+  it('should accept empty JSON script', () => {
+    return getAutocomplete({
+      'filter': 'substring',
+    }, '{}').then(ampAutocomplete => {
+      const impl = ampAutocomplete.implementation_;
+      expect(impl.inlineData_).to.be.an('array').that.is.empty;
     });
   });
 });
