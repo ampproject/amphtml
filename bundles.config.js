@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 'use strict';
-/* global exports */
+/* global exports, process, require */
+
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 /**
  * @enum {string}
@@ -932,26 +935,63 @@ exports.altMainBundles = [
   },
 ];
 
-exports.extensionBundles.forEach(c => {
-  const strRep = JSON.stringify(c);
-  console./*OK*/assert('name' in c, `name key must exist. Found ${strRep}.`);
-  console./*OK*/assert('version' in c, 'version key must exist. ' +
-      `Found ${strRep}.`);
-  console./*OK*/assert('latestVersion' in c, 'latestVersion key must exist. ' +
-      `Found ${strRep}.`);
-  const duplicates = exports.extensionBundles.filter(d => d.name === c.name);
-  console./*OK*/assert(
-      duplicates.every(d => d.latestVersion === c.latestVersion),
-      'latestVersion must be the same for all versions of an extension. ' +
-      `Found ${strRep}.`);
-  console./*OK*/assert('type' in c, `type key must exist. Found ${strRep}.`);
-  const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
-  console./*OK*/assert(validTypes.some(x => x === c.type),
-      `type value must be one of ${validTypes.join(',')}. Found ${c.type} ` +
-      `for ${strRep}.`);
-});
-exports.aliasBundles.forEach(c => {
-  console./*OK*/assert('name' in c, 'name key must exist');
-  console./*OK*/assert('version' in c, 'version key must exist');
-  console./*OK*/assert('latestVersion' in c, 'latestVersion key must exist');
-});
+/**
+ * @param {boolean} condition
+ * @param {string} field
+ * @param {string} message
+ * @param {string} name
+ * @param {string} found
+ */
+function verifyBundle_(condition, field, message, name, found) {
+  if (!condition) {
+    log(colors.red('ERROR:'),
+        colors.cyan(field), message, colors.cyan(name),
+        '\n' + found);
+    process.exit(1);
+  }
+}
+
+exports.verifyExtensionBundles = function() {
+  exports.extensionBundles.forEach(bundle => {
+    const bundleString = JSON.stringify(bundle, null, 2);
+    verifyBundle_(
+        'name' in bundle,
+        'name', 'is missing from', '', bundleString);
+    verifyBundle_(
+        'version' in bundle,
+        'version', 'is missing from', bundle.name, bundleString);
+    verifyBundle_(
+        'latestVersion' in bundle,
+        'latestVersion', 'is missing from', bundle.name, bundleString);
+    const duplicates = exports.extensionBundles.filter(
+        duplicate => duplicate.name === bundle.name);
+    verifyBundle_(
+        duplicates.every(
+            duplicate => duplicate.latestVersion === bundle.latestVersion),
+        'latestVersion', 'is not the same for all versions of', bundle.name,
+        JSON.stringify(duplicates, null, 2));
+    verifyBundle_(
+        'type' in bundle,
+        'type', 'is missing from', bundle.name, bundleString);
+    const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
+    verifyBundle_(
+        validTypes.some(validType => validType === bundle.type),
+        'type', `is not one of ${validTypes.join(',')} in`, bundle.name,
+        bundleString);
+  });
+};
+
+exports.verifyExtensionAliasBundles = function() {
+  exports.aliasBundles.forEach(bundle => {
+    const bundleString = JSON.stringify(bundle, null, 2);
+    verifyBundle_(
+        'name' in bundle,
+        'name', 'is missing from', '', bundleString);
+    verifyBundle_(
+        'version' in bundle,
+        'version', 'is missing from', bundle.name, bundleString);
+    verifyBundle_(
+        'latestVersion' in bundle,
+        'latestVersion', 'is missing from', bundle.name, bundleString);
+  });
+};
