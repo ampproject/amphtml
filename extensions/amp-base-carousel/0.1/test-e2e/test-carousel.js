@@ -20,14 +20,16 @@ import {
   waitForCarouselImg,
 } from './helpers';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('AMP carousel', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
-  experiments: ['amp-base-carousel'],
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
-  const pageWidth = 800;
-  const pageHeight = 600;
   let controller;
 
   function prop(el, name) {
@@ -36,11 +38,6 @@ describes.endtoend('AMP carousel', {
 
   beforeEach(async() => {
     controller = env.controller;
-
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
   });
 
   it('should render correctly', async() => {

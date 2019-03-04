@@ -96,16 +96,6 @@ class AmpDriver {
     await this.controller_.navigateTo(ampEnv.url(url));
     await ampEnv.ready(this.controller_);
   }
-
-  /**
-   * Navigate the browser to the URL that will cause the demo server to
-   * serve the runtime and extensions in the given format.
-   * @param {string} mode one of 'cdn', 'compiled', 'default',
-   */
-  async serveMode(mode) {
-    await this.controller_.navigateTo(
-        `http://localhost:8000/serve_mode=${mode}`);
-  }
 }
 
 module.exports = {

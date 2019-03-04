@@ -78,11 +78,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  if (process.env.ENABLE_DEV_DASHBOARD_CACHE &&
-      process.env.ENABLE_DEV_DASHBOARD_CACHE !== 'false') {
-    devDashboard.setCacheStatus(true);
-  }
-
+  // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
 
@@ -1494,7 +1490,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = {
-  middleware: app,
-  beforeServeTasks: devDashboard.beforeServeTasks,
-};
+module.exports = app;

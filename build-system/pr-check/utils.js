@@ -34,6 +34,7 @@ const DIST_OUTPUT_FILE =
     isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -160,6 +161,9 @@ function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
+  decryptTravisKey_();
+  execOrDie(`gsutil signurl -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
@@ -196,6 +200,9 @@ function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
+  decryptTravisKey_();
+  execOrDie(`gsutil signurl -m PUT -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil -m cp -r ${outputFileName} ` +
       `${OUTPUT_STORAGE_LOCATION}`);
   exec('echo travis_fold:end:upload_results');
@@ -231,6 +238,17 @@ function uploadBuildOutput(functionName) {
  */
 function uploadDistOutput(functionName) {
   uploadOutput_(functionName, DIST_OUTPUT_FILE);
+}
+
+/**
+ * Decrypts key used by storage service account
+ */
+function decryptTravisKey_() {
+  // -md sha256 is required due to encryption differences between
+  // openssl 1.1.1a, which was used to encrypt the key, and
+  // openssl 1.0.2g, which is used by Travis to decrypt.
+  execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
+      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {

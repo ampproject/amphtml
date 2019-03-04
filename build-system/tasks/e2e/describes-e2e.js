@@ -30,8 +30,8 @@ const TIMEOUT = 20000;
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  serveMode: (string|undefined),
  *  testUrl: string,
+ *  initialRect: ({{width: number, height:number}}|undefined)
  * }}
  */
 let TestSpec;
@@ -248,19 +248,20 @@ class AmpPageFixture {
     const {
       testUrl,
       experiments,
-      serveMode,
+      initialRect,
     } = this.spec;
     const {
       environment,
       // TODO(estherkim): browser
     } = env;
 
-    if (serveMode) {
-      await setServeMode(ampDriver, serveMode);
-    }
-
     if (Array.isArray(experiments)) {
       await toggleExperiments(ampDriver, testUrl, experiments);
+    }
+
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
     }
 
     await ampDriver.navigateToEnvironment(environment, testUrl);
@@ -277,16 +278,6 @@ class AmpPageFixture {
     }
     this.driver_ = null;
   }
-}
-
-/**
- * Set the serve mode on the AMP dev server
- * @param {!AmpDriver} ampDriver
- * @param {string} serveMode cdn, compiled, uncompiled
- * @return {!Promise}
- */
-async function setServeMode(ampDriver, serveMode) {
-  await ampDriver.serveMode(serveMode);
 }
 
 /**
