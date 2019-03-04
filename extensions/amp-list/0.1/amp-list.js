@@ -704,7 +704,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
-    if (this.getAttribute() == Layout.CONTAINER) {
+    if (this.getLayout() == Layout.CONTAINER) {
       return;
     }
     this.loadMoreEnabledPromise_.then(enabled => {
