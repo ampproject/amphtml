@@ -30,9 +30,9 @@ const {execOrDie, exec, getStdout} = require('../exec');
 const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
 const BUILD_OUTPUT_FILE =
-    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : '';
+    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : 'estherbuildoutput.zip';
 const DIST_OUTPUT_FILE =
-    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
+    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : 'estherdistoutput.zip';
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
@@ -208,7 +208,8 @@ async function uploadOutput_(functionName, outputFileName) {
   const uploadUrl = getStdout('gsutil signurl -m PUT -d 3m -r us ' +
       `-c application/zip ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName})`);
-  await requestPromise.put(uploadUrl, {
+  await requestPromise.put({
+    uri: uploadUrl,
     formData: {
       file: {
         value: fs.createReadStream(outputFileName),
