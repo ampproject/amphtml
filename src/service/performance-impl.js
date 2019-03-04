@@ -60,20 +60,6 @@ function incOrDef(obj, name) {
 }
 
 /**
- * Confirm whether the provided userAgent represents a Safari browser.
- *
- * @param {string} userAgent
- */
-export function isSafari(userAgent) {
-  const isEdge = /Edge/i.test(userAgent);
-  const isOpera = /OPR\/|Opera|OPiOS/i.test(userAgent);
-  const isChrome = /Chrome|CriOS/i.test(userAgent) && !isEdge && !isOpera;
-  const isFirefox = /Firefox|FxiOS/i.test(userAgent) && !isEdge;
-  const isIe = /Trident|MSIE|IEMobile/i.test(userAgent);
-  return /Safari/i.test(userAgent) && !isChrome && !isIe && !isEdge && !isFirefox && !isOpera;
-}
-
-/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
@@ -140,6 +126,7 @@ export class Performance {
     this.aggregateJankScore_ = 0;
 
     this.onVisibilityChange_ = this.onVisibilityChange_.bind(this);
+    this.tickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -282,8 +269,9 @@ export class Performance {
       // Safari does not reliably fire the `pagehide` or `visibilitychange`
       // events when closing a tab, so we have to use `beforeunload`.
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      if (isSafari(this.win.navigator.userAgent)) {
-        this.win.addEventListener('beforeunload', this.onVisibilityChange_);
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener('beforeunload', this.tickLayoutJankScore_);
       }
     }
 
@@ -352,8 +340,9 @@ export class Performance {
           this.onVisibilityChange_,
           {capture: true}
       );
-      if (isSafari(this.win.navigator.userAgent)) {
-        this.win.removeEventListener('beforeunload', this.onVisibilityChange_);
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.removeEventListener('beforeunload', this.tickLayoutJankScore_);
       }
     }
   }
