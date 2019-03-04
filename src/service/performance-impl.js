@@ -260,11 +260,8 @@ export class Performance {
       // Register a handler to record the layout jank metric when the page
       // enters the hidden lifecycle state.
       // @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
-      this.win.addEventListener(
-          'visibilitychange',
-          this.onVisibilityChange_,
-          {capture: true}
-      );
+      Services.documentStateFor(this.win)
+          .onVisibilityChanged(this.onVisibilityChange_);
 
       // Safari does not reliably fire the `pagehide` or `visibilitychange`
       // events when closing a tab, so we have to use `beforeunload`.
@@ -335,11 +332,6 @@ export class Performance {
       this.flush();
       this.tickedSecondJankScore_ = true;
 
-      this.win.removeEventListener(
-          'visibilitychange',
-          this.onVisibilityChange_,
-          {capture: true}
-      );
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
         this.win.removeEventListener('beforeunload', this.tickLayoutJankScore_);

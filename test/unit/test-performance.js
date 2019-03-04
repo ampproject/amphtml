@@ -940,6 +940,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         dispatchEvent: env.win.dispatchEvent,
         document: {
           addEventListener: env.sandbox.stub(),
+          hidden: false,
+          readyState: 'complete',
+          removeEventListener: env.sandbox.stub(),
           // Note: the document starts in a visible state.
           visibilityState: 'visible',
         },
@@ -957,20 +960,20 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         removeEventListener: env.win.removeEventListener,
       };
 
+      const docEventListeners = {};
+      fakeWin.document.addEventListener.callsFake((eventType, handler) => {
+        if (!docEventListeners[eventType]) {
+          docEventListeners[eventType] = [];
+        }
+        docEventListeners[eventType].push(handler);
+      });
+
       // Fake the PerformanceObserver implementation so we can send
       // fake PerformanceEntry objects to listeners.
       let performanceObserver;
       fakeWin.PerformanceObserver.callsFake(callback => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
-      });
-
-      // Fake addEventListener so we can trigger fake `visibilitychange` events.
-      const callbacks = [];
-      fakeWin.addEventListener.callsFake((eventType, callback) => {
-        if (eventType === 'visibilitychange') {
-          callbacks.push(callback);
-        }
       });
 
       // Fake layoutJank that occured before the Performance service is started.
@@ -993,7 +996,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // The document has become hidden, e.g. via the user switching tabs.
       fakeWin.document.visibilityState = 'hidden';
       const firstEvent = new Event('visibilitychange');
-      callbacks.forEach(callback => callback(firstEvent));
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(firstEvent));
+      }
 
       expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0])
@@ -1020,7 +1026,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // The document has become hidden again.
       fakeWin.document.visibilityState = 'hidden';
       const secondEvent = new Event('visibilitychange');
-      callbacks.forEach(callback => callback(secondEvent));
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(secondEvent));
+      }
       expect(perf.events_.length).to.equal(2);
       expect(perf.events_[1])
           .to.be.jsonEqual({
@@ -1033,7 +1042,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       performanceObserver.triggerCallback(list);
       fakeWin.document.visibilityState = 'hidden';
       const thirdEvent = new Event('visibilitychange');
-      callbacks.forEach(callback => callback(thirdEvent));
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(thirdEvent));
+      }
       expect(perf.events_.length).to.equal(2);
     });
     it('for browsers that don\'t support the visibilitychange event', () => {
@@ -1048,6 +1060,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         dispatchEvent: env.win.dispatchEvent,
         document: {
           addEventListener: env.sandbox.stub(),
+          hidden: false,
+          readyState: 'complete',
+          removeEventListener: env.sandbox.stub(),
           // Note: the document starts in a visible state.
           visibilityState: 'visible',
         },
@@ -1063,6 +1078,13 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           getEntriesByType: env.sandbox.stub(),
         },
       };
+      const docEventListeners = {};
+      fakeWin.document.addEventListener.callsFake((eventType, handler) => {
+        if (!docEventListeners[eventType]) {
+          docEventListeners[eventType] = [];
+        }
+        docEventListeners[eventType].push(handler);
+      });
 
       // Fake the PerformanceObserver implementation so we can send
       // fake PerformanceEntry objects to listeners.
@@ -1073,11 +1095,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
 
       // Fake addEventListener so we can trigger fake `beforeunload` events.
-      const callbacks = [];
-      fakeWin.addEventListener.callsFake((eventType, callback) => {
-        if (eventType === 'beforeunload') {
-          callbacks.push(callback);
+      const windowEventListeners = {};
+      fakeWin.addEventListener.callsFake((eventType, handler) => {
+        if (!windowEventListeners[eventType]) {
+          windowEventListeners[eventType] = [];
         }
+        windowEventListeners[eventType].push(handler);
       });
 
       // Fake layoutJank that occured before the Performance service is started.
@@ -1100,7 +1123,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // The document has become hidden, e.g. via the user switching tabs.
       fakeWin.document.visibilityState = 'hidden';
       const firstEvent = new Event('beforeunload');
-      callbacks.forEach(callback => callback(firstEvent));
+      if (windowEventListeners['beforeunload']) {
+        windowEventListeners['beforeunload']
+            .forEach(callback => callback(firstEvent));
+      }
 
       expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0])
