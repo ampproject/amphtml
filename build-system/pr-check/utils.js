@@ -162,7 +162,7 @@ function downloadOutput_(functionName, outputFileName) {
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
   decryptTravisKey_();
-  execOrDie(`gsutil signurl -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+  execOrDie(`gsutil signurl -d 3m -r us ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
@@ -201,7 +201,7 @@ function uploadOutput_(functionName, outputFileName) {
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
   decryptTravisKey_();
-  execOrDie(`gsutil signurl -m PUT -d 3m ${OUTPUT_STORAGE_KEY_FILE} ` +
+  execOrDie(`gsutil signurl -m PUT -d 3m -r us ${OUTPUT_STORAGE_KEY_FILE} ` +
       `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
   execOrDie(`gsutil -m cp -r ${outputFileName} ` +
       `${OUTPUT_STORAGE_LOCATION}`);
