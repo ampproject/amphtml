@@ -153,10 +153,10 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  */
 export function parseLayout(s) {
   const index = LAYOUTS.indexOf(s);
-  if (index < 0) {
-    return undefined;
+  if (index >= 0) {
+    return /** @type {!Layout} */ (index);
   }
-  return /** @type {!Layout} */ (index);
+  return undefined;
 }
 
 
@@ -365,7 +365,7 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (devAssert(
+    const layout = /** @type {!Layout} */ (dev().assertNumber(
         parseLayout(completedLayoutAttr)));
     if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
@@ -393,7 +393,7 @@ export function applyStaticLayout(element) {
   const heightsAttr = element.getAttribute('heights');
 
   // Input layout attributes.
-  const inputLayout = parseLayout(layoutAttr);
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
@@ -410,8 +410,10 @@ export function applyStaticLayout(element) {
   let height;
   let layout;
 
+  const isLayoutDefined = inputLayout !== null && inputLayout !== undefined;
+
   // Calculate effective width and height.
-  if ((!inputLayout || inputLayout == Layout.FIXED ||
+  if ((!isLayoutDefined || inputLayout == Layout.FIXED ||
       inputLayout == Layout.FIXED_HEIGHT) &&
       (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
     // Default width and height: handle elements that do not specify a
@@ -426,7 +428,7 @@ export function applyStaticLayout(element) {
   }
 
   // Calculate effective layout.
-  if (inputLayout) {
+  if (isLayoutDefined) {
     layout = inputLayout;
   } else if (!width && !height) {
     layout = Layout.CONTAINER;
@@ -532,6 +534,6 @@ export function applyStaticLayout(element) {
   }
   // Mark the element as having completed static layout, in case it is cloned
   // in the future.
-  element.setAttribute('i-amphtml-layout', layoutAttr);
+  element.setAttribute('i-amphtml-layout', LAYOUTS[layout]);
   return layout;
 }
