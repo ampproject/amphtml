@@ -165,7 +165,16 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return `i-amphtml-layout-${LAYOUTS[layout]}`;
+  return `i-amphtml-layout-${getLayoutName(layout)}`;
+}
+
+
+/**
+ * @param {!Layout} layout
+ * @return {string}
+ */
+export function getLayoutName(layout) {
+  return dev().assertString(LAYOUTS[/** @type {number} */ (layout)]);
 }
 
 
@@ -378,7 +387,7 @@ export function applyStaticLayout(element) {
       // `display: none`
       element['style']['display'] = '';
     }
-    return layout;
+    return /** @type {!Layout} */ (layout);
   }
 
   // If the layout was already done by server-side rendering (SSR), then the
@@ -408,6 +417,8 @@ export function applyStaticLayout(element) {
   // Effective layout attributes. These are effectively constants.
   let width;
   let height;
+
+  /** @type {!Layout} */
   let layout;
 
   const isLayoutDefined = inputLayout !== null && inputLayout !== undefined;
@@ -429,7 +440,7 @@ export function applyStaticLayout(element) {
 
   // Calculate effective layout.
   if (isLayoutDefined) {
-    layout = inputLayout;
+    layout = /** @type {!Layout} */ (inputLayout);
   } else if (!width && !height) {
     layout = Layout.CONTAINER;
   } else if (height == 'fluid') {
@@ -534,6 +545,6 @@ export function applyStaticLayout(element) {
   }
   // Mark the element as having completed static layout, in case it is cloned
   // in the future.
-  element.setAttribute('i-amphtml-layout', LAYOUTS[layout]);
+  element.setAttribute('i-amphtml-layout', getLayoutName(layout));
   return layout;
 }

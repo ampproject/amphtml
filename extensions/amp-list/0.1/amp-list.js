@@ -758,7 +758,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
-   * @param {string} previousLayout
+   * @param {!Layout} previousLayout
    */
   undoPreviousLayout_(previousLayout) {
     const {element} = this;
