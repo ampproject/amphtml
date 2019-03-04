@@ -73,7 +73,6 @@ tags: {  # <${name}>
 function getMarkdownExtensionFile(name) {
   return `<!--
   1. Change "category" below to one of:
-       media
        ads-analytics
        dynamic-content
        layout
@@ -82,7 +81,7 @@ function getMarkdownExtensionFile(name) {
        social
 
   2. Remove any of the "formats" that don't apply.
-     You can also add "ads" and/or "stories" if they apply.
+     You can also add the "ads" and "stories" formats if they apply.
 
   3. And remove this comment! (no empty lines before "---")
 -->
