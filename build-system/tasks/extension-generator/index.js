@@ -91,8 +91,6 @@ $category: presentation
 formats:
   - websites
   - email
-  - ads
-  - stories
 teaser:
   text: FILL THIS IN.
 ---
