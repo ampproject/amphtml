@@ -165,7 +165,8 @@ async function downloadOutput_(functionName, outputFileName) {
   decryptTravisKey_();
   const downloadUrl = getStdout('gsutil signurl -d 3m -r us ' +
       `-c application/zip ${OUTPUT_STORAGE_KEY_FILE} ` +
-      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName} ` +
+      '| awk \'{print $5}\' | sed -n 2p');
   await requestPromise.get(downloadUrl)
       .pipe(fs.createWriteStream(outputFileName));
   exec('echo travis_fold:end:download_results');
@@ -206,7 +207,8 @@ async function uploadOutput_(functionName, outputFileName) {
   decryptTravisKey_();
   const uploadUrl = getStdout('gsutil signurl -m PUT -d 3m -r us ' +
       `-c application/zip ${OUTPUT_STORAGE_KEY_FILE} ` +
-      `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`);
+      `${OUTPUT_STORAGE_LOCATION}/${outputFileName} ` +
+      '| awk \'{print $5}\' | sed -n 2p');
   await requestPromise.put({
     uri: uploadUrl,
     formData: {
