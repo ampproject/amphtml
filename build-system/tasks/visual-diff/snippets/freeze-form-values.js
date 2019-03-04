@@ -1,6 +1,6 @@
-// This file is executed via Puppeteer's page.evaluate on a document to remove
-// all <script> tags that import AMP pages. This makes for cleaner diffs and
-// prevents "double-execution" of AMP scripts when enableJavaScript=true.
+// This file is executed via Puppeteer's page.evaluate on a document to copy the
+// values of forms into their attributes, so that they will be passed in the
+// snapshots to Percy.
 
 for (const form of document.forms) {
   for (const formElement of form.elements) {
