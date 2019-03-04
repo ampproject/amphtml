@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('AMP list load-more=manual', {
+  testUrl: 'http://localhost:8000/test/manual/amp-list/' +
+      'load-more-manual.amp.html',
+  experiments: ['amp-list-load-more'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
-  const pageWidth = 800;
-  const pageHeight = 600;
   let controller;
-  let ampDriver;
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo('http://localhost:8000/test/manual/amp-list/load-more-manual.amp.html');
-    await ampDriver.toggleExperiment('amp-list-load-more', true);
-
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-list/load-more-manual.amp.html');
   });
 
   it('should render correctly', async() => {
