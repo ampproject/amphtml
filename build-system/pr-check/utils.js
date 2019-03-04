@@ -30,9 +30,9 @@ const {execOrDie, exec, getStdout} = require('../exec');
 const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
 const BUILD_OUTPUT_FILE =
-    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : 'estherbuildoutput.zip';
+    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : '';
 const DIST_OUTPUT_FILE =
-    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : 'estherdistoutput.zip';
+    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
