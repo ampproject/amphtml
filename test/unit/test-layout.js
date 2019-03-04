@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, VALID_LAYOUTS, applyStaticLayout,
+import {LAYOUTS, Layout, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
   isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
 
@@ -30,11 +30,10 @@ describe('Layout', () => {
 
     const expectedKey = type => type.replace(/\-/g, '_').toUpperCase();
 
-    it('has matching Layout for each of VALID_LAYOUTS', () => {
-      expect(Object.keys(Layout), 'Layout')
-          .to.have.length(VALID_LAYOUTS.length);
+    it('has matching `Layout` field for each of `LAYOUTS`', () => {
+      expect(Object.keys(Layout)).to.have.length(LAYOUTS.length);
 
-      VALID_LAYOUTS.forEach(layout => {
+      LAYOUTS.forEach(layout => {
         expect(Layout).to.include({[expectedKey(layout)]: layout});
       });
     });

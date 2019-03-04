@@ -30,7 +30,7 @@ import {startsWith} from './string';
  * enum keys only for type-checking and the values for runtime.
  * @const {!Array<string>}
  */
-export const VALID_LAYOUTS = [
+export const LAYOUTS = [
   // Make sure to include the matching enum field for `Layout`.
   'nodisplay',
   'fixed',
@@ -151,7 +151,7 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  *   the layout string.
  */
 export function parseLayout(s) {
-  if (VALID_LAYOUTS.includes(s)) {
+  if (LAYOUTS.includes(s)) {
     return /** @type {!Layout} */ (s);
   }
   return undefined;

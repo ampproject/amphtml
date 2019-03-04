@@ -1083,12 +1083,12 @@ export class Viewport {
         });
       }, duration, curve).thenAlways(() => {
         this.fixedLayer_.transformMutate(); // reset all transforms.
-
-        if (doneDeferred) {
-          doneDeferred.resolve();
-          doneDeferred = null; // GC
-        }
       });
+    }).then(() => {
+      if (doneDeferred) {
+        doneDeferred.resolve();
+        doneDeferred = null; // GC
+      }
     });
   }
 
