@@ -23,26 +23,95 @@ describes.realWin('amp-autocomplete', {
   },
 }, env => {
 
-  let win;
-  let element;
+  let win, doc;
 
   beforeEach(() => {
     win = env.win;
-    element = win.document.createElement('amp-autocomplete');
-    win.document.body.appendChild(element);
+    doc = win.document;
     toggleExperiment(win, 'amp-autocomplete', true);
   });
 
-  it('should have hello world when built with experiment on', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  function getAutocomplete(attributes) {
+    win.sessionStorage.clear();
+    const ampAutocomplete = doc.createElement('amp-autocomplete');
+    ampAutocomplete.setAttribute('layout', 'container');
+    for (const key in attributes) {
+      ampAutocomplete.setAttribute(key, attributes[key]);
+    }
+
+    const input = win.document.createElement('input');
+    input.setAttribute('type', 'text');
+    ampAutocomplete.appendChild(input);
+
+    const script = win.document.createElement('script');
+    script.setAttribute('type', 'application/json');
+    script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
+    ampAutocomplete.appendChild(script);
+
+    doc.body.appendChild(ampAutocomplete);
+    return ampAutocomplete.build().then(() => ampAutocomplete);
+  }
+
+  it('should render with experiment on', () => {
+    return getAutocomplete({
+      'filter': 'substring',
+    }).then(ampAutocomplete => {
+      const impl = ampAutocomplete.implementation_;
+      const expectedItems = ['apple', 'banana', 'orange'];
+      expect(impl.inlineData_).to.have.ordered.members(expectedItems);
+      expect(impl.inputElement__).not.to.be.null;
+      expect(impl.container_).not.to.be.null;
+      expect(impl.filter_).to.equal('substring');
+
+      const renderSpy = sandbox.spy(impl, 'renderResults_');
+      return ampAutocomplete.layoutCallback().then(() => {
+        expect(ampAutocomplete).to.have.class('i-amphtml-autocomplete');
+        expect(impl.inputElement_)
+            .to.have.class('i-amphtml-autocomplete-input');
+        expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+        expect(renderSpy).to.have.been.calledOnce;
+      });
+    });
   });
 
-  it('should not have hello world when built with experiment off', () => {
+  it('should require filter attribute', () => {
+    return allowConsoleError(() => {
+      return expect(getAutocomplete({})).to.be
+          .rejectedWith('amp-autocomplete requires "filter" attribute.​​​');
+    });
+  });
+
+  it('should require valid filter attribute', () => {
+    return allowConsoleError(() => {
+      return expect(getAutocomplete({
+        'filter': 'invalid-option',
+      })).to.be.rejectedWith('Unexpected filter: undefined');
+    });
+  });
+
+  it('should render with min-characters passed', () => {
+    return getAutocomplete({
+      'filter': 'substring',
+      'min-characters': '3',
+    }).then(ampAutocomplete => {
+      expect(ampAutocomplete.implementation_.minChars_).to.equal(3);
+    });
+  });
+
+  it('should render with max-entries passed', () => {
+    return getAutocomplete({
+      'filter': 'substring',
+      'max-entries': '10',
+    }).then(ampAutocomplete => {
+      expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
+    });
+  });
+
+  it('should not render with experiment off', () => {
     toggleExperiment(win, 'amp-autocomplete', false);
-    allowConsoleError(() => {
-      element.build();
-      expect(element.querySelector('div')).to.be.null;
+    return allowConsoleError(() => {
+      return expect(getAutocomplete({})).to.be.rejectedWith(
+          'Experiment amp-autocomplete is not turned on.');
     });
   });
 });
