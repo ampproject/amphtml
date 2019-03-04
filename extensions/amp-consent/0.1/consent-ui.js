@@ -89,6 +89,9 @@ export class ConsentUI {
     /** @private {?Element} */
     this.maskElement_ = null;
 
+    /** @private {?Element} */
+    this.elementWithFocusBeforeShowing_ = null;
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
 
@@ -100,6 +103,9 @@ export class ConsentUI {
 
     /** @private {!Window} */
     this.win_ = baseInstance.win;
+
+    /** @private @const {!Document} */
+    this.document_ = this.win_.document;
 
     /** @private {?Deferred} */
     this.iframeReady_ = null;
@@ -174,9 +180,17 @@ export class ConsentUI {
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
 
+          if (!this.isPostPrompt_) {
+            this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
+          }
+
           this.maybeShowOverlay_();
 
           this.showIframe_();
+
+          if (!this.isPostPrompt_) {
+            this.ui_./*OK*/focus();
+          }
         });
       });
     } else {
@@ -189,12 +203,16 @@ export class ConsentUI {
 
         if (!this.isPostPrompt_) {
 
+          this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
+
           this.maybeShowOverlay_();
 
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
           this.baseInstance_.scheduleLayout(this.ui_);
+
+          this.ui_./*OK*/focus();
         }
       };
 
@@ -244,6 +262,15 @@ export class ConsentUI {
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
       this.isVisible_ = false;
+
+      if (this.elementWithFocusBeforeShowing_) {
+        this.elementWithFocusBeforeShowing_./*OK*/focus();
+        this.elementWithFocusBeforeShowing_ = null;
+      } else if (this.win_.document.body.children.length > 0) {
+        // TODO (torch2424): Find if the first child can not be
+        // focusable due to styling.
+        this.win_.document.body.children[0]./*OK*/focus();
+      }
     });
   }
 
