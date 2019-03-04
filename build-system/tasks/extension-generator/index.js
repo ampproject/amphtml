@@ -72,18 +72,19 @@ tags: {  # <${name}>
 
 function getMarkdownExtensionFile(name) {
   return `<!--
-  Change "category" below to one of:
-    media
-    ads-analytics
-    dynamic-content
-    layout
-    media
-    presentation
-    social
+  1. Change "category" below to one of:
+       media
+       ads-analytics
+       dynamic-content
+       layout
+       media
+       presentation
+       social
 
-  Remove any of the "formats" that don't apply.
+  2. Remove any of the "formats" that don't apply.
+     You can also add "ads" and/or "stories" if they apply.
 
-  And then remove this comment! (no empty lines before "---")
+  3. And remove this comment! (no empty lines before "---")
 -->
 ---
 $category: presentation
