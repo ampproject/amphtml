@@ -22,7 +22,7 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function aja(global, data) {
 
-  validateData(data, ['sspCode'])
+  validateData(data, ['sspCode']);
 
   (global._aja = global._aja || {
     sspCode: data['sspCode'],
