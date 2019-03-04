@@ -1031,11 +1031,10 @@ export class Viewport {
    *
    * @param {!Element} element
    * @param {!FixedElementMeasureFnDef} measure
-   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  setFixedElementMeasurer(element, measure, opt_keepOffset) {
+  setFixedElementMeasurer(element, measure) {
     this.removeFromFixedLayer(
-        element, /* onlyTearDown */ true, opt_keepOffset);
+        element, /* onlyTearDown */ true, /* keepOffset */ true);
     this.fixedMeasurers_.push({element, measure});
   }
 
@@ -1047,9 +1046,7 @@ export class Viewport {
    * @private
    */
   updateFixedElementsOffset_(duration, curve, transient) {
-    const isAnimated = duration > 0;
     const {
-      fixedMeasurers_: fixedMeasurers,
       paddingTop_: paddingTop,
       lastPaddingTop_: lastPaddingTop,
     } = this;
@@ -1058,17 +1055,13 @@ export class Viewport {
 
     let doneDeferred;
 
-    if (fixedMeasurers.length > 0) {
-      doneDeferred = new Deferred();
-    }
-
     return this.vsync_.measurePromise(() => {
-      return fixedMeasurers.map(def => {
-        const afterAnimation = devAssert(doneDeferred).promise;
-        return def.measure(afterAnimation, lastPaddingTop, paddingTop);
+      return this.fixedMeasurers_.map(def => {
+        doneDeferred = doneDeferred || new Deferred();
+        return def.measure(doneDeferred.promise, lastPaddingTop, paddingTop);
       });
     }).then(animOffsets => {
-      if (!isAnimated) {
+      if (duration <= 0) {
         return;
       }
 
@@ -1085,18 +1078,17 @@ export class Viewport {
         // Translate independent elements that have their own animation offset
         // definition.
         interpolations.forEach((interpolation, i) => {
-          setStyle(fixedMeasurers[i].element, 'transform',
+          setStyle(this.fixedMeasurers_[i].element, 'transform',
               `translateY(${interpolation(time)}px)`);
         });
-      }, duration, curve);
-    }).then(() => {
-      if (isAnimated) {
+      }, duration, curve).thenAlways(() => {
         this.fixedLayer_.transformMutate(); // reset all transforms.
-      }
-      if (doneDeferred) {
-        doneDeferred.resolve();
-        doneDeferred = null; // GC
-      }
+
+        if (doneDeferred) {
+          doneDeferred.resolve();
+          doneDeferred = null; // GC
+        }
+      });
     });
   }
 

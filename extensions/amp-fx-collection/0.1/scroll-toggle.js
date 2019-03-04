@@ -300,7 +300,7 @@ export function installScrollToggleFloatIn(dispatch, element, position) {
         });
 
         return animOffset;
-      }, /* keepOffset */ true);
+      });
 }
 
 // TODO(alanorozco): Use the following for scroll-dispatched transition.
