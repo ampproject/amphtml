@@ -26,9 +26,28 @@ import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
+ * This is a dupe of `Layout` values. This is intentional, since we need the
+ * enum keys only for type-checking and the values for runtime.
+ * @const {!Array<string>}
+ */
+export const VALID_LAYOUTS = [
+  // Make sure to include the matching enum field for `Layout`.
+  'nodisplay',
+  'fixed',
+  'fixed-height',
+  'responsive',
+  'container',
+  'fill',
+  'flex-item',
+  'fluid',
+  'intrinsic',
+];
+
+/**
  * @enum {string}
  */
 export const Layout = {
+  // Naming convention enforced via tests.
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -132,10 +151,8 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in Layout) {
-    if (Layout[k] == s) {
-      return Layout[k];
-    }
+  if (VALID_LAYOUTS.includes(s)) {
+    return /** @type {!Layout} */ (s);
   }
   return undefined;
 }
