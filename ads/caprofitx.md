@@ -16,7 +16,11 @@ limitations under the License.
 
 # CA ProFit-X
 
-## Example
+## Examples
+
+### (Deprecated) Ad placement with `tagid`
+
+Please consider using the latest setup with `mediaid`.
 
 ```html
 <amp-ad
@@ -28,13 +32,39 @@ limitations under the License.
 </amp-ad>
 ```
 
-## Configuration
-For configuration details, please email ca_profitx_support@cyberagent.co.jp.
+### Ad placement with `mediaid`
 
-### Required parameters
+```html
+<amp-ad
+  width="320"
+  heigth="100"
+  type="caprofitx"
+  data-mediaid="3752"
+  data-tag-places="10007"
+```
 
-- `data-tagid`
+## Configurations
 
-### Optional parameters
+For details on the configuration semantics and to generate your tags,
+please email ca_profitx_support@cyberagent.co.jp.
 
-- `data-placeid`
+### (Deprecated) Ad placement with `tagid`
+
+Supported parameters:
+
+| Parameter    | Required |
+|--------------|--------- |
+| data-tagid   | Yes      |
+| data-placeid | No       |
+
+### Ad placement with `mediaid`
+
+Supported parameters:
+
+| Parameter                | Required |
+|--------------------------|----------|
+| data-mediaid             | Yes      |
+| data-tag-places          | Yes      |
+| data-pageid              | No       |
+| data-additional-css-urls | No       |
+| data-device-ifa          | No       |
