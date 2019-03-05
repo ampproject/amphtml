@@ -43,12 +43,13 @@ const assert = require('assert');
  * And compresses items of "elements" that follow the convention
  *    'HTML$MyEl$Element': ['$myel$']
  *
- * So that they're generated on runtime:
+ * So that they're generated on runtime inside an IIFE:
  *
  *   (function(def) {
  *      ['Applet', 'Area', 'Attachment', ...].forEach(function(tagName) {
  *        def.elements['HTML' + tagName + 'Element'] = [tagName.toLowerCase()];
  *      });
+ *      return def;
  *   }({
  *     'collections': {
  *       // ...
@@ -63,6 +64,9 @@ const assert = require('assert');
  *       // ...
  *     }
  *   }))
+ *
+ * This reduces the output size (~250B gzipped) since the amount of items that
+ * follow said convention is sufficiently large.
  *
  * @param {!Object<string, !Object<string, !Array<string>>>} def
  * @return {string}
