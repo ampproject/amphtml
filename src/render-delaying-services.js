@@ -82,12 +82,12 @@ export function waitForServices(win) {
         win,
         serviceId
     ).then(service => {
-      if (service && service.whenReady) {
+      if (service && isRenderDelayingService(service)) {
         return service.whenReady().then(() => {
           return service;
         });
       }
-      return Promise.resolve(service);
+      return service;
     });
 
     return Services.timerFor(win).timeoutPromise(
@@ -107,6 +107,21 @@ export function waitForServices(win) {
  */
 export function hasRenderDelayingServices(win) {
   return includedServices(win).length > 0;
+}
+
+/**
+ * Function to determine if the passed
+ * Object is a Render Delaying Service
+ * @param {!Object} service
+ * @return {?RenderDelayingService}
+ */
+export function isRenderDelayingService(service) {
+  const maybeRenderDelayingService =
+    /** @type {!RenderDelayingService}*/ (service);
+  if (typeof maybeRenderDelayingService.whenReady == 'function') {
+    return maybeRenderDelayingService;
+  }
+  return null;
 }
 
 /**
