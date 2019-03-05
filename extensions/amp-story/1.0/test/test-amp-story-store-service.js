@@ -62,6 +62,7 @@ describes.fakeWin('amp-story-store-service', {}, env => {
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
+
   class FakeComponent {
     constructor(callback) {
       this.callback_ = callback.bind(this);

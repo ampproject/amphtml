@@ -1,5 +1,3 @@
-import {dev} from './log';
-
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -60,7 +58,6 @@ export class Observable {
     if (index > -1) {
       this.handlers_.splice(index, 1);
     }
-    dev().error('Can\'t remove nonexistent handler %s.', handler);
   }
 
   /**
