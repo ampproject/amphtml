@@ -397,6 +397,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Engageya](../../ads/engageya.md)
 - [Epeex](../../ads/epeex.md)
 - [Jubna](../../ads/jubna.md)
+- [OneAD](../../ads/onead.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
 - [PubExchange](../../ads/pubexchange.md)
