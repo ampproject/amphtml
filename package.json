@@ -94,7 +94,7 @@
     "fuse.js": "3.4.2",
     "glob-move": "1.0.1",
     "globs-to-files": "1.0.0",
-    "google-closure-compiler": "20190215.0.2",
+    "google-closure-compiler": "20190301.0.0",
     "gulp": "3.9.1",
     "gulp-ava": "1.0.0",
     "gulp-closure-compiler": "0.4.0",
