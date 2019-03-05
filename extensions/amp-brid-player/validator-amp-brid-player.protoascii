@@ -49,6 +49,7 @@ tags: {  # <amp-brid-player>
   attrs: {
     name: "data-playlist"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
+    value_regex: ".+"
   }
   attrs: {
     name: "data-dynamic"

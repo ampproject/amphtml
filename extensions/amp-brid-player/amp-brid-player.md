@@ -72,11 +72,11 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-partner</strong></td>
-    <td>The Brid.tv partner id.</td>
+    <td>The Brid.tv partner ID.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-player</strong></td>
-    <td>The Brid.tv player id. Specific to every partner.</td>
+    <td>The Brid.tv player ID. Specific to every partner.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-video</strong></td>
@@ -84,7 +84,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-playlist</strong></td>
-    <td>The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.</td>
+    <td>The Brid.tv playlist ID or custom string value for dynamic playlists.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-outstream</strong></td>
@@ -92,13 +92,15 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-dynamic</strong></td>
-    <td>Parameter used to specify type of dynamic playlist.</td>
+    <td>Parameter used to specify type of dynamic playlist, e.g. latest, channel, tag.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
+
+Embed code must either have video or playlist or outstream attribute.
 
 ## Validation
 

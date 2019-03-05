@@ -49,7 +49,7 @@ FAIL
 |    <amp-brid-player
 |        data-partner="264"
 |        data-player="4144"
-|        data-playlist="test"
+|        data-playlist="test tag"
 |        data-dynamic="tag"
 |        layout="responsive"
 |        width="480" height="270">
