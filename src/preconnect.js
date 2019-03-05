@@ -232,8 +232,8 @@ class PreconnectService {
    * @private
    */
   performPreload_(url) {
-    const preload = htmlFor(this.document_)`
-        <link rel="preload" referrerpolicy="origin" />`;
+    const html = htmlFor(this.document_);
+    const preload = html`<link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
     // Do not set 'as' attribute to correct value for now, for 2 reasons
     // - document value is not yet supported and dropped

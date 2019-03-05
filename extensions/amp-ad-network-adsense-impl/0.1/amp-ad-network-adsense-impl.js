@@ -24,7 +24,7 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  getMatchedContentResponsiveHeight,
+  getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -60,11 +60,9 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   getExperimentBranch,
@@ -96,6 +94,9 @@ export function resetSharedState() {
 
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
+
+/** @type {string} */
+const DELAY_NUMBER_EXP = 'adsense-ff-number-delay';
 
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -235,7 +236,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return true;
+    if (getExperimentBranch(this.win, DELAY_NUMBER_EXP) != '21063207') {
+      return true;
+    }
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
   }
 
   /** @override */
@@ -255,7 +259,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const viewportSize = this.getViewport().getSize();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              this.autoFormat_, viewportSize),
+              this.autoFormat_, viewportSize, this.element),
           viewportSize.width).catch(() => {});
     }
     // This should happen last, as some diversion criteria rely on some of the
@@ -283,6 +287,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
+        },
+        [DELAY_NUMBER_EXP]: {
+          isTrafficEligible: () => true,
+          branches: ['21063206', '21063207'],
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -374,12 +382,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
     const ampAutoAdsResponsiveBranch =
       getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsBranch) {
-      experimentIds.push(ampAutoAdsBranch);
-    }
     if (ampAutoAdsResponsiveBranch) {
       experimentIds.push(ampAutoAdsResponsiveBranch);
     }
@@ -582,10 +586,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * given width.
    * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
+   * @param {!Element} element <amp-ad> added by publisher.
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(autoFormat, viewportSize) {
+  static getResponsiveHeightForContext_(autoFormat, viewportSize, element) {
     switch (autoFormat) {
       case ADSENSE_RSPV_TAG:
         const minHeight = 100;
@@ -594,7 +599,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
       case ADSENSE_MCRSPV_TAG:
-        return getMatchedContentResponsiveHeight(viewportSize.width);
+        return getMatchedContentResponsiveHeightAndUpdatePubParams(
+            viewportSize.width, element);
       default:
         return 0;
     }

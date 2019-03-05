@@ -15,9 +15,14 @@
  */
 
 import {Deferred} from './utils/promise';
-import {cssEscape} from '../third_party/css-escape/css-escape';
+import {
+  assertIsName,
+  isScopeSelectorSupported,
+  prependSelectorsWith,
+} from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
+import {onDocumentReady, whenDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -87,14 +92,34 @@ export function waitForChildPromise(parent, checkFunc) {
 }
 
 /**
- * Waits for document's body to be available.
+ * Waits for document's head to be available.
+ * @param {!Document} doc
+ * @param {function()} callback
+ */
+export function waitForHead(doc, callback) {
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
+}
+
+/**
+ * Waits for the document's head to be available.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function waitForHeadPromise(doc) {
+  return new Promise(resolve => {
+    waitForHead(doc, resolve);
+  });
+}
+
+/**
+ * Waits for document's body to be available and ready.
  * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
  * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  waitForChild(doc.documentElement, () => !!doc.body, callback);
+  return onDocumentReady(doc, callback);
 }
 
 
@@ -104,9 +129,7 @@ export function waitForBody(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyPromise(doc) {
-  return new Promise(resolve => {
-    waitForBody(doc, resolve);
-  });
+  return whenDocumentReady(doc);
 }
 
 
@@ -260,29 +283,13 @@ export function closestNode(node, callback) {
 
 
 /**
- * Finds the closest element with the specified name from this element
- * up the DOM subtree.
- * @param {!Element} element
- * @param {string} tagName
- * @return {?Element}
- */
-export function closestByTag(element, tagName) {
-  if (element.closest) {
-    return element.closest(tagName);
-  }
-  tagName = tagName.toUpperCase();
-  return closest(element, el => {
-    return el.tagName == tagName;
-  });
-}
-
-/**
- * Finds the closest element with the specified selector from this element
+ * Finds the closest ancestor element with the specified selector from this
+ * element.
  * @param {!Element} element
  * @param {string} selector
  * @return {?Element} closest ancestor if found.
  */
-export function closestBySelector(element, selector) {
+export function closestAncestorElementBySelector(element, selector) {
   if (element.closest) {
     return element.closest(selector);
   }
@@ -293,40 +300,36 @@ export function closestBySelector(element, selector) {
 }
 
 /**
- * Checks if the given element matches the selector
- * @param  {!Element} el The element to verify
- * @param  {string} selector The selector to check against
- * @return {boolean} True if the element matched the selector. False otherwise.
+ * Finds all ancestor elements that satisfy predicate.
+ * @param {!Element} child
+ * @param {function(!Element):boolean} predicate
+ * @return {!Array<!Element>}
  */
-export function matches(el, selector) {
-  const matcher = el.matches ||
-      el.webkitMatchesSelector ||
-      el.mozMatchesSelector ||
-      el.msMatchesSelector ||
-      el.oMatchesSelector;
-  if (matcher) {
-    return matcher.call(el, selector);
+export function ancestorElements(child, predicate) {
+  const ancestors = [];
+  for (let ancestor = child.parentElement; ancestor;
+    ancestor = ancestor.parentElement) {
+    if (predicate(ancestor)) {
+      ancestors.push(ancestor);
+    }
   }
-  return false; // IE8 always returns false.
+  return ancestors;
 }
+
 
 /**
- * Finds the first descendant element with the specified name.
- * @param {!Element|!Document|!ShadowRoot} element
+ * Finds all ancestor elements that has the specified tag name.
+ * @param {!Element} child
  * @param {string} tagName
- * @return {?Element}
+ * @return {!Array<!Element>}
  */
-export function elementByTag(element, tagName) {
-  let elements;
-  // getElementsByTagName() is not supported on ShadowRoot.
-  if (typeof element.getElementsByTagName === 'function') {
-    elements = element.getElementsByTagName(tagName);
-  } else {
-    elements = element./*OK*/querySelectorAll(tagName);
-  }
-  return (elements && elements[0]) || null;
+export function ancestorElementsByTag(child, tagName) {
+  assertIsName(tagName);
+  tagName = tagName.toUpperCase();
+  return ancestorElements(child, el => {
+    return el.tagName == tagName;
+  });
 }
-
 
 /**
  * Finds the first child element that satisfies the callback.
@@ -398,45 +401,13 @@ export function childNodes(parent, callback) {
 }
 
 /**
- * @type {boolean|undefined}
- * @visibleForTesting
- */
-let scopeSelectorSupported;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setScopeSelectorSupportedForTesting(val) {
-  scopeSelectorSupported = val;
-}
-
-/**
- * Test that the :scope selector is supported and behaves correctly.
- * @param {!Element} parent
- * @return {boolean}
- */
-function isScopeSelectorSupported(parent) {
-  const doc = parent.ownerDocument;
-  try {
-    const testElement = doc.createElement('div');
-    const testChild = doc.createElement('div');
-    testElement.appendChild(testChild);
-    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
-    // therefore we test actual functionality of`:scope` as well.
-    return testElement./*OK*/querySelector(':scope div') === testChild;
-  } catch (e) {
-    return false;
-  }
-}
-
-/**
  * Finds the first child element that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
+  assertIsName(attr);
   return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -448,6 +419,7 @@ export function childElementByAttr(parent, attr) {
  * @return {?Element}
  */
 export function lastChildElementByAttr(parent, attr) {
+  assertIsName(attr);
   return lastChildElement(parent, el => {
     return el.hasAttribute(attr);
   });
@@ -461,6 +433,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
+  assertIsName(attr);
   return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
@@ -472,6 +445,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
+  assertIsName(tagName);
   return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
@@ -483,32 +457,38 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
+  assertIsName(tagName);
   return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
 /**
- * Prefixes a selector for ancestor selection. Splits in subselectors and
- * applies prefix to each.
- *
- * e.g.
- * ```
- *   scopeSelector('.i-amphtml-scoped', 'div'); // .i-amphtml-scoped div
- *   scopeSelector(':scope', 'div, ul');        // :scope div, :scope ul
- *   scopeSelector('article >', 'div, ul');     // article > div, article > ul
- * ```
- *
- * @param {string} ancestorSelector
- * @param {string} descendantSelector
- * @return {string}
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {string} selector The selector to check against
+ * @return {boolean} True if the element matched the selector. False otherwise.
  */
-function scopeSelector(ancestorSelector, descendantSelector) {
-  return descendantSelector
-      .split(',')
-      .map(subSelector => `${ancestorSelector} ${subSelector}`)
-      .join(',');
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false; // IE8 always returns false.
 }
 
-export const scopeSelectorForTesting = scopeSelector;
+/**
+ * Finds the first descendant element with the specified name.
+ * @param {!Element|!Document|!ShadowRoot} element
+ * @param {string} tagName
+ * @return {?Element}
+ */
+export function elementByTag(element, tagName) {
+  assertIsName(tagName);
+  return element./*OK*/querySelector(tagName);
+}
 
 /**
  * Finds all elements that matche `selector`, scoped inside `root`
@@ -523,7 +503,7 @@ export const scopeSelectorForTesting = scopeSelector;
 function scopedQuerySelectionFallback(root, selector) {
   const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
-  const scopedSelector = scopeSelector(`.${unique}`, selector);
+  const scopedSelector = prependSelectorsWith(selector, `.${unique}`);
   const elements = root./*OK*/querySelectorAll(scopedSelector);
   root.classList.remove(unique);
   return elements;
@@ -537,11 +517,8 @@ function scopedQuerySelectionFallback(root, selector) {
  * @return {?Element}
  */
 export function scopedQuerySelector(root, selector) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(root);
-  }
-  if (scopeSelectorSupported) {
-    return root./*OK*/querySelector(scopeSelector(':scope', selector));
+  if (isScopeSelectorSupported(root)) {
+    return root./*OK*/querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
   // Only IE.
@@ -557,11 +534,9 @@ export function scopedQuerySelector(root, selector) {
  * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(root);
-  }
-  if (scopeSelectorSupported) {
-    return root./*OK*/querySelectorAll(scopeSelector(':scope', selector));
+  if (isScopeSelectorSupported(root)) {
+    return root./*OK*/querySelectorAll(
+        prependSelectorsWith(selector, ':scope'));
   }
 
   // Only IE.
@@ -612,38 +587,6 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
   } while ((currentElement = currentElement.parentNode) &&
             currentElement != opt_stopNode);
   return false;
-}
-
-
-/**
- * Finds all ancestor elements that satisfy predicate.
- * @param {!Element} child
- * @param {function(!Element):boolean} predicate
- * @return {!Array<!Element>}
- */
-export function ancestorElements(child, predicate) {
-  const ancestors = [];
-  for (let ancestor = child.parentElement; ancestor;
-    ancestor = ancestor.parentElement) {
-    if (predicate(ancestor)) {
-      ancestors.push(ancestor);
-    }
-  }
-  return ancestors;
-}
-
-
-/**
- * Finds all ancestor elements that has the specified tag name.
- * @param {!Element} child
- * @param {string} tagName
- * @return {!Array<!Element>}
- */
-export function ancestorElementsByTag(child, tagName) {
-  tagName = tagName.toUpperCase();
-  return ancestorElements(child, el => {
-    return el.tagName == tagName;
-  });
 }
 
 /**
@@ -741,34 +684,6 @@ export function isRTL(doc) {
                  || doc.documentElement.getAttribute('dir')
                  || 'ltr';
   return dir == 'rtl';
-}
-
-
-/**
- * Escapes an ident (ID or a class name) to be used as a CSS selector.
- *
- * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
- *
- * @param {string} ident
- * @return {string}
- */
-export function escapeCssSelectorIdent(ident) {
-  return cssEscape(ident);
-}
-
-/**
- * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
- *
- * See https://github.com/w3c/csswg-drafts/issues/2306.
- *
- * @param {string|number} ident
- * @return {string}
- */
-export function escapeCssSelectorNth(ident) {
-  const escaped = String(ident);
-  // Ensure it doesn't close the nth-child psuedo class.
-  devAssert(escaped.indexOf(')') === -1);
-  return escaped;
 }
 
 /**

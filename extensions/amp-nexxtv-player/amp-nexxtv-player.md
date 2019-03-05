@@ -69,29 +69,27 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>data-streamtype (optional)</strong></td>
-    <td>
-      Indicates the media streaming type, which can be one of the following:
-      <ul>
-          <li>`video` (default)</li>
-          <li>`audio`</li>
-          <li>`playlist`</li>
-          <li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
-          <li>`live`</li>
-          <li>`album`: An audio playlist.</li>
-      </ul>
-    </td>
+    <td><p>Indicates the media streaming type, which can be one of the following:</p>
+<ul>
+  <li>`video` (default)</li>
+  <li>`audio`</li>
+  <li>`playlist`</li>
+  <li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
+  <li>`live`</li>
+  <li>`album`: An audio playlist.</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-seek-to (optional)</strong></td>
-    <td>Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.</td>
+    <td>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-mode (optional)</strong></td>
-    <td>Indicates the data mode, which can be `static` (default) or `api`.</td>
+    <td>Indicates the data mode, which can be <code>static</code> (default) or <code>api</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-origin (optional)</strong></td>
-    <td>Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.</td>
+    <td>Indicates the source from which the embedded domain media is played. By default this is set to <code>https://embed.nexx.cloud/</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-disable-ads (optional)</strong></td>
@@ -103,7 +101,7 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

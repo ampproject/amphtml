@@ -44,8 +44,6 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
@@ -59,6 +57,7 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -314,13 +313,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
-
-    /**
-     * Used as a signal in some of the CSI pings.
-     * @private @const {string}
-     */
-    this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
-        '-1';
 
     /**
      * Mapping of feature name to value extracted from ad response header
@@ -1413,15 +1405,10 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error executing onCreativeRender', err);
       })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      const iniLoadPromise = friendlyIframeEmbed.whenIniLoaded().then(() => {
+      friendlyIframeEmbed.whenIniLoaded().then(() => {
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
       });
-      const isIniLoadFixExpr = !!frameDoc.querySelector(
-          'meta[name="amp-experiments-opt-in"][content*="fie_ini_load_fix"]');
-      if (!isIniLoadFixExpr) {
-        return iniLoadPromise;
-      }
 
       // There's no need to wait for all resources to load.
       // StartRender is enough

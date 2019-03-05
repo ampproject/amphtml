@@ -75,8 +75,18 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 22
+// NEXT AVAILABLE TAG: 25
 message AttrSpec {
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this AttrSpec. If a Type Identifier is in enabled_by then this
+  // AttrSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // AttrSpec will not be used in validating parsed documents with that
+  // Type Identifier. An AttrSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 23;
+  repeated string disabled_by = 24;
+
   // Use lower-case attribute names only.
   optional string name = 1;
   repeated string alternative_names = 2;
@@ -148,6 +158,10 @@ message AttrSpec {
   // requires that the named extended component script tag is present on the
   // page.
   repeated string requires_extension = 19;
+
+  // If set, this attr is invalid unless the current tag has an ancestor
+  // tag which set one or more of the required markers.
+  optional AncestorMarker requires_ancestor = 22;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -296,6 +310,20 @@ message AmpLayout {
   optional bool defines_default_height = 3;
 }
 
+// An AncestorMarker is a state maintained on the stack of matching tags.
+// When a TagSpec with an AncestorMarker matches, this Marker is placed on the
+// stack until the matched html tag is popped from the stack. Other rules may be
+// triggered by the presence of a specific AncestorMarker on the stack.
+message AncestorMarker {
+  enum Marker {
+    UNKNOWN = 0;
+    // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
+    // See https://github.com/ampproject/amphtml/20524 for more context.
+    AUTOSCROLL = 1;
+  }
+  repeated Marker marker = 1;
+}
+
 // TagSpec::child_tags uses this configuration to specify which child tags
 // are expected for a specific tag.
 //
@@ -425,13 +453,23 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 37
+// NEXT AVAILABLE TAG: 39
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
   // The repeated field is not allowed to be empty, it must have at least one
   // HtmlFormat.
   repeated HtmlFormat.Code html_format = 21;
+
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this TagSpec. If a Type Identifier is in enabled_by then this
+  // TagSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // TagSpec will not be used in validating parsed documents with that
+  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 35;
+  repeated string disabled_by = 36;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
@@ -445,16 +483,6 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
-
-  // If provided, the Type Identifier(s) that either enable or disable
-  // this TagSpec. If a Type Identifier is in enabled_by then this
-  // TagSpec will be used in validating parsed documents with that Type
-  // Identifier. If a Type Identifier is in disabled_by then this
-  // TagSpec will not be used in validating parsed documents with that
-  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
-  // set.
-  repeated string enabled_by = 35;
-  repeated string disabled_by = 36;
 
   // NamedId's are used to uniquely identify specific TagSpecs in the
   // validator rules in a stable manner. Most TagSpecs have no set NamedId.
@@ -573,6 +601,9 @@ message TagSpec {
 
   // If set, specifies which AMP Layouts are supported by this element.
   optional AmpLayout amp_layout = 11;
+
+  // If set, triggers related validation rules for descendants of this tag.
+  optional AncestorMarker mark_descendants = 38;
 
   // Deprecated fields, do not reuse.
   // reserved 14, 26;

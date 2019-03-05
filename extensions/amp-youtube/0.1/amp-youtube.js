@@ -19,6 +19,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
+  addUnsafeAllowAutoplay,
   createFrameFor,
   isJsonOrObj,
   mutedOrUnmutedEvent,
@@ -180,7 +181,7 @@ class AmpYoutube extends AMP.BaseElement {
       descriptor = 'live_stream?channel='
         + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
     }
-    return `${baseUrl}${descriptor}enablejsapi=1`;
+    return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
   /**
@@ -234,6 +235,10 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
+
+    // This is temporary until M74 launches.
+    // TODO(aghassemi, #21247)
+    addUnsafeAllowAutoplay(iframe);
 
     this.iframe_ = iframe;
 

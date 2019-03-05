@@ -75,29 +75,27 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-referrer</strong></td>
-    <td>Sets the referrer to be used for analytics within the player. This supports AMP variables such as `EXTERNAL_REFERRER`.</td>
+    <td>Sets the referrer to be used for analytics within the player. This supports AMP variables such as <code>EXTERNAL_REFERRER</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-param-&#42;</strong></td>
-    <td>All `data-param-*`  attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.<br>
-
-    Keys and values will be URI encoded. Keys will be camel cased.<br>
-
-    <ul>
-    <li>`data-param-geo="us"` becomes `&geo=us`
-    </li><li>`data-param-custom-data="key:value;key2:value2"` becomes `&customData=key%3Avalue%3Bkey2%3Avalue2`</li>
-    </ul>
-    </td>
+    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.</p>
+<p>Keys and values will be URI encoded. Keys will be camel cased.<br></p>
+<ul>
+  <li>`data-param-geo="us"` becomes `&geo=us`
+  </li>
+  <li>`data-param-custom-data="key:value;key2:value2"` becomes `&customData=key%3Avalue%3Bkey2%3Avalue2`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

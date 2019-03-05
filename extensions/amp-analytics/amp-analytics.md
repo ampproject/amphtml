@@ -517,7 +517,7 @@ The element visibility trigger waits for the signal specified by the `waitFor` p
 If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
-##### Error trigger (In experiment)
+##### Error trigger
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 

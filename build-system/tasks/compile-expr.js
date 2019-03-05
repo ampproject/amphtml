@@ -76,7 +76,7 @@ function compileBindExpr() {
 }
 
 function compileCssExpr() {
-  const path = 'extensions/amp-animation/0.1/';
+  const path = 'extensions/amp-animation/0.1/parsers/';
   const jisonFilename = 'css-expr-impl.jison';
   const imports = 'import * as ast from \'./css-expr-ast\';';
   const parserName = 'cssParser';

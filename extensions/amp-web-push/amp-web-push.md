@@ -65,8 +65,8 @@ Clicking the subscription widget pops up a page prompting the user for notificat
 <table>
   <tr>
     <td width="40%"><strong>visibility (required)</strong></td>
-    <td>Describes when the widget is shown. The value can be one of `unsubscribed`, `subscribed`, or `blocked`.<br>
-    Widgets are initially hidden while the user's subscription state is computed.</td>
+    <td>Describes when the widget is shown. The value can be one of <code>unsubscribed</code>, <code>subscribed</code>, or <code>blocked</code>.<br>
+Widgets are initially hidden while the user's subscription state is computed.</td>
   </tr>
 
 </table>

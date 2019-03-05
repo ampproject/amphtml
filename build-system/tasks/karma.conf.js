@@ -15,6 +15,11 @@
  */
 'use strict';
 
+const {gitCommitterEmail} = require('../git');
+const {isTravisBuild, travisJobNumber} = require('../travis');
+
+const TEST_SERVER_PORT = 8081;
+
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
@@ -66,7 +71,7 @@ module.exports = {
       ['babelify', {'sourceMapsAbsolute': true}],
     ],
     // Prevent "cannot find module" errors on Travis. See #14166.
-    bundleDelay: process.env.TRAVIS ? 5000 : 1200,
+    bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -128,7 +133,7 @@ module.exports = {
   autoWatch: true,
 
   browsers: [
-    process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
+    isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
   customLaunchers: {
@@ -226,7 +231,8 @@ module.exports = {
 
   sauceLabs: {
     testName: 'AMP HTML on Sauce',
-    tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+    // Identifier used in build-system/sauce_connect/start_sauce_connect.sh.
+    tunnelIdentifier: isTravisBuild() ? travisJobNumber() : gitCommitterEmail(),
     startConnect: false,
     connectOptions: {
       noSslBumpDomains: 'all',
@@ -237,10 +243,11 @@ module.exports = {
     mocha: {
       reporter: 'html',
       // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000,
+      timeout: isTravisBuild() ? 10000 : 2000,
     },
     captureConsole: false,
     verboseLogging: false,
+    testServerPort: TEST_SERVER_PORT,
   },
 
   singleRun: true,
@@ -250,7 +257,7 @@ module.exports = {
   failOnEmptyTestSuite: false,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
-  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
+  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
@@ -258,7 +265,6 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',
@@ -271,10 +277,11 @@ module.exports = {
     'karma-sauce-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',
+    'karma-source-map-support',
     'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
-        return require(require.resolve('../app.js')).middleware;
+        return require(require.resolve('../app.js'));
       }],
     },
   ],

@@ -210,11 +210,9 @@ export class AmpList extends AMP.BaseElement {
       this.attemptToFit_(placeholder);
     }
 
-    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
-      this.viewport_.onResize(() => {
-        this.attemptToFit_(dev().assertElement(this.container_));
-      });
-    }
+    this.viewport_.onResize(() => {
+      this.attemptToFit_(dev().assertElement(this.container_));
+    });
 
     this.loadMoreEnabledPromise_.then(enabled => {
       if (enabled) {
@@ -225,6 +223,7 @@ export class AmpList extends AMP.BaseElement {
           if (overflowElement) {
             toggle(overflowElement, false);
           }
+          this.element.warnOnMissingOverflow = false;
         }).then(() => {
           this.adjustContainerForLoadMoreButton_();
         });
@@ -708,43 +707,53 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.getAttribute('layout') == Layout.CONTAINER) {
       return;
     }
-    this.measureElement(() => {
-      const targetHeight = target./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      this.loadMoreEnabledPromise_.then(enabled => {
-        if (enabled) {
-          this.attemptToFitLoadMoreElements_(targetHeight, height);
-        } else {
+    this.loadMoreEnabledPromise_.then(enabled => {
+      if (enabled) {
+        const element = !!this.loadMoreSrc_ ?
+          this.loadMoreService_.getLoadMoreButton() :
+          this.loadMoreService_.getLoadMoreEndElement();
+        this.attemptToFitLoadMoreElement_(element, target);
+      } else {
+        this.measureElement(() => {
+          const targetHeight = target./*OK*/scrollHeight;
+          const height = this.element./*OK*/offsetHeight;
           if (targetHeight > height) {
             this.attemptChangeHeight(targetHeight).catch(() => {});
           }
-        }
-      });
+        });
+      }
     });
   }
 
   /**
-   * @param {number} targetHeight
-   * @param {number} height
+   * @param {?Element} element
+   * @param {!Element} target
    * @private
    */
-  attemptToFitLoadMoreElements_(targetHeight, height) {
-    const loadMoreHeight = this.loadMoreService_
-        .getLoadMoreButton()./*OK*/offsetHeight;
-    if (targetHeight + loadMoreHeight > height) {
-      this.attemptChangeHeight(targetHeight + loadMoreHeight)
-          .then(() => {
-            this.resizeFailed_ = false;
-            // If there were not enough items to fill the list, consider
-            // automatically loading more if load-more="auto" is enabled
-            if (this.element.getAttribute('load-more') === 'auto') {
-              this.maybeLoadMoreItems_();
-            }
-          })
-          .catch(() => {
-            this.resizeFailed_ = true;
-          });
-    }
+  attemptToFitLoadMoreElement_(element, target) {
+    this.measureElement(() => {
+      const targetHeight = target./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
+      const loadMoreHeight = element ? element./*OK*/offsetHeight : 0;
+      if (targetHeight + loadMoreHeight > height) {
+        this.attemptChangeHeight(targetHeight + loadMoreHeight)
+            .then(() => {
+              this.resizeFailed_ = false;
+              // If there were not enough items to fill the list, consider
+              // automatically loading more if load-more="auto" is enabled
+              if (this.element.getAttribute('load-more') === 'auto') {
+                this.maybeLoadMoreItems_();
+              }
+              setStyles(dev().assertElement(this.container_), {
+                'max-height': '',
+              });
+            })
+            .catch(() => {
+              this.resizeFailed_ = true;
+              this.adjustContainerForLoadMoreButton_();
+            });
+      }
+    });
   }
 
   /**
@@ -831,7 +840,10 @@ export class AmpList extends AMP.BaseElement {
    */
   maybeSetLoadMore_() {
     return this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled && this.loadMoreSrc_) {
+      if (!enabled) {
+        return;
+      }
+      if (this.loadMoreSrc_) {
         const autoLoad = this.element.getAttribute('load-more') === 'auto';
         if (autoLoad) {
           this.setupLoadMoreAuto_();
@@ -846,9 +858,10 @@ export class AmpList extends AMP.BaseElement {
           this.unlistenLoadMore_ = listen(
               this.loadMoreService_.getLoadMoreButtonClickable(),
               'click', () => this.loadMoreCallback_());
-        }).then(() => {
-          this.attemptToFit_(dev().assertElement(this.container_));
         });
+      } else {
+        return this.mutateElement(
+            () => this.loadMoreService_.setLoadMoreEnded());
       }
     });
   }
@@ -885,14 +898,17 @@ export class AmpList extends AMP.BaseElement {
             this.unlistenLoadMore_ = null;
           }
         }).catch(() => {
-          this.mutateElement(() => {
-            this.loadMoreService_.setLoadMoreFailed();
-          });
-          const loadMoreFailedClickable = this.loadMoreService_
-              .getLoadMoreFailedClickable();
-          this.unlistenLoadMore_ = listen(
-              loadMoreFailedClickable,
-              'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
+          this.mutateElement(() => this.loadMoreService_.setLoadMoreFailed())
+              .then(() => {
+                this.attemptToFitLoadMoreElement_(
+                    this.loadMoreService_.getLoadMoreFailedElement(),
+                    dev().assertElement(this.container_));
+                const loadMoreFailedClickable = this.loadMoreService_
+                    .getLoadMoreFailedClickable();
+                this.unlistenLoadMore_ = listen(
+                    loadMoreFailedClickable,
+                    'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
+              });
         });
   }
 
@@ -923,8 +939,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.resizeFailed_) {
       return;
     }
-    const lastItem = dev().assertElement(this.container_.lastChild);
-    this.viewport_.getClientRectAsync(lastItem)
+    const endoOfListMarker = this.container_.lastChild || this.container_;
+
+    this.viewport_.getClientRectAsync(dev().assertElement(endoOfListMarker))
         .then(positionRect => {
           const viewportHeight = this.viewport_.getHeight();
           const viewportTop = this.viewport_.getScrollTop();

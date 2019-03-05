@@ -328,6 +328,9 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     describe(test.desc, () => {
+      const {testServerPort} = window.ampTestRuntimeConfig;
+      const baseUrl = `http://localhost:${testServerPort}`;
+
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
       });
@@ -379,7 +382,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should do simple JSON fetch', () => {
         sandbox.stub(user(), 'assert');
-        return xhr.fetchJson('http://localhost:8081/get?k=v1')
+        return xhr.fetchJson(`${baseUrl}/get?k=v1`)
             .then(res => res.json())
             .then(res => {
               expect(res).to.exist;
@@ -388,8 +391,8 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should redirect fetch', () => {
-        const url = 'http://localhost:8081/redirect-to?url=' + encodeURIComponent(
-            'http://localhost:8081/get?k=v2');
+        const url = `${baseUrl}/redirect-to?url=`
+            + encodeURIComponent(`${baseUrl}/get?k=v2`);
         return xhr.fetchJson(url, {ampCors: false})
             .then(res => res.json())
             .then(res => {
@@ -399,7 +402,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should fail fetch for 400-error', () => {
-        const url = 'http://localhost:8081/status/404';
+        const url = `${baseUrl}/status/404`;
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
@@ -408,7 +411,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'http://localhost:8081/status/500?CID=cid';
+        const url = `${baseUrl}/status/500?CID=cid`;
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
@@ -419,7 +422,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should NOT succeed CORS setting cookies without credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
+        const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.be.null;
@@ -428,7 +431,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should succeed CORS setting cookies with credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
+        const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
         return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.equal('v1');
@@ -437,7 +440,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should ignore CORS setting cookies w/omit credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
+        const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
         return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.be.null;
@@ -451,8 +454,8 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should expose HTTP headers', () => {
-        const url = 'http://localhost:8081/response-headers?' +
-            'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
+        const url = `${baseUrl}/response-headers?AMP-Header=Value1&` +
+            'Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
         });
@@ -537,7 +540,8 @@ describe.configure().skipSafari().run('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const url = 'http://localhost:8081/post';
+    const {testServerPort} = window.ampTestRuntimeConfig;
+    const url = `http://localhost:${testServerPort}/post`;
 
     describe(test.desc + ' POST', () => {
       let xhr;

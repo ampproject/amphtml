@@ -81,28 +81,33 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>Required if no `<source>` children are present. Must be HTTPS.</td>
+    <td>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</td>
   </tr>
   <tr>
     <td width="40%"><strong>poster</strong></td>
     <td>The image for the frame to be displayed before video playback has started. By
-    default, the first frame is displayed.
+default, the first frame is displayed.
 <br>
-    Alternatively, you can present a click-to-play overlay. For details, see the [Click-to-Play overlay](#click-to-play-overlay) section below.</td>
+Alternatively, you can present a click-to-play overlay. For details, see the <a href="#click-to-play-overlay">Click-to-Play overlay</a> section below.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>controls</strong></td>
-    <td>This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.</td>
+    <td>This attribute is similar to the <code>controls</code> attribute in the HTML5 <code>video</code>. If this attribute is present, the browser offers controls to allow the user to control video playback.</td>
   </tr>
   <tr>
     <td width="40%"><strong>controlsList</strong></td>
-    <td>Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.</td>
+    <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 video element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>loop</strong></td>
@@ -110,7 +115,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
   </tr>
   <tr>
     <td width="40%"><strong>crossorigin</strong></td>
-    <td>Required if a `track` resource is hosted on a different origin than the document.</td>
+    <td>Required if a <code>track</code> resource is hosted on a different origin than the document.</td>
   </tr>
   <tr>
     <td width="40%"><strong>disableremoteplayback</strong></td>
@@ -118,20 +123,20 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
   </tr>
   <tr>
     <td width="40%"><strong>muted (deprecated)</strong></td>
-    <td>The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.</td>
+    <td>The <code>muted</code> attribute is deprecated and no longer has any effect. The <code>autoplay</code> attribute automatically controls the mute behavior.</td>
   </tr>
   <tr>
     <td width="40%"><strong>noaudio</strong></td>
     <td>Annotates the video as having no audio. This hides the equalizer icon that is displayed
-    when the video has autoplay.</td>
+when the video has autoplay.</td>
   </tr>
   <tr>
     <td width="40%"><strong>rotate-to-fullscreen</strong></td>
-    <td>If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).</td>
+    <td>If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen">Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

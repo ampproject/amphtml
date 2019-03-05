@@ -61,35 +61,35 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
-    <td>The absolute URL of the Facebook page. For example, `https://www.facebook.com/imdb/`.</td>
+    <td>The absolute URL of the Facebook page. For example, <code>https://www.facebook.com/imdb/</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-locale (optional)</strong></td>
-    <td>By default, the locale is set to the user's system language; however, you can specify a locale as well. For details, visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization).</td>
+    <td>By default, the locale is set to the user's system language; however, you can specify a locale as well. For details, visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-tabs (optional)</strong></td>
-    <td>Specifies the tabs to render (i.e., `timeline`, `events`, `messages`). Use a comma-separated list to add multiple tabs (e.g., `timeline, events`). By default, the Facebook page plugin shows the timeline activity.</td>
+    <td>Specifies the tabs to render (i.e., <code>timeline</code>, <code>events</code>, <code>messages</code>). Use a comma-separated list to add multiple tabs (e.g., <code>timeline, events</code>). By default, the Facebook page plugin shows the timeline activity.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-hide-cover (optional)</strong></td>
-    <td>Hides the cover photo in the header. Default value is `false`.</td>
+    <td>Hides the cover photo in the header. Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-show-facepile (optional)</strong></td>
-    <td>Shows profile photos of friends who like the page. Default value is `true`.</td>
+    <td>Shows profile photos of friends who like the page. Default value is <code>true</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-hide-cta (optional)</strong></td>
-    <td>Hides the custom call to action button (if available). Default value is `false`.</td>
+    <td>Hides the custom call to action button (if available). Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-small-header (optional)</strong></td>
-    <td>Uses the small header instead. Default value is `false`.</td>
+    <td>Uses the small header instead. Default value is <code>false</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

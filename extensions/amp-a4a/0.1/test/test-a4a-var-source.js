@@ -68,6 +68,21 @@ describe('A4AVariableSource', () => {
     expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
   });
 
+  it('should replace NAV_TIMING', () => {
+    expect(expandSync('NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
+    return expandAsync('NAV_TIMING', ['navigationStart']).then(val =>
+      expect(val).to.match(/\d+/)
+    );
+  });
+
+  it('should replace NAV_TYPE', () => {
+    expect(expandSync('NAV_TYPE')).to.match(/\d/);
+  });
+
+  it('should replace NAV_REDIRECT_COUNT', () => {
+    expect(expandSync('NAV_REDIRECT_COUNT')).to.match(/\d/);
+  });
+
   it('should replace HTML_ATTR', () => {
     expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal(
         '[{\"id\":\"parent\"}]');
@@ -84,9 +99,6 @@ describe('A4AVariableSource', () => {
   }
 
   // Performance timing info.
-  undefinedVariable('NAV_TIMING');
-  undefinedVariable('NAV_TYPE');
-  undefinedVariable('NAV_REDIRECT_COUNT');
   undefinedVariable('PAGE_LOAD_TIME');
   undefinedVariable('DOMAIN_LOOKUP_TIME');
   undefinedVariable('TCP_CONNECT_TIME');

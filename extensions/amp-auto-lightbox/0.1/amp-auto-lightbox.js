@@ -24,11 +24,17 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {CarouselCriteria} from './carousel-criteria';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {resolveFalse, resolveTrue} from './utils/promise';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
@@ -67,21 +73,34 @@ export const RENDER_AREA_RATIO = 1.2;
 /** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.25;
 
+/** @const {!Array<string>} */
+const CANDIDATES = ['amp-img', 'amp-carousel'];
+
 /**
- * Selector for subnodes for which the auto-lightbox treatment does not apply.
+ * Selector for subnodes by attribute for which the auto-lightbox treatment
+ * does not apply. These can be set directly on the candidate or on an ancestor.
  */
-const DISABLED_ANCESTORS = [
+const DISABLED_BY_ATTR = [
   // Runtime-specific.
   '[placeholder]',
 
   // Explicitly opted out.
   '[data-amp-auto-lightbox-disable]',
 
+  // Considered "actionable", i.e. that are bound to a default
+  // onclick action(e.g. `button`) or where it cannot be determined whether
+  // they're actionable or not (e.g. `amp-script`).
+  'amp-selector [option]',
+].join(',');
+
+/**
+ * Selector for subnodes for which the auto-lightbox treatment does not apply.
+ */
+const DISABLED_ANCESTORS = [
   // Ancestors considered "actionable", i.e. that are bound to a default
   // onclick action(e.g. `button`) or where it cannot be determined whether
   // they're actionable or not (e.g. `amp-script`).
   'a[href]',
-  'amp-selector [option]',
   'amp-script',
   'amp-story',
   'button',
@@ -90,8 +109,6 @@ const DISABLED_ANCESTORS = [
   'amp-lightbox',
 
   // Special treatment.
-  // TODO(alanorozco): Allow and possibly group carousels where images are the
-  // only content.
   'amp-carousel',
 ].join(',');
 
@@ -114,13 +131,65 @@ export class Criteria {
 
   /**
    * @param {!Element} element
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   static meetsAll(element) {
-    return Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsTreeShapeCriteria(element);
+    if (!Criteria.meetsSimpleCriteria(element) ||
+        !Criteria.meetsTreeShapeCriteria(element)) {
+      return resolveFalse();
+    }
+    return Criteria.meetsComplexCriteria(element);
   }
 
+  /**
+   * Criteria that is "simple", ie runs quickly and discards elements in order
+   * to shortcircuit.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static meetsSimpleCriteria(element) {
+    if (element.tagName.toUpperCase() == 'AMP-IMG') {
+      return ImageCriteria.meetsSizingCriteria(element);
+    }
+    return true;
+  }
+
+  /**
+   * Criteria that is "complex", ie takes longer to run and discards elements
+   * after they're likely to be good candidates per previous conditions.
+   * @param {!Element} element
+   * @return {!Promise<boolean>}
+   */
+  static meetsComplexCriteria(element) {
+    if (element.tagName.toUpperCase() == 'AMP-CAROUSEL') {
+      return CarouselCriteria.meetsAll(element);
+    }
+    return resolveTrue();
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static meetsTreeShapeCriteria(element) {
+    const disabledSelector = `${DISABLED_ANCESTORS},${DISABLED_BY_ATTR}`;
+    const disabledAncestor =
+        closestAncestorElementBySelector(element, disabledSelector);
+    // since we lookup both amp-img and amp-carousel at the same level, and
+    // we'd like to give amp-carousel special treatment by containing amp-img's,
+    // we need to filter out images inside carousels, but not carousels
+    // themselves.
+    if (disabledAncestor &&
+        (disabledAncestor != element ||
+        matches(disabledAncestor, DISABLED_BY_ATTR))) {
+      return false;
+    }
+    const actions = Services.actionServiceForDoc(element);
+    return !actions.hasResolvableAction(element, 'tap');
+  }
+}
+
+class ImageCriteria {
   /**
    * @param {!Element} element
    * @return {boolean}
@@ -141,18 +210,6 @@ export class Criteria {
         naturalHeight,
         vw,
         vh);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static meetsTreeShapeCriteria(element) {
-    if (closestBySelector(element, DISABLED_ANCESTORS)) {
-      return false;
-    }
-    const actions = Services.actionServiceForDoc(element);
-    return !actions.hasAction(element, 'tap');
   }
 }
 
@@ -196,7 +253,7 @@ export function meetsSizingCriteria(
 /**
  * Marks a lightbox candidate as visited as not to rescan on DOM update.
  * @param {!Element} candidate
- * @return {!Promise<!Element>}
+ * @return {!Promise}
  */
 function markAsVisited(candidate) {
   return Mutation.mutate(candidate, () => {
@@ -206,11 +263,21 @@ function markAsVisited(candidate) {
 
 
 /**
+ * @param {string} tagName
+ * @return {string}
+ */
+function candidateSelector(tagName) {
+  return `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+}
+
+
+/**
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise}
  */
 function whenLoaded(element) {
-  return element.signals().whenSignal(CommonSignals.LOAD_END);
+  return whenUpgradedToCustomElement(element).then(element =>
+    element.signals().whenSignal(CommonSignals.LOAD_END));
 }
 
 
@@ -223,8 +290,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector =
-        `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+    const selector = CANDIDATES.map(candidateSelector).join(',');
     const candidates = toArray(root.querySelectorAll(selector));
     candidates.forEach(markAsVisited);
     return candidates;
@@ -295,7 +361,8 @@ export class Mutation {
    * @return {!Promise}
    */
   static mutate(ampEl, mutator) {
-    return ampEl.getImpl().then(impl => impl.mutateElement(mutator));
+    return whenUpgradedToCustomElement(ampEl)
+        .then(ampEl => ampEl.getResources().mutateElement(ampEl, mutator));
   }
 }
 
@@ -406,12 +473,13 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
-      if (!Criteria.meetsAll(candidate)) {
-        dev().info(TAG, 'discarded', candidate);
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return Criteria.meetsAll(candidate).then(meetsAll => {
+        if (!meetsAll) {
+          return;
+        }
+        dev().info(TAG, 'apply', candidate);
+        return apply(ampdoc, candidate);
+      });
     }, NOOP));
 }
 

@@ -58,105 +58,90 @@ With responsive layout, the width and height from the example should yield corre
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>
-      If this attribute is present, and the browser supports autoplay:
-      <ul>
-          <li>the video is automatically muted before autoplay starts</li>
-          <li>when the video is scrolled out of view, the video is paused</li>
-          <li>when the video is scrolled into view, the video resumes playback</li>
-          <li>when the user taps the video, the video is unmuted</li>
-          <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-      </ul>
-    </td>
+    <td>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-videoid (required)</strong></td>
-    <td>The Dailymotion video id found in every video page URL. For example, `"x2m8jpp"` is the video id for `https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation`.</td>
+    <td>The Dailymotion video id found in every video page URL. For example, <code>"x2m8jpp"</code> is the video id for <code>https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-mute (optional)</strong></td>
-    <td>
-      Indicates whether to mute the video.
-      <ul>
-          <li>Value: `"true"` or `"false"`</li>
-          <li>Default value: `"false"`</li>
-      </ul>
-    </td>
+    <td>Indicates whether to mute the video.</p>
+<ul>
+  <li>Value: `"true"` or `"false"`</li>
+  <li>Default value: `"false"`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-endscreen-enable (optional)</strong></td>
-    <td>
-      Indicates whether to enable the end screen.
-      <ul>
-          <li>Value: `"true"` or `"false"`</li>
-          <li>Default value: `"true"`</li>
-      </ul>
-    </td>
+    <td>Indicates whether to enable the end screen.</p>
+<ul>
+  <li>Value: `"true"` or `"false"`</li>
+  <li>Default value: `"true"`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-sharing-enable (optional)</strong></td>
-    <td>
-      Indicates whether to display the sharing button.
-      <ul>
-          <li>Value: `"true"` or `"false"`</li>
-          <li>Default value: `"true"`</li>
-      </ul>
-    </td>
+    <td>Indicates whether to display the sharing button.</p>
+<ul>
+  <li>Value: `"true"` or `"false"`</li>
+  <li>Default value: `"true"`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-start (optional)</strong></td>
-    <td>
-      Specifies the time (in seconds) from which the video should start playing.
-      <ul>
-          <li>Value: integer (number of seconds). For example, `data-start=45`.</li>
-          <li>Default value: `0`</li>
-      </ul>
-    </td>
+    <td>Specifies the time (in seconds) from which the video should start playing.</p>
+<ul>
+  <li>Value: integer (number of seconds). For example, `data-start=45`.</li>
+  <li>Default value: `0`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-ui-highlight (optional)</strong></td>
-    <td>
-      Change the default highlight color used in the controls.
-      <ul>
-          <li>alue: Hexadecimal color value (without the leading #). For example, `data-ui-highlight="e540ff"`.</li>
-      </ul>
-    </td>
+    <td>Change the default highlight color used in the controls.</p>
+<ul>
+  <li>alue: Hexadecimal color value (without the leading #). For example, `data-ui-highlight="e540ff"`.</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-ui-logo (optional)</strong></td>
-    <td>
-      Indicates whether to display the Dailymotion logo.
-      <ul>
-          <li>Value: `"true"` or `"false"`</li>
-          <li>Default value: `"true"`</li>
-      </ul>
-    </td>
+    <td>Indicates whether to display the Dailymotion logo.</p>
+<ul>
+  <li>Value: `"true"` or `"false"`</li>
+  <li>Default value: `"true"`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-info (optional)</strong></td>
-    <td>
-      Indicates whether to show video information (title and owner) on the start screen.
-      <ul>
-          <li>Value: `"true"` or `"false"`</li>
-          <li>Default value: `"true"`</li>
-      </ul>
-    </td>
+    <td>Indicates whether to show video information (title and owner) on the start screen.</p>
+<ul>
+  <li>Value: `"true"` or `"false"`</li>
+  <li>Default value: `"true"`</li>
+</ul></td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-param-\* (optional)</strong></td>
-    <td>
-      All data-param-* attributes are added as query parameters to the src value of the embedded Dailymotion iframe. You can use this attribute to pass custom values not explicitly declared.<br>Keys and values will be URI encoded.
-      <ul>
-          <li>`data-param-origin="example.com"`</li>
-      </ul>
-      Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player#player-parameters) to know more about parameters and options.
-    </td>
+    <td width="40%"><strong>data-param-* (optional)</strong></td>
+    <td><p>All data-param-* attributes are added as query parameters to the src value of the embedded Dailymotion iframe. You can use this attribute to pass custom values not explicitly declared.<br>Keys and values will be URI encoded.</p>
+<ul>
+  <li>`data-param-origin="example.com"`</li>
+</ul>
+<p>Please read <a href="https://developer.dailymotion.com/player#player-parameters">Dailymotion's video player documentation</a> to know more about parameters and options.</p></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>
-      This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-    </td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

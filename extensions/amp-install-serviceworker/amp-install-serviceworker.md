@@ -68,11 +68,11 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>src (required)</strong></td>
-    <td>The URL of the ServiceWorker to register, which must use `https` protocol.</td>
+    <td>The URL of the ServiceWorker to register, which must use <code>https</code> protocol.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-iframe-src (optional)</strong></td>
-    <td>The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol.</td>
+    <td>The URL of an HTML document that installs a ServiceWorker. The URL must use <code>https</code> protocol.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-scope (optional)</strong></td>
@@ -80,23 +80,22 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>layout</strong></td>
-    <td>Must have the value `nodisplay`.</td>
+    <td>Must have the value <code>nodisplay</code>.</td>
   </tr>
   <tr>
      <td width="40%"><strong>data-no-service-worker-fallback-url-match</strong></td>
-     <td>
-      The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be a valid JavaScript RegExp string. For example:
-       <ul>
-           <li>`amp.html`</li>
-           <li>`.*amp`</li>
-           <li>`.*\.amp\.html`</li>
-           <li>`.*\/amp$`</li>
-       </ul>
-     </td>
+     <td><p>The is a regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback. See <a href="#shell-url-rewrite">Shell URL rewrite</a> section for more details. The value must be a valid JavaScript RegExp string. For example:</p>
+      <ul>
+        <li><code>amp.html</code></li>
+        <li><code>.*amp</code></li>
+        <li><code>.*\.amp\.html</code></li>
+        <li><code>.*\/amp$</code></li>
+      </ul>
+    </td>
    </tr>
    <tr>
      <td width="40%"><strong>data-no-service-worker-fallback-shell-url</strong></td>
-     <td>The URL to the shell to use to rewrite URL navigations for no-service-worker fallback. See [Shell URL rewrite](#shell-url-rewrite) section for more details. The value must be an URL on the same origin as the AMP document itself.</td>
+     <td>The URL to the shell to use to rewrite URL navigations for no-service-worker fallback. See <a href="#shell-url-rewrite">Shell URL rewrite</a> section for more details. The value must be an URL on the same origin as the AMP document itself.</td>
    </tr>
 </table>
 

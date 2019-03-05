@@ -71,13 +71,13 @@
   display: none !important;
 }
 
-[desktop-fullbleed].i-amphtml-story-share-menu {
+[desktop].i-amphtml-story-share-menu {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-[desktop-fullbleed] .i-amphtml-story-share-menu-container {
+[desktop] .i-amphtml-story-share-menu-container {
   position: relative !important;
   margin: 0 !important;
   max-width: 320px !important; /* Three icons. */
@@ -86,14 +86,14 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-[desktop-fullbleed].i-amphtml-story-share-menu-visible .i-amphtml-story-share-menu-container {
+[desktop].i-amphtml-story-share-menu-visible .i-amphtml-story-share-menu-container {
   border-radius: 8px !important;
   opacity: 1 !important;
   transform: none !important;
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop-fullbleed] .i-amphtml-story-share-menu-close-button {
+[desktop] .i-amphtml-story-share-menu-close-button {
   display: block !important;
   position: absolute !important;
   top: 0 !important;
@@ -107,7 +107,7 @@
   text-align: center !important;
 }
 
-[desktop-fullbleed] .i-amphtml-story-share-item {
+[desktop] .i-amphtml-story-share-item {
   padding: 0 !important;
   margin: 12px 24px !important;
 }

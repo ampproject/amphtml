@@ -173,8 +173,12 @@ export class Resources {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ = isExperimentOn(this.win,
+        'layers-prioritization');
+
     let boundScorer;
-    if (this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       boundScorer = this.calcTaskScoreLayers_.bind(this);
     } else {
       boundScorer = this.calcTaskScore_.bind(this);
@@ -239,10 +243,6 @@ export class Resources {
 
       /** @private @const {!./layers-impl.LayoutLayers} */
       this.layers_ = layers;
-
-      layers.onScroll((/* elements */) => {
-        this.schedulePass();
-      });
 
       /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
@@ -1042,16 +1042,21 @@ export class Resources {
    * @param {!Element} element
    */
   dirtyElement(element) {
+    let relayoutAll = false;
     if (this.useLayers_) {
       this.layers_.dirty(element);
+      // Remeasures can result in a doc height change.
+      this.maybeChangeHeight_ = true;
     } else {
       const isAmpElement = element.classList.contains('i-amphtml-element');
       if (isAmpElement) {
         const r = Resource.forElement(element);
         this.setRelayoutTop_(r.getLayoutBox().top);
+      } else {
+        relayoutAll = true;
       }
-      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
     }
+    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
 
 
@@ -1087,8 +1092,7 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
-      // TODO setRelayoutTop_ is being deprecated.
-      this.setRelayoutTop_(box.top);
+      this.dirtyElement(element);
     }
     resource.completeCollapse();
     this.schedulePass(FOUR_FRAME_DELAY_);
@@ -1278,6 +1282,7 @@ export class Resources {
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
+      const dirtySet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -1384,6 +1389,9 @@ export class Resources {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
+          if (this.useLayers_) {
+            dirtySet.push(request.resource.element);
+          }
           request.resource./*OK*/changeSize(
               request.newHeight, request.newWidth, newMargins);
           request.resource.overflowCallback(/* overflown */ false,
@@ -1396,7 +1404,11 @@ export class Resources {
         }
       }
 
-      if (minTop != -1) {
+      if (this.useLayers_) {
+        dirtySet.forEach(element => {
+          this.dirtyElement(element);
+        });
+      } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
       }
 
@@ -1419,7 +1431,11 @@ export class Resources {
                 request.callback(/* hasSizeChanged */true);
               }
             });
-            if (minTop != -1) {
+            if (this.useLayers_) {
+              scrollAdjSet.forEach(request => {
+                this.dirtyElement(request.resource.element);
+              });
+            } else if (minTop != -1) {
               this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
@@ -2262,31 +2278,33 @@ export class Resources {
       doPass();
     };
 
-    vsm.addTransition(prerender, prerender, doPass);
-    vsm.addTransition(prerender, visible, doPass);
-    vsm.addTransition(prerender, hidden, doPass);
-    vsm.addTransition(prerender, inactive, doPass);
-    vsm.addTransition(prerender, paused, doPass);
+    const addTransition = vsm.addTransition.bind(vsm); // for size savings.
 
-    vsm.addTransition(visible, visible, doPass);
-    vsm.addTransition(visible, hidden, doPass);
-    vsm.addTransition(visible, inactive, unload);
-    vsm.addTransition(visible, paused, pause);
+    addTransition(prerender, prerender, doPass);
+    addTransition(prerender, visible, doPass);
+    addTransition(prerender, hidden, doPass);
+    addTransition(prerender, inactive, doPass);
+    addTransition(prerender, paused, doPass);
 
-    vsm.addTransition(hidden, visible, doPass);
-    vsm.addTransition(hidden, hidden, doPass);
-    vsm.addTransition(hidden, inactive, unload);
-    vsm.addTransition(hidden, paused, pause);
+    addTransition(visible, visible, doPass);
+    addTransition(visible, hidden, doPass);
+    addTransition(visible, inactive, unload);
+    addTransition(visible, paused, pause);
 
-    vsm.addTransition(inactive, visible, resume);
-    vsm.addTransition(inactive, hidden, resume);
-    vsm.addTransition(inactive, inactive, noop);
-    vsm.addTransition(inactive, paused, doPass);
+    addTransition(hidden, visible, doPass);
+    addTransition(hidden, hidden, doPass);
+    addTransition(hidden, inactive, unload);
+    addTransition(hidden, paused, pause);
 
-    vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, doPass);
-    vsm.addTransition(paused, inactive, unload);
-    vsm.addTransition(paused, paused, noop);
+    addTransition(inactive, visible, resume);
+    addTransition(inactive, hidden, resume);
+    addTransition(inactive, inactive, noop);
+    addTransition(inactive, paused, doPass);
+
+    addTransition(paused, visible, resume);
+    addTransition(paused, hidden, doPass);
+    addTransition(paused, inactive, unload);
+    addTransition(paused, paused, noop);
   }
 
   /**

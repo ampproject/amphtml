@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
@@ -36,7 +37,6 @@ import {
   ancestorElementsByTag,
   childElementByAttr,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
   tryFocus,
@@ -45,6 +45,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -1297,9 +1298,11 @@ export class AmpFormService {
    */
   installHandlers_(ampdoc) {
     return ampdoc.whenReady().then(() => {
-      this.installSubmissionHandlers_(
-          ampdoc.getRootNode().querySelectorAll('form'));
-      this.installGlobalEventListener_(ampdoc.getRootNode());
+      const root = ampdoc.getRootNode();
+
+      this.installSubmissionHandlers_(root.querySelectorAll('form'));
+      AmpFormTextarea.install(ampdoc);
+      this.installGlobalEventListener_(root);
     });
   }
 

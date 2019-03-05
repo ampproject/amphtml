@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import {LinkerManager, areFriendlyDomains} from '../linker-manager';
+import {
+  LinkerManager,
+  areFriendlyDomains,
+  isWildCardMatch,
+} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {
@@ -315,6 +319,65 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       expect(fooDomainUrl).to.not.contain('testLinker2=');
       expect(barDomainUrl).to.contain('testLinker2=');
       expect(barDomainUrl).to.not.contain('testLinker1=');
+    });
+  });
+
+  it('should accept wildcard domains', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        destinationDomains: ['*.foo.com'],
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+        testLinker2: {
+          ids: {
+            id: '222',
+          },
+          destinationDomains: ['*.bar.com*'],
+        },
+        testLinker3: {
+          ids: {
+            id: '333',
+          },
+          destinationDomains: ['*.baz.co*'],
+        },
+      },
+    };
+
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
+      const subdomain = clickAnchor('https://amp.foo.com/path');
+      expect(subdomain).to.contain('testLinker1=');
+      expect(subdomain).to.not.contain('testLinker2=');
+      expect(subdomain).to.not.contain('testLinker3=');
+
+      const noDot = clickAnchor('https://foo.com/path');
+      expect(noDot).to.not.contain('testLinker1=');
+      expect(noDot).to.not.contain('testLinker2=');
+      expect(noDot).to.not.contain('testLinker3=');
+
+      const thirdLevel = clickAnchor('https://a.b.foo.com/path');
+      expect(thirdLevel).to.contain('testLinker1=');
+      expect(thirdLevel).to.not.contain('testLinker2=');
+      expect(thirdLevel).to.not.contain('testLinker3=');
+
+      const multiTLDDomainEnabled = clickAnchor('https://foo.bar.com.uk/path');
+      expect(multiTLDDomainEnabled).to.contain('testLinker2=');
+      expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
+      expect(multiTLDDomainEnabled).to.not.contain('testLinker3=');
+
+      const multiTLDDomainDisabled = clickAnchor('https://amp.foo.com.uk/path');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
+      expect(multiTLDDomainDisabled).to.not.contain('testLinker3=');
+
+      const co = clickAnchor('https://www.baz.com/path');
+      expect(co).to.contain('testLinker3=');
+      expect(co).not.to.contain('testLinker1=');
+      expect(co).not.to.contain('testLinker2=');
     });
   });
 
@@ -857,5 +920,51 @@ describe('areFriendlyDomains', () => {
     expect(areFriendlyDomains('amp.source.com', 'amp.google.com')).to.be.false;
     expect(areFriendlyDomains('web.amp.source.com', 'web.m.source.com'))
         .to.be.false;
+  });
+});
+
+describe('wildcard matching', () => {
+  const testCases = [
+    {
+      hostname: 'amp.foo.com',
+      domain: '*.foo.com',
+      result: true,
+    },
+    {
+      hostname: 'amp.foo.com.uk',
+      domain: '*.foo.com',
+      result: false,
+    },
+    {
+      hostname: 'amp.foo.com.uk',
+      domain: '*.foo.com*',
+      result: true,
+    },
+    {
+      hostname: 'foo.com',
+      domain: '*.foo.com',
+      result: false,
+    },
+    {
+      hostname: 'amp.foo.com',
+      domain: '*.foo.co*',
+      result: true,
+    },
+    {
+      hostname: 'me.foo.co.uk',
+      domain: '*.foo.co*',
+      result: true,
+    },
+    {
+      hostname: 'a.b.foo.com',
+      domain: '*.foo.co*',
+      result: true,
+    },
+  ];
+  testCases.forEach(test => {
+    const {hostname, domain, result} = test;
+    it(`wildcard test: ${hostname}, ${domain}, ${result}`, () => {
+      expect(isWildCardMatch(hostname, domain)).to.equal(result);
+    });
   });
 });

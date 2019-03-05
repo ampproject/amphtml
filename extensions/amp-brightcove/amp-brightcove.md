@@ -69,7 +69,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-player or data-player-id</strong></td>
-    <td>The Brightcove player id. This is a GUID, shortid or "default". The default value is "default".<br>`data-player` is preferred. `data-player-id` is also supported for backwards-compatibility.</td>
+    <td>The Brightcove player id. This is a GUID, shortid or "default". The default value is "default".<br><code>data-player</code> is preferred. <code>data-player-id</code> is also supported for backwards-compatibility.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-embed</strong></td>
@@ -77,38 +77,41 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-video-id</strong></td>
-    <td>The Video Cloud video id. Most Video Cloud players will need this.<br>This is not used for Perform players by default; use it if you have added a plugin that expects a `videoId` param in the query string.</td>
+    <td>The Video Cloud video id. Most Video Cloud players will need this.<br>This is not used for Perform players by default; use it if you have added a plugin that expects a <code>videoId</code> param in the query string.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-playlist-id</strong></td>
-    <td>The Video Cloud playlist id. For AMP HTML uses a video id will normally be used instead. If both a playlist and a video are specified, the playlist takes precedence.
-
-    This is not used for Perform players by default; use it if you have added a plugin that expects a `playlistId` param in the query string.</td>
+    <td><p>The Video Cloud playlist id. For AMP HTML uses a video id will normally be used instead. If both a playlist and a video are specified, the playlist takes precedence.</p>
+<p>This is not used for Perform players by default; use it if you have added a plugin that expects a <code>playlistId</code> param in the query string.</p></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-referrer</strong></td>
-    <td>Sets the referrer to be used for the Video Cloud analytics within the player. Requires Brightcove Player version v6.25.0+. This supports AMP varables such as `EXTERNAL_REFERRER`.</td>
+    <td>Sets the referrer to be used for the Video Cloud analytics within the player. Requires Brightcove Player version v6.25.0+. This supports AMP varables such as <code>EXTERNAL_REFERRER</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-param-\*</strong></td>
-    <td>All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
-    <br>
-    Keys and values will be URI encoded. Keys will be camel cased.
-    <ul>
-        <li>`data-param-language="de"` becomes `&language=de`</li>
-        <li>`data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`</li>
-    </ul>
-    </td>
+    <td width="40%"><strong>data-param-*</strong></td>
+    <td>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
+<br>
+Keys and values will be URI encoded. Keys will be camel cased.</p>
+<ul>
+  <li>`data-param-language="de"` becomes `&language=de`</li>
+  <li>`data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
-    played as soon as it becomes visible. There are some conditions that the component needs to meet
-    to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).</td>
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
   </tr>
 </table>
 

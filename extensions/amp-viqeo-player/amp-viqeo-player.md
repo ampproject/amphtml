@@ -67,22 +67,20 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>If this attribute is present, and the browser supports autoplay:
+    <td><p>If this attribute is present, and the browser supports autoplay:</p>
 <ul>
-    <li>the video is automatically muted before autoplay starts</li>
-    <li>when the video is scrolled out of view, the video is paused</li>
-    <li>when the video is scrolled into view, the video resumes playback</li>
-    <li>when the user taps the video, the video is unmuted</li>
-    <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-</ul>
-    </td>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-profileid</strong></td>
-    <td>Viqeo is a registration only video platform for Publishers to add videos as illustrations. All videos are played automaticaly without sound and only when fully visible (minimum visible area possible is 50%).
-    Detailed description of Viqeo is in presentation: https://docs.google.com/presentation/d/1P6DJTPJtfeMmPozv1pPz7Wner7NCcJ_DmlPOcVclgLE/present?slide=id.p<br>
-
-    To get data-profileid you need to login to Viqeo account (https://viqeo.tv) and press 'Get code' near the video you want to paste to website. You will get a code with data-profileid, data-videoid & width and height.</td>
+    <td><p>Viqeo is a registration only video platform for Publishers to add videos as illustrations. All videos are played automaticaly without sound and only when fully visible (minimum visible area possible is 50%).
+  Detailed description of Viqeo is in presentation: https://docs.google.com/presentation/d/1P6DJTPJtfeMmPozv1pPz7Wner7NCcJ_DmlPOcVclgLE/present?slide=id.p</p>
+<p>To get data-profileid you need to login to Viqeo account (https://viqeo.tv) and press 'Get code' near the video you want to paste to website. You will get a code with data-profileid, data-videoid &amp; width and height.</p></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-videoid</strong></td>

@@ -15,14 +15,15 @@
  */
 import {poll} from '../../../../../testing/iframe';
 
-const baseUrl = 'http://localhost:8081';
-
 const RENDER_TIMEOUT = 15000;
 
 const describeChrome = describe.configure().ifChrome().skipSinglePass();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
 describeChrome.skip('amp-form verifiers', function() {
+  const {testServerPort} = window.ampTestRuntimeConfig;
+  const baseUrl = `http://localhost:${testServerPort}`;
+
   this.timeout(RENDER_TIMEOUT);
 
   describes.integration('verify-error template', {

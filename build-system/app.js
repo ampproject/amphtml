@@ -24,6 +24,7 @@ const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const devDashboard = require('./app-index/index');
+const enableCors = require('./amp-cors');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -36,7 +37,7 @@ const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
-} = require('./recaptcha-router.js');
+} = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
@@ -77,11 +78,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
-      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
-    devDashboard.setCacheStatus(false);
-  }
-
+  // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
 
@@ -118,18 +115,63 @@ app.get('/serve_mode_change', (req, res) => {
 //   - /proxy/?url=hello.com?mode=/shadow/ 👉 /shadow/proxy/s/hello.com
 //   - /proxy/?url=https://hello.com 👉 /proxy/s/hello.com
 //   - /proxy/?url=https://www.google.com/amp/s/hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=hello.com/canonical 👉 /proxy/s/hello.com/amp
 //
 // This passthrough is useful to generate the URL from <form> values,
-// (See ./app-index/proxy-fom.js)
-app.get('/proxy', (req, res) => {
+// (See ./app-index/proxy-form.js)
+app.get('/proxy', async(req, res, next) => {
   const {mode, url} = req.query;
-  const prefix = (mode || '').replace(/\/$/, '');
-  const sufixClearPrefixReStr =
-      '^http(s?)://' +
+  const urlSuffixClearPrefixReStr =
+      '^https?://' +
       '((www\.)?google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)/amp/s/)?';
-  const sufix = url.replace(new RegExp(sufixClearPrefixReStr, 'i'), '');
-  res.redirect(`${prefix}/proxy/s/${sufix}`);
+  const urlSuffix = url.replace(new RegExp(urlSuffixClearPrefixReStr, 'i'), '');
+
+  try {
+    const ampdocUrl = await requestAmphtmlDocUrl(urlSuffix);
+    const ampdocUrlSuffix = ampdocUrl.replace(/^https?:\/\//, '');
+    const modePrefix = (mode || '').replace(/\/$/, '');
+    const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
+    res.redirect(proxyUrl);
+  } catch ({message}) {
+    console.log(`ERROR: ${message}`);
+    next();
+  }
 });
+
+
+/**
+ * Resolves an AMPHTML URL from a canonical URL. If AMPHTML is canonical, same
+ * URL is returned.
+ * @param {string} urlSuffix URL without protocol or google.com/amp/s/...
+ * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
+ * @return {!Promise<string>}
+ */
+function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+  const defaultUrl = `${protocol}://${urlSuffix}`;
+  console.log(`Fetching URL: ${defaultUrl}`);
+  return new Promise((resolve, reject) => {
+    request(defaultUrl, (error, response, body) => {
+      if (error || (response && (
+        response.statusCode < 200 || response.statusCode >= 300))) {
+
+        if (protocol == 'https') {
+          return requestAmphtmlDocUrl(urlSuffix, 'http');
+        }
+        return reject(new Error(error || `Status: ${response.statusCode}`));
+      }
+      const {window} = new jsdom.JSDOM(body);
+      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+      if (!linkRelAmphtml) {
+        return resolve(defaultUrl);
+      }
+      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
+      if (!amphtmlUrl) {
+        return resolve(defaultUrl);
+      }
+      return resolve(amphtmlUrl);
+    });
+  });
+}
 
 /*
  * Intercept Recaptcha frame for,
@@ -137,7 +179,7 @@ app.get('/proxy', (req, res) => {
  * out the recaptcha api.
  */
 app.get(
-    '/dist.3p/current*/recaptcha.*html',
+    '/dist.3p/*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
 app.use(
@@ -892,7 +934,7 @@ function escapeRegExp(string) {
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
-      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      `<${tagName}[\\s][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
 }
 
@@ -1386,18 +1428,6 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-function enableCors(req, res, origin, opt_exposeHeaders) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  if (req.query.__amp_source_origin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.query.__amp_source_origin);
-  }
-}
-
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
   opt_ignoreMissingSourceOrigin) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
@@ -1460,7 +1490,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = {
-  middleware: app,
-  beforeServeTasks: devDashboard.beforeServeTasks,
-};
+module.exports = app;
