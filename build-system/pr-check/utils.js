@@ -163,8 +163,8 @@ async function downloadOutput_(functionName, outputFileName) {
   exec('echo travis_fold:start:download_results && echo');
   decryptTravisKey_();
   execOrDie('gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
+      `--key-file ${OUTPUT_STORAGE_KEY_FILE} && ` +
+      `gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
   console.log(
@@ -202,9 +202,8 @@ async function uploadOutput_(functionName, outputFileName) {
   exec('echo travis_fold:start:upload_results && echo');
   decryptTravisKey_();
   execOrDie('gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
-  execOrDie(`gsutil -m cp -r ${outputFileName} ` +
-      `${OUTPUT_STORAGE_LOCATION}`);
+      `--key-file ${OUTPUT_STORAGE_KEY_FILE} && ` +
+      `gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
   exec('echo travis_fold:end:upload_results');
 }
 
