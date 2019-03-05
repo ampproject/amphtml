@@ -32,15 +32,15 @@ import {startsWith} from './string';
  */
 export const LAYOUTS = [
   // Make sure to include the matching enum field for `Layout`.
-  'nodisplay', //    0
-  'fixed', //        1
-  'fixed-height', // 2
-  'responsive', //   3
-  'container', //    4
-  'fill', //         5
-  'flex-item', //    6
-  'fluid', //        7
-  'intrinsic', //    8
+  'nodisplay',
+  'fixed',
+  'fixed-height',
+  'responsive',
+  'container',
+  'fill',
+  'flex-item',
+  'fluid',
+  'intrinsic',
 ];
 
 /**
@@ -49,15 +49,15 @@ export const LAYOUTS = [
 export const Layout = {
   // Values should match indices of `LAYOUTS`.
   // Naming convention and indices enforced via tests.
-  NODISPLAY: 0,
-  FIXED: 1,
-  FIXED_HEIGHT: 2,
-  RESPONSIVE: 3,
-  CONTAINER: 4,
-  FILL: 5,
-  FLEX_ITEM: 6,
-  FLUID: 7,
-  INTRINSIC: 8,
+  NODISPLAY: LAYOUTS.indexOf('nodisplay'),
+  FIXED: LAYOUTS.indexOf('fixed'),
+  FIXED_HEIGHT: LAYOUTS.indexOf('fixed-height'),
+  RESPONSIVE: LAYOUTS.indexOf('responsive'),
+  CONTAINER: LAYOUTS.indexOf('container'),
+  FILL: LAYOUTS.indexOf('fill'),
+  FLEX_ITEM: LAYOUTS.indexOf('flex-item'),
+  FLUID: LAYOUTS.indexOf('fluid'),
+  INTRINSIC: LAYOUTS.indexOf('intrinsic'),
 };
 
 
