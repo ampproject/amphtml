@@ -65,7 +65,7 @@ const assert = require('assert');
  *     }
  *   }))
  *
- * This reduces the output size (~250B gzipped) since the amount of items that
+ * This reduces the output size (~180B gzipped) since the amount of items that
  * follow said convention is sufficiently large.
  *
  * @param {!Object<string, !Object<string, !Array<string>>>} def
