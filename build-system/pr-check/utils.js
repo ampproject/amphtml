@@ -163,8 +163,12 @@ async function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
+  decryptTravisKey_();
+  execOrDie('gcloud auth activate-service-account ' +
+      `--key-file ${OUTPUT_STORAGE_KEY_FILE} && ` +
+      `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} && ` +
+      'gcloud config set pass_credentials_to_gsutil true && ' +
+      `gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
   console.log(
@@ -200,20 +204,13 @@ async function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
-  exec('echo travis_fold:end:upload_results');
-}
-
-/**
- * Uses GCloud SDK to authenticate at storage location with a service account
- */
-function authenticateWithStorageLocation_() {
   decryptTravisKey_();
   execOrDie('gcloud auth activate-service-account ' +
       `--key-file ${OUTPUT_STORAGE_KEY_FILE} && ` +
       `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} && ` +
-      'gcloud config set pass_credentials_to_gsutil true');
+      'gcloud config set pass_credentials_to_gsutil true && ' +
+      `gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
+  exec('echo travis_fold:end:upload_results');
 }
 
 /**
