@@ -32,15 +32,15 @@ import {startsWith} from './string';
  */
 export const LAYOUTS = [
   // Make sure to include the matching enum field for `Layout`.
-  'nodisplay',
-  'fixed',
-  'fixed-height',
-  'responsive',
-  'container',
-  'fill',
-  'flex-item',
-  'fluid',
-  'intrinsic',
+  'nodisplay', //    0
+  'fixed', //        1
+  'fixed-height', // 2
+  'responsive', //   3
+  'container', //    4
+  'fill', //         5
+  'flex-item', //    6
+  'fluid', //        7
+  'intrinsic', //    8
 ];
 
 /**
@@ -174,7 +174,7 @@ export function getLayoutClass(layout) {
  * @return {string}
  */
 export function getLayoutName(layout) {
-  return dev().assertString(LAYOUTS[/** @type {number} */ (layout)]);
+  return /** @type {string} */ (LAYOUTS[/** @type {number} */ (layout)]);
 }
 
 
@@ -374,8 +374,8 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (dev().assertNumber(
-        parseLayout(completedLayoutAttr)));
+    const layout = parseLayout(completedLayoutAttr);
+    devAssert(layout !== undefined);
     if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.

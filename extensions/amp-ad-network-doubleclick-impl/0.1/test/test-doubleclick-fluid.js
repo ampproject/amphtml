@@ -20,6 +20,7 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {Layout} from '../../../../src/layout';
 import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -128,12 +129,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     multiSizeImpl = new AmpAdNetworkDoubleclickImpl(
         multiSizeElement, env.win.document, env.win);
 
-    const getLayout = () => 'fluid';
+    const getLayout = () => Layout.FLUID;
     impl.getLayout = getLayout;
-    impl.isLayoutSupported('fluid');
+    impl.isLayoutSupported(Layout.FLUID);
     impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
     multiSizeImpl.getLayout = getLayout;
-    multiSizeImpl.isLayoutSupported('fluid');
+    multiSizeImpl.isLayoutSupported(Layout.FLUID);
     multiSizeImpl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
@@ -154,7 +155,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should have a supported layout', () => {
-    expect(impl.isLayoutSupported('fluid')).to.be.true;
+    expect(impl.isLayoutSupported(Layout.FLUID)).to.be.true;
   });
 
   it('should NOT load delayed impression amp-pixels', () => {
@@ -180,7 +181,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     expect(fireDelayedImpressionsSpy).to.not.be.calledOnce;
   });
 
-  it('should contain sz=320x50 in ad request by default', () => {
+  it.only('should contain sz=320x50 in ad request by default', () => {
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       expect(impl.adUrl_).to.be.ok;

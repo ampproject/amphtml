@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
+import {Layout, LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
@@ -554,7 +554,7 @@ describes.realWin('Resource', {amp: true}, env => {
 
   it('should complete startLayout with height == 0', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
-    elementMock.expects('getLayout').returns('fluid').once();
+    elementMock.expects('getLayout').returns(Layout.FLUID).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
