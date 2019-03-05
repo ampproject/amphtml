@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {getStyle, toggle} from '../../../src/style';
+import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
@@ -257,12 +257,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let filteredData = data.filter(item => {
       switch (this.filter_) {
         case FilterType.SUBSTRING:
-          return item.includes(input);
+          return includes(item, input);
         case FilterType.PREFIX:
-          return item.startsWith(input);
+          return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
           return item.split(' ').some(token => {
-            return token.startsWith(input);
+            return startsWith(token, input);
           });
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
