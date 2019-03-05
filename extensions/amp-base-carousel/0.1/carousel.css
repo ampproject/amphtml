@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-.i-amphtml-carousel-scroll {
+ /**
+  * We need a separate container for `position: absolute` for two reasons:
+  *
+  * 1. We do not want to make the scrolling area positioned, so that content
+  *    inside can position relative to the outer container.
+  * 2. Chrome causes the slides to flicker if the scrolling element is
+  *    position: absolute;
+  */
+.i-amphtml-carousel-content {
   position: absolute;
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.i-amphtml-carousel-scroll {
   display: flex;
   width: 100%;
   height: 100%;
   align-items: center;
-
-  /*
-   * Need to force a layer to work around a Chrome bug where scroll position
-   * updates cause a temporary incorrect UI rendering.
-   */
-  transform: translateZ(0);
 
   scroll-behavior: smooth;
   /* Hide scrollbar */
