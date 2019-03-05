@@ -107,24 +107,26 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    this.inlineData_ = this.getInlineData_();
+    return this.measureMutateElement(() => {
+      this.inlineData_ = this.getInlineData_();
 
-    const inputElements = childElementsByTag(this.element, 'INPUT');
-    userAssert(inputElements.length === 1,
-        `${TAG} should contain exactly one <input> child`);
-    this.inputElement_ = inputElements[0];
-
-    this.filter_ = userAssert(this.element.getAttribute('filter'),
-        `${TAG} requires "filter" attribute.`);
-    userAssert(isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter_}`);
-
-    this.minChars_ = this.element.hasAttribute('min-characters') ?
-      parseInt(this.element.getAttribute('min-characters'), 10) : 1;
-    this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
-
-    this.container_ = this.createContainer_();
-    this.element.appendChild(this.container_);
+      const inputElements = childElementsByTag(this.element, 'INPUT');
+      userAssert(inputElements.length === 1,
+          `${TAG} should contain exactly one <input> child`);
+      this.inputElement_ = inputElements[0];
+  
+      this.filter_ = userAssert(this.element.getAttribute('filter'),
+          `${TAG} requires "filter" attribute.`);
+      userAssert(isEnumValue(FilterType, this.filter_),
+          `Unexpected filter: ${this.filter_}`);
+  
+      this.minChars_ = this.element.hasAttribute('min-characters') ?
+        parseInt(this.element.getAttribute('min-characters'), 10) : 1;
+      this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
+    }, () => {
+      this.container_ = this.createContainer_();
+      this.element.appendChild(this.container_);
+    });
   }
 
   /**
