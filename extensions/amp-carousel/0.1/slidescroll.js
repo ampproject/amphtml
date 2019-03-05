@@ -19,6 +19,7 @@ import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -276,6 +277,14 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   layoutCallback() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return Promise.resolve();
+    }
+
     if (this.slideIndex_ === null) {
       this.showSlide_(this.initialSlideIndex_);
     } else {
