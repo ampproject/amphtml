@@ -26,7 +26,6 @@ branches:
 addons:
   apt:
     packages:
-      - protobuf
       - protobuf-compiler
       - python-protobuf
       - openssl
