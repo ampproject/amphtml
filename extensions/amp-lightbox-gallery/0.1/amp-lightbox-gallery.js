@@ -120,7 +120,7 @@ const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, .55, .3, 0.95)';
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
 const FADE_CURVE = bezierCurve(0.8, 0, 0.2, 1);
 
-const MAX_TRANSITION_DURATION = 1000; // ms
+const MAX_TRANSITION_DURATION = 700; // ms
 const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
