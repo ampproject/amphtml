@@ -19,7 +19,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {getStyle, toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';

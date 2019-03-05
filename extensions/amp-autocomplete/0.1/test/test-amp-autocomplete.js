@@ -133,4 +133,13 @@ describes.realWin('amp-autocomplete', {
       expect(impl.inlineData_).to.be.an('array').that.is.empty;
     });
   });
+
+  it('should accept empty items JSON script', () => {
+    return getAutocomplete({
+      'filter': 'substring',
+    }, '{ "items" : [] }').then(ampAutocomplete => {
+      const impl = ampAutocomplete.implementation_;
+      expect(impl.inlineData_).to.be.an('array').that.is.empty;
+    });
+  });
 });
