@@ -204,7 +204,7 @@ limitations under the License.
     <div class="desktop">
       <h2 class="ampstart-title block px3 pt2 mb2">Nature</h2>
       <div>
-        <amp-list layout="fixed-height" height="50vw" src="/infinite-scroll-random/nature" load-more>
+        <amp-list layout="fixed-height" height="50vw" src="/list/infinite-scroll-random/nature" load-more>
           <template type="amp-mustache">
             <div class=item>
               <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
@@ -215,7 +215,7 @@ limitations under the License.
 
       <h2 class="ampstart-title block px3 pt2 mb2">Architecture</h2>
       <div>
-          <amp-list layout="fixed-height" height="16.6vw" src="/infinite-scroll-random/arch" load-more>
+          <amp-list layout="fixed-height" height="16.6vw" src="/list/infinite-scroll-random/arch" load-more>
             <template type="amp-mustache">
               <div class=item>
                 <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
@@ -225,7 +225,7 @@ limitations under the License.
         </div>
       <h2 class="ampstart-title block px3 pt2 mb2">Animals</h2>
       <div>
-          <amp-list layout="fixed-height" height="16.6vw" src="/infinite-scroll-random/animals" load-more>
+          <amp-list layout="fixed-height" height="16.6vw" src="/list/infinite-scroll-random/animals" load-more>
             <template type="amp-mustache">
               <div class=item>
                 <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
@@ -235,7 +235,7 @@ limitations under the License.
         </div>
       <h2 class="ampstart-title block px3 pt2 mb2">Tech</h2>
       <div>
-          <amp-list layout="fixed-height" height="16.6vw" src="/infinite-scroll-random/tech" load-more>
+          <amp-list layout="fixed-height" height="16.6vw" src="/list/infinite-scroll-random/tech" load-more>
             <template type="amp-mustache">
               <div class=item>
                 <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
@@ -253,7 +253,7 @@ limitations under the License.
         <div option=Tech>Tech</div>
       </amp-selector>
 
-      <amp-list layout="fixed-height" height="100vh" src="/infinite-scroll-random/nature" [src]="'/infinite-scroll-random/' + (category ? category : 'nature')" load-more=auto>
+      <amp-list layout="fixed-height" height="100vh" src="/list/infinite-scroll-random/nature" [src]="'/infinite-scroll-random/' + (category ? category : 'nature')" load-more=auto>
         <template type="amp-mustache">
           <div class=item>
             <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
