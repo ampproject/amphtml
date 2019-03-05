@@ -142,8 +142,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async getActiveElement() {
-    const activeElement = await this.driver.executeScript(
-        () => document.activeElement);
+    const activeElement = await this.driver.switchTo().activeElement();
     return new ElementHandle(activeElement);
   }
 

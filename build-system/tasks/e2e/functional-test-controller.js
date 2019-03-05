@@ -310,7 +310,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#get-element-tag-name}
    *
    * @param {!ElementHandle} unusedHandle
-   * @return {!ControllerPromise<string>}
+   * @return {!Promise<string>}
    */
   async getElementTagName(unusedHandle) {}
 
