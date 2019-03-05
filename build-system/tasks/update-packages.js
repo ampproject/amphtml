@@ -19,6 +19,10 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const {
+  shrinkRegisterElementTable,
+  shrinkRegisterElementTableRe,
+} = require('./update-packages-document-register-element');
 const {exec, execOrDie, getStderr} = require('../exec');
 const {isTravisBuild} = require('../travis');
 
@@ -49,7 +53,7 @@ function replaceInFile(filePath, newFilePath, ...args) {
   for (let i = 0; i < args.length; i += 2) {
     const searchValue = args[i];
     const replaceValue = args[i + 1];
-    if (!file.includes(searchValue)) {
+    if (typeof searchValue == 'string' && !file.includes(searchValue)) {
       throw new Error(`Expected "${searchValue}" to appear in ${filePath}.`);
     }
     file = file.replace(searchValue, replaceValue);
@@ -108,12 +112,18 @@ function patchRegisterElement() {
   replaceInFile(
       dir + 'document-register-element.node.js',
       dir + 'document-register-element.patched.js',
+
       // Elimate the immediate side effect.
       'installCustomElements(global);',
       '',
+
       // Replace CJS export with ES6 export.
       'module.exports = installCustomElements;',
-      'export {installCustomElements};');
+      'export {installCustomElements};',
+
+      // Shrink default custom elements table to autogen `HTML*Element`s
+      shrinkRegisterElementTableRe,
+      shrinkRegisterElementTable);
 }
 
 /**

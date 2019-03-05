@@ -53,7 +53,7 @@ export class GoogleCidApi {
     /**
      * @private {!./timer-impl.Timer}
      */
-    this.timer_ = Services.timerFor(this.win_);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /**
      * @private {!Object<string, !Promise<?string>>}
@@ -85,7 +85,7 @@ export class GoogleCidApi {
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
       if (token === TokenStatus.OPT_OUT) {
-        return TokenStatus.OPT_OUT;
+        return token;
       }
       // If the page referrer is proxy origin, we force to use API even the
       // token indicates a previous fetch returned nothing

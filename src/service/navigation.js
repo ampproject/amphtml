@@ -99,29 +99,29 @@ export class Navigation {
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!./viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private @const {!./history-impl.History} */
-    this.history_ = Services.historyForDoc(this.ampdoc);
+    this.history_ = Services.historyForDoc(ampdoc);
 
     /** @private @const {!./platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.ampdoc.win);
+    this.platform_ = Services.platformFor(ampdoc.win);
 
     /** @private @const {boolean} */
     this.isIosSafari_ = this.platform_.isIos() && this.platform_.isSafari();
 
     /** @private @const {boolean} */
     this.isIframed_ =
-        isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
+        isIframed(ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {boolean} */
-    this.isEmbed_ = this.rootNode_ != this.ampdoc.getRootNode();
+    this.isEmbed_ = this.rootNode_ != ampdoc.getRootNode();
 
     /** @private @const {boolean} */
-    this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
+    this.isInABox_ = getMode(ampdoc.win).runtime == 'inabox';
 
     /**
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
@@ -139,7 +139,7 @@ export class Navigation {
     this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
-    shouldAppendExtraParams(this.ampdoc).then(res => {
+    shouldAppendExtraParams(ampdoc).then(res => {
       this.appendExtraParams_ = res;
     });
 
