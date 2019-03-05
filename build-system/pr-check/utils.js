@@ -35,6 +35,8 @@ const DIST_OUTPUT_FILE =
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
+const OUTPUT_STORAGE_SERVICE_ACCOUNT =
+    'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -161,9 +163,7 @@ async function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
-  decryptTravisKey_();
-  execOrDie('gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
+  authenticateWithStorageLocation_();
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
@@ -200,12 +200,18 @@ async function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
+  authenticateWithStorageLocation_();
+  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
+  exec('echo travis_fold:end:upload_results');
+}
+
+function authenticateWithStorageLocation_() {
   decryptTravisKey_();
   execOrDie('gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
-  execOrDie(`gsutil -m cp -r ${outputFileName} ` +
-      `${OUTPUT_STORAGE_LOCATION}`);
-  exec('echo travis_fold:end:upload_results');
+  `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
+  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
+  execOrDie('gcloud config set pass_credentials_to_gsutil true');
+  execOrDie('gcloud config list');
 }
 
 /**
