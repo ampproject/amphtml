@@ -17,19 +17,8 @@
 
 const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
-const clearLocalStorage = async (page) => {
-  await page.evaluate(() => {
-    localStorage.clear();
-  });
-  page.setDefaultNavigationTimeout(5000);
-  await page.reload({waitUntil: 'domcontentloaded'});
-}
-
 module.exports = {
   'accept consent': async (page, name) => {
-
-    await clearLocalStorage(page);
-
     await page.tap('#consent-ui #accept');
 
     await verifySelectorsVisible(page, name, [
@@ -39,10 +28,8 @@ module.exports = {
         '#not-specified img'
       ]);
   },
+
   'reject consent': async (page, name) => {
-
-    await clearLocalStorage(page);
-
     await page.tap('#consent-ui #reject');
 
     await page.evaluate(() => {
@@ -53,41 +40,13 @@ module.exports = {
         'amp-img[data-block-on-consent="_till_responded"] img'
     ]);
   },
+
   'should preserve accepted state': async (page, name) => {
-
-    await clearLocalStorage(page);
-
     // Accept the consent
     await page.tap('#consent-ui #accept');
 
-    await verifySelectorsVisible(page, name, [
-        'amp-img[data-block-on-consent="_till_responded"] img',
-        'amp-img[data-block-on-consent="_till_accepted"] img',
-        'amp-img[data-block-on-consent="default"] img',
-        '#not-specified img'
-      ]);
-
-    // save the accepted local storage value
-    const localStorageJson = await page.evaluate(() => {
-      const json = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        json[key] = localStorage.getItem(key);
-      }
-      return json;
-    });
-
     // Refresh the page
     await page.reload();
-
-    // Set the local storage back to the accepted value
-    await page.evaluate(json => {
-      localStorage.clear();
-
-      Object.keys(json).forEach(key => {
-        localStorage.setItem(key, json[key]);
-      });
-    }, localStorageJson);
 
     await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img',
@@ -96,4 +55,4 @@ module.exports = {
         '#not-specified img'
     ]);
   }
- };
+};
