@@ -51,7 +51,7 @@
     "ast-replace": "1.1.3",
     "atob": "2.1.2",
     "autoprefixer": "9.4.9",
-    "ava": "1.2.1",
+    "ava": "1.3.1",
     "babel-eslint": "10.0.1",
     "babel-plugin-filter-imports": "2.0.4",
     "babel-plugin-istanbul": "5.1.1",
