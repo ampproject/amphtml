@@ -18,7 +18,7 @@
  * @param {!Window} win
  * @param {!Object} obj
  * @param {string} name
- * @param {function()} value
+ * @param {*} value
  * @param {boolean=} opt_enumerable
  */
 export function defineConfigurableWritableProperty(
