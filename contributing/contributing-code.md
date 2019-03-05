@@ -36,10 +36,20 @@ Significant changes (e.g. new components or significant changes to behavior) req
 
 ## Finding a reviewer for small changes
 
-If you're making a minor fix and just want to find someone to review/approve your code, look at the OWNERS.yaml files in the directories where you're modifying code and either:
-- assign your PR to one of them if you are able to
+All code must be reviewed and approved as described in the [Code review and approval](#code-review-and-approval) section.
+
+If you're making a minor fix and just want to find someone to review/approve your code, choose:
+
+- an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
+- and a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
+
+(It is acceptable for one person to fulfill both roles.)
+
+After you've found your reviewers:
+- add them as reviewers on your PR to them if you are able to
 - cc them by adding the text "/cc @username" in the PR description/comment
 
+If the reviewers you find aren't responsive, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
 ## Finding a reviewer for significant changes
 
@@ -90,8 +100,10 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
+  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your reviewer can help with this.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-- After your PR is approved, it will merged by your reviewer or one of the other approvers. To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
+- After your PR is approved, it will merged by one of the Reviewers/Collaborators who reviewed your code.
+- To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
 - [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
 ## Contributing extended components
@@ -122,3 +134,43 @@ We recommend you handle signing/being covered by a CLA *before* you send a PR to
   * Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days.  To ensure you can get your code reviewed and merged quickly please start this process as soon as possible.  The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
   * To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
   * If you aren't sure whehther your company has already signed a corporate CLA, if you don't know who at your company owns the Google Group you need to be added to, or you run into any other questions about the corporate CLA, please reach out to @mrjoro (via cc on a PR or on [Slack](https://amphtml.slack.com) ([signup](https://bit.ly/amp-slack-signup))) or the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel on Slack.
+
+## Code review and approval
+
+All code in AMP must be reviewed and approved before it is merged so that we can maintain AMP's high quality and consistency.
+
+This section describes the different review/approval roles and the approvals that are required before code may be merged.  These guidelines are specific to the amphtml repository.  Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
+
+### Roles
+
+* Owners
+  * Review & approve PRs in the area in which they have expertise.
+  * Requirements to be an Owner:
+    * Demonstrated expertise in the area in which they are an OWNER.
+    * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
+    * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
+    * Owners of an area may approve other owners at or below their area of expertise following the normal PR process.
+  * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.
+
+* Reviewers
+  * Review, approve and merge PRs in the repo for which Reviewer status is granted.
+  * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
+  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current REVIEWER.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.
+  * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
+
+* Collaborators
+  * Review, approve and merge PRs in the repo for which COLLABORATOR status is granted.
+  * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
+  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.
+  * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
+
+### Approval requirements
+
+To be merged, a PR must always be reviewed and approved by:
+
+* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
+* At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
+
+It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
+
+Any Reviewer or Collaborator may merge the code after it has been approved, including the PR author.
