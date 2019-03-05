@@ -17,13 +17,64 @@
 const assert = require('assert');
 
 
-function generateElementDefReplacement(tagNames, parsedSanitizedDef) {
+/**
+ * Takes a document-register-element polyfill init object (like: git.io/fhxbR)
+ * in the form:
+ *
+ *  {
+ *    'collections': {
+ *      // ...
+ *    },
+ *    'elements': {
+ *      'Element': ['element'],
+ *      'HTMLAnchorElement': ['a'],
+ *      'HTMLAppletElement': ['applet'],
+ *      'HTMLAreaElement': ['area'],
+ *      'HTMLAttachmentElement': ['attachment'],
+ *      'HTMLAudioElement': ['audio'],
+ *      'HTMLBRElement': ['br'],
+ *      // ...
+ *    },
+ *    'nodes': {
+ *      // ...
+ *    }
+ *  }
+ *
+ * And compresses items of "elements" that follow the convention
+ *    'HTML$MyEl$Element': ['$myel$']
+ *
+ * So that they're generated on runtime:
+ *
+ *   (function(def) {
+ *      ['Applet', 'Area', 'Attachment', ...].forEach(function(tagName) {
+ *        def.elements['HTML' + tagName + 'Element'] = [tagName.toLowerCase()];
+ *      });
+ *   }({
+ *     'collections': {
+ *       // ...
+ *     },
+ *     'elements': {
+ *       'Element': ['element'],
+ *       'HTMLAnchorElement': ['a'],
+ *       // HTMLAppletElement, HTMLAreaElement, &c. stripped out.
+ *       // ...
+ *     },
+ *     'nodes': {
+ *       // ...
+ *     }
+ *   }))
+ *
+ * @param {!Object<string, !Object<string, !Array<string>>>} def
+ * @return {string}
+ */
+function generateElementDefReplacement(def) {
+  const tagNames = getSimpleKeysSanitizeDef(def);
   return `(function(def) {
     ${JSON.stringify(tagNames)}.forEach(function(tagName) {
       def.elements['HTML' + tagName + 'Element'] = [tagName.toLowerCase()];
     });
     return def;
-  }(${JSON.stringify(parsedSanitizedDef)}))`;
+  }(${JSON.stringify(def)}))`;
 }
 
 
@@ -54,11 +105,16 @@ function getSimpleKeysSanitizeDef(unsanitized) {
 const trimParens = match => match.replace(/^\(+|\)+$/g, '');
 
 
+/**
+ * Takes a match from `shrinkRegisterElementTableRe` and returns a compressed
+ * replacement.
+ * If the format is not as expected, the match is left as-is.
+ * @param {string} match
+ * @return {string}
+ */
 function shrinkRegisterElementTable(match) {
   try {
-    const parsed = JSON.parse(trimParens(match));
-    const simpleKeys = getSimpleKeysSanitizeDef(parsed);
-    return generateElementDefReplacement(simpleKeys, parsed);
+    return generateElementDefReplacement(JSON.parse(trimParens(match)));
   } catch {
     // if parsing or cleanup fails, safely leave as-is
     return match;
