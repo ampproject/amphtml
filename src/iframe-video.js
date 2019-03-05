@@ -136,3 +136,18 @@ export function objOrParseJson(objOrStr) {
 export function mutedOrUnmutedEvent(isMuted) {
   return isMuted ? VideoEvents.MUTED : VideoEvents.UNMUTED;
 }
+
+
+/**
+ * TEMPORARY workaround for M72-M74 user-activation breakage.
+ * If this method is still here in May 2019, please ping @aghassemi
+ * Only used by trusted video players: IMA and YouTube.
+ * See https://github.com/ampproject/amphtml/issues/21242 for details.
+ * TODO(aghassemi, #21247)
+ * @param {Element} iframe
+ */
+export function addUnsafeAllowAutoplay(iframe) {
+  let val = iframe.getAttribute('allow') || '';
+  val += 'autoplay;';
+  iframe.setAttribute('allow', val);
+}
