@@ -211,9 +211,9 @@ async function uploadOutput_(functionName, outputFileName) {
 function authenticateWithStorageLocation_() {
   decryptTravisKey_();
   execOrDie('gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
-  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
-  execOrDie('gcloud config set pass_credentials_to_gsutil true');
+      `--key-file ${OUTPUT_STORAGE_KEY_FILE} && ` +
+      `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} && ` +
+      'gcloud config set pass_credentials_to_gsutil true');
 }
 
 /**
