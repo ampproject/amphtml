@@ -176,12 +176,14 @@ const generateJsonWithState = (numberOfItems, pagesLeft) => {
 
 router.get('/infinite-scroll-state', function(req, res) {
   const {query} = req;
-  const numberOfItems = query['items'] || 10;
+  const numberOfItems = query['items'] || 2;
   const pagesLeft = query['left'] || 0;
   const items = generateJsonWithState(numberOfItems, pagesLeft);
+  const next = '/list/infinite-scroll-state?left=' + (pagesLeft - 1)
+      + '&items=' + numberOfItems;
   const results = {
     items,
-    'next': '/list/infinite-scroll-state?left=' + (pagesLeft - 1),
+    next,
   };
   res.json(results);
 });

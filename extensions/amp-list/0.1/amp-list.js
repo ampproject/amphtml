@@ -557,7 +557,7 @@ export class AmpList extends AMP.BaseElement {
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data)
-        .then(result => this.updateBindings_(result))
+        .then(result => this.updateBindings_(result, current.append))
         .then(element => this.render_(element, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
@@ -610,10 +610,11 @@ export class AmpList extends AMP.BaseElement {
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
    * @param {!Array<!Element>|!Element} elementOrElements
+   * @param {boolean} append
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elementOrElements) {
+  updateBindings_(elementOrElements, append) {
     const elements = /** @type {!Array<!Element>} */
       (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
 
@@ -623,8 +624,9 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve(elements);
     }
     const updateWith = bind => {
+      const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
-      return bind.scanAndApply(elements, [this.container_])
+      return bind.scanAndApply(elements, removedElements)
           .then(() => elements, () => elements);
     };
     // "refresh": Do _not_ block on retrieval of the Bind service before the
