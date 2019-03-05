@@ -121,7 +121,7 @@ class FunctionalTestController {
    * Retrieves the URL for the current page.
    * {@link https://www.w3.org/TR/webdriver1/#get-current-url}
    *
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
   async getCurrentUrl() {}
 
@@ -129,7 +129,7 @@ class FunctionalTestController {
    * Returns the document title.
    * {@link https://www.w3.org/TR/webdriver1/#get-title}
    *
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
   async getTitle() {}
 
@@ -170,7 +170,7 @@ class FunctionalTestController {
    * Gets the active element of the current browsing context’s document element.
    * {@link https://www.w3.org/TR/webdriver1/#get-active-element}
    *
-   * @return {!Promise<!ElementHandle>}
+   * @return {!ControllerPromise<!ElementHandle>}
    */
   async getActiveElement() {}
 
@@ -259,10 +259,9 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#is-element-selected}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {boolean=} opt_expect An expected value to wait for
-   * @return {!Promise<boolean>}
+   * @return {!ControllerPromise<boolean>}
    */
-  async isElementSelected(unusedHandle, opt_expect) {}
+  async isElementSelected(unusedHandle) {}
 
   /**
    * Return the value of the given attribute name on the given element.
@@ -271,10 +270,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedAttribute
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementAttribute(unusedHandle, unusedAttribute, opt_expect) {}
+  async getElementAttribute(unusedHandle, unusedAttribute) {}
 
   /**
    * Return the value of the given property name on the given element.
@@ -282,20 +280,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedProperty
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementProperty(unusedHandle, unusedProperty, opt_expect) {}
-
-
-  /**
-   * Returns the rect for a given Element.
-   * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
-   *
-   * @param {!ElementHandle} unusedHandle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
-   */
-  async getElementRect(unusedHandle) {}
+  async getElementProperty(unusedHandle, unusedProperty) {}
 
   /**
    * Return the value of the given CSS value on the given element.
@@ -303,10 +290,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedStyleProperty
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>} styleProperty
+   * @return {!ControllerPromise<string>} styleProperty
    */
-  async getElementCssValue(unusedHandle, unusedStyleProperty, opt_expect) {}
+  async getElementCssValue(unusedHandle, unusedStyleProperty) {}
 
   /**
    * The Get Element Text command intends to return an element’s text
@@ -315,17 +301,16 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#get-element-text}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {(string|RegExp)=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementText(unusedHandle, opt_expect) {}
+  async getElementText(unusedHandle) {}
 
   /**
    * Return the value of the tag name for the given element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-tag-name}
    *
    * @param {!ElementHandle} unusedHandle
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
   async getElementTagName(unusedHandle) {}
 
@@ -335,7 +320,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
-   * @return {!Promise<!DOMRectDef>}
+   * @return {!ControllerPromise<!DOMRectDef>}
    */
   async getElementRect(unusedHandle) {}
 
@@ -345,10 +330,9 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#is-element-enabled}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {boolean=} opt_expect An expected value to wait for
-   * @return {!Promise<boolean>}
+   * @return {!ControllerPromise<boolean>}
    */
-  async isElementEnabled(unusedHandle, opt_expect) {}
+  async isElementEnabled(unusedHandle) {}
 
   /**
    * The Set Window Rect command alters the size and the position of the
