@@ -228,7 +228,7 @@ class AmpCarousel extends AMP.BaseElement {
   renderContainerDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div>
+      <div class="i-amphtml-carousel-content">
         <div class="i-amphtml-carousel-scroll"></div>
         <div class="i-amphtml-carousel-arrow-next-slot"></div>
         <div class="i-amphtml-carousel-arrow-prev-slot"></div>
