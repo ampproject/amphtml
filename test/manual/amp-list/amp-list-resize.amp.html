@@ -72,7 +72,7 @@
 
   <h2>AMP List Resize with Accordion</h2>
   <amp-list id="accordion-list" width="396" height="180" layout=responsive reset-on-refresh
-      src="/test/manual/amp-list-data.json">
+      src="/test/manual/amp-list/amp-list-data.json">
     <template type="amp-mustache">
       <div class="story-entry">
         <amp-accordion on="expand:accordion-list.changeToLayoutContainer;collapse:accordion-list.changeToLayoutContainer">
@@ -104,7 +104,7 @@
   <p>This contains an incorrectly sized container where the contents exceed the list height. It should show an overflow button. </p>
   <button on="tap:AMP.setState({containerState: true})">Change to Container</button>
   <amp-list width="396" height="80" layout="fixed" reset-on-refresh [is-layout-container]="containerState"
-      src="/test/manual/amp-list-data.json?RANDOM">
+      src="/test/manual/amp-list/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry">
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -123,7 +123,7 @@
   <button on="tap:AMP.setState({listStyle: 'grid'}),toggleList.changeToLayoutContainer()">Show Grid</button>
   <button on="tap:AMP.setState({listStyle: 'list'})">Show List</button>
   <amp-list id="toggleList" width="396" height="80" layout="responsive"
-      src="/test/manual/amp-list-data.json?RANDOM">
+      src="/test/manual/amp-list/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry" [class]="'story-entry ' + listStyle">
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -159,9 +159,9 @@
     width="396"
     height="80"
     layout=responsive
-    src="/search/countries"
+    src="/list/search/countries"
     reset-on-refresh
-    [src]="'/search/countries?q=' + query">
+    [src]="'/list/search/countries?q=' + query">
     <template type="amp-mustache">
       {{#results}}
       <div class="story-entry" >

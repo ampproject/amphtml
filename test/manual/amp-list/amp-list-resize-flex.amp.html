@@ -76,7 +76,7 @@
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
     <amp-list width="396" height="80" layout="flex-item" resizable-children
-        src="/test/manual/amp-list-data.json?RANDOM">
+        src="/test/manual/amp-list/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry">
           <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -95,7 +95,7 @@
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
     <amp-list width="396" height="80" layout="flex-item" resizable-children reset-on-refresh
-        src="/test/manual/amp-list-data.json">
+        src="/test/manual/amp-list/amp-list-data.json">
       <template type="amp-mustache">
         <div class="story-entry">
           <amp-accordion>
@@ -130,7 +130,7 @@
       layout="flex-item"
       reset-on-refresh
       resizable-children
-      src="/test/manual/amp-list-data.json?RANDOM">
+      src="/test/manual/amp-list/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry" [class]="'story-entry ' + listStyle">
           <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -167,10 +167,10 @@
       width="396"
       height="80"
       layout="flex-item"
-      src="/search/countries"
+      src="/list/search/countries"
       reset-on-refresh
       resizable-children
-      [src]="'/search/countries?q=' + query">
+      [src]="'/list/search/countries?q=' + query">
       <template type="amp-mustache">
         {{#results}}
         <div class="story-entry" >

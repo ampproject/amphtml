@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const enableCors = require('./amp-cors');
+const cors = require('./amp-cors');
 const pc = process;
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
@@ -49,7 +49,7 @@ recaptchaRouter.post(
     '/submit',
     upload.array(),
     (req, res) => {
-      enableCors(req, res);
+      cors.enableCors(req, res);
 
       const responseJson = {
         message: 'Success!',
