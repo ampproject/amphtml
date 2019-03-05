@@ -48,6 +48,7 @@ describe('Layout', () => {
     expect(parseLayout('container')).to.equal(Layout.CONTAINER);
     expect(parseLayout('fill')).to.equal(Layout.FILL);
     expect(parseLayout('fluid')).to.equal(Layout.FLUID);
+    expect(parseLayout('intrinsic')).to.equal(Layout.INTRINSIC);
   });
 
   it('are loading components allowed', () => {

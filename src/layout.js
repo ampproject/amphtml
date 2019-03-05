@@ -165,18 +165,9 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return `i-amphtml-layout-${getLayoutName(layout)}`;
+  const name = /** @type {string} */ (LAYOUTS[/** @type {number} */ (layout)]);
+  return `i-amphtml-layout-${name}`;
 }
-
-
-/**
- * @param {!Layout} layout
- * @return {string}
- */
-export function getLayoutName(layout) {
-  return /** @type {string} */ (LAYOUTS[/** @type {number} */ (layout)]);
-}
-
 
 /**
  * Whether an element with this layout inherently defines the size.
@@ -545,6 +536,7 @@ export function applyStaticLayout(element) {
   }
   // Mark the element as having completed static layout, in case it is cloned
   // in the future.
-  element.setAttribute('i-amphtml-layout', getLayoutName(layout));
+  const name = /** @type {string} */ (LAYOUTS[/** @type {number} */ (layout)]);
+  element.setAttribute('i-amphtml-layout', name);
   return layout;
 }
