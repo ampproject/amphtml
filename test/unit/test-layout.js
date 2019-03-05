@@ -572,7 +572,7 @@ describe('Layout', () => {
   it('should fail when server generates invalid layout', () => {
     div.setAttribute('i-amphtml-layout', 'invalid');
     allowConsoleError(() => {
-      expect(() => applyStaticLayout(div)).to.throw(/expected/);
+      expect(() => applyStaticLayout(div)).to.throw(/failed/);
     });
   });
 
