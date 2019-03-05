@@ -213,7 +213,7 @@ describes.realWin('amp-iframe', {
       yield waitForAmpIframeLayoutPromise(doc, ampIframe);
       const iframe = ampIframe.querySelector('iframe');
       expect(iframe.getAttribute('allow')).to
-          .equal('microphone; disable-autoplay; camera');
+          .equal('microphone; autoplay-disabled; camera');
     });
 
     it('should default frameborder to 0 if not set', function* () {
