@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 
 /**
@@ -33,10 +36,6 @@ export function values(target) {
  */
 export function install(win) {
   if (!win.Object.values) {
-    win.Object.defineProperty(win.Object, 'values', {
-      configurable: true,
-      writable: true,
-      value: values,
-    });
+    defineConfigurableWritableProperty(win, win.Object, 'values', values);
   }
 }

@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 /**
  * Polyfill for `document.contains()` method. Notice that according to spec
@@ -40,11 +42,7 @@ export function install(win) {
   // so we use that as a fallback.
   const documentClass = win.HTMLDocument || win.Document;
   if (!documentClass.prototype.contains) {
-    win.Object.defineProperty(documentClass.prototype, 'contains', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: documentContainsPolyfill,
-    });
+    defineConfigurableWritableProperty(win, documentClass.prototype, 'contains',
+        documentContainsPolyfill, /* opt_enumerable */ false);
   }
 }

@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 const {hasOwnProperty} = Object.prototype;
 
@@ -50,11 +53,7 @@ export function assign(target, var_args) {
  */
 export function install(win) {
   if (!win.Object.assign) {
-    win.Object.defineProperty(win.Object, 'assign', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: assign,
-    });
+    defineConfigurableWritableProperty(win, win.Object, 'assign', assign,
+        /* opt_enumerable */ false);
   }
 }

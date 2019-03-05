@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 import {dev, devAssert, user} from '../log';
 import {hasOwn, map} from '../utils/object';
 import {isArray, isObject} from '../types';
@@ -308,17 +311,9 @@ export class Response extends FetchResponse {
  */
 export function install(win) {
   if (!win.fetch) {
-    Object.defineProperty(win, 'fetch', {
-      value: fetchPolyfill,
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(win, 'Response', {
-      value: Response,
-      writable: true,
-      enumerable: false,
-      configurable: true,
-    });
+    defineConfigurableWritableProperty(win, win, 'fetch', fetchPolyfill,
+        /* opt_enumerable */ true);
+    defineConfigurableWritableProperty(win, win, 'Response', Response,
+        /* opt_enumerable */ false);
   }
 }

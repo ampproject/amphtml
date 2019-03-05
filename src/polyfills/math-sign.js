@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 /**
  * Parses the number x and returns its sign. For positive x returns 1, for
@@ -40,11 +43,7 @@ export function sign(x) {
  */
 export function install(win) {
   if (!win.Math.sign) {
-    win.Object.defineProperty(win.Math, 'sign', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: sign,
-    });
+    defineConfigurableWritableProperty(win, win.Math, 'sign', sign,
+        /* opt_enumerable */ false);
   }
 }

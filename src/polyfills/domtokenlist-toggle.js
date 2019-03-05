@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 /**
  * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method. This
@@ -42,12 +44,8 @@ function domTokenListTogglePolyfill(token, opt_force) {
  */
 export function install(win) {
   if (isIe(win) && win.DOMTokenList) {
-    win.Object.defineProperty(win.DOMTokenList.prototype, 'toggle', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: domTokenListTogglePolyfill,
-    });
+    defineConfigurableWritableProperty(win, win.DOMTokenList.prototype,
+        'toggle', domTokenListTogglePolyfill, /* opt_enumerable */ false);
   }
 }
 

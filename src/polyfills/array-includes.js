@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {
+  defineConfigurableWritableProperty,
+} from './configurable-writable-property';
 
 /**
  * Returns true if the element is in the array and false otherwise.
@@ -44,11 +46,7 @@ function includes(value, opt_fromIndex) {
 */
 export function install(win) {
   if (!win.Array.prototype.includes) {
-    win.Object.defineProperty(Array.prototype, 'includes', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: includes,
-    });
+    defineConfigurableWritableProperty(win, win.Array.prototype, 'includes',
+        includes, /* opt_enumerable */ false);
   }
 }
