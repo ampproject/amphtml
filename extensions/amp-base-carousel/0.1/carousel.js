@@ -221,6 +221,9 @@ export class Carousel {
     /** @private {!Array<!Element>} */
     this.afterSpacers_ = [];
 
+    /** @private {!Array<!Element>} */
+    this.allSpacers_ = [];
+
     /**
     * Set from sources of programmatic scrolls to avoid doing work associated
     * with regular scrolling.
@@ -716,6 +719,9 @@ export class Carousel {
       this.setElementTransform_(spacer, -1, totalLength);
       this.scrollContainer_.appendChild(spacer);
     });
+
+    this.allSpacers_ = this.beforeSpacers_
+        .concat(this.replacementSpacers_, this.afterSpacers_);
   }
 
   /**
@@ -809,28 +815,41 @@ export class Carousel {
    * @private
    */
   updateCurrent_() {
+    const {
+      allSpacers_,
+      alignment_,
+      axis_,
+      currentIndex_,
+      element_,
+      loop_,
+      slides_,
+    } = this;
     const totalLength = sum(this.getSlideLengths_());
-    const overlappingIndex = findOverlappingIndex(
-        this.axis_, this.alignment_, this.element_, this.slides_,
-        this.currentIndex_);
+    // When looping, we translate the slides, but the slides might decide to
+    // translate their content instead of the whole slide. As a result, we need
+    // to use the spacers to figure out where we are rather than the slides
+    // themselves.
+    const items = loop_ ? allSpacers_ : slides_;
+    const startIndex = loop_ ? currentIndex_ + slides_.length : currentIndex_;
+    const overlappingIndex =
+        findOverlappingIndex(axis_, alignment_, element_, items, startIndex);
 
     // Currently not over a slide (e.g. on top of overscroll area).
     if (overlappingIndex === undefined) {
       return;
     }
 
-    // Pulled out as a separate variable, since Closure gets confused about
-    // whether it can be undefined pas this point when closed over (in
-    // runMutate).
-    const newIndex = overlappingIndex;
+    // Since we are potentially looking accross all spacers, we need to convert
+    // to a slide index.
+    const newIndex = overlappingIndex % slides_.length;
     // Update the current offset on each scroll so that we have it up to date
     // in case of a resize.
-    const currentElement = this.slides_[newIndex];
-    const dimension = getDimension(this.axis_, currentElement);
+    const currentElement = slides_[newIndex];
+    const dimension = getDimension(axis_, currentElement);
     this.currentElementOffset_ = dimension.start;
 
     // We did not move at all.
-    if (newIndex == this.currentIndex_) {
+    if (newIndex == currentIndex_) {
       return;
     }
 

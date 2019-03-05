@@ -15,7 +15,7 @@
  */
 
 import {mod} from '../../../src/utils/math';
-import {setStyle} from '../../../src/style';
+import {setImportantStyles, setStyle} from '../../../src/style';
 
 /**
  * @enum {number}
@@ -117,6 +117,11 @@ export function setTransformTranslateStyle(axis, el, delta) {
   const deltaX = axis == Axis.X ? delta : 0;
   const deltaY = axis == Axis.X ? 0 : delta;
   setStyle(el, 'transform', `translate(${deltaX}px, ${deltaY}px)`);
+  // Set a custom property so that the slide itself can determine how to
+  // translate the content if it so chooses.
+  setImportantStyles(el, {
+    '--content-transform': `translate(${deltaX}px, ${deltaY}px)`,
+  });
 }
 
 /**
