@@ -45,7 +45,7 @@ An <code>amp-brid-player</code> displays the Brid Player used in <a href="https:
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
-Examples:
+Example:
 
 ```html
 <amp-brid-player
@@ -89,6 +89,10 @@ Examples:
   <tr>
     <td width="40%"><strong>data-outstream</strong></td>
     <td>The Brid.tv outstream unit ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-dynamic</strong></td>
+    <td>Parameter used to specify type of dynamic playlist.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
