@@ -24,6 +24,7 @@ import {getStyle, toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
+import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 /** @const */
@@ -90,13 +91,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The reference to the <div> of the active suggested item.
-     * @private {?HTMLElement}
+     * @private {?Element}
      */
     this.activeElement_ = null;
 
     /**
      * The reference to the <div> that contains template-rendered children.
-     * @private {?HTMLElement}
+     * @private {?Element}
      */
     this.container_ = null;
   }
@@ -116,7 +117,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.filter_ = userAssert(this.element.getAttribute('filter'),
         `${TAG} requires "filter" attribute.`);
     userAssert(isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter}`);
+        `Unexpected filter: ${this.filter_}`);
 
     this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
@@ -146,12 +147,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return json.items ? json.items : [];
+    return json['items'] ? json['items'] : [];
   }
 
   /**
    * Creates and returns <div> that contains the template-rendered children.
-   * @return {?HTMLElement}
+   * @return {Element}
    * @private
    */
   createContainer_() {
@@ -183,12 +184,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.keyDownHandler_.bind(this));
     this.inputElement_.addEventListener('focus', this.showResults.bind(this));
     this.inputElement_.addEventListener('blur', this.hideResults.bind(this));
-    this.container_.addEventListener('mousedown', e => {
-      if (!this.isItemElement(e.target)) {
-        return;
-      }
-      this.selectItem(e.target);
-    });
+    this.container_.addEventListener('mousedown',
+        this.selectHandler_.bind(this));
 
     this.renderResults_();
     return Promise.resolve();
@@ -197,7 +194,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Create and return <div> element from given plan-text item.
    * @param {string} item
-   * @return {!HTMLElement}
+   * @return {!Element}
    * @private
    */
   createElementFromItem_(item) {
@@ -210,7 +207,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
   * Handle rendering results on user input.
-  * @param {?event} event
+  * @param {Event} event
   * @private
   */
   inputHandler_(event) {
@@ -222,13 +219,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+  * Handle selecting items on user mousedown.
+  * @param {Event} event
+  * @private
+  */
+  selectHandler_(event) {
+    if (!this.isItemElement(event.target)) {
+      return;
+    }
+    this.selectItem(event.target);
+  }
+
+  /**
    * Render filtered results on the current input and update the container_.
    * @private
    */
   renderResults_() {
     const userInput = this.inputElement_.value;
     this.clearAllItems();
-    if (userInput.length < this.minChars_) {
+    if (userInput.length < this.minChars_ || !this.inlineData_) {
       return;
     }
     const filteredData = this.filterData_(this.inlineData_, userInput);
@@ -277,11 +286,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** Set container_ visibility to visible. */
   showResults() {
+    if (!this.container_) {
+      return;
+    }
     toggle(this.container_, true);
   }
 
   /** Set container_ visibility to hidden. */
   hideResults() {
+    if (!this.container_) {
+      return;
+    }
     toggle(this.container_, false);
     this.resetActiveElement_();
     this.activeIndex_ = -1;
@@ -289,13 +304,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** Returns true if the results are visible and has items. */
   resultsShowing() {
-    return getStyle(this.container_, 'visibility') === 'visible' &&
-      this.container_.children.length;
+    return !this.container_.hasAttribute('hidden') &&
+      this.container_.children.length > 0;
   }
 
   /**
    * Returns true if the given element is a suggested item.
-   * @param {HTMLElement} element
+   * @param {Element|EventTarget} element
    */
   isItemElement(element) {
     return element.classList.contains('i-amphtml-autocomplete-item');
@@ -303,7 +318,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Writes the selected value into the input field.
-   * @param {HTMLElement} element
+   * @param {Element|EventTarget} element
    */
   selectItem(element) {
     this.inputElement_.value = element.textContent;
@@ -350,7 +365,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Handles keyboard events.
-   * @param {!event} event
+   * @param {Event} event
    * @private
    */
   keyDownHandler_(event) {
