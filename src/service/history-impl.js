@@ -833,22 +833,6 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = viewer.onMessage('historyPopped',
         data => this.onHistoryPopped_(data));
-
-    /**
-     * Sends the message to the viewer and wait for response.
-     * If cancelUnsent is true, the previous message of the same message type
-     * will be canceled.
-     *
-     * This is a restricted API.
-     *
-     * @param {string} eventType
-     * @param {?JsonObject|string|undefined} data
-     * @param {boolean=} cancelUnsent
-     * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
-     * @private
-     */
-    this.viewerSendMessageAwaitResponse_ =
-        viewer.sendMessageAwaitResponse.bind(viewer);
   }
 
   /** @override */
@@ -879,7 +863,7 @@ export class HistoryBindingVirtual_ {
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_ + 1}, opt_stateUpdate || {})
     );
-    return this.viewerSendMessageAwaitResponse_('pushHistory', message)
+    return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
           // Return the message if response is undefined.
           const newState = /** @type {!HistoryStateDef} */ (
@@ -903,7 +887,7 @@ export class HistoryBindingVirtual_ {
       return this.get();
     }
     const message = dict({'stackIndex': this.stackIndex_});
-    return this.viewerSendMessageAwaitResponse_('popHistory', message)
+    return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
           // Return the new stack index if response is undefined.
           const newState = /** @type {!HistoryStateDef} */ (
@@ -940,7 +924,7 @@ export class HistoryBindingVirtual_ {
     const message = /** @type {!JsonObject} */ (
       Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
     );
-    return this.viewerSendMessageAwaitResponse_('replaceHistory', message,
+    return this.viewer_.sendMessageAwaitResponse('replaceHistory', message,
         /* cancelUnsent */ true).then(response => {
       const newState = /** @type {!HistoryStateDef} */ (response || message);
       this.updateHistoryState_(newState);
@@ -1005,7 +989,7 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewerSendMessageAwaitResponse_('getFragment', undefined,
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
         data => {
           if (!data) {
@@ -1032,7 +1016,7 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.viewerSendMessageAwaitResponse_(
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
         'replaceHistory', dict({'fragment': fragment}),
         /* cancelUnsent */ true));
   }
