@@ -26,6 +26,26 @@ import {EmbedMode, EmbedModeParam} from '../embed-mode';
 describes.fakeWin('amp-story-store-service', {}, env => {
   let storeService;
 
+  class FakeComponent1 {
+    static subscribeTo(state, listener) {
+      storeService.subscribe(state, listener);
+    }
+
+    static unsubscribeFrom(state, listener) {
+      storeService.unsubscribe(state, listener);
+    }
+  }
+
+  class FakeComponent2 {
+    static subscribeTo(state, listener) {
+      storeService.subscribe(state, listener);
+    }
+
+    static unsubscribeFrom(state, listener) {
+      storeService.unsubscribe(state, listener);
+    }
+  }
+
   beforeEach(() => {
     // Making sure we always get a new instance to isolate each test.
     storeService = new AmpStoryStoreService(env.win);
@@ -61,6 +81,20 @@ describes.fakeWin('amp-story-store-service', {}, env => {
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
+  });
+
+  it('should unsubscribe from corresponding listener', () => {
+    const listenerSpy = sandbox.spy();
+    const listenerSpy2 = sandbox.spy();
+
+    FakeComponent1.subscribeTo(StateProperty.BOOKEND_STATE, listenerSpy);
+    FakeComponent2.subscribeTo(StateProperty.BOOKEND_STATE, listenerSpy2);
+    FakeComponent1.unsubscribeFrom(StateProperty.BOOKEND_STATE, listenerSpy);
+
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+
+    expect(listenerSpy2).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.callCount(0);
   });
 });
 

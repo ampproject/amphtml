@@ -399,11 +399,7 @@ export class AmpStoryStoreService {
       dev().error(TAG, 'Can\'t unsubscribe from unknown state %s.', key);
       return;
     }
-    if (!this.listeners_[key]) {
-      dev().error(TAG, 'Can\'t unsubscribe from state with no listeners %s.',
-          listener);
-      return;
-    }
+
     this.listeners_[key].remove(listener);
   }
 
