@@ -25,121 +25,130 @@ describes.realWin('amp-autocomplete', {
 
   let win, doc;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    toggleExperiment(win, 'amp-autocomplete', true);
-  });
+  describe('test extension', () => {
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      toggleExperiment(win, 'amp-autocomplete', true);
+    });
 
-  function getAutocomplete(attributes,
-    json = '{ "items" : ["apple", "banana", "orange"] }') {
-    win.sessionStorage.clear();
-    const ampAutocomplete = doc.createElement('amp-autocomplete');
-    ampAutocomplete.setAttribute('layout', 'container');
-    for (const key in attributes) {
-      ampAutocomplete.setAttribute(key, attributes[key]);
+    function getAutocomplete(attributes,
+      json = '{ "items" : ["apple", "banana", "orange"] }') {
+      win.sessionStorage.clear();
+      const ampAutocomplete = doc.createElement('amp-autocomplete');
+      ampAutocomplete.setAttribute('layout', 'container');
+      for (const key in attributes) {
+        ampAutocomplete.setAttribute(key, attributes[key]);
+      }
+
+      const input = win.document.createElement('input');
+      input.setAttribute('type', 'text');
+      ampAutocomplete.appendChild(input);
+
+      const script = win.document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      script.innerHTML = json;
+      ampAutocomplete.appendChild(script);
+
+      doc.body.appendChild(ampAutocomplete);
+      return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    const input = win.document.createElement('input');
-    input.setAttribute('type', 'text');
-    ampAutocomplete.appendChild(input);
+    it('should render with experiment on', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+      }).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        const expectedItems = ['apple', 'banana', 'orange'];
+        expect(impl.inlineData_).to.have.ordered.members(expectedItems);
+        expect(impl.inputElement__).not.to.be.null;
+        expect(impl.container_).not.to.be.null;
+        expect(impl.filter_).to.equal('substring');
 
-    const script = win.document.createElement('script');
-    script.setAttribute('type', 'application/json');
-    script.innerHTML = json;
-    ampAutocomplete.appendChild(script);
-
-    doc.body.appendChild(ampAutocomplete);
-    return ampAutocomplete.build().then(() => ampAutocomplete);
-  }
-
-  it('should render with experiment on', () => {
-    return getAutocomplete({
-      'filter': 'substring',
-    }).then(ampAutocomplete => {
-      const impl = ampAutocomplete.implementation_;
-      const expectedItems = ['apple', 'banana', 'orange'];
-      expect(impl.inlineData_).to.have.ordered.members(expectedItems);
-      expect(impl.inputElement__).not.to.be.null;
-      expect(impl.container_).not.to.be.null;
-      expect(impl.filter_).to.equal('substring');
-
-      const renderSpy = sandbox.spy(impl, 'renderResults_');
-      return ampAutocomplete.layoutCallback().then(() => {
-        expect(ampAutocomplete).to.have.class('i-amphtml-autocomplete');
-        expect(impl.inputElement_)
-            .to.have.class('i-amphtml-autocomplete-input');
-        expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
-        expect(renderSpy).to.have.been.calledOnce;
+        const renderSpy = sandbox.spy(impl, 'renderResults_');
+        return ampAutocomplete.layoutCallback().then(() => {
+          expect(ampAutocomplete).to.have.class('i-amphtml-autocomplete');
+          expect(impl.inputElement_)
+              .to.have.class('i-amphtml-autocomplete-input');
+          expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+          expect(renderSpy).to.have.been.calledOnce;
+        });
       });
     });
-  });
 
-  it('should require filter attribute', () => {
-    return allowConsoleError(() => {
-      return expect(getAutocomplete({})).to.be
-          .rejectedWith('amp-autocomplete requires "filter" attribute.​​​');
+    it('should require filter attribute', () => {
+      return allowConsoleError(() => {
+        return expect(getAutocomplete({})).to.be
+            .rejectedWith('amp-autocomplete requires "filter" attribute.​​​');
+      });
     });
-  });
 
-  it('should require valid filter attribute', () => {
-    return allowConsoleError(() => {
+    it('should require valid filter attribute', () => {
+      return allowConsoleError(() => {
+        return expect(getAutocomplete({
+          'filter': 'invalid-option',
+        })).to.be.rejectedWith('Unexpected filter: undefined');
+      });
+    });
+
+    it('should render with min-characters passed', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'min-characters': '3',
+      }).then(ampAutocomplete => {
+        expect(ampAutocomplete.implementation_.minChars_).to.equal(3);
+      });
+    });
+
+    it('should render with max-entries passed', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'max-entries': '10',
+      }).then(ampAutocomplete => {
+        expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
+      });
+    });
+
+    it('should not render with experiment off', () => {
+      toggleExperiment(win, 'amp-autocomplete', false);
+      return allowConsoleError(() => {
+        return expect(getAutocomplete({})).to.be.rejectedWith(
+            'Experiment amp-autocomplete is not turned on.');
+      });
+    });
+
+    it('should error with invalid JSON script', () => {
+      expectAsyncConsoleError('Unexpected token o in JSON at position'
+        + ' 32 [object HTMLElement]');
       return expect(getAutocomplete({
-        'filter': 'invalid-option',
-      })).to.be.rejectedWith('Unexpected filter: undefined');
+        'filter': 'substring',
+      }, '{ "items" : ["apple", "banana", orange] }')).to.be.rejectedWith(
+          'Unexpected token o in JSON at position 32');
     });
-  });
 
-  it('should render with min-characters passed', () => {
-    return getAutocomplete({
-      'filter': 'substring',
-      'min-characters': '3',
-    }).then(ampAutocomplete => {
-      expect(ampAutocomplete.implementation_.minChars_).to.equal(3);
+    it('should accept empty JSON script', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+      }, '{}').then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.inlineData_).to.be.an('array').that.is.empty;
+      });
     });
-  });
 
-  it('should render with max-entries passed', () => {
-    return getAutocomplete({
-      'filter': 'substring',
-      'max-entries': '10',
-    }).then(ampAutocomplete => {
-      expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
+    it('should accept empty items JSON script', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+      }, '{ "items" : [] }').then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.inlineData_).to.be.an('array').that.is.empty;
+      });
     });
-  });
 
-  it('should not render with experiment off', () => {
-    toggleExperiment(win, 'amp-autocomplete', false);
-    return allowConsoleError(() => {
-      return expect(getAutocomplete({})).to.be.rejectedWith(
-          'Experiment amp-autocomplete is not turned on.');
-    });
-  });
-
-  it('should error with invalid JSON script', () => {
-    expectAsyncConsoleError('Unexpected token o in JSON at position'
-      + ' 32 [object HTMLElement]');
-    return expect(getAutocomplete({
-      'filter': 'substring',
-    }, '{ "items" : ["apple", "banana", orange] }')).to.be.rejectedWith(
-        'Unexpected token o in JSON at position 32');
-  });
-
-  it('should accept empty JSON script', () => {
-    return getAutocomplete({
-      'filter': 'substring',
-    }, '{}').then(ampAutocomplete => {
-      const impl = ampAutocomplete.implementation_;
-      expect(impl.inlineData_).to.be.an('array').that.is.empty;
-    });
-  });
-
-  it('should accept empty items JSON script', () => {
-    return getAutocomplete({
-      'filter': 'substring',
-    }, '{ "items" : [] }').then(ampAutocomplete => {
-      const impl = ampAutocomplete.implementation_;
-      expect(impl.inlineData_).to.be.an('array').that.is.empty;
-    });
+    describe('createElementFromItem_(item)', () => {});
+    describe('renderResults_()', () => {});
+    describe('filterData_()', () => {});
+    describe('rendering, showing, and hiding results', () => {});
+    describe('event handlers', () => {});
+    describe('marking active items', () => {});
   });
 });
