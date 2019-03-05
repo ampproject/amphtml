@@ -175,7 +175,7 @@ async function downloadOutput_(functionName, outputFileName) {
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
   exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -la ${OUTPUT_DIRS}`);
+  execOrDie(`ls -laR ${OUTPUT_DIRS}`);
   exec('echo travis_fold:end:verify_unzip_results');
 }
 
