@@ -1405,8 +1405,8 @@ export class Resources {
       }
 
       if (this.useLayers_) {
-        dirtySet.forEach(request => {
-          this.dirtyElement(request.resource.element);
+        dirtySet.forEach(element => {
+          this.dirtyElement(element);
         });
       } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
@@ -2278,31 +2278,33 @@ export class Resources {
       doPass();
     };
 
-    vsm.addTransition(prerender, prerender, doPass);
-    vsm.addTransition(prerender, visible, doPass);
-    vsm.addTransition(prerender, hidden, doPass);
-    vsm.addTransition(prerender, inactive, doPass);
-    vsm.addTransition(prerender, paused, doPass);
+    const addTransition = vsm.addTransition.bind(vsm); // for size savings.
 
-    vsm.addTransition(visible, visible, doPass);
-    vsm.addTransition(visible, hidden, doPass);
-    vsm.addTransition(visible, inactive, unload);
-    vsm.addTransition(visible, paused, pause);
+    addTransition(prerender, prerender, doPass);
+    addTransition(prerender, visible, doPass);
+    addTransition(prerender, hidden, doPass);
+    addTransition(prerender, inactive, doPass);
+    addTransition(prerender, paused, doPass);
 
-    vsm.addTransition(hidden, visible, doPass);
-    vsm.addTransition(hidden, hidden, doPass);
-    vsm.addTransition(hidden, inactive, unload);
-    vsm.addTransition(hidden, paused, pause);
+    addTransition(visible, visible, doPass);
+    addTransition(visible, hidden, doPass);
+    addTransition(visible, inactive, unload);
+    addTransition(visible, paused, pause);
 
-    vsm.addTransition(inactive, visible, resume);
-    vsm.addTransition(inactive, hidden, resume);
-    vsm.addTransition(inactive, inactive, noop);
-    vsm.addTransition(inactive, paused, doPass);
+    addTransition(hidden, visible, doPass);
+    addTransition(hidden, hidden, doPass);
+    addTransition(hidden, inactive, unload);
+    addTransition(hidden, paused, pause);
 
-    vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, doPass);
-    vsm.addTransition(paused, inactive, unload);
-    vsm.addTransition(paused, paused, noop);
+    addTransition(inactive, visible, resume);
+    addTransition(inactive, hidden, resume);
+    addTransition(inactive, inactive, noop);
+    addTransition(inactive, paused, doPass);
+
+    addTransition(paused, visible, resume);
+    addTransition(paused, hidden, doPass);
+    addTransition(paused, inactive, unload);
+    addTransition(paused, paused, noop);
   }
 
   /**
