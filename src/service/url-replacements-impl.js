@@ -128,41 +128,38 @@ export class GlobalVariableSource extends VariableSource {
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
-    const set = this.set.bind(this);
-    const setAsync = this.setAsync.bind(this);
-
     // Returns a random value for cache busters.
-    set('RANDOM', () => Math.random());
+    this.set('RANDOM', () => Math.random());
 
     // Provides a counter starting at 1 per given scope.
     const counterStore = Object.create(null);
-    set('COUNTER', scope => {
+    this.set('COUNTER', scope => {
       return counterStore[scope] = (counterStore[scope] | 0) + 1;
     });
 
     // Returns the canonical URL for this AMP document.
-    set('CANONICAL_URL', () => this.getDocInfo_().canonicalUrl);
+    this.set('CANONICAL_URL', () => this.getDocInfo_().canonicalUrl);
 
     // Returns the host of the canonical URL for this AMP document.
-    set('CANONICAL_HOST', () =>
+    this.set('CANONICAL_HOST', () =>
       parseUrlDeprecated(this.getDocInfo_().canonicalUrl).host);
 
     // Returns the hostname of the canonical URL for this AMP document.
-    set('CANONICAL_HOSTNAME', () =>
+    this.set('CANONICAL_HOSTNAME', () =>
       parseUrlDeprecated(this.getDocInfo_().canonicalUrl).hostname);
 
     // Returns the path of the canonical URL for this AMP document.
-    set('CANONICAL_PATH', () =>
+    this.set('CANONICAL_PATH', () =>
       parseUrlDeprecated(this.getDocInfo_().canonicalUrl).pathname);
 
     // Returns the referrer URL.
-    setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
+    this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
     }));
 
     // Like DOCUMENT_REFERRER, but returns null if the referrer is of
     // same domain or the corresponding CDN proxy.
-    setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
+    this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
           .then(referrer => {
             if (!referrer) {
@@ -177,7 +174,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Returns the title of this AMP document.
-    set('TITLE', () => {
+    this.set('TITLE', () => {
       // The environment may override the title and set originalTitle. Prefer
       // that if available.
       const doc = win.document;
@@ -185,19 +182,19 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the URL for this AMP document.
-    set('AMPDOC_URL', () => {
+    this.set('AMPDOC_URL', () => {
       return removeFragment(
           this.addReplaceParamsIfMissing_(win.location.href));
     });
 
     // Returns the host of the URL for this AMP document.
-    set('AMPDOC_HOST', () => {
+    this.set('AMPDOC_HOST', () => {
       const url = parseUrlDeprecated(win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
-    set('AMPDOC_HOSTNAME', () => {
+    this.set('AMPDOC_HOSTNAME', () => {
       const url = parseUrlDeprecated(win.location.href);
       return url && url.hostname;
     });
@@ -212,21 +209,21 @@ export class GlobalVariableSource extends VariableSource {
         () => getTrackImpressionPromise().then(() => expandSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
-    set('SOURCE_HOST', () =>
+    this.set('SOURCE_HOST', () =>
       parseUrlDeprecated(this.getDocInfo_().sourceUrl).host);
 
     // Returns the hostname of the Source URL for this AMP document.
-    set('SOURCE_HOSTNAME', () =>
+    this.set('SOURCE_HOSTNAME', () =>
       parseUrlDeprecated(this.getDocInfo_().sourceUrl).hostname);
 
     // Returns the path of the Source URL for this AMP document.
-    set('SOURCE_PATH', () =>
+    this.set('SOURCE_PATH', () =>
       parseUrlDeprecated(this.getDocInfo_().sourceUrl).pathname);
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
+    this.set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -240,11 +237,11 @@ export class GlobalVariableSource extends VariableSource {
     // Second parameter is an optional default value.
     // For example, if location is 'pub.com/amp.html?x=1#y=2' then
     // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
-    setAsync('FRAGMENT_PARAM',
+    this.setAsync('FRAGMENT_PARAM',
         this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
 
     // Returns the first item in the ancestorOrigins array, if available.
-    setAsync('ANCESTOR_ORIGIN',
+    this.setAsync('ANCESTOR_ORIGIN',
         this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
     /**
@@ -310,7 +307,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns assigned variant name for the given experiment.
-    setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
+    this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         userAssert(variant !== undefined,
@@ -322,7 +319,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Returns all assigned experiment variants in a serialized form.
-    setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
+    this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
       return this.getVariantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
@@ -335,7 +332,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Returns assigned geo value for geoType or all groups.
-    setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
+    this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
       return this.getGeo_(geos => {
         if (geoType) {
           userAssert(geoType === 'ISOCountry',
@@ -347,7 +344,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Returns incoming share tracking fragment.
-    setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
+    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
       () => {
         return this.getShareTrackingValue_(fragments => {
           return fragments.incomingFragment;
@@ -355,7 +352,7 @@ export class GlobalVariableSource extends VariableSource {
       }));
 
     // Returns outgoing share tracking fragment.
-    setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
+    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
       () => {
         return this.getShareTrackingValue_(fragments => {
           return fragments.outgoingFragment;
@@ -363,17 +360,17 @@ export class GlobalVariableSource extends VariableSource {
       }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
-    set('TIMESTAMP', dateMethod('getTime'));
+    this.set('TIMESTAMP', dateMethod('getTime'));
 
     // Returns the human readable timestamp in format of
     // 2011-01-01T11:11:11.612Z.
-    set('TIMESTAMP_ISO', dateMethod('toISOString'));
+    this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
-    set('TIMEZONE', dateMethod('getTimezoneOffset'));
+    this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
     // Returns the IANA timezone code
-    set('TIMEZONE_CODE', () => {
+    this.set('TIMEZONE_CODE', () => {
       let tzCode;
       if ('Intl' in win && 'DateTimeFormat' in win.Intl) {
         // It could be undefined (i.e. IE11)
@@ -384,54 +381,54 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    set('SCROLL_TOP', () => viewport.getScrollTop());
+    this.set('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    set('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
+    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    set('SCROLL_WIDTH', () => viewport.getScrollWidth());
+    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
 
     // Returns the viewport height.
-    set('VIEWPORT_HEIGHT', () => viewport.getHeight());
+    this.set('VIEWPORT_HEIGHT', () => viewport.getHeight());
 
     // Returns the viewport width.
-    set('VIEWPORT_WIDTH', () => viewport.getWidth());
+    this.set('VIEWPORT_WIDTH', () => viewport.getWidth());
 
     const {screen} = win;
     // Returns screen.width.
-    set('SCREEN_WIDTH', screenProperty(screen, 'width'));
+    this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
     // Returns screen.height.
-    set('SCREEN_HEIGHT', screenProperty(screen, 'height'));
+    this.set('SCREEN_HEIGHT', screenProperty(screen, 'height'));
 
     // Returns screen.availHeight.
-    set('AVAILABLE_SCREEN_HEIGHT', screenProperty(screen, 'availHeight'));
+    this.set('AVAILABLE_SCREEN_HEIGHT', screenProperty(screen, 'availHeight'));
 
     // Returns screen.availWidth.
-    set('AVAILABLE_SCREEN_WIDTH', screenProperty(screen, 'availWidth'));
+    this.set('AVAILABLE_SCREEN_WIDTH', screenProperty(screen, 'availWidth'));
 
     // Returns screen.ColorDepth.
-    set('SCREEN_COLOR_DEPTH', screenProperty(screen, 'colorDepth'));
+    this.set('SCREEN_COLOR_DEPTH', screenProperty(screen, 'colorDepth'));
 
     // Returns document characterset.
-    set('DOCUMENT_CHARSET', () => {
+    this.set('DOCUMENT_CHARSET', () => {
       const doc = win.document;
       return doc.characterSet || doc.charset;
     });
 
     // Returns the browser language.
-    set('BROWSER_LANGUAGE', () => {
+    this.set('BROWSER_LANGUAGE', () => {
       const nav = win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
     });
 
     // Returns the user agent.
-    set('USER_AGENT', () => {
+    this.set('USER_AGENT', () => {
       return win.navigator.userAgent;
     });
 
@@ -470,14 +467,14 @@ export class GlobalVariableSource extends VariableSource {
         'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
-    setAsync('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
+    this.setAsync('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
       return this.getAccessValue_(accessService => {
         return accessService.getAccessReaderId();
       }, 'ACCESS_READER_ID');
     }));
 
     // Access: data from the authorization response.
-    setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
+    this.setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
       userAssert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
@@ -486,7 +483,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Returns an identifier for the viewer.
-    setAsync('VIEWER', () => {
+    this.setAsync('VIEWER', () => {
       return Services.viewerForDoc(this.ampdoc)
           .getViewerOrigin().then(viewer => {
             return viewer == undefined ? '' : viewer;
@@ -494,7 +491,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the total engaged time since the content became viewable.
-    setAsync('TOTAL_ENGAGED_TIME', () => {
+    this.setAsync('TOTAL_ENGAGED_TIME', () => {
       return Services.activityForDoc(element).then(activity => {
         return activity.getTotalEngagedTime();
       });
@@ -502,14 +499,14 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the incremental engaged time since the last push under the
     // same name.
-    setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(element).then(activity => {
         return activity.getIncrementalEngagedTime(/** @type {string} */ (name),
             reset !== 'false');
       });
     });
 
-    set('NAV_TIMING', (startAttribute, endAttribute) => {
+    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
       userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataSync(
@@ -517,7 +514,7 @@ export class GlobalVariableSource extends VariableSource {
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     });
-    setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
+    this.setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
       userAssert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataAsync(
@@ -526,22 +523,22 @@ export class GlobalVariableSource extends VariableSource {
           /**@type {string}*/(endAttribute));
     });
 
-    set('NAV_TYPE', () => {
+    this.set('NAV_TYPE', () => {
       return getNavigationData(win, 'type');
     });
 
-    set('NAV_REDIRECT_COUNT', () => {
+    this.set('NAV_REDIRECT_COUNT', () => {
       return getNavigationData(win, 'redirectCount');
     });
 
     // returns the AMP version number
-    set('AMP_VERSION', () => '$internalRuntimeVersion$');
+    this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
 
-    set('BACKGROUND_STATE', () => {
+    this.set('BACKGROUND_STATE', () => {
       return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
 
-    setAsync('VIDEO_STATE', (id, property) => {
+    this.setAsync('VIDEO_STATE', (id, property) => {
       const root = this.ampdoc.getRootNode();
       const video = user().assertElement(
           root.getElementById(/** @type {string} */ (id)),
@@ -551,28 +548,28 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
+    this.setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
         'STORY_PAGE_INDEX'));
 
-    setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
+    this.setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
         'STORY_PAGE_ID'));
 
-    setAsync('FIRST_CONTENTFUL_PAINT', () => {
+    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return tryResolve(() =>
         Services.performanceFor(win).getFirstContentfulPaint());
     });
 
-    setAsync('FIRST_VIEWPORT_READY', () => {
+    this.setAsync('FIRST_VIEWPORT_READY', () => {
       return tryResolve(() =>
         Services.performanceFor(win).getFirstViewportReady());
     });
 
-    setAsync('MAKE_BODY_VISIBLE', () => {
+    this.setAsync('MAKE_BODY_VISIBLE', () => {
       return tryResolve(() =>
         Services.performanceFor(win).getMakeBodyVisible());
     });
 
-    setAsync('AMP_STATE', key => {
+    this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
       const {documentElement} = win.document;
       return Services.bindForDocOrNull(documentElement).then(bind => {
