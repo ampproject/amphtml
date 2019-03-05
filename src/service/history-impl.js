@@ -835,10 +835,16 @@ export class HistoryBindingVirtual_ {
         data => this.onHistoryPopped_(data));
 
     /**
+     * Sends the message to the viewer and wait for response.
+     * If cancelUnsent is true, the previous message of the same message type
+     * will be canceled.
+     *
+     * This is a restricted API.
+     *
      * @param {string} eventType
-     * @param {!JsonObject} data
-     * @param {boolean} unusedAwaitResponse
-     * @return {(!Promise<*>|undefined)}
+     * @param {?JsonObject|string|undefined} data
+     * @param {boolean=} cancelUnsent
+     * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
      * @private
      */
     this.viewerSendMessageAwaitResponse_ =

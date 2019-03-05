@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const assert = require('assert');
+
 
 function generateElementDefReplacement(tagNames, parsedSanitizedDef) {
   return `(function(def) {
@@ -32,6 +34,7 @@ function getSimpleKeysSanitizeDef(unsanitized) {
       // special case, many tags to one type.
       return;
     }
+    assert(unsanitized.elements[k].length == 1);
     const simpleKey = k.replace(/^HTML|Element$/g, '');
     if (simpleKey.length != (k.length - ('HTML'.length + 'Element'.length))) {
       // special case, not `HTML*Element`
