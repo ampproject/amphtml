@@ -91,18 +91,43 @@ export function isExperimentOn(win, experimentId) {
 export function toggleExperiment(win, experimentId, opt_on,
   opt_transientExperiment, opt_value) {
   const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
-  const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
+  let on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
+    let cookieTogglesValue = on;
     const toggles = experimentToggles(win);
-    toggles[experimentId] = on || opt_value;
-
+    if (opt_value && on) {
+      on = !!opt_value;
+      cookieTogglesValue = opt_value;
+    }
+    toggles[experimentId] = on;
     if (!opt_transientExperiment) {
       const cookieToggles = getExperimentTogglesFromCookie(win);
-      cookieToggles[experimentId] = on || opt_value;
+      cookieToggles[experimentId] = cookieTogglesValue;
       saveExperimentTogglesToCookie(win, cookieToggles);
     }
   }
   return on;
+}
+
+/**
+ * Gets the value of an experiment.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {?string}
+ */
+export function getExperimentValue(win, experimentId) {
+  const ampExperiments = getCookie(win, 'AMP_EXP');
+  if (ampExperiments) {
+    const experiments = ampExperiments.split(';');
+    for (let i = 0; i < experiments.length; i++) {
+      const experiment = experiments[i];
+      const keyValue = experiment.split('=');
+      if (keyValue.length == 2 && keyValue[0] === experimentId) {
+        return keyValue[1];
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -178,7 +203,7 @@ export function experimentTogglesOrNull(win) {
 /**
  * Returns a set of experiment IDs currently on.
  * @param {!Window} win
- * @return {!Object<string, boolean>}
+ * @return {!Object<string, boolean|string>}
  */
 function getExperimentTogglesFromCookie(win) {
   const experimentCookie = getCookie(win, COOKIE_NAME);
@@ -189,10 +214,14 @@ function getExperimentTogglesFromCookie(win) {
     if (tokens[i].length == 0) {
       continue;
     }
-    if (tokens[i][0] == '-') {
-      toggles[tokens[i].substr(1)] = false;
+    let token = tokens[i];
+    if (token.indexOf('=') != -1) {
+      token = token.split('=')[0];
+    }
+    if (token[0] == '-') {
+      toggles[token.substr(1)] = false;
     } else {
-      toggles[tokens[i]] = true;
+      toggles[token] = true;
     }
   }
 
@@ -202,12 +231,20 @@ function getExperimentTogglesFromCookie(win) {
 /**
  * Saves a set of experiment IDs currently on.
  * @param {!Window} win
- * @param {!Object<string, boolean>} toggles
+ * @param {!Object<string, boolean|string>} toggles
  */
 function saveExperimentTogglesToCookie(win, toggles) {
   const experimentIds = [];
-  for (const experiment in toggles) {
-    experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
+  for (let experiment in toggles) {
+    const experimentSetting = toggles[experiment];
+    // Some experiments, e.g. log, is not simply on or off based on the
+    // presence of the experiment ID in the cookie but also has a value
+    // associated with the cookie name. If so include value when setting
+    // cookie.
+    if (typeof experimentSetting == 'string') {
+      experiment += '=' + experimentSetting;
+    }
+    experimentIds.push((!!experimentSetting === false ? '-' : '') + experiment);
   }
 
   setCookie(win, COOKIE_NAME, experimentIds.join(','),

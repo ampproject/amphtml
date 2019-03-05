@@ -54,6 +54,7 @@ export function getCookie(win, name) {
   return null;
 }
 
+
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
  * NoInline keyword at the end of function name also prevents Closure compiler

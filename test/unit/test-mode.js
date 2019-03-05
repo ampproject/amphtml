@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as cookies from '../../src/cookies';
+import * as experiments from '../../src/experiments';
 import {
   getMode,
   getRtvVersionForTesting,
@@ -62,15 +62,15 @@ describe('log level', () => {
   });
 
   it('should use hash query log level over cookie defined log level', () => {
-    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'log')
-        .returns('1');
+    sandbox.stub(experiments, 'getExperimentValue')
+        .withArgs(sinon.match.object, 'log').returns('1');
     const mode = getMode(getWin('https://amp-site.org#log=2'));
     expect(mode.log).to.equal('2');
   });
 
   it('should use cookie defined log level if hash query is absent', () => {
-    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'log')
-        .returns('1');
+    sandbox.stub(experiments, 'getExperimentValue')
+        .withArgs(sinon.match.object, 'log').returns('1');
     const mode = getMode(getWin('https://amp-site.org'));
     expect(mode.log).to.equal('1');
   });

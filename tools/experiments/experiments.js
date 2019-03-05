@@ -19,8 +19,12 @@ import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
+import {
+  getExperimentValue,
+  isExperimentOn,
+  toggleExperiment,
+} from '../../src/experiments';
 import {getMode} from '../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
@@ -428,30 +432,33 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'log',
-    name: 'Log level ERROR. Note that log level set via hash query #log '
-       + 'will take precedence over this cookie.',
+    id: 'log-error',
+    experimentName: 'log',
+    name: 'Log level ERROR.',
     value: '1',
+    cleanupIssue: 'N/A',
   },
   {
-    id: 'log',
-    name: 'Log level WARN. Note that log level set via hash query #log'
-        + 'will take precedence over this cookie.',
+    id: 'log-warn',
+    experimentName: 'log',
+    name: 'Log level WARN.',
     value: '2',
+    cleanupIssue: 'N/A',
   },
   {
-    id: 'log',
-    name: 'Log level INFO. Note that log level set via hash query #log'
-        + 'will take precedence over this cookie.',
+    id: 'log-info',
+    experimentName: 'log',
+    name: 'Log level INFO.',
     value: '3',
+    cleanupIssue: 'N/A',
   },
   {
-    id: 'log',
-    name: 'Log level FINE. Note that log level set via hash query #log'
-        + 'will take precedence over this cookie.',
+    id: 'log-fine',
+    experimentName: 'log',
+    name: 'Log level FINE.',
     value: '4',
+    cleanupIssue: 'N/A',
   },
-
 ];
 
 if (getMode().localDev) {
@@ -463,7 +470,7 @@ if (getMode().localDev) {
 
 
 /**
- * Builds the expriments tbale.
+ * Builds the experiments table.
  */
 function build() {
   const table = document.getElementById('experiments-table');
@@ -514,7 +521,8 @@ function buildExperimentRow(experiment) {
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
 
-  button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
+  button.addEventListener('click', toggleExperiment_.bind(null,
+      experiment.experimentName || experiment.id,
       experiment.name, undefined, experiment.value));
 
   return tr;
@@ -560,9 +568,20 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  let state = isExperimentOn_(experiment.id) ? 1 : 0;
-  if (self.AMP_CONFIG[experiment.id]) {
+  const {experimentName} = experiment;
+  let experimentValue;
+  let isOnBasedOnExperimentValue;
+  if (experimentName) {
+    experimentValue = getExperimentValue(window, experimentName);
+    isOnBasedOnExperimentValue = experiment.value == experimentValue;
+  }
+  const isOn = isExperimentOn_(experimentName || experiment.id);
+  let state = isOn ? 1 : 0;
+  if (self.AMP_CONFIG[experimentName || experiment.id]) {
     state = 'default';
+  }
+  if (experimentName && isOn && !isOnBasedOnExperimentValue) {
+    state = 0;
   }
   tr.setAttribute('data-on', state);
 }
@@ -623,7 +642,7 @@ function toggleExperiment_(id, name, opt_on, opt_value) {
       setAmpCanaryCookie_(
           on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED);
     } else {
-      toggleExperiment(window, id, on, opt_value);
+      toggleExperiment(window, id, on, undefined, opt_value);
     }
     update();
   });
