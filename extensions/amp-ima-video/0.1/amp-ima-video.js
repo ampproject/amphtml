@@ -18,6 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
@@ -171,6 +172,10 @@ class AmpImaVideo extends AMP.BaseElement {
           {initialConsentState}, {allowFullscreen: true});
 
       this.applyFillContent(iframe);
+
+      // This is temporary until M74 launches.
+      // TODO(aghassemi, #21247)
+      addUnsafeAllowAutoplay(iframe);
 
       this.iframe_ = iframe;
 
