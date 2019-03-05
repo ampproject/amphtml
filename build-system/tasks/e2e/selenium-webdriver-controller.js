@@ -169,7 +169,7 @@ class SeleniumWebDriverController {
       const results = await this.evaluate((xpath, root) => {
         return window.queryXpath(xpath, root);
       }, xpath, root);
-      return results[0];
+      return (results && results[0]);
     }), ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
