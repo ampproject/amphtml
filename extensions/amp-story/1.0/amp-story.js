@@ -142,17 +142,18 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /** @enum {string} */
 const Attributes = {
-  STANDALONE: 'standalone',
+  AD_SHOWING: 'ad-showing',
   ADVANCE_TO: 'i-amphtml-advance-to',
+  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  AUTO_ADVANCE_TO: 'auto-advance-to',
+  DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
-  AUTO_ADVANCE_TO: 'auto-advance-to',
-  AD_SHOWING: 'ad-showing',
-  // Attributes that desktop css looks for to decide where pages will be placed
-  DESKTOP_POSITION: 'i-amphtml-desktop-position',
-  VISITED: 'i-amphtml-visited', // stacked offscreen to left
-  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  STANDALONE: 'standalone',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
+  // Attributes that desktop css looks for to decide where pages will be placed
+  VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
 
 /**
@@ -289,6 +290,10 @@ export class AmpStory extends AMP.BaseElement {
     this.canRotateToDesktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
+
+    /** @private @const */
+    this.landscapeOrientationMedia_ =
+        this.win.matchMedia('(orientation: landscape)');
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
@@ -629,6 +634,10 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
       this.onCurrentPageIdUpdate_(pageId);
     });
+
+    this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
+      this.onLandscapeStateUpdate_(isLandscape);
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
@@ -1445,39 +1454,43 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
+    const isLandscape = this.isLandscape_();
+    this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, isLandscape);
+
     if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       return;
     }
 
-    // On mobile, maybe display the landscape overlay warning and pause the
-    // story.
-    this.vsync_.run({
-      measure: state => {
-        const {offsetWidth, offsetHeight} = this.element;
-        state.isLandscape = offsetWidth > offsetHeight;
-      },
-      mutate: state => {
-        const viewportWarningState =
-            this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE);
+    // Only called when the desktop media query is not matched and the landscape
+    // mode is not enabled.
+    this.maybeTriggerViewportWarning_(isLandscape);
+  }
 
-        if (viewportWarningState === state.isLandscape) {
-          return;
-        }
+  /**
+   * Maybe triggers the viewport warning overlay.
+   * @param {boolean} isLandscape
+   * @private
+   */
+  maybeTriggerViewportWarning_(isLandscape) {
+    if (isLandscape ===
+        this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)) {
+      return;
+    }
 
-        if (state.isLandscape) {
-          this.pausedStateToRestore_ =
-              !!this.storeService_.get(StateProperty.PAUSED_STATE);
-          this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-        } else {
-          this.storeService_
-              .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-        }
-      },
-    }, {});
+    this.mutateElement(() => {
+      if (isLandscape) {
+        this.pausedStateToRestore_ =
+            !!this.storeService_.get(StateProperty.PAUSED_STATE);
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
+      } else {
+        this.storeService_
+            .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
+      }
+    });
   }
 
   /**
@@ -1513,6 +1526,7 @@ export class AmpStory extends AMP.BaseElement {
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
+          this.element.setAttribute('mobile', '');
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
@@ -1523,6 +1537,7 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('mobile');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1538,6 +1553,7 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('mobile');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
@@ -1573,6 +1589,14 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} True if the screen orientation is landscape.
+   * @private
+   */
+  isLandscape_() {
+    return this.landscapeOrientationMedia_.matches;
+  }
+
+  /**
    * @return {boolean} true if this is a standalone story (i.e. this story is
    *     the only content of the document).
    * @private
@@ -1589,6 +1613,18 @@ export class AmpStory extends AMP.BaseElement {
    */
   isLandscapeSupported_() {
     return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
+  }
+
+  /**
+   * Reacts to landscape state updates.
+   * @param {boolean} isLandscape
+   * @private
+   */
+  onLandscapeStateUpdate_(isLandscape) {
+    this.mutateElement(() => {
+      this.element.setAttribute(
+          Attributes.ORIENTATION, isLandscape ? 'landscape' : 'portrait');
+    });
   }
 
   /**

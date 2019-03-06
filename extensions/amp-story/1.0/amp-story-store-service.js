@@ -90,6 +90,7 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
+ *    landscapeState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
@@ -130,6 +131,7 @@ export const StateProperty = {
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
+  LANDSCAPE_STATE: 'landscapeState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
@@ -165,15 +167,16 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
+  TOGGLE_LANDSCAPE: 'toggleLandscape',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
-  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
@@ -258,6 +261,9 @@ const actions = (state, action, data) => {
             [StateProperty.INFO_DIALOG_STATE]: !!data,
             [StateProperty.PAUSED_STATE]: !!data,
           }));
+    case Action.TOGGLE_LANDSCAPE:
+        return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Shows or hides the audio controls.
     case Action.TOGGLE_STORY_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -434,6 +440,7 @@ export class AmpStoryStoreService {
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },
+      [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
