@@ -100,7 +100,7 @@ Example:
   </tr>
 </table>
 
-Embed code must either have video or playlist or outstream attribute.
+Embed code must either have video, playlist or outstream attribute.
 
 ## Validation
 
