@@ -191,5 +191,5 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page {
-  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+  box-shadow: 0 30px 200px rgba(0, 0, 0, 0.7) !important
 }
