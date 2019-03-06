@@ -177,14 +177,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Register event handlers.
-    this.inputElement_.addEventListener('input',
-        this.inputHandler_.bind(this));
-    this.inputElement_.addEventListener('keydown',
-        this.keyDownHandler_.bind(this));
-    this.inputElement_.addEventListener('focus', this.showResults.bind(this));
-    this.inputElement_.addEventListener('blur', this.hideResults.bind(this));
-    this.container_.addEventListener('mousedown',
-        this.selectHandler_.bind(this));
+    this.inputElement_.addEventListener('input', e => {
+      this.inputHandler_(e);
+    });
+    this.inputElement_.addEventListener('keydown', e => {
+      this.keyDownHandler_(e);
+    });
+    this.inputElement_.addEventListener('focus', () => {
+      this.showResults();
+    });
+    this.inputElement_.addEventListener('blur', () => {
+      this.hideResults();
+    });
+    this.container_.addEventListener('mousedown', e => {
+      this.selectHandler_(e);
+    });
 
     return this.mutateElement(() => {
       this.element.classList.add('i-amphtml-autocomplete');
@@ -375,7 +382,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (!this.activeElement_) {
       return;
     }
-    this.activeElement_.classList.remove('i-amphtml-autocomplete-item-active');
+    this.activeElement_.classList.toggle(
+        'i-amphtml-autocomplete-item-active', false);
     this.activeElement_ = null;
   }
 
@@ -412,6 +420,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.hideResults();
         return Promise.resolve();
       default:
+        return Promise.resolve();
     }
   }
 
