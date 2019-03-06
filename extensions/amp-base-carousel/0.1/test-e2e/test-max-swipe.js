@@ -19,12 +19,17 @@ import {
   getSlides,
 } from './helpers';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('AMP carousel max-swipe', {
+  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+      'max-swipe-one.amp.html',
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
-  const pageWidth = 800;
-  const pageHeight = 600;
+
   let controller;
-  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -36,25 +41,9 @@ describes.endtoend('AMP carousel max-swipe', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/max-swipe-one.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
-
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
   });
 
   describe('looping', () => {
-    beforeEach(async() => {
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/max-swipe-one.amp.html');
-    });
-
     it('should only show one slide on each side initially', async() => {
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
