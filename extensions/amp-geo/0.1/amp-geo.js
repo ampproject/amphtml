@@ -282,7 +282,6 @@ export class AmpGeo extends AMP.BaseElement {
    * @private
    */
   addToBody_(config) {
-    const doc = this.win.document;
     const ampdoc = this.getAmpDoc();
     /** @type {Object} */
     const states = {};
@@ -339,8 +338,8 @@ export class AmpGeo extends AMP.BaseElement {
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
               }
-              const state = doc.createElement('amp-state');
-              const confScript = doc.createElement('script');
+              const state = ampdoc.win.document.createElement('amp-state');
+              const confScript = ampdoc.win.document.createElement('script');
               confScript.setAttribute('type', 'application/json');
               confScript.textContent =
                   JSON.stringify(/** @type {!JsonObject} */(states)) ;
