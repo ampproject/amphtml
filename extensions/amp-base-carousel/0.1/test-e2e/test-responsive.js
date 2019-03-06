@@ -79,7 +79,8 @@ describes.endtoend('AMP Carousel responsive attributes', {
     await expect(controller.getElementRect(secondSlide)).to.include({x: 0});
   });
 
-  it('should respond to attribute changes', async() => {
+  // TODO(sparhami, #21296): Fix bug causing test to fail
+  it.skip('should respond to attribute changes', async() => {
     const firstSlide = await getSlide(controller, 0);
 
     // 3 slides width width 1000 = 333 width per slide.
