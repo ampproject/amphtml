@@ -74,7 +74,7 @@ const squareImgUrl = width => {
 };
 
 const randomFalsy = () => {
-  const rand = Math.floor(Math.random() * Math.floor(3));
+  const rand = Math.floor(Math.random() * 4);
   switch (rand) {
     case 1: return null;
     case 2: return undefined;
