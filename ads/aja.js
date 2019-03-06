@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -28,6 +28,16 @@ export function aja(global, data) {
     sspCode: data['sspCode'],
   });
 
-  const url = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
-  writeScript(global,url);
+  const elStyle = global.document.createElement('iframe');
+  elStyle.setAttribute('id', 'adframe');
+  elStyle.setAttribute('width', data.width);
+  elStyle.setAttribute('height', data.height);
+  elStyle.setAttribute('frameborder', '0');
+  elStyle.setAttribute('marginheight', '0');
+  elStyle.setAttribute('marginwidth', '0');
+  elStyle.setAttribute('allowfullscreen', 'true');
+  elStyle.setAttribute('scrolling', 'no');
+  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
+  global.document.body.appendChild(elStyle);
+
 }
