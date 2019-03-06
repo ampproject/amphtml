@@ -73,6 +73,12 @@ export const EXPANDABLE_COMPONENTS = {
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
+  'amp-youtube': {
+    selector: 'amp-youtube',
+  },
+  'amp-instagram': {
+    selector: 'amp-instagram',
+  },
 };
 
 /**
@@ -299,6 +305,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
+    /** @private */
+    this.onChangePageHandler_ = this.onChangePage_.bind(this);
+
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
           this.onComponentStateUpdate_(component);
@@ -392,6 +401,10 @@ export class AmpStoryEmbeddedComponent {
 
     this.animateExpanded_(devAssert(targetToExpand));
 
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID,
+        this.onChangePageHandler_);
+
+    this.resources_.scheduleResume(this.storyEl_, this.triggeringTarget_);
     this.expandedViewOverlay_ = this.componentPage_
         .querySelector('.i-amphtml-story-expanded-view-overflow');
     if (!this.expandedViewOverlay_) {
@@ -453,13 +466,6 @@ export class AmpStoryEmbeddedComponent {
       // desktop buttons.
       if (this.state_ === EmbeddedComponentState.FOCUSED) {
         this.close_();
-      }
-
-      // Hide expanded view when page switch is triggered by keyboard or desktop
-      // buttons.
-      if (this.state_ === EmbeddedComponentState.EXPANDED) {
-        this.maybeCloseExpandedView_(null /** target */,
-            true /** forceClose */);
       }
     });
 
@@ -558,6 +564,21 @@ export class AmpStoryEmbeddedComponent {
       this.tooltip_.addEventListener('click', this.expandComponentHandler_,
           true);
     }
+  }
+
+  /**
+   *
+   */
+  onChangePage_() {
+    // Hide expanded view when page switch is triggered by keyboard or desktop
+    // buttons.
+    if (this.state_ === EmbeddedComponentState.EXPANDED) {
+      this.maybeCloseExpandedView_(null /** target */,
+          true /** forceClose */);
+    }
+    this.resources_.schedulePause(this.storyEl_, this.triggeringTarget_);
+    this.storeService_.unsubscribe(StateProperty.CURRENT_PAGE_ID,
+        this.onChangePageHandler_);
   }
 
   /**
