@@ -262,8 +262,8 @@ const EXPERIMENTS = [
     id: 'disable-amp-story-desktop-background',
     name: 'Removes blurred background images from the amp-story component\'s ' +
         'three-panel desktop UI.',
-    spec: 'https://github.com/ampproject/amphtml/issues/xxxxx',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/xxxxx',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
   },
   {
     id: 'amp-next-page',
