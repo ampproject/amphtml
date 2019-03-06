@@ -29,6 +29,7 @@ import {getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {number} */
@@ -450,8 +451,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
     }
 
-    userAssert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
-      `"${configAttrs.type}" ad type is not supported`);
+    const {type} = configAttrs;
+    userAssert(!!ALLOWED_AD_TYPES[type], `${TAG}: ` +
+      `"${type}" ad type is not supported`);
+
+    if (type === 'fake') {
+      const id = this.element.getAttribute('id');
+      if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+        user().warn(TAG, 'id must start with i-amphtml-demo- to use fake ads');
+        return;
+      }
+      configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
+    }
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         configAttrs, requiredAttrs));
