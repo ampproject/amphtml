@@ -260,11 +260,11 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Returns a list of classes to remove if pre-render has
    * been invalidated by way of being on an amp cache
-   * @param {Document} doc
+   * @param {Element} body
    * @return {Array<string>}
    */
-  clearPreRender_(doc) {
-    const {classList} = doc.body;
+  clearPreRender_(body) {
+    const {classList} = body;
     const classesToRemove = [];
     const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX ,'i');
     for (let i = classList.length - 1; i > 0; i--) {
@@ -282,7 +282,6 @@ export class AmpGeo extends AMP.BaseElement {
    * @private
    */
   addToBody_(config) {
-    const doc = this.win.document;
     const ampdoc = this.getAmpDoc();
     /** @type {Object} */
     const states = {};
@@ -298,7 +297,7 @@ export class AmpGeo extends AMP.BaseElement {
 
       switch (self.mode_) {
         case mode.GEO_OVERRIDE:
-          classesToRemove = self.clearPreRender_(doc);
+          classesToRemove = self.clearPreRender_(body);
           // Intentionally fall through.
         case mode.GEO_HOT_PATCH:
           // Build the AMP State, add classes
@@ -335,12 +334,12 @@ export class AmpGeo extends AMP.BaseElement {
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
             if (config['AmpBind']) {
-              const geoState = doc.getElementById(GEO_ID);
+              const geoState = ampdoc.getElementById(GEO_ID);
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
               }
-              const state = doc.createElement('amp-state');
-              const confScript = doc.createElement('script');
+              const state = ampdoc.win.document.createElement('amp-state');
+              const confScript = ampdoc.win.document.createElement('script');
               confScript.setAttribute('type', 'application/json');
               confScript.textContent =
                   JSON.stringify(/** @type {!JsonObject} */(states)) ;
