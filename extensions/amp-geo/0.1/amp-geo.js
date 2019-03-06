@@ -321,7 +321,7 @@ export class AmpGeo extends AMP.BaseElement {
           classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
           // Let the runtime know we're mutating the AMP body
-          // Actual change happens in callback to runtime can
+          // Actual change happens in callback so runtime can
           // optimize dom mutations.
           self.mutateElement(() => {
             const {classList} = body;
