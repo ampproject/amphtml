@@ -40,7 +40,6 @@ router.use('/vegetable-data/get', (req, res) => {
   });
 });
 
-
 /**
  * Autosuggest endpoint
  */
@@ -67,11 +66,21 @@ router.get('/search/countries', function(req, res) {
  * Infinite scroll related endpoints.
  */
 const randInt = n => {
-  return Math.floor(Math.random() * Math.floor(n));
+  return Math.floor(Math.random()) * n;
 };
 
 const squareImgUrl = width => {
   return `http://picsum.photos/${width}?${randInt(50)}`;
+};
+
+const randomFalsy = () => {
+  const rand = randInt(4);
+  switch (rand) {
+    case 1: return null;
+    case 2: return undefined;
+    case 3: return '';
+    default: return false;
+  }
 };
 
 const generateJson = numberOfItems => {
@@ -140,17 +149,6 @@ router.get('/infinite-scroll', function(req, res) {
   const nextUrl = '/list/infinite-scroll?items=' +
     numberOfItems + '&left=' + (pagesLeft - 1) +
     '&latency=' + latency;
-
-  const randomFalsy = () => {
-    const rand = Math.floor(Math.random() * Math.floor(3));
-    switch (rand) {
-      case 1: return null;
-      case 2: return undefined;
-      case 3: return '';
-      default: return false;
-    }
-  };
-
   const next = pagesLeft == 0 ? randomFalsy() : nextUrl;
   const results = next === false ? {items}
     : {items, next,
@@ -163,6 +161,31 @@ router.get('/infinite-scroll', function(req, res) {
   } else {
     res.json(results);
   }
+});
+
+
+const generateJsonWithState = (numberOfItems, pagesLeft) => {
+  const results = generateJson(numberOfItems);
+  results.forEach((e, i) => {
+    e['id'] = pagesLeft * 10 + i;
+    e['count'] = randInt(10);
+    e['favorited'] = randInt(2) == 0 ? 'no' : 'yes';
+  });
+  return results;
+};
+
+router.get('/infinite-scroll-state', function(req, res) {
+  const {query} = req;
+  const numberOfItems = query['items'] || 2;
+  const pagesLeft = query['left'] || 0;
+  const items = generateJsonWithState(numberOfItems, pagesLeft);
+  const next = '/list/infinite-scroll-state?left=' + (pagesLeft - 1)
+      + '&items=' + numberOfItems;
+  const results = {
+    items,
+    next,
+  };
+  res.json(results);
 });
 
 module.exports = router;
