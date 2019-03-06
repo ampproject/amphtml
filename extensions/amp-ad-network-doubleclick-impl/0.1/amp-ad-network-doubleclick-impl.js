@@ -493,6 +493,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
+    let psz = null;
+    let msz = null;
+    if (this.sendFlexibleAdSlotParams_) {
+      const parentWidth = getContainerWidth(
+          this.win, this.element.parentElement);
+      let slotWidth = getContainerWidth(
+          this.win, this.element, 1 /* maxDepth */);
+      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      psz = `${parentWidth}x-1`;
+      msz = `${slotWidth}x-1`;
+    }
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -510,11 +521,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'fsf': this.forceSafeframe ? '1' : null,
       // Both msz/psz send a height of -1 because height expansion is
       // disallowed in AMP.
-      'msz': this.sendFlexibleAdSlotParams_ ?
-        `${getContainerWidth(this.win, this.element)}x-1` : null,
-      'psz': this.sendFlexibleAdSlotParams_ ?
-        `${getContainerWidth(this.win, this.element.parentElement)}x-1` :
-        null,
+      'msz': msz,
+      'psz': psz,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting &&

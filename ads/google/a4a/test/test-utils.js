@@ -1103,4 +1103,16 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
         .returns({width: 300});
     expect(getContainerWidth(win, element)).to.equal(300);
   });
+
+  it('should return -1 width for non-fixed layouts, maxDepth = 1', () => {
+    ['fill', 'fixed-height', 'fluid', 'responsive'].forEach(layout => {
+      const parent = document.createElement('div');
+      parent.setAttribute('width', 300);
+      parent.setAttribute('layout', 'fixed');
+      doc.body.appendChild(parent);
+      const element = createResource(
+          {height: 250}, layout, 'amp-ad', parent);
+      expect(getContainerWidth(win, element, 1)).to.equal(-1);
+    });
+  });
 });

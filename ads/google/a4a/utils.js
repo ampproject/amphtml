@@ -968,14 +968,15 @@ export function getAmpRuntimeTypeParameter(win) {
  * ancestor that has a fixed size, if the given element has none.
  * @param {!Window} win
  * @param {?Element} element
+ * @param {number=} maxDepth The maximum number of ancestors to check.
  * @return {number} The width of the given element, or of the nearest ancestor
  *    with a fixed size, if the given element has none.
  */
-export function getContainerWidth(win, element) {
+export function getContainerWidth(win, element, maxDepth = 100) {
   let el = element;
-  let maxDepth = 100;
+  let depth = maxDepth;
   // Find the first ancestor with a fixed size.
-  while (el && maxDepth--) {
+  while (el && depth--) {
     const layout = el.getAttribute('layout');
     switch (layout) {
       case Layout.FIXED:
@@ -1006,6 +1007,6 @@ export function getContainerWidth(win, element) {
         return parseInt(computedStyle(win, el).width, 10) || 0;
     }
   }
-  return 0;
+  return -1;
 }
 
