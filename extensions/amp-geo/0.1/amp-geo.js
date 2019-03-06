@@ -53,7 +53,7 @@ import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 /** @const */
@@ -165,11 +165,11 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * findCountry_, sets this.country_ and this.mode_
-   * @param {Document} doc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  findCountry_(doc) {
+  findCountry_(ampdoc) {
     // Flag to see if we've been pre-rendered with a country
-    const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
+    const preRenderMatch = ampdoc.getBody().className.match(PRE_RENDER_REGEX);
     // Trim the spaces off the patched country
     const trimmedCountry = COUNTRY.trim();
 
@@ -183,7 +183,7 @@ export class AmpGeo extends AMP.BaseElement {
       this.mode_ = mode.GEO_OVERRIDE;
       this.country_ = getMode(this.win).geoOverride.toLowerCase();
     } else if (preRenderMatch &&
-        !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
+        !Services.urlForDoc(this.element).isProxyOrigin(this.win.location)) {
       // pre-rendered by a publisher case, if we're a cache we ignore that
       // since there is no way the publisher could know the geo of the client.
       // When caches start pre-rendering geo we'll need to add specifc code
@@ -283,14 +283,15 @@ export class AmpGeo extends AMP.BaseElement {
    */
   addToBody_(config) {
     const doc = this.win.document;
+    const ampdoc = this.getAmpDoc();
     /** @type {Object} */
     const states = {};
     const self = this;
 
-    // Wait for the body before we figure antying out becasue we might be
+    // Wait for the body before we figure anything out because we might be
     // prerendered and we know that from body classes
-    return waitForBodyPromise(doc).then(() => {
-      self.findCountry_(doc);
+    return ampdoc.whenBodyAvailable().then(body => {
+      self.findCountry_(ampdoc);
       self.matchCountryGroups_(config);
 
       let classesToRemove = [];
@@ -319,11 +320,11 @@ export class AmpGeo extends AMP.BaseElement {
           states.ISOCountryGroups = self.matchedGroups_;
           classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
-          // Let the runtime know we're mutating the doc.body
+          // Let the runtime know we're mutating the AMP body
           // Actual change happens in callback to runtime can
           // optimize dom mutations.
           self.mutateElement(() => {
-            const {classList} = doc.body;
+            const {classList} = body;
             // Always remove the pending class
             classesToRemove.push('amp-geo-pending');
             classesToRemove.forEach(toRemove => classList.remove(toRemove));
@@ -345,9 +346,9 @@ export class AmpGeo extends AMP.BaseElement {
                   JSON.stringify(/** @type {!JsonObject} */(states)) ;
               state.appendChild(confScript);
               state.id = GEO_ID;
-              doc.body.appendChild(state);
+              body.appendChild(state);
             }
-          }, doc.body);
+          }, body);
 
           break;
         case mode.GEO_PRERENDER:
