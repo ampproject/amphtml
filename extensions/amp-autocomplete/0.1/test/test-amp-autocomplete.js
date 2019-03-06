@@ -231,9 +231,10 @@ describes.realWin('amp-autocomplete', {
         impl.showResults();
         expect(impl.resultsShowing()).to.be.true;
         expect(resetSpy).not.to.have.been.called;
-        impl.hideResults();
-        expect(impl.resultsShowing()).to.be.false;
-        expect(resetSpy).to.have.been.calledOnce;
+        impl.hideResults().then(() => {
+          expect(impl.resultsShowing()).to.be.false;
+          expect(resetSpy).to.have.been.calledOnce;
+        });
       });
 
       it('should call event handlers', () => {
@@ -246,30 +247,34 @@ describes.realWin('amp-autocomplete', {
             inputType: 'insertText',
             data: 'a',
           };
-          impl.inputHandler_(event);
-          expect(renderSpy).to.have.been.calledOnce;
-          expect(showResultsSpy).to.have.been.calledOnce;
-          expect(impl.container_.children.length).to.equal(3);
+          impl.inputHandler_(event).then(() => {
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(showResultsSpy).to.have.been.calledOnce;
+            expect(impl.container_.children.length).to.equal(3);
+          });
 
           // keyDownHandler_()
           const updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
           const resultsShowingSpy = sandbox.spy(impl, 'resultsShowing');
           event = {key: Keys.DOWN_ARROW};
-          impl.keyDownHandler_(event);
-          expect(resultsShowingSpy).to.have.been.calledOnce;
-          expect(updateActiveSpy).to.have.been.calledWith(1);
+          impl.keyDownHandler_(event).then(() => {
+            expect(resultsShowingSpy).to.have.been.calledOnce;
+            expect(updateActiveSpy).to.have.been.calledWith(1);
+          });
 
           event = {key: Keys.UP_ARROW};
-          impl.keyDownHandler_(event);
-          expect(resultsShowingSpy).to.have.been.calledTwice;
-          expect(updateActiveSpy).to.have.been.calledWith(-1);
+          impl.keyDownHandler_(event).then(() => {
+            expect(resultsShowingSpy).to.have.been.calledTwice;
+            expect(updateActiveSpy).to.have.been.calledWith(-1);
+          });
 
           const selectItemSpy = sandbox.spy(impl, 'selectItem');
           const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
           event = {key: Keys.ENTER, preventDefault: () => {}};
-          impl.keyDownHandler_(event);
-          expect(selectItemSpy).to.have.been.calledOnce;
-          expect(resetSpy).to.have.been.calledOnce;
+          impl.keyDownHandler_(event).then(() => {
+            expect(selectItemSpy).to.have.been.calledOnce;
+            expect(resetSpy).to.have.been.calledOnce;
+          });
 
           const hideResultsSpy = sandbox.spy(impl, 'hideResults');
           event = {key: Keys.ESCAPE};
@@ -280,14 +285,16 @@ describes.realWin('amp-autocomplete', {
           impl.showResults();
           const isItemSpy = sandbox.spy(impl, 'isItemElement');
           let mockEl = doc.createElement('div');
-          impl.selectHandler_({target: mockEl});
-          expect(isItemSpy).to.have.been.calledOnce;
-          expect(selectItemSpy).to.have.been.calledOnce; // Prior call
+          impl.selectHandler_({target: mockEl}).then(() => {
+            expect(isItemSpy).to.have.been.calledOnce;
+            expect(selectItemSpy).to.have.been.calledOnce; // Prior call
+          });
 
           mockEl = impl.createElementFromItem_('abc');
-          impl.selectHandler_({target: mockEl});
-          expect(isItemSpy).to.have.been.calledTwice;
-          expect(selectItemSpy).to.have.been.calledTwice;
+          impl.selectHandler_({target: mockEl}).then(() => {
+            expect(isItemSpy).to.have.been.calledTwice;
+            expect(selectItemSpy).to.have.been.calledTwice;
+          });
         });
       });
 
@@ -299,18 +306,21 @@ describes.realWin('amp-autocomplete', {
           impl.renderResults_();
           expect(impl.container_.children.length).to.equal(3);
           const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-          impl.updateActiveItem_(1);
-          expect(resetSpy).not.to.have.been.called;
-          expect(impl.activeIndex_).to.equal(0);
-          expect(impl.activeElement_).not.to.be.null;
-          impl.updateActiveItem_(-1);
-          expect(resetSpy).to.have.been.calledOnce;
-          expect(impl.activeElement_).not.to.be.null;
-          expect(impl.activeIndex_).to.equal(2);
-          impl.updateActiveItem_(0);
-          expect(resetSpy).to.have.been.calledOnce;
-          expect(impl.activeElement_).not.to.be.null;
-          expect(impl.activeIndex_).to.equal(2);
+          impl.updateActiveItem_(1).then(() => {
+            expect(resetSpy).not.to.have.been.called;
+            expect(impl.activeIndex_).to.equal(0);
+            expect(impl.activeElement_).not.to.be.null;
+          });
+          impl.updateActiveItem_(-1).then(() => {
+            expect(resetSpy).to.have.been.calledOnce;
+            expect(impl.activeElement_).not.to.be.null;
+            expect(impl.activeIndex_).to.equal(2);
+          });
+          impl.updateActiveItem_(0).then(() => {
+            expect(resetSpy).to.have.been.calledOnce;
+            expect(impl.activeElement_).not.to.be.null;
+            expect(impl.activeIndex_).to.equal(2);
+          });
         });
       });
     });

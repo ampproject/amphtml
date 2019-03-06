@@ -107,23 +107,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    return this.measureMutateElement(() => {
-      this.inlineData_ = this.getInlineData_();
+    this.inlineData_ = this.getInlineData_();
 
-      const inputElements = childElementsByTag(this.element, 'INPUT');
-      userAssert(inputElements.length === 1,
-          `${TAG} should contain exactly one <input> child`);
-      this.inputElement_ = inputElements[0];
-  
-      this.filter_ = userAssert(this.element.getAttribute('filter'),
-          `${TAG} requires "filter" attribute.`);
-      userAssert(isEnumValue(FilterType, this.filter_),
-          `Unexpected filter: ${this.filter_}`);
-  
-      this.minChars_ = this.element.hasAttribute('min-characters') ?
-        parseInt(this.element.getAttribute('min-characters'), 10) : 1;
-      this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
-    }, () => {
+    const inputElements = childElementsByTag(this.element, 'INPUT');
+    userAssert(inputElements.length === 1,
+        `${TAG} should contain exactly one <input> child`);
+    this.inputElement_ = inputElements[0];
+
+    this.filter_ = userAssert(this.element.getAttribute('filter'),
+        `${TAG} requires "filter" attribute.`);
+    userAssert(isEnumValue(FilterType, this.filter_),
+        `Unexpected filter: ${this.filter_}`);
+
+    this.minChars_ = this.element.hasAttribute('min-characters') ?
+      parseInt(this.element.getAttribute('min-characters'), 10) : 1;
+    this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
+
+    return this.mutateElement(() => {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
     });
@@ -168,9 +168,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.classList.add('i-amphtml-autocomplete');
-    this.inputElement_.classList.add('i-amphtml-autocomplete-input');
-
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
@@ -189,8 +186,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.container_.addEventListener('mousedown',
         this.selectHandler_.bind(this));
 
-    this.renderResults_();
-    return Promise.resolve();
+    return this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-autocomplete');
+      this.inputElement_.classList.add('i-amphtml-autocomplete-input');
+      this.renderResults_();
+    });
   }
 
   /**
@@ -210,26 +210,33 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
   * Handle rendering results on user input.
   * @param {Event} event
+  * @return {!Promise}
   * @private
   */
   inputHandler_(event) {
     if (event.inputType === 'deleteContentBackward') {
       // Explore options for caching results to avoid repetitive queries.
     }
-    this.renderResults_();
-    this.showResults();
+    return this.mutateElement(() => {
+      this.renderResults_();
+    }).then(() => {
+      this.showResults();
+    });
   }
 
   /**
-  * Handle selecting items on user mousedown.
-  * @param {Event} event
-  * @private
-  */
+   * Handle selecting items on user mousedown.
+   * @param {Event} event
+   * @return {!Promise}
+   * @private
+   */
   selectHandler_(event) {
     if (!this.isItemElement(event.target)) {
-      return;
+      return Promise.resolve();
     }
-    this.selectItem(event.target);
+    return this.mutateElement(() => {
+      this.selectItem(event.target);
+    });
   }
 
   /**
@@ -294,14 +301,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     toggle(this.container_, true);
   }
 
-  /** Set container_ visibility to hidden. */
+  /** Set container_ visibility to hidden.
+   * @return {!Promise}
+   */
   hideResults() {
     if (!this.container_) {
-      return;
+      return Promise.resolve();
     }
     toggle(this.container_, false);
-    this.resetActiveElement_();
     this.activeIndex_ = -1;
+    return this.mutateElement(() => {
+      this.resetActiveElement_();
+    });
   }
 
   /** Returns true if the results are visible and has items. */
@@ -331,21 +342,33 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Given a delta between the current active item and the desired active item,
    * marks the desired active item as active. Loops to the beginning.
    * @param {number} delta
+   * @return {!Promise}
    * @private
    */
   updateActiveItem_(delta) {
     if (delta === 0) {
-      return;
+      return Promise.resolve();
     }
     if (this.activeElement_ !== null) {
-      this.resetActiveElement_();
+      return this.mutateElement(() => {
+        this.resetActiveElement_();
+      });
     }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    this.activeIndex_ = mod(index, this.container_.children.length);
-    this.activeElement_ = this.container_.children[this.activeIndex_];
-    this.activeElement_.classList
-        .add('i-amphtml-autocomplete-item-active');
+    let resultsShowing = false;
+    return this.measureMutateElement(() => {
+      resultsShowing = this.resultsShowing();
+      if (resultsShowing) {
+        this.activeIndex_ = mod(index, this.container_.children.length);
+        this.activeElement_ = this.container_.children[this.activeIndex_];
+      }
+    }, () => {
+      if (resultsShowing) {
+        this.activeElement_.classList
+            .add('i-amphtml-autocomplete-item-active');
+      }
+    });
   }
 
   /**
@@ -368,30 +391,28 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Handles keyboard events.
    * @param {Event} event
+   * @return {!Promise}
    * @private
    */
   keyDownHandler_(event) {
     switch (event.key) {
       case Keys.DOWN_ARROW:
-        if (this.resultsShowing()) {
-          this.updateActiveItem_(1);
-        }
-        break;
+        return this.updateActiveItem_(1);
       case Keys.UP_ARROW:
-        if (this.resultsShowing()) {
-          this.updateActiveItem_(-1);
-        }
-        break;
+        return this.updateActiveItem_(-1);
       case Keys.ENTER:
         if (this.activeElement_) {
           // Only prevent if submit-on-enter === false.
           event.preventDefault();
-          this.selectItem(this.activeElement_);
-          this.resetActiveElement_();
+          return this.mutateElement(() => {
+            this.selectItem(this.activeElement_);
+            this.resetActiveElement_();
+          });
         }
-        break;
+        return Promise.resolve();
       case Keys.ESCAPE:
         this.hideResults();
+        return Promise.resolve();
       default:
     }
   }
