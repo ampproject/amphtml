@@ -260,11 +260,11 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Returns a list of classes to remove if pre-render has
    * been invalidated by way of being on an amp cache
-   * @param {Document} doc
+   * @param {Element} body
    * @return {Array<string>}
    */
-  clearPreRender_(doc) {
-    const {classList} = doc.body;
+  clearPreRender_(body) {
+    const {classList} = body;
     const classesToRemove = [];
     const stripRe = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX ,'i');
     for (let i = classList.length - 1; i > 0; i--) {
@@ -298,7 +298,7 @@ export class AmpGeo extends AMP.BaseElement {
 
       switch (self.mode_) {
         case mode.GEO_OVERRIDE:
-          classesToRemove = self.clearPreRender_(doc);
+          classesToRemove = self.clearPreRender_(body);
           // Intentionally fall through.
         case mode.GEO_HOT_PATCH:
           // Build the AMP State, add classes
