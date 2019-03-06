@@ -349,24 +349,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0) {
       return Promise.resolve();
     }
-    if (this.activeElement_ !== null) {
-      return this.mutateElement(() => {
-        this.resetActiveElement_();
-      });
-    }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    let resultsShowing = false;
+    let resultsShowing, newActiveElement;
     return this.measureMutateElement(() => {
       resultsShowing = this.resultsShowing();
       if (resultsShowing) {
         this.activeIndex_ = mod(index, this.container_.children.length);
-        this.activeElement_ = this.container_.children[this.activeIndex_];
+        newActiveElement = this.container_.children[this.activeIndex_];
       }
     }, () => {
       if (resultsShowing) {
-        this.activeElement_.classList
-            .add('i-amphtml-autocomplete-item-active');
+        this.resetActiveElement_();
+        newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+        this.activeElement_ = newActiveElement;
       }
     });
   }
@@ -397,8 +393,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
   keyDownHandler_(event) {
     switch (event.key) {
       case Keys.DOWN_ARROW:
+        event.preventDefault();
         return this.updateActiveItem_(1);
       case Keys.UP_ARROW:
+        event.preventDefault();
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
         if (this.activeElement_) {
