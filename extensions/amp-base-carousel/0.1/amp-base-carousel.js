@@ -23,6 +23,7 @@ import {
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -191,6 +192,14 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return Promise.resolve();
+    }
+
     this.carousel_.updateUi();
     return Promise.resolve();
   }
@@ -219,7 +228,7 @@ class AmpCarousel extends AMP.BaseElement {
   renderContainerDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div>
+      <div class="i-amphtml-carousel-content">
         <div class="i-amphtml-carousel-scroll"></div>
         <div class="i-amphtml-carousel-arrow-next-slot"></div>
         <div class="i-amphtml-carousel-arrow-prev-slot"></div>

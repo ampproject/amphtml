@@ -21,9 +21,13 @@ const {
   Key,
   error,
 } = require('selenium-webdriver');
-const {NoSuchElementError} = error;
-const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
+const {
+  ControllerPromise,
+  ElementHandle,
+} = require('./functional-test-controller');
 const {expect} = require('chai');
+
+const {NoSuchElementError} = error;
 
 const ELEMENT_WAIT_TIMEOUT = 5000;
 
@@ -210,6 +214,15 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async getActiveElement() {
+    const activeElement = await this.driver.switchTo().activeElement();
+    return new ElementHandle(activeElement);
+  }
+
+  /**
    * @param {string} location
    * @return {!Promise}
    * @override
@@ -248,6 +261,16 @@ class SeleniumWebDriverController {
     return new ControllerPromise(
         webElement.getText(),
         this.getWaitFn_(() => webElement.getText()));
+  }
+
+  /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise<string>}
+   * @override
+   */
+  getElementTagName(handle) {
+    const webElement = handle.getElement();
+    return webElement.getTagName();
   }
 
   /**
@@ -303,6 +326,30 @@ class SeleniumWebDriverController {
     return new ControllerPromise(
         webElement.getCssValue(styleProperty),
         this.getWaitFn_(() => webElement.getCssValue(styleProperty)));
+  }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   * @override
+   */
+  isElementEnabled(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+        webElement.isEnabled(),
+        this.getWaitFn_(() => webElement.isEnabled()));
+  }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   * @override
+   */
+  isElementSelected(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+        webElement.isSelected(),
+        this.getWaitFn_(() => webElement.isSelected()));
   }
 
   /**
