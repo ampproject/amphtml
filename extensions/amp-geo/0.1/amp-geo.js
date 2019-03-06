@@ -335,7 +335,7 @@ export class AmpGeo extends AMP.BaseElement {
             // Only include amp state if user requests it to
             // avoid validator issue with missing amp-bind js
             if (config['AmpBind']) {
-              const geoState = doc.getElementById(GEO_ID);
+              const geoState = ampdoc.getElementById(GEO_ID);
               if (geoState) {
                 geoState.parentNode.removeChild(geoState);
               }
