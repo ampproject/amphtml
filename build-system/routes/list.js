@@ -66,7 +66,7 @@ router.get('/search/countries', function(req, res) {
  * Infinite scroll related endpoints.
  */
 const randInt = n => {
-  return Math.floor(Math.random() * Math.floor(n));
+  return Math.floor(Math.random()) * n;
 };
 
 const squareImgUrl = width => {
@@ -74,7 +74,7 @@ const squareImgUrl = width => {
 };
 
 const randomFalsy = () => {
-  const rand = Math.floor(Math.random() * 4);
+  const rand = randInt(4);
   switch (rand) {
     case 1: return null;
     case 2: return undefined;
