@@ -221,17 +221,7 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
-    'AMP-BRIGHTCOVE': {
-      'data-account': null,
-      'data-embed': null,
-      'data-player': null,
-      'data-player-id': null,
-      'data-playlist-id': null,
-      'data-video-id': null,
-    },
-    'AMP-CAROUSEL': {
-      'slide': null,
-      // For carousel v2
+    'AMP-BASE-CAROUSEL': {
       'advance-count': null,
       'auto-advance-count': null,
       'auto-advance-interval': null,
@@ -242,10 +232,22 @@ function createElementRules_() {
       'loop': null,
       'mixed-length': null,
       'side-slide-count': null,
+      'slide': null,
       'snap-align': null,
       'snap-by': null,
       'snap': null,
       'visible-count': null,
+    },
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
+    'AMP-CAROUSEL': {
+      'slide': null,
     },
     'AMP-DATE-PICKER': {
       'max': null,
