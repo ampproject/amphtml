@@ -28,7 +28,6 @@ const {execOrDie, execScriptAsync} = require('../../exec');
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
-const SLOW_TEST_THRESHOLD_MS = 2500;
 
 let webServerProcess_;
 
@@ -106,7 +105,6 @@ async function e2e() {
 
   // start up web server
   await launchWebServer_();
-  mocha.slow(SLOW_TEST_THRESHOLD_MS);
   // run tests
   mocha.run(failures => {
     // end web server
