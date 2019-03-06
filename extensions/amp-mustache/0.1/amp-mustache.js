@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
@@ -23,7 +24,6 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
-import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
@@ -61,10 +61,13 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
+    /** @private {!Array<string>} */
+    this.delimiters_ = [];
+
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    mustache.parse(this.template_, /* tags */ this.delimiters_);
   }
 
   /**
@@ -72,6 +75,8 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @return {string}
    */
   initTemplateString_() {
+    const {element} = this;
+    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
     if (this.element.tagName == 'TEMPLATE') {
       const content = templateContentClone(this.element);
       this.processNestedTemplates_(content);
@@ -79,6 +84,11 @@ export class AmpMustache extends AMP.BaseTemplate {
       container.appendChild(content);
       return container./*OK*/innerHTML;
     } else if (this.element.tagName == 'SCRIPT') {
+      if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+        const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+        devAssert(delimitersStr.split(',').length == 2,
+            'Beginning and ending delimiter is required: %s.', element);
+      }
       return this.element.textContent;
     }
 

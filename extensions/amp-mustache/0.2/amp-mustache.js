@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
@@ -55,10 +56,13 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
+    /** @private {!Array<string>} */
+    this.delimiters_ = [];
+
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    mustache.parse(this.template_, /* tags */ this.delimiters_);
   }
 
   /**
@@ -66,14 +70,22 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @return {string}
    */
   initTemplateString_() {
-    if (this.element.tagName == 'TEMPLATE') {
-      const content = templateContentClone(this.element);
+    const {element} = this;
+    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+    if (element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(element);
       this.processNestedTemplates_(content);
-      const container = this.element.ownerDocument.createElement('div');
+      const container = element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
-      return this.element.textContent;
+    } else if (element.tagName == 'SCRIPT') {
+      if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+        const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+        devAssert(delimitersStr.split(',').length == 2,
+            'Beginning and ending delimiter is required: %s.', element);
+        this.delimiters_ = delimitersStr.split(',');
+      }
+      return element.textContent;
     }
 
     return '';
@@ -87,6 +99,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    * restrictive sanitization rules of triple-mustache.
    *
    * @param {!DocumentFragment} content
+   * @private
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
