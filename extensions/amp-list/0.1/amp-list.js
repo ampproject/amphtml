@@ -52,6 +52,15 @@ import {
 /** @const {string} */
 const TAG = 'amp-list';
 
+
+/** @typedef {{
+  data:(?JsonObject|string|undefined|!Array),
+  resolver:!Function,
+  rejecter:!Function,
+  append:boolean,
+}} */
+export let RenderItems;
+
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
@@ -82,7 +91,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{data:(?JsonObject|string|undefined|!Array), resolver:!Function, rejecter:!Function}}
+     * @private {?RenderItems}
      */
     this.renderItems_ = null;
 
