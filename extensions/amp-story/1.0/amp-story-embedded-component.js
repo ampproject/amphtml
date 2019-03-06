@@ -73,12 +73,6 @@ export const EXPANDABLE_COMPONENTS = {
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
-  'amp-youtube': {
-    selector: 'amp-youtube',
-  },
-  'amp-instagram': {
-    selector: 'amp-instagram',
-  },
 };
 
 /**
@@ -306,7 +300,7 @@ export class AmpStoryEmbeddedComponent {
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
     /** @private */
-    this.onChangePageHandler_ = this.onChangePage_.bind(this);
+    this.embedsToBePaused_ = [];
 
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
@@ -374,11 +368,24 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.EXPANDED:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
+        this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
+    }
+  }
+
+  /**
+   * Schedules embeds to be paused.
+   * @param {!Element} embedEl
+   * @private
+   */
+  scheduleEmbedToPause_(embedEl) {
+    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    if (!this.embedsToBePaused_.includes(embedEl)) {
+      this.embedsToBePaused_.push(embedEl);
     }
   }
 
@@ -401,10 +408,6 @@ export class AmpStoryEmbeddedComponent {
 
     this.animateExpanded_(devAssert(targetToExpand));
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID,
-        this.onChangePageHandler_);
-
-    this.resources_.scheduleResume(this.storyEl_, this.triggeringTarget_);
     this.expandedViewOverlay_ = this.componentPage_
         .querySelector('.i-amphtml-story-expanded-view-overflow');
     if (!this.expandedViewOverlay_) {
@@ -457,18 +460,6 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-      // Hide active tooltip when page switch is triggered by keyboard or
-      // desktop buttons.
-      if (this.state_ === EmbeddedComponentState.FOCUSED) {
-        this.close_();
-      }
-    });
-
     return this.shadowRoot_;
   }
 
@@ -499,8 +490,10 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    // First time attaching the overlay. Runs only once.
     if (!this.focusedStateOverlay_) {
       this.storyEl_.appendChild(this.buildFocusedState_());
+      this.attachUIListeners_();
     }
 
     this.updateTooltipBehavior_(component.element);
@@ -515,6 +508,37 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
         });
+  }
+
+  /**
+   * Attaches listeners that listen for UI updates.
+   * @private
+   */
+  attachUIListeners_() {
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+      // Hide active tooltip when page switch is triggered by keyboard or
+      // desktop buttons.
+      if (this.state_ === EmbeddedComponentState.FOCUSED) {
+        this.close_();
+      }
+
+      // Hide expanded view when page switch is triggered by keyboard or desktop
+      // buttons.
+      if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        this.maybeCloseExpandedView_(null /** target */,
+            true /** forceClose */);
+      }
+
+      // Pauses content inside embeds when a page change occurs.
+      while (this.embedsToBePaused_.length > 0) {
+        const embedEl = this.embedsToBePaused_.pop();
+        this.resources_.schedulePause(this.storyEl_, embedEl);
+      }
+    });
   }
 
   /**
@@ -564,21 +588,6 @@ export class AmpStoryEmbeddedComponent {
       this.tooltip_.addEventListener('click', this.expandComponentHandler_,
           true);
     }
-  }
-
-  /**
-   *
-   */
-  onChangePage_() {
-    // Hide expanded view when page switch is triggered by keyboard or desktop
-    // buttons.
-    if (this.state_ === EmbeddedComponentState.EXPANDED) {
-      this.maybeCloseExpandedView_(null /** target */,
-          true /** forceClose */);
-    }
-    this.resources_.schedulePause(this.storyEl_, this.triggeringTarget_);
-    this.storeService_.unsubscribe(StateProperty.CURRENT_PAGE_ID,
-        this.onChangePageHandler_);
   }
 
   /**
