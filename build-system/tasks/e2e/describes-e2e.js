@@ -19,7 +19,9 @@ require('chromedriver'); // eslint-disable-line no-unused-vars
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
-const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
+const {installRepl, uninstallRepl} = require('./repl');
+const {SeleniumWebDriverController} = require(
+    './selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -112,6 +114,9 @@ function describeEnv(factory) {
             }
           }
         });
+        totalPromise = totalPromise.then(() => {
+          installRepl(global, env);
+        });
         return totalPromise;
       });
 
@@ -131,6 +136,8 @@ function describeEnv(factory) {
         for (const key in env) {
           delete env[key];
         }
+
+        uninstallRepl();
       });
 
       after(function() {
