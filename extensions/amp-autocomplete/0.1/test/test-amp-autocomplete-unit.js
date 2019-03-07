@@ -89,60 +89,55 @@ describes.realWin('amp-autocomplete unit tests', {
   it('filterData_() should filter based on all types', () => {
     // Substring filter
     expect(impl.filterData_(['a', 'b', 'ab', 'ba', 'c'], 'a')).to.have
-      .ordered.members(['a', 'ab', 'ba']);
+        .ordered.members(['a', 'ab', 'ba']);
     // Prefix filter
     impl.filter_ = 'prefix';
     expect(impl.filterData_(['a', 'b', 'ab', 'ba', 'c'], 'a')).to.have
-      .ordered.members(['a', 'ab']);
+        .ordered.members(['a', 'ab']);
     // Token-prefix filter
     impl.filter_ = 'token-prefix';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
-      .ordered.members(['a', 'b a', 'ab', 'c a']);
+        .ordered.members(['a', 'b a', 'ab', 'c a']);
     // Remaining filters should error
     impl.filter_ = 'fuzzy';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-      'Filter not yet supported: fuzzy');
+        'Filter not yet supported: fuzzy');
     impl.filter_ = 'custom';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-      'Filter not yet supported: custom');
+        'Filter not yet supported: custom');
     impl.filter_ = 'none';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-      'Filter not yet supported: none');
+        'Filter not yet supported: none');
     impl.filter_ = 'invalid';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-      'Unexpected filter: invalid');
-    });
+        'Unexpected filter: invalid');
+  });
 
-  it('should show and hide results', () => {
-    const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+  it('should show and hide results on toggle', () => {
     expect(impl.resultsShowing()).to.be.false;
     impl.inputElement_.value = 'ap';
     impl.renderResults_();
     expect(impl.resultsShowing()).to.be.false;
-    expect(resetSpy).not.to.have.been.called;
-    impl.showResults();
+    impl.toggleResults(true);
     expect(impl.resultsShowing()).to.be.true;
-    expect(resetSpy).not.to.have.been.called;
-    return impl.hideResults().then(() => {
-      expect(impl.resultsShowing()).to.be.false;
-      expect(resetSpy).to.have.been.calledOnce;
-    });
+    impl.toggleResults(false);
+    expect(impl.resultsShowing()).to.be.false;
   });
 
   it('should call inputHandler_() on input', () => {
     return element.layoutCallback().then(() => {
       const renderSpy = sandbox.spy(impl, 'renderResults_');
-      const showResultsSpy = sandbox.spy(impl, 'showResults');
+      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
       impl.inputElement_.value = 'a';
       const event = {inputType: 'insertText'};
       return impl.inputHandler_(event).then(() => {
         expect(renderSpy).to.have.been.calledOnce;
-        expect(showResultsSpy).to.have.been.calledOnce;
+        expect(toggleResultsSpy).to.have.been.calledWith(true);
         expect(impl.container_.children.length).to.equal(3);
       });
     });
   });
-    
+
   it('should call keyDownHandler_() on Down and Up arrow', () => {
     const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
     const updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
@@ -163,9 +158,9 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call keyDownHandler_() on Enter', () => {
     const event = {
-      key: Keys.ENTER, 
-      preventDefault: () => {}, 
-      target: {textContent: 'hello'}
+      key: Keys.ENTER,
+      preventDefault: () => {},
+      target: {textContent: 'hello'},
     };
     return element.layoutCallback().then(() => {
       const selectItemSpy = sandbox.spy(impl, 'selectItem');
@@ -179,9 +174,9 @@ describes.realWin('amp-autocomplete unit tests', {
       }).then(() => {
         impl.activeElement_ = impl.createElementFromItem_('abc');
         return impl.keyDownHandler_(event).then(() => {
-            expect(impl.inputElement_.value).to.equal('abc');
-            expect(selectItemSpy).to.have.been.calledOnce;
-            expect(clearAllSpy).to.have.been.calledOnce;
+          expect(impl.inputElement_.value).to.equal('abc');
+          expect(selectItemSpy).to.have.been.calledOnce;
+          expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
         });
       });
@@ -190,10 +185,10 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call keyDownHandler_() on Esc', () => {
     const event = {key: Keys.ESCAPE};
-    const hideResultsSpy = sandbox.spy(impl, 'hideResults');
+    const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
     return element.layoutCallback().then(() => {
       return impl.keyDownHandler_(event).then(() => {
-        expect(hideResultsSpy).to.have.been.calledOnce;
+        expect(toggleResultsSpy).to.have.been.calledWith(false);
       });
     });
   });
@@ -205,9 +200,25 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
+  it('should call toggleResultsHandler_()', () => {
+    return element.layoutCallback().then(() => {
+      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
+      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+      return impl.toggleResultsHandler_(true).then(() => {
+        expect(toggleResultsSpy).to.have.been.calledOnce;
+        expect(resetSpy).not.to.have.been.called;
+      }).then(() => {
+        return impl.toggleResultsHandler_(false).then(() => {
+          expect(toggleResultsSpy).to.have.been.calledTwice;
+          expect(resetSpy).to.have.been.calledOnce;
+        });
+      });
+    });
+  });
+
   it('should call selectHandler_() on mousedown', () => {
     return element.layoutCallback().then(() => {
-      impl.showResults();
+      impl.toggleResults(true);
       const isItemSpy = sandbox.spy(impl, 'isItemElement');
       const selectItemSpy = sandbox.spy(impl, 'selectItem');
       let mockEl = doc.createElement('div');
@@ -240,7 +251,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(impl.resetActiveElement_()).to.equal();
       expect(impl.activeElement_).to.be.null;
 
-      impl.showResults();
+      impl.toggleResults(true);
       const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       return impl.updateActiveItem_(1).then(() => {
         expect(resetSpy).to.have.been.calledOnce;

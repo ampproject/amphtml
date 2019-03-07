@@ -184,10 +184,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.keyDownHandler_(e);
     });
     this.inputElement_.addEventListener('focus', () => {
-      this.showResults();
+      this.toggleResultsHandler_(true);
     });
     this.inputElement_.addEventListener('blur', () => {
-      this.hideResults();
+      this.toggleResultsHandler_(false);
     });
     this.container_.addEventListener('mousedown', e => {
       this.selectHandler_(e);
@@ -227,7 +227,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     return this.mutateElement(() => {
       this.renderResults_();
-      this.showResults();
+      this.toggleResults(true);
     });
   }
 
@@ -301,25 +301,30 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return filteredData;
   }
 
-  /** Set container_ visibility to visible. */
-  showResults() {
+  /**
+   * Shows or hides the results container_.
+   * @param {boolean=} opt_display
+   */
+  toggleResults(opt_display) {
     if (!this.container_) {
       return;
     }
-    toggle(this.container_, true);
+    toggle(this.container_, opt_display);
   }
 
-  /** Set container_ visibility to hidden.
+  /**
+   * Handle showing or hiding results on user focus/blur.
+   * @param {boolean} opt_display
    * @return {!Promise}
+   * @private
    */
-  hideResults() {
-    if (!this.container_) {
-      return Promise.resolve();
-    }
-    this.activeIndex_ = -1;
+  toggleResultsHandler_(opt_display) {
     return this.mutateElement(() => {
-      toggle(this.container_, false);
-      this.resetActiveElement_();
+      if (!opt_display) {
+        this.resetActiveElement_();
+        this.activeIndex_ = -1;
+      }
+      this.toggleResults(opt_display);
     });
   }
 
@@ -418,8 +423,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return Promise.resolve();
       case Keys.ESCAPE:
-        this.hideResults();
-        return Promise.resolve();
+        // Hide results.
+        return this.toggleResultsHandler_(false);
       default:
         return Promise.resolve();
     }
