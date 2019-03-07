@@ -928,7 +928,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     }
   });
 
-  describe.only('forwards layout jank metric', () => {
+  describe('forwards layout jank metric', () => {
     let fakeWin;
     let windowEventListeners;
     let performanceObserver;
