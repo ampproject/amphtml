@@ -13,27 +13,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-
 tags: {  # amp-digidip
   html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-digidip"
     version: "0.1"
     version: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
+tags: {  # amp-digidip (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
+  tag_name: "SCRIPT"
+  spec_name: "amp-digidip extension .json script"
+  requires_extension: "amp-digidip"
+  mandatory_parent: "AMP-DIGIDIP"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
 tags: {  # <amp-digidip>
   html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "AMP-DIGIDIP"
   requires_extension: "amp-digidip"
-  child_tags: {
-    mandatory_min_num_child_tags: 1
-    first_child_tag_name_oneof: "SCRIPT"
-  }
   amp_layout: {
     supported_layouts: NODISPLAY
   }
-  attr_lists: "extended-amp-global"
 }

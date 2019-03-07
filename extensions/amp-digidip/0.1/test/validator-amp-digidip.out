@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,55 +13,36 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Valid amp-test tag
+|    Valid amp-digidip tag
 |  -->
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
-|    <title>amp-digidip example</title>
-|    <link rel="canonical" href="amps.html">
-|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-|    <script async custom-element="amp-digidip" src="https://cdn.ampproject.org/v0/amp-digidip-0.1.js"></script>
+|    <script async custom-element='amp-digidip' src='https://cdn.ampproject.org/v0/amp-digidip-0.1.js'></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <!-- Valid: Activating link shifter -->
-|    <amp-digidip
-|            layout="nodisplay"
-|            publisher-id="stylebudget"
-|            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
-|            element-clickhandler=""
-|            element-clickhandler-attribute=""
-|            element-ignore-attribute="rel"
-|            element-ignore-pattern="pass"
-|    >
-|    </amp-digidip>
-|    <!-- Invalid: missing publisher-id attribute. -->
-|    <amp-digidip
->>   ^~~~~~~~~
-amp-digidip/0.1/test/validator-amp-digidip.html:41:2 The mandatory attribute 'publisher-id' is missing in tag 'amp-digidip'. (see https://www.ampproject.org/docs/reference/components/amp-digidip) [AMP_TAG_PROBLEM]
-|            layout="nodisplay"
-|            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
-|            element-clickhandler=""
-|            element-clickhandler-attribute=""
-|            element-ignore-attribute="rel"
-|            element-ignore-pattern="pass"
-|    >
-|    </amp-digidip>
-|    <!-- Invalid: wrong publisher-id value. -->
-|    <amp-digidip
->>   ^~~~~~~~~
-amp-digidip/0.1/test/validator-amp-digidip.html:51:2 The attribute 'publisher-id' in tag 'amp-digidip' is set to the invalid value 'stylebudget!'. (see https://www.ampproject.org/docs/reference/components/amp-digidip) [DISALLOWED_HTML]
-|            layout="nodisplay"
-|            publisher-id="stylebudget!"
-|            hosts-ignore="facebook.com|youtube.com|baidu.com|wikipedia.org|twitter.com|qq.com|linkedin.com|taobao.com|live.com|hao123.com|sina.com.cn|blogspot.com|weibo.com|yandex.ru|sohu.com|vk.com|pinterest.com|wordpress.com|360.cn|instagram.com|paypal.com|msn.com|soso.com|ask.com|tumblr.com|xvideos.com|mail.ru|163.com|imdb.com|stackoverflow.com|imgur.com|reddit.com|blogger.com|cnn.com|lemonde.fr|lefigaro.fr|tukif.com|allocine.fr|parisexe.com|t.co|lequipe.fr|pagesjaunes.fr|dailymotion.com|store.steampowered.com|googleadservices.com|doubleclick.net|youtu.be|rstyle.me|mondemul.net|cdn.m6web.fr|jheberg.net|userscloud.com"
-|            element-clickhandler=""
-|            element-clickhandler-attribute=""
-|            element-ignore-attribute="rel"
-|            element-ignore-pattern="pass"
-|    >
-|    </amp-digidip>
+|  <amp-digidip layout="nodisplay">
+|  <script type="application/json">
+|  {
+|    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=${referrer}&location=${location}&rel=${rel}",
+|    "section": [
+|        "#track-section"
+|    ],
+|    "attribute": {
+|        "href": "^((?!\bgmail\\.com\b|\byoutube\\.com\b).)*$",
+|        "class": "content"
+|    },
+|    "vars": {
+|        "customerId": "12345",
+|        "merchantId": "3234"
+|    }
+|    }
+|  </script>
+|  </amp-digidip>
 |  </body>
 |  </html>
