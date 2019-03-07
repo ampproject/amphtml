@@ -3313,7 +3313,31 @@ amp.validator.CssLength = class {
 };
 
 /**
- * Calculates the effective width from the input layout and width.
+ * Calculates the effective width from the input layout, input width and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateWidthForTag(inputLayout, inputWidth, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
+      !inputWidth.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '60px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputWidth;
+}
+
+/**
+ * Calculates the effective width from the input layout and input width.
  * This involves considering that some elements, such as amp-audio and
  * amp-pixel, have natural dimensions (browser or implementation-specific
  * defaults for width / height).
@@ -3330,6 +3354,31 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
         '1px', /* allowAuto */ false, /* allowFluid */ false);
   }
   return inputWidth;
+}
+
+/**
+ * Calculates the effective height from the input layout, input height and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateHeightForTag(inputLayout, inputHeight, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
+      !inputHeight.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '44px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputHeight;
 }
 
 /**
@@ -3722,16 +3771,30 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
  * Validates the server-side rendering related attributes for the given layout.
  * @param {!amp.validator.TagSpec} spec
  * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
- * @param {!amp.validator.AmpLayout.Layout} layout
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} sizesAttr
+ * @param {string} heightsAttr
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} result
  */
-function validateSsrLayout(spec, encounteredTag, layout, context, result) {
+function validateSsrLayout(
+    spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+    heightsAttr, context, result) {
   // Only applies to transformed AMP and custom elements (<amp-...>).
   if (!context.isTransformed() ||
       !goog.string./*OK*/ startsWith(encounteredTag.lowerName(), 'amp-')) {
     return;
   }
+
+  // calculate effective ssr layout
+  const width =
+      CalculateWidthForTag(inputLayout, inputWidth, encounteredTag.upperName());
+  const height = CalculateHeightForTag(
+      inputLayout, inputHeight, encounteredTag.upperName());
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
   const attrsByKey = encounteredTag.attrsByKey();
 
@@ -3847,7 +3910,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
   // Validate for transformed AMP the server-side rendering layout.
-  validateSsrLayout(spec, encounteredTag, layout, context, result);
+  validateSsrLayout(
+      spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+      heightsAttr, context, result);
 
   // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {

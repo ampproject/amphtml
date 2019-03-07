@@ -26,12 +26,16 @@
   <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
   <meta name="viewport" content="width=device-width">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element=amp-social-share src=https://cdn.ampproject.org/v0/amp-social-share-0.1.js></script>
   <link rel="canonical" href="./regular-html-version.html">
 </head>
 <body>
+  <!-- Valid -->
   <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
     <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
   </amp-img>
+  <!-- Valid -->
+  <amp-social-share class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:60px;height:44px; type=test></amp-social-share>
   <!-- Invalid i-amphtml-layout attribute value does not match layout value -->
   <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=nodisplay layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
     <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
