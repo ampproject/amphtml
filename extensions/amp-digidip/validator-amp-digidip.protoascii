@@ -15,8 +15,6 @@
 #
 tags: {  # amp-digidip
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-digidip"
