@@ -52,11 +52,14 @@ const EnvironmentVariantMap = {
       {name: 'Standalone environment', value: {environment: 'single'}},
   [AmpdocEnvironment.VIEWER_DEMO]:
       {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
+  [AmpdocEnvironment.SHADOW_DEMO]:
+      {name: 'Shadow environment', value: {environment: 'shadow-demo'}},
 };
 
 const defaultEnvironments = [
   AmpdocEnvironment.SINGLE,
   AmpdocEnvironment.VIEWER_DEMO,
+  AmpdocEnvironment.SHADOW_DEMO,
 ];
 
 /**
