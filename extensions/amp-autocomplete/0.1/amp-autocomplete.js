@@ -221,9 +221,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_(event) {
-    if (event.inputType === 'deleteContentBackward') {
-      // Explore options for caching results to avoid repetitive queries.
-    }
+    // Explore options for caching results to avoid repetitive queries on delete.
     return this.mutateElement(() => {
       this.renderResults_();
     }).then(() => {
