@@ -101,23 +101,12 @@ function describeEnv(factory) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(() => {
-        let totalPromise = undefined;
+      beforeEach(async() => {
         // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
-          if (totalPromise) {
-            totalPromise = totalPromise.then(() => fixture.setup(env));
-          } else {
-            const res = fixture.setup(env);
-            if (res && typeof res.then == 'function') {
-              totalPromise = res;
-            }
-          }
-        });
-        totalPromise = totalPromise.then(() => {
-          installRepl(global, env);
-        });
-        return totalPromise;
+        for (const fixture of fixtures) {
+          await fixture.setup(env);
+        }
+        installRepl(global, env);
       });
 
       afterEach(function() {

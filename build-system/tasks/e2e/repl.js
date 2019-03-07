@@ -65,16 +65,18 @@ function installRepl(global, env) {
   };
 
   function replContinue() {
-    if (replResolve) {
-      replResolve();
-      replResolve = null;
-      replPromise = null;
-      delete global.repl.controller;
-      delete global.repl.env;
-      delete global.repl.continue;
-
-      console./*OK*/log(CONTINUE_MESSAGE);
+    if (!replResolve) {
+      return;
     }
+
+    replResolve();
+    replResolve = null;
+    replPromise = null;
+    delete global.repl.controller;
+    delete global.repl.env;
+    delete global.repl.continue;
+
+    console./*OK*/log(CONTINUE_MESSAGE);
   }
 }
 
