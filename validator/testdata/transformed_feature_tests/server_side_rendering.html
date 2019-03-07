@@ -32,6 +32,18 @@
   <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
     <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
   </amp-img>
+  <!-- Invalid i-amphtml-layout attribute value does not match layout value -->
+  <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=nodisplay layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid class attribute value due to not matching layout value -->
+  <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid class attribute value due to layout not being size defined (spaces) -->
+  <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
+  <!-- Invalid class attribute value due to layout not being size defined (tabs) -->
+  <amp-img class="i-amphtml-layout-nodisplay  i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
   <!-- Invalid i-amphtml-sizer due to css declarations -->
   <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
     <i-amphtml-sizer style=display:none;padding-bottom:171.4370%;></i-amphtml-sizer>

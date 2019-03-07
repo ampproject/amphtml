@@ -2729,6 +2729,14 @@ class Context {
   }
 
   /**
+   * Returns true iff "transformed" is a type identifier in this document.
+   * @return {boolean}
+   */
+  isTransformed() {
+    return this.typeIdentifiers_.includes('transformed');
+  }
+
+  /**
    * Record that this document contains a tag which is a member of a list
    * of mandatory alternatives.
    * @param {!ParsedTagSpec} parsedTagSpec
@@ -3176,6 +3184,46 @@ function validateNonTemplateAttrValueAgainstSpec(
     }
   }
   // } end oneof
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutClass(layout) {
+  return 'i-amphtml-layout-' + getLayoutName(layout);
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutName(layout) {
+  const idx = amp.validator.AmpLayout.Layout_ValuesByIndex.indexOf(layout);
+  return amp.validator.AmpLayout.Layout_NamesByIndex[idx].toLowerCase().replace(
+      '_', '-');
+}
+
+/**
+ * @return {string}
+ */
+function getLayoutSizeDefinedClass() {
+  return 'i-amphtml-layout-size-defined';
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutSizeDefined(layout) {
+  return (
+      layout === amp.validator.AmpLayout.Layout.FILL ||
+      layout === amp.validator.AmpLayout.Layout.FIXED ||
+      layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
+      layout === amp.validator.AmpLayout.Layout.FLEX_ITEM ||
+      layout === amp.validator.AmpLayout.Layout.FLUID ||
+      layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE);
 }
 
 /**
@@ -3670,6 +3718,65 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
 }
 
 /**
+ * Helper method for validateLayout.
+ * Validates the server-side rendering related attributes for the given layout.
+ * @param {!amp.validator.TagSpec} spec
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateSsrLayout(spec, encounteredTag, layout, context, result) {
+  // Only applies to transformed AMP and custom elements (<amp-...>).
+  if (!context.isTransformed() ||
+      !goog.string./*OK*/ startsWith(encounteredTag.lowerName(), 'amp-')) {
+    return;
+  }
+
+  const attrsByKey = encounteredTag.attrsByKey();
+
+  // class attribute
+  const classAttr = attrsByKey['class'];
+  if (classAttr !== undefined) {
+    // i-amphtml-layout-{layout_name}
+    const validInternalClasses = Object.create(null);
+    validInternalClasses[getLayoutClass(layout)] = 0;
+    if (isLayoutSizeDefined(layout)) {
+      // i-amphtml-layout-size-defined
+      validInternalClasses[getLayoutSizeDefinedClass()] = 0;
+    }
+    const classes = classAttr.split(/[\s+]/);
+    for (const classValue of classes) {
+      if (goog.string./*OK*/ startsWith(classValue, 'i-amphtml-') &&
+          !(classValue in validInternalClasses)) {
+        context.addError(
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getLineCol(),
+            /* params */['class', getTagSpecName(spec), classAttr],
+            getTagSpecUrl(spec), result);
+      }
+    }
+  }
+
+  // i-amphtml-layout attribute
+  const ssrAttr = attrsByKey['i-amphtml-layout'];
+  if (ssrAttr !== undefined) {
+    const layoutName = getLayoutName(layout);
+    if (layoutName !== ssrAttr.toLowerCase()) {
+      context.addError(
+          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+          context.getLineCol(),
+          /* params */
+          [
+            ssrAttr, 'i-amphtml-layout', getTagSpecName(spec),
+            layoutName.toUpperCase(), layoutName
+          ],
+          getTagSpecUrl(spec), result);
+    }
+  }
+}
+
+/**
  * Validates the layout for the given tag. This involves checking the
  * layout, width, height, sizes attributes with AMP specific logic.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -3738,6 +3845,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   const height = CalculateHeight(spec.ampLayout, inputLayout, inputHeight);
   const layout =
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  // Validate for transformed AMP the server-side rendering layout.
+  validateSsrLayout(spec, encounteredTag, layout, context, result);
 
   // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
@@ -4094,6 +4204,12 @@ function validateAttributes(
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
+    // For transformed AMP, attributes `class` and `i-amphtml-layout` are
+    // handled within validateSsrLayout.
+    if (context.isTransformed() &&
+        (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
+      continue;
+    }
     if (!(attr.name in attrsByName)) {
       // The HTML tag specifies type identifiers which are validated in
       // validateHtmlTag(), so we skip them here.
