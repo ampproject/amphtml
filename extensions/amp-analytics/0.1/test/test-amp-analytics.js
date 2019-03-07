@@ -801,8 +801,8 @@ describes.realWin('amp-analytics', {
             },
             'vars': {},
             'optout': {
-              'function': 'foo.bar'
-            }
+              'function': 'foo.bar',
+            },
           }));
     });
 
@@ -848,14 +848,14 @@ describes.realWin('amp-analytics', {
             },
             'vars': {},
             'optout': {
-              'id': 'elementId'
-            }
+              'id': 'elementId',
+            },
           }));
     });
 
     it('doesnt send hit when config optout id is found', function() {
-      const element = doc.createElement("script");
-      element.type = "text/javascript";
+      const element = doc.createElement('script');
+      element.type = 'text/javascript';
       element.id = 'elementId';
       doc.documentElement.insertBefore(
           element, doc.documentElement.firstChild);
@@ -865,8 +865,8 @@ describes.realWin('amp-analytics', {
     });
 
     it('sends hit when config optout id is not found', function() {
-      const element = doc.createElement("script");
-      element.type = "text/javascript";
+      const element = doc.createElement('script');
+      element.type = 'text/javascript';
       element.id = 'elementId';
       doc.documentElement.insertBefore(
           element, doc.documentElement.firstChild);
