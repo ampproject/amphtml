@@ -85,19 +85,21 @@ export function isExperimentOn(win, experimentId) {
  *     experiment state "transiently" (i.e., for this page load only) or
  *     durably (by saving the experiment IDs to the cookie after toggling).
  *     Default: false (save durably).
- * @param {string=} opt_value The value to use for the cookie.
+ * @param {string=} opt_experimentIdValue The value to use for the experimentId.
  * @return {boolean} New state for experimentId.
  */
 export function toggleExperiment(win, experimentId, opt_on,
-  opt_transientExperiment, opt_value) {
+  opt_transientExperiment, opt_experimentIdValue) {
   const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   let on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     let cookieTogglesValue = on;
     const toggles = experimentToggles(win);
-    if (opt_value && on) {
-      on = !!opt_value;
-      cookieTogglesValue = opt_value;
+    // If an experimentId value is present then set the cookieToggleValue to it
+    // as that it what's saved in the AMP_EXP cookie.
+    if (opt_experimentIdValue && on) {
+      on = !!opt_experimentIdValue;
+      cookieTogglesValue = opt_experimentIdValue;
     }
     toggles[experimentId] = on;
     if (!opt_transientExperiment) {
@@ -110,7 +112,7 @@ export function toggleExperiment(win, experimentId, opt_on,
 }
 
 /**
- * Gets the value of an experiment.
+ * Gets the value of an experiment, if present.
  * @param {!Window} win
  * @param {string} experimentId
  * @return {?string}

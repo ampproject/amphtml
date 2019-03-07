@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import * as cookies from '../../src/cookies';
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
   getBinaryType,
   getExperimentBranch,
   getExperimentToglesFromCookieForTesting,
+  getExperimentValue,
   isCanary,
   isExperimentOn,
   randomlySelectUnsetExperiments,
@@ -547,6 +549,27 @@ describes.fakeWin('url override', {}, env => {
     expect(isExperimentOn(win, 'e6')).to.be.true;
     expect(isExperimentOn(win, 'e7')).to.be.false;
     expect(isExperimentOn(win, 'e8')).to.be.true;
+  });
+});
+
+describe('getExperimentValue', () => {
+  it('should get value if present', () => {
+    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'AMP_EXP')
+        .returns('experiment=value;x=y');
+    expect(getExperimentValue({}, 'experiment')).to.equal('value');
+    expect(getExperimentValue({}, 'x')).to.equal('y');
+  });
+
+  it('should return null if value not present', () => {
+    sandbox.stub(cookies, 'getCookie').withArgs(sinon.match.object, 'AMP_EXP')
+        .returns('some-experiment;amp-list-load-more');
+    expect(getExperimentValue({}, 'amp-list-load-more')).to.be.null;
+  });
+
+  it('should return null if experiment is not present', () => {
+    sandbox.stub(cookies, 'getCookie')
+        .withArgs(sinon.match.object, 'AMP_EXP').returns(null);
+    expect(getExperimentValue({}, 'experiment-non-existent')).to.be.null;
   });
 });
 
