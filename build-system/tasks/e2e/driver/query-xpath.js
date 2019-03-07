@@ -79,7 +79,7 @@ function queryXpath(xpathString, context) {
   const xpathIterator = createXpathIterator(
       evaluate(xpathString, fakeDocument, null, XPathResult.ANY_TYPE));
   const elements = [...xpathIterator].map(node => {
-    const testId = node.dataset[TEST_ID_PROPERTY];
+    const testId = getData(node);
     const selector = `[${TEST_ID_ATTRIBUTE}="${testId}"]`;
     return context./*OK*/querySelector(selector);
   });
@@ -90,6 +90,15 @@ function queryXpath(xpathString, context) {
   }
 
   return elements.length ? elements : null;
+}
+
+/**
+ * Get the xpath test id data param
+ * @param {!Element} node
+ * @return {string}
+ */
+function getData(node) {
+  return node.dataset[TEST_ID_PROPERTY];
 }
 
 /**
