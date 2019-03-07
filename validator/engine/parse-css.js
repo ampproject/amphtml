@@ -561,10 +561,10 @@ class Canonicalizer {
         return rule;
       }
       if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/0))
-        errors.push(tokenStream.current().copyPosTo(
-            new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
-                ['style'])));
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
   }
 
@@ -609,10 +609,10 @@ class Canonicalizer {
       }
       // This consumes a CSS selector as the rules prelude.
       if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/0))
-        errors.push(tokenStream.current().copyPosTo(
-            new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
-                ['style'])));
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
   }
 
@@ -654,10 +654,10 @@ class Canonicalizer {
           tokenStream.consume();
           const dummyTokenList = [];
           if (!consumeAComponentValue(tokenStream, dummyTokenList, /*depth*/0))
-            errors.push(tokenStream.current().copyPosTo(
-                new parse_css.ErrorToken(
-                    amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
-                    ['style'])));
+          {errors.push(tokenStream.current().copyPosTo(
+              new parse_css.ErrorToken(
+                  amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+                  ['style'])));}
         }
       }
     }
@@ -703,10 +703,10 @@ class Canonicalizer {
           tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
       tokenStream.consume();
       if (!consumeAComponentValue(tokenStream, decl.value, /*depth*/0))
-        errors.push(tokenStream.current().copyPosTo(
-            new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
-                ['style'])));
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
     decl.value.push(tokenStream.next().copyPosTo(new parse_css.EOFToken()));
 
@@ -747,16 +747,16 @@ const kMaximumCssRecursion = 100;
  * @return {boolean}
  */
 function consumeAComponentValue(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) return false;
+  if (depth > kMaximumCssRecursion) {return false;}
   const current = tokenStream.current().tokenType;
   if (current === parse_css.TokenType.OPEN_CURLY ||
       current === parse_css.TokenType.OPEN_SQUARE ||
       current === parse_css.TokenType.OPEN_PAREN) {
     if (!consumeASimpleBlock(tokenStream, tokenList, depth + 1))
-      return false;
+    {return false;}
   } else if (current === parse_css.TokenType.FUNCTION_TOKEN) {
-    if (!consumeAFunction(tokenStream, tokenList, depth +1))
-      return false;
+    if (!consumeAFunction(tokenStream, tokenList, depth + 1))
+    {return false;}
   } else {
     tokenList.push(tokenStream.current());
   }
@@ -773,7 +773,7 @@ function consumeAComponentValue(tokenStream, tokenList, depth) {
  * @return {boolean}
  */
 function consumeASimpleBlock(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) return false;
+  if (depth > kMaximumCssRecursion) {return false;}
   const current = tokenStream.current().tokenType;
   goog.asserts.assert(
       (current === parse_css.TokenType.OPEN_CURLY ||
@@ -801,8 +801,8 @@ function consumeASimpleBlock(tokenStream, tokenList, depth) {
       tokenList.push(tokenStream.current());
       return true;
     } else {
-      if (!consumeAComponentValue(tokenStream, tokenList, depth +1))
-        return false;
+      if (!consumeAComponentValue(tokenStream, tokenList, depth + 1))
+      {return false;}
     }
   }
 }
@@ -844,7 +844,7 @@ parse_css.extractASimpleBlock = function(tokenStream, errors) {
  * @return {boolean}
  */
 function consumeAFunction(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) return false;
+  if (depth > kMaximumCssRecursion) {return false;}
   goog.asserts.assert(
       tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN,
       'Internal Error: consumeAFunction precondition not met');
@@ -858,7 +858,7 @@ function consumeAFunction(tokenStream, tokenList, depth) {
       return true;
     } else {
       if (!consumeAComponentValue(tokenStream, tokenList, depth + 1))
-        return false;
+      {return false;}
     }
   }
 }

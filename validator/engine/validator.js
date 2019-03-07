@@ -3217,7 +3217,7 @@ function getLayoutSizeDefinedClass() {
  */
 function isLayoutSizeDefined(layout) {
   return (
-      layout === amp.validator.AmpLayout.Layout.FILL ||
+    layout === amp.validator.AmpLayout.Layout.FILL ||
       layout === amp.validator.AmpLayout.Layout.FIXED ||
       layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
       layout === amp.validator.AmpLayout.Layout.FLEX_ITEM ||
@@ -3780,8 +3780,8 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
  * @param {!amp.validator.ValidationResult} result
  */
 function validateSsrLayout(
-    spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
-    heightsAttr, context, result) {
+  spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+  heightsAttr, context, result) {
   // Only applies to transformed AMP and custom elements (<amp-...>).
   if (!context.isTransformed() ||
       !goog.string./*OK*/ startsWith(encounteredTag.lowerName(), 'amp-')) {
@@ -3832,7 +3832,7 @@ function validateSsrLayout(
           /* params */
           [
             ssrAttr, 'i-amphtml-layout', getTagSpecName(spec),
-            layoutName.toUpperCase(), layoutName
+            layoutName.toUpperCase(), layoutName,
           ],
           getTagSpecUrl(spec), result);
     }

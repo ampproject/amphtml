@@ -499,10 +499,10 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     const funcToken =
     /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
     /**  @type {!Array<!parse_css.ErrorToken>} */
-    let errors = [];
+    const errors = [];
     const func = parse_css.extractAFunction(tokenStream, errors);
     if (errors.length > 0)
-      return errors[0];
+    {return errors[0];}
     tokenStream.consume();
     return firstColon.copyPosTo(
         new parse_css.PseudoSelector(isClass, funcToken.value, func));
