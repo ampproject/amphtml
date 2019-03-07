@@ -383,7 +383,7 @@ export function verifyAmpCORSHeaders(win, response, init) {
     userAssert(false, 'Response must contain the' +
         ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
   }
-  devAssert(accessControlAllowOrigin,
+  userAssert(accessControlAllowOrigin,
       `${ACCESS_CONTROL_ALLOW_ORIGIN_HEADER} needs to be to be set `
       + 'and should allow for the value set in the request Origin header. '
       + 'See https://www.ampproject.org/docs/fundamentals/amp-cors-requests '
