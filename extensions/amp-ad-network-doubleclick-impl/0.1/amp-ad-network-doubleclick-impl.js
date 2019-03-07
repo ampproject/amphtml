@@ -34,6 +34,7 @@ import {
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
+  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -117,6 +118,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+
+/** @const @enum{string} */
+const FLEXIBLE_AD_SLOTS_BRANCHES = {
+  CONTROL: '21063173',
+  EXPERIMENT: '21063174',
 };
 
 /**
@@ -267,6 +277,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.shouldSandbox_ = false;
+
+    /** @private {boolean} */
+    this.sendFlexibleAdSlotParams_ = false;
   }
 
   /**
@@ -363,10 +376,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
+        [FLEXIBLE_AD_SLOTS_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
+    if (setExps[FLEXIBLE_AD_SLOTS_EXP] &&
+        setExps[FLEXIBLE_AD_SLOTS_EXP] ==
+        FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT) {
+      this.sendFlexibleAdSlotParams_ = true;
+    }
   }
 
   /**
@@ -472,6 +494,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
+    let psz = null;
+    let msz = null;
+    if (this.sendFlexibleAdSlotParams_) {
+      const parentWidth = getContainerWidth(
+          this.win, this.element.parentElement);
+      let slotWidth = getContainerWidth(
+          this.win, this.element, 1 /* maxDepth */);
+      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      psz = `${parentWidth}x-1`;
+      msz = `${slotWidth}x-1`;
+    }
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -487,6 +520,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
+      // Both msz/psz send a height of -1 because height expansion is
+      // disallowed in AMP.
+      'msz': msz,
+      'psz': psz,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting &&
@@ -1405,7 +1442,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
 });
-
 
 /** @visibleForTesting */
 export function resetSraStateForTesting() {

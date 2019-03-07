@@ -165,6 +165,7 @@ exports.rules = [
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
+      'ads/google/a4a/utils.js->src/layout.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
