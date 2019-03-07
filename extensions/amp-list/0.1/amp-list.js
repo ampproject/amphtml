@@ -700,7 +700,6 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      // Attempt to resize to fit new rendered contents.
       this.attemptToFit_(dev().assertElement(this.container_));
     });
   }
@@ -897,17 +896,22 @@ export class AmpList extends AMP.BaseElement {
     });
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
+          const promises = [Promise.resolve()];
           if (this.loadMoreSrc_) {
-            this.mutateElement(() =>
-              this.loadMoreService_.toggleLoadMoreLoading(false));
+            promises.push(this.mutateElement(() =>
+              this.loadMoreService_.toggleLoadMoreLoading(false)));
           } else {
-            this.mutateElement(() =>
-              this.loadMoreService_.setLoadMoreEnded());
+            promises.push(this.mutateElement(() =>
+              this.loadMoreService_.setLoadMoreEnded()));
           }
           if (this.unlistenLoadMore_) {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
           }
+          return promises;
+        }).then(() => {
+          // Necessary since load-more elements are toggled in the above block
+          this.attemptToFit_(dev().assertElement(this.container_));
         }).catch(() => {
           this.mutateElement(() => this.loadMoreService_.setLoadMoreFailed())
               .then(() => {
