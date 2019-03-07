@@ -58,6 +58,7 @@ const TAG = 'amp-list';
   resolver:!Function,
   rejecter:!Function,
   append:boolean,
+  payload: (?JsonObject|Array<JsonObject>),
 }} */
 export let RenderItems;
 
@@ -896,19 +897,17 @@ export class AmpList extends AMP.BaseElement {
     });
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
-          const promises = [Promise.resolve()];
-          if (this.loadMoreSrc_) {
-            promises.push(this.mutateElement(() =>
-              this.loadMoreService_.toggleLoadMoreLoading(false)));
-          } else {
-            promises.push(this.mutateElement(() =>
-              this.loadMoreService_.setLoadMoreEnded()));
-          }
           if (this.unlistenLoadMore_) {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
           }
-          return promises;
+          return this.mutateElement(() => {
+            if (this.loadMoreSrc_) {
+              this.loadMoreService_.toggleLoadMoreLoading(false);
+            } else {
+              this.loadMoreService_.setLoadMoreEnded();
+            }
+          });
         }).then(() => {
           // Necessary since load-more elements are toggled in the above block
           this.attemptToFit_(dev().assertElement(this.container_));
