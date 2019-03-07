@@ -113,15 +113,15 @@ export function hasRenderDelayingServices(win) {
  * Function to determine if the passed
  * Object is a Render Delaying Service
  * @param {!Object} service
- * @return {?RenderDelayingService}
+ * @return {boolean}
  */
 export function isRenderDelayingService(service) {
   const maybeRenderDelayingService =
     /** @type {!RenderDelayingService}*/ (service);
   if (typeof maybeRenderDelayingService.whenReady == 'function') {
-    return maybeRenderDelayingService;
+    return true;
   }
-  return null;
+  return false;
 }
 
 /**

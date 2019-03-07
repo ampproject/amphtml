@@ -65,7 +65,7 @@ export class Variants {
    * @return {!Promise}
    */
   whenReady() {
-    return this.variantsDeferred_.promise;
+    return this.getVariants();
   }
 }
 
