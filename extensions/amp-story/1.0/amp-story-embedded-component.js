@@ -383,6 +383,9 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   scheduleEmbedToPause_(embedEl) {
+    // Resources that previously called `schedulePause` must also call
+    // `scheduleResume`. Calling `scheduleResume` on resources that did not
+    // previously call `schedulePause` has no effect.
     this.resources_.scheduleResume(this.storyEl_, embedEl);
     if (!this.embedsToBePaused_.includes(embedEl)) {
       this.embedsToBePaused_.push(embedEl);
@@ -493,7 +496,7 @@ export class AmpStoryEmbeddedComponent {
     // First time attaching the overlay. Runs only once.
     if (!this.focusedStateOverlay_) {
       this.storyEl_.appendChild(this.buildFocusedState_());
-      this.attachUIListeners_();
+      this.initializeListeners_();
     }
 
     this.updateTooltipBehavior_(component.element);
@@ -514,7 +517,7 @@ export class AmpStoryEmbeddedComponent {
    * Attaches listeners that listen for UI updates.
    * @private
    */
-  attachUIListeners_() {
+  initializeListeners_() {
     this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
       this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
