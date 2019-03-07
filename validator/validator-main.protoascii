@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 841
+spec_file_revision: 842
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -6711,6 +6711,10 @@ error_specificity {
   code: INVALID_UTF8
   specificity: 118
 }
+error_specificity {
+  code: CSS_EXCESSIVELY_NESTED
+  specificity: 119
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -7166,4 +7170,8 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+error_formats {
+  code: CSS_EXCESSIVELY_NESTED
+  format: "CSS excessively nested in tag '%1'."
 }
