@@ -40,7 +40,8 @@ Please consider using the latest setup with `mediaid`.
   heigth="100"
   type="caprofitx"
   data-mediaid="3752"
-  data-tag-places="10007"
+  data-tag-places="10007">
+</amp-ad>
 ```
 
 ## Configurations
