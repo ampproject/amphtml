@@ -934,3 +934,17 @@ amp-story-page .i-amphtml-story-page-open-attachment-text {
   line-height: 40px !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
+
+/** Landscape desktop templates. */
+
+[orientation=landscape] [landscape-template=half-left] {
+  width: 50% !important;
+  left: 0 !important;
+  right: auto !important;
+}
+
+[orientation=landscape] [landscape-template=half-right] {
+  width: 50% !important;
+  left: auto !important;
+  right: 0 !important;
+}
