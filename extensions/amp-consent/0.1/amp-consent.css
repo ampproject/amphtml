@@ -98,7 +98,7 @@ iframe.i-amphtml-consent-ui-fill {
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active {
-  width: 100vw !important;
+  width: 100% !important;
   height: 100vh !important;
   padding: 0px !important;
   margin: 0px !important;
