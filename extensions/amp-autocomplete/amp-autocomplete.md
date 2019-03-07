@@ -1,7 +1,7 @@
 ---
 $category: misc
 formats: websites
-teasure: 
+teaser: 
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
 <!--
