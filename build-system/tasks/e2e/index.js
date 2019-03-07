@@ -106,7 +106,6 @@ async function e2e() {
 
   // start up web server
   await launchWebServer_();
-
   // e2e tests have a different standard for when a test is too slow,
   // so we set a non-default threshold.
   mocha.slow(SLOW_TEST_THRESHOLD_MS);
