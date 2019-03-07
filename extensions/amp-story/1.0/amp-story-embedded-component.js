@@ -299,6 +299,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
+    /** @private */
+    this.embedsToBePaused_ = [];
+
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
           this.onComponentStateUpdate_(component);
@@ -365,11 +368,27 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.EXPANDED:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
+        this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
+    }
+  }
+
+  /**
+   * Schedules embeds to be paused.
+   * @param {!Element} embedEl
+   * @private
+   */
+  scheduleEmbedToPause_(embedEl) {
+    // Resources that previously called `schedulePause` must also call
+    // `scheduleResume`. Calling `scheduleResume` on resources that did not
+    // previously call `schedulePause` has no effect.
+    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    if (!this.embedsToBePaused_.includes(embedEl)) {
+      this.embedsToBePaused_.push(embedEl);
     }
   }
 
@@ -444,25 +463,6 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-      // Hide active tooltip when page switch is triggered by keyboard or
-      // desktop buttons.
-      if (this.state_ === EmbeddedComponentState.FOCUSED) {
-        this.close_();
-      }
-
-      // Hide expanded view when page switch is triggered by keyboard or desktop
-      // buttons.
-      if (this.state_ === EmbeddedComponentState.EXPANDED) {
-        this.maybeCloseExpandedView_(null /** target */,
-            true /** forceClose */);
-      }
-    });
-
     return this.shadowRoot_;
   }
 
@@ -493,8 +493,10 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    // First time attaching the overlay. Runs only once.
     if (!this.focusedStateOverlay_) {
       this.storyEl_.appendChild(this.buildFocusedState_());
+      this.initializeListeners_();
     }
 
     this.updateTooltipBehavior_(component.element);
@@ -509,6 +511,37 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
         });
+  }
+
+  /**
+   * Attaches listeners that listen for UI updates.
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+      // Hide active tooltip when page switch is triggered by keyboard or
+      // desktop buttons.
+      if (this.state_ === EmbeddedComponentState.FOCUSED) {
+        this.close_();
+      }
+
+      // Hide expanded view when page switch is triggered by keyboard or desktop
+      // buttons.
+      if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        this.maybeCloseExpandedView_(null /** target */,
+            true /** forceClose */);
+      }
+
+      // Pauses content inside embeds when a page change occurs.
+      while (this.embedsToBePaused_.length > 0) {
+        const embedEl = this.embedsToBePaused_.pop();
+        this.resources_.schedulePause(this.storyEl_, embedEl);
+      }
+    });
   }
 
   /**
