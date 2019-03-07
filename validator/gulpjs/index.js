@@ -105,7 +105,7 @@ module.exports.format = function(logger) {
     if (validationResult.status === STATUS_PASS) {
       report += colors.green(validationResult.status);
       report += '\n Important: Valid AMP pages should also be tested for '
-          + 'proper CORS handling when served an AMP cache. For details '
+          + 'proper CORS handling when served from an AMP cache. For details '
           + 'please see '
           + 'https://www.ampproject.org/docs/fundamentals/amp-cors-requests';
     } else if (validationResult.status === STATUS_UNKNOWN) {
