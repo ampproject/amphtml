@@ -1526,7 +1526,8 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
-        if (!this.background_) {
+        if (!this.background_ &&
+            isExperimentOn(this.win, 'amp-story-desktop-background')) {
           this.background_ = new AmpStoryBackground(this.win, this.element);
           this.background_.attach();
         }
