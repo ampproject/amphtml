@@ -29,8 +29,6 @@ tags: {  # amp-digidip
 }
 tags: {  # amp-digidip (json)
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-digidip extension .json script"
   requires_extension: "amp-digidip"
@@ -50,8 +48,6 @@ tags: {  # amp-digidip (json)
 }
 tags: {  # <amp-digidip>
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "AMP-DIGIDIP"
   requires_extension: "amp-digidip"
   amp_layout: {
