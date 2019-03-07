@@ -270,6 +270,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   filterData_(data, input) {
+    input = input.toLowerCase();
     let filteredData = data.filter(item => {
       switch (this.filter_) {
         case FilterType.SUBSTRING:
