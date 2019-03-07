@@ -53,7 +53,8 @@ module.exports.validate = function(validator) {
       validator.getInstance()
           .then(function(validatorInstance) {
             const inputString = file.contents.toString();
-            file.ampValidationResult = validatorInstance.validateString(inputString);
+            file.ampValidationResult =
+                validatorInstance.validateString(inputString);
             return callback(null, file);
           })
           .catch(function(err) {
@@ -93,7 +94,8 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    logger.log('AMP Validation results:\n\n' + results.map(printResult).join('\n'));
+    logger.log('AMP Validation results:\n\n' +
+        results.map(printResult).join('\n'));
     return callback();
   }
 
@@ -102,6 +104,10 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += colors.green(validationResult.status);
+      report += '\n Important: Valid AMP pages should also be tested for '
+          + 'proper CORS handling when served from the amp cache. For details '
+          + 'please see '
+          + 'https://www.ampproject.org/docs/fundamentals/amp-cors-requests';
     } else if (validationResult.status === STATUS_UNKNOWN) {
       report += colors.red(validationResult.status);
     } else {

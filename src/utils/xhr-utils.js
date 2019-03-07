@@ -28,15 +28,12 @@ import {getCorsUrl,
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {urls} from '../config';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {string} */
-export const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
-
-export const CORS_ALLOW_ORIGIN_HEADER = 'Access-Control-Allow-Origin';
+const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
@@ -379,20 +376,7 @@ export function verifyAmpCORSHeaders(win, response, init) {
     userAssert(false, 'Response must contain the' +
         ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
   }
-  const allowOriginHeader = response.headers.get(CORS_ALLOW_ORIGIN_HEADER);
-  devAssert(validAmpCORSHeadersForAmpCache(response),
-      `Returned ${CORS_ALLOW_ORIGIN_HEADER} "${allowOriginHeader}" is not` +
-        ' is not set up for handling requests from amp-cache');
   return response;
-}
-
-/**
- * Verify that 'Access-Control-Allow-Origin' is a proxy URL.
- * @param {!Response} response
- */
-export function validAmpCORSHeadersForAmpCache(response) {
-  const allowOriginHeader = response.headers.get(CORS_ALLOW_ORIGIN_HEADER);
-  return urls.cdnProxyRegex.test(allowOriginHeader);
 }
 
 /**

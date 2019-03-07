@@ -5753,6 +5753,10 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const {status} = this;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
+    terminal.info('Important: Valid AMP pages should also be tested for proper '
+        + 'CORS handling when served from the amp cache. For details please '
+        + 'see'
+        + 'https://www.ampproject.org/docs/fundamentals/amp-cors-requests');
     if (this.errors.length === 0) {
       return;
     }
