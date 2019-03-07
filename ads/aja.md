@@ -37,4 +37,4 @@ do not directly install this code with existing widgets.
 Supported parameters:
 
 - SSPCODE
-  - `data-aja-ssp-asi`
+  - `data-ssp-code`
