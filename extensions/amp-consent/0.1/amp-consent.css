@@ -118,6 +118,9 @@ amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
   top: 0px !important;
   transform: translate3d(0px, 0px, 0px) !important;
+
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
 }
 
 amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-ui-fill {
