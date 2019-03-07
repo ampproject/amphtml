@@ -221,12 +221,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_(event) {
-    // Explore options for caching results to avoid repetitive queries on delete.
-    return this.mutateElement(() => {
-      this.renderResults_();
-    }).then(() => {
-      this.showResults();
-    });
+    // Consider caching results to avoid repetitive queries on delete.
+    if (event.inputType) {
+      return this.mutateElement(() => {
+        this.renderResults_();
+      }).then(() => {
+        this.showResults();
+      });
+    }
   }
 
   /**
