@@ -269,7 +269,6 @@ export const adConfig = {
   },
 
   'aja': {
-    renderStartImplemented: true,
   },
 
   'appvador': {
