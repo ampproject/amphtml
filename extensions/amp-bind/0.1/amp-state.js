@@ -23,6 +23,7 @@ import {
 } from '../../../src/batched-json';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
+import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
@@ -151,23 +152,10 @@ export class AmpState extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
 
-    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
-    // the viewer will make a remote xhr POST request with an auth token in the
-    // request body. Requires amp-viewer-assistance extension for auth token.
-    const crossOriginAttr = element.getAttribute('cross-origin');
-    if (crossOriginAttr &&
-        crossOriginAttr.indexOf('amp-viewer-auth-token-via-post') >= 0) {
-      return Services.viewerAssistanceForDocOrNull(ampdoc.win)
-          .then(viewerAssistance => {
-            devAssert(viewerAssistance,
-                'Viewer Assistance service can not be found');
-            return viewerAssistance.getIdTokenPromise();
-          })
-          .then(token => this.fetch_(
-              ampdoc, element, policy, opt_refresh, token));
-    }
-
-    return this.fetch_(ampdoc, element, policy, opt_refresh);
+    return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token =>
+      this.fetch_(ampdoc, element, policy, opt_refresh, token)
+    );
+    // return this.fetch_(ampdoc, element, policy, opt_refresh);
   }
 
   /**

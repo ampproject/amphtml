@@ -2336,7 +2336,7 @@ describes.repeated('', {
       });
     });
 
-    it('should attach auth token with cross-origin attribute', () => {
+    it('should attach auth token with crossorigin attribute', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.resolve({
             getIdTokenPromise: (() => Promise.resolve('idToken')),
@@ -2358,8 +2358,7 @@ describes.repeated('', {
 
         ampForm.method_ = 'POST';
         ampForm.form_.setAttribute(
-            'cross-origin', 'amp-viewer-auth-token-via-post');
-        ampForm.crossOrigin_ = 'amp-viewer-auth-token-via-post';
+            'crossorigin', 'amp-viewer-auth-token-via-post');
         sandbox.stub(ampForm.xhr_, 'fetch').returns(
             Promise.resolve({json: (() => Promise.resolve())}));
 

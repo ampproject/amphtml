@@ -129,7 +129,7 @@ describes.repeated('amp-list', {
     function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
       // Mock the actual network request.
       listMock.expects('fetch_')
-          .withExactArgs(!!opts.refresh)
+          .withExactArgs(!!opts.refresh, undefined)
           .returns(Promise.resolve(fetched))
           .atLeast(1);
 
@@ -591,7 +591,7 @@ describes.repeated('amp-list', {
             Promise.resolve({
               getIdTokenPromise: (() => Promise.resolve('idToken')),
             }));
-        element.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
+        element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
         const fetched = {items: DEFAULT_ITEMS};
         const foo = doc.createElement('div');
         const rendered = [foo];

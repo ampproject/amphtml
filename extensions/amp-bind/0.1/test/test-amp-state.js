@@ -15,9 +15,9 @@
  */
 
 import '../amp-bind';
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 describes.realWin('AmpState', {
   amp: {
@@ -28,6 +28,7 @@ describes.realWin('AmpState', {
   let win;
   let sandbox;
   let fetchStub;
+  let getViewerAuthTokenIfAvailableStub;
 
   let element;
   let ampState;
@@ -61,6 +62,8 @@ describes.realWin('AmpState', {
     sandbox.spy(ampState, 'fetchAndUpdate_');
     sandbox.spy(ampState, 'prepareAndSendFetch_');
     sandbox.stub(ampState, 'updateState_');
+    getViewerAuthTokenIfAvailableStub = sandbox.stub(
+        xhrUtils, 'getViewerAuthTokenIfAvailable').returns(Promise.resolve());
     fetchStub = sandbox.stub(ampState, 'fetch_')
         .returns(Promise.resolve({baz: 'qux'}));
   });
@@ -76,6 +79,8 @@ describes.realWin('AmpState', {
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
+      return getViewerAuthTokenIfAvailableStub();
+    }).then(() => {
       return ampState.fetch_();
     }).then(() => {
       expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
@@ -134,6 +139,8 @@ describes.realWin('AmpState', {
     return whenFirstVisiblePromise.then(() => {
       expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
+      return getViewerAuthTokenIfAvailableStub();
+    }).then(() => {
       return ampState.fetch_();
     }).then(() => {
       expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
@@ -165,25 +172,20 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise
+        .then(() => getViewerAuthTokenIfAvailableStub())
         .then(() => ampState.fetch_())
         .then(() => {
           expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
         });
   });
 
-  it('should fetch with auth token if `cross-origin` attribute exists'
+  it('should fetch with auth token if `crossorigin` attribute exists'
       + ' with `amp-viewer-auth-token-via-post`', () => {
-    const viewerAssistanceMock = mockServiceForDoc(
-        env.sandbox,
-        env.ampdoc,
-        'amp-viewer-assistance',
-        ['getIdTokenPromise']);
-    viewerAssistanceMock.getIdTokenPromise.returns(Promise.resolve('idToken'));
-
     sandbox.stub(viewer, 'hasBeenVisible').returns(false);
+    getViewerAuthTokenIfAvailableStub.returns(Promise.resolve('idToken'));
 
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
-    element.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
+    element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
     element.build();
 
     // IMPORTANT: No CORS fetch should happen until viewer is visible.

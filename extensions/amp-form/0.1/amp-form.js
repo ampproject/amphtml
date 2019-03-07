@@ -56,13 +56,14 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {
+  getViewerAuthTokenIfAvailable,
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
+import {installFormProxy} from './form-proxy';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -163,9 +164,6 @@ export class AmpForm {
      */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, this.viewer_, this.templates_);
-
-    /** @const @private {string} */
-    this.crossOrigin_ = this.form_.getAttribute('cross-origin');
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -290,26 +288,14 @@ export class AmpForm {
       }),
     };
 
-    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
-    // the viewer will make a remote xhr POST request with an auth token in the
-    // request body. Requires amp-viewer-assistance extension for auth token.
-    if (this.crossOrigin_ &&
-        this.crossOrigin_.indexOf('amp-viewer-auth-token-via-post') >= 0) {
-      userAssert(request.fetchOpt['method'] == 'POST',
-          'Cannot attach auth token with GET request.');
-      return Services.viewerAssistanceForDocOrNull(this.win_)
-          .then(viewerAssistance => {
-            userAssert(viewerAssistance,
-                'Viewer Assistance service cannot be found.');
-            return viewerAssistance.getIdTokenPromise();
-          })
-          .then(token => {
-            body.append('ampViewerAuthToken', token);
-            return request;
-          });
-    }
-
-    return Promise.resolve(request);
+    return getViewerAuthTokenIfAvailable(this.win_, this.form_).then(token => {
+      if (!!token) {
+        userAssert(request.fetchOpt['method'] == 'POST',
+            'Cannot attach auth token with GET request.');
+        body.append('ampViewerAuthToken', token);
+      }
+      return request;
+    });
   }
 
   /**

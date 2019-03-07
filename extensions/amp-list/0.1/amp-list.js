@@ -36,6 +36,12 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {
+  getViewerAuthTokenIfAvailable,
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
+import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
@@ -43,11 +49,6 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -949,21 +950,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   prepareAndSendFetch_(opt_refresh = false) {
-    // If cross-origin="amp-viewer-auth-token-via-post" attribute is present,
-    // the viewer will make a remote xhr POST request with an auth token in the
-    // request body. Requires amp-viewer-assistance extension for auth token.
-    const crossOriginAttr = this.element.getAttribute('cross-origin');
-    if (crossOriginAttr &&
-        crossOriginAttr.indexOf('amp-viewer-auth-token-via-post') >= 0) {
-      return Services.viewerAssistanceForDocOrNull(this.win)
-          .then(viewerAssistance => {
-            devAssert(viewerAssistance,
-                'Viewer Assistance service can not be found');
-            return viewerAssistance.getIdTokenPromise();
-          })
-          .then(token => this.fetch_(opt_refresh, token));
-    }
-    return this.fetch_(opt_refresh);
+    return getViewerAuthTokenIfAvailable(this.win, this.element).then(token =>
+      this.fetch_(opt_refresh, token)
+    );
   }
 
   /**
