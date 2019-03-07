@@ -33,7 +33,12 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {string} */
-const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
+export const ALLOW_SOURCE_ORIGIN_HEADER =
+    'AMP-Access-Control-Allow-Source-Origin';
+
+/** @private @const {string} */
+export const ACCESS_CONTROL_ALLOW_ORIGIN_HEADER =
+    'Access-Control-Allow-Origin';
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
@@ -362,6 +367,8 @@ function normalizeMethod_(method) {
 export function verifyAmpCORSHeaders(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(
       ALLOW_SOURCE_ORIGIN_HEADER);
+  const accessControlAllowOrigin =
+      response.headers.get(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER);
   if (allowSourceOriginHeader) {
     const sourceOrigin = getSourceOrigin(win.location.href);
     // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
@@ -376,6 +383,11 @@ export function verifyAmpCORSHeaders(win, response, init) {
     userAssert(false, 'Response must contain the' +
         ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
   }
+  devAssert(accessControlAllowOrigin,
+      `${ACCESS_CONTROL_ALLOW_ORIGIN_HEADER} needs to be to be set `
+      + 'and should allow for the value set in the request Origin header. '
+      + 'See https://www.ampproject.org/docs/fundamentals/amp-cors-requests '
+      + 'in verifying CORS requests and responses.');
   return response;
 }
 
