@@ -227,7 +227,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     return this.mutateElement(() => {
       this.renderResults_();
-    }).then(() => {
       this.showResults();
     });
   }
@@ -316,9 +315,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (!this.container_) {
       return Promise.resolve();
     }
-    toggle(this.container_, false);
     this.activeIndex_ = -1;
     return this.mutateElement(() => {
+      toggle(this.container_, false);
       this.resetActiveElement_();
     });
   }
