@@ -35,7 +35,6 @@ describes.realWin('amp-autocomplete', {
 
     function getAutocomplete(attributes,
       json = '{ "items" : ["apple", "banana", "orange"] }') {
-      win.sessionStorage.clear();
       const ampAutocomplete = doc.createElement('amp-autocomplete');
       ampAutocomplete.setAttribute('layout', 'container');
       for (const key in attributes) {
