@@ -45,9 +45,10 @@ function flyIn(fxElement, axis, coeff) {
   devAssert(Math.abs(coeff) == 1);
 
   const element = dev().assertElement(fxElement.element);
-  const flyInDistance = coeff * fxElement.flyInDistance;
 
   const unit = axis == 'top' ? 'vh' : 'vw';
+  const flyInDistance = coeff * fxElement.flyInDistance;
+  const flyInDistanceAsLength = flyInDistance + unit;
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
@@ -62,13 +63,11 @@ function flyIn(fxElement, axis, coeff) {
         position,
         visibility: 'visible',
       };
-      styles[axis] = `calc(${axisAsLength} + (${-flyInDistance}${unit}))`;
+      styles[axis] = `calc(${axisAsLength} - ${flyInDistanceAsLength})`;
       setStyles(element, assertDoesNotContainDisplay(styles));
     });
     fxElement.initialTrigger = true;
   }
-
-  const flyInDistanceAsLength = flyInDistance + unit;
 
   const offsetX = axis == 'left' ? flyInDistanceAsLength : 0;
   const offsetY = axis == 'top' ? flyInDistanceAsLength : 0;
