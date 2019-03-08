@@ -463,6 +463,26 @@ describe('toggleExperiment', () => {
     // Sanity check, the global setting should never be changed.
     expect(win.AMP_CONFIG.e1).to.equal(1);
   });
+
+  it('should set experiment value if present', () => {
+    const win = {
+      document: {
+        cookie: '',
+      },
+      location: {
+        hostname: 'test.test',
+        href: 'http://foo.bar',
+      },
+    };
+    toggleExperiment(
+        win, 'log', undefined, undefined, /* experimentIdValue */ '1');
+    expect(getExperimentValue(win, 'log')).to.equal('1');
+
+    // Should override the experimentId value.
+    toggleExperiment(
+        win, 'log', undefined, undefined, /* experimentIdValue */ '2');
+    expect(getExperimentValue(win, 'log')).to.equal('2');
+  });
 });
 
 describes.realWin('meta override', {}, env => {

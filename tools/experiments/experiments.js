@@ -438,28 +438,28 @@ const EXPERIMENTS = [
   },
   {
     id: 'log-error',
-    experimentName: 'log',
+    experimentId: 'log',
     name: 'Log level ERROR.',
     value: '1',
     cleanupIssue: 'N/A',
   },
   {
     id: 'log-warn',
-    experimentName: 'log',
+    experimentId: 'log',
     name: 'Log level WARN.',
     value: '2',
     cleanupIssue: 'N/A',
   },
   {
     id: 'log-info',
-    experimentName: 'log',
+    experimentId: 'log',
     name: 'Log level INFO.',
     value: '3',
     cleanupIssue: 'N/A',
   },
   {
     id: 'log-fine',
-    experimentName: 'log',
+    experimentId: 'log',
     name: 'Log level FINE.',
     value: '4',
     cleanupIssue: 'N/A',
@@ -527,7 +527,7 @@ function buildExperimentRow(experiment) {
   button.appendChild(buttonOff);
 
   button.addEventListener('click', toggleExperiment_.bind(null,
-      experiment.experimentName || experiment.id,
+      experiment.experimentId || experiment.id,
       experiment.name, undefined, experiment.value));
 
   return tr;
@@ -573,19 +573,19 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  const {experimentName} = experiment;
+  const {experimentId} = experiment;
   let experimentValue;
   let isOnBasedOnExperimentValue;
-  if (experimentName) {
-    experimentValue = getExperimentValue(window, experimentName);
+  if (experimentId) {
+    experimentValue = getExperimentValue(window, experimentId);
     isOnBasedOnExperimentValue = experiment.value == experimentValue;
   }
-  const isOn = isExperimentOn_(experimentName || experiment.id);
+  const isOn = isExperimentOn_(experimentId || experiment.id);
   let state = isOn ? 1 : 0;
-  if (self.AMP_CONFIG[experimentName || experiment.id]) {
+  if (self.AMP_CONFIG[experimentId || experiment.id]) {
     state = 'default';
   }
-  if (experimentName && isOn && !isOnBasedOnExperimentValue) {
+  if (experimentId && isOn && !isOnBasedOnExperimentValue) {
     state = 0;
   }
   tr.setAttribute('data-on', state);
@@ -633,7 +633,12 @@ function setAmpCanaryCookie_(cookieState) {
  */
 function toggleExperiment_(id, name, opt_on, opt_value) {
   const currentlyOn = isExperimentOn_(id);
-  const on = opt_on === undefined ? !currentlyOn : opt_on;
+  const experimentValue = getExperimentValue(window, id);
+  let on = opt_on === undefined ? !currentlyOn : opt_on;
+  // The experiment of the same value is being toggled to off.
+  if (currentlyOn && opt_value && (opt_value === experimentValue)) {
+    on = false;
+  }
   // Protect against click jacking.
   const confirmMessage = on ?
     'Do you really want to activate the AMP experiment' :
