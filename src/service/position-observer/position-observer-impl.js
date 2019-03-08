@@ -206,7 +206,5 @@ export class PositionObserver {
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
-    return new PositionObserver(ampdoc);
-  });
+  registerServiceBuilderForDoc(ampdoc, 'position-observer', PositionObserver);
 }

@@ -42,9 +42,9 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
-    timedExecOrDie('gulp test --integration --nobuild --coverage');
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
-    timedExecOrDie('gulp test --dev_dashboard --nobuild');
     //TODO(estherkim): turn on when stabilized :)
     //timedExecOrDie('gulp e2e --nobuild');
   } else {
@@ -53,16 +53,16 @@ function main() {
     if (!(buildTargets.has('RUNTIME') ||
           buildTargets.has('BUILD_SYSTEM') ||
           buildTargets.has('UNIT_TEST') ||
-          buildTargets.has('INTEGRATION_TEST') ||
-          buildTargets.has('DEV_DASHBOARD'))) {
+          buildTargets.has('INTEGRATION_TEST'))) {
       console.log(
-          `${FILELOGPREFIX} Skipping unit and integration tests because ` +
-          'this commit not affect the runtime, build system, ' +
-          'unit test files, integration test files, or the dev dashboard.');
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Local Tests ') +
+          'because this commit not affect the runtime, build system, ' +
+          'unit test files, or integration test files.');
       stopTimer(FILENAME, FILENAME, startTime);
-      return 0;
+      return;
     }
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
@@ -82,14 +82,9 @@ function main() {
       //TODO(estherkim): turn on when stabilized :)
       //timedExecOrDie('gulp e2e --nobuild');
     }
-
-    if (buildTargets.has('DEV_DASHBOARD')) {
-      timedExecOrDie('gulp test --dev_dashboard --nobuild');
-    }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

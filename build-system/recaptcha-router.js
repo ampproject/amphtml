@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const cors = require('./amp-cors');
 const pc = process;
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
@@ -48,10 +49,7 @@ recaptchaRouter.post(
     '/submit',
     upload.array(),
     (req, res) => {
-      const sourceOrigin = req.query['__amp_source_origin'];
-      if (sourceOrigin) {
-        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-      }
+      cors.enableCors(req, res);
 
       const responseJson = {
         message: 'Success!',

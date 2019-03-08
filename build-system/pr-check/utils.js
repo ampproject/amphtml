@@ -16,6 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
+const requestPromise = require('request-promise');
 const {
   gitBranchName,
   gitDiffCommitLog,
@@ -24,12 +25,18 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
-const {execOrDie, exec, getStdout} = require('../exec');
-const {travisBuildNumber, travisPullRequestSha} = require('../travis');
+const {execOrDie, exec} = require('../exec');
+const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
 
-const BUILD_OUTPUT_FILE = `amp_build_${travisBuildNumber()}.zip`;
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
-const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+const BUILD_OUTPUT_FILE =
+    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : '';
+const DIST_OUTPUT_FILE =
+    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
+const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
+const OUTPUT_STORAGE_SERVICE_ACCOUNT =
+    'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -38,12 +45,14 @@ const BUILD_OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
-  console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-      `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
-  console.log(
-      `${fileLogPrefix} Testing the following changes at commit ` +
-      `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+  if (isTravisBuild()) {
+    console.log(
+        `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
+        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
+    console.log(
+        `${fileLogPrefix} Testing the following changes at commit ` +
+        `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+  }
 
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
@@ -60,10 +69,10 @@ function printChangeSummary(fileName) {
  * Starts connection to Sauce Labs after getting account credentials
  * @param {string} functionName
  */
-function startSauceConnect(functionName) {
+async function startSauceConnect(functionName) {
   process.env['SAUCE_USERNAME'] = 'amphtml';
-  process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
-      'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
+  const response = await requestPromise('https://amphtml-sauce-token-dealer.appspot.com/getJwtToken');
+  process.env['SAUCE_ACCESS_KEY'] = response.trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   console.log('\n' + fileLogPrefix,
@@ -106,9 +115,9 @@ function startTimer(functionName, fileName) {
  */
 function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
-  const executionTime = new Date(endTime - startTime);
-  const mins = executionTime.getMinutes();
-  const secs = executionTime.getSeconds();
+  const executionTime = endTime - startTime;
+  const mins = Math.floor(executionTime / 60000);
+  const secs = Math.floor(executionTime % 60000 / 1000);
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),
@@ -140,31 +149,85 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
 }
 
 /**
- * Downloads build output from storage
+ * Download output helper
  * @param {string} functionName
+ * @param {string} outputFileName
+ * @private
  */
-function downloadBuildOutput(functionName) {
+async function downloadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl =
-    `${BUILD_OUTPUT_STORAGE_LOCATION}/${BUILD_OUTPUT_FILE}`;
+    `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
 
   console.log(
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${BUILD_OUTPUT_FILE}`);
+  authenticateWithStorageLocation_();
+  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
   console.log(
-      `${fileLogPrefix} Extracting ` + colors.cyan(BUILD_OUTPUT_FILE) + '...');
+      `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...');
   exec('echo travis_fold:start:unzip_results && echo');
-  execOrDie(`unzip -o ${BUILD_OUTPUT_FILE}`);
+  execOrDie(`unzip -o ${outputFileName}`);
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
   exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -la ${BUILD_OUTPUT_DIRS}`);
+  execOrDie(`ls -laR ${OUTPUT_DIRS}`);
   exec('echo travis_fold:end:verify_unzip_results');
+}
+
+/**
+ * Upload output helper
+ * @param {string} functionName
+ * @param {string} outputFileName
+ * @private
+ */
+async function uploadOutput_(functionName, outputFileName) {
+  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+
+  console.log(
+      `\n${fileLogPrefix} Compressing ` +
+      colors.cyan(OUTPUT_DIRS.split(' ').join(', ')) +
+      ' into ' + colors.cyan(outputFileName) + '...');
+  exec('echo travis_fold:start:zip_results && echo');
+  execOrDie(`zip -r ${outputFileName} ${OUTPUT_DIRS}`);
+  exec('echo travis_fold:end:zip_results');
+
+  console.log(
+      `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
+      colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
+  exec('echo travis_fold:start:upload_results && echo');
+  authenticateWithStorageLocation_();
+  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
+  exec('echo travis_fold:end:upload_results');
+}
+
+function authenticateWithStorageLocation_() {
+  decryptTravisKey_();
+  execOrDie('gcloud auth activate-service-account ' +
+  `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
+  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
+  execOrDie('gcloud config set pass_credentials_to_gsutil true');
+  execOrDie('gcloud config list');
+}
+
+/**
+ * Downloads and unzips build output from storage
+ * @param {string} functionName
+ */
+function downloadBuildOutput(functionName) {
+  downloadOutput_(functionName, BUILD_OUTPUT_FILE);
+}
+
+/**
+ * Downloads and unzips dist output from storage
+ * @param {string} functionName
+ */
+function downloadDistOutput(functionName) {
+  downloadOutput_(functionName, DIST_OUTPUT_FILE);
 }
 
 /**
@@ -172,26 +235,31 @@ function downloadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function uploadBuildOutput(functionName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+  uploadOutput_(functionName, BUILD_OUTPUT_FILE);
+}
 
-  console.log(
-      `\n${fileLogPrefix} Compressing ` + colors.cyan(BUILD_OUTPUT_DIRS) +
-      ' into ' + colors.cyan(BUILD_OUTPUT_FILE) + '...');
-  exec('echo travis_fold:start:zip_results && echo');
-  execOrDie(`zip -r ${BUILD_OUTPUT_FILE} ${BUILD_OUTPUT_DIRS}`);
-  exec('echo travis_fold:end:zip_results');
+/**
+ * Zips and uploads the dist output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadDistOutput(functionName) {
+  uploadOutput_(functionName, DIST_OUTPUT_FILE);
+}
 
-  console.log(
-      `${fileLogPrefix} Uploading ` + colors.cyan(BUILD_OUTPUT_FILE) + ' to ' +
-      colors.cyan(BUILD_OUTPUT_STORAGE_LOCATION) + '...');
-  exec('echo travis_fold:start:upload_results && echo');
-  execOrDie(`gsutil -m cp -r ${BUILD_OUTPUT_FILE} ` +
-      `${BUILD_OUTPUT_STORAGE_LOCATION}`);
-  exec('echo travis_fold:end:upload_results');
+/**
+ * Decrypts key used by storage service account
+ */
+function decryptTravisKey_() {
+  // -md sha256 is required due to encryption differences between
+  // openssl 1.1.1a, which was used to encrypt the key, and
+  // openssl 1.0.2g, which is used by Travis to decrypt.
+  execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
+      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {
   downloadBuildOutput,
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -200,4 +268,5 @@ module.exports = {
   timedExec,
   timedExecOrDie,
   uploadBuildOutput,
+  uploadDistOutput,
 };

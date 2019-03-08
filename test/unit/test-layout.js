@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, applyStaticLayout,
+import {LAYOUTS, Layout, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
   isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
 
@@ -24,6 +24,20 @@ describe('Layout', () => {
 
   beforeEach(() => {
     div = document.createElement('div');
+  });
+
+  describe('Layout definition sanity-check', () => {
+
+    const expectedKey = type => type.replace(/\-/g, '_').toUpperCase();
+
+    it('has matching `Layout` field for each of `LAYOUTS`', () => {
+      expect(Object.keys(Layout)).to.have.length(LAYOUTS.length);
+
+      LAYOUTS.forEach(layout => {
+        expect(Layout).to.include({[expectedKey(layout)]: layout});
+      });
+    });
+
   });
 
   it('parseLayout', () => {
@@ -41,19 +55,35 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
+      // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
       'AMP-EMBED',
+      'AMP-FACEBOOK',
+      'AMP-FACEBOOK-COMMENTS',
+      'AMP-FACEBOOK-LIKE',
+      'AMP-FACEBOOK-PAGE',
+      'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
       'AMP-IMG',
       'AMP-INSTAGRAM',
       'AMP-LIST',
-      'AMP-OOYALA-PLAYER',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-VIDEO',
       'AMP-YOUTUBE',
+      'AMP-VIMEO',
+
+      // matched by video player naming convention (fake)
+      'AMP-FOO-PLAYER',
+      'AMP-VIDEO-FOO',
+
+      // matched by video player naming convention (actual)
+      'AMP-JWPLAYER',
+      'AMP-OOYALA-PLAYER',
+      'AMP-VIDEO',
+      'AMP-VIDEO-IFRAME',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;

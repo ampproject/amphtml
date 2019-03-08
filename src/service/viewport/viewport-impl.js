@@ -15,6 +15,7 @@
  */
 
 import {Animation} from '../../animation';
+import {Deferred, tryResolve} from '../../utils/promise';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
@@ -27,6 +28,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {clamp} from '../../utils/math';
 import {closestAncestorElementBySelector, isIframed} from '../../dom';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
@@ -45,7 +47,6 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {setStyle} from '../../style';
-import {tryResolve} from '../../utils/promise';
 
 
 const TAG_ = 'Viewport';
@@ -73,6 +74,17 @@ export let ViewportChangedEventDef;
 export let ViewportResizedEventDef;
 
 /**
+ * Params:
+ *  - afterAnimation. Promise.
+ *  - lastPaddingTop in px.
+ *  - paddingTop in px.
+ *
+ * Returns the animation offset at beginning of animation. End will always be 0.
+ * @typedef {function(!Promise, number, number):number}
+ */
+export let FixedElementMeasureFnDef;
+
+/**
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
@@ -86,6 +98,8 @@ export class Viewport {
    * @param {!../viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, binding, viewer) {
+    const {win} = ampdoc;
+
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -131,10 +145,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!../timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private {!../vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -157,59 +171,62 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
+    /** @private {!Array<{element: !Element, measure: !FixedElementMeasureFnDef}>} */
+    this.fixedMeasurers_ = [];
+
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
-      installLayersServiceForDoc(this.ampdoc,
-          this.binding_.getScrollingElement(),
-          this.binding_.getScrollingElementScrollsLikeViewport());
+      installLayersServiceForDoc(ampdoc,
+          binding.getScrollingElement(),
+          binding.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
-        this.ampdoc,
+        ampdoc,
         this.vsync_,
-        this.binding_.getBorderTop(),
+        binding.getBorderTop(),
         this.paddingTop_,
-        this.binding_.requiresFixedLayerTransfer());
-    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+        binding.requiresFixedLayerTransfer());
+    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
-    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
-    this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
-    this.viewer_.onMessage(
+    viewer.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
+    viewer.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
+    viewer.onMessage(
         'disableScroll', this.disableScrollEventHandler_.bind(this));
-    this.binding_.updatePaddingTop(this.paddingTop_);
+    binding.updatePaddingTop(this.paddingTop_);
 
-    this.binding_.onScroll(this.scroll_.bind(this));
-    this.binding_.onResize(this.resize_.bind(this));
+    binding.onScroll(this.scroll_.bind(this));
+    binding.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
 
     /** @private {boolean} */
     this.visible_ = false;
-    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    viewer.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
     // Top-level mode classes.
-    if (this.ampdoc.isSingleDoc()) {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-singledoc');
+    const globalDocElement = this.globalDoc_.documentElement;
+    if (ampdoc.isSingleDoc()) {
+      globalDocElement.classList.add('i-amphtml-singledoc');
     }
     if (viewer.isEmbedded()) {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-embedded');
+      globalDocElement.classList.add('i-amphtml-embedded');
     } else {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-standalone');
+      globalDocElement.classList.add('i-amphtml-standalone');
     }
-    if (isIframed(this.ampdoc.win)) {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
+    if (isIframed(win)) {
+      globalDocElement.classList.add('i-amphtml-iframed');
     }
     if (viewer.getParam('webview') === '1') {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
+      globalDocElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
-    if (isIframed(this.ampdoc.win) &&
-        ('scrollRestoration' in this.ampdoc.win.history)) {
-      this.ampdoc.win.history.scrollRestoration = 'manual';
+    if (isIframed(win) && ('scrollRestoration' in win.history)) {
+      win.history.scrollRestoration = 'manual';
     }
   }
 
@@ -518,66 +535,63 @@ export class Viewport {
    * transition.
    *
    * @param {!Element} element
-   * @param {number=} duration
-   * @param {string=} curve
    * @param {string=} pos (takes one of 'top', 'bottom', 'center')
+   * @param {number=} opt_duration
+   * @param {string=} opt_curve
    * @return {!Promise}
    */
-  animateScrollIntoView(element,
-    duration = 500,
-    curve = 'ease-in',
-    pos = 'top') {
+  animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
+    devAssert(!opt_curve || opt_duration !== undefined,
+        'Curve without duration doesn\'t make sense.');
 
     return this.getScrollingContainerFor_(element).then(parent =>
       this.animateScrollWithinParent(
           element,
           parent,
-          dev().assertNumber(duration),
-          dev().assertString(curve),
-          dev().assertString(pos)));
+          dev().assertString(pos),
+          opt_duration,
+          opt_curve));
   }
 
   /**
    * @param {!Element} element
    * @param {!Element} parent Should be scrollable.
-   * @param {number} duration
-   * @param {string} curve
    * @param {string} pos (takes one of 'top', 'bottom', 'center')
+   * @param {number=} opt_duration
+   * @param {string=} opt_curve
    * @return {!Promise}
    */
-  animateScrollWithinParent(element, parent, duration, curve, pos) {
+  animateScrollWithinParent(element, parent, pos, opt_duration, opt_curve) {
+    devAssert(!opt_curve || opt_duration !== undefined,
+        'Curve without duration doesn\'t make sense.');
+
     const elementRect = this.binding_.getLayoutRect(element);
 
     const {height: parentHeight} = this.isScrollingElement_(parent) ?
       this.getSize() :
       this.getLayoutRect(parent);
 
-    let offset;
-    switch (pos) {
-      case 'bottom':
-        offset = -parentHeight + elementRect.height;
-        break;
-      case 'center':
-        offset = (-parentHeight / 2) + (elementRect.height / 2);
-        break;
-      default:
-        offset = 0;
-        break;
+    let offset = 0;
+    if (pos == 'bottom') {
+      offset = -parentHeight + elementRect.height;
+    }
+    if (pos == 'center') {
+      offset = (-parentHeight / 2) + (elementRect.height / 2);
     }
 
     return this.getElementScrollTop_(parent).then(curScrollTop => {
       let newScrollTop;
       if (this.useLayers_) {
-        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
+        newScrollTop = elementRect.top + offset + curScrollTop;
       } else {
-        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-        newScrollTop = Math.max(0, calculatedScrollTop);
+        newScrollTop = elementRect.top - this.paddingTop_ + offset;
       }
+      newScrollTop = Math.max(0, newScrollTop);
       if (newScrollTop == curScrollTop) {
         return;
       }
       return this.interpolateScrollIntoView_(
-          parent, curScrollTop, newScrollTop, duration, curve);
+          parent, curScrollTop, newScrollTop, opt_duration, opt_curve);
     });
   }
 
@@ -585,19 +599,19 @@ export class Viewport {
    * @param {!Element} parent
    * @param {number} curScrollTop
    * @param {number} newScrollTop
-   * @param {number} duration
-   * @param {string} curve
+   * @param {number=} opt_duration
+   * @param {string=} curve
    * @private
    */
   interpolateScrollIntoView_(
-    parent, curScrollTop, newScrollTop, duration, curve) {
+    parent, curScrollTop, newScrollTop, opt_duration, curve = 'ease-in') {
+
+    const duration = opt_duration !== undefined ?
+      dev().assertNumber(opt_duration) :
+      getDefaultScrollAnimationDuration(curScrollTop, newScrollTop);
 
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-
-    // TODO(aghassemi, #10463): the duration should not be a constant and
-    // should be proportional to the distance to be scrolled for better
-    // transition experience when things are closer vs farther.
     return Animation.animate(parent, position => {
       this.setElementScrollTop_(parent, interpolate(position));
     }, duration, curve).thenAlways(() => {
@@ -695,17 +709,18 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
+   * @param {!Promise=} opt_onComplete Optional promise that's resolved when
+   *     the caller finishes opening the lightbox e.g. transition animations.
    * @return {!Promise}
    */
-  enterLightboxMode(opt_requestingElement) {
+  enterLightboxMode(opt_requestingElement, opt_onComplete) {
     this.viewer_.sendMessage(
         'requestFullOverlay', dict(), /* cancelUnsent */ true);
 
     this.enterOverlayMode();
-    this.hideFixedLayer();
+    this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
@@ -717,16 +732,15 @@ export class Viewport {
 
   /**
    * Instruct the viewport to leave lightbox mode.
-   * Requesting element is necessary to be able to enter lightbox mode under FIE
-   * cases.
-   * @param {!Element=} opt_requestingElement
+   * @param {!Element=} opt_requestingElement Must be provided to be able to
+   *     enter lightbox mode under FIE cases.
    * @return {!Promise}
    */
   leaveLightboxMode(opt_requestingElement) {
     this.viewer_.sendMessage(
         'cancelFullOverlay', dict(), /* cancelUnsent */ true);
 
-    this.showFixedLayer();
+    this.fixedLayer_.leaveLightbox();
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
@@ -885,20 +899,6 @@ export class Viewport {
   }
 
   /**
-   * Hides the fixed layer.
-   */
-  hideFixedLayer() {
-    this.fixedLayer_.setVisible(false);
-  }
-
-  /**
-   * Shows the fixed layer.
-   */
-  showFixedLayer() {
-    this.fixedLayer_.setVisible(true);
-  }
-
-  /**
    * Updates the fixed layer.
    */
   updateFixedLayer() {
@@ -919,9 +919,11 @@ export class Viewport {
   /**
    * Removes the element from the fixed layer.
    * @param {!Element} element
+   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeFromFixedLayer(element) {
-    this.fixedLayer_.removeElement(element);
+  removeFromFixedLayer(element, opt_onlyTearDown, opt_keepOffset) {
+    this.fixedLayer_.removeElement(element, opt_onlyTearDown, opt_keepOffset);
   }
 
   /**
@@ -985,15 +987,18 @@ export class Viewport {
 
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
-    if (this.paddingTop_ < this.lastPaddingTop_) {
+
+    const animPromise =
+        this.updateFixedElementsOffset_(duration, curve, transient);
+
+    if (paddingTop < this.lastPaddingTop_) {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      this.animateFixedElements_(duration, curve, transient);
-    } else {
-      this.animateFixedElements_(duration, curve, transient).then(() => {
-        this.binding_.showViewerHeader(transient, this.paddingTop_);
-      });
+      return;
     }
 
+    animPromise.then(() => {
+      this.binding_.showViewerHeader(transient, paddingTop);
+    });
   }
 
   /**
@@ -1009,24 +1014,81 @@ export class Viewport {
   }
 
   /**
+   * Specifies a callback for measuring an element's fixed offset when the
+   * viewport's padding top changes.
+   *
+   * `measure` runs in a measure phase and takes:
+   *  - afterAnimation
+   *    a promise that resolves after a running translation is finished.
+   *  - lastPaddingTop in px.
+   *  - paddingTop in px.
+   *
+   * And returns a vertical offset at start of animation. End will always be 0.
+   *
+   * This tears down the element from the fixed layer (but does NOT remove from
+   * the transfer layer), so its offset needs to be managed independently
+   * afterwards.
+   *
+   * @param {!Element} element
+   * @param {!FixedElementMeasureFnDef} measure
+   */
+  setFixedElementMeasurer(element, measure) {
+    this.removeFromFixedLayer(
+        element, /* onlyTearDown */ true, /* keepOffset */ true);
+    this.fixedMeasurers_.push({element, measure});
+  }
+
+  /**
    * @param {number} duration
    * @param {string} curve
    * @param {boolean} transient
    * @return {!Promise}
    * @private
    */
-  animateFixedElements_(duration, curve, transient) {
-    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
-    if (duration <= 0) {
-      return Promise.resolve();
-    }
-    // Add transit effect on position fixed element
-    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
-    return Animation.animate(this.ampdoc.getRootNode(), time => {
-      const p = tr(time);
-      this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-    }, duration, curve).thenAlways(() => {
-      this.fixedLayer_.transformMutate(null);
+  updateFixedElementsOffset_(duration, curve, transient) {
+    const {
+      paddingTop_: paddingTop,
+      lastPaddingTop_: lastPaddingTop,
+    } = this;
+
+    this.fixedLayer_.updatePaddingTop(paddingTop, transient);
+
+    let doneDeferred;
+
+    return this.vsync_.measurePromise(() => {
+      return this.fixedMeasurers_.map(def => {
+        doneDeferred = doneDeferred || new Deferred();
+        return def.measure(doneDeferred.promise, lastPaddingTop, paddingTop);
+      });
+    }).then(animOffsets => {
+      if (duration <= 0) {
+        return;
+      }
+
+      const interpolations =
+          animOffsets.map(animOffset => numeric(animOffset, 0));
+
+      const defaultAnimOffset = lastPaddingTop - paddingTop;
+      const defaultInterpolation = numeric(defaultAnimOffset, 0);
+
+      return Animation.animate(this.ampdoc.getRootNode(), time => {
+        this.fixedLayer_.transformMutate(
+            `translateY(${defaultInterpolation(time)}px)`);
+
+        // Translate independent elements that have their own animation offset
+        // definition.
+        interpolations.forEach((interpolation, i) => {
+          setStyle(this.fixedMeasurers_[i].element, 'transform',
+              `translateY(${interpolation(time)}px)`);
+        });
+      }, duration, curve).thenAlways(() => {
+        this.fixedLayer_.transformMutate(); // reset all transforms.
+      });
+    }).then(() => {
+      if (doneDeferred) {
+        doneDeferred.resolve();
+        doneDeferred = null; // GC
+      }
     });
   }
 
@@ -1234,6 +1296,17 @@ export function updateViewportMetaString(currentValue, updateParams) {
   return stringifyViewportMeta(params);
 }
 
+/**
+ * Calculates a default duration for a scrollTop animation.
+ * @param {number} scrollTopA commutative with b.
+ * @param {number} scrollTopB commutative with a.
+ * @param {number=} max in ms. default 500ms.
+ * @return {number}
+ */
+function getDefaultScrollAnimationDuration(scrollTopA, scrollTopB, max = 500) {
+  // 65% of scroll Δ to ms, eg 1000px -> 650ms, integer between 0 and max
+  return Math.floor(clamp(0.65 * Math.abs(scrollTopA - scrollTopB), 0, max));
+}
 
 /**
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
@@ -1242,16 +1315,17 @@ export function updateViewportMetaString(currentValue, updateParams) {
  */
 function createViewport(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
+  const {win} = ampdoc;
   let binding;
   if (ampdoc.isSingleDoc() &&
-      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
-        ampdoc.win.Element.prototype.attachShadow &&
+      getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
+    if (isExperimentOn(win, 'ios-embed-sd') &&
+        win.Element.prototype.attachShadow &&
         // Even though iOS 10 supports Shadow DOM, the support is buggy.
-        Services.platformFor(ampdoc.win).getMajorVersion() >= 11) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
+        Services.platformFor(win).getMajorVersion() >= 11) {
+      binding = new ViewportBindingIosEmbedShadowRoot_(win);
     } else {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+      binding = new ViewportBindingIosEmbedWrapper_(win);
     }
   } else {
     binding = new ViewportBindingNatural_(ampdoc);

@@ -28,13 +28,13 @@ import {
 } from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {getPresetDef, setStyleForPreset} from './animation-presets';
+import {map, omit} from '../../../src/utils/object';
 import {
-  escapeCssSelectorIdent,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {getPresetDef, setStyleForPreset} from './animation-presets';
-import {map, omit} from '../../../src/utils/object';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -264,6 +264,20 @@ class AnimationRunner {
     this.playback_(PlaybackActivity.FINISH);
   }
 
+  /** Pauses the animation. */
+  pause() {
+    if (this.runner_) {
+      devAssert(this.runner_).pause();
+    }
+  }
+
+  /** Resumes the animation. */
+  resume() {
+    if (this.runner_) {
+      devAssert(this.runner_).resume();
+    }
+  }
+
   /**
    * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
@@ -443,6 +457,22 @@ export class AnimationManager {
       return;
     }
     this.getRunners_().forEach(runner => runner.cancel());
+  }
+
+  /** Pauses all animations in the page. */
+  pauseAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.pause());
+  }
+
+  /** Resumes all animations in the page. */
+  resumeAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.resume());
   }
 
   /** Determines if there is an entrance animation running. */

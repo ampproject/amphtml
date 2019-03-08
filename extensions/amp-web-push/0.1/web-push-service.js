@@ -21,9 +21,10 @@ import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, openWindowDialog} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{

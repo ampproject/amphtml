@@ -85,7 +85,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -99,6 +98,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
@@ -497,7 +497,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
-    if (!this.activePage_) {
+    if (!this.activePage_ || !this.isStandalone_()) {
       return;
     }
 
@@ -509,7 +509,7 @@ export class AmpStory extends AMP.BaseElement {
         state.vmax = Math.max(state.vh, state.vw);
       },
       mutate: state => {
-        this.element.setAttribute('style',
+        this.win.document.documentElement.setAttribute('style',
             `--i-amphtml-story-vh: ${px(state.vh)};` +
             `--i-amphtml-story-vw: ${px(state.vw)};` +
             `--i-amphtml-story-vmin: ${px(state.vmin)};` +
@@ -840,12 +840,8 @@ export class AmpStory extends AMP.BaseElement {
             this.activePage_.openAttachment(false /** shouldAnimate */);
           }
 
-          // Preloads and prerenders the share menu if mobile, where the share
-          // button is visible.
-          const uiState = this.storeService_.get(StateProperty.UI_STATE);
-          if (uiState === UIType.MOBILE) {
-            this.shareMenu_.build();
-          }
+          // Preloads and prerenders the share menu.
+          this.shareMenu_.build();
 
           const infoDialog = Services.viewerForDoc(this.element).isEmbedded() ?
             new InfoDialog(this.win, this.element) : null;
@@ -1516,9 +1512,6 @@ export class AmpStory extends AMP.BaseElement {
   onUIStateUpdate_(uiState) {
     switch (uiState) {
       case UIType.MOBILE:
-        // Preloads and prerenders the share menu as the share button gets
-        // visible on the mobile UI. No-op if already built.
-        this.shareMenu_.build();
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
@@ -1533,7 +1526,8 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
-        if (!this.background_) {
+        if (!this.background_ &&
+            isExperimentOn(this.win, 'amp-story-desktop-background')) {
           this.background_ = new AmpStoryBackground(this.win, this.element);
           this.background_.attach();
         }
@@ -1542,7 +1536,6 @@ export class AmpStory extends AMP.BaseElement {
         }
         break;
       case UIType.DESKTOP_FULLBLEED:
-        this.shareMenu_.build();
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');

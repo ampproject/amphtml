@@ -43,6 +43,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
@@ -55,18 +56,19 @@ function main() {
         buildTargets.has('FLAG_CONFIG')) {
 
       downloadBuildOutput(FILENAME);
+      timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
       console.log(
-          `${FILELOGPREFIX} Skipping visual diff tests because this commit ` +
-          'does not affect the runtime, build system, integration ' +
-          'test files, visual diff test files, or flag config files.');
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Visual Diff Tests ') +
+          'because this commit does not affect the ' +
+          'runtime, build system, integration test files, ' +
+          'visual diff test files, or flag config files.');
     }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

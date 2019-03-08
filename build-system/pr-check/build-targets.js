@@ -20,6 +20,7 @@
  * This script sets the build targets for our PR check, where the build targets
  * determine which tasks are required to run for pull request builds.
  */
+const colors = require('ansi-colors');
 const config = require('../config');
 const minimatch = require('minimatch');
 const path = require('path');
@@ -181,6 +182,32 @@ function isFlagConfig(filePath) {
 }
 
 /**
+ * Validate build targets.
+ * Exit early if flag-config files are mixed with runtime files.
+ * @param {!Set<string>} buildTargets
+ * @param {string} fileName
+ * @return {boolean}
+ */
+function areValidBuildTargets(buildTargets, fileName) {
+  const files = gitDiffNameOnlyMaster();
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
+    console.log(fileName, colors.red('ERROR:'),
+        'Looks like your PR contains',
+        colors.cyan('{prod|canary}-config.json'),
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
+    const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
+    const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+    console.log(fileLogPrefix, colors.red('ERROR:'),
+        'Please move these files to a separate PR:',
+        colors.cyan(nonFlagConfigFiles.join(', ')));
+    return false;
+  }
+  return true;
+}
+
+/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @return {!Set<string>}
@@ -232,6 +259,6 @@ function determineBuildTargets() {
 }
 
 module.exports = {
+  areValidBuildTargets,
   determineBuildTargets,
-  isFlagConfig,
 };

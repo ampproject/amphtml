@@ -79,7 +79,9 @@ export function createFixtureIframe(
       [FormEvents.SERVICE_INIT]: 0,
     };
     const messages = [];
-    let html = __html__[fixture]; // eslint-disable-line no-undef
+    let html = __html__[fixture] // eslint-disable-line no-undef
+        .replace(/__TEST_SERVER_PORT__/g,
+            window.ampTestRuntimeConfig.testServerPort);
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
@@ -543,11 +545,13 @@ function onInsert(win) {
  * @param {string} html
  * @return {string}
  */
-function maybeSwitchToCompiledJs(html) {
+export function maybeSwitchToCompiledJs(html) {
   if (window.ampTestRuntimeConfig.useCompiledJs) {
     return html
         // Main JS
-        .replace(/\/dist\/amp\.js/, '/dist/v0.js')
+        .replace(/\/dist\/amp\.js/g, '/dist/v0.js')
+        // Inabox
+        .replace(/\/dist\/amp-inabox/g, '/dist/amp4ads-v0')
         // Extensions
         .replace(/\.max\.js/g, '.js')
         // 3p html binary

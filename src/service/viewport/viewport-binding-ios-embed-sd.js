@@ -113,8 +113,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       documentElement.classList.add('i-amphtml-body-minheight');
     }
 
-    const scroller = htmlFor(doc)`
-      <div id="i-amphtml-scroller">
+    const html = htmlFor(doc);
+    const scroller =
+      html`<div id="i-amphtml-scroller">
         <div id="i-amphtml-body-wrapper">
           <slot></slot>
         </div>
@@ -173,9 +174,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
-
-    /** @private {number} */
-    this.paddingTop_ = 0;
 
     /** @private {boolean} */
     this.bodySyncScheduled_ = false;
@@ -320,7 +318,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.paddingTop_ = paddingTop;
     setImportantStyles(this.scroller_, {
       'padding-top': px(paddingTop),
     });
@@ -397,14 +394,20 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   getContentHeight() {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)`, even though we only want the latter. Also, it doesn't
-    // account for margins
-    const scrollingElement = this.wrapper_;
-    const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
+    // document_height)` (we only want the latter), and it doesn't account
+    // for margins.
+    const bodyWrapper = this.wrapper_;
+    const rect = bodyWrapper./*OK*/getBoundingClientRect();
+    const style = computedStyle(this.win, bodyWrapper);
+    // The Y-position of any element can be offset by the vertical margin
+    // of its first child, and this is _not_ accounted for in `rect.height`.
+    // This "top gap" causes smaller than expected contentHeight, so calculate
+    // and add it manually. Note that the "top gap" includes any padding-top
+    // on ancestor elements and the scroller's border-top. The "bottom gap"
+    // remains unaddressed.
+    const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
     return rect.height
-        + this.paddingTop_
-        + this.getBorderTop()
+        + topGapPlusPaddingAndBorder
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }

@@ -91,7 +91,7 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   aps: {
-    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%7D%5D&pj=PARAMS',
+    url: 'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS',
     macros: ['PUB_ID', 'PARAMS', 'PUB_UUID'],
     disableKeyAppend: true,
   },

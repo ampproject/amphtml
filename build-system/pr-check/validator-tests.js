@@ -50,13 +50,13 @@ function main() {
       timedExecOrDie('gulp validator-webui');
     } else {
       console.log(
-          `${FILELOGPREFIX} Skipping validator job because this commit does ` +
-          'not affect the validator or validator web UI.');
+          `${FILELOGPREFIX} Skipping ` + colors.cyan('Validator Tests ') +
+          'because this commit does not affect ' +
+          'the validator or validator web UI.');
     }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

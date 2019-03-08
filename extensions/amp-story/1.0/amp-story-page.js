@@ -30,6 +30,12 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
+import {AmpEvents} from '../../../src/amp-events';
+import {
+  AmpStoryEmbeddedComponent,
+  EMBED_ID_ATTRIBUTE_NAME,
+  EXPANDABLE_COMPONENTS,
+} from './amp-story-embedded-component';
 import {
   AnimationManager,
   hasAnimations,
@@ -52,6 +58,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -89,6 +96,13 @@ const Selectors = {
       'amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
+
+/** @private @const {string} */
+const EMBEDDED_COMPONENTS_SELECTORS =
+  Object.keys(EXPANDABLE_COMPONENTS).join(', ');
+
+/** @private @const {number} */
+const RESIZE_TIMEOUT_MS = 350;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -142,6 +156,26 @@ export const NavigationDirection = {
   NEXT: 'next',
   PREVIOUS: 'previous',
 };
+
+/**
+ * Prepares an embed for its expanded mode animation. Since this requires
+ * calculating the size of the embed, we debounce after each resize event to
+ * make sure we have the final size before doing the calculation for the
+ * animation.
+ * @param {!Window} win
+ * @param {!Element} page
+ * @param {!../../../src/service/resources-impl.Resources} resources
+ * @return {function(!Element, ?UnlistenDef)}
+ */
+function debounceEmbedResize(win, page, resources) {
+  return debounce(win, (el, unlisten) => {
+    AmpStoryEmbeddedComponent
+        .prepareForAnimation(page, dev().assertElement(el), resources);
+    if (unlisten) {
+      unlisten();
+    }
+  }, RESIZE_TIMEOUT_MS);
+}
 
 /**
  * The <amp-story-page> custom element, which represents a single page of
@@ -205,6 +239,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
      * optimizations that make the document less useful at crawl time, e.g.
@@ -237,7 +274,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    upgradeBackgroundAudio(this.element);
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -306,6 +342,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
           this.playAllMedia_();
+          if (this.animationManager_) {
+            this.animationManager_.resumeAll();
+          }
         }
 
         this.state_ = state;
@@ -313,6 +352,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.PAUSED:
         this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
+        if (this.animationManager_) {
+          this.animationManager_.pauseAll();
+        }
         this.state_ = state;
         break;
       default:
@@ -354,6 +396,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.maybeStartAnimations();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
+      this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -364,13 +407,22 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    upgradeBackgroundAudio(this.element);
     this.muteAllMedia();
-
+    this.getViewport().onResize(
+        debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS));
     return Promise.all([
       this.beforeVisible(),
       this.mediaLayoutPromise_,
       this.mediaPoolPromise_,
     ]);
+  }
+
+  /**
+   * @private
+   */
+  onResize_() {
+    this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
   /** @return {!Promise} */
@@ -416,6 +468,30 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
 
     return Promise.all(mediaPromises);
+  }
+
+  /**
+   * Finds embedded components in page and prepares them for their expanded view
+   * animation.
+   * @param {boolean=} forceResize
+   * @private
+   */
+  findAndPrepareEmbeddedComponents_(forceResize = false) {
+    scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+        .forEach(el => {
+          const debouncePrepareForAnimation =
+            debounceEmbedResize(this.win, this.element, this.resources_);
+
+          if (forceResize) {
+            debouncePrepareForAnimation(el, null /* unlisten */);
+          } else if (!el.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // Element has not been prepared for its animation yet.
+            const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
+              debouncePrepareForAnimation(el, unlisten);
+            });
+            // Run in case target never changes size.
+            debouncePrepareForAnimation(el, null /* unlisten */);
+          }
+        });
   }
 
   /** @return {!Promise} */
@@ -658,6 +734,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('distance', distance);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
+      this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_();
     }
   }
