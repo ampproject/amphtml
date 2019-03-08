@@ -90,9 +90,6 @@ class AmpCarousel extends AMP.BaseElement {
       'mixed-length': newValue => {
         this.carousel_.updateMixedLength(newValue == 'true');
       },
-      'side-slide-count': newValue => {
-        this.carousel_.updateSideSlideCount(Number(newValue) || 0);
-      },
       'slide': newValue => {
         this.carousel_.goToSlide(Number(newValue));
       },
