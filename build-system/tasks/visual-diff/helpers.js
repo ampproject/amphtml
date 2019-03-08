@@ -20,7 +20,7 @@ const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
 const {isTravisBuild} = require('../../travis');
 
-const CSS_SELECTOR_RETRY_MS = 100;
+const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
