@@ -62,16 +62,19 @@ function flyIn(fxElement, axis, coeff) {
       };
       styles[axis] = `calc(${axisAsLength} + (${-flyInDistance}vw))`;
       setStyles(element, assertDoesNotContainDisplay(styles));
-      fxElement.initialTrigger = true;
     });
+    fxElement.initialTrigger = true;
   }
+
+  const offsetX = axis == 'left' ? `${flyInDistance}vw` : 0;
+  const offsetY = axis == 'top' ? `${flyInDistance}vh` : 0;
 
   // If above the threshold of trigger-position
   // Translate the element offset pixels.
   setStyles(element, {
     'transition-duration': fxElement.duration,
     'transition-timing-function': fxElement.easing,
-    'transform': `translateX(${flyInDistance}vw)`,
+    'transform': `translate(${offsetX}, ${offsetY})`,
   });
 }
 
