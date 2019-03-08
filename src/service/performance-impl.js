@@ -30,6 +30,12 @@ import {whenDocumentComplete} from '../document-ready';
  */
 const QUEUE_LIMIT = 50;
 
+/** @const {string} */
+const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
+
+/** @const {string} */
+const BEFORE_UNLOAD_EVENT = 'beforeunload';
+
 /**
  * Fields:
  * {{
@@ -161,6 +167,22 @@ export class Performance {
       this.flush();
     });
 
+    if (this.win.PerformanceLayoutJank) {
+      // Register a handler to record the layout jank metric when the page
+      // enters the hidden lifecycle state.
+      this.win.addEventListener(VISIBILITY_CHANGE_EVENT,
+          this.boundOnVisibilityChange_, {capture: true});
+
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener(BEFORE_UNLOAD_EVENT,
+            this.boundTickLayoutJankScore_);
+      }
+    }
+
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
     // is off we only need to know if the AMP page has a messaging
@@ -249,23 +271,6 @@ export class Performance {
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('layoutJank').forEach(processEntry);
       entryTypesToObserve.push('layoutJank');
-
-      // Register a handler to record the layout jank metric when the page
-      // enters the hidden lifecycle state.
-      // @see https://developers.google.com/web/updates/2018/07/page-lifecycle-api
-      Services.documentStateFor(this.win)
-          .onVisibilityChanged(this.boundOnVisibilityChange_);
-
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        this.win.addEventListener(
-            'beforeunload',
-            this.boundTickLayoutJankScore_
-        );
-      }
     }
 
     if (entryTypesToObserve.length === 0) {
@@ -298,10 +303,9 @@ export class Performance {
    * send the layout jank score.
    */
   onVisibilityChange_() {
-    if (!Services.documentStateFor(this.win).isHidden()) {
-      return;
+    if (this.win.document.visibilityState === 'hidden') {
+      this.tickLayoutJankScore_();
     }
-    this.tickLayoutJankScore_();
   }
 
   /**
@@ -321,24 +325,16 @@ export class Performance {
       this.tickDelta('lj', this.aggregateJankScore_);
       this.flush();
       this.jankScoresTicked_ = 1;
-      return;
-    }
-    if (this.jankScoresTicked_ === 1) {
+    } else if (this.jankScoresTicked_ === 1) {
       this.tickDelta('lj-2', this.aggregateJankScore_);
       this.flush();
       this.jankScoresTicked_ = 2;
 
-      // TODO(chmoux) - add the ability to remove a visibilityobservable handler
-      // in the DocumentState Service, and remove the handler
-      // this.boundOnVisibilityChange_ here.
-
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        this.win.removeEventListener(
-            'beforeunload',
-            this.boundTickLayoutJankScore_
-        );
-      }
+      // No more work to do, so clean up event listeners.
+      this.win.removeEventListener(VISIBILITY_CHANGE_EVENT,
+          this.boundOnVisibilityChange_, {capture: true});
+      this.win.removeEventListener(BEFORE_UNLOAD_EVENT,
+          this.boundTickLayoutJankScore_);
     }
   }
 
