@@ -47,6 +47,8 @@ function flyIn(fxElement, axis, coeff) {
   const element = dev().assertElement(fxElement.element);
   const flyInDistance = coeff * fxElement.flyInDistance;
 
+  const unit = axis == 'top' ? 'vh' : 'vw';
+
   // only do this on the first element
   if (!fxElement.initialTrigger) {
     Services.resourcesForDoc(element).mutateElement(element, () => {
@@ -60,14 +62,16 @@ function flyIn(fxElement, axis, coeff) {
         position,
         visibility: 'visible',
       };
-      styles[axis] = `calc(${axisAsLength} + (${-flyInDistance}vw))`;
+      styles[axis] = `calc(${axisAsLength} + (${-flyInDistance}${unit}))`;
       setStyles(element, assertDoesNotContainDisplay(styles));
     });
     fxElement.initialTrigger = true;
   }
 
-  const offsetX = axis == 'left' ? `${flyInDistance}vw` : 0;
-  const offsetY = axis == 'top' ? `${flyInDistance}vh` : 0;
+  const flyInDistanceAsLength = flyInDistance + unit;
+
+  const offsetX = axis == 'left' ? flyInDistanceAsLength : 0;
+  const offsetY = axis == 'top' ? flyInDistanceAsLength : 0;
 
   // If above the threshold of trigger-position
   // Translate the element offset pixels.
