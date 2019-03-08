@@ -4,8 +4,8 @@ AMP contibutors embrace testing to maintain confidence that their code is execut
 
 * [What is an end-to-end test?](#what-is-an-end-to-end-test?)
 * [Choosing which features to test](#choosing-which-features-to-test)
-* [Writing E2E tests](#make-a-suggestion)
-* [Debugging E2E tests](#contribute-codefeatures)
+* [Writing E2E tests](#writing-e2e-tests)
+* [Debugging E2E tests](#debugging-e2e-tests)
 
 This document is a usage guide. For full test command documentation, consult the following resource:
 
@@ -14,7 +14,7 @@ This document is a usage guide. For full test command documentation, consult the
 
 ## What is an end-to-end test?
 
-Let's compare the test types available to AMP contributor:
+Let's compare the test types available to AMP contributors:
 
 * Unit tests
 * Integration tests
@@ -52,6 +52,10 @@ AMP uses an abstraction layer that is implemented using major end-to-end testing
 
 Create your test JS files by adding them to `test/e2e` or `extensions/**/test-e2e`. For examples, see `extensions/amp-base-carousel/0.1/test-e2e/*.js`.
 
+End-to-end tests for a specific extension can be saved in the extension's `test-e2e` directory e.g. `extensions/amp-foo/0.1/test-e2e/test-amp-foo.js`
+
+End-to-end tests for a core AMP runtime feature, a combination of AMP components, or an important third party AMP page can be saved in the `test/e2e` directory e.g. `test/e2e/foo-bar-baz/test-foo-bar-baz.js`.
+
 ```js
 // extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
 
@@ -88,11 +92,11 @@ AMP E2E tests have a few differences from AMP integration and unit tests.
 
 ### async/await
 
-Your end-to-end tests should use `async`/`await` instead of Promises. E2E tests are inherently asynchronous, and using Promises would become verbose quickly.
+While many legacy integration and unit tests use `Promise`s, your end-to-end tests should always use `async`/`await`. E2E tests are inherently asynchronous, and using Promises would become verbose quickly.
 
 ### asynchronous expect
 
-Another change is that `expect` is now asynchronous, so we always put `await` before calls to `expect`. It is not necessary in 100% of cases, but when the test will break if it is necessary and it is not present, so we prefer to always use `await` before `expect`. This change enables us to use implicit polling.
+Another change is that `expect` is now asynchronous, so we always put `await` before calls to `expect`. While it is not necessary in all cases, you should always use `await` with `expect` to maintain consistency and to ensure that you do not inadvertently forget to add it. Otherwise, tests will not behave correctly (and may be flaky) when the `expect` is working on an asynchronous operation.
 
 
 ```js
