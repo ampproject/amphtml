@@ -69,8 +69,8 @@ function flyIn(fxElement, axis, coeff) {
     fxElement.initialTrigger = true;
   }
 
-  // If above the threshold of trigger-position
-  // Translate the element offset pixels.
+  // If above the threshold of trigger-position, translate the element by
+  // distance as [vw|vh].
   setStyles(element, {
     'transition-duration': fxElement.duration,
     'transition-timing-function': fxElement.easing,
