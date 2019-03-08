@@ -15,7 +15,7 @@
  */
 
 
-export const ACTIVATION_TIMEOUT = 5000;  // 5 seconds.
+export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 
 const ACTIVATION_EVENTS = ['click', 'input', 'dblclick', 'keypress', 'submit'];
 

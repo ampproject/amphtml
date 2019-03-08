@@ -17,8 +17,8 @@
 import {
   ACTIVATION_TIMEOUT,
   UserActivationTracker,
-} from '../../../src/utils/user-activation-tracker';
-import {htmlFor} from '../../../src/static-template';
+} from '../../user-activation-tracker';
+import {htmlFor} from '../../../../../src/static-template';
 
 
 describes.realWin('UserActivationTracker', {}, env => {
