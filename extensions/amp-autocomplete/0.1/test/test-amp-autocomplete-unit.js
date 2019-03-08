@@ -129,8 +129,7 @@ describes.realWin('amp-autocomplete unit tests', {
       const renderSpy = sandbox.spy(impl, 'renderResults_');
       const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
       impl.inputElement_.value = 'a';
-      const event = {inputType: 'insertText'};
-      return impl.inputHandler_(event).then(() => {
+      return impl.inputHandler_().then(() => {
         expect(renderSpy).to.have.been.calledOnce;
         expect(toggleResultsSpy).to.have.been.calledWith(true);
         expect(impl.container_.children.length).to.equal(3);

@@ -178,8 +178,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Register event handlers.
-    this.inputElement_.addEventListener('input', e => {
-      this.inputHandler_(e);
+    this.inputElement_.addEventListener('input', () => {
+      this.inputHandler_();
     });
     this.inputElement_.addEventListener('keydown', e => {
       this.keyDownHandler_(e);
@@ -215,11 +215,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
   * Handle rendering results on user input.
-  * @param {Event} event
   * @return {!Promise}
   * @private
   */
-  inputHandler_(event) {
+  inputHandler_() {
     return this.mutateElement(() => {
       this.renderResults_();
       this.toggleResults(true);
