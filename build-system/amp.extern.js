@@ -375,9 +375,6 @@ window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes
 
-Element.prototype.signals;
-window.whenSignal;
-
 /** @typedef {number}  */
 var time;
 
@@ -393,6 +390,37 @@ var UnlistenDef;
  * @typedef {!Element}
  */
 var AmpElement;
+
+/** @return {!Signals} */
+AmpElement.prototype.signals = function() {};
+
+var Signals = class {};
+/**
+  * @param {string} unusedName
+  * @return {number|!Error|null}
+  */
+Signals.prototype.get = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @return {!Promise<time>}
+  */
+Signals.prototype.whenSignal = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @param {time=} unusedOpt_time
+  */
+Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
+
+/**
+  * @param {string} unusedName
+  * @param {!Error} unusedError
+  */
+Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
+
+/** @param {string} unusedName */
+Signals.prototype.reset = function(unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */
