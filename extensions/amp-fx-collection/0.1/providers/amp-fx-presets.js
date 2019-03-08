@@ -48,7 +48,10 @@ function flyIn(fxElement, axis, coeff) {
 
   const axisIsLeft = axis == 'left';
   const flyInDistance = coeff * fxElement.flyInDistance;
-  const flyInDistanceAsLength = `${flyInDistance}${axisIsLeft ? 'vw' : 'vh'}`;
+
+  // Not using interpolation in the following assignment since closure compiles
+  // to a leading, useless empty string.
+  const flyInDistanceAsLength = flyInDistance + (axisIsLeft ? 'vw' : 'vh');
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
