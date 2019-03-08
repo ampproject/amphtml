@@ -828,7 +828,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('optout by function', () => {
+  describe('optout by id', () => {
 
     beforeEach(() => {
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
@@ -865,11 +865,6 @@ describes.realWin('amp-analytics', {
     });
 
     it('sends hit when config optout id is not found', function() {
-      const element = doc.createElement('script');
-      element.type = 'text/javascript';
-      element.id = 'elementId';
-      doc.documentElement.insertBefore(
-          element, doc.documentElement.firstChild);
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       return waitForSendRequest(analytics).then(() => {
         requestVerifier.verifyRequest('https://example.com/bar');
