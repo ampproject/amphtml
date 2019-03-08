@@ -56,10 +56,17 @@
       height: auto;
     }
 
-    amp-list-load-more[load-more-failed] {
-      height: 100vh;
+    .pro-like {
       width: 100%;
+      height: 80px;
       background-color: red;
+    }
+
+    .favorite {
+      width: 30px;
+      height: 30px;
+      background-color: blue;
+      cursor: pointer;
     }
 
   </style>
@@ -72,68 +79,38 @@
 <body>
 <article>
 
-
-    <amp-state id="data">
-        <script type="application/json">
-          {
-            "items": 8,
-            "left": 5,
-            "latency": 0,
-            "url": "/list/infinite-scroll?items=8&left=2"
-          }
-        </script>
-      </amp-state>
-
-    <article>
-
-      <div>
-        <span>Items per page: </span>
-        <input type="text" id="items" placeholder="Items per page" value="8"
-             on="change:AMP.setState({data: {items: event.value}})">
-      </div>
-
-      <div>
-        <span>Number of additional pages: </span>
-        <input type="text" id="left" placeholder="Pages left" value="2"
-             on="change:AMP.setState({data: {left: event.value}})">
-      </div>
-
-      <div>
-        <span>Load latency: </span>
-        <input type="text" id="latency" placeholder="Latency" value="0"
-             on="change:AMP.setState({data: {latency: event.value}})">
-      </div>
-
-      <button
-              on="tap:AMP.setState({data: {url: '/infinite-scroll?items='
-                    + data.items + '&left=' + data.left + '&latency=' + data.latency}})">
-        Update
-      </button>
-
   <h1>AMP List</h1>
-  <p>This is a flexbox amp-list with tiles, something like an infinite image gallery.</p>
 
   <amp-list width="auto" height="400"
     layout="fixed-height"
-    src="/list/infinite-scroll?items=2&left=2"
-    [src]="data.url"
+    src="/list/infinite-scroll-state?left=5&items=2"
     load-more="manual"
     load-more-bookmark="next">
     <template type="amp-mustache">
+      <amp-state id="fav_state{{id}}" hidden aria-hidden="true">
+          <script type="application/json">
+              {
+                  "count":"{{count}}",
+                  "value":"{{favorited}}"
+              }
+          </script>
+      </amp-state>
       <div class="pin-container">
         <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
-        <div class="title">{{title}}</div>
-        <div class="description">
-          At vero eos et accusamus et iusto odio dignissimos ducimus...
+        <div class="pro-like">
+            <div class="favorite" on="tap:AMP.setState({
+              fav_state{{id}}: {
+                value: fav_state{{id}}.value == 'yes' ? 'no' : 'yes'
+              }
+              })" role="button" tabindex="0">
+            </div>
+            <p [text]="'Favorited: ' + fav_state{{id}}.value"></p>
         </div>
       </div>
     </template>
     <div fallback>
       FALLBACK
     </div>
-    <amp-list-load-more load-more-failed>
-
-    </amp-list-load-more>
   </amp-list>
 </article>
 </body>
