@@ -132,7 +132,7 @@ export class InaboxMessagingHost {
     const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
     // having no whitelist is legacy behavior so assume all types are allowed
     if (allowedTypes &&
-        !allowedTypes.split(/\s*,\s*/).includes(request['type'])) {
+        allowedTypes.split(/\s*,\s*/).indexOf(request['type']) === -1) {
       dev().info(TAG, 'Ignored non-whitelisted message type:', message);
       return false;
     }
