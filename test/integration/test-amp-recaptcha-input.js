@@ -18,7 +18,9 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-describe.configure().skipSinglePass().run('amp-recaptcha-input', function() {
+// TODO(torch2424, #20541): These tests fail on firefox.
+describe.configure().skipSinglePass().skipFirefox().run('amp-recaptcha-' +
+    'input', function() {
 
   describes.integration('with form and amp-mustache', {
   /* eslint-disable max-len */

@@ -87,12 +87,12 @@ PASS
 |
 |    <!-- Valid -->
 |    <div>
-|      <h1 amp-fx="fly-in-top"></h1>
+|      <h1 amp-fx="float-in-top"></h1>
 |    </div>
 |
 |    <!-- Valid -->
 |    <div>
-|      <h1 amp-fx="fly-in-bottom"></h1>
+|      <h1 amp-fx="float-in-bottom"></h1>
 |    </div>
 |  </body>
 |  </html>

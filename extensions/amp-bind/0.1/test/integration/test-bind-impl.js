@@ -285,7 +285,7 @@ describe.configure().ifChrome().run('Bind', function() {
 
       history = bind.historyForTesting();
 
-      clock = lolex.install({target: win});
+      clock = lolex.install({target: win, toFake: ['Date', 'setTimeout']});
     });
 
     afterEach(() => {

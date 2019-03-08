@@ -67,9 +67,6 @@ export class ViewportBindingNatural_ {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
-    /** @private {number} */
-    this.paddingTop_ = 0;
-
     dev().fine(TAG_, 'initialized natural viewport');
   }
 
@@ -117,7 +114,6 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.paddingTop_ = paddingTop;
     setImportantStyles(this.win.document.documentElement, {
       'padding-top': px(paddingTop),
     });
@@ -200,17 +196,20 @@ export class ViewportBindingNatural_ {
   /** @override */
   getContentHeight() {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)`, even though we only want the latter. Also, it doesn't
-    // account for margins
+    // document_height)` (we only want the latter), and it doesn't account
+    // for margins. Also, don't use documentElement's rect height because
+    // there's no workable analog for either ios-embed-* modes.
     const scrollingElement = this.getScrollingElement();
     const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = computedStyle(this.win, scrollingElement);
-    let paddingTop = 0;
-    if (scrollingElement !== this.win.document.documentElement) {
-      paddingTop = this.paddingTop_;
-    }
+    // The Y-position of any element can be offset by the vertical margin
+    // of its first child, and this is _not_ accounted for in `rect.height`.
+    // This "top gap" causes smaller than expected contentHeight, so calculate
+    // and add it manually. Note that the "top gap" includes any padding-top
+    // on ancestor elements, and the "bottom gap" remains unaddressed.
+    const topGapPlusPadding = rect.top + this.getScrollTop();
     return rect.height
-        + paddingTop
+        + topGapPlusPadding
         + parseInt(style.marginTop, 10)
         + parseInt(style.marginBottom, 10);
   }
