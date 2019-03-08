@@ -103,7 +103,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should not set AMP-Same-Origin header', () => {
       getWinOrigin.returns('http://www.origin.org');
       parseUrlDeprecated.returns({origin: 'http://www.different.org'});
-      const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {headers:{}});
+      const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {headers: {}});
       expect(fetchInitDef['headers']['AMP-Same-Origin']).to.be.undefined;
     });
   });
@@ -153,8 +153,8 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
       return getViewerInterceptResponse({}, ampDoc, 'https://www.googz.org')
           .then(() => {
-        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-      });
+            expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+          });
     });
 
     it('should send xhr request to viewer', () => {
@@ -167,7 +167,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
       viewerForDoc.returns(viewer);
       const doc = document.createElement('html');
-      doc.setAttribute('allow-xhr-interception', 'true')
+      doc.setAttribute('allow-xhr-interception', 'true');
       const ampDoc = {
         getRootNode: () => {
           return {documentElement: doc};
@@ -176,8 +176,8 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
       return getViewerInterceptResponse({}, ampDoc, 'https://www.googz.org', {body: {}})
           .then(() => {
-        expect(viewer.sendMessageAwaitResponse).to.have.been.called;
-      });
+            expect(viewer.sendMessageAwaitResponse).to.have.been.called;
+          });
     });
   });
 
