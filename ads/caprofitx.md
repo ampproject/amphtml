@@ -18,29 +18,13 @@ limitations under the License.
 
 ## Examples
 
-### (Deprecated) Ad placement with `tagid`
-
-Please consider using the latest setup with `mediaid`.
-
-```html
-<amp-ad
-  width="320"
-  height="50"
-  type="caprofitx"
-  data-tagid="15217"
-  data-placeid="0">
-</amp-ad>
-```
-
-### Ad placement with `mediaid`
-
 ```html
 <amp-ad
   width="320"
   heigth="100"
   type="caprofitx"
   data-mediaid="3752"
-  data-tag-places="10007">
+  data-tag-places="10001">
 </amp-ad>
 ```
 
@@ -48,17 +32,6 @@ Please consider using the latest setup with `mediaid`.
 
 For details on the configuration semantics and to generate your tags,
 please email ca_profitx_support@cyberagent.co.jp.
-
-### (Deprecated) Ad placement with `tagid`
-
-Supported parameters:
-
-| Parameter    | Required |
-|--------------|--------- |
-| data-tagid   | Yes      |
-| data-placeid | No       |
-
-### Ad placement with `mediaid`
 
 Supported parameters:
 
