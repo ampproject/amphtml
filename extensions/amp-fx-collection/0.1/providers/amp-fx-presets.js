@@ -50,7 +50,8 @@ function flyIn(fxElement, axis, coeff) {
 
   // Not using interpolation in the following assignment since closure compiles
   // to a leading, useless empty string.
-  const flyInDistanceAsLength = coeff * flyInDistance + (axisIsX ? 'vw' : 'vh');
+  const flyInDistanceAsLength =
+      coeff * fxElement.flyInDistance + (axisIsX ? 'vw' : 'vh');
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
