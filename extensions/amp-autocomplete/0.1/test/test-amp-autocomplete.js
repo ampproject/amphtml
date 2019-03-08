@@ -66,9 +66,6 @@ describes.realWin('amp-autocomplete', {
 
         const renderSpy = sandbox.spy(impl, 'renderResults_');
         return ampAutocomplete.layoutCallback().then(() => {
-          expect(ampAutocomplete).to.have.class('i-amphtml-autocomplete');
-          expect(impl.inputElement_)
-              .to.have.class('i-amphtml-autocomplete-input');
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
           expect(renderSpy).to.have.been.calledOnce;
         });

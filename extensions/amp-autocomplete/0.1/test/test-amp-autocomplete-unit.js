@@ -177,7 +177,7 @@ describes.realWin('amp-autocomplete unit tests', {
           expect(impl.inputElement_.value).to.equal('abc');
           expect(selectItemSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
-            expect(resetSpy).to.have.been.calledOnce;
+          expect(resetSpy).to.have.been.calledOnce;
         });
       });
     });

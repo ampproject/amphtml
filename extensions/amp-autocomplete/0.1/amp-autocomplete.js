@@ -121,7 +121,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
-    this.maxEntries_ = parseInt(this.element.getAttribute('max-entries'), 10);
+    this.maxEntries_ = this.element.hasAttribute('max-entries') ?
+      parseInt(this.element.getAttribute('max-entries'), 10) : null;
 
     return this.mutateElement(() => {
       this.container_ = this.createContainer_();
@@ -219,10 +220,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_(event) {
-    // Consider caching results to avoid repetitive queries on delete.
-    if (!event.inputType) {
-      return Promise.resolve();
-    }
     return this.mutateElement(() => {
       this.renderResults_();
       this.toggleResults(true);
