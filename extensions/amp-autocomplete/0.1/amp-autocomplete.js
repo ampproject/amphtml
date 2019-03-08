@@ -221,7 +221,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   inputHandler_() {
     return this.mutateElement(() => {
       this.renderResults_();
-      this.toggleResults(true);
+      this.toggleResults_(true);
     });
   }
 
@@ -232,11 +232,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectHandler_(event) {
-    if (!this.isItemElement(event.target)) {
+    if (!this.isItemElement_(event.target)) {
       return Promise.resolve();
     }
     return this.mutateElement(() => {
-      this.selectItem(event.target);
+      this.selectItem_(event.target);
     });
   }
 
@@ -246,7 +246,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   renderResults_() {
     const userInput = this.inputElement_.value;
-    this.clearAllItems();
+    this.clearAllItems_();
     if (userInput.length < this.minChars_ || !this.inlineData_) {
       return;
     }
@@ -301,8 +301,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Shows or hides the results container_.
    * @param {boolean=} opt_display
+   * @private
    */
-  toggleResults(opt_display) {
+  toggleResults_(opt_display) {
     if (!this.container_) {
       return;
     }
@@ -321,12 +322,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.resetActiveElement_();
         this.activeIndex_ = -1;
       }
-      this.toggleResults(opt_display);
+      this.toggleResults_(opt_display);
     });
   }
 
-  /** Returns true if the results are visible and has items. */
-  resultsShowing() {
+  /**
+   * Returns true if the results are visible and has items.
+   * @return {boolean}
+   * @private
+   */
+  resultsShowing_() {
     return !this.container_.hasAttribute('hidden') &&
       this.container_.children.length > 0;
   }
@@ -334,18 +339,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Returns true if the given element is a suggested item.
    * @param {Element|EventTarget} element
+   * @private
    */
-  isItemElement(element) {
+  isItemElement_(element) {
     return element.classList.contains('i-amphtml-autocomplete-item');
   }
 
   /**
    * Writes the selected value into the input field.
    * @param {Element|EventTarget} element
+   * @private
    */
-  selectItem(element) {
+  selectItem_(element) {
     this.inputElement_.value = element.textContent;
-    this.clearAllItems();
+    this.clearAllItems_();
   }
 
   /**
@@ -360,20 +367,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     const index = this.activeIndex_ + delta;
-    let resultsShowing, newActiveElement, newValue;
+    let resultsShowing, newActiveElement, newValue, validItem;
     return this.measureMutateElement(() => {
-      resultsShowing = this.resultsShowing();
+      resultsShowing = this.resultsShowing_();
       if (resultsShowing) {
         this.activeIndex_ = mod(index, this.container_.children.length);
         newActiveElement = this.container_.children[this.activeIndex_];
         newValue = newActiveElement.textContent;
+        validItem = this.activeIndex_ !== this.container_.children.length - 1;
       }
     }, () => {
-      if (resultsShowing) {
-        this.resetActiveElement_();
+      if (!resultsShowing) {
+        return;
+      }
+      this.inputElement_.value = newValue;
+      this.resetActiveElement_();
+      if (validItem) {
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
         this.activeElement_ = newActiveElement;
-        this.inputElement_.value = newValue;
       }
     });
   }
@@ -391,8 +402,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.activeElement_ = null;
   }
 
-  /** Delete all children to the container_ */
-  clearAllItems() {
+  /**
+   * Delete all children to the container_
+   * @private
+   */
+  clearAllItems_() {
     removeChildren(dev().assertElement(this.container_));
   }
 
@@ -415,7 +429,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           // Only prevent if submit-on-enter === false.
           event.preventDefault();
           return this.mutateElement(() => {
-            this.selectItem(this.activeElement_);
+            this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
           });
         }
@@ -426,9 +440,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.measureMutateElement(() => {
           partialInputChild = this.container_.lastChild;
         }, () => {
-          this.selectItem(partialInputChild);
+          this.selectItem_(partialInputChild);
           this.resetActiveElement_();
-          this.toggleResults(false);
+          this.toggleResults_(false);
         });
       default:
         return Promise.resolve();
