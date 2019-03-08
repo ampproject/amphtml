@@ -46,9 +46,9 @@ function flyIn(fxElement, axis, coeff) {
 
   const element = dev().assertElement(fxElement.element);
 
-  const unit = axis == 'top' ? 'vh' : 'vw';
+  const axisIsLeft = axis == 'left';
   const flyInDistance = coeff * fxElement.flyInDistance;
-  const flyInDistanceAsLength = flyInDistance + unit;
+  const flyInDistanceAsLength = `${flyInDistance}${axisIsLeft ? 'vw' : 'vh'}`;
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
@@ -69,15 +69,12 @@ function flyIn(fxElement, axis, coeff) {
     fxElement.initialTrigger = true;
   }
 
-  const offsetX = axis == 'left' ? flyInDistanceAsLength : 0;
-  const offsetY = axis == 'top' ? flyInDistanceAsLength : 0;
-
   // If above the threshold of trigger-position
   // Translate the element offset pixels.
   setStyles(element, {
     'transition-duration': fxElement.duration,
     'transition-timing-function': fxElement.easing,
-    'transform': `translate(${offsetX}, ${offsetY})`,
+    'transform': `translate${axisIsLeft ? 'X' : 'Y'}(${flyInDistanceAsLength})`,
   });
 }
 
