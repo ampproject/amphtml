@@ -80,8 +80,9 @@ describes.realWin('amp-autocomplete unit tests', {
 
     impl.minChars_ = 2;
     impl.renderResults_();
-    expect(impl.container_.children.length).to.equal(1);
+    expect(impl.container_.children.length).to.equal(2);
     expect(impl.container_.children[0].innerText).to.equal('apple');
+    expect(impl.container_.children[1].innerText).to.equal('ap');
     expect(clearAllItemsSpy).to.have.been.calledTwice;
     expect(filterDataSpy).to.have.been.calledOnce;
   });
@@ -132,7 +133,7 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.inputHandler_().then(() => {
         expect(renderSpy).to.have.been.calledOnce;
         expect(toggleResultsSpy).to.have.been.calledWith(true);
-        expect(impl.container_.children.length).to.equal(3);
+        expect(impl.container_.children.length).to.equal(4);
       });
     });
   });
@@ -184,11 +185,21 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call keyDownHandler_() on Esc', () => {
     const event = {key: Keys.ESCAPE};
-    const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
+      const selectItemSpy = sandbox.spy(impl, 'selectItem');
+      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults');
     return element.layoutCallback().then(() => {
+      impl.inputElement_.value = 'a';
+      impl.renderResults_();
+      expect(impl.container_.children.length).to.equal(4);
+      impl.toggleResults(true);
+      expect(impl.resultsShowing()).to.be.true;
       return impl.keyDownHandler_(event).then(() => {
+        expect(selectItemSpy).to.have.been.calledOnce;
+        expect(resetSpy).to.have.been.calledOnce;
         expect(toggleResultsSpy).to.have.been.calledWith(false);
-      });
+        expect(impl.resultsShowing()).to.be.false;
+    });
     });
   });
 
@@ -243,7 +254,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(impl.activeIndex_).to.equal(-1);
       impl.inputElement_.value = 'a';
       impl.renderResults_();
-      expect(impl.container_.children.length).to.equal(3);
+      expect(impl.container_.children.length).to.equal(4);
 
       impl.activeElement_ = doc.createElement('div');
       expect(impl.activeElement_).not.to.be.null;
@@ -265,7 +276,7 @@ describes.realWin('amp-autocomplete unit tests', {
       }).then(() => {
         return impl.updateActiveItem_(-1).then(() => {
           expect(resetSpy).to.have.been.calledTwice;
-          expect(impl.activeIndex_).to.equal(2);
+          expect(impl.activeIndex_).to.equal(3);
           expect(impl.activeElement_).not.to.be.null;
           expect(impl.activeElement_).to.have.class(
               'i-amphtml-autocomplete-item-active');
@@ -279,7 +290,7 @@ describes.realWin('amp-autocomplete unit tests', {
             expect(impl.activeElement_).to.have.class(
                 'i-amphtml-autocomplete-item-active');
             expect(impl.activeElement_).not.to.be.null;
-            expect(impl.activeIndex_).to.equal(2);
+            expect(impl.activeIndex_).to.equal(3);
           });
         });
       });

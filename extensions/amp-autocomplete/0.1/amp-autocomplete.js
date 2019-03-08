@@ -254,6 +254,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     filteredData.forEach(item => {
       this.container_.appendChild(this.createElementFromItem_(item));
     });
+
+    // Append the partial user-provided input to navigate back to.
+    this.container_.appendChild(this.createElementFromItem_(userInput));
   }
 
   /**
@@ -356,20 +359,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0) {
       return Promise.resolve();
     }
-    const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
-    const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    let resultsShowing, newActiveElement;
+    const index = this.activeIndex_ + delta;
+    let resultsShowing, newActiveElement, newValue;
     return this.measureMutateElement(() => {
       resultsShowing = this.resultsShowing();
       if (resultsShowing) {
         this.activeIndex_ = mod(index, this.container_.children.length);
         newActiveElement = this.container_.children[this.activeIndex_];
+        newValue = newActiveElement.textContent;
       }
     }, () => {
       if (resultsShowing) {
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
         this.activeElement_ = newActiveElement;
+        this.inputElement_.value = newValue;
       }
     });
   }
@@ -417,8 +421,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return Promise.resolve();
       case Keys.ESCAPE:
-        // Hide results.
-        return this.toggleResultsHandler_(false);
+        // Select user's partial input and hide results.
+        let partialInputChild;
+        return this.measureMutateElement(() => {
+          partialInputChild = this.container_.lastChild;
+        }, () => {
+          this.selectItem(partialInputChild);
+          this.resetActiveElement_();
+          this.toggleResults(false);
+        });
       default:
         return Promise.resolve();
     }
