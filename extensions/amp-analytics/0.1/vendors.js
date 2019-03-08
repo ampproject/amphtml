@@ -217,6 +217,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'mobify': MOBIFY_CONFIG,
   'mparticle': MPARTICLE_CONFIG,
   'mpulse': MPULSE_CONFIG,
+  'navegg': NAVEGG_CONFIG,
   'newrelic': NEWRELIC_CONFIG,
   'nielsen': NIELSEN_CONFIG,
   'nielsen-marketing-cloud': NIELSEN_MARKETING_CLOUD_CONFIG,
@@ -246,7 +247,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
-  'navegg': NAVEGG_CONFIG,
 });
 
 if (getMode().test || getMode().localDev) {
