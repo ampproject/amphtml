@@ -127,14 +127,14 @@ In order to act upon a successful sign in from the viewer assistance, a `signedI
 
 ## Utilizing an Identity Token
 
-Given a viewer with identity capabilities, the `amp-viewer-assistance` extension can pass an identity token back to the amphtml run-time to attach to remote XHRs. To attach the identity token to a remote XHR request in an `amp-state`, `amp-list`, or `amp-form` element, simply attach the attribute `cross-origin="amp-viewer-auth-token-via-post"` to the performing element. The request will be transformed into a POST request, and within the request body will be an `ampViewerAuthToken` variable set to the authorization token from the viewer.
+Given a viewer with identity capabilities, the `amp-viewer-assistance` extension can pass an identity token back to the amphtml run-time to attach to remote XHRs. To attach the identity token to a remote XHR request in an `amp-state`, `amp-list`, or `amp-form` element, simply attach the attribute `crossorigin="amp-viewer-auth-token-via-post"` to the performing element. The request will be transformed into a POST request, and within the request body will be an `ampViewerAuthToken` variable set to the authorization token from the viewer.
 
 Here are some examples:
 
 `amp-state:`
 ```html
 <amp-state id="myRemoteState" src="https://data.com/articles.json" 
-     cross-origin=”amp-viewer-auth-token-via-post”>
+     crossorigin=”amp-viewer-auth-token-via-post”>
 </amp-state>
 ```
 yields a POST request body:
@@ -148,7 +148,7 @@ ampViewerAuthToken=AUTH_TOKEN_FROM_VIEWER_ASSISTANCE
     method="post"
     target="_top"
     action-xhr="https://data.com/formsubmit"
-    cross-origin="amp-viewer-auth-token-via-post">
+    crossorigin="amp-viewer-auth-token-via-post">
   <div class="form-header">Full Name</div>
   <input type="text"
       name="name"
@@ -210,7 +210,7 @@ Wrapping up the above, here is an example implementation of a page utilizing sig
 <form id="state-change-form"
     method="POST"
     action-xhr="myAuthorizedRemoteXHR/endpoint"
-    cross-origin="amp-viewer-auth-token-via-post"
+    crossorigin="amp-viewer-auth-token-via-post"
     on="submit-success:amp-viewer-assistance.updateActionState(update=event.response)">
 </form>
 <button on="tap:state-change-form.submit">

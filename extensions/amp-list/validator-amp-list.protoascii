@@ -206,6 +206,11 @@ tags: {  # <amp-list>
   attrs: {
     name: "cross-origin"
     value: "amp-viewer-auth-token-via-post"
+    deprecation: "crossorigin"
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "amp-viewer-auth-token-via-post"
   }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
