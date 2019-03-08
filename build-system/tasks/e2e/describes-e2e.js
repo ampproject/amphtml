@@ -27,6 +27,10 @@ const {SeleniumWebDriverController} = require(
 const SUB = ' ';
 const TIMEOUT = 20000;
 
+
+const DEFAULT_E2E_WIDTH = 800;
+const DEFAULT_E2E_HEIGHT = 600;
+
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
@@ -258,6 +262,11 @@ class AmpPageFixture {
     if (initialRect) {
       const {width, height} = initialRect;
       await controller.setWindowRect({width, height});
+    } else {
+      await controller.setWindowRect({
+        width: DEFAULT_E2E_WIDTH,
+        height: DEFAULT_E2E_HEIGHT,
+      });
     }
 
     await ampDriver.navigateToEnvironment(environment, testUrl);
