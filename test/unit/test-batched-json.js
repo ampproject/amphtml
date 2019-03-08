@@ -107,12 +107,9 @@ describe('batchFetchJsonFor', () => {
     });
   });
 
-  // TODO(choumx): Add tests for normal fetch functionality.
-  describe('POST based identity with cross-origin attribute', () => {
-    it('should send POST request with auth token if attribute ' +
-    'cross-origin=amp-viewer-auth-token-via-post is present', () => {
+  describe('POST based identity', () => {
+    it('should send POST request with auth token if present', () => {
       const el = element('https://data.com');
-      el.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
       const all = UrlReplacementPolicy.ALL;
 
       urlReplacements.expandUrlAsync
@@ -134,31 +131,7 @@ describe('batchFetchJsonFor', () => {
                 'https://data.com', expectedRequest);
           });
     });
-
-    it('should send POST request with cross-origin attribute present with no' +
-        ' identity token', () => {
-      const el = element('https://data.com');
-      el.setAttribute('cross-origin', 'amp-viewer-auth-token-via-post');
-      const all = UrlReplacementPolicy.ALL;
-
-      urlReplacements.expandUrlAsync
-          .withArgs('https://data.com')
-          .returns(Promise.resolve('https://data.com'));
-
-      const expectedRequest = {
-        'body': {'ampViewerAuthToken': ''},
-        'headers': {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        'method': 'POST',
-        'requireAmpResponseSourceOrigin': false,
-      };
-
-      return batchFetchJsonFor(ampdoc, el, null, all, false, '')
-          .then(() => {
-            expect(fetchJson).to.be.calledWithExactly(
-                'https://data.com', expectedRequest);
-          });
-    });
   });
+
+  // TODO(choumx): Add tests for normal fetch functionality.
 });

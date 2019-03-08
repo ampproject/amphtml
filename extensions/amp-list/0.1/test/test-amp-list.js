@@ -585,7 +585,7 @@ describes.repeated('amp-list', {
         });
       });
 
-      it('should fetch with viewer auth token if \'cross-origin='
+      it('should fetch with viewer auth token if \'crossorigin='
           + 'amp-viewer-auth-token-via-post\' attribute is present', () => {
         sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
             Promise.resolve({
