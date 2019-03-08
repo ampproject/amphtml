@@ -25,34 +25,34 @@ module.exports = {
     await page.tap('amp-twitter.blue');
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
-  // 'tapping outside tooltip should hide it': async (page, name) => {
-  //   const screen = page.touchscreen;
-  //   await screen.tap(200, 240);
-  //   await page.waitFor(500);
-  //   await page.tap('amp-twitter.blue');
-  //   await page.waitFor('a.i-amphtml-story-tooltip');
-  //   await page.tap('.i-amphtml-story-focused-state-layer');
-  //   await verifySelectorsVisible(
-  //     page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
-  // },
-  // 'tapping on tooltip should expand the component': async (page, name) => {
-  //   const screen = page.touchscreen;
-  //   await screen.tap(200, 240);
-  //   await page.waitFor(500);
-  //   await page.tap('amp-twitter.blue');
-  //   await page.waitFor('a.i-amphtml-story-tooltip');
-  //   await page.tap('a.i-amphtml-story-tooltip');
-  //   await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
-  // },
-  // 'tapping on closing button should exit expanded view': async (page, name) => {
-  //   const screen = page.touchscreen;
-  //   await screen.tap(200, 240);
-  //   await page.waitFor(500);
-  //   await page.tap('amp-twitter.blue');
-  //   await page.waitFor('a.i-amphtml-story-tooltip');
-  //   await page.tap('a.i-amphtml-story-tooltip');
-  //   await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
-  //   await page.tap('span.i-amphtml-expanded-view-close-button');
-  //   await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
-  // },
+  'tapping outside tooltip should hide it': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor(500);
+    await page.tap('amp-twitter.blue');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.tap('.i-amphtml-story-focused-state-layer');
+    await verifySelectorsVisible(
+      page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
+  },
+  'tapping on tooltip should expand the component': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor(500);
+    await page.tap('amp-twitter.blue');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.tap('a.i-amphtml-story-tooltip');
+    await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  },
+  'tapping on closing button should exit expanded view': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor(500);
+    await page.tap('amp-twitter.blue');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
+    await page.tap('span.i-amphtml-expanded-view-close-button');
+    await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  },
  };
