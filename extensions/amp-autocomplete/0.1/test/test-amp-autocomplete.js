@@ -277,6 +277,19 @@ describes.realWin('amp-autocomplete unit tests', {
         return impl.updateActiveItem_(-1).then(() => {
           expect(resetSpy).to.have.been.calledTwice;
           expect(impl.activeIndex_).to.equal(3);
+          expect(impl.activeElement_).to.be.null;
+          expect(impl.container_.children[0]).not.to.have.class(
+              'i-amphtml-autocomplete-item-active');
+          expect(impl.container_.children[1]).not.to.have.class(
+              'i-amphtml-autocomplete-item-active');
+          expect(impl.container_.children[2]).not.to.have.class(
+              'i-amphtml-autocomplete-item-active');
+          expect(impl.container_.children[3]).not.to.have.class(
+              'i-amphtml-autocomplete-item-active');
+        }).then(() => {
+          return impl.updateActiveItem_(-1).then(() => {
+            expect(resetSpy).to.have.been.calledThrice;
+            expect(impl.activeIndex_).to.equal(2);
           expect(impl.activeElement_).not.to.be.null;
           expect(impl.activeElement_).to.have.class(
               'i-amphtml-autocomplete-item-active');
@@ -284,13 +297,16 @@ describes.realWin('amp-autocomplete unit tests', {
               'i-amphtml-autocomplete-item-active');
           expect(impl.container_.children[1]).not.to.have.class(
               'i-amphtml-autocomplete-item-active');
+            expect(impl.container_.children[3]).not.to.have.class(
+                'i-amphtml-autocomplete-item-active');
         }).then(() => {
           return impl.updateActiveItem_(0).then(() => {
-            expect(resetSpy).to.have.been.calledTwice;
+              expect(resetSpy).to.have.been.calledThrice;
+              expect(impl.activeIndex_).to.equal(2);
+              expect(impl.activeElement_).not.to.be.null;
             expect(impl.activeElement_).to.have.class(
                 'i-amphtml-autocomplete-item-active');
-            expect(impl.activeElement_).not.to.be.null;
-            expect(impl.activeIndex_).to.equal(3);
+            });
           });
         });
       });
