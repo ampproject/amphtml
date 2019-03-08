@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-.i-amphtml-autocomplete {
-  position: relative;
-  display: inline-block;
-}
-
-.i-amphtml-autocomplete-input {
-  padding: 4px;
-}
-
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;

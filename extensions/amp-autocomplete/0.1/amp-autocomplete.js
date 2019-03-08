@@ -194,8 +194,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
 
     return this.mutateElement(() => {
-      this.element.classList.add('i-amphtml-autocomplete');
-      this.inputElement_.classList.add('i-amphtml-autocomplete-input');
       this.renderResults_();
     });
   }
