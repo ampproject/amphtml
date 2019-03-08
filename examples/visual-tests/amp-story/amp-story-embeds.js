@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,43 +15,44 @@
  */
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible, verifySelectorsInvisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
-  'tapping on a clickable anchor should show the tooltip': async (page, name) => {
+  'tapping on an embed should show the tooltip': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-    await page.tap('a.title-small.center');
+    await page.waitFor(300);
+    await page.tap('amp-twitter.blue');
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
-  'tapping outside tooltip should hide it': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-    await page.tap('a.title-small.center');
-    await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.tap('.i-amphtml-story-focused-state-layer');
-    await verifySelectorsVisible(
-      page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
-  },
-  'tapping on tooltip should keep it open': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-    await page.tap('a.title-small.center');
-    await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.tap('a.i-amphtml-story-tooltip');
-    await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
-  },
-  'tapping arrow when tooltip is open should navigate': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-    await page.tap('a.title-small.center');
-    await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.tap('button.i-amphtml-story-tooltip-nav-button-left');
-    await page.waitFor(150);
-    await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
-  },
+  // 'tapping outside tooltip should hide it': async (page, name) => {
+  //   const screen = page.touchscreen;
+  //   await screen.tap(200, 240);
+  //   await page.waitFor(500);
+  //   await page.tap('amp-twitter.blue');
+  //   await page.waitFor('a.i-amphtml-story-tooltip');
+  //   await page.tap('.i-amphtml-story-focused-state-layer');
+  //   await verifySelectorsVisible(
+  //     page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
+  // },
+  // 'tapping on tooltip should expand the component': async (page, name) => {
+  //   const screen = page.touchscreen;
+  //   await screen.tap(200, 240);
+  //   await page.waitFor(500);
+  //   await page.tap('amp-twitter.blue');
+  //   await page.waitFor('a.i-amphtml-story-tooltip');
+  //   await page.tap('a.i-amphtml-story-tooltip');
+  //   await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  // },
+  // 'tapping on closing button should exit expanded view': async (page, name) => {
+  //   const screen = page.touchscreen;
+  //   await screen.tap(200, 240);
+  //   await page.waitFor(500);
+  //   await page.tap('amp-twitter.blue');
+  //   await page.waitFor('a.i-amphtml-story-tooltip');
+  //   await page.tap('a.i-amphtml-story-tooltip');
+  //   await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
+  //   await page.tap('span.i-amphtml-expanded-view-close-button');
+  //   await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  // },
  };

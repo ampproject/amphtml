@@ -5,6 +5,10 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-twitter"
+        src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
     <title>amp-story tooltip diff</title>
     <link rel="canonical" href="index.html">
     <meta name="viewport"
@@ -35,6 +39,13 @@
         text-align: center;
         color: white;
       }
+
+      amp-twitter.blue {
+        background-color: blue;
+        width: 100px;
+        height: 200px;
+        left: 30%;
+      }
     </style>
   </head>
 
@@ -56,11 +67,8 @@
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
           <p>Page two of two</p>
-          <amp-twitter width="300"
-            height="475"
-            layout="responsive"
-            data-tweetid="885634330868850689">
-          </amp-twitter>
+          <amp-twitter class="blue"></amp-twitter>
+          <p class="title-small">Bacon ipsum.</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
