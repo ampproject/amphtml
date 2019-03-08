@@ -252,6 +252,9 @@ function saveExperimentTogglesToCookie(win, toggles) {
     if (typeof experimentSetting == 'string') {
       experiment += '=' + experimentSetting;
     }
+    // TODO(alabiaga): As long as experimentId associated values are not empty
+    // strings then they will evalute to being set. Is there a more elegant way
+    // to do this.
     experimentIds.push((!!experimentSetting === false ? '-' : '') + experiment);
   }
 
