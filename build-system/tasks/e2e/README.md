@@ -98,7 +98,6 @@ While many legacy integration and unit tests use `Promise`s, your end-to-end tes
 
 Another change is that `expect` is now asynchronous, so we always put `await` before calls to `expect`. While it is not necessary in all cases, you should always use `await` with `expect` to maintain consistency and to ensure that you do not inadvertently forget to add it. Otherwise, tests will not behave correctly (and may be flaky) when the `expect` is working on an asynchronous operation.
 
-
 ```js
 it('should render correctly', async() => {
   const fooBars = await controller.findElements('.i-amphtml-foo-bar');
@@ -181,5 +180,7 @@ Add `repl(/* mochaThis */ this)` to a test to pause execution at that line witho
      /* ... */
    });
 ```
+
+In the Node debugger, the `repl` global provides a reference to the test controller at `repl.controller`. To continue a test after using `repl`, call `repl.continue()` which will resolve the Promise returned by the `repl(this)` call and allow execution to continue past the `await`.
 
 
