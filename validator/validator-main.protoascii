@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 843
+spec_file_revision: 844
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4086,7 +4086,8 @@ tags: {  # <form method=POST ...>
 }
 # AMP4EMAIL allows action-xhr and disallows action attribute. It also disallows
 # the use of mustache templates in action-xhr. The only allowed
-# protocol for action-xhr is https. Relative urls are disallowed.
+# protocol for action-xhr is https. Relative urls are disallowed. It also
+# disallows the name attribute as the name attribute is prone to DOM clobbering.
 tags {  # <form method=GET ...>
   html_format: AMP4EMAIL
   tag_name: "FORM"
@@ -4119,7 +4120,6 @@ tags {  # <form method=GET ...>
     value_casei: "get"
   }
   attrs: { name: "novalidate" }
-  attr_lists: "form-name-attr"
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -4155,7 +4155,6 @@ tags {  # <form method=POST ...>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "novalidate" }
-  attr_lists: "form-name-attr"
 }
 # Will add verify state template if requested by users
 tags {
