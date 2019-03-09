@@ -972,6 +972,7 @@ export class Viewport {
 
   /**
    * @param {!JsonObject} data
+   * @return {!Promise|undefined}
    * @private
    */
   updateOnViewportEvent_(data) {
@@ -996,7 +997,7 @@ export class Viewport {
       return;
     }
 
-    animPromise.then(() => {
+    return animPromise.then(() => {
       this.binding_.showViewerHeader(transient, paddingTop);
     });
   }
