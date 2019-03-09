@@ -32,12 +32,9 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Required Scripts</strong></td>
     <td>
-        <small>Notice that you need scripts for "amp-access-poool", "amp-access" and "amp-analytics".</small>
+        <small>Notice that you need scripts for "amp-access-poool" and "amp-access".</small>
       <div>
         <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
       </div>
       <div>
         <code>&lt;script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js">&lt;/script></code>
@@ -52,7 +49,7 @@ limitations under the License.
 
 The `amp-access-poool`, based on `amp-access` component, loads and shows a paywall using your `bundleID` from Poool's Dashboard configuration.
 
-If you are unfortunately familiar with Poool's behavior outside AMP, you cannot use `excerpt` and `hidden` modes here, due to AMP's particular behavior. You will be able to lock or unlock your content with the `access` variable which is provided by amp environment. Check poool-widget section just bellow.
+If you are familiar with Poool's behavior outside AMP, you cannot use `excerpt` and `hidden` modes here, due to AMP's particular behavior. You will be able to lock or unlock your content with the `access` variable which is provided by amp environment. Check poool-widget section just bellow.
 
 The `amp-access-poool` component does not require an authorization or pingback configuration, because it is pre-configured to work with the Poool service.
 
@@ -64,20 +61,21 @@ For more informations about modes, check our [documentation](https://dev.poool.f
 ### HTML sections
 
 __Set poool-widget section, which contain poool paywall when access isn't granted.__
-Set the poool-widget section bellow both shown and hidden content like the following example.
-First section is the article preview, always shown to readers.
-Second section need an access (`amp-access="access"` attribute) to be displayed. Moreover, this section require an id `poool-access`.
-Third section is poool, called when access isn't granted (`amp-access="NOT access"` attribute).
+
+The `amp-access-poool` component requires 3 different sections:
+  - The article preview, shown when access hasn't been granted yet (with `amp-access="NOT access"`) and identified by Poool using the `poool-access-preview` attribute
+  - The article content, shown when access has been granted (with `amp-access="access"`), hidden by the `amp-access-hide` attribute until access has been granted, and identified by Poool using the `poool-access-content` attribute
+  - Poool's Paywall container, shown when access hasn't been granted yet (with `amp-access="NOT error AND NOT access"`), identified by Poool using the `poool` id
 
 ```html
-<section>
+<section poool-access-preview amp-access="NOT access">
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     Curabitur ullamcorper turpis vel commodo scelerisque.
   </p>
 </section>
 
-<section id="poool-access" amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
+<section poool-access-content amp-access="access" amp-access-hide>
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     Curabitur ullamcorper turpis vel commodo scelerisque.
@@ -92,9 +90,7 @@ Third section is poool, called when access isn't granted (`amp-access="NOT acces
   </p>
 </section>
 
-<section amp-access="NOT error AND NOT access">
-    <div id="poool-widget"></div>
-</section>
+<section amp-access="NOT error AND NOT access" id="poool"></section>
 ```
 
 
