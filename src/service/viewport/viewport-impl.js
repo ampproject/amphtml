@@ -1051,8 +1051,6 @@ export class Viewport {
       lastPaddingTop_: lastPaddingTop,
     } = this;
 
-    this.fixedLayer_.updatePaddingTop(paddingTop, transient);
-
     let doneDeferred;
 
     return this.vsync_.measurePromise(() => {
@@ -1061,6 +1059,8 @@ export class Viewport {
         return def.measure(doneDeferred.promise, lastPaddingTop, paddingTop);
       });
     }).then(animOffsets => {
+      this.fixedLayer_.updatePaddingTop(paddingTop, transient);
+
       if (duration <= 0) {
         return;
       }
