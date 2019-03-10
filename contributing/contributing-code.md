@@ -137,36 +137,9 @@ We recommend you handle signing/being covered by a CLA *before* you send a PR to
 
 ## Code review and approval
 
-All code in AMP must be reviewed and approved before it is merged so that we can maintain AMP's high quality and consistency.
+All code in AMP must be reviewed and approved before it is merged.  Reviewers/Collaborators primarily ensure that the code is correct, efficient and consistent with existing AMP code while Owners primarily provide a domain-specific review of the code.
 
-This section describes the different review/approval roles and the approvals that are required before code may be merged.  These guidelines are specific to the amphtml repository.  Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
-
-### Roles
-
-* Owners
-  * Review & approve PRs in the area in which they have expertise.
-  * Requirements to be an Owner:
-    * Demonstrated expertise in the area in which they are an OWNER.
-    * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
-    * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
-    * Owners of an area may approve other owners at or below their area of expertise following the normal PR process.
-  * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.
-
-* Reviewers
-  * Review, approve and merge PRs in the repo for which Reviewer status is granted.
-  * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
-  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current REVIEWER.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.
-  * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
-
-* Collaborators
-  * Review, approve and merge PRs in the repo for which COLLABORATOR status is granted.
-  * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
-  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.
-  * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
-
-### Approval requirements
-
-To be merged, a PR must always be reviewed and approved by:
+To be merged, all code must be approved by:
 
 * At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
 * At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
@@ -174,3 +147,28 @@ To be merged, a PR must always be reviewed and approved by:
 It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
 
 Any Reviewer or Collaborator may merge the code after it has been approved, including the PR author.
+
+These guidelines are specific to the amphtml repository.  Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
+
+### Roles
+
+* Collaborators
+  * Review, approve and merge PRs in the repository for which they are Collaborators.
+  * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
+  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.
+  * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
+
+* Reviewers
+  * Review, approve and merge PRs in the repository for which they are Reviewers.
+  * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
+  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current Reviewer.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.
+  * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
+
+* Owners
+  * Review & approve PRs in the area in which they have expertise.
+  * Requirements to be an Owner:
+    * Demonstrated expertise in the area in which they are an Owner.
+    * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
+    * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
+    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.
+  * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.
