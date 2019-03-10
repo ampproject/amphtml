@@ -139,7 +139,7 @@ We recommend you handle signing/being covered by a CLA *before* you send a PR to
 
 All code in AMP must be reviewed and approved before it is merged.  Reviewers/Collaborators primarily ensure that the code is correct, efficient and consistent with existing AMP code while Owners primarily provide a domain-specific review of the code.
 
-To be merged, all code must be approved by:
+To be merged, all code must be approved by both:
 
 * At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
 * At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
