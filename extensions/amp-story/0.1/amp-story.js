@@ -54,11 +54,11 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {LocalizationService} from '../../../src/service/localization';
 import {
-  LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../src/service/localization';
+} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';

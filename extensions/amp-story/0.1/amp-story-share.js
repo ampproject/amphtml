@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from '../../../src/service/localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {Toast} from './toast';
 import {
@@ -198,7 +198,7 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?./../../../src/service/localization.LocalizationService>} */
+    /** @private {?Promise<?./../../../src/servoce/localization.LocalizationService>} */
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */

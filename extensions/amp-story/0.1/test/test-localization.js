@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {LocalizationService} from '../../../../src/service/localization';
 import {
-  LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
   getLanguageCodesFromString,
-} from '../../../../src/service/localization';
+} from '../../../../src/localized-strings';
 
 describes.fakeWin('localization', {}, env => {
   describe('localized string IDs', () => {

@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-story-hint-0.1.css';
-import {LocalizedStringId} from '../../../src/service/localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';

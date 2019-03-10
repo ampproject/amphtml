@@ -46,7 +46,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '../../../src/service/localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {

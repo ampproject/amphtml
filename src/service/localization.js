@@ -129,28 +129,9 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 
 
 /**
- * @param {string} languageCode
- * @return {!Array<string>} A list of language codes.
- */
-export function getLanguageCodesFromString(languageCode) {
-  if (!languageCode) {
-    return ['en', FALLBACK_LANGUAGE_CODE];
-  }
-  const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
-  return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
-    const fallbackLanguageCode = matches.slice(0, index + 1)
-        .join('-')
-        .toLowerCase();
-    fallbackLanguageCodeList.unshift(fallbackLanguageCode);
-    return fallbackLanguageCodeList;
-  }, [FALLBACK_LANGUAGE_CODE]);
-}
-
-
-/**
  * Gets the string matching the specified localized string ID in the language
  * specified.
- * @param {!Object<string, LocalizedStringBundleDef>} localizedStringBundles
+ * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
  */
@@ -174,40 +155,22 @@ function findLocalizedString(localizedStringBundles, languageCodes,
 
 
 /**
- * Creates a deep copy of the specified LocalizedStringBundle.
- * @param {!LocalizedStringBundleDef} localizedStringBundle
- * @return {!LocalizedStringBundleDef}
+ * @param {string} languageCode
+ * @return {!Array<string>} A list of language codes.
+ * @visibleForTesting
  */
-function cloneLocalizedStringBundle(localizedStringBundle) {
-  return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))));
-}
-
-
-/**
- * Creates a pseudo locale by applying string transformations (specified by the
- * localizationFn) to an existing string bundle, without modifying the original.
- * @param {!LocalizedStringBundleDef} localizedStringBundle The localized
- *     string bundle to be transformed.
- * @param {function(string): string} localizationFn The transformation to be
- *     applied to each string in the bundle.
- * @return {!LocalizedStringBundleDef} The new strings.
- */
-export function createPseudoLocale(localizedStringBundle, localizationFn) {
-  /** @type {!LocalizedStringBundleDef} */
-  const pseudoLocaleStringBundle =
-      cloneLocalizedStringBundle(localizedStringBundle);
-
-  Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
-    const localizedStringId =
-    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
-    pseudoLocaleStringBundle[localizedStringId].string =
-        localizationFn(localizedStringBundle[localizedStringId].string);
-    pseudoLocaleStringBundle[localizedStringId].fallback =
-        localizationFn(localizedStringBundle[localizedStringId].fallback);
-  });
-
-  return pseudoLocaleStringBundle;
+export function getLanguageCodesFromString(languageCode) {
+  if (!languageCode) {
+    return ['en', FALLBACK_LANGUAGE_CODE];
+  }
+  const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
+  return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
+    const fallbackLanguageCode = matches.slice(0, index + 1)
+        .join('-')
+        .toLowerCase();
+    fallbackLanguageCodeList.unshift(fallbackLanguageCode);
+    return fallbackLanguageCodeList;
+  }, [FALLBACK_LANGUAGE_CODE]);
 }
 
 
@@ -228,7 +191,7 @@ export class LocalizationService {
 
     /**
      * A mapping of language code to localized string bundle.
-     * @private @const {!Object<string, !LocalizedStringBundleDef>}
+     * @private @const {!Object<string, !../localized-strings.LocalizedStringBundleDef>}
      */
     this.localizedStringBundles_ = {};
   }
@@ -249,8 +212,8 @@ export class LocalizationService {
   /**
    * @param {string} languageCode The language code to associate with the
    *     specified localized string bundle.
-   * @param {!LocalizedStringBundleDef} localizedStringBundle The localized
-   *     string bundle to register.
+   * @param {!../localized-strings.LocalizedStringBundleDef} localizedStringBundle
+   *     The localized string bundle to register.
    * @return {!LocalizationService} For chaining.
    */
   registerLocalizedStringBundle(languageCode, localizedStringBundle) {
@@ -265,7 +228,7 @@ export class LocalizationService {
 
 
   /**
-   * @param {!LocalizedStringId} LocalizedStringId
+   * @param {!!../localized-strings.LocalizedStringId} LocalizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
