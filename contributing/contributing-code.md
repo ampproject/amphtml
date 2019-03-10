@@ -146,25 +146,25 @@ To be merged, all code must be approved by both:
 
 It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
 
-Any Reviewer or Collaborator may merge the code after it has been approved, including the PR author.
+Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
 These guidelines are specific to the amphtml repository.  Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
 
 ### Roles
 
-* Collaborators
+#### Collaborators
   * Review, approve and merge PRs in the repository for which they are Collaborators.
   * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
   * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.
   * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
 
-* Reviewers
+#### Reviewers
   * Review, approve and merge PRs in the repository for which they are Reviewers.
   * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
   * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current Reviewer.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.
   * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
 
-* Owners
+#### Owners
   * Review & approve PRs in the area in which they have expertise.
   * Requirements to be an Owner:
     * Demonstrated expertise in the area in which they are an Owner.
