@@ -111,6 +111,11 @@ const EXPERIMENTS = [
     cleanupIssue: '',
   },
   {
+    id: 'amp-base-carousel',
+    name: 'AMP extension for a basic, flexible, carousel',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -252,6 +257,13 @@ const EXPERIMENTS = [
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
+  },
+  {
+    id: 'amp-story-desktop-background',
+    name: 'Removes blurred background images from the amp-story component\'s ' +
+        'three-panel desktop UI.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
   },
   {
     id: 'amp-next-page',
@@ -406,6 +418,12 @@ const EXPERIMENTS = [
     name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
     spec: 'https://github.com/ampproject/amphtml/issues/20964',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
+  },
+  {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
   },
   {
     id: 'amp-autocomplete',

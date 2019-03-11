@@ -28,10 +28,10 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
+import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -145,6 +145,14 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return;
+    }
+
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
     }
@@ -154,6 +162,13 @@ export class AmpImageViewer extends AMP.BaseElement {
   layoutCallback() {
     if (this.loadPromise_) {
       return this.loadPromise_;
+    }
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return Promise.resolve();
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
     const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||
@@ -190,9 +205,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      if (!this.gestures_) {
-        this.setupGestures_();
-      }
+      this.resetImageDimensions_();
+      this.setupGestures_();
     });
   }
 

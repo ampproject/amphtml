@@ -120,6 +120,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
+    'build-system/layout-jank.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -245,6 +246,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-viewer-assistance/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
+      // Needed for amp-smartlinks dep on amp-skimlinks
+      'extensions/amp-skimlinks/0.1/**/*.js',
       'src/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',

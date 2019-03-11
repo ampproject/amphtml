@@ -75,7 +75,7 @@ export function gumgum(global, data) {
       'slot.load': onLoad('SLOT'),
     });
     // Main script
-    loadScript(global, 'https://g2.gumgum.com/javascripts/ad.js');
+    loadScript(global, 'https://js.gumgum.com/slot.js');
   } else {
     // No valid configuration
     ctx.noContentAvailable();

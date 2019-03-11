@@ -31,6 +31,7 @@ export const VARIANT_VERSION = {
 
 /**
  * Variants service provides VARIANT variables for the experiment config.
+ * @implements {../../../src/render-delaying-services.RenderDelayingService}
  */
 export class Variants {
 
@@ -63,6 +64,16 @@ export class Variants {
    */
   getVariants() {
     return this.variantsDeferred_.promise;
+  }
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.getVariants();
   }
 }
 
