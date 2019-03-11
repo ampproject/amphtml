@@ -530,39 +530,49 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  it('should update non-transient padding', () => {
+  it('should update non-transient padding', async() => {
     const bindingMock = sandbox.mock(binding);
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop')
         .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
         .once();
-    viewerViewportHandler({paddingTop: 0});
+    stubVsyncMeasure();
+    await viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
 
-  it('should update padding when viewer wants to hide header', () => {
+  it('should update padding when viewer wants to hide header', async() => {
     const bindingMock = sandbox.mock(binding);
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop')
         .withExactArgs(/* paddingTop */ 0, /* transient */ true)
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
-    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-      transient: true});
+    stubVsyncMeasure();
+    await viewerViewportHandler({
+      paddingTop: 0,
+      duation: 300,
+      curve: 'ease-in',
+      transient: true,
+    });
     bindingMock.verify();
     fixedLayerMock.verify();
   });
 
-  it('should update padding for fixed layer when viewer wants to ' +
-      'hide header', () => {
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
-    fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-      transient: 'true'});
-    fixedLayerMock.verify();
-  });
+  it('should update padding for fixed layer when viewer wants to hide header',
+      async() => {
+        const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+        fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
+        stubVsyncMeasure();
+        await viewerViewportHandler({
+          paddingTop: 0,
+          duation: 300,
+          curve: 'ease-in',
+          transient: 'true',
+        });
+        fixedLayerMock.verify();
+      });
 
   it('should update viewport when entering lightbox mode', () => {
     const requestingEl = document.createElement('div');
