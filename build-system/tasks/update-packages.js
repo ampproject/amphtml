@@ -22,7 +22,12 @@ const log = require('fancy-log');
 const {exec, execOrDie, getStderr} = require('../exec');
 const {isTravisBuild} = require('../travis');
 
-const yarnExecutable = 'npx yarn';
+/**
+ * NOTE: executing yarn with --production=false prevents having
+ * NODE_ENV=production variable set which forces yarn to not install
+ * devDependencies. This usually breaks gulp for example.
+ */
+const yarnExecutable = 'npx yarn --production=false';
 
 /**
  * Writes the given contents to the patched file if updated
