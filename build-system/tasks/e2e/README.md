@@ -2,7 +2,7 @@
 
 AMP contibutors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
 
-* [What is an end-to-end test?](#what-is-an-end-to-end-test?)
+* [What is an end-to-end test?](#what-is-an-end-to-end-test)
 * [Choosing which features to test](#choosing-which-features-to-test)
 * [Writing E2E tests](#writing-e2e-tests)
 * [Debugging E2E tests](#debugging-e2e-tests)
@@ -182,5 +182,3 @@ Add `repl(/* mochaThis */ this)` to a test to pause execution at that line witho
 ```
 
 In the Node debugger, the `repl` global provides a reference to the test controller at `repl.controller`. To continue a test after using `repl`, call `repl.continue()` which will resolve the Promise returned by the `repl(this)` call and allow execution to continue past the `await`.
-
-
