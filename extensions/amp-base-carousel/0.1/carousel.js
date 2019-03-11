@@ -30,8 +30,7 @@ import {AutoAdvance} from './auto-advance';
 import {
   backwardWrappingDistance,
   forwardWrappingDistance,
-  wrappingDistance,
-} from './array-util.js';
+} from './array-util';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
@@ -128,15 +127,6 @@ function sum(arr) {
  *
  * [h][h][h][h][ ][ ][2][3][4][5][1][ ][ ][h][h]
  *
- * Handling sideSlideCount:
- *
- * The carousel may be configured to only show a certain number of slides on
- * either side of the resting index. This limits how far the user can move at
- * a time. This simply hides any slides or spacers that are too far from the
- * resting index. For example, if we have a resting index of '1', we want:
- *
- * [h][h][h][h][5][1][2][h][h][h][h][h][h][h][h]
- *
  * Moving slides:
  *
  * Slides are moved around using `transform: translate` relative to their
@@ -221,6 +211,9 @@ export class Carousel {
     /** @private {!Array<!Element>} */
     this.afterSpacers_ = [];
 
+    /** @private {!Array<!Element>} */
+    this.allSpacers_ = [];
+
     /**
     * Set from sources of programmatic scrolls to avoid doing work associated
     * with regular scrolling.
@@ -278,9 +271,6 @@ export class Carousel {
 
     /** @private {boolean} */
     this.loop_ = false;
-
-    /** @private {number} */
-    this.sideSlideCount_ = Number.MAX_VALUE;
 
     /** @private {boolean} */
     this.snap_ = true;
@@ -390,7 +380,6 @@ export class Carousel {
     }
 
     this.actionSource_ = actionSource;
-    // TODO(sparhami) This does not work with side-slide-count
     this.scrollSlideIntoView_(this.slides_[index], {smoothScroll});
   }
 
@@ -470,17 +459,6 @@ export class Carousel {
    */
   updateMixedLength(mixedLength) {
     this.mixedLength_ = mixedLength;
-    this.updateUi();
-  }
-
-  /**
-   * @param {number} sideSlideCount The number of slides to show on either side
-   *    of the current slide. This can be used to limit how far the user can
-   *    swipe at a time.
-   */
-  updateSideSlideCount(sideSlideCount) {
-    this.sideSlideCount_ = sideSlideCount > 0 ? sideSlideCount :
-      Number.MAX_VALUE;
     this.updateUi();
   }
 
@@ -716,6 +694,9 @@ export class Carousel {
       this.setElementTransform_(spacer, -1, totalLength);
       this.scrollContainer_.appendChild(spacer);
     });
+
+    this.allSpacers_ = this.beforeSpacers_
+        .concat(this.replacementSpacers_, this.afterSpacers_);
   }
 
   /**
@@ -752,10 +733,10 @@ export class Carousel {
   }
 
   /**
-   * Hides any spacers or slides that are not currently necessary. Slides may
-   * be hidden if sideSlideCount is specified. Enough spacers are shown to
-   * allow 1 revolution of scrolling (not including the current slide) before
-   * / after the current slide. The rest of the spacers are hidden.
+   * Hides any spacers or slides that are not currently necessary. Enough
+   * spacers are shown to allow 1 revolution of scrolling (not including the
+   * current slide) before / after the current slide. The rest of the spacers
+   * are hidden.
    *
    * Note that spacers are sized the same as the slide that they replace. As a
    * result, we need to hide the correct spacers rather than simply the
@@ -766,39 +747,24 @@ export class Carousel {
   hideSpacersAndSlides_() {
     const {
       afterSpacers_,
-      replacementSpacers_,
       beforeSpacers_,
       currentIndex_,
-      loop_,
       slides_,
     } = this;
-    const sideSlideCount = Math.min(slides_.length - 1, this.sideSlideCount_);
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
-
-    slides_.forEach((el, i) => {
-      const distance = loop_ ?
-        wrappingDistance(currentIndex_, i, slides_) :
-        Math.abs(currentIndex_ - i);
-      const tooFar = distance > sideSlideCount;
-      el.hidden = tooFar;
-    });
-
-    replacementSpacers_.forEach(el => {
-      el.hidden = sideSlideCount < (slides_.length - 1);
-    });
 
     beforeSpacers_.forEach((el, i) => {
       const distance = backwardWrappingDistance(
           currentIndex_, i, beforeSpacers_);
-      const tooFar = distance > sideSlideCount;
+      const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i < slides_.length - numBeforeSpacers;
     });
 
     afterSpacers_.forEach((el, i) => {
       const distance = forwardWrappingDistance(
           currentIndex_, i, afterSpacers_);
-      const tooFar = distance > sideSlideCount;
+      const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i > numAfterSpacers;
     });
   }
@@ -809,28 +775,41 @@ export class Carousel {
    * @private
    */
   updateCurrent_() {
+    const {
+      allSpacers_,
+      alignment_,
+      axis_,
+      currentIndex_,
+      element_,
+      loop_,
+      slides_,
+    } = this;
     const totalLength = sum(this.getSlideLengths_());
-    const overlappingIndex = findOverlappingIndex(
-        this.axis_, this.alignment_, this.element_, this.slides_,
-        this.currentIndex_);
+    // When looping, we translate the slides, but the slides might decide to
+    // translate their content instead of the whole slide. As a result, we need
+    // to use the spacers to figure out where we are rather than the slides
+    // themselves.
+    const items = loop_ ? allSpacers_ : slides_;
+    const startIndex = loop_ ? currentIndex_ + slides_.length : currentIndex_;
+    const overlappingIndex =
+        findOverlappingIndex(axis_, alignment_, element_, items, startIndex);
 
     // Currently not over a slide (e.g. on top of overscroll area).
     if (overlappingIndex === undefined) {
       return;
     }
 
-    // Pulled out as a separate variable, since Closure gets confused about
-    // whether it can be undefined pas this point when closed over (in
-    // runMutate).
-    const newIndex = overlappingIndex;
+    // Since we are potentially looking accross all spacers, we need to convert
+    // to a slide index.
+    const newIndex = overlappingIndex % slides_.length;
     // Update the current offset on each scroll so that we have it up to date
     // in case of a resize.
-    const currentElement = this.slides_[newIndex];
-    const dimension = getDimension(this.axis_, currentElement);
+    const currentElement = slides_[newIndex];
+    const dimension = getDimension(axis_, currentElement);
     this.currentElementOffset_ = dimension.start;
 
     // We did not move at all.
-    if (newIndex == this.currentIndex_) {
+    if (newIndex == currentIndex_) {
       return;
     }
 
