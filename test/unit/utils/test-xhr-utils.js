@@ -58,13 +58,11 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
           href: sourceOrigin,
         },
       };
-      allowConsoleError(() => {
-        expect(() => {
-          verifyAmpCORSHeaders(win, response, {} /* init */);})
-            .to.throw('Returned AMP-Access-Control-Allow-Source-Origin '
-                + 'is not equal to the current: https://www.original.org vs '
-                + 'https://www.da-original.org');
-      });
+      expect(() => {
+        verifyAmpCORSHeaders(win, response, {} /* init */);})
+          .to.throw('Returned AMP-Access-Control-Allow-Source-Origin '
+              + 'is not equal to the current: https://www.original.org vs '
+              + 'https://www.da-original.org');
     });
   });
 
@@ -127,23 +125,24 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   });
 
   describe('getViewerInterceptResponse', () => {
+    let viewer;
     let viewerForDoc;
     beforeEach(() => {
+      viewer = {
+        hasCapability: unusedParam => false,
+        whenFirstVisible: () => Promise.resolve(),
+        sendMessageAwaitResponse: sandbox.stub(),
+      };
       viewerForDoc = sandbox.stub(Services, 'viewerForDoc');
     });
 
-    it('should be no opt if amp doc is absent', () => {
+    it('should be no-op if amp doc is absent', () => {
       return getViewerInterceptResponse({}, null, '', {}).then(() => {
         expect(viewerForDoc).to.not.have.been.called;
       });
     });
 
-    it('should be no opt if amp doc does not support xhr interception', () => {
-      const viewer = {
-        hasCapability: unusedParam => false,
-        whenFirstVisible: () => Promise.resolve(),
-        sendMessageAwaitResponse: sandbox.stub(),
-      };
+    it('should be no-op if amp doc does not support xhr interception', () => {
       viewerForDoc.returns(viewer);
       const doc = document.createElement('html');
       const ampDoc = {
@@ -159,12 +158,10 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
     it('should send xhr request to viewer', () => {
       sandbox.stub(mode, 'getMode').returns({development: false});
-      const viewer = {
+      viewer = Object.assign(viewer, {
         hasCapability: unusedParam => true,
-        whenFirstVisible: () => Promise.resolve(),
-        sendMessageAwaitResponse: sandbox.stub(),
         isTrustedViewer: () => Promise.resolve(true),
-      };
+      });
       viewerForDoc.returns(viewer);
       const doc = document.createElement('html');
       doc.setAttribute('allow-xhr-interception', 'true');
