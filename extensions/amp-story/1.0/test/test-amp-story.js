@@ -769,7 +769,7 @@ describes.realWin('amp-story', {
           }).then(() => {
             const mask = story.element.querySelector(
                 '.i-amphtml-story-opacity-mask');
-            expect(mask.hasAttribute('hidden')).to.be.true;
+            expect(mask).to.have.attribute('hidden');
           });
     });
   });
