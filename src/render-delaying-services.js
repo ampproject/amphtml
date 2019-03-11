@@ -118,10 +118,7 @@ export function hasRenderDelayingServices(win) {
 export function isRenderDelayingService(service) {
   const maybeRenderDelayingService =
     /** @type {!RenderDelayingService}*/ (service);
-  if (typeof maybeRenderDelayingService.whenReady == 'function') {
-    return true;
-  }
-  return false;
+  return typeof maybeRenderDelayingService.whenReady == 'function';
 }
 
 /**
