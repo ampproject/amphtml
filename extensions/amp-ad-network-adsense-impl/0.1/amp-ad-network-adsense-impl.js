@@ -95,9 +95,6 @@ export function resetSharedState() {
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
 
-/** @type {string} */
-const DELAY_NUMBER_EXP = 'adsense-ff-number-delay';
-
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
@@ -236,9 +233,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    if (getExperimentBranch(this.win, DELAY_NUMBER_EXP) != '21063207') {
-      return true;
-    }
     return getAmpAdRenderOutsideViewport(this.element) || 3;
   }
 
@@ -287,10 +281,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
-        },
-        [DELAY_NUMBER_EXP]: {
-          isTrafficEligible: () => true,
-          branches: ['21063206', '21063207'],
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
