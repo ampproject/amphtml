@@ -77,6 +77,7 @@ module.exports = {
     await page.tap('amp-twitter.blue');
     await page.waitFor(300); // For animations to finish.
     await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
     await page.waitFor(300); // For animations to finish.
     await page.tap('span.i-amphtml-expanded-view-close-button');
     await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
