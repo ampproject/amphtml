@@ -5,7 +5,8 @@
     "ampdoc-shell",
     "disable-amp-story-desktop",
     "linker-meta-opt-in",
-    "inabox-viewport-friendly"
+    "inabox-viewport-friendly",
+    "amp-img-auto-sizes"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
