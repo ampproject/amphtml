@@ -573,7 +573,7 @@ export class AmpList extends AMP.BaseElement {
         // from the container.
         .then(result => this.updateBindings_(
             isSSR ? toArray(result.childNodes) : result, current.append))
-        .then(element => this.render_(element, current.append));
+        .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
       renderPromise = renderPromise
@@ -625,6 +625,7 @@ export class AmpList extends AMP.BaseElement {
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
    * @param {!Array<!Element>} elements
+   * @param {boolean} append
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
