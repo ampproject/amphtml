@@ -56,13 +56,31 @@ describes.realWin('amp-autocomplete unit tests', {
     expect(element).not.to.be.null;
     expect(element).to.have.class('i-amphtml-autocomplete-item');
     expect(element.hasAttribute('role')).to.be.true;
-    expect(element.innerText).to.equal('hello');
+    expect(element.innerHTML).to.equal('hello');
 
     element = impl.createElementFromItem_('');
     expect(element).not.to.be.null;
     expect(element).to.have.class('i-amphtml-autocomplete-item');
     expect(element.hasAttribute('role')).to.be.true;
-    expect(element.innerText).to.equal('');
+    expect(element.innerHTML).to.equal('');
+
+    element = impl.createElementFromItem_('hello', 'el');
+    expect(element).not.to.be.null;
+    expect(element).to.have.class('i-amphtml-autocomplete-item');
+    expect(element.hasAttribute('role')).to.be.true;
+    expect(element.innerHTML).to.equal('h<strong>el</strong>lo');
+
+    element = impl.createElementFromItem_('hello', 'HeLlO');
+    expect(element).not.to.be.null;
+    expect(element).to.have.class('i-amphtml-autocomplete-item');
+    expect(element.hasAttribute('role')).to.be.true;
+    expect(element.innerHTML).to.equal('<strong>hello</strong>');
+
+    element = impl.createElementFromItem_('hello', 'hellohello');
+    expect(element).not.to.be.null;
+    expect(element).to.have.class('i-amphtml-autocomplete-item');
+    expect(element.hasAttribute('role')).to.be.true;
+    expect(element.innerHTML).to.equal('hello');
   });
 
   it('renderResults_() should update the container_', () => {

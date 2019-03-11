@@ -199,14 +199,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Create and return <div> element from given plan-text item.
    * @param {string} item
+   * @param {string=} substring
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item) {
+  createElementFromItem_(item, substring) {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.textContent = item;
+    if (!substring || substring.length > item.length) {
+      element.textContent = item;
+    } else {
+      const regex = new RegExp(substring, 'gi');
+      element.innerHTML = item.replace(regex, '<strong>$&</strong>');
+    }
     return element;
   }
 
@@ -249,7 +255,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const filteredData = this.filterData_(this.inlineData_, userInput);
     filteredData.forEach(item => {
-      this.container_.appendChild(this.createElementFromItem_(item));
+      this.container_.appendChild(
+        this.createElementFromItem_(item, userInput));
     });
 
     // Append the partial user-provided input to navigate back to.
