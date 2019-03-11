@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExperimentValue} from './experiments';
+import {getCookieExperimentIdValue} from './cookies';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -112,7 +112,7 @@ function getMode_(win) {
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     // Prioritize the hashQuery defined log level then the cookie.
-    log: hashQuery['log'] || getExperimentValue(win, 'log'),
+    log: hashQuery['log'] || getCookieExperimentIdValue(win, 'log'),
     version,
     rtvVersion,
     singlePassType,

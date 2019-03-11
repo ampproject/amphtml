@@ -21,7 +21,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {getCookie, setCookie} from './cookies';
+import {getCookie, getCookieExperimentIdValue, setCookie} from './cookies';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
@@ -91,7 +91,8 @@ export function isExperimentOn(win, experimentId) {
 export function toggleExperiment(win, experimentId, opt_on,
   opt_transientExperiment, opt_experimentIdValue) {
   const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
-  const experimentValue = getExperimentValue(win, experimentId);
+  const experimentValue =
+      getCookieExperimentIdValue(win, experimentId);
   let on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     let cookieTogglesValue = on;
@@ -117,26 +118,6 @@ export function toggleExperiment(win, experimentId, opt_on,
   return on;
 }
 
-/**
- * Gets the value of an experiment, if present.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {?string}
- */
-export function getExperimentValue(win, experimentId) {
-  const ampExperiments = getCookie(win, 'AMP_EXP');
-  if (ampExperiments) {
-    const experiments = ampExperiments.split(';');
-    for (let i = 0; i < experiments.length; i++) {
-      const experiment = experiments[i];
-      const keyValue = experiment.split('=');
-      if (keyValue.length == 2 && keyValue[0] === experimentId) {
-        return keyValue[1];
-      }
-    }
-  }
-  return null;
-}
 
 /**
  * Calculate whether the experiment is on or off based off of the

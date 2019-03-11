@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../../src/cookies';
+import {
+  getCookie,
+  getCookieExperimentIdValue,
+  setCookie,
+} from '../../src/cookies';
 
 
 describe('cookies', () => {
@@ -130,5 +134,35 @@ describe('cookies', () => {
     expect(() => {
       test('&&&.CDN.ampproject.org', '&&&.cdn.AMPproject.org', false);
     }).to.throw(/in depth check/);
+  });
+
+  describe('getCookieExperimentIdValue', () => {
+    it('should get value if present', () => {
+      const win = {
+        document: {
+          cookie: 'AMP_EXP=experiment=value%2Cx=y',
+        },
+      };
+      expect(getCookieExperimentIdValue(win, 'experiment')).to.equal('value');
+      expect(getCookieExperimentIdValue(win, 'x')).to.equal('y');
+    });
+
+    it('should return null if value not present', () => {
+      const win = {
+        document: {
+          cookie: 'AMP_EXP=some-experiment=value%2Camp-list-load-more',
+        },
+      };
+      expect(getCookieExperimentIdValue(win, 'amp-list-load-more')).to.be.null;
+    });
+
+    it('should return null if experiment is not present', () => {
+      const win = {
+        document: {
+          cookie: '',
+        },
+      };
+      expect(getCookieExperimentIdValue(win, 'exp-non-existent')).to.be.null;
+    });
   });
 });

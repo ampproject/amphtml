@@ -167,3 +167,25 @@ function checkOriginForSettingCookie(win, options, name) {
         + ' (in depth check): ' + name);
   }
 }
+
+
+/**
+ * Gets the value of an experiment, if present.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {?string}
+ */
+export function getCookieExperimentIdValue(win, experimentId) {
+  const ampExperiments = getCookie(win, 'AMP_EXP');
+  if (ampExperiments) {
+    const experiments = ampExperiments.split(',');
+    for (let i = 0; i < experiments.length; i++) {
+      const experiment = experiments[i];
+      const keyValue = experiment.split('=');
+      if (keyValue.length == 2 && keyValue[0] === experimentId) {
+        return keyValue[1];
+      }
+    }
+  }
+  return null;
+}
