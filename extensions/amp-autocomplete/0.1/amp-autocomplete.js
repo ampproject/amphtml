@@ -27,10 +27,7 @@ import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
-/** @const */
 const EXPERIMENT = 'amp-autocomplete';
-
-/** @const */
 const TAG = 'amp-autocomplete';
 
 /**
@@ -155,7 +152,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Creates and returns <div> that contains the template-rendered children.
-   * @return {Element}
+   * @return {!Element}
    * @private
    */
   createContainer_() {
@@ -227,7 +224,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Handle selecting items on user mousedown.
-   * @param {Event} event
+   * @param {!Event} event
    * @return {!Promise}
    * @private
    */
@@ -312,17 +309,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Handle showing or hiding results on user focus/blur.
-   * @param {boolean} opt_display
+   * @param {boolean} display
    * @return {!Promise}
    * @private
    */
-  toggleResultsHandler_(opt_display) {
+  toggleResultsHandler_(display) {
     return this.mutateElement(() => {
-      if (!opt_display) {
+      if (!display) {
         this.resetActiveElement_();
         this.activeIndex_ = -1;
       }
-      this.toggleResults_(opt_display);
+      this.toggleResults_(display);
     });
   }
 
@@ -338,7 +335,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Returns true if the given element is a suggested item.
-   * @param {Element|EventTarget} element
+   * @param {!Element|!EventTarget} element
    * @private
    */
   isItemElement_(element) {
@@ -347,7 +344,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Writes the selected value into the input field.
-   * @param {Element|EventTarget} element
+   * @param {!Element|!EventTarget} element
    * @private
    */
   selectItem_(element) {
@@ -412,7 +409,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Handles keyboard events.
-   * @param {Event} event
+   * @param {!Event} event
    * @return {!Promise}
    * @private
    */
