@@ -27,6 +27,8 @@ const {SeleniumWebDriverController} = require(
 const SUB = ' ';
 const TIMEOUT = 20000;
 
+const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
@@ -243,22 +245,18 @@ class AmpPageFixture {
 
     const {
       testUrl,
-      experiments,
-      initialRect,
+      experiments = [],
+      initialRect = DEFAULT_E2E_INITIAL_RECT,
     } = this.spec;
     const {
       environment,
       // TODO(estherkim): browser
     } = env;
 
-    if (Array.isArray(experiments)) {
-      await toggleExperiments(ampDriver, testUrl, experiments);
-    }
+    await toggleExperiments(ampDriver, testUrl, experiments);
 
-    if (initialRect) {
-      const {width, height} = initialRect;
-      await controller.setWindowRect({width, height});
-    }
+    const {width, height} = initialRect;
+    await controller.setWindowRect({width, height});
 
     await ampDriver.navigateToEnvironment(environment, testUrl);
   }
@@ -284,6 +282,10 @@ class AmpPageFixture {
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
+  if (!experiments.length) {
+    return;
+  }
+
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {
