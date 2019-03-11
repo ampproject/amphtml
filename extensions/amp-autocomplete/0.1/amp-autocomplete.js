@@ -335,19 +335,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Returns true if the given element is a suggested item.
-   * @param {!Element|!EventTarget} element
+   * @param {?Element|?EventTarget} element
    * @private
    */
   isItemElement_(element) {
-    return element.classList.contains('i-amphtml-autocomplete-item');
+    return element !== null &&
+      element.classList.contains('i-amphtml-autocomplete-item');
   }
 
   /**
    * Writes the selected value into the input field.
-   * @param {!Element|!EventTarget} element
+   * @param {?Element|?EventTarget} element
    * @private
    */
   selectItem_(element) {
+    if (element === null) {
+      return;
+    }
     this.inputElement_.value = element.textContent;
     this.clearAllItems_();
   }
