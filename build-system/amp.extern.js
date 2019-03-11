@@ -453,8 +453,6 @@ data.bodyBackgroundColor;
 data.data.fontColor;
 data.width;
 data.sitekey;
-data.id;
-data.token;
 data.fortesting;
 
 // 3p code
