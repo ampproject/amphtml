@@ -96,39 +96,14 @@ export class AmpExperiment extends AMP.BaseElement {
 
     for (const name in experiments) {
       if (experiments[name]) {
-        const variant = config[name]['variants'][experiments[name]];
-        const variantVersion = getVariantVersion(variant);
-
-        if (variantVersion === VARIANT_VERSION['0.1']) {
-          appliedExperimentVariantPromises.push(
-            this.addToBody_(name, experiments[name])
-          );
-        } else if (variantVersion === VARIANT_VERSION['1.0']) {
-          appliedExperimentVariantPromises.push(
-            this.applyMutations__(name, experiments[name])
-          );
-        }
+        appliedExperimentVariantPromises.push(
+          this.applyMutations__(name, experiments[name])
+        );
       }
     }
 
     return Promise.all(appliedExperimentVariantPromises)
       .then(() => experiments);
-  }
-
-  /**
-   * Adds the given experimentName and variantName pairs
-   * to body element as attributes and values.
-   * @param {!string} experimentName
-   * @param {!string} variantName
-   * @return {!Promise}
-   * @private
-   */
-  addToBody_(experimentName, variantName) {
-    const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(body => {
-      body.setAttribute(ATTR_PREFIX + experimentName,
-        dev().assertString(variantName));
-    });
   }
 
   /**

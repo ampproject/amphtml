@@ -23,12 +23,6 @@ import {isObject} from '../../../src/types';
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
 
-export const VARIANT_VERSION = {
-  '0.1': '0.1',
-  '1.0': '1.0'
-};
-
-
 /**
  * Variants service provides VARIANT variables for the experiment config.
  * @implements {../../../src/render-delaying-services.RenderDelayingService}
@@ -137,22 +131,6 @@ export function allocateVariant(ampdoc, experimentName, config) {
 }
 
 /**
- * Function to parse and determine the version
- * of the experiment in the config.
- * Find if we are a 0.1 design (body attributes),
- * or 1.0 design (mutation objects)
- * @param {!JsonObject} config
- * @return string
- */
-export function getVariantVersion(variant) {
-  if (typeof variant === 'number') {
-    return VARIANT_VERSION['0.1']
-  } else {
-    return VARIANT_VERSION['1.0']
-  }
-}
-
-/**
  * Validates an experiment config.
  * @param {string} experimentName
  * @param {!JsonObject} config
@@ -178,14 +156,7 @@ function validateConfig(experimentName, config) {
         variantName
       );
 
-      const variantVersion = getVariantVersion(variant);
-
-      let percentage = null;
-      if (variantVersion === VARIANT_VERSION['0.1']) {
-        percentage = variant;
-      } else if(variantVersion === VARIANT_VERSION['1.0']) {
-        percentage = variant.weight;
-      }
+      const percentage = variant.weight;
 
       userAssert(
         percentage && percentage > 0 && percentage < 100,
@@ -241,10 +212,6 @@ function assertName(name) {
  * @throws {!Error}
  */
 function assertVariant(variant, experimentName, variantName) {
-
-  if (typeof variant === 'number') {
-    return;
-  }
 
   // Assert that the variant is an object
   userAssert(
