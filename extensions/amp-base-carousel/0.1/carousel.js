@@ -27,6 +27,10 @@ import {
   updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
+import {
+  backwardWrappingDistance,
+  forwardWrappingDistance,
+} from './array-util';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
@@ -751,11 +755,17 @@ export class Carousel {
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
     beforeSpacers_.forEach((el, i) => {
-      el.hidden = i < slides_.length - numBeforeSpacers;
+      const distance = backwardWrappingDistance(
+          currentIndex_, i, beforeSpacers_);
+      const tooFar = distance > slides_.length - 1;
+      el.hidden = tooFar || i < slides_.length - numBeforeSpacers;
     });
 
     afterSpacers_.forEach((el, i) => {
-      el.hidden = i > numAfterSpacers;
+      const distance = forwardWrappingDistance(
+          currentIndex_, i, afterSpacers_);
+      const tooFar = distance > slides_.length - 1;
+      el.hidden = tooFar || i > numAfterSpacers;
     });
   }
 
