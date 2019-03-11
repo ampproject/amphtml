@@ -984,6 +984,39 @@ For example, in the following code, `object2` animates in after `object1` comple
 </amp-story-page>
 ```
 
+##### scale-start, scale-end [optional, only works with `zoom-in` & `zoom-out` animations]
+
+Use these two attributes to further specify the parameters of your zoom-in and zoom-out animations. The value must be greater than or equal to 0, and decimals are allowed. The default will be scale-start: 1 and scale-start: 3 for zoom-in, and the inverse for zoom-out.
+
+*Example*: An image zooming-in from 2x to 5x its size over 4 seconds.
+
+```html
+<amp-img animate-in="zoom-in" scale-start="2" scale-end="5" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-x [optional, only works with `pan-left` & `pan-right` animations]
+
+Use this attribute to specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole width of the specified image.
+
+*Example*: An image panning 200px to the left over 10 seconds.
+
+```html
+<amp-img animate-in="pan-left" translate-x="200px" animate-in-duration="10s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-y [optional, only works with `pan-up` & `pan-down` animations]
+
+Use this attribute to specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
+
+*Example*: An image panning 50px down over 15 seconds.
+
+```html
+<amp-img animate-in="pan-down" translate-y="50px" animate-in-duration="15s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
 ### Sequencing animations
 
 To chain animations in sequence, use the `animate-in-after` attribute. All elements in a given chain must be present in the same `<amp-story-page>`. Elements without the `animate-in-after` attribute do not belong to a sequence chain, and will start independently on page entrance.
