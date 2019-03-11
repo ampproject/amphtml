@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 843
+spec_file_revision: 845
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1063,7 +1063,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
-      regex: "!important"
+      regex: "!\\s*important"
       error_message: "CSS !important"
     }
   }
@@ -1148,7 +1148,7 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
       error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
-      regex: "!important"
+      regex: "!\\s*important"
       error_message: "CSS !important"
     }
   }
@@ -1237,7 +1237,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
       error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
-      regex: "!important"
+      regex: "!\\s*important"
       error_message: "CSS !important"
     }
   }
@@ -1306,7 +1306,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
-      regex: "!important"
+      regex: "!\\s*important"
       error_message: "CSS !important"
     }
   }
@@ -2772,7 +2772,7 @@ attr_lists: {
   name: "svg-style-attr"
   attrs: {
     name: "style"
-    blacklisted_value_regex: "!important"
+    blacklisted_value_regex: "!\\s*important"
     # CSS proprities: https://www.w3schools.com/cssref/default.asp
     # SVG specific properties: https://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
     # Disallowed:
@@ -4086,7 +4086,8 @@ tags: {  # <form method=POST ...>
 }
 # AMP4EMAIL allows action-xhr and disallows action attribute. It also disallows
 # the use of mustache templates in action-xhr. The only allowed
-# protocol for action-xhr is https. Relative urls are disallowed.
+# protocol for action-xhr is https. Relative urls are disallowed. It also
+# disallows the name attribute as the name attribute is prone to DOM clobbering.
 tags {  # <form method=GET ...>
   html_format: AMP4EMAIL
   tag_name: "FORM"
@@ -4119,7 +4120,6 @@ tags {  # <form method=GET ...>
     value_casei: "get"
   }
   attrs: { name: "novalidate" }
-  attr_lists: "form-name-attr"
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -4155,7 +4155,6 @@ tags {  # <form method=POST ...>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "novalidate" }
-  attr_lists: "form-name-attr"
 }
 # Will add verify state template if requested by users
 tags {
@@ -5150,7 +5149,7 @@ tags: {
   attrs: {
     name: "style"
     mandatory: true
-    blacklisted_value_regex: "!important"
+    blacklisted_value_regex: "!\\s*important"
     css_declaration: {
       name: "display"
       value_casei: "block"
@@ -5966,7 +5965,7 @@ attr_lists: {
   attrs: { name: "rev" }
   attrs: {
     name: "style"
-    blacklisted_value_regex: "(!important|<!--)"
+    blacklisted_value_regex: "(!\\s*important|<!--)"
     # CSS proprities: https://www.w3schools.com/cssref/default.asp
     # Disallowed:
     # css_declaration: { name: "@charset" }
