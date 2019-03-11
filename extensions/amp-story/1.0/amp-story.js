@@ -1623,7 +1623,6 @@ export class AmpStory extends AMP.BaseElement {
               mutation => mutation.attributeName === 'open')) {
             this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
                 this.sidebar_.hasAttribute('open'));
-
           } if (mutationsList.some(
               mutation => mutation.attributeName === 'hidden')) {
             this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
