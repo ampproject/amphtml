@@ -156,6 +156,11 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
+      "url": "examples/visual-tests/amp-consent/amp-consent.amp.html",
+      "name": "amp-consent",
+      "interactive_tests": "examples/visual-tests/amp-consent/amp-consent.js"
+    },
+    {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_selectors": [
@@ -632,6 +637,11 @@
       "url": "examples/visual-tests/amp-selector.amp.html",
       "name": "amp-selector",
       "interactive_tests": "examples/visual-tests/amp-selector.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-form/amp-form.amp.html",
+      "name": "amp-form",
+      "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
