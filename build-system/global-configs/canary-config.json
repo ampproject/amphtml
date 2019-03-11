@@ -58,5 +58,6 @@
   "amp-list-resizable-children": 1,
   "amp-auto-lightbox": 1,
   "adsense-ff-number-delay": 0.01,
-  "amp-img-auto-sizes": 1
+  "amp-img-auto-sizes": 1,
+  "amp-list-load-more": 1
 }
