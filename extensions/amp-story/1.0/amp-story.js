@@ -1626,8 +1626,7 @@ export class AmpStory extends AMP.BaseElement {
 
           } if (mutationsList.some(
               mutation => mutation.attributeName === 'hidden')) {
-            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-                this.sidebar_.hasAttribute('open'));
+            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
           }
         });
       }
