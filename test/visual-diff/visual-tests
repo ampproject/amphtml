@@ -565,26 +565,22 @@
       ],
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component-desktop.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
