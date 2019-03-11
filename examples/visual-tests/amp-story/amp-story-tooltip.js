@@ -22,16 +22,21 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150);
     await page.tap('a.title-small.center');
+    await page.waitFor(300);
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
   'tapping outside tooltip should hide it': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150);
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300);
     await page.tap('.i-amphtml-story-focused-state-layer');
+    await page.waitFor(150);
     await verifySelectorsVisible(
       page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
   },
@@ -48,8 +53,10 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(100);
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300);
     await page.tap('button.i-amphtml-story-tooltip-nav-button-left');
     await page.waitFor(150);
     await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
