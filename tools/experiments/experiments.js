@@ -453,6 +453,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    data: {name: 'log-disabled', id: 'log', value: '0'},
+    desc: 'Log level OFF',
+    cleanupIssue: 'N/A',
+  },
+  {
     data: {name: 'log-error', id: 'log', value: '1'},
     desc: 'Log level ERROR.',
     cleanupIssue: 'N/A',
