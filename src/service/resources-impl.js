@@ -1092,7 +1092,12 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
-      this.dirtyElement(element);
+      if (isExperimentOn(this.win, 'dirty-collapse-element') ||
+          this.useLayers_) {
+        this.dirtyElement(element);
+      } else {
+        this.setRelayoutTop_(box.top);
+      }
     }
     resource.completeCollapse();
     this.schedulePass(FOUR_FRAME_DELAY_);
