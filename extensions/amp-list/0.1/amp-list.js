@@ -152,7 +152,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().error(TAG, 'some error');
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
