@@ -129,8 +129,8 @@ export class JankMeter {
    */
   displayMeterDisplay_(batteryDrop) {
     const doc = this.win_.document;
-    const html = htmlFor(doc);
-    const display = html`<div class="i-amphtml-jank-meter"></div>`;
+    const display = htmlFor(doc)`
+      <div class="i-amphtml-jank-meter"></div>`;
     display.textContent =
         `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
         `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;

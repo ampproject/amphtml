@@ -26,28 +26,9 @@ import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
- * This is a dupe of `Layout` values. This is intentional, since we need the
- * enum keys only for type-checking and the values for runtime.
- * @const {!Array<string>}
- */
-export const LAYOUTS = [
-  // Make sure to include the matching enum field for `Layout`.
-  'nodisplay',
-  'fixed',
-  'fixed-height',
-  'responsive',
-  'container',
-  'fill',
-  'flex-item',
-  'fluid',
-  'intrinsic',
-];
-
-/**
  * @enum {string}
  */
 export const Layout = {
-  // Naming convention enforced via tests.
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -151,8 +132,10 @@ const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
  *   the layout string.
  */
 export function parseLayout(s) {
-  if (LAYOUTS.includes(s)) {
-    return /** @type {!Layout} */ (s);
+  for (const k in Layout) {
+    if (Layout[k] == s) {
+      return Layout[k];
+    }
   }
   return undefined;
 }
@@ -495,9 +478,8 @@ export function applyStaticLayout(element) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
-    const html = htmlFor(element);
-    const sizer =
-      html`<i-amphtml-sizer class="i-amphtml-sizer">
+    const sizer = htmlFor(element)`
+      <i-amphtml-sizer class="i-amphtml-sizer">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
