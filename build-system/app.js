@@ -823,7 +823,7 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
+app.use(['/examples/*', '/extensions/*', '/test/manual/*'], (req, res, next) => {
   const sourceOrigin = req.query['__amp_source_origin'];
   if (sourceOrigin) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);

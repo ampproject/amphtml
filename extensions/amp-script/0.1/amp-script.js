@@ -26,9 +26,11 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {
+  WorkerDom,
   sanitizer,
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
+import {UserActivationTracker} from './user-activation-tracker';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -36,7 +38,26 @@ const TAG = 'amp-script';
 /** @const {number} */
 const MAX_SCRIPT_SIZE = 150000;
 
+const PHASE_MUTATING = 2;
+
 export class AmpScript extends AMP.BaseElement {
+
+  /**
+   * @param {!Element} element
+   */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+
+    /** @private {?WorkerDom} */
+    this.workerDom_ = null;
+
+    /** @private {?UserActivationTracker} */
+    this.userActivation_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER ||
@@ -49,6 +70,9 @@ export class AmpScript extends AMP.BaseElement {
       user().error(TAG, 'Experiment "amp-script" is not enabled.');
       return Promise.reject('Experiment "amp-script" is not enabled.');
     }
+
+    this.userActivation_ = new UserActivationTracker(this.element);
+
     // Configure worker-dom's sanitizer with AMP-specific config and hooks.
     const config = purifyConfig();
     sanitizer.configure(config, {
@@ -98,8 +122,11 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: data => {
         dev().info(TAG, 'From worker:', data);
       },
+      onMutationPump: this.mutationPump_.bind(this),
     },
-    /* debug */ true);
+    /* debug */ true).then(workerDom => {
+      this.workerDom_ = workerDom;
+    });
     return Promise.resolve();
   }
 
@@ -114,6 +141,33 @@ export class AmpScript extends AMP.BaseElement {
     const useLocal = getMode().localDev || getMode().test;
     return calculateExtensionScriptUrl(
         location, 'amp-script-worker', '0.1', useLocal);
+  }
+
+  /**
+   * @param {function()} flush
+   * @param {number} phase
+   * @private
+   */
+  mutationPump_(flush, phase) {
+    // Hydration is always allowed.
+    if (phase != PHASE_MUTATING) {
+      this.vsync_.mutate(flush);
+      return;
+    }
+
+    // Mutation depends on the gesture state.
+    // TODO(dvoytenko): support "long tasks".
+    if (this.userActivation_.isActive()) {
+      this.vsync_.mutate(flush);
+      return;
+    }
+
+    // Otherwise, terminate the worker.
+    this.workerDom_.terminate();
+    // TODO(dvoytenko): a better UI to indicate the broken state.
+    this.element.classList.remove('i-amphtml-hydrated');
+    this.element.classList.add('i-amphtml-broken');
+    user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
   }
 }
 
