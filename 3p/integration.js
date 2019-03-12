@@ -271,7 +271,6 @@ import {speakol} from '../ads/speakol';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
