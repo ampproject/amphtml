@@ -58,10 +58,7 @@ class LinkerReader {
     }
 
     if (this.linkerParams_[name] && this.linkerParams_[name][id]) {
-      // Return the id value and remove the id from the object
-      const value = this.linkerParams_[name][id];
-      delete this.linkerParams_[name][id];
-      return value;
+      return this.linkerParams_[name][id];
     }
 
     return null;

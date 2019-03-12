@@ -69,6 +69,9 @@ export class LinkerManager {
 
     /** @private {?UnlistenDef} */
     this.formSubmitUnlistener_ = null;
+
+    /** @const @private {!VariableService} */
+    this.variableService_ = variableServiceFor(this.ampdoc_.win);
   }
 
 
@@ -187,11 +190,11 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    return variableServiceFor(this.ampdoc_.win)
-        .expandTemplate(template, expansionOptions)
+    const bindings = this.variableService_.getMacros();
+    return this.variableService_.expandTemplate(template, expansionOptions)
         .then(expanded => {
           const urlReplacements = Services.urlReplacementsForDoc(this.element_);
-          return urlReplacements.expandUrlAsync(expanded);
+          return urlReplacements.expandStringAsync(expanded, bindings);
         });
   }
 

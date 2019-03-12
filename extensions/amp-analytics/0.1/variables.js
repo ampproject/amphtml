@@ -20,6 +20,7 @@ import {devAssert, user, userAssert} from '../../../src/log';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {linkerReaderServiceFor} from './linker-reader';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
@@ -150,6 +151,9 @@ export class VariableService {
     /** @private {!Object<string, *>} */
     this.macros_ = {};
 
+    /** @const @private {!LinkerReader} */
+    this.linkerReader_ = linkerReaderServiceFor(this.win_);
+
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', value => value.trim());
@@ -161,6 +165,8 @@ export class VariableService {
     this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
     this.register_('$REPLACE', replaceMacro);
+    this.register_('LINKER_PARAM', (name, id) =>
+      this.linkerReader_.get(name, id));
   }
 
   /**
