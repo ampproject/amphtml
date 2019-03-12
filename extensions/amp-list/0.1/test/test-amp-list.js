@@ -471,19 +471,30 @@ describes.repeated('amp-list', {
 
         it('should delegate template rendering to viewer', function*() {
           const rendered = doc.createElement('p');
+          const html = '<div role="list" class="i-amphtml-fill-content '
+                    + 'i-amphtml-replaced-content">'
+                    + '<div role="item">foo</div>'
+                    + '</div>';
+          const listContainer = document.createElement('div');
+          listContainer.setAttribute('role', 'list');
+          listContainer.setAttribute('class', 'i-amphtml-fill-content '
+              + 'i-amphtml-replace-content');
+          const listItem = document.createElement('div');
+          listItem.setAttribute('role', 'item');
+          listContainer.appendChild(listItem);
+          const childNodes =
+              Array.prototype.slice.apply(listContainer.childNodes);
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
-              .returns(Promise.resolve({html: '<p>foo</p>'}));
+              .returns(Promise.resolve({html}));
           ssrTemplateHelper.renderTemplate
-              .returns(Promise.resolve('<p>foo</p>'));
-          sandbox.stub(list, 'updateBindings_')
-              .returns(Promise.resolve([rendered]));
-
-          // Expects mutate/measure and hiding of loading/placeholder
-          // indicators.
-          expectRender();
+              .returns(Promise.resolve(listContainer));
+          listMock.expects('updateBindings_')
+              .returns(Promise.resolve(childNodes)).once();
+          listMock.expects('render_').withExactArgs(childNodes, false)
+              .returns(listContainer);
 
           ssrTemplateHelper.renderTemplate
-              .withArgs(element, '<p>foo</p>')
+              .withArgs(element, html)
               .returns(Promise.resolve(rendered));
 
           yield list.layoutCallback();
@@ -505,8 +516,6 @@ describes.repeated('amp-list', {
           expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
           expect(ssrTemplateHelper.fetchAndRenderTemplate)
               .to.be.calledWithExactly(element, request, null, attrs);
-          expect(list.updateBindings_).to.be.calledOnce;
-          expect(list.container_.contains(rendered)).to.be.true;
         });
       });
 
