@@ -695,8 +695,8 @@ export class AmpStory extends AMP.BaseElement {
         }
         return;
       }
-      if (gesture.event && (gesture.event.defaultPrevented ||
-          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY))) {
+      if ((gesture.event && gesture.event.defaultPrevented) ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
 
