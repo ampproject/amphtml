@@ -17,6 +17,8 @@
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {UrlReplacementPolicy,
+  batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
@@ -104,7 +106,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    this.inlineData_ = this.getInlineData_();
+    const dataPromise = this.element.hasAttribute('src') ?
+      this.getRemoteData_() : this.getInlineData_();
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
@@ -121,23 +124,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
 
-    return this.mutateElement(() => {
+    return Promise.all([dataPromise, this.mutateElement(() => {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
+    })]).then(values => {
+      this.inlineData_ = values[0];
     });
   }
 
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @return {?Array}
+   * @return {!Promise}
    * @private
    */
   getInlineData_() {
     const scriptElements = childElementsByTag(this.element, 'SCRIPT');
-    if (!scriptElements.length) {
-      return null;
-    }
+    userAssert(scriptElements.length,
+        `${TAG} should contain a <script> child or a URL specified in "src".`);
     userAssert(scriptElements.length === 1,
         `${TAG} should contain at most one <script> child`);
     const scriptElement = scriptElements[0];
@@ -147,7 +151,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return json['items'] ? json['items'] : [];
+    return Promise.resolve(json['items'] ? json['items'] : []);
+  }
+
+  /**
+   * Reads the 'items' data from the URL provided in the 'src' attribute.
+   * For use with remote data.
+   * @return {!Promise}
+   */
+  getRemoteData_() {
+    const ampdoc = this.getAmpDoc();
+    const policy = UrlReplacementPolicy.ALL;
+    return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
+        policy).then(json => {
+      return json.items;
+    });
   }
 
   /**
