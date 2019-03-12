@@ -18,10 +18,10 @@ import {
   getProxyServingType,
   getSourceUrl,
   parseQueryString,
-  parseUrlDeprecated,
 } from '../url';
 import {isArray} from '../types';
 import {map} from '../utils/object';
+import {parseUrlDeprecated} from '../url-utils';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */

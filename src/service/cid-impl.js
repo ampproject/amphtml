@@ -35,12 +35,9 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../service';
-import {
-  getSourceOrigin,
-  isProxyOrigin,
-  parseUrlDeprecated,
-} from '../url';
+import {getSourceOrigin} from '../url';
 import {isIframed} from '../dom';
+import {isProxyOrigin, parseUrlDeprecated} from '../url-utils';
 import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 

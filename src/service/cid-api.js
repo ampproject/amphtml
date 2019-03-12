@@ -19,7 +19,7 @@ import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
-import {isProxyOrigin, parseUrlDeprecated} from '../url';
+import {isProxyOrigin, parseUrlDeprecated} from '../url-utils';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
+import {assertHttpsUrl} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {parseUrlDeprecated} from './url-utils';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';

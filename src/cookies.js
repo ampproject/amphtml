@@ -15,11 +15,8 @@
  */
 
 import {endsWith} from './string';
-import {
-  isProxyOrigin,
-  parseUrlDeprecated,
-  tryDecodeUriComponent,
-} from './url';
+import {isProxyOrigin, parseUrlDeprecated} from './url-utils';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component.js';
 import {urls} from './config';
 
 
@@ -46,9 +43,9 @@ export function getCookie(win, name) {
     if (eq == -1) {
       continue;
     }
-    if (tryDecodeUriComponent(cookie.substring(0, eq).trim()) == name) {
+    if (tryDecodeUriComponent_(cookie.substring(0, eq).trim()) == name) {
       const value = cookie.substring(eq + 1).trim();
-      return tryDecodeUriComponent(value, value);
+      return tryDecodeUriComponent_(value, value);
     }
   }
   return null;
@@ -167,7 +164,6 @@ function checkOriginForSettingCookie(win, options, name) {
         + ' (in depth check): ' + name);
   }
 }
-
 
 /**
  * Gets the value of an experiment, if present.

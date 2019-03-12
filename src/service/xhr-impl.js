@@ -24,12 +24,10 @@ import {
   setupJsonFetchInit,
   verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
-import {
-  getCorsUrl,
-  parseUrlDeprecated,
-} from '../url';
+import {getCorsUrl} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {parseUrlDeprecated} from '../url-utils';
 import {user} from '../log';
 
 /**

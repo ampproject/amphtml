@@ -21,13 +21,12 @@ import {fromIterator} from './array';
 import {getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
-  isProxyOrigin,
-  parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {isProxyOrigin, parseUrlDeprecated} from '../url-utils';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];

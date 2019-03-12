@@ -35,7 +35,7 @@ import {getMode} from './mode';
 import {
   isLoadErrorMessage,
 } from './event-helper';
-import {isProxyOrigin} from './url';
+import {isProxyOrigin} from './url-utils';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';

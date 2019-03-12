@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {dict} from '../utils/object';
-import {parseUrlDeprecated} from '../url';
+import {parseUrlDeprecated} from '../url-utils';
 
 /**
  * Exposes CID API if provided by the Viewer.

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getCookieExperimentIdValue} from './cookies';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
@@ -765,89 +766,4 @@ export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
   opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
   return user()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
       opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
-}
-
-/**
- * TODO(alabiaga): all code is below is duplicated as to avoid
- * cyclic dependency, e.g. log -> cookies -> url -> log. This needs
- * to be fixed.
- * Gets the value of an experiment, if present.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {?string}
- */
-function getCookieExperimentIdValue(win, experimentId) {
-  const ampExperiments = getCookie(win, 'AMP_EXP');
-  if (ampExperiments) {
-    const experiments = ampExperiments.split(',');
-    for (let i = 0; i < experiments.length; i++) {
-      const experiment = experiments[i];
-      const keyValue = experiment.split('=');
-      if (keyValue.length == 2 && keyValue[0] === experimentId) {
-        return keyValue[1];
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * Returns the cookie's value or `null`.
- *
- * @param {!Window} win
- * @param {string} name
- * @return {?string}
- */
-function getCookie(win, name) {
-  const cookieString = tryGetDocumentCookieNoInline(win);
-  if (!cookieString) {
-    return null;
-  }
-  const cookies = cookieString.split(';');
-  for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i].trim();
-    const eq = cookie.indexOf('=');
-    if (eq == -1) {
-      continue;
-    }
-    if (tryDecodeUriComponent(cookie.substring(0, eq).trim()) == name) {
-      const value = cookie.substring(eq + 1).trim();
-      return tryDecodeUriComponent(value, value);
-    }
-  }
-  return null;
-}
-
-/**
- * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
- * @param {!Window} win
- * @return {string}
- */
-function tryGetDocumentCookieNoInline(win) {
-  try {
-    return win.document.cookie;
-  } catch (e) {
-    // Act as if no cookie is available. Exceptions can be thrown when
-    // AMP docs are opened on origins that do not allow setting
-    // cookies such as null origins.
-    return '';
-  }
-}
-
-/**
- * Tries to decode a URI component, falling back to opt_fallback (or an empty
- * string)
- *
- * @param {string} component
- * @param {string=} fallback
- * @return {string}
- */
-function tryDecodeUriComponent(component, fallback = '') {
-  try {
-    return decodeURIComponent(component);
-  } catch (e) {
-    return fallback;
-  }
 }

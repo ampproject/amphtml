@@ -20,14 +20,13 @@ import {
   assertHttpsUrl,
   getSourceOrigin,
   isProtocolValid,
-  isProxyOrigin,
   isSecureUrlDeprecated,
-  parseUrlWithA,
 } from '../url';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isProxyOrigin, parseUrlWithA} from '../url-utils';
 
 const SERVICE = 'url';
 

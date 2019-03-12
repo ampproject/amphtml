@@ -24,7 +24,7 @@ import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
-import {parseUrlDeprecated} from './url';
+import {parseUrlDeprecated} from './url-utils';
 import {startsWith} from './string';
 import {toWin} from './types';
 

@@ -22,13 +22,15 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
-  isProxyOrigin,
   parseQueryString,
-  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {
+  isProxyOrigin,
+  parseUrlDeprecated,
+} from '../url-utils';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';

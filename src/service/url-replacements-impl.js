@@ -32,7 +32,6 @@ import {
   getSourceUrl,
   isProtocolValid,
   parseQueryString,
-  parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
@@ -44,6 +43,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {parseUrlDeprecated} from '../url-utils';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
 import {endsWith, startsWith} from './string';
-import {getMode} from './mode';
 import {isArray} from './types';
+import {isProxyOrigin, parseUrlDeprecated} from './url-utils';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
@@ -39,20 +38,6 @@ const SERVING_TYPE_PREFIX = dict({
   // Actions viewer
   'action': true,
 });
-
-/**
- * Cached a-tag to avoid memory allocation during URL parsing.
- * @type {HTMLAnchorElement}
- */
-let a;
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {LruCache}
- */
-let cache;
 
 /** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -85,94 +70,6 @@ export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
  */
 export function getWinOrigin(win) {
   return win.origin || parseUrlDeprecated(win.location.href).origin;
-}
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
- * @param {string} url
- * @param {boolean=} opt_nocache
- * @return {!Location}
- */
-export function parseUrlDeprecated(url, opt_nocache) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
-  }
-
-  return parseUrlWithA(a, url, opt_nocache ? null : cache);
-}
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
- * @param {!HTMLAnchorElement} a
- * @param {string} url
- * @param {LruCache=} opt_cache
- * @return {!Location}
- * @restricted
- */
-export function parseUrlWithA(a, url, opt_cache) {
-  if (opt_cache && opt_cache.has(url)) {
-    return opt_cache.get(url);
-  }
-
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick #3449.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  const info = /** @type {!Location} */({
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: null, // Set below.
-  });
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if ((info.protocol == 'http:' && info.port == 80)
-      || (info.protocol == 'https:' && info.port == 443)) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
-  }
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_cache) {
-    opt_cache.put(url, frozen);
-  }
-
-  return frozen;
 }
 
 /**
@@ -361,18 +258,6 @@ export function getFragment(url) {
     return '';
   }
   return url.substring(index);
-}
-
-/**
- * Returns whether the URL has the origin of a proxy.
- * @param {string|!Location} url URL of an AMP document.
- * @return {boolean}
- */
-export function isProxyOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
-  return urls.cdnProxyRegex.test(url.origin);
 }
 
 /**

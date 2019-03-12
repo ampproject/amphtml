@@ -80,7 +80,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
-import {parseUrlDeprecated} from './url';
+import {parseUrlDeprecated} from './url-utils';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';

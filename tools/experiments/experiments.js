@@ -45,7 +45,13 @@ const ExperimentState = {
   ON: 1,
   OFF: 0,
 };
+
 /**
+ * Defines an experiment. the ID identifies the experiment. Experiments
+ * can share the same ID, if so the name will be used to generate the
+ * unique row for the experiment in the experiments table and the value
+ * provided will be what's associated with the ID when the experiment is set.
+ * See experiment ID 'log' as an example of a key/value experiment.
  * @typedef {{
  *   data: {id: string, name: =string, value: =string},
  *   desc: string,

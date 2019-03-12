@@ -339,6 +339,7 @@ const forbiddenTerms = {
     message: 'Use parseUrl instead.',
     whitelist: [
       'src/url.js',
+      'src/url-utils.js',
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',

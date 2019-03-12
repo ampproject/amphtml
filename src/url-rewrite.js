@@ -17,10 +17,9 @@
 import {
   checkCorsUrl,
   getSourceUrl,
-  isProxyOrigin,
-  parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
+import {isProxyOrigin, parseUrlDeprecated} from './url-utils';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';

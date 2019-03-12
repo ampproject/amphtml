@@ -19,7 +19,7 @@ import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {getData} from './event-helper';
-import {parseUrlDeprecated} from './url';
+import {parseUrlDeprecated} from './url-utils';
 import {remove} from './utils/array';
 import {setStyle} from './style';
 import {tryParseJson} from './json';

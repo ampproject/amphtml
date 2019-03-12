@@ -19,11 +19,11 @@ import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
   checkCorsUrl,
-  isProxyOrigin,
 } from './url';
 import {Services} from './services';
 import {dev, user, userAssert} from './log';
 import {isExtensionScriptInNode} from './element-service';
+import {isProxyOrigin} from './url-utils';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

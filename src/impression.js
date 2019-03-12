@@ -16,15 +16,11 @@
 
 import {Deferred} from './utils/promise';
 import {Services} from './services';
-import {
-  addParamsToUrl,
-  isProxyOrigin,
-  parseQueryString,
-  parseUrlDeprecated,
-} from './url';
+import {addParamsToUrl, parseQueryString} from './url';
 import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {isProxyOrigin, parseUrlDeprecated} from './url-utils';
 
 const TIMEOUT_VALUE = 8000;
 
