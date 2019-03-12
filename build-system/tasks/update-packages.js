@@ -182,7 +182,12 @@ function runYarnCheck() {
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    execOrDie(yarnExecutable); // Stop execution when Ctrl + C is detected.
+    /**
+     * NOTE: executing yarn with --production=false prevents having
+     * NODE_ENV=production variable set which forces yarn to not install
+     * devDependencies. This usually breaks gulp for example.
+     */
+    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));
