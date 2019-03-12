@@ -269,8 +269,6 @@ export const adConfig = {
   },
 
   'aja': {
-    renderStartImplemented: true,
-    prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
   },
 
   'appvador': {

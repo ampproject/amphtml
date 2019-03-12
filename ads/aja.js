@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,20 +22,22 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function aja(global, data) {
 
-  // ensure we have valid widgetIds value
-  validateData(data, ['widgetids']);
+  validateData(data, ['sspCode']);
 
   (global._aja = global._aja || {
-    viewId: global.context.pageViewId,
-    widgetIds: data['widgetids'],
-    htmlURL: data['htmlurl'] || global.context.canonicalUrl,
-    ampURL: data['ampurl'] || global.context.sourceUrl,
-    fbk: data['fbk'] || '',
-    testMode: data['testmode'] || 'false',
-    styleFile: data['stylefile'] || '',
-    referrer: data['referrer'] || global.context.referrer,
+    sspCode: data['sspCode'],
   });
 
-  // load the Aja AMP JS file
-  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js');
+  const elStyle = global.document.createElement('iframe');
+  elStyle.setAttribute('id', 'adframe');
+  elStyle.setAttribute('width', data.width);
+  elStyle.setAttribute('height', data.height);
+  elStyle.setAttribute('frameborder', '0');
+  elStyle.setAttribute('marginheight', '0');
+  elStyle.setAttribute('marginwidth', '0');
+  elStyle.setAttribute('allowfullscreen', 'true');
+  elStyle.setAttribute('scrolling', 'no');
+  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
+  global.document.body.appendChild(elStyle);
+
 }
