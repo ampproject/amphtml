@@ -221,7 +221,13 @@ export class AmpList extends AMP.BaseElement {
     }
 
     this.viewport_.onResize(() => {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      this.loadMoreEnabledPromise_.then(enabled => {
+        if (enabled) {
+          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+        } else {
+          this.attemptToFit_(dev().assertElement(this.container_));
+        }
+      });
     });
 
     this.loadMoreEnabledPromise_.then(enabled => {
@@ -713,7 +719,13 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      this.attemptToFit_(dev().assertElement(this.container_));
+      this.loadMoreEnabledPromise_.then(enabled => {
+        if (enabled) {
+          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+        } else {
+          this.attemptToFit_(dev().assertElement(this.container_));
+        }
+      });
     });
   }
 
@@ -730,31 +742,36 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.getAttribute('layout') == Layout.CONTAINER) {
       return;
     }
-    this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled) {
-        const element = !!this.loadMoreSrc_ ?
-          this.getLoadMoreService_().getLoadMoreButton() :
-          this.getLoadMoreService_().getLoadMoreEndElement();
-        this.attemptToFitLoadMoreElement_(element, target);
-      } else {
-        this.measureElement(() => {
-          const targetHeight = target./*OK*/scrollHeight;
-          const height = this.element./*OK*/offsetHeight;
-          if (targetHeight > height) {
-            this.attemptChangeHeight(targetHeight).catch(() => {});
-          }
-        });
+    this.measureElement(() => {
+      const targetHeight = target./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
+      if (targetHeight > height) {
+        this.attemptChangeHeight(targetHeight).catch(() => {});
       }
     });
   }
 
   /**
+   *
+   * @param {!Element} target
+   * @return {!Promise}
+   * @private
+   */
+  attemptToFitLoadMore_(target) {
+    const element = !!this.loadMoreSrc_ ?
+      this.getLoadMoreService_().getLoadMoreButton() :
+      this.getLoadMoreService_().getLoadMoreEndElement();
+    this.attemptToFitLoadMoreElement_(element, target);
+  }
+
+  /**
    * @param {?Element} element
    * @param {!Element} target
+   * @return {!Promise}
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    this.measureElement(() => {
+    return this.measureElement(() => {
       const targetHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       const loadMoreHeight = element ? element./*OK*/offsetHeight : 0;
@@ -922,7 +939,7 @@ export class AmpList extends AMP.BaseElement {
           });
         }).then(() => {
           // Necessary since load-more elements are toggled in the above block
-          this.attemptToFit_(dev().assertElement(this.container_));
+          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
         }).catch(() => {
           this.mutateElement(() =>
             this.getLoadMoreService_().setLoadMoreFailed())
