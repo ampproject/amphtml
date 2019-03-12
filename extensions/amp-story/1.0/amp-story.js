@@ -1453,9 +1453,11 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
     const isLandscape = this.isLandscape_();
-    this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, isLandscape);
+    const isLandscapeSupported = this.isLandscapeSupported_();
+    this.storeService_.dispatch(
+        Action.TOGGLE_LANDSCAPE, isLandscapeSupported && isLandscape);
 
-    if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
+    if (uiState !== UIType.MOBILE || isLandscapeSupported) {
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       return;
@@ -1524,7 +1526,6 @@ export class AmpStory extends AMP.BaseElement {
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
-          this.element.setAttribute('mobile', '');
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
@@ -1535,7 +1536,6 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.removeAttribute('mobile');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1552,7 +1552,6 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.removeAttribute('mobile');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });

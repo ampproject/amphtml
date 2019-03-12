@@ -483,9 +483,9 @@ describes.realWin('amp-story', {
   it('should set the orientation portrait attribute on render', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
 
-    const landscapeOrientationMedia = story.landscapeOrientationMedia_;
     story.landscapeOrientationMedia_ = {matches: false};
     story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
 
     story.buildCallback();
 
@@ -494,14 +494,29 @@ describes.realWin('amp-story', {
           expect(story.element).to.have.attribute('orientation');
           expect(story.element.getAttribute('orientation'))
               .to.equal('portrait');
-          story.landscapeOrientationMedia_ = landscapeOrientationMedia;
         });
   });
 
   it('should set the orientation landscape attribute on render', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
 
-    const landscapeOrientationMedia = story.landscapeOrientationMedia_;
+    story.landscapeOrientationMedia_ = {matches: true};
+    story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('landscape');
+        });
+  });
+
+  it('should not set orientation landscape if no supports-landscape', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+
     story.landscapeOrientationMedia_ = {matches: true};
     story.element.setAttribute('standalone', '');
 
@@ -511,8 +526,7 @@ describes.realWin('amp-story', {
         .then(() => {
           expect(story.element).to.have.attribute('orientation');
           expect(story.element.getAttribute('orientation'))
-              .to.equal('landscape');
-          story.landscapeOrientationMedia_ = landscapeOrientationMedia;
+              .to.equal('portrait');
         });
   });
 
