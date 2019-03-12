@@ -71,3 +71,13 @@ For details on the configuration semantics, see [AdOcean documentation](http://w
 - `data-ao-vars` - additional configuration, see adserver documentation, do not define different values for slaves within one master
 - `data-ao-clusters` - additional configuration,see adserver documentation
 - `data-ao-master` - unique id of master placement
+
+## User Consent Integration
+
+When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. AdOcean ad approaches user consent in the following ways:
+
+- `CONSENT_POLICY_STATE.SUFFICIENT`: Serve a personalized ad to the user.
+- `CONSENT_POLICY_STATE.INSUFFICIENT`: Serve a non-personalized ad to the user.
+- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Serve a personalized ad to the user.
+- `CONSENT_POLICY_STATE.UNKNOWN`: Serve a non-personalized ad to the user.
+

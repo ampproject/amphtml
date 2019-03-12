@@ -15,9 +15,9 @@
  */
 
 
+import {CONSENT_POLICY_STATE} from '../src/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
-import {CONSENT_POLICY_STATE} from '../src/consent-state';
 
 /**
  * @const {Object<string, string>}
@@ -206,7 +206,7 @@ function requestCodes(masterId, data, global, callback) {
   }, codes => {
     const creative = codes[slaveId];
     if (codes[slaveId + '_second_phase']) {
-      creative.code += '\n' + codes[slaveId + '_second_phase'].code;
+      creative['code'] += '\n' + codes[slaveId + '_second_phase']['code'];
     }
     callback(creative);
   });
@@ -258,9 +258,9 @@ class AdoBuffer {
    */
   _execute() {
     const adoElement = new this.global['AdoElement']({
-      id: this.container.id,
-      orgId: this.container.id,
-      clearId: this.container.id,
+      'id': this.container.id,
+      'orgId': this.container.id,
+      'clearId': this.container.id,
       '_isBuffer': true,
     });
     this.global['AdoElems'] = this.global['AdoElems'] || [];
@@ -286,18 +286,18 @@ class AdoBuffer {
 function executeSlave(slaveId, config, global) {
   const doc = global.document;
   const placement = doc.createElement('div');
-  placement.id = slaveId;
+  placement['id'] = slaveId;
 
   const dom = doc.getElementById('c');
   dom.appendChild(placement);
 
   if (global['ado']) {
-    if (!config || config.isEmpty) {
+    if (!config || config['isEmpty']) {
       global.context.noContentAvailable();
     } else {
       const buffer = new AdoBuffer(placement, global);
       buffer.render(() => {
-        (new Function(config.sendHitsDef + config.code))();
+        (new Function(config['sendHitsDef'] + config['code']))();
       });
     }
   }
@@ -323,22 +323,26 @@ export function adocean(global, data) {
   const masterId = data['aoMaster'];
   const mode = (data['aoMode'] !== 'sync' || masterId ? 'buffered' : 'sync');
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
+  const ctx = global.context;
 
   /*
-   * INSUFFICIENT and UNKOWN should be threated as INSUFFICIENT
-   * not defined states should be threated as INSUFFICIENT
+   * INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
+   * not defined states should be treated as INSUFFICIENT
    */
-  const consent = (global.context.initialConsentState === null /* tags without data-block-on-consent */
-                   || global.context.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT
-                   || global.context.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+  const consent = (
+    ctx.initialConsentState === null /* tags without data-block-on-consent */ ||
+    ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
+    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
+  );
 
   writeScript(global, adoUrl, () => {
     setupAdoConfig(mode, global, consent);
     setupPreview(global, data);
 
     if (masterId) {
-      if (global['ado']['features'] && global['ado']['features']['passback']) {
-        global['ado']['features']['passback'] = false;
+      const ado = global['ado'];
+      if (ado && ado['features'] && ado['features']['passback']) {
+        ado['features']['passback'] = false;
       }
 
       requestCodes(masterId, data, global, codes => {
