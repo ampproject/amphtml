@@ -89,9 +89,9 @@ export function getAmpAdMetadata(creative) {
       const headSubstring = creative.slice(
           headStart, headEnd + '</head>'.length);
       ampRuntimeUtf16CharOffsets = [
-          headStart + headSubstring.indexOf('<script'),
-          headStart + headSubstring.lastIndexOf('</script>') +
-              '</script>'.length
+        headStart + headSubstring.indexOf('<script'),
+        headStart + headSubstring.lastIndexOf('</script>') +
+            '</script>'.length,
       ];
     }
     const metaData = {};
