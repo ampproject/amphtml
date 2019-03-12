@@ -5216,15 +5216,12 @@ class ParsedValidatorRules {
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
             validationResult);
-        // TODO(honeybadgerdontcare): require "actions" as a type identifier
-        // when publishers are ready. Uncomment code below and update test.
-        // if (validationResult.typeIdentifier.indexOf("actions") === -1) {
-        //   context.addError(
-        //       amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-        //       context.getLineCol(), /*params=*/["actions", 'html'],
-        //       'https://www.ampproject.org/docs/reference/spec#required-markup',
-        //       validationResult);
-        // }
+        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(), /* params */['actions', 'html'],
+              /* url */'', validationResult);
+        }
         break;
     }
   }
