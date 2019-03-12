@@ -973,19 +973,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () =>
-      expect(impl.delayAdRequestEnabled()).to.be.true);
-
-    it('should return 3 if in experiment', () => {
-      forceExperimentBranch(impl.win, 'adsense-ff-number-delay', '21063207');
+    it('should return 3', () => {
       impl.divertExperiments();
       expect(impl.delayAdRequestEnabled()).to.equal(3);
     });
 
-    it('should respect loading strategy in experiment', () => {
+    it('should respect loading strategy', () => {
       impl.element.setAttribute(
           'data-loading-strategy', 'prefer-viewability-over-views');
-      forceExperimentBranch(impl.win, 'adsense-ff-number-delay', '21063207');
       impl.divertExperiments();
       expect(impl.delayAdRequestEnabled()).to.equal(1.25);
     });
