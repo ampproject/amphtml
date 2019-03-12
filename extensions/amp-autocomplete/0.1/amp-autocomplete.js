@@ -84,6 +84,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = null;
 
     /**
+     * If the "submit-on-enter" attribute is present on <autocomplete>.
+     */
+    this.submitOnEnter_ = false;
+
+    /**
      * The index of the active suggested item.
      * @private {number}
      */
@@ -151,6 +156,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
+    this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -504,8 +510,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
         if (this.activeElement_) {
-          // Only prevent if submit-on-enter === false.
-          event.preventDefault();
+          if (!this.submitOnEnter_) {
+            event.preventDefault();
+          }
           return this.mutateElement(() => {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();

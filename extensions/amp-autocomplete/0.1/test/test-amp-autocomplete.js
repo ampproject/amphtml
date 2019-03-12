@@ -205,8 +205,9 @@ describes.realWin('amp-autocomplete unit tests', {
       preventDefault: () => {},
       target: {textContent: 'hello'},
     };
-    let selectItemSpy, resetSpy, clearAllSpy;
+    let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
     return element.layoutCallback().then(() => {
+      eventPreventSpy = sandbox.spy(event, 'preventDefault');
       selectItemSpy = sandbox.spy(impl, 'selectItem_');
       resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
@@ -216,6 +217,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).not.to.have.been.called;
       expect(clearAllSpy).not.to.have.been.called;
       expect(resetSpy).not.to.have.been.called;
+      expect(eventPreventSpy).not.to.have.been.called;
       impl.activeElement_ = impl.createElementFromItem_('abc');
       return impl.keyDownHandler_(event);
     }).then(() => {
@@ -223,6 +225,18 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).to.have.been.calledOnce;
       expect(clearAllSpy).to.have.been.calledOnce;
       expect(resetSpy).to.have.been.calledOnce;
+      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(impl.submitOnEnter_).to.be.false;
+      impl.submitOnEnter_ = true;
+      impl.activeElement_ = impl.createElementFromItem_('abc');
+      return impl.keyDownHandler_(event);
+    }).then(() => {
+      expect(impl.inputElement_.value).to.equal('abc');
+      expect(selectItemSpy).to.have.been.calledTwice;
+      expect(clearAllSpy).to.have.been.calledTwice;
+      expect(resetSpy).to.have.been.calledTwice;
+      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(impl.submitOnEnter_).to.be.true;
     });
   });
 
