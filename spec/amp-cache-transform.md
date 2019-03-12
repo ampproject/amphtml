@@ -167,6 +167,17 @@ For a given URL, if the server content-negotiates on `AMP-Cache-Transform`, it
 must include `Vary: AMP-Cache-Transform` in all responses, whether signed or
 unsigned.
 
+Note that this also likely means it's negotiating on `Accept`, so it should
+include `Vary: Accept` in these cases, too. The high-entropy nature of `Accept`
+causes cache fragmentation in default setups; publishers may wish to configure
+caches under their control to convert incoming `Accept` headers into
+lower-entropy forms, e.g. by performing the content negotiation (using
+hard-coded knowledge about what variants are available at a given URL) and
+including only the negotiated media-type, without q-values. The publisher may
+also specify
+[Variants](https://httpwg.org/http-extensions/draft-ietf-httpbis-variants.html)
+to aid caching proxies that understand that header.
+
 ### URL rewrites
 
 The exact set of rewrites is not yet fully specified; a few
