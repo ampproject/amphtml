@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-digidip
+tags: {  # amp-link-rewriter
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-digidip"
+    name: "amp-link-rewriter"
     version: "0.1"
     version: "latest"
     requires_usage: GRANDFATHERED
@@ -25,12 +25,12 @@ tags: {  # amp-digidip
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-digidip (json)
+tags: {  # amp-link-rewriter (json)
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-digidip extension .json script"
-  requires_extension: "amp-digidip"
-  mandatory_parent: "AMP-DIGIDIP"
+  spec_name: "amp-link-rewriter extension .json script"
+  requires_extension: "amp-link-rewriter"
+  mandatory_parent: "AMP-LINNK-REWRITER"
   attrs: {
     name: "type"
     mandatory: true
@@ -44,10 +44,10 @@ tags: {  # amp-digidip (json)
     }
   }
 }
-tags: {  # <amp-digidip>
+tags: {  # <amp-link-rewriter>
   html_format: AMP
-  tag_name: "AMP-DIGIDIP"
-  requires_extension: "amp-digidip"
+  tag_name: "AMP-LINK-REWRITER"
+  requires_extension: "amp-link-rewriter"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

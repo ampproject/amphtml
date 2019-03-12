@@ -15,11 +15,12 @@
  */
 
 import {LinkShifter} from './link-shifter';
+import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getScopeElements} from './helper';
 
-export class AmpDigidip extends AMP.BaseElement {
+export class AmpLinkRewriter extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -50,9 +51,7 @@ export class AmpDigidip extends AMP.BaseElement {
     this.configOpts_ = getConfigOpts(this.element);
 
     return this.ampDoc_.whenBodyAvailable()
-        .then(() => {
-          this.letsRockIt_();
-        });
+        .then(this.letsRockIt_.bind(this));
   }
 
   /**
@@ -75,13 +74,13 @@ export class AmpDigidip extends AMP.BaseElement {
         this.configOpts_);
 
     this.listElements_.forEach(nodeElement => {
-      nodeElement.addEventListener('click', event => {
-        this.shifter_.clickHandler(event);
-      }, false);
 
-      nodeElement.addEventListener('contextmenu', event => {
+      const navigation = Services.navigationForDoc(nodeElement);
+      navigation.registerAnchorMutator((anchor, event) => {
         this.shifter_.clickHandler(event);
-      }, false);
+      },
+      Priority.LINK_REWRITER_MANAGER);
+
     });
 
     return true;
@@ -93,6 +92,6 @@ export class AmpDigidip extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-digidip', '0.1', AMP => {
-  AMP.registerElement('amp-digidip', AmpDigidip);
+AMP.extension('amp-link-rewriter', '0.1', AMP => {
+  AMP.registerElement('amp-link-rewriter', AmpLinkRewriter);
 });

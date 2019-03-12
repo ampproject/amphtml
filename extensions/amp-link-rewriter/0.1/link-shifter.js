@@ -54,8 +54,6 @@ export class LinkShifter {
     const trimmedDomain = this.viewer_.win.document.domain
         .replace(/(www\.)?(.*)/, '$2');
 
-    this.event_.stopPropagation();
-
     // avoid firefox to trigger the event twice (just caution)
     if ((this.event_.type !== 'contextmenu') && (this.event_.button === 2)) {
       return;

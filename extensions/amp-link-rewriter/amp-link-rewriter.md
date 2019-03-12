@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-digidip`
+# `amp-link-rewriter`
 
 <table>
   <tr>
@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-digidip" src="https://cdn.ampproject.org/v0/amp-digidip-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`>&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -33,10 +33,7 @@ limitations under the License.
 
 ## Overview
 
-
-Digidip allows you to monetise your content through affiliate marketing. It gives you instant access to over 40,000 merchant affiliate programs without the hassle of network sign ups, approvals or creating affiliate links.
-
-In order to allow our publishers to track traffic, and at the same time profit from the power of amp pages, we developed a link-rewrite generic component. `amp-digidip` allows digidip publishers to automatically turn their normal merchant links into monetizable links and access analytics on how their data is performing. As a generic extension for url rewriting, it covers a wide range of needs, that makes it also useful for other type of users.
+`amp-link-rewriter` allows publishers to rewrite URL based on configurable pattern.
 
 ## Getting started
 
@@ -46,7 +43,7 @@ Inside the `<head>...</head>` section of your AMP page, insert this code before 
 
 Code:
 ```html
-    <script async custom-element="amp-digidip" src="https://cdn.ampproject.org/v0/amp-digidip-0.1.js"></script>
+    <script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`"></script>
 ```
 
 **Add the amp-digidip extension**
@@ -54,7 +51,7 @@ Inside the `<body>...</body>` section of your AMP page, insert this code:
 
 Code:
 ```html
-    <amp-digidip
+    <amp-lin-rewriter
         layout="nodisplay">
 
         <script type="application/json">
@@ -76,7 +73,7 @@ Code:
                 }
          </script>
 
-    </amp-digidip>
+    </amp-link-rewriter>
 ```
 
 
@@ -87,13 +84,13 @@ The final code should look like:
 <html ⚡>
 <head>
   ...
-  <script async custom-element="amp-digidip" src="https://cdn.ampproject.org/v0/amp-digidip-0.1.js"></script>
+  <script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js"></script>
   ...
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
     ...
-    <amp-digidip
+    <amp-link-rewriter
         layout="nodisplay">
 
         <script type="application/json">
@@ -104,7 +101,7 @@ The final code should look like:
                         "#product-listing-2",
                     ],
                     "attribute": {
-                        "href": "((?!(https:\/\/youtube\.com)|(https:\/\/mobile\.vodafone\.de)).)*",
+                        "href": "`((?!(https:\/\/youtube\.com)|(https:\/\/mobile\.vodafone\.de)).)*`",
                         "id": "comments",
                         "class": "sidebar",
                         "rel": "(?!(skip))*",
@@ -115,7 +112,7 @@ The final code should look like:
                 }
          </script>
 
-    </amp-digidip>
+    </amp-link-rewriter>
     ....
 </body>
 </html>
@@ -129,24 +126,24 @@ The "output" property is the redirection url plus a query string of placeholders
 
 Example:
 ```html
-    <amp-digidip
+    <amp-link-rewriter
         layout="nodisplay">
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&cid=${data.customerId}",
+                    "output": "https://visit.digidip.net?pid=110&cid=${data.customerId}`",
                     "vars": {
                         "customerId": "12345"
                     }
                 }
          </script>
 
-    </amp-digidip>
+    </amp-link-rewriter>
 ```
 
 We can also define data values in the anchor data attribute as the following example:
 ```html
-    <a href="http://amazon.de/644556" data-vars-event-id="231">
+    <a href="https://www.amazon.de/s?i=computers&rh=n%3A340843031&ref=sn_gfs_co_computervs_AM_5" data-vars-event-id="231">
 ```
 
 The config could be something like:
@@ -159,7 +156,7 @@ The config could be something like:
 ```
 The resulting, rewritten URL would be:
 ```url
-https://visit.digidip.net?eid=231&cid=12345
+`https://visit.digidip.net?eid=231&cid=12345`
 ```
 
 Besides defined placeholders that match the data defined in the 'vars' property of the JSON configuration, or as a data attribute, there are other pre-defined placeholders that will be shifted with information such as anchor url, page location, referrer page, or anchor id. The following table shows the relationship between defined data and placeholders.
@@ -187,7 +184,7 @@ Example:
         "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
         "section": [
             "#product-listing-1",
-            "#product-listing-2",
+            "#product-listing-2"
         ]
     }
 ```
@@ -213,9 +210,9 @@ Example:
 ```
 
 The anchors within the html area with id 'product-listing-1' will have to match the regex expression defined for the attribute href and id.
-In this example, it means that all the anchors with 'youtube.com' and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'   
+In this example, it means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'   
 
 
 ## Validation
 
-See [amp-digidip rules](validator-amp-digidip.protoascii) in the AMP validator specification.
+See [amp-link-rewriter rules](validator-amp-link-rewriter.protoascii) in the AMP validator specification.

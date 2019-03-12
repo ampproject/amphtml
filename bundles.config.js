@@ -914,7 +914,7 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
-    name: 'amp-digidip',
+    name: 'amp-link-rewriter',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,

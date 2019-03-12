@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 import { getMode } from '../../../../../../../src/mode';
-const test = false;
-const localDev = false;
-const minified = true;
+const test = getMode().test;
+const localDev = getMode().localDev;
+const minified = getMode().minified;
