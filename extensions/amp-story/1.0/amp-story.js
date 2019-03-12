@@ -2360,6 +2360,32 @@ export class AmpStory extends AMP.BaseElement {
   }
 }
 
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpStoryRender {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /**
+     * @private {!Element}
+     */
+    this.storyEl_ = ampdoc.getRootNode().querySelector('amp-story[standalone]');
+  }
+
+  /**
+   * Function to return a promise for when it is finished delaying render, and
+   * is ready.  Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    if (!this.storyEl_) {
+      return Promise.resolve();
+    }
+
+    return this.storyEl_.signals().whenSignal(CommonSignals.LOAD_END);
+  }
+}
+
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-access', AmpStoryAccess);
@@ -2369,4 +2395,5 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerServiceForDoc('amp-story-render', AmpStoryRender);
 });
