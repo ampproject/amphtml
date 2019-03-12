@@ -221,13 +221,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     this.viewport_.onResize(() => {
-      this.loadMoreEnabledPromise_.then(enabled => {
-        if (enabled) {
-          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
-        } else {
-          this.attemptToFit_(dev().assertElement(this.container_));
-        }
-      });
+      this.maybeResizeListToFitItems_();
     });
 
     this.loadMoreEnabledPromise_.then(enabled => {
@@ -246,6 +240,19 @@ export class AmpList extends AMP.BaseElement {
     });
 
     return this.fetchList_();
+  }
+
+  /**
+   * @private
+   */
+  maybeResizeListToFitItems_() {
+    this.loadMoreEnabledPromise_.then(enabled => {
+      if (enabled) {
+        this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+      } else {
+        this.attemptToFit_(dev().assertElement(this.container_));
+      }
+    });
   }
 
   /**
@@ -719,13 +726,7 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      this.loadMoreEnabledPromise_.then(enabled => {
-        if (enabled) {
-          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
-        } else {
-          this.attemptToFit_(dev().assertElement(this.container_));
-        }
-      });
+      this.maybeResizeListToFitItems_();
     });
   }
 
@@ -754,7 +755,6 @@ export class AmpList extends AMP.BaseElement {
   /**
    *
    * @param {!Element} target
-   * @return {!Promise}
    * @private
    */
   attemptToFitLoadMore_(target) {
@@ -767,11 +767,13 @@ export class AmpList extends AMP.BaseElement {
   /**
    * @param {?Element} element
    * @param {!Element} target
-   * @return {!Promise}
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    return this.measureElement(() => {
+    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+      return;
+    }
+    this.measureElement(() => {
       const targetHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       const loadMoreHeight = element ? element./*OK*/offsetHeight : 0;
