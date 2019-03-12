@@ -61,10 +61,10 @@ export class TemplateValidator extends Validator {
     // ensure this template will be valid AMP. We will pass the body of the
     // response as the creative, and downstream renderers may attempt to render
     // it as a non-AMP creative within a cross-domain iframe.
-    if (false && (!parsedResponseBody || !headers ||
+    if (!parsedResponseBody || !headers ||
         (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache' &&
          headers.get(DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME) !==
-           'amp-mustache'))) {
+           'amp-mustache')) {
       return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
             creativeData: {
@@ -78,7 +78,6 @@ export class TemplateValidator extends Validator {
     return getAmpAdTemplateHelper(context.win)
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
-          debugger;
           const creativeMetadata = getAmpAdMetadata(template);
           if (parsedResponseBody.analytics) {
             pushIfNotExist(
