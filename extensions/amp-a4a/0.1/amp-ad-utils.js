@@ -78,13 +78,21 @@ export function getAmpAdMetadata(creative) {
   try {
     const metaDataObj = parseJson(
         creative.slice(metadataStart + metadataString.length, metadataEnd));
-    const ampRuntimeUtf16CharOffsets =
+    let ampRuntimeUtf16CharOffsets =
       metaDataObj['ampRuntimeUtf16CharOffsets'];
     if (!isArray(ampRuntimeUtf16CharOffsets) ||
         ampRuntimeUtf16CharOffsets.length != 2 ||
         typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
         typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
-      throw new Error('Invalid runtime offsets');
+      const headStart = creative.indexOf('<head>');
+      const headEnd = creative.indexOf('</head>');
+      const headSubstring = creative.slice(
+          headStart, headEnd + '</head>'.length);
+      ampRuntimeUtf16CharOffsets = [
+          headStart + headSubstring.indexOf('<script'),
+          headStart + headSubstring.lastIndexOf('</script>') +
+              '</script>'.length
+      ];
     }
     const metaData = {};
     if (metaDataObj['customElementExtensions']) {

@@ -166,7 +166,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     }
     return response.arrayBuffer().then(unvalidatedBytes => {
       const validatorType = response.headers.get('AMP-Ad-Response-Type')
-          || 'default';
+          || 'template';
       dev().assert(this.validators_[validatorType],
           'Validator never registered!');
       return this.validators_[validatorType].validate(
