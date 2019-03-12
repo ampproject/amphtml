@@ -163,6 +163,7 @@ describes.realWin('amp-autocomplete unit tests', {
       target: {textContent: 'hello'},
     };
     return element.layoutCallback().then(() => {
+      const eventPreventSpy = sandbox.spy(event, 'preventDefault');
       const selectItemSpy = sandbox.spy(impl, 'selectItem_');
       const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       const clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
@@ -171,6 +172,7 @@ describes.realWin('amp-autocomplete unit tests', {
         expect(selectItemSpy).not.to.have.been.called;
         expect(clearAllSpy).not.to.have.been.called;
         expect(resetSpy).not.to.have.been.called;
+        expect(eventPreventSpy).not.to.have.been;
       }).then(() => {
         impl.activeElement_ = impl.createElementFromItem_('abc');
         return impl.keyDownHandler_(event).then(() => {
@@ -178,6 +180,8 @@ describes.realWin('amp-autocomplete unit tests', {
           expect(selectItemSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
           expect(resetSpy).to.have.been.calledOnce;
+          expect(impl.submitOnEnter_).to.be.false;
+          expect(eventPreventSpy).to.have.been.calledOnce;
         });
       });
     });
