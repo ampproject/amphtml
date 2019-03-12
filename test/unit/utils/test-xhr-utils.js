@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import * as mode from '../../../src/mode';
-import * as url from '../../../src/url';
 import {
   ALLOW_SOURCE_ORIGIN_HEADER,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
+  setupJsonFetchInit,
   verifyAmpCORSHeaders,
 } from '../../../src/utils/xhr-utils';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
 
@@ -67,41 +67,32 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   });
 
   describe('setupAMPCors', () => {
-    let getWinOrigin;
-    let parseUrlDeprecated;
-
-    beforeEach(() => {
-      getWinOrigin = sandbox.stub(url, 'getWinOrigin');
-      parseUrlDeprecated = sandbox.stub(url, 'parseUrlDeprecated');
-    });
-
     describe('requireAmpResponseSourceOrigin', () => {
       it('should be false if ampCors is false', () => {
-        getWinOrigin.returns('http://www.origin.org');
-        parseUrlDeprecated.returns({origin: 'http://www.origin.org'});
-        const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {ampCors: false});
+        const fetchInitDef = setupAMPCors(
+            {origin: 'http://www.origin.org'}, 'http://www.origin.org', {ampCors: false});
         expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(false);
       });
 
       it('should be set if not defined', () => {
-        getWinOrigin.returns('http://www.origin.org');
-        parseUrlDeprecated.returns({origin: 'http://www.origin.org'});
-        const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {});
+        const fetchInitDef = setupAMPCors(
+            {origin: 'http://www.origin.org'}, 'http://www.origin.org', {});
         expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(true);
       });
     });
 
     it('should set AMP-Same-Origin header', () => {
-      getWinOrigin.returns('http://www.origin.org');
-      parseUrlDeprecated.returns({origin: 'http://www.origin.org'});
-      const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {});
+      // Given a same origin request.
+      const fetchInitDef = setupAMPCors(
+          {origin: 'http://www.origin.org'}, 'http://www.origin.org', {});
+      // Expect proper header to be set.
       expect(fetchInitDef['headers']['AMP-Same-Origin']).to.equal('true');
     });
 
     it('should not set AMP-Same-Origin header', () => {
-      getWinOrigin.returns('http://www.origin.org');
-      parseUrlDeprecated.returns({origin: 'http://www.different.org'});
-      const fetchInitDef = setupAMPCors({}, 'http://www.origin.org', {headers: {}});
+      // If not a same origin request.
+      const fetchInitDef = setupAMPCors(
+          {origin: 'http://www.originz.org'}, 'http://www.origin.org', {headers: {}});
       expect(fetchInitDef['headers']['AMP-Same-Origin']).to.be.undefined;
     });
   });
@@ -121,6 +112,27 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       allowConsoleError(() => { expect(() => {
         setupInit({credentials: null}, 'text/html');
       }).to.throw(/Only credentials=include\|omit support: null/); });
+    });
+  });
+
+  describe('setupJsonFetchInit', () => {
+    it('set proper properties', () => {
+      expect(setupJsonFetchInit({body: {}})).to.deep.equal({
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: {},
+        method: 'GET',
+      });
+
+      expect(setupJsonFetchInit({body: {}, method: 'POST'})).to.deep.equal({
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: '{}',
+        method: 'POST',
+      });
     });
   });
 
@@ -157,7 +169,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should send xhr request to viewer', () => {
-      sandbox.stub(mode, 'getMode').returns({development: false});
+      const win = {AMP_MODE: {development: false}};
       viewer = Object.assign(viewer, {
         hasCapability: unusedParam => true,
         isTrustedViewer: () => Promise.resolve(true),
@@ -171,9 +183,20 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         },
       };
       viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
-      return getViewerInterceptResponse({}, ampDoc, 'https://www.googz.org', {body: {}})
+      return getViewerInterceptResponse(
+          win, ampDoc, 'https://www.googz.org', {body: {}})
           .then(() => {
+            const msgPayload = dict({
+              'originalRequest': {
+                'input': 'https://www.googz.org',
+                'init': {
+                  'body': {},
+                },
+              },
+            });
             expect(viewer.sendMessageAwaitResponse).to.have.been.called;
+            expect(viewer.sendMessageAwaitResponse)
+                .to.have.been.calledWith('xhr', msgPayload);
           });
     });
   });
