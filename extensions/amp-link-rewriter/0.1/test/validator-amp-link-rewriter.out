@@ -27,22 +27,22 @@ PASS
 |  </head>
 |  <body>
 |  <amp-link-rewriter layout="nodisplay">
-|  <script type="application/json">
-|  {
-|    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=${referrer}&location=${location}&rel=${rel}",
-|    "section": [
-|        "#track-section"
-|    ],
-|    "attribute": {
-|        "href": "^((?!\bgmail\\.com\b|\byoutube\\.com\b).)*$",
-|        "class": "content"
-|    },
-|    "vars": {
-|        "customerId": "12345",
-|        "merchantId": "3234"
-|    }
-|    }
-|  </script>
+|    <script type="application/json">
+|      {
+|        "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=${referrer}&location=${location}&rel=${rel}",
+|        "section": [
+|          "#track-section"
+|        ],
+|        "attribute": {
+|          "href": "^((?!\bgmail\\.com\b|\byoutube\\.com\b).)*$",
+|          "class": "content"
+|        },
+|        "vars": {
+|          "customerId": "12345",
+|          "merchantId": "3234"
+|        }
+|      }
+|    </script>
 |  </amp-link-rewriter>
 |  </body>
 |  </html>

@@ -30,7 +30,7 @@ tags: {  # amp-link-rewriter (json)
   tag_name: "SCRIPT"
   spec_name: "amp-link-rewriter extension .json script"
   requires_extension: "amp-link-rewriter"
-  mandatory_parent: "AMP-LINNK-REWRITER"
+  mandatory_parent: "AMP-LINK-REWRITER"
   attrs: {
     name: "type"
     mandatory: true
