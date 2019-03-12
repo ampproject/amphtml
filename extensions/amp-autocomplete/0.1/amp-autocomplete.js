@@ -288,11 +288,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let filteredData = data.filter(item => {
       switch (this.filter_) {
         case FilterType.SUBSTRING:
-          return includes(item, input);
+          return includes(item.toLowerCase(), input);
         case FilterType.PREFIX:
-          return startsWith(item, input);
+          return startsWith(item.toLowerCase(), input);
         case FilterType.TOKEN_PREFIX:
-          return item.split(' ').some(token => {
+          return item.toLowerCase().split(' ').some(token => {
             return startsWith(token, input);
           });
         case FilterType.FUZZY:
