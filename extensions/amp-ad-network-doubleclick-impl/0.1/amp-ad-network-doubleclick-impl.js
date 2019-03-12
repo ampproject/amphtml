@@ -1047,7 +1047,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if ((this.isFluidRequest_ && width && height) ||
         ((width != pWidth || height != pHeight) &&
          (width <= pWidth && height <= pHeight))) {
-      this.attemptChangeSize(height, width).catch((arg) => {});
+      this.attemptChangeSize(height, width).catch(() => {});
     }
   }
 
