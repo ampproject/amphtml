@@ -59,7 +59,7 @@ describes.endtoend('AMP list load-more=auto', {
     let listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
 
-    const article = await controller.findElement('html');
+    const article = await controller.findElement('article');
     await controller.scrollBy(article, {top: 50});
 
     const fourthItem = await controller.findElement('div.item:nth-child(4)');
