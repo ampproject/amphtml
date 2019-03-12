@@ -98,16 +98,16 @@
   position: absolute !important;
   top: 0 !important;
   right: 0 !important;
-  height: 36px !important;
-  width: 36px !important;
-  color: #757575 !important;
+  height: 30px !important;
+  width: 30px !important;
+  color: #9AA0A6 !important;
   cursor: pointer !important;
   font-size: 24px !important;
-  line-height: 36px !important;
+  line-height: 30px !important;
   text-align: center !important;
 }
 
 [desktop] .i-amphtml-story-share-item {
   padding: 0 !important;
-  margin: 12px 24px !important;
+  margin: 12px !important;
 }
