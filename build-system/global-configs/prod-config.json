@@ -56,6 +56,6 @@
   "fixed-elements-in-lightbox": 1,
   "amp-list-viewport-resize": 1,
   "amp-list-resizable-children": 1,
-  "amp-auto-lightbox": 0.05,
+  "amp-auto-lightbox": 0.5,
   "amp-list-load-more": 1
 }
