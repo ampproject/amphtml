@@ -80,19 +80,26 @@ export function getAmpAdMetadata(creative) {
         creative.slice(metadataStart + metadataString.length, metadataEnd));
     let ampRuntimeUtf16CharOffsets =
       metaDataObj['ampRuntimeUtf16CharOffsets'];
-    if (!isArray(ampRuntimeUtf16CharOffsets) ||
-        ampRuntimeUtf16CharOffsets.length != 2 ||
-        typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
-        typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
+    if (!isArray(ampRuntimeUtf16CharOffsets)) {
       const headStart = creative.indexOf('<head>');
       const headEnd = creative.indexOf('</head>');
       const headSubstring = creative.slice(
           headStart, headEnd + '</head>'.length);
+      const scriptStart = headSubstring.indexOf('<script');
+      const scriptEnd = headSubstring.lastIndexOf('</script>');
+      if (scriptStart < 0 || scriptEnd < 0) {
+        throw new Error('The mandatory script tag is missing or incorrect.');
+      }
       ampRuntimeUtf16CharOffsets = [
-        headStart + headSubstring.indexOf('<script'),
-        headStart + headSubstring.lastIndexOf('</script>') +
-            '</script>'.length,
+        // This assumes all script tags are contiguous.
+        // This assumption is enforced server-side.
+        headStart + scriptStart,
+        headStart + scriptEnd + '</script>'.length,
       ];
+    } else if (ampRuntimeUtf16CharOffsets.length != 2 ||
+        typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
+        typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
+      throw new Error('Invalid runtime offsets');
     }
     const metaData = {};
     if (metaDataObj['customElementExtensions']) {
