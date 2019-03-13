@@ -19,15 +19,16 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
+import {Services} from '../../../src/services';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -54,7 +55,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /**
      * The data extracted from the <script> tag optionally provided
      * as a child. For use with static data.
-     * @private {?Array}
+     * @private {?Array<JsonObject|string>}
      */
     this.inlineData_ = null;
 
@@ -99,6 +100,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.container_ = null;
+
+    /** @const @private {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
+
+    /**
+     * The reference to the <template> tag provided as a child.
+     * @private {?Element}
+     */
+    this.templateElement_ = null;
   }
 
   /** @override */
@@ -114,6 +124,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = inputElements[0];
+
+    if (this.templates_.hasTemplate(this.element, 'template')) {
+      this.templateElement_ =
+        this.templates_.findTemplate(this.element, 'template');
+    }
 
     this.filter_ = userAssert(this.element.getAttribute('filter'),
         `${TAG} requires "filter" attribute.`);
@@ -225,6 +240,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
+    element.setAttribute('value', item);
     element.textContent = item;
     return element;
   }
@@ -248,44 +264,71 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectHandler_(event) {
-    if (!this.isItemElement_(event.target)) {
-      return Promise.resolve();
-    }
-    return this.mutateElement(() => {
-      this.selectItem_(event.target);
+    let item;
+    return this.measureMutateElement(() => {
+      item = this.getItemElement_(event.target);
+    }, () => {
+      this.selectItem_(item);
     });
   }
 
   /**
    * Render filtered results on the current input and update the container_.
+   * @return {!Promise}
    * @private
    */
   renderResults_() {
     const userInput = this.inputElement_.value;
     this.clearAllItems_();
     if (userInput.length < this.minChars_ || !this.inlineData_) {
-      return;
+      return Promise.resolve();
     }
-    const filteredData = this.filterData_(this.inlineData_, userInput);
-    filteredData.forEach(item => {
-      this.container_.appendChild(this.createElementFromItem_(item));
-    });
 
-    // Append the partial user-provided input to navigate back to.
-    this.container_.appendChild(this.createElementFromItem_(userInput));
+    const filteredData = this.filterData_(this.inlineData_, userInput);
+    let renderPromise = Promise.resolve();
+    if (this.templateElement_) {
+      renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
+          filteredData).then(renderedChildren => {
+        renderedChildren.map(child => {
+          userAssert(child.hasAttribute('value'),
+              `${TAG} requires <template value=""> tag`);
+          child.classList.add('i-amphtml-autocomplete-item');
+          child.setAttribute('role', 'listitem');
+          this.container_.appendChild(child);
+        });
+      });
+    } else {
+      /**@type {!Array<string>} */ (filteredData).forEach(item => {
+        this.container_.appendChild(
+            this.createElementFromItem_(item));
+      });
+    }
+    return renderPromise.then(() => {
+      // Append the partial user-provided input to navigate back to.
+      this.container_.appendChild(this.createElementFromItem_(userInput));
+    });
   }
 
   /**
    * Apply the filter to the given data based on the given input.
-   * @param {!Array<string>} data
+   * @param {!Array<JsonObject|string>} data
    * @param {string} input
-   * @return {!Array<string>}
+   * @return {!Array<JsonObject|string>}
    * @private
    */
   filterData_(data, input) {
     input = input.toLowerCase();
+    const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     let filteredData = data.filter(item => {
       item = item.toLocaleLowerCase();
+      if (itemsExpr && itemsExpr != '.') {
+        userAssert(typeof item === 'object', `${TAG} using 'filter-item'
+          attribute must provide data as Array<JsonObject>.`);
+        item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
+      }
+      userAssert(typeof item === 'string',
+          `${TAG} data property "${itemsExpr}" must map to string type.`);
+      item = item.toLowerCase();
       switch (this.filter_) {
         case FilterType.SUBSTRING:
           return includes(item, input);
@@ -354,13 +397,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the given element is a suggested item.
+   * Returns the nearest ancestor element that is a suggested item.
    * @param {?Element|?EventTarget} element
-   * @private
+   * @return {?Element}
    */
-  isItemElement_(element) {
-    return element !== null &&
-      element.classList.contains('i-amphtml-autocomplete-item');
+  getItemElement_(element) {
+    if (element === null) {
+      return null;
+    }
+    if (element.classList.contains('i-amphtml-autocomplete-item')) {
+      return /**@type {!Element} */ (element);
+    }
+    return this.getItemElement_(element.parentElement);
   }
 
   /**
@@ -372,7 +420,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null) {
       return;
     }
-    this.inputElement_.value = element.textContent;
+    this.inputElement_.value = element.getAttribute('value');
     this.clearAllItems_();
   }
 
@@ -394,7 +442,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       if (resultsShowing) {
         this.activeIndex_ = mod(index, this.container_.children.length);
         newActiveElement = this.container_.children[this.activeIndex_];
-        newValue = newActiveElement.textContent;
+        newValue = newActiveElement.getAttribute('value');
         validItem = this.activeIndex_ !== this.container_.children.length - 1;
       }
     }, () => {
