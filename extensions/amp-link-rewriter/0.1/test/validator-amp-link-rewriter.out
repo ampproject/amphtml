@@ -1,6 +1,6 @@
-PASS
+FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
@@ -13,7 +13,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Valid amp-link-rewriter tag
+|    Tests amp-link-rewriter tag
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -26,6 +26,7 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
+|  <!-- Example of a valid amp-link-rewriter -->
 |  <amp-link-rewriter layout="nodisplay">
 |    <script type="application/json">
 |      {
@@ -44,5 +45,9 @@ PASS
 |      }
 |    </script>
 |  </amp-link-rewriter>
+|  <!-- Example of invalid amp-link-rewriter missing a script tag -->
+|  <amp-link-rewriter layout="nodisplay"></amp-link-rewriter>
+>> ^~~~~~~~~
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter.html:48:0 Tag 'amp-link-rewriter' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

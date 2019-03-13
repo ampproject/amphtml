@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {LinkShifter} from './link-shifter';
+import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
-import {getScopeElements} from './helper';
+import {getScopeElements} from './scope';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
 
@@ -32,8 +32,8 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /* @private {?./link-shifter} */
-    this.shifter_ = null;
+    /** @private {?./link-rewriter} */
+    this.rewriter_ = null;
 
     /** @private {?Object} */
     this.configOpts_ = {};
@@ -58,7 +58,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
    * @private
    */
   letsRockIt_() {
-    this.shifter_ = new LinkShifter(
+    this.rewriter_ = new LinkRewriter(
         this.element,
         this.viewer_);
 
@@ -77,7 +77,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
 
       const navigation = Services.navigationForDoc(nodeElement);
       navigation.registerAnchorMutator((anchor, event) => {
-        this.shifter_.clickHandler(event);
+        this.rewriter_.clickHandler(event);
       },
       Priority.LINK_REWRITER_MANAGER);
 

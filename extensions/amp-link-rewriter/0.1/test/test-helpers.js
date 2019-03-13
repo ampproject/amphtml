@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ const helpersMaker = () => {
     createLinkRewriterElement(config) {
 
       const element = document.createElement('amp-link-rewriter');
+      element.setAttribute('layout', 'nodisplay');
 
       element.innerHTML = '<script type="application/json">' +
         JSON.stringify(config) +

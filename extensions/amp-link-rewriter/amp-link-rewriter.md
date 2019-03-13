@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Run digidip inside your AMP page</td>
+    <td>Run link-rewriter inside your AMP page</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -46,17 +46,17 @@ Code:
     <script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`"></script>
 ```
 
-**Add the amp-digidip extension**
+**Add the amp-link-rewriter extension**
 Inside the `<body>...</body>` section of your AMP page, insert this code:
 
 Code:
 ```html
-    <amp-lin-rewriter
+    <amp-link-rewriter
         layout="nodisplay">
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}",
+                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
                     "section": [
                         "#product-listing-1",
                         "#product-listing-2",
@@ -95,7 +95,7 @@ The final code should look like:
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}",
+                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
                     "section": [
                         "#product-listing-1",
                         "#product-listing-2",
@@ -131,7 +131,7 @@ Example:
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&cid=${data.customerId}`",
+                    "output": "https://visit.digidip.net?pid=110&cid=${customerId}`",
                     "vars": {
                         "customerId": "12345"
                     }
@@ -150,7 +150,7 @@ The config could be something like:
 
 ```json
     {
-      "output": "https://visit.digidip.net?eid=${data.eventId}&cid=${data.customerId}"
+      "output": "https://visit.digidip.net?eid=${eventId}&cid=${customerId}"
 
     }
 ```
@@ -170,8 +170,8 @@ Besides defined placeholders that match the data defined in the 'vars' property 
 | rev            | anchor     |    `<a href="..." rel="pass" />`                      |  `${rel}`             
 | href           | anchor     |    `<a href="https://amazon.com" />`                  |  `${href}`            
 | rev            | anchor     |    `<a href="..." rev="author" />`                    |  `${rev}`             
-| data-vars-*    | anchor     |    `<a href="..." data-vars-merchant-id="123" />`     |  `${data.merchantId}`
-| vars.*         | config     |    `{ "vars": { "publisherId": "123" } }`             |  `${data.publisherId}`
+| data-vars-*    | anchor     |    `<a href="..." data-vars-merchant-id="123" />`     |  `${merchantId}`
+| vars.*         | config     |    `{ "vars": { "publisherId": "123" } }`             |  `${publisherId}`
 
 
 ##### section (optional)

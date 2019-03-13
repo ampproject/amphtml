@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-import {LinkShifter} from '../link-shifter';
+import {EVENTS} from '../../../amp-skimlinks/0.1/link-rewriter/constants';
+import {LinkRewriter} from '../link-rewriter';
+import {Services} from '../../../../src/services';
 import {getConfigOpts} from '../config-options';
-import {getScopeElements} from '../helper';
+import {getScopeElements} from '../scope';
 import helpersMaker from './test-helpers';
 
 describes.fakeWin('amp-link-rewriter', {
+  win: {
+    location: 'http://mydealz.com/123',
+  },
   amp: {
     extensions: ['amp-link-rewriter'],
   },
 }, env => {
 
-  let config, pageAttributes, helpers, mockedHtml;
+  let config, helpers, mockedHtml;
 
   beforeEach(() => {
 
     helpers = helpersMaker(env);
 
     config = {
-      'output': 'https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}&ref=${referrer}&location=${location}&rel=${rel}&usr=${data.customerId}&productId=${data.eventId}',
+      'output': 'https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}&ref=${referrer}&location=${location}&rel=${rel}&productId=${eventId}',
       'section': [
         '#track-section',
       ],
@@ -52,32 +57,32 @@ describes.fakeWin('amp-link-rewriter', {
       '<a class="sidebar" href="http://vendor.com">Vendor1</a>' +
       '<a class="sidebar" href="https://gmail.com">Vendor2</a>' +
       '</div>';
-
-    pageAttributes = {
-      referrer: 'http://mydealz.com',
-      location: 'http://mydealz.com/123',
-    };
-
   });
 
   afterEach(() => {
     env.sandbox.restore();
   });
 
-  it('Should match the built url', () => {
-
-    const linkRewriterElement = helpers.createLinkRewriterElement(config);
-
-    const shifter = new LinkShifter(linkRewriterElement, null);
-    const anchorElement = document.createElement('a');
+  it('Should match the built url', done => {
+    const fakeViewer = Services.viewerForDoc(env.ampdoc),
+        linkRewriterElement = helpers.createLinkRewriterElement(config),
+        rewriter = new LinkRewriter(linkRewriterElement, fakeViewer),
+        anchorElement = document.createElement('a');
 
     anchorElement.href = 'http://example.com';
     anchorElement.rel = '235';
     anchorElement.setAttribute('data-vars-event-id', '567');
 
-    expect(shifter.replacePlaceHolders(anchorElement, pageAttributes))
-        .to.equal('https://visit.digidip.net?pid=110&url=http%3A%2F%2Fexample.com&cid=&ref=http%3A%2F%2Fmydealz.com&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&usr=12345&productId=567');
-  });
+    rewriter.event_ = {
+      type: EVENTS.CLICK,
+    };
+
+    rewriter.setRedirectUrl_(anchorElement).then(() => {
+      expect(rewriter.rewrittenUrl)
+          .to.equal('https://visit.digidip.net?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&productId=567');
+
+    }).then(() => done(), done);
+  }).timeout(10000);
 
   it('Should return the number of anchors that match the config', () => {
 
@@ -93,7 +98,5 @@ describes.fakeWin('amp-link-rewriter', {
 
     expect(list.length).to.equal(1);
   });
-
-
 
 });
