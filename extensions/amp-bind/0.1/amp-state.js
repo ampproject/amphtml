@@ -155,7 +155,6 @@ export class AmpState extends AMP.BaseElement {
     return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token =>
       this.fetch_(ampdoc, element, policy, opt_refresh, token)
     );
-    // return this.fetch_(ampdoc, element, policy, opt_refresh);
   }
 
   /**
