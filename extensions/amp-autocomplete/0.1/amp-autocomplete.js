@@ -22,12 +22,12 @@ import {UrlReplacementPolicy,
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -160,11 +160,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @return {!Promise}
    */
   getRemoteData_() {
+    userAssert(!childElementsByTag(this.element, 'SCRIPT').length, `${TAG} 
+      should contain a <script> child OR a URL specified in "src", not both.`);
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
         policy).then(json => {
-      return json.items;
+      return json['items'] ? json['items'] : [];
     });
   }
 
