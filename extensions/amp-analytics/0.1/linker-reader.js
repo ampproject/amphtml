@@ -106,7 +106,7 @@ class LinkerReader {
  * @param {!Window} win
  */
 export function installLinkerReaderService(win) {
-  registerServiceBuilder(win, 'amp-analyitcs-linker-reader',
+  registerServiceBuilder(win, 'amp-analytics-linker-reader',
       LinkerReader);
 }
 
@@ -115,5 +115,5 @@ export function installLinkerReaderService(win) {
  * @return {!LinkerReader}
  */
 export function linkerReaderServiceFor(win) {
-  return getService(win, 'amp-analyitcs-linker-reader');
+  return getService(win, 'amp-analytics-linker-reader');
 }
