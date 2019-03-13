@@ -493,7 +493,7 @@ async function runTests() {
       }
       request.post(
           `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
-          '/unit/started', (error, response) => console.log(
+          '/unit/started', (error, response) => console/*OK*/.log(
               '[amp-test-status]', response && response.statusCode));
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
@@ -523,7 +523,7 @@ async function runTests() {
       request.post(
           `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
           `/unit/report/${results.passed}/${results.failed}`,
-          (error, response) => console.log(
+          (error, response) => console/*OK*/.log(
               '[amp-test-status]', response && response.statusCode));
     }).start();
     return deferred;
