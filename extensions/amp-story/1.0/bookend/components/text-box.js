@@ -35,7 +35,7 @@ export let TextBoxComponentDef;
  */
 function buildLineElement(line, contextEl) {
   const html = cachedHtmlFor(contextEl);
-  const el = html `<h3 class="i-amphtml-story-bookend-text"></h3>`;
+  const el = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
   el.textContent = line;
   return el;
 }

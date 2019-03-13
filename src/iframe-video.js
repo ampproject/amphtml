@@ -15,8 +15,8 @@
  */
 import {Services} from './services';
 import {VideoEvents} from './video-interface';
-import {cachedHtmlFor} from './static-template';
 import {dev} from './log';
+import {htmlFor} from './static-template';
 import {isArray, isObject} from './types';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
@@ -80,8 +80,8 @@ export function redispatch(element, event, events) {
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
-  const html = cachedHtmlFor(element);
   const frame = html`<iframe frameborder=0 allowfullscreen></iframe>`;
+  const html = htmlFor(element);
 
   if (opt_name) {
     frame.setAttribute('name', opt_name);

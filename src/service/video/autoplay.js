@@ -15,8 +15,8 @@
  */
 
 import {Services} from '../../services';
-import {cachedHtmlFor} from '../../static-template';
 import {dev} from '../../log';
+import {htmlFor} from '../../static-template';
 import {removeElement} from '../../dom';
 
 
@@ -25,7 +25,7 @@ import {removeElement} from '../../dom';
  * @return {!Element}
  */
 export function renderInteractionOverlay(element) {
-  const html = cachedHtmlFor(element);
+  const html = htmlFor(element);
   return html`<i-amphtml-video-mask class="i-amphtml-fill-content" role=button>
     </i-amphtml-video-mask>`;
 }
@@ -37,7 +37,7 @@ export function renderInteractionOverlay(element) {
  * @return {!Element}
  */
 export function renderIcon(win, element) {
-  const html = cachedHtmlFor(element);
+  const html = htmlFor(element);
   const icon = html`<i-amphtml-video-icon class="amp-video-eq">
     <div class="amp-video-eq-col">
       <div class="amp-video-eq-filler"></div>

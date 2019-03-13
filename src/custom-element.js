@@ -1595,8 +1595,8 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.loadingContainer_) {
         const html = cachedHtmlFor(this);
-        const container = html`
-            <div class="i-amphtml-loading-container i-amphtml-fill-content
+        const container =
+            html`<div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
         const element = createLoaderElement(this, this.elementName());
