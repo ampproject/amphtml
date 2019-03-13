@@ -163,10 +163,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
@@ -262,6 +259,22 @@ tags: {
   attrs: { name: "animate-in-duration" }
   attrs: { name: "grid-area" }
   attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
     name: "justify-content"
     value: "center"
     value: "end"
@@ -332,6 +345,22 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -421,10 +450,7 @@ tags: {  # <amp-story-consent>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
   requires: "amp-story-consent extension .json script"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
@@ -471,6 +497,22 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
@@ -514,6 +556,7 @@ descendant_tag_list: {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"
@@ -564,6 +607,7 @@ descendant_tag_list: {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-TIMEAGO"
+  tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
   tag: "ARTICLE"
   tag: "ASIDE"
@@ -598,6 +642,7 @@ descendant_tag_list: {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"
@@ -756,6 +801,7 @@ descendant_tag_list {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"

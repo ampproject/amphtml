@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as docready from '../../../../src/document-ready';
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
@@ -100,6 +101,7 @@ describes.realWin('HighlightHandler', {
   },
 }, env => {
   let root = null;
+  let docreadyCb = null;
   beforeEach(() => {
     const {document} = env.win;
     root = document.createElement('div');
@@ -110,6 +112,12 @@ describes.realWin('HighlightHandler', {
     const div1 = document.createElement('div');
     div1.textContent = 'highlighted text';
     root.appendChild(div1);
+
+    sandbox.stub(docready, 'whenDocumentReady').returns({
+      then: cb => {
+        docreadyCb = cb;
+      },
+    });
   });
 
   it('initialize with visibility=visible', () => {
@@ -124,6 +132,12 @@ describes.realWin('HighlightHandler', {
 
     const handler = new HighlightHandler(
         ampdoc,{sentences: ['amp', 'highlight']});
+
+    // initHighlight_ is not called before document become ready.
+    expect(handler.highlightedNodes_).to.be.null;
+    docreadyCb();
+    // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+    expect(handler.highlightedNodes_).not.to.be.null;
 
     expect(setScrollTop).to.be.calledOnce;
     expect(setScrollTop.firstCall.args.length).to.equal(1);
@@ -173,6 +187,7 @@ describes.realWin('HighlightHandler', {
 
     new HighlightHandler(ampdoc,
         {sentences: ['amp', 'highlight'], skipRendering: true});
+    docreadyCb();
 
     expect(scrollStub).not.to.be.called;
 
@@ -202,6 +217,7 @@ describes.realWin('HighlightHandler', {
         Services.viewerForDoc(ampdoc), 'sendMessage');
 
     new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
+    docreadyCb();
 
     expect(scrollStub).not.to.be.called;
 
@@ -230,6 +246,7 @@ describes.realWin('HighlightHandler', {
         .returns(VisibilityState.PRERENDER);
 
     new HighlightHandler(ampdoc,{sentences: ['amp', 'highlight']});
+    docreadyCb();
 
     expect(setScrollTop).to.be.calledOnce;
     expect(setScrollTop.firstCall.args.length).to.equal(1);
@@ -244,6 +261,7 @@ describes.realWin('HighlightHandler', {
 
   it('calcTopToCenterHighlightedNodes_ center elements', () => {
     const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    docreadyCb();
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
@@ -259,6 +277,7 @@ describes.realWin('HighlightHandler', {
 
   it('calcTopToCenterHighlightedNodes_ too tall element', () => {
     const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    docreadyCb();
     expect(handler.highlightedNodes_).not.to.be.null;
 
     const viewport = Services.viewportForDoc(env.ampdoc);
@@ -276,6 +295,7 @@ describes.realWin('HighlightHandler', {
 
   it('mayAdjustTop_', () => {
     const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    docreadyCb();
     expect(handler.highlightedNodes_).not.to.be.null;
 
     // Set up an environment where calcTopToCenterHighlightedNodes_

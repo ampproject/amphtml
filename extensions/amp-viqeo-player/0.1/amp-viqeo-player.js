@@ -205,7 +205,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       placeholder.setAttribute('alt', 'Loading video');
     }
     placeholder.setAttribute('src',
-        `http://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`);
+        `https://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`);
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

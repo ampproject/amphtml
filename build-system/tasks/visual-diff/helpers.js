@@ -20,7 +20,7 @@ const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
 const {isTravisBuild} = require('../../travis');
 
-const CSS_SELECTOR_RETRY_MS = 100;
+const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
@@ -65,61 +65,48 @@ function log(mode, ...messages) {
  *
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {string} testName the full name of the test.
- * @param {!Array<string>} forbiddenCss Array of CSS elements that must not be
- *     found in the page.
- * @param {!Array<string>} loadingIncompleteCss Array of CSS elements that must
- *     eventually be removed from the page.
- * @param {!Array<string>} loadingCompleteCss Array of CSS elements that must
- *     eventually appear on the page.
- * @throws {string} an encountered error.
+ * @param {!Array<string>} selectors Array of CSS selector that must eventually
+ *     be removed from the page.
+ * @throws {Error} an encountered error.
  */
-async function verifyCssElements(page, testName, forbiddenCss,
-  loadingIncompleteCss, loadingCompleteCss) {
-  // Begin by waiting for all loader dots to disappear.
-  if (!(await waitForLoaderDot(page))) {
-    throw new Error(`${colors.cyan(testName)} still has the AMP loader dot ` +
-        `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+async function verifySelectorsInvisible(page, testName, selectors) {
+  log('verbose', 'Waiting for invisibility of all:',
+      colors.cyan(selectors.join(', ')));
+  for (const selector of selectors) {
+    if (!(await waitForElementVisibility(page, selector, {hidden: true}))) {
+      throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+          `selector ${colors.cyan(selector)} is still visible after ` +
+          `${CSS_SELECTOR_TIMEOUT_MS} ms`);
+    }
   }
+}
 
-  if (forbiddenCss) {
-    for (const css of forbiddenCss) {
-      if ((await page.$(css)) !== null) {
-        throw new Error(`${colors.cyan(testName)} | The forbidden CSS ` +
-            `element ${colors.cyan(css)} exists in the page`);
-      }
+/**
+ * Verifies that all CSS elements are as expected before taking a snapshot.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {string} testName the full name of the test.
+ * @param {!Array<string>} selectors Array of CSS selectors that must
+ *     eventually appear on the page.
+ * @throws {Error} an encountered error.
+ */
+async function verifySelectorsVisible(page, testName, selectors) {
+  log('verbose', 'Waiting for existence of all:',
+      colors.cyan(selectors.join(', ')));
+  for (const selector of selectors) {
+    if (!(await waitForSelectorExistence(page, selector))) {
+      throw new Error(`${colors.cyan(testName)} | The CSS selector ` +
+          `${colors.cyan(selector)} does not match any elements in the page`);
     }
   }
 
-  if (loadingIncompleteCss) {
-    log('verbose', 'Waiting for invisibility of all:',
-        colors.cyan(loadingIncompleteCss.join(', ')));
-    for (const css of loadingIncompleteCss) {
-      if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
-        throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
-            `selector ${colors.cyan(css)} is still visible after ` +
-            `${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      }
-    }
-  }
-
-  if (loadingCompleteCss) {
-    log('verbose', 'Waiting for existence of all:',
-        colors.cyan(loadingCompleteCss.join(', ')));
-    for (const css of loadingCompleteCss) {
-      if (!(await waitForSelectorExistence(page, css))) {
-        throw new Error(`${colors.cyan(testName)} | The CSS selector ` +
-            `${colors.cyan(css)} does not match any elements in the page`);
-      }
-    }
-
-    log('verbose', 'Waiting for visibility of all:',
-        colors.cyan(loadingCompleteCss.join(', ')));
-    for (const css of loadingCompleteCss) {
-      if (!(await waitForElementVisibility(page, css, {visible: true}))) {
-        throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
-            `selector ${colors.cyan(css)} is still invisible after ` +
-            `${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      }
+  log('verbose', 'Waiting for visibility of all:',
+      colors.cyan(selectors.join(', ')));
+  for (const selector of selectors) {
+    if (!(await waitForElementVisibility(page, selector, {visible: true}))) {
+      throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+          `selector ${colors.cyan(selector)} is still invisible after ` +
+          `${CSS_SELECTOR_TIMEOUT_MS} ms`);
     }
   }
 }
@@ -128,11 +115,16 @@ async function verifyCssElements(page, testName, forbiddenCss,
  * Wait for all AMP loader dot to disappear.
  *
  * @param {!puppeteer.Page} page page to wait on.
- * @return {boolean} true if the loader dot disappeared before the timeout.
+ * @param {string} testName the full name of the test.
+ * @throws {Error} an encountered error.
  */
-async function waitForLoaderDot(page) {
-  return await waitForElementVisibility(
+async function waitForLoaderDots(page, testName) {
+  const allLoaderDotsGone = await waitForElementVisibility(
       page, '.i-amphtml-loader-dot', {hidden: true});
+  if (!allLoaderDotsGone) {
+    throw new Error(`${colors.cyan(testName)} still has the AMP loader dot ` +
+        `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+  }
 }
 
 /**
@@ -203,4 +195,9 @@ async function waitForSelectorExistence(page, selector) {
   return false;
 }
 
-module.exports = {log, verifyCssElements};
+module.exports = {
+  log,
+  waitForLoaderDots,
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
+};

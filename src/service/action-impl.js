@@ -437,13 +437,42 @@ export class ActionService {
 
   /**
    * Checks if the given element has registered a particular action type.
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {string} actionEventType
    * @param {!Element=} opt_stopAt
    * @return {boolean}
    */
-  hasAction(target, actionEventType, opt_stopAt) {
-    return !!this.findAction_(target, actionEventType, opt_stopAt);
+  hasAction(element, actionEventType, opt_stopAt) {
+    return !!this.findAction_(element, actionEventType, opt_stopAt);
+  }
+
+  /**
+   * Checks if the given element's registered action resolves to at least one
+   * existing element by id or a global target (e.g. "AMP").
+   * @param {!Element} element
+   * @param {string} actionEventType
+   * @param {!Element=} opt_stopAt
+   * @return {boolean}
+   */
+  hasResolvableAction(element, actionEventType, opt_stopAt) {
+    const action = this.findAction_(element, actionEventType, opt_stopAt);
+    if (!action) {
+      return false;
+    }
+    return action.actionInfos.some(({target}) => !!this.getActionNode_(target));
+  }
+
+  /**
+   * For global targets e.g. "AMP", returns the document root. Otherwise,
+   * `target` is an element id and the corresponding element is returned.
+   * @param {string} target
+   * @return {?Document|?Element|?ShadowRoot}
+   * @private
+   */
+  getActionNode_(target) {
+    return this.globalTargets_[target] ?
+      this.root_ :
+      this.root_.getElementById(target);
   }
 
   /**
@@ -487,24 +516,18 @@ export class ActionService {
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-    action.actionInfos.forEach(actionInfo => {
-      const {target} = actionInfo;
-      const args = dereferenceArgsVariables(actionInfo.args, event, opt_args);
+    action.actionInfos.forEach(({target, args, method, str}) => {
+      const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
-        // For global targets e.g. "AMP, `node` is the document root. Otherwise,
-        // `target` is an element id and `node` is the corresponding element.
-        const node = (this.globalTargets_[target])
-          ? this.root_
-          : this.root_.getElementById(target);
-        if (node) {
-          const invocation = new ActionInvocation(node, actionInfo.method,
-              args, source, action.node, event, trust,
-              actionEventType, node.tagName || target, sequenceId);
-          return this.invoke_(invocation);
-        } else {
-          this.error_(`Target "${target}" not found for action ` +
-              `[${actionInfo.str}].`);
+        const node = this.getActionNode_(target);
+        if (!node) {
+          this.error_(`Target "${target}" not found for action [${str}].`);
+          return;
         }
+        const invocation = new ActionInvocation(node, method,
+            dereferencedArgs, source, action.node, event, trust,
+            actionEventType, node.tagName || target, sequenceId);
+        return this.invoke_(invocation);
       };
       // Wait for the previous action, if any.
       currentPromise = (currentPromise)
@@ -788,9 +811,6 @@ export class DeferredEvent {
   constructor(event) {
     /** @type {?Object} */
     this.detail = null;
-
-    /** @type {?Object} */
-    this.additionalViewportData;
 
     cloneWithoutFunctions(event, this);
   }

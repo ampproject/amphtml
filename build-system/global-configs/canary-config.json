@@ -4,7 +4,9 @@
     "amp-next-page",
     "ampdoc-shell",
     "disable-amp-story-desktop",
-    "linker-meta-opt-in"
+    "linker-meta-opt-in",
+    "inabox-viewport-friendly",
+    "amp-img-auto-sizes"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
@@ -45,13 +47,16 @@
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "layers": 0,
+  "layers": 1,
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
   "hidden-mutation-observer": 1,
   "sandbox-ads": 1,
+  "fixed-elements-in-lightbox": 1,
   "amp-list-viewport-resize": 1,
   "amp-list-resizable-children": 1,
-  "amp-auto-lightbox": 1
+  "amp-auto-lightbox": 1,
+  "amp-img-auto-sizes": 1,
+  "amp-list-load-more": 1
 }

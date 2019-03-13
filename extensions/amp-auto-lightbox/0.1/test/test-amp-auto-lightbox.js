@@ -67,7 +67,8 @@ describes.realWin(TAG, {
   }
 
   const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
-  const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
+  const mockAllCriteriaMet = isMet =>
+    stubAllCriteriaMet().returns(tryResolve(() => isMet));
 
   function mockCandidates(candidates) {
     env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
@@ -176,13 +177,22 @@ describes.realWin(TAG, {
       criteriaIsMetThereforeAcceptsOrRejects(false, [{rejects: 'any'}]);
     });
 
+    beforeEach(() => {
+      // Insert element for valid tap actions to be resolved.
+      env.win.document.body.appendChild(html`<div id="valid"></div>`);
+    });
+
     itAcceptsOrRejects([
       {
         accepts: 'elements by default',
       },
       {
         accepts: 'elements with a non-tap action',
-        mutate: el => el.setAttribute('on', 'nottap:doSomething'),
+        mutate: el => el.setAttribute('on', 'nottap:valid'),
+      },
+      {
+        accepts: 'elements with a tap action that does not resolve to a node',
+        mutate: el => el.setAttribute('on', 'tap:i-do-not-exist'),
       },
       {
         accepts: 'elements inside non-clickable anchor',
@@ -198,12 +208,11 @@ describes.realWin(TAG, {
       },
       {
         rejects: 'items actionable by tap with a single action',
-        mutate: el => el.setAttribute('on', 'tap:doSomething'),
+        mutate: el => el.setAttribute('on', 'tap:valid'),
       },
       {
         rejects: 'items actionable by tap with multiple actions',
-        mutate: el =>
-          el.setAttribute('on', 'whatever:doSomething;tap:doSomethingElse'),
+        mutate: el => el.setAttribute('on', 'whatever:something;tap:valid'),
       },
       {
         rejects: 'items inside an amp-selector',
@@ -426,9 +435,9 @@ describes.realWin(TAG, {
 
       const allCriteriaMet = stubAllCriteriaMet();
 
-      allCriteriaMet.withArgs(matchEquals(a)).returns(true);
-      allCriteriaMet.withArgs(matchEquals(b)).returns(false);
-      allCriteriaMet.withArgs(matchEquals(c)).returns(true);
+      allCriteriaMet.withArgs(matchEquals(a)).returns(tryResolve(() => true));
+      allCriteriaMet.withArgs(matchEquals(b)).returns(tryResolve(() => false));
+      allCriteriaMet.withArgs(matchEquals(c)).returns(tryResolve(() => true));
 
       mockCandidates([a, b, c]);
       mockIsProxyOrigin(true);

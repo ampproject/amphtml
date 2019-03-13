@@ -158,6 +158,26 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 
 
 /**
+ * Most transferred fixed elements are hidden when a lightbox is opened. This
+ * prevents fixed elements from being displayed on top of lightboxes.
+ */
+#i-amphtml-wrapper + body[i-amphtml-lightbox] {
+  visibility: hidden;
+}
+/**
+ * The exception to the above is descendants of lightboxes, which we only
+ * want to display when a lightbox is open (the opposite behavior!).
+ * See fixed-layer.js#enterLightbox() for details.
+ */
+#i-amphtml-wrapper + body .i-amphtml-lightbox-element {
+  visibility: hidden;
+}
+#i-amphtml-wrapper + body[i-amphtml-lightbox] .i-amphtml-lightbox-element {
+  visibility: visible;
+}
+
+
+/**
  * iOS-Embed Wrapper shadow root mode. The `body` children are distributed
  * inside a scrollable element inside the shadow root.
  */
@@ -830,7 +850,7 @@ amp-story[standalone], amp-story-page {
 }
 
 amp-story[standalone] {
-  background-color: #fff !important;
+  background-color: #202125 !important;
   position: relative !important;
 }
 
@@ -840,6 +860,18 @@ amp-story-page {
 
 amp-story .i-amphtml-loader {
   display: none !important;
+}
+
+/**
+ * amp-autocomplete to avoid FOUC.
+ */
+amp-autocomplete {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+amp-autocomplete > input {
+  padding: 4px !important;
 }
 
 /**
@@ -862,7 +894,7 @@ amp-story .i-amphtml-loader {
 /**
  * Make amp-addthis tool floating if user give data-widget-type
  */
-@media only screen and (max-width: 980px) {
+@media only screen and (max-width: 979px) {
   amp-addthis[data-widget-type="floating"] {
     position: fixed !important;
     width: 100% !important;
@@ -870,11 +902,8 @@ amp-story .i-amphtml-loader {
     bottom: 0;
   }
 }
-@media only screen and (min-width: 981px) {
+@media only screen and (min-width: 980px) {
   amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 100% !important;
-    height: 300px!important;
-    top: 200px;
+    display:none;
   }
 }

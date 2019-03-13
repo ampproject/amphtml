@@ -38,8 +38,11 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let ampdoc;
   let viewer;
   let child;
+  let sandbox;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
+
     env.iframe.style.width = '100px';
     env.iframe.style.height = '200px';
     win = env.win;
@@ -139,6 +142,19 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(binding.getContentHeight()).to.equal(310);
   });
 
+  it('should account for child margin-top', () => {
+    child.style.marginTop = '15px';
+    expect(binding.getContentHeight()).to.equal(315);
+  });
+
+  it('should account for child margin-top (WebKit)', () => {
+    sandbox.stub(win.document, 'scrollingElement').value(null);
+    sandbox.stub(binding.platform_, 'isWebKit').returns(true);
+
+    child.style.marginTop = '15px';
+    expect(binding.getContentHeight()).to.equal(315);
+  });
+
   it('should update scrollTop on scrollElement', () => {
     win.pageYOffset = 11;
     win.document.scrollingElement.scrollTop = 17;
@@ -183,7 +199,6 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(rect.width).to.equal(14); // round(13.5)
     expect(rect.height).to.equal(15); // round(14.5)
   });
-
 
   it('should disable scroll temporarily and reset scroll', () => {
     let htmlCss = win.getComputedStyle(win.document.documentElement);
@@ -385,6 +400,11 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     binding.updatePaddingTop(10);
     binding.setScrollTop(20); // should have no effect on height
     expect(binding.getContentHeight()).to.equal(311); // +1px for border-top.
+  });
+
+  it('should account for child margin-top', () => {
+    child.style.marginTop = '15px';
+    expect(binding.getContentHeight()).to.equal(316); // +1px for border-top.
   });
 
   it('should update scrollTop on wrapper', () => {
@@ -733,6 +753,11 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       binding.updatePaddingTop(10);
       binding.setScrollTop(20); // should have no effect on height
       expect(binding.getContentHeight()).to.equal(311); // +1px for border-top.
+    });
+
+    it('should account for child margin-top', () => {
+      child.style.marginTop = '15px';
+      expect(binding.getContentHeight()).to.equal(316); // +1px for border-top.
     });
 
     it('should update scrollTop on scroller', () => {

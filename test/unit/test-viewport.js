@@ -123,6 +123,8 @@ describes.fakeWin('Viewport', {}, env => {
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
     viewport.fixedLayer_ = {
+      enterLightbox: () => {},
+      leaveLightbox: () => {},
       update: () => {
         return {then: callback => callback()};
       },
@@ -567,19 +569,18 @@ describes.fakeWin('Viewport', {}, env => {
     const requestingEl = document.createElement('div');
 
     viewport.vsync_ = {mutate: callback => callback()};
-    const enterOverlayModeStub = sandbox.stub(viewport, 'enterOverlayMode');
-    const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
-    const maybeEnterFieLightboxStub =
-        sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
+    sandbox.stub(viewport, 'enterOverlayMode');
+    sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
+    sandbox.stub(viewport.fixedLayer_, 'enterLightbox');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
     viewport.enterLightboxMode(requestingEl);
 
     bindingMock.verify();
-    expect(enterOverlayModeStub).to.be.calledOnce;
-    expect(hideFixedLayerStub).to.be.calledOnce;
-    expect(maybeEnterFieLightboxStub).to.be.calledOnce;
+    expect(viewport.enterOverlayMode).to.be.calledOnce;
+    expect(viewport.maybeEnterFieLightboxMode).to.be.calledOnce;
+    expect(viewport.fixedLayer_.enterLightbox).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('requestFullOverlay',
@@ -590,19 +591,18 @@ describes.fakeWin('Viewport', {}, env => {
     const requestingEl = document.createElement('div');
 
     viewport.vsync_ = {mutate: callback => callback()};
-    const leaveOverlayModeStub = sandbox.stub(viewport, 'leaveOverlayMode');
-    const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
-    const maybeLeaveFieLightboxStub =
-        sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
+    sandbox.stub(viewport, 'leaveOverlayMode');
+    sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
+    sandbox.stub(viewport.fixedLayer_, 'leaveLightbox');
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
     viewport.leaveLightboxMode(requestingEl);
 
     bindingMock.verify();
-    expect(leaveOverlayModeStub).to.be.calledOnce;
-    expect(showFixedLayerStub).to.be.calledOnce;
-    expect(maybeLeaveFieLightboxStub).to.be.calledOnce;
+    expect(viewport.leaveOverlayMode).to.be.calledOnce;
+    expect(viewport.maybeLeaveFieLightboxMode).to.be.calledOnce;
+    expect(viewport.fixedLayer_.leaveLightbox).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('cancelFullOverlay',
@@ -837,7 +837,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  it('scrolls with animateScrollIntoView respecting padding', function* () {
+  it('scrolls with animateScrollIntoView respecting padding', async() => {
     const element = document.createElement('div');
 
     // animateScrollIntoView traverses up the DOM tree, so it needs the node to
@@ -863,14 +863,14 @@ describes.fakeWin('Viewport', {}, env => {
     stubVsyncMeasure();
 
     const duration = 1000;
-
-    const animatePromise = viewport.animateScrollIntoView(element, duration);
+    const pos = 'top';
+    const promise = viewport.animateScrollIntoView(element, pos, duration);
 
     clock.tick(duration);
 
     runVsync();
 
-    yield animatePromise;
+    await promise;
 
     bindingMock.verify();
 
@@ -891,7 +891,9 @@ describes.fakeWin('Viewport', {}, env => {
     sandbox.stub(viewport, 'getScrollTop').returns(111);
     bindingMock.expects('setScrollTop').withArgs(111).never();
     const duration = 1000;
-    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+    const pos = 'top';
+    const promise = viewport.animateScrollIntoView(element, pos, 1000);
+    promise.then(() => {
       bindingMock.verify();
     });
     clock.tick(duration);

@@ -65,6 +65,7 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   height: 24px !important;
   left: 0 !important;
   padding: 14px 0 0 !important;
+  pointer-events: none !important;
   position: absolute !important;
   top: 0 !important;
   z-index: 100001 !important;

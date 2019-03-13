@@ -29,7 +29,6 @@ tags: {  # <amp-payment-google-button> (json)
   spec_name: "amp-payment-google-button extension .json script"
   requires_extension: "amp-payment-google-button"
   mandatory_parent: "AMP-PAYMENT-GOOGLE-BUTTON"
-  attrs: { name: "name" }
   attrs: {
     disabled_by: "transformed"
     name: "nonce"
@@ -40,6 +39,7 @@ tags: {  # <amp-payment-google-button> (json)
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "name-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -53,6 +53,11 @@ tags: {  # <amp-payment-google-button>
   requires_extension: "amp-payment-google-button"
   attrs: {
     name: "is-test-mode"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "render_only_if_payment_method_present"
     value_casei: "false"
     value_casei: "true"
   }

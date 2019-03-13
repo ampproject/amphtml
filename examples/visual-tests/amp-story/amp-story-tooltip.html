@@ -21,16 +21,6 @@
         display: none;
       }
 
-      /*
-       * The share pill text does not show in the same place consistently, and
-       * as such causes the visual tests to be flaky.  This hides the share pill
-       * with visibility: hidden, so as to keep other elements in the same place
-       * that they would otherwise be, while deflaking the tests.  See #19890.
-       */
-       .i-amphtml-story-share-pill {
-        visibility: hidden;
-      }
-
       h1.hello-world {
         color: white;
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
@@ -65,7 +55,7 @@
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
           <p>Page two of two</p>
-          <a href="google.com" role="link"  class="title-small center">Click me!</a>
+          <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
         </amp-story-grid-layer>
       </amp-story-page>
 

@@ -104,6 +104,17 @@ const forbiddenTerms = {
       'build-system/app.js',
       'build-system/amp4test.js',
       'build-system/check-package-manager.js',
+      'build-system/pr-check/build.js',
+      'build-system/pr-check/build-targets.js',
+      'build-system/pr-check/checks.js',
+      'build-system/pr-check/dist.js',
+      'build-system/pr-check/dist-tests.js',
+      'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/remote-tests.js',
+      'build-system/pr-check/utils.js',
+      'build-system/pr-check/validator-tests.js',
+      'build-system/pr-check/visual-diff-tests.js',
+      'build-system/pr-check/yarn-checks.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -169,6 +180,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -397,6 +409,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',
@@ -404,6 +417,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'eval\\(': {
@@ -798,14 +812,8 @@ const forbiddenTermsSrcInclusive = {
     'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/css-expr-impl.js',
+      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
       'extensions/amp-bind/0.1/bind-expr-impl.js',
-    ],
-  },
-  'scopeSelectorForTesting': {
-    message: 'scopeSelector is not intended to be used outside of dom.js',
-    whitelist: [
-      'src/dom.js',
     ],
   },
   '[^.]loadPromise': {
