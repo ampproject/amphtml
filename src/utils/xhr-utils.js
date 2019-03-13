@@ -422,7 +422,7 @@ export function getViewerAuthTokenIfAvailable(win, element) {
       element.getAttribute('crossorigin');
   if (crossOriginAttr &&
       crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
-    return Services.viewerAssistanceForDocOrNull(win)
+    return Services.viewerAssistanceForDocOrNull(element)
         .then(viewerAssistance => {
           userAssert(viewerAssistance,
               'crossorigin="amp-viewer-auth-token-post" ' +

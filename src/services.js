@@ -588,14 +588,14 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
    */
-  static viewerAssistanceForDocOrNull(win) {
+  static viewerAssistanceForDocOrNull(element) {
     return (
     /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
-      (getElementServiceIfAvailable(win, 'amp-viewer-assistance',
-          'amp-viewer-assistance', true)));
+      (getElementServiceIfAvailableForDoc(element, 'amp-viewer-assistance',
+          'amp-viewer-assistance')));
   }
 
   /**
