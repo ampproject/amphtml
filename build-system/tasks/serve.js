@@ -101,6 +101,7 @@ gulp.task(
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
         'inspect': '  Run nodemon in `inspect` mode',
+        'offline': '  Serve the dashboard using locally built extensions for offline development.'
       },
     }
 );
