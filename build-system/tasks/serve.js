@@ -44,6 +44,13 @@ function serve() {
     log(colors.green('Serving unminified js'));
   }
 
+  // Get if we are offline
+  if (argv.offline) {
+    process.env.OFFLINE = true;
+    log(colors.red('OFFLINE MODE. SERVING DASHBOARD v0 AND EXTENSIONS FROM dist/ .'));
+    log(colors.green('Offline only works after running `gulp build`. Broken extensions will break the dashboard.'));
+  }
+
   const config = {
     script: require.resolve('../server.js'),
     watch: [

@@ -17,11 +17,11 @@
 /* eslint-disable amphtml-internal/html-template */
 
 const assert = require('assert');
-const boilerPlate = require('./boilerplate');
+const minimist = require('minimist');
 
+const boilerPlate = require('./boilerplate');
 const {html, joinFragments} = require('./html');
 const {matchIterator} = require('./regex');
-
 
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
 const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
@@ -33,14 +33,12 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-
 const ExtensionScript = ({name, version, isTemplate}) =>
   html`<script
     async
     ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
-    src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
+    src="${process.env.OFFLINE ? '/dist' : 'https://cdn.ampproject.org'}/v0/${name}-${version || '0.1'}${process.env.OFFLINE ? '.max' : ''}.js">
   </script>`;
-
 
 const AmpState = (id, state) => html`
   <amp-state id="${id}">
@@ -74,7 +72,7 @@ const AmpDoc = ({body, css, head, canonical}) => {
       ${css ? html`<style amp-custom>${css}</style>` : ''}
       <link rel="canonical" href="${canonical}">
       ${boilerPlate}
-      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      <script async src="${process.env.OFFLINE ? '/dist/amp.js' : 'https://cdn.ampproject.org/v0.js'}"></script>
       ${head || ''}
     </head>
     <body>
