@@ -45,7 +45,8 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         },
       };
       expect(() => {
-        verifyAmpCORSHeaders(win, response, /* init */ {});}).to.not.throw;
+        verifyAmpCORSHeaders(win, response, /* init */ {});
+      }).to.not.throw;
     });
 
     it('should throw error if invalid origin', () => {
