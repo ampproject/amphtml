@@ -482,27 +482,32 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeds_();
-    this.resizeInteractiveEmbeds_(forceResize);
+    this.resizeInteractiveEmbeddedComponents_(forceResize);
   }
 
   /**
    * Adds a pseudo element on top of the embed to block clicks from going into
    * the iframe.
+   * @private
    */
   addClickShieldToEmbeds_() {
+    const els = [];
     scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS).forEach(
-        el => {
-          this.resources_.mutateElement(el, () => {
-            el.classList.add('i-amphtml-embedded-component');
-          });
-        });
+        el => els.push(el));
+
+    this.mutateElement(() => {
+      els.forEach(el => {
+        el.classList.add('i-amphtml-embedded-component');
+      });
+    });
   }
 
   /**
    * Resizes interactive embeds to prepare them for their expanded animation.
    * @param {boolean} forceResize
+   * @private
    */
-  resizeInteractiveEmbeds_(forceResize) {
+  resizeInteractiveEmbeddedComponents_(forceResize) {
     scopedQuerySelectorAll(this.element,
         INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
@@ -1028,7 +1033,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   toggleLoadingSpinner_(isActive) {
-    this.resources_.mutateElement(this.element, () => {
+    this.mutateElement(() => {
       if (!this.loadingSpinner_) {
         this.buildAndAppendLoadingSpinner_();
       }

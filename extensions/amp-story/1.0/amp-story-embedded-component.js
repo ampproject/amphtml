@@ -71,7 +71,7 @@ export const EXPANDABLE_COMPONENTS = {
     '0 78.62 23"/></g></svg>',
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
-    selector: 'amp-twitter[interactive=yes]',
+    selector: 'amp-twitter',
   },
 };
 
@@ -88,6 +88,12 @@ const LAUNCHABLE_COMPONENTS = {
   },
 };
 
+/** @const {!Array<string>} */
+const INTERACTIVE_ATTR_NAMES = [
+  '[interactive="true"]',
+  '[interactive=""]',
+  '[interactive]'];
+
 /**
  * Union of expandable and launchable components.
  * @private
@@ -99,16 +105,23 @@ const INTERACTIVE_COMPONENTS = Object.assign({}, EXPANDABLE_COMPONENTS,
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
+ * @param {Array<string>=} opt_attrs
  * @return {!Object<string, string>}
  */
-function getComponentSelectors(components) {
-  const obj = {};
+function getComponentSelectors(components, opt_attrs) {
+  const componentSelectors = {};
 
-  Object.keys(components).forEach(key => {
-    obj[key] = components[key].selector;
+  Object.keys(components).forEach(componentName => {
+    let {selector} = components[componentName];
+
+    if (opt_attrs) {
+      selector = opt_attrs.map(attr => selector + attr).join(',');
+    }
+
+    componentSelectors[componentName] = selector;
   });
 
-  return obj;
+  return componentSelectors;
 }
 
 /**
@@ -117,7 +130,7 @@ function getComponentSelectors(components) {
  */
 export function expandableElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return getComponentSelectors(EXPANDABLE_COMPONENTS);
+  return getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAMES);
 }
 
 /**
@@ -125,7 +138,7 @@ export function expandableElementsSelectors() {
  * @type {!Object}
  */
 const interactiveSelectors = Object.assign({},
-    getComponentSelectors(INTERACTIVE_COMPONENTS),
+    getComponentSelectors(INTERACTIVE_COMPONENTS, INTERACTIVE_ATTR_NAMES),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });

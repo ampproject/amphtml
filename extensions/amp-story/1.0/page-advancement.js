@@ -42,7 +42,7 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
-const EMBEDDED_COMPONENT_SELECTORS = Object.values(
+const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
     interactiveElementsSelectors()).join(',');
 
 /** @const {number} */
@@ -484,7 +484,7 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.canShowTooltip_(event) &&
-      matches(target, EMBEDDED_COMPONENT_SELECTORS)) {
+      matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
