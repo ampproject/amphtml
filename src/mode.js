@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {getCookieExperimentIdValue} from './cookies';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -110,7 +110,7 @@ function getMode_(win) {
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    log: hashQuery['log'],
+    log: hashQuery['log'] || getCookieExperimentIdValue(win, 'log'),
     version,
     rtvVersion,
     singlePassType,

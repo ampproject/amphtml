@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getCookieExperimentIdValue} from './cookies';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
@@ -148,9 +147,8 @@ export class Log {
       return LogLevel.OFF;
     }
 
-    const logLevelSetViaCookie = getCookieExperimentIdValue(this.win, 'log');
     // Logging has been explicitly disabled.
-    if (getMode().log == '0' && logLevelSetViaCookie == '0') {
+    if (getMode().log == '0') {
       return LogLevel.OFF;
     }
 
@@ -161,14 +159,12 @@ export class Log {
 
     // LocalDev by default allows INFO level, unless overridden by `#log` or
     // log level via cookie.
-    if (getMode().localDev && (!getMode().log || !logLevelSetViaCookie)) {
+    if (getMode().localDev && !getMode().log) {
       return LogLevel.INFO;
     }
 
     // Delegate to the specific resolver.
-    const modeObject = getModeObject();
-    modeObject.log = modeObject.log || logLevelSetViaCookie;
-    return this.levelFunc_(modeObject);
+    return this.levelFunc_(getModeObject());
   }
 
   /**
