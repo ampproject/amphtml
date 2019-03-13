@@ -26,11 +26,11 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {
-  embeddedComponentSelectors,
-} from './amp-story-embedded-component';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {
+  interactiveElementsSelectors,
+} from './amp-story-embedded-component';
 import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
@@ -43,7 +43,7 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 const EMBEDDED_COMPONENT_SELECTORS = Object.values(
-    embeddedComponentSelectors()).join(',');
+    interactiveElementsSelectors()).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;

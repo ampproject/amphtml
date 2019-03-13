@@ -71,7 +71,7 @@ export const EXPANDABLE_COMPONENTS = {
     '0 78.62 23"/></g></svg>',
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
-    selector: 'amp-twitter',
+    selector: 'amp-twitter[interactive=yes]',
   },
 };
 
@@ -112,22 +112,31 @@ function getComponentSelectors(components) {
 }
 
 /**
+ * Selectors of elements that can go into expanded view.
+ * @return {!Object}
+ */
+export function expandableElementsSelectors() {
+  // Using indirect invocation to prevent no-export-side-effect issue.
+  return getComponentSelectors(EXPANDABLE_COMPONENTS);
+}
+
+/**
  * Contains all interactive component CSS selectors.
  * @type {!Object}
  */
-const interactiveComponentSelectors = Object.assign({},
+const interactiveSelectors = Object.assign({},
     getComponentSelectors(INTERACTIVE_COMPONENTS),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });
 
 /**
- * Selectors that should delegate to AmpStoryEmbeddedComponent.
+ * All selectors that should delegate to the AmpStoryEmbeddedComponent class.
  * @return {!Object}
  */
-export function embeddedComponentSelectors() {
+export function interactiveElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return interactiveComponentSelectors;
+  return interactiveSelectors;
 }
 
 /**
@@ -752,10 +761,8 @@ export class AmpStoryEmbeddedComponent {
         },
         /** mutate */
         () => {
-          element.classList.add('i-amphtml-embedded-component');
-
           elId = elId ? elId : ++embedIds;
-          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating embed style element.
+          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating <style> element for embed.
             const html = htmlFor(pageEl);
             const embedStyleEl = html`<style></style>`;
 
