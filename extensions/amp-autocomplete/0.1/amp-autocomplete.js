@@ -22,12 +22,12 @@ import {UrlReplacementPolicy,
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
