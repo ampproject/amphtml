@@ -64,7 +64,7 @@ export class CookieWriter {
     /** @private {!JsonObject} */
     this.config_ = config;
 
-    /** @const @private {!VariableService} */
+    /** @const @private {!JsonObject} */
     this.bindings_ = variableServiceFor(this.win_).getMacros();
   }
 

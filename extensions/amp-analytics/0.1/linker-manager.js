@@ -70,7 +70,7 @@ export class LinkerManager {
     /** @private {?UnlistenDef} */
     this.formSubmitUnlistener_ = null;
 
-    /** @const @private {!VariableService} */
+    /** @const @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.ampdoc_.win);
   }
 

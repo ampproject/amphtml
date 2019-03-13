@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -148,10 +149,10 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, *>} */
-    this.macros_ = {};
+    /** @private {!JsonObject} */
+    this.macros_ = dict({});
 
-    /** @const @private {!LinkerReader} */
+    /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.win_);
 
     this.register_('$DEFAULT', defaultMacro);
@@ -170,7 +171,7 @@ export class VariableService {
   }
 
   /**
-   * @return {!Object} contains all registered macros
+   * @return {!JsonObject} contains all registered macros
    */
   getMacros() {
     return this.macros_;

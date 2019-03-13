@@ -28,7 +28,7 @@ import {user} from '../../../src/log';
 const TAG = 'amp-analytics/linker-reader';
 
 
-class LinkerReader {
+export class LinkerReader {
 
   /**
    * @param {!Window} win
