@@ -77,7 +77,7 @@ FAIL
 |      <!-- Valid: With cross-origin -->
 |      <form method="post" action-xhr="https://example.com/subscribe" name="test"
 >>     ^~~~~~~~~
-actions_feature_tests/amp_form.html:77:4 The attribute 'cross-origin' in tag 'FORM [method=POST] (ACTIONS)' is deprecated - use 'crossorigin' instead. [DEPRECATION]
+actions_feature_tests/amp_form.html:77:4 The attribute 'cross-origin' in tag 'FORM [method=POST] (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
 |      cross-origin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete
 |      verify-xhr="https://example.com/verify" enctype="test_enc">
 |        <fieldset>

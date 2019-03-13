@@ -4052,6 +4052,7 @@ tags: {  # <form method=POST ...>
       also_requires_attr: "action-xhr"
     }
     deprecation: "crossorigin"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
   }
   attrs: {
     name: "crossorigin"
