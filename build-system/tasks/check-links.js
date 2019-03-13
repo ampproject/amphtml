@@ -144,7 +144,11 @@ function filterWhitelistedLinks(markdown) {
 
   // The heroku nightly build page is not always acccessible by the checker.
   filteredMarkdown = filteredMarkdown.replace(
-      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
+      /\(http:\/\/amphtml-nightly\.herokuapp\.com\/\)/g, '');
+
+  // The Googlebot help page is currently only available to signed-in users.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(https:\/\/support\.google\.com\/webmasters\/answer\/182072\)/g, '');
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block

@@ -50,7 +50,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    downloadDistOutput();
+    downloadDistOutput(FILENAME);
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {

@@ -5804,10 +5804,10 @@ google-closure-compiler-osx@^20190215.0.1:
   resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20190215.0.1.tgz#2398d4702220e1d80c1672ebe4f0499a6bf219f2"
   integrity sha512-SHyBwXx3V30pGNVZeD5D7DigAKZ2GdWT8uI4izGI+GHe/W/joQD7MGUYGrpIqFRXkbDZ+symnfvq7YRIH2w28A==
 
-google-closure-compiler@20190215.0.1:
-  version "20190215.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190215.0.1.tgz#26ffb67522f3e1055f195cdd32c08c994eaef111"
-  integrity sha512-vvKxZVOf+zgoI9GxLdACJ1/AhCRjYJjXddLc28pn1tTcvu0rNXBYjtDtweHubxwcDY8rAopA55Cqa93Lz5xLwg==
+google-closure-compiler@20190215.0.2:
+  version "20190215.0.2"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190215.0.2.tgz#88269b68c5f910805117d4439b4967ddfadb3417"
+  integrity sha512-yhxVcm2bl05IoombIiTs5mRZChjJaOg4riFtrtsJrJL8WR1a2lz3btH6giX4+NgWduD5LNg4joF9BT4xLfzkIQ==
   dependencies:
     chalk "^1.0.0"
     google-closure-compiler-java "^20190215.0.1"
