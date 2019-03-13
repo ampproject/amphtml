@@ -378,6 +378,15 @@ function runSanitizerTests() {
           '<b>a<i>b</i></b>');
     });
 
+    describe('should sanitize `input` attribute', () => {
+      it('should strip out invalid attrs', () => {
+        expect(sanitizeHtml('<input type="button" />')).to.equal('<input>');
+        expect(sanitizeHtml('<input type="file" />')).to.equal('<input>');
+        expect(sanitizeHtml('<input type="image" />')).to.equal('<input>');
+        expect(sanitizeHtml('<input type="password" />')).to.equal('<input>');
+      });
+    });
+
     describe('should sanitize `style` attribute', () => {
       it('should allow valid styles',() => {
         expect(sanitizeHtml('<div style="color:blue">Test</div>'))

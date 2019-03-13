@@ -163,7 +163,7 @@ const BLACKLISTED_ATTR_VALUES = [
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': /(?:image|button)/i,
+    'type': /(?:button|file|image|password)/i,
   },
 });
 
