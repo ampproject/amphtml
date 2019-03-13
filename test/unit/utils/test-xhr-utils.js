@@ -45,7 +45,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         },
       };
       expect(() => {
-        verifyAmpCORSHeaders(win, response, {} /* init */);}).to.not.throw;
+        verifyAmpCORSHeaders(win, response, /* init */ {});}).to.not.throw;
     });
 
     it('should throw error if invalid origin', () => {
@@ -137,54 +137,54 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   });
 
   describe('getViewerInterceptResponse', () => {
+    let ampDocSingle = null;
+    let doc;
+    let init = {};
+    let input = '';
     let viewer;
     let viewerForDoc;
+    let win = {};
     beforeEach(() => {
       viewer = {
         hasCapability: unusedParam => false,
         whenFirstVisible: () => Promise.resolve(),
         sendMessageAwaitResponse: sandbox.stub(),
       };
-      viewerForDoc = sandbox.stub(Services, 'viewerForDoc');
-    });
-
-    it('should be no-op if amp doc is absent', () => {
-      return getViewerInterceptResponse({}, null, '', {}).then(() => {
-        expect(viewerForDoc).to.not.have.been.called;
-      });
-    });
-
-    it('should be no-op if amp doc does not support xhr interception', () => {
-      viewerForDoc.returns(viewer);
-      const doc = document.createElement('html');
-      const ampDoc = {
+      doc = document.createElement('html');
+      doc.setAttribute('allow-xhr-interception', 'true');
+      ampDocSingle = {
         getRootNode: () => {
           return {documentElement: doc};
         },
       };
-      return getViewerInterceptResponse({}, ampDoc, 'https://www.googz.org')
+      viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+    });
+
+    it('should be no-op if amp doc is absent', () => {
+      ampDocSingle = null;
+      return getViewerInterceptResponse(win, ampDocSingle, input, init)
+          .then(() => {
+            expect(viewerForDoc).to.not.have.been.called;
+          });
+    });
+
+    it('should be no-op if amp doc does not support xhr interception', () => {
+      doc.removeAttribute('allow-xhr-interception');
+      input = 'https://www.googz.org';
+      return getViewerInterceptResponse(win, ampDocSingle, input, init)
           .then(() => {
             expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
           });
     });
 
     it('should send xhr request to viewer', () => {
-      const win = {AMP_MODE: {development: false}};
-      viewer = Object.assign(viewer, {
-        hasCapability: unusedParam => true,
-        isTrustedViewer: () => Promise.resolve(true),
-      });
-      viewerForDoc.returns(viewer);
-      const doc = document.createElement('html');
-      doc.setAttribute('allow-xhr-interception', 'true');
-      const ampDoc = {
-        getRootNode: () => {
-          return {documentElement: doc};
-        },
-      };
+      win = {AMP_MODE: {development: false}};
+      viewer.hasCapability = () => true;
+      viewer.isTrustedViewer = () => Promise.resolve(true);
+      input = 'https://www.googz.org';
+      init = {body: {}};
       viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
-      return getViewerInterceptResponse(
-          win, ampDoc, 'https://www.googz.org', {body: {}})
+      return getViewerInterceptResponse(win, ampDocSingle, input, init)
           .then(() => {
             const msgPayload = dict({
               'originalRequest': {
@@ -194,7 +194,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
                 },
               },
             });
-            expect(viewer.sendMessageAwaitResponse).to.have.been.called;
+            expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
             expect(viewer.sendMessageAwaitResponse)
                 .to.have.been.calledWith('xhr', msgPayload);
           });
