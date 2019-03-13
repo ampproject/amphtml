@@ -491,14 +491,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   addClickShieldToEmbeds_() {
-    const els = [];
-    scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS).forEach(
-        el => els.push(el));
-
     this.mutateElement(() => {
-      els.forEach(el => {
-        el.classList.add('i-amphtml-embedded-component');
-      });
+      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+          .forEach(el => {
+            el.classList.add('i-amphtml-embedded-component');
+          });
     });
   }
 
