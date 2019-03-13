@@ -33,7 +33,8 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {string} */
-const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
+export const ALLOW_SOURCE_ORIGIN_HEADER =
+    'AMP-Access-Control-Allow-Source-Origin';
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
@@ -227,7 +228,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 }
 
 /**
- * Setsup URL based on ampCors
+ * Sets up URL based on ampCors
  * @param {!Window} win
  * @param {string} input
  * @param {!FetchInitDef} init The options of the XHR which may get
