@@ -4359,6 +4359,8 @@ tags: {
   }
   attrs: {
     name: "type"
+    # When updating this blacklist be sure to update the sanitizer BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES
+    # as these values also need to be stripped when used in templates.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"
@@ -4414,6 +4416,8 @@ tags: {
   spec_name: "INPUT (AMP4EMAIL)"
   attrs: {
     name: "type"
+    # When updating this blacklist be sure to update the sanitizer BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES
+    # as these values also need to be stripped when used in templates.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"

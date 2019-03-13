@@ -160,7 +160,12 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '</script',
 ];
 
-/** @const {!Object<string, !Object<string, !RegExp>>} */
+/**
+ * These values should align with any changes to the blacklisted input types
+ * rules in validator-main.protoascii.
+ *
+ * @const {!Object<string, !Object<string, !RegExp>>}
+ */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
     'type': /(?:button|file|image|password)/i,
