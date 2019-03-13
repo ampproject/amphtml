@@ -79,6 +79,8 @@ export class InaboxMessagingHost {
    * @param {!Array<!HTMLIFrameElement>} iframes
    */
   constructor(win, iframes) {
+    const hostWin = canInspectWindow(win.top) ? win.top : win;
+
     /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
 
@@ -86,19 +88,23 @@ export class InaboxMessagingHost {
     this.iframeMap_ = Object.create(null);
 
     /** @private {!PositionObserver} */
-    this.positionObserver_ = new PositionObserver(win);
+    this.positionObserver_ = new PositionObserver(hostWin);
 
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();
 
     /** @private {!FrameOverlayManager} */
-    this.frameOverlayManager_ = new FrameOverlayManager(win);
+    this.frameOverlayManager_ = new FrameOverlayManager(hostWin);
 
-    this.msgObservable_.listen(
-        MessageType.SEND_POSITIONS, this.handleSendPositions_);
+    // Start listening only if the top level window can be read, because
+    // otherwise positioning info cannot be guaranteed to be accurate.
+    if (canInspectWindow(win.top)) {
+      this.msgObservable_.listen(
+          MessageType.HOST_BROADCAST, this.handleHostBroadcast_);
 
-    this.msgObservable_.listen(
-        MessageType.HOST_BROADCAST, this.handleHostBroadcast_);
+      this.msgObservable_.listen(
+          MessageType.SEND_POSITIONS, this.handleSendPositions_);
+    }
 
     this.msgObservable_.listen(
         MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
