@@ -19,7 +19,7 @@ import {dev, devAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle, setStyles} from '../../../src/style';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 

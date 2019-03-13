@@ -21,7 +21,7 @@ import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */

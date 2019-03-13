@@ -20,7 +20,7 @@ import {dev, devAssert} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isExperimentOn, nextTick} from './3p';
 import {isObject} from '../src/types';
-import {parseUrlDeprecated} from '../src/url';
+import {parseUrlDeprecated} from '../src/url-utils';
 import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {

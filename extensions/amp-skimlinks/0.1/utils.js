@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 
 /**
  * Generate random id of 32 chars.

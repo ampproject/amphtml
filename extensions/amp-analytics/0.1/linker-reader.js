@@ -19,10 +19,9 @@ import {hasOwn} from '../../../src/utils/object';
 import {parseLinker} from './linker';
 import {
   parseQueryString,
-  parseUrlDeprecated,
   removeParamsFromSearch,
 } from '../../../src/url';
-
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/linker-reader';

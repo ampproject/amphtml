@@ -21,8 +21,9 @@ import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
+import {isProxyOrigin} from '../../../src/url-utils';
 import {parseJson} from '../../../src/json';
+import {removeFragment} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

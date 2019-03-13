@@ -17,8 +17,8 @@ import {devAssert, user, userAssert} from '../../../src/log';
 import {
   getSourceOrigin,
   isProtocolValid,
-  parseUrlDeprecated,
 } from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 
 
 const TAG = 'amp-story';

@@ -32,11 +32,12 @@ import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {isProtocolValid} from '../../../src/url';
 import {
   parseArticlesToClassicApi,
   relatedArticlesFromJson,
 } from './related-articles';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 

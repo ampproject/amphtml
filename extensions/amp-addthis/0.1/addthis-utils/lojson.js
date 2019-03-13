@@ -30,7 +30,7 @@ import {
 import {dict} from '../../../../src/utils/object';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 import {toArray} from '../../../../src/types';
 
 const VIEW_EVENT_CHANNEL = 100;

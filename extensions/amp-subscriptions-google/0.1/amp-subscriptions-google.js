@@ -33,7 +33,7 @@ import {
 import {SubscriptionsScoreFactor}
   from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';

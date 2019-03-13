@@ -15,13 +15,13 @@
  */
 import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
-import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
+import {addParamsToUrl} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
 import {getData} from '../../../../src/event-helper';
 import {isObject} from '../../../../src/types';
 import {parseJson} from '../../../../src/json';
-
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 import {setStyles, toggle} from '../../../../src/style';
 
 const RE_IFRAME = /#iframe$/;

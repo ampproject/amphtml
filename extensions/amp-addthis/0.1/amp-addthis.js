@@ -64,7 +64,7 @@ import {
 } from './addthis-utils/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {setStyle} from '../../../src/style';
 
 import {userAssert} from '../../../src/log';

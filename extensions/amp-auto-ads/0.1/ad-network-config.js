@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {tryParseJson} from '../../../src/json';
 
 

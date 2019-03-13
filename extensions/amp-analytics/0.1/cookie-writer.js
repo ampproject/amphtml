@@ -21,7 +21,7 @@ import {getNameArgs} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin} from '../../../src/url-utils';
 import {linkerReaderServiceFor} from './linker-reader';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';

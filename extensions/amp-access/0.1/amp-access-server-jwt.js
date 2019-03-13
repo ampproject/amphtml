@@ -19,7 +19,6 @@ import {JwtHelper} from './jwt';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  isProxyOrigin,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
@@ -30,6 +29,7 @@ import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {isProxyOrigin} from '../../../src/url-utils';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

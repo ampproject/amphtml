@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated} from '../src/url';
+import {parseUrlDeprecated} from '../src/url-utils';
 import {validateData, writeScript} from '../3p/3p';
 
 /**

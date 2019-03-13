@@ -15,7 +15,7 @@
  */
 
 import {dev, devAssert} from '../../../src/log';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin} from '../../../src/url-utils';
 
 /** @const {string} */
 const TAG = 'amp-access-other';

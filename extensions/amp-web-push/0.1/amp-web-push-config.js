@@ -18,7 +18,7 @@ import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
 import {dev, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getServiceForDoc} from '../../../src/service';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 
 /** @enum {string} */
 export const WebPushConfigAttributes = {

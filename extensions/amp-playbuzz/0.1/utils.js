@@ -18,8 +18,8 @@
 import {dict} from './../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 import {parseJson} from './../../../src/json';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {
-  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';

@@ -36,7 +36,7 @@ import {
   getLocation,
 } from './frame-metadata';
 import {getMode} from '../src/mode';
-import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
+import {getSourceUrl} from '../src/url';
 import {
   initLogConstructor,
   isUserErrorMessage,
@@ -44,6 +44,7 @@ import {
   userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
+import {isProxyOrigin, parseUrlDeprecated} from '../src/url-utils';
 import {parseJson} from '../src/json';
 import {
   register,

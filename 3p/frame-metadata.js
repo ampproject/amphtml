@@ -19,7 +19,7 @@ import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {once} from '../src/utils/function.js';
 import {parseJson} from '../src/json';
-import {parseUrlDeprecated} from '../src/url';
+import {parseUrlDeprecated} from '../src/url-utils';
 
 
 /**

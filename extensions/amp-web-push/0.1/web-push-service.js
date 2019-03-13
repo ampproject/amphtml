@@ -25,7 +25,8 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+import {parseQueryString} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 
 /** @typedef {{
  *    isControllingFrame: boolean,

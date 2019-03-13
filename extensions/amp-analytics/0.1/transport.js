@@ -27,7 +27,6 @@ import {WindowInterface} from '../../../src/window-interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
-  parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
 import {dev, user, userAssert} from '../../../src/log';
@@ -35,6 +34,7 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 

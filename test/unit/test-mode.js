@@ -20,7 +20,7 @@ import {
   getRtvVersionForTesting,
   resetRtvVersionForTesting,
 } from '../../src/mode';
-import {parseUrlDeprecated} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url-utils';
 
 function getWin(url) {
   const win = {

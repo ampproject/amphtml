@@ -45,12 +45,12 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 

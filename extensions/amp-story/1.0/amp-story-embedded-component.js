@@ -33,7 +33,8 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {isProtocolValid} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {
   px,
   setImportantStyles,

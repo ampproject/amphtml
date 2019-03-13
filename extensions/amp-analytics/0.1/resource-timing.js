@@ -17,7 +17,7 @@
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {findIndex} from '../../../src/utils/array';
 import {isObject} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url-utils';
 import {user} from '../../../src/log';
 
 /**
