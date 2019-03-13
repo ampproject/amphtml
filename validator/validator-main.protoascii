@@ -4361,7 +4361,7 @@ tags: {
     name: "type"
     # When updating this blacklist be sure to update the sanitizer BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES
     # as these values also need to be stripped when used in templates.
-    # https://github.com/ampproject/amphtml/blob/3150dc2974c49e555e98e7df10c8bad19f488251/src/sanitation.js#L164
+    # https://github.com/ampproject/amphtml/blob/master/src/sanitation.js
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"
@@ -4419,7 +4419,7 @@ tags: {
     name: "type"
     # When updating this blacklist be sure to update the sanitizer BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES
     # as these values also need to be stripped when used in templates.
-    # https://github.com/ampproject/amphtml/blob/3150dc2974c49e555e98e7df10c8bad19f488251/src/sanitation.js#L164
+    # # https://github.com/ampproject/amphtml/blob/master/src/sanitation.js
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
         "file|"
