@@ -80,8 +80,8 @@ export function redispatch(element, event, events) {
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
-  const frame = html`<iframe frameborder=0 allowfullscreen></iframe>`;
   const html = htmlFor(element);
+  const frame = html`<iframe frameborder=0 allowfullscreen></iframe>`;
 
   if (opt_name) {
     frame.setAttribute('name', opt_name);
