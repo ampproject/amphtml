@@ -163,6 +163,7 @@ const BLACKLISTED_ATTR_VALUES = [
 /**
  * These values should align with any changes to the blacklisted input types
  * rules in validator-main.protoascii.
+ * https://github.com/ampproject/amphtml/blob/3150dc2974c49e555e98e7df10c8bad19f488251/validator/validator-main.protoascii
  *
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
