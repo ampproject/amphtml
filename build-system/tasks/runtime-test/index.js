@@ -25,11 +25,13 @@ const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
+const request = require('request');
 const webserver = require('gulp-webserver');
 const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
+const {gitCommitHash} = require('../../git');
 const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
@@ -449,6 +451,7 @@ async function runTests() {
    */
   function createKarmaServer(configBatch) {
     let resolver;
+    const commitHash = gitCommitHash();
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
@@ -488,6 +491,10 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
+      request.post(
+          `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
+          '/unit/started', (error, response) => console.log(
+              '[amp-test-status]', response && response.statusCode));
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
@@ -512,6 +519,12 @@ async function runTests() {
       message += '\n';
       console./*OK*/log('\n');
       log(message);
+    }).on('run_complete', (browsers, results) => {
+      request.post(
+          `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
+          `/unit/report/${results.passed}/${results.failed}`,
+          (error, response) => console.log(
+              '[amp-test-status]', response && response.statusCode));
     }).start();
     return deferred;
   }
