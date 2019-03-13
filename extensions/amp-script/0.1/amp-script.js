@@ -17,6 +17,12 @@
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {UserActivationTracker} from './user-activation-tracker';
+import {
+  WorkerDom,
+  sanitizer,
+  upgrade,
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 // TODO(choumx): Avoid bundling an extra copy of DOMPurify here.
 import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
@@ -25,12 +31,6 @@ import {
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  WorkerDom,
-  sanitizer,
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
-import {UserActivationTracker} from './user-activation-tracker';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -169,6 +169,11 @@ export class AmpScript extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-broken');
     user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
   }
+}
+
+/** @return {!Function} */
+export function getWorkerDomClassForTesting() {
+  return WorkerDom;
 }
 
 AMP.extension('amp-script', '0.1', function(AMP) {
