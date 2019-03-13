@@ -73,4 +73,64 @@ describes.realWin('UserActivationTracker', {}, env => {
     expect(tracker.isActive()).to.be.true;
     expect(tracker.getLastActivationTime()).to.equal(ACTIVATION_TIMEOUT + 2);
   });
+
+  describe('expandLongTask', () => {
+    it('should expand when active', () => {
+      const promise = Promise.resolve();
+
+      tracker.activated_({isTrusted: true});
+      tracker.expandLongTask(promise);
+      expect(tracker.isActive()).to.be.true;
+
+      clock.tick(ACTIVATION_TIMEOUT + 1);
+      expect(tracker.isActive()).to.be.true;
+
+      clock.tick(ACTIVATION_TIMEOUT + 1);
+      expect(tracker.isActive()).to.be.true;
+
+      return promise.then(() => {
+        // Skip microtask.
+        return Promise.resolve();
+      }).then(() => {
+        // The gesture window is expanded for an extra window.
+        expect(tracker.isActive()).to.be.true;
+
+        clock.tick(ACTIVATION_TIMEOUT - 1);
+        expect(tracker.isActive()).to.be.true;
+
+        clock.tick(2);
+        expect(tracker.isActive()).to.be.false;
+      });
+    });
+
+    it('should NOT expand when not active', () => {
+      tracker.expandLongTask(Promise.resolve());
+      expect(tracker.isActive()).to.be.false;
+    });
+
+    it('should tolerate promise failures', () => {
+      const promise = Promise.reject();
+
+      tracker.activated_({isTrusted: true});
+      tracker.expandLongTask(promise);
+      expect(tracker.isActive()).to.be.true;
+
+      clock.tick(ACTIVATION_TIMEOUT + 1);
+      expect(tracker.isActive()).to.be.true;
+
+      return promise.catch(() => {}).then(() => {
+        // Skip microtask.
+        return Promise.resolve();
+      }).then(() => {
+        // The gesture window is expanded for an extra window.
+        expect(tracker.isActive()).to.be.true;
+
+        clock.tick(ACTIVATION_TIMEOUT - 1);
+        expect(tracker.isActive()).to.be.true;
+
+        clock.tick(2);
+        expect(tracker.isActive()).to.be.false;
+      });
+    });
+  });
 });

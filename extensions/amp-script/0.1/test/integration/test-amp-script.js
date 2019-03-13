@@ -34,6 +34,7 @@ describe.configure().skipSinglePass().run('amp-script', function() {
     body: `
       <amp-script layout=container src="/examples/amp-script/hello-world.js">
         <button id="hello">Insert</button>
+        <button id="long">Long</button>
       </amp-script>
     `,
     /* eslint-enable max-len */
@@ -193,6 +194,25 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       browser.click('button#hello');
       yield poll('terminated', () => {
         return element.classList.contains('i-amphtml-broken') && terminated;
+      });
+    });
+
+    it('should start long task', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = element.implementation_;
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+      let inLongTask = false;
+      sandbox.stub(impl.userActivation_, 'expandLongTask').callsFake(() => {
+        inLongTask = true;
+      });
+      browser.click('button#long');
+      yield poll('long task started', () => {
+        return inLongTask;
       });
     });
   });

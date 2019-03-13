@@ -25,6 +25,20 @@ document.getElementById('hello').addEventListener('click', () => {
   document.body.appendChild(el);
 });
 
+// Long task.
+if (document.getElementById('long')) {
+  document.getElementById('long').addEventListener('click', () => {
+    longTask(new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+        const el = document.createElement('h1');
+        el.textContent = 'Hello (long) World!';
+        document.body.appendChild(el);
+      }, 6000);
+    }));
+  });
+}
+
 // <amp-img> should be allowed.
 const ampImg = document.getElementById('amp-img');
 if (ampImg) {
