@@ -154,9 +154,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getInlineData_() {
     const scripts = childElementsByTag(this.element, 'SCRIPT');
-    if (!scripts.length) {
-      return null;
-    }
+    userAssert(scripts.length,
+        `${TAG} should contain a <script> child or a URL specified in "src".`);
     const jsonScripts = [];
     scripts.forEach(script => { if (isJsonScriptTag(script)) {
       jsonScripts.push(script);
