@@ -50,9 +50,8 @@ describes.realWin('amp-autocomplete init', {
       script.innerHTML = json;
       ampAutocomplete.appendChild(script);
     } else {
-      sandbox.stub(ampAutocomplete.implementation_, 'getRemoteData_').returns(
-          Promise.resolve(json.items)
-      );
+      sandbox.stub(ampAutocomplete.implementation_, 'getRemoteData_').resolves(
+          json.items);
     }
 
     doc.body.appendChild(ampAutocomplete);

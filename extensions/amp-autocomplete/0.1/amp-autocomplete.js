@@ -133,7 +133,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @return {!Promise}
+   * @return {!Promise<!Array<string>>}
    * @private
    */
   getInlineData_() {
@@ -155,7 +155,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Reads the 'items' data from the URL provided in the 'src' attribute.
    * For use with remote data.
-   * @return {!Promise}
+   * @return {!Promise<!Array<string>>}
    * @private
    */
   getRemoteData_() {
