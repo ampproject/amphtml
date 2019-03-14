@@ -491,10 +491,12 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
-      request.post(
-          `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
-          '/unit/started', (error, response) => console/*OK*/.log(
-              '[amp-test-status]', response && response.statusCode));
+      if (argv.unit) {
+        request.post(
+            `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
+            '/unit/started', (error, response) => console/*OK*/.log(
+                '[amp-test-status]', response && response.statusCode));
+      }
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
@@ -520,11 +522,13 @@ async function runTests() {
       console./*OK*/log('\n');
       log(message);
     }).on('run_complete', (browsers, results) => {
-      request.post(
-          `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
-          `/unit/report/${results.passed}/${results.failed}`,
-          (error, response) => console/*OK*/.log(
-              '[amp-test-status]', response && response.statusCode));
+      if (argv.unit) {
+        request.post(
+            `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
+            `/unit/report/${results.success}/${results.failed}`,
+            (error, response) => console/*OK*/.log(
+                '[amp-test-status]', response && response.statusCode));
+      }
     }).start();
     return deferred;
   }
