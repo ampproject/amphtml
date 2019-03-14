@@ -32,7 +32,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?./link-rewriter} */
+    /** @private {?./link-rewriter.LinkRewriter} */
     this.rewriter_ = null;
 
     /** @private {?Object} */
