@@ -481,7 +481,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   findAndPrepareEmbeddedComponents_(forceResize = false) {
-    this.addClickShieldToEmbeds_();
+    this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
   }
 
@@ -490,12 +490,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    * the iframe.
    * @private
    */
-  addClickShieldToEmbeds_() {
+  addClickShieldToEmbeddedComponents_() {
+    const componentEls = scopedQuerySelectorAll(this.element,
+        EMBEDDED_COMPONENTS_SELECTORS);
+
+    if (componentEls.length <= 0) {
+      return;
+    }
+
     this.mutateElement(() => {
-      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
-          .forEach(el => {
-            el.classList.add('i-amphtml-embedded-component');
-          });
+      componentEls.forEach(el => {
+        el.classList.add('i-amphtml-embedded-component');
+      });
     });
   }
 
