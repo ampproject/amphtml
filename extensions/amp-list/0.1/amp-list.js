@@ -36,6 +36,12 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {
+  getViewerAuthTokenIfAvailable,
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
+import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
@@ -43,11 +49,6 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -413,7 +414,7 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      fetch = this.fetch_(opt_refresh).then(data => {
+      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
         let items = data;
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
@@ -567,8 +568,13 @@ export class AmpList extends AMP.BaseElement {
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
         this.element, current.data)
-        .then(result => this.updateBindings_(result, current.append))
-        .then(element => this.render_(element, current.append));
+        // For SSR, the result will be the container node that contains the
+        // list items. Just pass in the list items when updating the bindings
+        // and rendering else the sanitizer will strip out the class attribute
+        // from the container.
+        .then(result => this.updateBindings_(
+            isSSR ? toArray(result.childNodes) : result, current.append))
+        .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
       renderPromise = renderPromise
@@ -619,15 +625,12 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>|!Element} elementOrElements
+   * @param {!Array<!Element>} elements
    * @param {boolean} append
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elementOrElements, append) {
-    const elements = /** @type {!Array<!Element>} */
-      (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
-
+  updateBindings_(elements, append) {
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
@@ -926,15 +929,15 @@ export class AmpList extends AMP.BaseElement {
         });
   }
 
-
   /**
-   * @param {boolean} opt_refresh
-   * @return {!Promise<(!Array<JsonObject>|!JsonObject)>}
+   * @param {boolean=} opt_refresh
+   * @param {string=} token
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(opt_refresh = false) {
-    return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, '.', this.getPolicy_(), opt_refresh);
+  fetch_(opt_refresh = false, token = undefined) {
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, '.',
+        this.getPolicy_(), opt_refresh, token);
   }
 
   /**
@@ -964,6 +967,17 @@ export class AmpList extends AMP.BaseElement {
           }
         });
 
+  }
+
+  /**
+   * @param {boolean=} opt_refresh
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
+   */
+  prepareAndSendFetch_(opt_refresh = false) {
+    return getViewerAuthTokenIfAvailable(this.win, this.element).then(token =>
+      this.fetch_(opt_refresh, token)
+    );
   }
 
   /**

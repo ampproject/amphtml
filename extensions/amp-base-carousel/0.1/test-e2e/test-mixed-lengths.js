@@ -25,65 +25,9 @@ const pageHeight = 600;
 
 describes.endtoend('AMP carousel mixed length slides', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'mixed-lengths-no-snap.amp.html',
-  experiments: ['amp-base-carousel', 'layers'],
-  initialRect: {width: pageWidth, height: pageHeight},
-}, async env => {
-  let controller;
-
-  function prop(el, name) {
-    return controller.getElementProperty(el, name);
-  }
-
-  async function assertSpacerWidth(index, width) {
-    const spacers = await getSpacersForSlide(controller, index);
-    await expect(prop(spacers[1], 'offsetWidth')).to.equal(width);
-  }
-
-  beforeEach(async() => {
-    controller = env.controller;
-  });
-
-  // Test mixed lengths without snapping. This is start aligned as that seems
-  // make the most sense for non-snapping mixed lengths.
-  describe('no snap', () => {
-    const slideOneWidth = 600;
-    const slideTwoWidth = 400;
-
-    it('should have the correct initial slide positions', async() => {
-      const slides = await getSlides(controller);
-
-      // First slide has width 75%, and viewport is 600 pixels wide
-      await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
-      await expect(controller.getElementRect(slides[0])).to.include({x: 0});
-      await assertSpacerWidth(0, slideOneWidth);
-      // Second slide has width 50%, and viewport is 400 pixels wide
-      await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
-      await expect(controller.getElementRect(slides[1])).to.include({
-        x: slideOneWidth,
-      });
-      await assertSpacerWidth(1, slideTwoWidth);
-    });
-
-    it('should scroll freely', async() => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
-
-      await controller.scrollBy(el, {left: 10});
-      await expect(controller.getElementRect(slides[0])).to.include({x: -10});
-    });
-  });
-});
-
-
-const mixedPageWidth = 800;
-const mixedpageHeight = 600;
-
-describes.endtoend('AMP carousel mixed length slides', {
-  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
       'mixed-lengths.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
-  initialRect: {width: mixedPageWidth, height: mixedpageHeight},
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
 
@@ -112,13 +56,13 @@ describes.endtoend('AMP carousel mixed length slides', {
       // First slide has width 75%, and viewport is 600 pixels wide
       await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
       await expect(controller.getElementRect(slides[0])).to.include({
-        x: (mixedPageWidth - slideOneWidth) / 2,
+        x: (pageWidth - slideOneWidth) / 2,
       });
       await assertSpacerWidth(0, slideOneWidth);
       // Second slide has width 50%, and viewport is 400 pixels wide
       await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
       await expect(controller.getElementRect(slides[1])).to.include({
-        x: slideOneWidth + (mixedPageWidth - slideOneWidth) / 2,
+        x: slideOneWidth + (pageWidth - slideOneWidth) / 2,
       });
       await assertSpacerWidth(1, slideTwoWidth);
     });
@@ -130,7 +74,7 @@ describes.endtoend('AMP carousel mixed length slides', {
 
       await controller.scrollBy(el, {left: scrollAmount});
       await expect(controller.getElementRect(slides[1])).to.include({
-        x: (mixedPageWidth - slideTwoWidth) / 2,
+        x: (pageWidth - slideTwoWidth) / 2,
       });
     });
   });
