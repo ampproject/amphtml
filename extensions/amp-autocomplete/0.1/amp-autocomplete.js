@@ -106,8 +106,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    const dataPromise = this.element.hasAttribute('src') ?
-      this.getRemoteData_() : this.getInlineData_();
+    if (!this.element.hasAttribute('src')) {
+      this.inlineData_ = this.getInlineData_();
+    }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
@@ -126,14 +127,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
-
-    return dataPromise.then(data => this.inlineData_ = data);
   }
 
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @return {!Promise<!Array<string>>}
+   * @return {!Array<string>}
    * @private
    */
   getInlineData_() {
@@ -149,7 +148,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return Promise.resolve(json['items'] || []);
+    return json['items'] || [];
   }
 
   /**
@@ -188,11 +187,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
-    // No static local data to filter against.
-    if (!this.inlineData_) {
-      return Promise.resolve();
-    }
-
     // Register event handlers.
     this.inputElement_.addEventListener('input', () => {
       this.inputHandler_();
@@ -210,8 +204,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    return this.mutateElement(() => {
-      this.renderResults_();
+    let dataPromise = Promise.resolve();
+    if (this.element.hasAttribute('src')) {
+      dataPromise = this.getRemoteData_();
+    }
+
+    return dataPromise.then(value => {
+      this.inlineData_ = value || this.inlineData_;
+      return this.mutateElement(() => {
+        this.renderResults_();
+      });
     });
   }
 

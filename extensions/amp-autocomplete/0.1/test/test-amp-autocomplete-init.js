@@ -159,8 +159,10 @@ describes.realWin('amp-autocomplete init', {
       'filter': 'substring',
       'src': 'https://examples.com/json',
     }, data, false).then(ampAutocomplete => {
-      const impl = ampAutocomplete.implementation_;
-      expect(impl.inlineData_).to.have.ordered.members(data.items);
+      ampAutocomplete.layoutCallback().then(() => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.inlineData_).to.have.ordered.members(data.items);
+      });
     });
   });
 });
