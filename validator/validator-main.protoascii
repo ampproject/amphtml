@@ -4051,6 +4051,15 @@ tags: {  # <form method=POST ...>
     trigger: {
       also_requires_attr: "action-xhr"
     }
+    deprecation: "crossorigin"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "amp-viewer-auth-token-via-post"
+    trigger: {
+      also_requires_attr: "action-xhr"
+    }
   }
   attrs: {
     name: "custom-validation-reporting"
