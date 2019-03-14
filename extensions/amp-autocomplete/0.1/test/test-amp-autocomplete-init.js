@@ -32,7 +32,8 @@ describes.realWin('amp-autocomplete init', {
   });
 
   function getAutocomplete(attributes,
-    json = '{ "items" : ["apple", "banana", "orange"] }') {
+    json = '{ "items" : ["apple", "banana", "orange"] }',
+    wantInlineData = true) {
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
     for (const key in attributes) {
@@ -43,10 +44,15 @@ describes.realWin('amp-autocomplete init', {
     input.setAttribute('type', 'text');
     ampAutocomplete.appendChild(input);
 
-    const script = win.document.createElement('script');
-    script.setAttribute('type', 'application/json');
-    script.innerHTML = json;
-    ampAutocomplete.appendChild(script);
+    if (wantInlineData) {
+      const script = win.document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      script.innerHTML = json;
+      ampAutocomplete.appendChild(script);
+    } else {
+      sandbox.stub(ampAutocomplete.implementation_, 'getRemoteData_').resolves(
+          json.items);
+    }
 
     doc.body.appendChild(ampAutocomplete);
     return ampAutocomplete.build().then(() => ampAutocomplete);
@@ -136,6 +142,27 @@ describes.realWin('amp-autocomplete init', {
     }, '{ "items" : [] }').then(ampAutocomplete => {
       const impl = ampAutocomplete.implementation_;
       expect(impl.inlineData_).to.be.an('array').that.is.empty;
+    });
+  });
+
+  it('should fetch remote data when specified in src', () => {
+    const data = {
+      items: [
+        'Albany, New York',
+        'Annapolis, Maryland',
+        'Atlanta, Georgia',
+        'Augusta, Maine',
+        'Austin, Texas',
+      ],
+    };
+    return getAutocomplete({
+      'filter': 'substring',
+      'src': 'https://examples.com/json',
+    }, data, false).then(ampAutocomplete => {
+      ampAutocomplete.layoutCallback().then(() => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.inlineData_).to.have.ordered.members(data.items);
+      });
     });
   });
 });

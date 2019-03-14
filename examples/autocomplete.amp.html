@@ -19,6 +19,7 @@
 <body>
     <h1>Autocomplete</h1>
     <h2>Form context</h2>
+    <h3>Static data</h3>
     <form method="post"
         action-xhr="http://amp.localhost:8000/form/echo-json/post"
         target="_blank">
@@ -53,6 +54,28 @@
         <div submit-error>
             <template type="amp-mustache">
                 Oops! {{name}}, We apologies something went wrong. Please try again later.
+            </template>
+        </div>
+    </form>
+
+    <h3>Dynamic data</h3>
+    <form method="post"
+        action-xhr="http://amp.localhost:8000/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your hometown</span>
+                <amp-autocomplete filter="substring" min-characters="0"
+                    src="autocomplete-cities.example.json">
+                    <input type="text" name="city" required>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit">
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Success! Mailing a postcard to {{city}}.
             </template>
         </div>
     </form>
