@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {isObject, isArray} from '../../../src/types';
+import {isArray, isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
@@ -41,15 +41,12 @@ export class Variants {
   }
 
   /**
-   * @param {!Object<string, ?string>|!Promise<!Object<string, ?string>>} variants
+   * @param {!Promise<!Object<string, ?string>>} variants
    * @package
    * @restricted
    */
   init(variants) {
-    setTimeout(() => {
-      console.log('resolving...');
-      this.variantsDeferred_.resolve(variants);
-    }, 1000);
+    variants.then(this.variantsDeferred_.resolve);
   }
 
   /**
@@ -151,18 +148,18 @@ function validateConfig(experimentName, config) {
 
       const variant = variants[variantName];
       assertVariant(
-        variant,
-        experimentName,
-        variantName
+          variant,
+          experimentName,
+          variantName
       );
 
       const percentage = variant.weight;
 
       userAssert(
-        percentage && percentage > 0 && percentage < 100,
-        'Invalid percentage %s:%s.'
+          percentage && percentage > 0 && percentage < 100,
+          'Invalid percentage %s:%s.'
         + ' Has to be greater than 0 and less than 100',
-        variantName, percentage);
+          variantName, percentage);
       totalPercentage += percentage;
     }
   }
@@ -207,26 +204,26 @@ function assertName(name) {
 /**
  * Validates the variant schema of a config.
  * @param {!JsonObject} variant
- * @param {!string} experimentName
- * @param {!string} variantName
+ * @param {string} experimentName
+ * @param {string} variantName
  * @throws {!Error}
  */
 function assertVariant(variant, experimentName, variantName) {
 
   // Assert that the variant is an object
   userAssert(
-    isObject(variant),
-    `${experimentName}.${variantName} must be an object.`);
+      isObject(variant),
+      `${experimentName}.${variantName} must be an object.`);
 
   // Assert the variant weight
   userAssert(
-    variant.weight !== undefined &&
+      variant.weight !== undefined &&
     typeof variant.weight === 'number',
-    `${experimentName}.${variantName} must have a weight.`);
+      `${experimentName}.${variantName} must have a weight.`);
 
   // Assert the variant mutations
   userAssert(
-    isArray(variant.mutations),
-    `${experimentName}.${variantName} must have a mutations array.`);
+      isArray(variant.mutations),
+      `${experimentName}.${variantName} must have a mutations array.`);
 }
 
