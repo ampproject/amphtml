@@ -211,9 +211,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return dataPromise.then(value => {
       this.inlineData_ = value || this.inlineData_;
-      return this.mutateElement(() => {
-        this.renderResults_();
-      });
+      this.renderResults_();
     });
   }
 
