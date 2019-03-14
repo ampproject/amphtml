@@ -60,7 +60,7 @@ function writeSafeFrame(doc, iframe, adContent) {
  * iframes that has been removed when their tests ended.
  */
 function unregisterIframe(frame) {
-  const hostWin = window.top;
+  const hostWin = window;
   if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
     hostWin['AMP'].inaboxUnregisterIframe(frame);
   }
@@ -190,7 +190,7 @@ describe('inabox', function() {
 
     beforeEach(() => {
       iframe = document.createElement('iframe');
-      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+      Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
     });
 
     afterEach(() => {
@@ -228,7 +228,7 @@ describe('inabox', function() {
     beforeEach(() => {
       env.iframe.style.height = '100vh';
       iframe = document.createElement('iframe');
-      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+      Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
     });
 
     afterEach(() => {
@@ -294,7 +294,7 @@ describe('inabox with a complex image ad', function() {
       iframe = document.createElement('iframe');
       // we add the iframe here because it's dynamically created, so the
       // bootstrap script would have missed it.
-      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+      Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
     });
 
     it('should properly render ad in a friendly iframe with viewability pings',
@@ -359,7 +359,7 @@ describe('inabox with a complex image ad', function() {
       env.iframe.style.height = '100vh';
       doc = env.win.document;
       iframe = document.createElement('iframe');
-      Array.prototype.push.apply(env.win.top.ampInaboxIframes, [iframe]);
+      Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
       setTimeout(() => {
         env.win.scrollTo(0, 1000);
         window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
