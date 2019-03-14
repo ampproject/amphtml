@@ -23,6 +23,7 @@ import {
 } from '../../../src/batched-json';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
+import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
@@ -122,11 +123,26 @@ export class AmpState extends AMP.BaseElement {
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {!UrlReplacementPolicy} policy
+   * @param {boolean=} opt_refresh
+   * @param {string=} token
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
+   */
+  fetch_(ampdoc, element, policy, opt_refresh, token = undefined) {
+    return batchFetchJsonFor(ampdoc, element, /* opt_expr */ undefined, policy,
+        opt_refresh, token);
+  }
+
+  /**
+   * Transforms and prepares the fetch request.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    */
-  fetch_(ampdoc, element, isInit, opt_refresh) {
+  prepareAndSendFetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
@@ -135,14 +151,16 @@ export class AmpState extends AMP.BaseElement {
       (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(
-        ampdoc, element, /* opt_expr */ undefined, policy, opt_refresh);
+
+    return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token =>
+      this.fetch_(ampdoc, element, policy, opt_refresh, token)
+    );
   }
 
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<undefined>}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
@@ -150,7 +168,8 @@ export class AmpState extends AMP.BaseElement {
     // Don't fetch in prerender mode.
     const viewer = Services.viewerForDoc(this.element);
     return viewer.whenFirstVisible()
-        .then(() => this.fetch_(ampdoc, this.element, isInit, opt_refresh))
+        .then(() => this.prepareAndSendFetch_(
+            ampdoc, this.element, isInit, opt_refresh))
         .then(json => this.updateState_(json, isInit));
   }
 
