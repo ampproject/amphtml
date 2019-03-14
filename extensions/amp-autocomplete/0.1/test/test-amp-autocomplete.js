@@ -91,6 +91,8 @@ describes.realWin('amp-autocomplete unit tests', {
     // Substring filter
     expect(impl.filterData_(['a', 'b', 'ab', 'ba', 'c'], 'a')).to.have
         .ordered.members(['a', 'ab', 'ba']);
+    expect(impl.filterData_(['a', 'b', 'ab', 'ba', 'c'], 'A')).to.have
+        .ordered.members(['a', 'ab', 'ba']);
     // Prefix filter
     impl.filter_ = 'prefix';
     expect(impl.filterData_(['a', 'b', 'ab', 'ba', 'c'], 'a')).to.have

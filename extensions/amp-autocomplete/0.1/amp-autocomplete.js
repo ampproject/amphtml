@@ -17,6 +17,8 @@
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {UrlReplacementPolicy,
+  batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
@@ -104,7 +106,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    this.inlineData_ = this.getInlineData_();
+    if (!this.element.hasAttribute('src')) {
+      this.inlineData_ = this.getInlineData_();
+    }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
@@ -121,23 +125,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
 
-    return this.mutateElement(() => {
-      this.container_ = this.createContainer_();
-      this.element.appendChild(this.container_);
-    });
+    this.container_ = this.createContainer_();
+    this.element.appendChild(this.container_);
   }
 
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @return {?Array}
+   * @return {!Array<string>}
    * @private
    */
   getInlineData_() {
     const scriptElements = childElementsByTag(this.element, 'SCRIPT');
-    if (!scriptElements.length) {
-      return null;
-    }
+    userAssert(scriptElements.length,
+        `${TAG} should contain a <script> child or a URL specified in "src".`);
     userAssert(scriptElements.length === 1,
         `${TAG} should contain at most one <script> child`);
     const scriptElement = scriptElements[0];
@@ -147,7 +148,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return json['items'] ? json['items'] : [];
+    return json['items'] || [];
+  }
+
+  /**
+   * Reads the 'items' data from the URL provided in the 'src' attribute.
+   * For use with remote data.
+   * @return {!Promise<!Array<string>>}
+   * @private
+   */
+  getRemoteData_() {
+    userAssert(!childElementsByTag(this.element, 'SCRIPT').length, `${TAG} 
+      should contain a <script> child OR a URL specified in "src", not both.`);
+    const ampdoc = this.getAmpDoc();
+    const policy = UrlReplacementPolicy.ALL;
+    return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
+        policy).then(json => {
+      return json['items'] || [];
+    });
   }
 
   /**
@@ -169,11 +187,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
-    // No static local data to filter against.
-    if (!this.inlineData_) {
-      return Promise.resolve();
-    }
-
     // Register event handlers.
     this.inputElement_.addEventListener('input', () => {
       this.inputHandler_();
@@ -191,7 +204,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    return this.mutateElement(() => {
+    let dataPromise = Promise.resolve();
+    if (this.element.hasAttribute('src')) {
+      dataPromise = this.getRemoteData_();
+    }
+
+    return dataPromise.then(value => {
+      this.inlineData_ = value || this.inlineData_;
       this.renderResults_();
     });
   }
@@ -266,6 +285,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterData_(data, input) {
     input = input.toLowerCase();
     let filteredData = data.filter(item => {
+      item = item.toLocaleLowerCase();
       switch (this.filter_) {
         case FilterType.SUBSTRING:
           return includes(item, input);
