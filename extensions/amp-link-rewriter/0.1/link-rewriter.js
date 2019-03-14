@@ -42,7 +42,7 @@ export class LinkRewriter {
     /** @private {?Event} */
     this.event_ = null;
 
-    /** @public {?string} */
+    /** @public {string} */
     this.rewrittenUrl = '';
 
     /** @private {?Object} */
@@ -77,6 +77,10 @@ export class LinkRewriter {
 
     const trimmedDomain = this.viewer_.win.document.domain
         .replace(/(www\.)?(.*)/, '$2');
+
+    if (!htmlElement) {
+      return;
+    }
 
     if (this.wasShifted_(htmlElement)) {
       return;
@@ -115,14 +119,16 @@ export class LinkRewriter {
   }
 
   /**
-   * @param {?Element} htmlElement
+   * @param {!Element} htmlElement
    * return {Promise}
    */
   setRedirectUrl_(htmlElement) {
     const oldValHref = htmlElement.getAttribute('href');
 
     return this.vars_.then(vars => {
-      htmlElement.href = this.replacePlaceHolders(htmlElement, vars);
+      if (vars instanceof Object) {
+        htmlElement.href = this.replacePlaceHolders(htmlElement, vars);
+      }
 
       // If the link has been "activated" via contextmenu,
       // we have to keep the shifting in mind
@@ -144,7 +150,7 @@ export class LinkRewriter {
   }
 
   /**
-   * @param {?Element} htmlElement
+   * @param {!Element} htmlElement
    * @param {!Object} vars
    * @return {string}
    */
