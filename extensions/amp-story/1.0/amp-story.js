@@ -1619,14 +1619,11 @@ export class AmpStory extends AMP.BaseElement {
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
         this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
-          mutationsList.forEach(mutation => {
-            if (mutation.attributeName === 'open') {
-              this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-                  this.sidebar_.hasAttribute('open'));
-            } else if (mutation.attributeName === 'hidden') {
-              this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
-            }
-          });
+          if (mutationsList.some(
+              mutation => mutation.attributeName === 'open')) {
+            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+                this.sidebar_.hasAttribute('open'));
+          }
         });
       }
       if (this.sidebar_ && sidebarState) {
@@ -1635,10 +1632,8 @@ export class AmpStory extends AMP.BaseElement {
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
-      } else if (this.sidebar_ && !sidebarState &&
-                    !this.maskElement_.hasAttribute('hidden')) {
-        this.closeOpacityMask_();
       } else {
+        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {

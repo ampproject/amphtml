@@ -755,23 +755,6 @@ describes.realWin('amp-story', {
                 .to.be.false;
           });
     });
-
-    it('should close sidebar mask with close action', () => {
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      const sidebar = win.document.createElement('amp-sidebar');
-      story.element.appendChild(sidebar);
-
-      story.buildCallback();
-      return story.layoutCallback()
-          .then(() => {
-            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
-          }).then(() => {
-            const mask = story.element.querySelector(
-                '.i-amphtml-story-opacity-mask');
-            expect(mask).to.have.attribute('hidden');
-          });
-    });
   });
 
   describe('desktop attributes', () => {
