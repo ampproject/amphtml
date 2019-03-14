@@ -25,13 +25,16 @@ const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-const request = require('request');
 const webserver = require('gulp-webserver');
+const {
+  reportTestErrored,
+  reportTestFinished,
+  reportTestStarted,
+} = require('./test-status-report');
 const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
-const {gitCommitHash} = require('../../git');
 const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
@@ -451,7 +454,6 @@ async function runTests() {
    */
   function createKarmaServer(configBatch) {
     let resolver;
-    const commitHash = gitCommitHash();
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
       if (argv.coverage) {
@@ -491,12 +493,7 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
-      if (argv.unit) {
-        request.post(
-            `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
-            '/unit/started', (error, response) => console/*OK*/.log(
-                '[amp-test-status]', response && response.statusCode));
-      }
+      reportTestStarted();
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
@@ -522,12 +519,10 @@ async function runTests() {
       console./*OK*/log('\n');
       log(message);
     }).on('run_complete', (browsers, results) => {
-      if (argv.unit) {
-        request.post(
-            `https://amp-test-status-bot.appspot.com/v0/tests/${commitHash}` +
-            `/unit/report/${results.success}/${results.failed}`,
-            (error, response) => console/*OK*/.log(
-                '[amp-test-status]', response && response.statusCode));
+      if (results.error) {
+        reportTestErrored();
+      } else {
+        reportTestFinished(results.success, results.failed);
       }
     }).start();
     return deferred;
