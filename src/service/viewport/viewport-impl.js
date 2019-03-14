@@ -107,7 +107,7 @@ export class Viewport {
      * Some viewport operations require the global document.
      * @private @const {!Document}
      */
-    this.globalDoc_ = this.ampdoc.win.document;
+    this.globalDoc_ = win.document;
 
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
