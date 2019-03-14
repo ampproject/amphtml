@@ -236,7 +236,7 @@ The following example shows a simple `amp-sidebar` within an `amp-story`.
     <amp-story standalone>
       <amp-sidebar id="sidebar1" layout="nodisplay">
         <ul>
-          <li><a "href=https://www.ampproject.org"> External Link </a></li>
+          <li><a href="https://www.ampproject.org"> External Link </a></li>
           <li>Nav item 2</li>
           <li>Nav item 3</li>
         </ul>
