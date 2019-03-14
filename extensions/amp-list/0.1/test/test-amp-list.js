@@ -129,7 +129,7 @@ describes.repeated('amp-list', {
     function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
       // Mock the actual network request.
       listMock.expects('fetch_')
-          .withExactArgs(!!opts.refresh)
+          .withExactArgs(!!opts.refresh, undefined)
           .returns(Promise.resolve(fetched))
           .atLeast(1);
 
@@ -592,6 +592,34 @@ describes.repeated('amp-list', {
           list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
           expect(element.getAttribute('src')).to.equal('');
         });
+      });
+
+      it('should fetch with viewer auth token if \'crossorigin='
+          + 'amp-viewer-auth-token-via-post\' attribute is present', () => {
+        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+            Promise.resolve({
+              getIdTokenPromise: (() => Promise.resolve('idToken')),
+            }));
+        element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+        const fetched = {items: DEFAULT_ITEMS};
+        const foo = doc.createElement('div');
+        const rendered = [foo];
+        const opts = DEFAULT_LIST_OPTS;
+
+        listMock.expects('fetch_')
+            .withExactArgs(!!opts.refresh, 'idToken')
+            .returns(Promise.resolve(fetched))
+            .atLeast(1);
+
+        // Stub the rendering of the template.
+        const itemsToRender = fetched[opts.expr];
+        ssrTemplateHelper.renderTemplate
+            .withArgs(element, itemsToRender)
+            .returns(Promise.resolve(rendered));
+
+        expectRender();
+
+        return list.layoutCallback().then(() => Promise.resolve());
       });
 
       it('should reset if `reset-on-refresh` is set (new URL)', () => {
