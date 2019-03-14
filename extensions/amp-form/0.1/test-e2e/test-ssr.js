@@ -21,7 +21,7 @@ const pageHeight = 600;
  * Amp-form test for SSR enabled viewer.
  */
 
-describes.endtoend.only('AMP form server side rendered templates', {
+describes.endtoend('AMP form server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form.ssr.html',
   environments: ['viewer-demo'],
   experiments: ['layers'],

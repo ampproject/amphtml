@@ -21,7 +21,7 @@ const pageHeight = 600;
  * Amp-list test for SSR enabled viewer.
  */
 
-describes.endtoend.only('AMP list server side rendered templates', {
+describes.endtoend('AMP list server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list.ssr.html',
   environments: ['viewer-demo'],
   experiments: ['layers'],
