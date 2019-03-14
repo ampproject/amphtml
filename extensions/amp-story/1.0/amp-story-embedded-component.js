@@ -99,18 +99,23 @@ const INTERACTIVE_COMPONENTS = Object.assign({}, EXPANDABLE_COMPONENTS,
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
+ * @param {string=} opt_predicate
  * @return {!Object<string, string>}
  */
-function getComponentSelectors(components) {
+function getComponentSelectors(components, opt_predicate) {
   const componentSelectors = {};
 
   Object.keys(components).forEach(componentName => {
-    componentSelectors[componentName] = components[componentName].selector +
-      '[interactive]:not([interactive=false])';
+    componentSelectors[componentName] = opt_predicate ?
+      components[componentName].selector + opt_predicate :
+      components[componentName].selector;
   });
 
   return componentSelectors;
 }
+
+/** @const {string} */
+const INTERACTIVE_ATTR_NAME = '[interactive]:not([interactive=false])';
 
 /**
  * Selectors of elements that can go into expanded view.
@@ -118,7 +123,7 @@ function getComponentSelectors(components) {
  */
 export function expandableElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return getComponentSelectors(EXPANDABLE_COMPONENTS);
+  return getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME);
 }
 
 /**
@@ -126,7 +131,8 @@ export function expandableElementsSelectors() {
  * @type {!Object}
  */
 const interactiveSelectors = Object.assign({},
-    getComponentSelectors(INTERACTIVE_COMPONENTS),
+    getComponentSelectors(LAUNCHABLE_COMPONENTS),
+    getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });
