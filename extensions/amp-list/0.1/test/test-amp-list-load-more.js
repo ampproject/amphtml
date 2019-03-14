@@ -44,48 +44,46 @@ describes.realWin('amp-list component', {
     sandbox.stub(Services, 'templatesFor').returns(templates);
     sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
-    element = doc.createElement('amp-list');
-    element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
-    element.setAttribute('load-more', 'manual');
-
-    list = new AmpList(element);
-
-    sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
-    sandbox.stub(list, 'getFallback').returns(null);
-
-    sandbox.stub(list, 'mutateElement').callsFake(mutator => {
-      mutator();
-      return Promise.resolve();
-    });
-
-    sandbox.stub(list, 'measureElement').callsFake(measurer => {
-      measurer();
-      return Promise.resolve();
-    });
-
-    sandbox.stub(list, 'measureMutateElement').callsFake(
-        (measurer, mutator) => {
-          measurer();
-          mutator();
-          return Promise.resolve();
-        });
-
     toggleExperiment(win, 'amp-list-load-more', true);
-    expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
-
-    element.style.height = '10px';
-    doc.body.appendChild(element);
-  });
-
-  afterEach(() => {
-
   });
 
   describe('manual', () => {
 
     beforeEach(() => {
       expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
-      sandbox.stub(list, 'getPlaceholder').returns(null);
+
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+
+      sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
+      sandbox.stub(list, 'getFallback').returns(null);
+
+      sandbox.stub(list, 'mutateElement').callsFake(mutator => {
+        mutator();
+        return Promise.resolve();
+      });
+
+      sandbox.stub(list, 'measureElement').callsFake(measurer => {
+        measurer();
+        return Promise.resolve();
+      });
+
+      sandbox.stub(list, 'measureMutateElement').callsFake(
+          (measurer, mutator) => {
+            measurer();
+            mutator();
+            return Promise.resolve();
+          });
+
+      element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
+      element.setAttribute('load-more', 'manual');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '50');
+      element.setAttribute('height', '10');
+
+      element.style.height = '10px';
+      doc.body.appendChild(element);
+
       sandbox.stub(list, 'getOverflowElement').returns(null);
       sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
       list.element.changeSize = () => {};
@@ -93,6 +91,7 @@ describes.realWin('amp-list component', {
     });
 
     it('should create load-more elements after layout callback', async() => {
+      sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.layoutCallback();
       expect(list.element.querySelector('[load-more-button]')).to.be.ok;
       expect(list.element.querySelector('[load-more-failed]')).to.be.ok;
@@ -100,6 +99,7 @@ describes.realWin('amp-list component', {
     });
 
     it('should hide load-more elements at layout', async() => {
+      sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.layoutCallback();
       const button = list.element.querySelector('[load-more-button]');
       const buttonStyles = win.getComputedStyle(button);
@@ -110,6 +110,16 @@ describes.realWin('amp-list component', {
       expect(failedStyles.display).to.equal('none');
     });
 
+    it('should resize the list to fit a placeholder', async() => {
+      const attemptChangeHeightSpy = sandbox.spy(list, 'attemptChangeHeight');
+      const placeholder = doc.createElement('div');
+      placeholder.setAttribute('placeholder', '');
+      placeholder.style.height = '50px';
+      placeholder.style.width = '50px';
+      list.element.appendChild(placeholder);
+      sandbox.stub(list, 'getPlaceholder').returns(placeholder);
+      await list.layoutCallback();
+      expect(attemptChangeHeightSpy).to.be.calledOnceWith(50);
+    });
   });
-
 });
