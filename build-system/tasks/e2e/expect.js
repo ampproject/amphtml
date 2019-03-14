@@ -46,6 +46,9 @@ function expect(actual, opt_message) {
     chai.use(installLengthWrapper);
     chai.use(installAboveWrapper);
     chai.use(installBelowWrapper);
+    chai.use(installIsTrueWrapper);
+    chai.use(installIsFalseWrapper);
+    chai.use(installIsOkWrapper);
   }
 
   return chai.expect(actual, opt_message);
@@ -108,6 +111,30 @@ function installBelowWrapper(chai, utils) {
   Assertion.overwriteMethod('below', overwrite);
   Assertion.overwriteMethod('lt', overwrite);
   Assertion.overwriteMethod('lessThan', overwrite);
+}
+
+function installIsTrueWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isTrue', overwrite);
+  Assertion.overwriteProperty('true', overwrite);
+}
+
+function installIsFalseWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isFalse', overwrite);
+  Assertion.overwriteProperty('false', overwrite);
+}
+
+function installIsOkWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isOk', overwrite);
+  Assertion.overwriteProperty('ok', overwrite);
 }
 
 function overwriteAlwaysUseSuper(utils) {

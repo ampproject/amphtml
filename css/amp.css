@@ -863,6 +863,18 @@ amp-story .i-amphtml-loader {
 }
 
 /**
+ * amp-autocomplete to avoid FOUC.
+ */
+amp-autocomplete {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+amp-autocomplete > input {
+  padding: 4px !important;
+}
+
+/**
  * amp-fx
  */
 
