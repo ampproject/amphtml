@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-const pageWidth = 800;
-const pageHeight = 600;
-
 /**
  * Amp-form test for SSR enabled viewer.
  */
 
 describes.endtoend('AMP form server side rendered templates', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form.ssr.html',
+  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.ssr.html',
   environments: ['viewer-demo'],
   experiments: ['layers'],
-  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
 

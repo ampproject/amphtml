@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-const pageWidth = 800;
-const pageHeight = 600;
-
 /**
  * Amp-list test for SSR enabled viewer.
  */
 
 describes.endtoend('AMP list server side rendered templates', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list.ssr.html',
+  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.ssr.html',
   environments: ['viewer-demo'],
   experiments: ['layers'],
-  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   let controller;
 
