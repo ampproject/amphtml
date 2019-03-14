@@ -191,6 +191,7 @@ app.use(
 app.get([
   '/examples/*.(min|max).html',
   '/test/manual/*.(min|max).html',
+  '/test/fixtures/e2e/*.(min|max).html',
   '/dist/cache-sw.(min|max).html',
 ], (req, res) => {
   const filePath = req.url;
@@ -851,7 +852,10 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
-app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
+app.get([
+  '/examples/*.html',
+  '/test/manual/*.html',
+  '/test/fixtures/e2e/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
   const inabox = req.query['inabox'];
