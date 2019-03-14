@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {isObject} from '../../../src/types';
+import {isObject, isArray} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
