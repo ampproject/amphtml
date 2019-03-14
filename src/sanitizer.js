@@ -79,9 +79,10 @@ let KEY_COUNTER = 0;
  *
  * @param {string} html
  * @param {boolean=} diffing
+ * @param {Document=} opt_doc
  * @return {string}
  */
-export function sanitizeHtml(html, diffing) {
+export function sanitizeHtml(html, diffing, opt_doc) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -205,7 +206,7 @@ export function sanitizeHtml(html, diffing) {
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(tagName, attrName, attrValue)) {
+        if (!isValidAttr(tagName, attrName, attrValue, false, opt_doc)) {
           user().error(TAG, `Removing "${attrName}" attribute with invalid `
               + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;

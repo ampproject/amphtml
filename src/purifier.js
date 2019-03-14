@@ -72,11 +72,12 @@ let KEY_COUNTER = 0;
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
  * @param {boolean=} diffing
+ * @param {Document=} opt_doc
  * @return {!Node}
  */
-export function purifyHtml(dirty, diffing = false) {
+export function purifyHtml(dirty, diffing = false, opt_doc) {
   const config = purifyConfig();
-  addPurifyHooks(DomPurify, diffing);
+  addPurifyHooks(DomPurify, diffing, opt_doc);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
   return body;
@@ -112,8 +113,9 @@ export function purifyConfig() {
  * Adds AMP hooks to given DOMPurify object.
  * @param {!DomPurifyDef} purifier
  * @param {boolean} diffing
+ * @param {Document=} opt_doc
  */
-export function addPurifyHooks(purifier, diffing) {
+export function addPurifyHooks(purifier, diffing, opt_doc) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -249,7 +251,8 @@ export function addPurifyHooks(purifier, diffing) {
       disableDiffingFor(node);
     }
 
-    if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
+    if (isValidAttr(tagName, attrName, attrValue,
+        /* opt_purify */ true, /* opt_doc */ opt_doc)) {
       if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }

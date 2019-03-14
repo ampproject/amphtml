@@ -130,9 +130,10 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @private
    */
   serializeHtml_(html) {
-    const root = this.win.document.createElement('div');
+    const doc = this.win.document;
+    const root = doc.createElement('div');
     const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const sanitized = sanitizeHtml(html, diffing);
+    const sanitized = sanitizeHtml(html, diffing, doc);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }

@@ -167,6 +167,13 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   },
 });
 
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
+  'input': {
+    'type': /(?:button|file|image|password)/i,
+  },
+});
+
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
   'form',
@@ -204,9 +211,11 @@ const INVALID_INLINE_STYLE_REGEX =
  * @param {string} attrValue
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
+ * @param {Document=} opt_doc
  * @return {boolean}
  */
-export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
+export function isValidAttr(
+  tagName, attrName, attrValue, opt_purify = false, opt_doc) {
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
@@ -247,7 +256,12 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  let attrBlacklist;
+  if (isAmp4Email_(opt_doc)) {
+    attrBlacklist = STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  } else {
+    attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  }
   if (attrBlacklist) {
     const blacklistedValuesRegex = attrBlacklist[attrName];
     if (blacklistedValuesRegex &&
@@ -257,4 +271,38 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
   }
 
   return true;
+}
+
+/**
+ * Checks that the document is of an AMP format type.
+ * @param {!Array<string>} formats
+ * @param {?Document|undefined} doc
+ * @return {boolean}
+ */
+function isAmpFormatType(formats, doc) {
+  if (!doc) {
+    return false;
+  }
+  const html = doc.documentElement;
+  const isFormatType =
+      formats.some(format => html.hasAttribute(format));
+  return isFormatType;
+}
+
+/**
+ * @param {?Document|undefined} doc
+ * @return {boolean}
+ * @private
+ */
+function isAmp4Email_(doc) {
+  return isAmpFormatType(['⚡4email', 'amp4email'], doc);
+}
+
+/**
+ * @param {?Document|undefined} doc
+ * @return {boolean}
+ * @private
+ */
+function isAmp_(doc) {
+  return isAmpFormatType(['⚡', 'amp'], doc);
 }
