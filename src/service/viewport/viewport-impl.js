@@ -1052,44 +1052,77 @@ export class Viewport {
       lastPaddingTop_: lastPaddingTop,
     } = this;
 
-    let doneDeferred;
+    const isAnimated = duration > 0;
 
-    return this.vsync_.measurePromise(() => {
-      return this.fixedMeasurers_.map(def => {
-        doneDeferred = doneDeferred || new Deferred();
-        return def.measure(doneDeferred.promise, lastPaddingTop, paddingTop);
-      });
-    }).then(animOffsets => {
-      this.fixedLayer_.updatePaddingTop(paddingTop, transient);
+    let doneResolver;
+    let animOffsetsPromise;
 
-      if (duration <= 0) {
-        return;
+    if (this.fixedMeasurers_.length > 0) {
+      let donePromise;
+      if (isAnimated) {
+        const doneDeferred = new Deferred();
+        donePromise = doneDeferred.promise;
+        doneResolver = doneDeferred.resolve;
+      } else {
+        donePromise = Promise.resolve();
       }
+      animOffsetsPromise = this.vsync_.measurePromise(() => {
+        return this.fixedMeasurers_.map(def =>
+          def.measure(donePromise, lastPaddingTop, paddingTop));
+      });
+      animOffsetsPromise.then(() => {
+        this.fixedLayer_.updatePaddingTop(paddingTop, transient);
+      });
+    } else {
+      this.fixedLayer_.updatePaddingTop(paddingTop, transient);
+    }
 
-      const interpolations =
-          animOffsets.map(animOffset => numeric(animOffset, 0));
+    if (!isAnimated) {
+      return Promise.resolve();
+    }
 
-      const defaultAnimOffset = lastPaddingTop - paddingTop;
-      const defaultInterpolation = numeric(defaultAnimOffset, 0);
+    const defaultAnimOffset = lastPaddingTop - paddingTop;
 
-      return Animation.animate(this.ampdoc.getRootNode(), time => {
-        this.fixedLayer_.transformMutate(
-            `translateY(${defaultInterpolation(time)}px)`);
+    if (animOffsetsPromise) {
+      return animOffsetsPromise
+          .then(animOffsets =>
+            this.animateFixedElements_(
+                duration, curve, defaultAnimOffset, animOffsets))
+          .then(devAssert(doneResolver));
+    }
 
-        // Translate independent elements that have their own animation offset
-        // definition.
+    return this.animateFixedElements_(duration, curve, defaultAnimOffset);
+  }
+
+  /**
+   * @param {number} duration
+   * @param {string} curve
+   * @param {number} defaultAnimOffset
+   * @param {!Array<number>=} opt_animOffsets
+   * @private
+   */
+  animateFixedElements_(duration, curve, defaultAnimOffset, opt_animOffsets) {
+    const interpolations =
+        opt_animOffsets
+          ? opt_animOffsets.map(animOffset => numeric(animOffset, 0))
+          : null;
+
+    const defaultInterpolation = numeric(defaultAnimOffset, 0);
+
+    return Animation.animate(this.ampdoc.getRootNode(), time => {
+      this.fixedLayer_.transformMutate(
+          `translateY(${defaultInterpolation(time)}px)`);
+
+      // Translate independent elements that have their own animation offset
+      // definition.
+      if (interpolations) {
         interpolations.forEach((interpolation, i) => {
           setStyle(this.fixedMeasurers_[i].element, 'transform',
               `translateY(${interpolation(time)}px)`);
         });
-      }, duration, curve).thenAlways(() => {
-        this.fixedLayer_.transformMutate(); // reset all transforms.
-      });
-    }).then(() => {
-      if (doneDeferred) {
-        doneDeferred.resolve();
-        doneDeferred = null; // GC
       }
+    }, duration, curve).thenAlways(() => {
+      this.fixedLayer_.transformMutate(); // reset all transforms.
     });
   }
 
