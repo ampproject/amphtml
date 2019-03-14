@@ -17,9 +17,9 @@
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {Services} from '../../../src/services';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
@@ -125,9 +125,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = inputElements[0];
 
-    if (this.templates_.hasTemplate(this.element, 'template')) {
+    if (this.templates_.hasTemplate(
+        this.element, 'template, script[template]')) {
       this.templateElement_ =
-        this.templates_.findTemplate(this.element, 'template');
+        this.templates_.findTemplate(this.element,
+            'template, script[template]');
     }
 
     this.filter_ = userAssert(this.element.getAttribute('filter'),
@@ -151,15 +153,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
-    userAssert(scriptElements.length,
-        `${TAG} should contain a <script> child or a URL specified in "src".`);
-    userAssert(scriptElements.length === 1,
-        `${TAG} should contain at most one <script> child`);
-    const scriptElement = scriptElements[0];
-    userAssert(isJsonScriptTag(scriptElement),
-        `${TAG} should be inside a <script> tag with type="application/json"`);
-    const json = tryParseJson(scriptElement.textContent,
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
+    if (!scripts.length) {
+      return null;
+    }
+    const jsonScripts = [];
+    scripts.forEach(script => { if (isJsonScriptTag(script)) {
+      jsonScripts.push(script);
+    } });
+    userAssert(jsonScripts.length === 1,
+        `${TAG} expected one <script type="application/json"> child.`);
+    const json = tryParseJson(jsonScripts[0].textContent,
         error => {
           throw error;
         });
@@ -298,7 +302,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
         });
       });
     } else {
-      /**@type {!Array<string>} */ (filteredData).forEach(item => {
+      filteredData.forEach(item => {
+        userAssert(typeof item === 'string',
+            `${TAG} data must provide template for non-string items.`);
         this.container_.appendChild(
             this.createElementFromItem_(item));
       });
@@ -320,15 +326,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     input = input.toLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     let filteredData = data.filter(item => {
-      item = item.toLocaleLowerCase();
-      if (itemsExpr && itemsExpr != '.') {
-        userAssert(typeof item === 'object', `${TAG} using 'filter-item'
-          attribute must provide data as Array<JsonObject>.`);
+      if (typeof item === 'object') {
         item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
       }
       userAssert(typeof item === 'string',
           `${TAG} data property "${itemsExpr}" must map to string type.`);
-      item = item.toLowerCase();
+      item = item.toLocaleLowerCase();
       switch (this.filter_) {
         case FilterType.SUBSTRING:
           return includes(item, input);
@@ -400,6 +403,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Returns the nearest ancestor element that is a suggested item.
    * @param {?Element|?EventTarget} element
    * @return {?Element}
+   * @private
    */
   getItemElement_(element) {
     if (element === null) {
