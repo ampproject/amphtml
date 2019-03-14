@@ -2336,6 +2336,44 @@ describes.repeated('', {
       });
     });
 
+    it('should attach auth token with crossorigin attribute', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.resolve({
+            getIdTokenPromise: (() => Promise.resolve('idToken')),
+          }));
+      return getAmpForm(getForm()).then(ampForm => {
+        const form = ampForm.form_;
+        form.id = 'registration';
+
+        const emailInput = createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('value', 'j@hnmiller.com');
+        form.appendChild(emailInput);
+
+        const unnamedInput = createElement('input');
+        unnamedInput.setAttribute('type', 'text');
+        unnamedInput.setAttribute('value', 'unnamed');
+        form.appendChild(unnamedInput);
+
+        ampForm.method_ = 'POST';
+        ampForm.form_.setAttribute(
+            'crossorigin', 'amp-viewer-auth-token-via-post');
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(
+            Promise.resolve({json: (() => Promise.resolve())}));
+
+        return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(Services.viewerAssistanceForDocOrNull).to.be.called;
+            const fetchCallFormData =
+                ampForm.xhr_.fetch.firstCall.args[1].body.getFormData();
+            expect(fetchCallFormData.get('ampViewerAuthToken'))
+                .to.equal('idToken');
+          });
+        });
+      });
+    });
+
     describe('Async Inputs', () => {
 
       it('NonXHRGet should submit sync if no Async Input', () => {

@@ -850,7 +850,7 @@ amp-story[standalone], amp-story-page {
 }
 
 amp-story[standalone] {
-  background-color: #fff !important;
+  background-color: #202125 !important;
   position: relative !important;
 }
 
@@ -860,6 +860,18 @@ amp-story-page {
 
 amp-story .i-amphtml-loader {
   display: none !important;
+}
+
+/**
+ * amp-autocomplete to avoid FOUC.
+ */
+amp-autocomplete {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+amp-autocomplete > input {
+  padding: 4px !important;
 }
 
 /**

@@ -10,14 +10,10 @@ notifications:
       - amp-build-cop@grotations.appspotmail.com
     on_success: change
     on_failure: change
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - pip install --user gsutil protobuf urllib3[secure]
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-  - sudo apt-get install openssl
 branches:
   only:
     - master
@@ -30,6 +26,8 @@ addons:
     packages:
       - protobuf-compiler
       - python-protobuf
+      - openssl
+      - google-cloud-sdk
   chrome: stable
   hosts:
     - ads.localhost

@@ -20,12 +20,16 @@ import {
   getSpacersForSlide,
 } from './helpers';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend('AMP carousel mixed length slides', {
+  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+      'mixed-lengths.amp.html',
+  experiments: ['amp-base-carousel', 'layers'],
+  initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
-  const pageWidth = 800;
-  const pageHeight = 600;
   let controller;
-  let ampDriver;
 
   function prop(el, name) {
     return controller.getElementProperty(el, name);
@@ -38,52 +42,6 @@ describes.endtoend('AMP carousel mixed length slides', {
 
   beforeEach(async() => {
     controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-base-carousel/mixed-lengths-no-snap.amp.html');
-    await ampDriver.toggleExperiment('layers', true);
-    await ampDriver.toggleExperiment('amp-base-carousel', true);
-
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
-  });
-
-  // Test mixed lengths without snapping. This is start aligned as that seems
-  // make the most sense for non-snapping mixed lengths.
-  describe('no snap', () => {
-    const slideOneWidth = 600;
-    const slideTwoWidth = 400;
-
-    beforeEach(async() => {
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/mixed-lengths-no-snap.amp.html');
-    });
-
-    it('should have the correct initial slide positions', async() => {
-      const slides = await getSlides(controller);
-
-      // First slide has width 75%, and viewport is 600 pixels wide
-      await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
-      await expect(controller.getElementRect(slides[0])).to.include({x: 0});
-      await assertSpacerWidth(0, slideOneWidth);
-      // Second slide has width 50%, and viewport is 400 pixels wide
-      await expect(prop(slides[1], 'offsetWidth')).to.equal(slideTwoWidth);
-      await expect(controller.getElementRect(slides[1])).to.include({
-        x: slideOneWidth,
-      });
-      await assertSpacerWidth(1, slideTwoWidth);
-    });
-
-    it('should scroll freely', async() => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
-
-      await controller.scrollBy(el, {left: 10});
-      await expect(controller.getElementRect(slides[0])).to.include({x: -10});
-    });
   });
 
   // Test mixed lengths with snapping. This is center aligned as that seems
@@ -91,11 +49,6 @@ describes.endtoend('AMP carousel mixed length slides', {
   describe('snap', () => {
     const slideOneWidth = 600;
     const slideTwoWidth = 400;
-
-    beforeEach(async() => {
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/mixed-lengths.amp.html');
-    });
 
     it('should have the correct initial slide positions', async() => {
       const slides = await getSlides(controller);

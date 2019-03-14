@@ -156,6 +156,11 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
+      "url": "examples/visual-tests/amp-consent/amp-consent.amp.html",
+      "name": "amp-consent",
+      "interactive_tests": "examples/visual-tests/amp-consent/amp-consent.js"
+    },
+    {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_selectors": [
@@ -560,26 +565,22 @@
       ],
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/477972351#L762
-      "url": "examples/visual-tests/amp-story/amp-story-embedded-component.html",
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded"
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-embedded-component-desktop.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
@@ -632,6 +633,11 @@
       "url": "examples/visual-tests/amp-selector.amp.html",
       "name": "amp-selector",
       "interactive_tests": "examples/visual-tests/amp-selector.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-form/amp-form.amp.html",
+      "name": "amp-form",
+      "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",

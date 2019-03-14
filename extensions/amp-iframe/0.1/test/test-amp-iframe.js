@@ -201,6 +201,21 @@ describes.realWin('amp-iframe', {
       expect(iframe.getAttribute('marginwidth')).to.be.null;
     });
 
+    // This is temporary.
+    // TODO(aghassemi, #21247)
+    it('should disable allow=autoplay', function* () {
+      const ampIframe = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 100,
+        height: 100,
+        allow: 'microphone; autoplay; camera',
+      });
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const iframe = ampIframe.querySelector('iframe');
+      expect(iframe.getAttribute('allow')).to
+          .equal('microphone; autoplay-disabled; camera');
+    });
+
     it('should default frameborder to 0 if not set', function* () {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
