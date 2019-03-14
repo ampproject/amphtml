@@ -124,12 +124,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
 
-    return Promise.all([dataPromise, this.mutateElement(() => {
-      this.container_ = this.createContainer_();
-      this.element.appendChild(this.container_);
-    })]).then(values => {
-      this.inlineData_ = values[0];
-    });
+    this.container_ = this.createContainer_();
+    this.element.appendChild(this.container_);
+
+    return dataPromise.then(data => this.inlineData_ = data);
   }
 
   /**
@@ -151,13 +149,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return Promise.resolve(json['items'] ? json['items'] : []);
+    return Promise.resolve(json['items'] || []);
   }
 
   /**
    * Reads the 'items' data from the URL provided in the 'src' attribute.
    * For use with remote data.
    * @return {!Promise}
+   * @private
    */
   getRemoteData_() {
     userAssert(!childElementsByTag(this.element, 'SCRIPT').length, `${TAG} 
@@ -166,7 +165,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
         policy).then(json => {
-      return json['items'] ? json['items'] : [];
+      return json['items'] || [];
     });
   }
 
@@ -286,13 +285,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterData_(data, input) {
     input = input.toLowerCase();
     let filteredData = data.filter(item => {
+      item = item.toLocaleLowerCase();
       switch (this.filter_) {
         case FilterType.SUBSTRING:
-          return includes(item.toLowerCase(), input);
+          return includes(item, input);
         case FilterType.PREFIX:
-          return startsWith(item.toLowerCase(), input);
+          return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
-          return item.toLowerCase().split(' ').some(token => {
+          return item.split(' ').some(token => {
             return startsWith(token, input);
           });
         case FilterType.FUZZY:
