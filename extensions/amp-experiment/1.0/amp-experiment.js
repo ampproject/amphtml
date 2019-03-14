@@ -97,7 +97,7 @@ export class AmpExperiment extends AMP.BaseElement {
     for (const name in experiments) {
       if (experiments[name]) {
         appliedExperimentVariantPromises.push(
-          this.applyMutations__(name, experiments[name])
+          this.applyMutations_(name, experiments[name])
         );
       }
     }
@@ -114,10 +114,9 @@ export class AmpExperiment extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  applyMutations(experimentName, variantObject) {
+  applyMutations_(experimentName, variantObject) {
 
-    // TODO (torch2424): Use a mutation service,
-    // to validate our mutations
+    console.log('Applying Variant', variantObject);
 
     const doc = this.getAmpDoc();
     return doc.whenBodyAvailable().then(body => {

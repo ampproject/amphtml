@@ -120,7 +120,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
           // enumeration is implementation (browser) dependent.
           const variantNames = Object.keys(config['variants']).sort();
           for (let i = 0; i < variantNames.length; i++) {
-            upperBound += config['variants'][variantNames[i]];
+            upperBound += config['variants'][variantNames[i]].weight;
             if (ticket < upperBound) {
               return variantNames[i];
             }
