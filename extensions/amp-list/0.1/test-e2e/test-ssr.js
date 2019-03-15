@@ -31,7 +31,7 @@ describes.endtoend('AMP list server side rendered templates', {
     controller = env.controller;
   });
 
-  it('should render ssr rendered list', async function() {
+  it('should render list', async function() {
     const container = await controller.findElement('div[role=list]');
     // Verify that container is present and has the right properties.
     await expect(controller.getElementAttribute(container, 'class'))

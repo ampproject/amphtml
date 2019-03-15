@@ -31,7 +31,7 @@ describes.endtoend('AMP form server side rendered templates', {
     controller = env.controller;
   });
 
-  it('should render server side render form response', async() => {
+  it('should render form response', async() => {
     const searchInput =
         await controller.findElement('#xhr-get input[name=term]');
     await controller.type(searchInput, 'search term');
