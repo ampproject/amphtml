@@ -30,7 +30,7 @@ const {
   reportTestErrored,
   reportTestFinished,
   reportTestStarted,
-} = require('./test-status-report');
+} = require('./status-report');
 const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
