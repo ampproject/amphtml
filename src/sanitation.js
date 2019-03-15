@@ -191,6 +191,11 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'select': BLACKLISTED_FIELDS_ATTR,
 });
 
+/** @const {!Object<string, !Array<string>>} */
+const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
+/** @type {!JsonObject} */ Object.assign(
+      {'form': ['name']}, BLACKLISTED_TAG_SPECIFIC_ATTRS);
+
 /**
  * Test for invalid `style` attribute values.
  *
@@ -248,20 +253,23 @@ export function isValidAttr(
     return false;
   }
 
+  let attrBlacklist;
+  let attrNameBlacklist;
+  if (isAmp4Email_(opt_doc)) {
+    attrBlacklist = STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    attrNameBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  } else {
+    attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  }
+
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
   if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
     return false;
   }
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  let attrBlacklist;
-  if (isAmp4Email_(opt_doc)) {
-    attrBlacklist = STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  } else {
-    attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  }
   if (attrBlacklist) {
     const blacklistedValuesRegex = attrBlacklist[attrName];
     if (blacklistedValuesRegex &&
@@ -298,11 +306,3 @@ function isAmp4Email_(doc) {
   return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }
 
-/**
- * @param {?Document|undefined} doc
- * @return {boolean}
- * @private
- */
-function isAmp_(doc) {
-  return isAmpFormatType(['⚡', 'amp'], doc);
-}

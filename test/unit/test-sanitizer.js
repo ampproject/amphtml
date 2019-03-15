@@ -340,6 +340,55 @@ function runSanitizerTests() {
       // Other elements should NOT have i-amphtml-key-set.
       expect(sanitizeHtml('<p></p>')).to.equal('<p></p>');
     });
+
+    it('should sanitize invalid attributes', () => {
+      allowConsoleError(() => {
+        expect(sanitizeHtml('<input type="button">')).to.equal('<input>');
+        expect(sanitizeHtml('<input type="image">')).to.equal('<input>');
+      });
+    });
+  });
+
+  describe('should sanitize based on AMP doc format type', () => {
+    let doc;
+    let html;
+
+    beforeEach(() => {
+      html = document.createElement('html');
+      doc = {
+        documentElement: html,
+      };
+    });
+
+    it('should allow for input type file and password', () => {
+      // Given that the doc is not provided.
+      allowConsoleError(() => {
+        expect(sanitizeHtml('<input type="file">'))
+            .to.equal('<input type="file">');
+        expect(sanitizeHtml('<input type="password">'))
+            .to.equal('<input type="password">');
+      });
+    });
+
+    it('should disallow name attribute on form for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(sanitizeHtml(
+            '<form name="form-name"></form>', /* diffing */ false, doc))
+            .to.equal('<form></form>');
+      });
+    });
+
+    it('should disallow type file and password for AMP4Email format', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(sanitizeHtml(
+            '<input type="password">', /* diffing */ false, doc))
+            .to.equal('<input>');
+        expect(sanitizeHtml('<input type="file">', /* diffing */false, doc))
+            .to.equal('<input>');
+      });
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {
