@@ -58,7 +58,7 @@ describes.endtoend('AMP carousel', {
     await waitForCarouselImg(controller, SLIDE_COUNT - 1);
   });
 
-  it('should snap when scrolling', async function() {
+  it('should snap when scrolling', async() => {
     const el = await getScrollingElement(controller);
     const firstSlide = await getSlide(controller, 0);
 
@@ -68,7 +68,6 @@ describes.endtoend('AMP carousel', {
 
     const slideWidth = await prop(firstSlide, 'offsetWidth');
     const scrollLeft = await prop(el, 'scrollLeft');
-
     const snappedScrollLeft = scrollLeft + slideWidth;
     const requestedScrollLeft = snappedScrollLeft + 1;
 
@@ -115,9 +114,6 @@ describes.endtoend('AMP carousel', {
     // Wait for the first two slides's imgs to load.
     await waitForCarouselImg(controller, 0);
     await waitForCarouselImg(controller, 1);
-
-    // TODO(cvializ,sparhami): This assertion fails in headless puppeteer
-    // with x: -1, y: 228, width: 0, height: 0
     await expect(controller.getElementRect(firstSlide)).to.include({
       'x': 0,
       'width': 800,

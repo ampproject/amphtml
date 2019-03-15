@@ -185,9 +185,9 @@ class FunctionalTestController {
 
   /**
    * Gets the root of the current document, for use in scrolling e.g.
-   * @param {!ElementHandle} unusedHandle A handle to a Document or Element
+   * @return {!Promise<!ElementHandle>}
    */
-  async getDocumentElement(unusedHandle) {}
+  async getDocumentElement() {}
 
   /**
    * The Find Element command is used to find the first element matching the

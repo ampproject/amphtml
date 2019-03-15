@@ -1,14 +1,30 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const fs = require('fs');
 const {
-  Browser,
-  JSHandle,
-  Page,
-  ElementHandle: PuppeteerHandle,
+  Browser, // eslint-disable-line no-unused-vars
+  JSHandle, // eslint-disable-line no-unused-vars
+  Page, // eslint-disable-line no-unused-vars
+  ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
 } = require('puppeteer');
 const {
   ControllerPromise,
   ElementHandle,
-  FunctionalTestController,
+  FunctionalTestController, // eslint-disable-line no-unused-vars
 } = require('./functional-test-controller');
 const {dirname, join} = require('path');
 
@@ -234,7 +250,7 @@ class PuppeteerController {
   }
 
   /**
-   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
    */
   async getDocumentElement() {
@@ -290,7 +306,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
    * @param {string} styleProperty
    * @return {!Promise<string>} styleProperty
    * @override
@@ -298,7 +314,7 @@ class PuppeteerController {
   getElementCssValue(handle, styleProperty) {
     const element = handle.getElement();
     const getter = (element, styleProperty) => {
-      return window.getComputedStyle(element)[styleProperty];
+      return window./*OK*/getComputedStyle(element)[styleProperty];
     };
     return new ControllerPromise(
         this.evaluate(getter, element, styleProperty),
@@ -346,7 +362,7 @@ class PuppeteerController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {x, y, width, height} = element.getBoundingClientRect();
+      const {x, y, width, height} = element./*OK*/getBoundingClientRect();
       return {
         x: Math.round(x),
         y: Math.round(y),
@@ -396,11 +412,12 @@ class PuppeteerController {
       clientWidth,
       clientHeight,
     } = await this.evaluate(() => {
-      const saved = document.documentElement.style.overflow;
-      document.documentElement.style.overflow = 'scroll';
+      const {style} = document.documentElement;
+      const saved = style.overflow;
+      style.overflow = 'scroll';
       const {outerWidth, outerHeight} = window;
       const {clientWidth, clientHeight} = document.documentElement;
-      document.documentElement.style.overflow = saved;
+      style.overflow = saved;
       return {
         outerWidth: Math.round(outerWidth),
         outerHeight: Math.round(outerHeight),
@@ -446,21 +463,12 @@ class PuppeteerController {
   }
 
   /**
-   * @return {!Promise<string>}
    * @override
    */
   getTitle() {
     const title = this.getCurrentFrame_().then(frame => frame.title());
-    return new ControllerPromise(title);
-  }
-
-  /**
-   * @return {!Promise<string>}
-   * @override
-   */
-  getCurrentUrl() {
-    const title = this.getCurrentFrame_().then(frame => frame.url());
-    return new ControllerPromise(title);
+    return new ControllerPromise(
+        title, () => this.getCurrentFrame_().then(frame => frame.title()));
   }
 
   /**
@@ -492,7 +500,7 @@ class PuppeteerController {
   async scroll(handle, opt_scrollToOptions) {
     const element = handle.getElement();
     await this.evaluate((element, opt_scrollToOptions) => {
-      element.scrollTo(opt_scrollToOptions);
+      element./*OK*/scrollTo(opt_scrollToOptions);
     }, element, opt_scrollToOptions);
   }
 
@@ -505,7 +513,7 @@ class PuppeteerController {
   async scrollBy(handle, opt_scrollToOptions) {
     const element = handle.getElement();
     await this.evaluate((element, opt_scrollToOptions) => {
-      element.scrollBy(opt_scrollToOptions);
+      element./*OK*/scrollBy(opt_scrollToOptions);
     }, element, opt_scrollToOptions);
   }
 
@@ -521,7 +529,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle} handle
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
    * @param {string} path The path relative to the build-system/tasks/e2e root.
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
@@ -545,7 +553,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {?ElementHandle} handle
+   * @param {?ElementHandle<!PuppeteerHandle>} handle
    * @return {!Promise}
    */
   async switchToFrame(handle) {

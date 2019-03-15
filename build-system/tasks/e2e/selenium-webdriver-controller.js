@@ -63,7 +63,6 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
     // (like "") do not cause driver.wait to continue waiting.
     return condition(value) ? {value} : null;
   };
-
   return driver.wait(expectCondition(valueFn, conditionValue, opt_mutate))
       .then(result => result.value); // Unbox the value.
 }
@@ -230,7 +229,7 @@ class SeleniumWebDriverController {
    * @return {!Promise<!ElementHandle<!WebElement>>}
    * @override
    */
-  async getDocumentRoot() {
+  async getDocumentElement() {
     const root = await this.getRoot_();
     const getter = root => root.ownerDocument.documentElement;
     const documentElement =
@@ -301,19 +300,6 @@ class SeleniumWebDriverController {
     return new ControllerPromise(
         webElement.getAttribute(attribute),
         this.getWaitFn_(() => webElement.getAttribute(attribute)));
-  }
-
-  hasElementClass(handle, className) {
-    const webElement = handle.getElement();
-
-    return new ControllerPromise(
-        webElement.getAttribute('class').then(value => {
-          return (value || '').split(' ').includes(className);
-        }),
-        this.getWaitFn_(() =>
-          webElement.getAttribute('class').then(value => {
-            return (value || '').split(' ').includes(className);
-          })));
   }
 
   /**

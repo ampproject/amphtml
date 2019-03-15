@@ -18,7 +18,6 @@ import {
   getScrollingElement,
   getSlides,
   getSpacersForSlide,
-  waitForCarouselImg,
 } from './helpers';
 
 const pageWidth = 800;
@@ -53,7 +52,6 @@ describes.endtoend('AMP carousel mixed length slides', {
 
     it('should have the correct initial slide positions', async() => {
       const slides = await getSlides(controller);
-      // await waitForCarouselImg(controller, 1);
 
       // First slide has width 75%, and viewport is 600 pixels wide
       await expect(prop(slides[0], 'offsetWidth')).to.equal(slideOneWidth);
@@ -73,7 +71,7 @@ describes.endtoend('AMP carousel mixed length slides', {
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
       const scrollAmount = 1 + (slideOneWidth + slideTwoWidth) / 2;
-      // await waitForCarouselImg(controller, 1);
+
       await controller.scrollBy(el, {left: scrollAmount});
       await expect(controller.getElementRect(slides[1])).to.include({
         x: (pageWidth - slideTwoWidth) / 2,

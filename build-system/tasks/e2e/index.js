@@ -79,9 +79,11 @@ async function e2e() {
 
   // create mocha instance
   require('@babel/register');
-  require('./helper');
-
-  describes.configure({engine: argv.engine});
+  const {describes} = require('./helper');
+  describes.configure({
+    engine: argv.engine,
+    headless: argv.headless,
+  });
 
   const mocha = new Mocha({
     reporter: argv.testnames ? '' : ciReporter,

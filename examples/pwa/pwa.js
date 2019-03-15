@@ -55,9 +55,6 @@ class Shell {
       const hashParams = parseQueryString(this.win.location.hash);
       const href = hashParams['href'];
       if (href) {
-        const stream = document.getElementById('stream');
-        stream.hidden = true;
-
         this.currentPage_ = href;
         this.navigateTo(href);
       }

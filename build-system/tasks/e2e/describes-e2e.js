@@ -19,10 +19,10 @@ require('chromedriver'); // eslint-disable-line no-unused-vars
 
 const puppeteer = require('puppeteer');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
+const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
 const {PuppeteerController} = require('./puppeteer-controller');
-const {Builder, Capabilities} = require('selenium-webdriver');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -31,14 +31,58 @@ const TIMEOUT = 20000;
 
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 
-async function createPuppeteer(config) {
-  // const browser = await puppeteer.launch({headless: false});
-  const browser = await puppeteer.launch(
-      {headless: true, devtools: false, defaultViewport: null, timeout: 0});
-  return {browser};
+/**
+ * @typedef {{
+ *  headless: boolean,
+ *  engine: string,
+ * }}
+ */
+let DescribesConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let PuppeteerConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let SeleniumConfigDef;
+
+/** @const {!DescribesConfigDef} */
+const describesConfig = {};
+
+/**
+ * Configure all tests.
+ * @param {!DescribesConfigDef} config
+ */
+function configure(config) {
+  Object.assign(describesConfig, config);
 }
 
-async function createSelenium(config) {
+/**
+ * Configure and launch a Puppeteer instance
+ * @param {!PuppeteerConfigDef=} opt_config
+ */
+async function createPuppeteer(opt_config = {}) {
+  const browser = await puppeteer.launch({
+    headless: opt_config.headless || false,
+    devtools: false,
+    defaultViewport: null,
+    timeout: 0,
+  });
+  return browser;
+}
+
+/**
+ * Configure and launch a Selenium instance
+ * @param {!SeleniumConfigDef=} opt_config
+ */
+async function createSelenium(opt_config = {}) {
   // TODO(estherkim): implement sessions
   // TODO(estherkim): ensure tests are in a sandbox
   // See https://w3c.github.io/webdriver/#sessions
@@ -49,12 +93,17 @@ async function createSelenium(config) {
   //   session: undefined,
   // };
 
+  const args = [];
+  if (opt_config.headless) {
+    args.push('--headless');
+  }
+
   // TODO(estherkim): remove hardcoded chrome driver
   const capabilities = Capabilities.chrome();
   const chromeOptions = {
     // TODO(cvializ,estherkim,sparhami):
     // figure out why headless causes more flakes
-    // 'args': ['--headless']
+    'args': args,
   };
   capabilities.set('chromeOptions', chromeOptions);
 
@@ -246,7 +295,7 @@ class AmpPageFixture {
 
   /** @override */
   async setup(env) {
-    const controller = await getController();
+    const controller = await getController(describesConfig);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
@@ -281,19 +330,21 @@ class AmpPageFixture {
 
 /**
  * Get the controller object for the configured engine.
+ * @param {!DescribesConfigDef} describesConfig
  */
-async function getController() {
+async function getController(describesConfig) {
   const {
     engine = 'selenium',
+    headless = false,
   } = describesConfig;
 
   if (engine == 'puppeteer') {
-    const {browser} = await createPuppeteer();
+    const browser = await createPuppeteer({headless});
     return new PuppeteerController(browser);
   }
 
   if (engine == 'selenium') {
-    const driver = await createSelenium();
+    const driver = await createSelenium({headless});
     return new SeleniumWebDriverController(driver);
   }
 }
@@ -315,12 +366,6 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
   }
-}
-
-const describesConfig = {};
-
-function configure(config) {
-  Object.assign(describesConfig, config);
 }
 
 module.exports = {
