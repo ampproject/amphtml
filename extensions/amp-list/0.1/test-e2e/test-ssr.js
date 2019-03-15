@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * Amp-list test for standalone and SSR enabled viewer. Verifies that
- * the rendered html is the same if the data from the REST endpoint and
- * the template from the SSR endpoint will result in the same html template.
- */
+import {
+  getListContainer,
+  getListItems,
+  verifyContainer,
+} from '../../../../test/fixtures/e2e/amp-list/helpers';
 
-describes.endtoend('AMP list server side rendered templates', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.ssr.html',
-  environments: ['single', 'viewer-demo'],
+
+describes.endtoend('amp-list SSR templates', {
+  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
+  environments: ['viewer-demo'],
   experiments: ['layers'],
 }, async env => {
   let controller;
@@ -31,17 +32,18 @@ describes.endtoend('AMP list server side rendered templates', {
     controller = env.controller;
   });
 
-  it('should render list', async function() {
-    const container = await controller.findElement('div[role=list]');
-    // Verify that container is present and has the right properties.
-    await expect(controller.getElementAttribute(container, 'class'))
-        .to.equal('i-amphtml-fill-content i-amphtml-replaced-content');
+  it('should render ssr rendered list', async function() {
+    const container = await getListContainer(controller);
+    await verifyContainer(controller, container);
 
     // Verify that all items rendered.
-    const listItems = await controller.findElements('div[role=listitem]');
+    const listItems = await getListItems(controller);
     await expect(listItems).to.have.length(6);
 
-    await controller.takeScreenshot('screenshots/amp-list-ssr-and-non-ssr.png');
+    // Verify that bindings work.
+    await expect(controller.getElementText(listItems[0])).to.equal('Pineapple');
+
+    await controller.takeScreenshot('screenshots/amp-list-ssr.png');
   });
 
 });

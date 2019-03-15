@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-form', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
+import {
+  getListContainer,
+  getListItems,
+  verifyContainer,
+} from '../../../../test/fixtures/e2e/amp-list/helpers';
+
+describes.endtoend('amp-list', {
+  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
   environments: ['single'],
   experiments: ['layers'],
 }, async env => {
@@ -25,20 +31,15 @@ describes.endtoend('amp-form', {
     controller = env.controller;
   });
 
-  it('should render form response', async() => {
-    const searchInput =
-        await controller.findElement('#xhr-get input[name=term]');
-    await controller.type(searchInput, 'search term');
-    const submitForm =
-        await controller.findElement('#xhr-get input[type=submit]');
-    await controller.click(submitForm);
+  it('should render list', async function() {
+    const container = await getListContainer(controller);
+    await verifyContainer(controller, container);
 
-    const renderedTemplate = await controller.findElement(
-        'div[i-amphtml-rendered]');
-    await expect(controller.getElementText(renderedTemplate)).to.equal(
-        'Here are the results for the search:\nResult 1\nResult 2\nResult 3');
+    // Verify that all items rendered.
+    const listItems = await getListItems(controller);
+    await expect(listItems).to.have.length(5);
 
-    await controller.takeScreenshot('screenshots/amp-form-ssr.png');
+    await controller.takeScreenshot('screenshots/amp-list.png');
   });
 
 });

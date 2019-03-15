@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-form', {
+describes.endtoend('amp-form SSR templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
-  environments: ['single'],
+  environments: ['viewer-demo'],
   experiments: ['layers'],
 }, async env => {
   let controller;
@@ -36,9 +36,9 @@ describes.endtoend('amp-form', {
     const renderedTemplate = await controller.findElement(
         'div[i-amphtml-rendered]');
     await expect(controller.getElementText(renderedTemplate)).to.equal(
-        'Here are the results for the search:\nResult 1\nResult 2\nResult 3');
+        'SSR response');
 
-    await controller.takeScreenshot('screenshots/amp-form-ssr.png');
+    await controller.takeScreenshot('screenshots/amp-form.png');
   });
 
 });
