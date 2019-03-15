@@ -19,7 +19,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag, isJsonScriptTag,
+import {childElementsByTag, childElementByAttr, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {includes, startsWith} from '../../../src/string';
@@ -99,6 +99,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.container_ = null;
+
+    /** @private {boolean} */
+    this.fallbackDisplayed_ = false;
   }
 
   /** @override */
@@ -212,7 +215,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return dataPromise.then(value => {
       this.inlineData_ = value || this.inlineData_;
       this.renderResults_();
-    });
+    }).catch(e => this.renderFallbackUI_(e));
   }
 
   /**
@@ -238,7 +241,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.renderResults_();
       this.toggleResults_(true);
-    });
+    }).catch(e => this.renderFallbackUI_(e));
   }
 
   /**
@@ -384,7 +387,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   updateActiveItem_(delta) {
-    if (delta === 0) {
+    if (delta === 0 || this.fallbackDisplayed_) {
       return Promise.resolve();
     }
     const index = this.activeIndex_ + delta;
@@ -467,6 +470,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
         });
       default:
         return Promise.resolve();
+    }
+  }
+
+  /** 
+   * If a fallback element is provided, displays it instead of suggestions.
+   * Otherwise, throws given error. Must be called in a mutate context.
+   * @param {error} error
+   * @private
+   */
+  renderFallbackUI_(error) {
+    this.clearAllItems_();
+    const fallback = childElementByAttr(this.element, "fallback");
+    if (fallback) {
+      this.fallbackDisplayed_ = true;
+      this.container_.append(fallback);
+    } else {
+      throw error;
     }
   }
 
