@@ -105,7 +105,7 @@ const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/
 /** @const {!{branch: string, control: string, experiment: string}} */
 export const ADX_ADY_EXP = {
   branch: 'amp-ad-ff-adx-ady',
-  control: '21062400',
+  control: '21062398',
   experiment: '21062593',
 };
 
