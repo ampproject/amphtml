@@ -26,7 +26,10 @@ describes.realWin('amp-list component', {
     extensions: ['amp-list'],
   },
 }, env => {
-  let win, doc, ampdoc, sandbox;
+  let win;
+  let doc;
+  let ampdoc;
+  let sandbox;
   let element, list;
   let templates;
 
@@ -93,21 +96,42 @@ describes.realWin('amp-list component', {
     it('should create load-more elements after layout callback', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.layoutCallback();
-      expect(list.element.querySelector('[load-more-button]')).to.be.ok;
-      expect(list.element.querySelector('[load-more-failed]')).to.be.ok;
+
+      expect(list.element.querySelectorAll('[load-more-button]'))
+          .to.have.lengthOf(1);
+      expect(list.element.querySelectorAll('[load-more-failed]'))
+          .to.have.lengthOf(1);
       expect(list.element.querySelector('[load-more-end]')).to.be.null;
     });
 
-    it('should hide load-more elements at layout', async() => {
+    it('should hide load-more-button at layout', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.layoutCallback();
+
       const button = list.element.querySelector('[load-more-button]');
       const buttonStyles = win.getComputedStyle(button);
-      expect(buttonStyles.display).to.equal('block');
-      expect(buttonStyles.visibility).to.equal('hidden');
+      expect(buttonStyles).include({
+        'display': 'block',
+        'visibility': 'hidden',
+      });
+    });
+
+    it('should hide load-more-failed element at layout', async() => {
+      sandbox.stub(list, 'getPlaceholder').returns(null);
+      await list.layoutCallback();
+
       const failedElement = list.element.querySelector('[load-more-failed]');
       const failedStyles = win.getComputedStyle(failedElement);
       expect(failedStyles.display).to.equal('none');
+    });
+
+    it('should hide load-more-loading element at layout', async() => {
+      sandbox.stub(list, 'getPlaceholder').returns(null);
+      await list.layoutCallback();
+
+      const loader = list.element.querySelector('[load-more-loading]');
+      const loaderStyles = win.getComputedStyle(loader);
+      expect(loaderStyles.display).to.equal('none');
     });
 
     it('should resize the list to fit a placeholder', async() => {
