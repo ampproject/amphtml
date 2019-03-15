@@ -63,6 +63,7 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
     // (like "") do not cause driver.wait to continue waiting.
     return condition(value) ? {value} : null;
   };
+
   return driver.wait(expectCondition(valueFn, conditionValue, opt_mutate))
       .then(result => result.value); // Unbox the value.
 }
@@ -580,6 +581,11 @@ class SeleniumWebDriverController {
     }
 
     return this.evaluate(() => document.documentElement);
+  }
+
+  /** @override */
+  dispose() {
+    return this.driver.quit();
   }
 }
 

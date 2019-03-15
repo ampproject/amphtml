@@ -11,11 +11,12 @@ const {
   FunctionalTestController,
 } = require('./functional-test-controller');
 const {dirname, join} = require('path');
-// const {promises: fs} = require('fs');
 
 const KeysMapping = {
   'ENTER': 'Enter',
 };
+
+const DEFAULT_WAIT_TIMEOUT = 10000;
 
 /**
  * Make the test runner wait until the value returned by the valueFn matches
@@ -35,7 +36,8 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
   }
 
   while (!condition(value)) {
-    const handle = await page.waitForFunction(valueFn, {}, ...args);
+    const handle = await page.waitForFunction(
+        valueFn, {timeout: DEFAULT_WAIT_TIMEOUT}, ...args);
     value = await handle.jsonValue();
     if (opt_mutate) {
       value = await opt_mutate(value);
@@ -52,11 +54,11 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
  */
 function evaluate(frame, fn) {
   const args = Array.prototype.slice.call(arguments, 2);
-  return frame.evaluate(fn, ...args);
+  return frame.evaluateHandle(fn, ...args);
 }
 
 /** @implements {FunctionalTestController} */
-export class PuppeteerController {
+class PuppeteerController {
   /**
    * @param {!Browser} browser
    */
@@ -138,10 +140,9 @@ export class PuppeteerController {
   async findElement(selector) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
-    // const elementHandle = await frame.waitForSelector(selector);
     const jsHandle = await frame.waitForFunction((root, selector) => {
       return root./*OK*/querySelector(selector);
-    }, {}, root, selector);
+    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
     const elementHandle = jsHandle.asElement();
     return new ElementHandle(elementHandle);
   }
@@ -157,7 +158,7 @@ export class PuppeteerController {
     const nodeListHandle = await frame.waitForFunction((root, selector) => {
       const nodeList = root./*OK*/querySelectorAll(selector);
       return nodeList.length > 0 ? nodeList : null;
-    }, {}, root, selector);
+    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
 
     const lengthHandle = await nodeListHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -184,7 +185,7 @@ export class PuppeteerController {
     const jsHandle = await frame.waitForFunction((xpath, root) => {
       const results = window.queryXpath(xpath, root);
       return results && results[0];
-    }, {}, xpath, root);
+    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
     return new ElementHandle(jsHandle.asElement());
   }
 
@@ -201,7 +202,7 @@ export class PuppeteerController {
 
     const arrayHandle = await frame.waitForFunction((xpath, root) => {
       return window.queryXpath(xpath, root);
-    }, {}, xpath, root);
+    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
 
     const lengthHandle = await arrayHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -239,8 +240,7 @@ export class PuppeteerController {
   async getDocumentElement() {
     const root = await this.getRoot_();
     const getter = root => root.ownerDocument.documentElement;
-    const frame = await this.getCurrentFrame_();
-    const element = await frame.evaluateHandle(getter, root);
+    const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
 
@@ -469,8 +469,7 @@ export class PuppeteerController {
    */
   async getActiveElement() {
     const getter = () => document.activeElement;
-    const frame = await this.getCurrentFrame_();
-    const element = await frame.evaluateHandle(getter);
+    const element = await this.evaluate(getter);
     return new ElementHandle(element);
   }
 
@@ -566,23 +565,10 @@ export class PuppeteerController {
     this.currentFrame_ = frame;
   }
 
-  /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {function():(!Promise|undefined)} fn
-   * @return {!Promise}
-   * @override
-   */
-  async usingFrame(handle, fn) {
-    await this.switchToFrame_(handle);
-    await fn();
-    await this.switchToParent_();
-  }
-
   async switchToShadow(handle) {
-    const frame = await this.getCurrentFrame_();
     const shadowHost = handle.getElement();
-    const shadowRootBodyHandle = await frame.evaluateHandle(
-        shadowHost => shadowHost.shadowRoot.body, shadowHost);
+    const getter = shadowHost => shadowHost.shadowRoot.body;
+    const shadowRootBodyHandle = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBodyHandle.asElement();
   }
 
@@ -599,7 +585,17 @@ export class PuppeteerController {
       return this.shadowRoot_;
     }
 
-    const frame = await this.getCurrentFrame_();
-    return await frame.evaluateHandle(() => document.documentElement);
+    return await this.evaluate(() => document.documentElement);
+  }
+
+  /**
+   * @override
+   */
+  dispose() {
+    return this.browser_.close();
   }
 }
+
+module.exports = {
+  PuppeteerController,
+};

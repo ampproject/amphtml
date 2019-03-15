@@ -81,6 +81,8 @@ async function e2e() {
   require('@babel/register');
   require('./helper');
 
+  describes.configure({engine: argv.engine});
+
   const mocha = new Mocha({
     reporter: argv.testnames ? '' : ciReporter,
   });

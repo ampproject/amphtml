@@ -22,9 +22,8 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
 const {PuppeteerController} = require('./puppeteer-controller');
-// const {Builder, Capabilities} = require('selenium-webdriver');
-// const {SeleniumWebDriverController} = require(
-//     './selenium-webdriver-controller');
+const {Builder, Capabilities} = require('selenium-webdriver');
+const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -32,11 +31,36 @@ const TIMEOUT = 20000;
 
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 
-export async function createPuppeteer(config) {
+async function createPuppeteer(config) {
   // const browser = await puppeteer.launch({headless: false});
   const browser = await puppeteer.launch(
       {headless: true, devtools: false, defaultViewport: null, timeout: 0});
   return {browser};
+}
+
+async function createSelenium(config) {
+  // TODO(estherkim): implement sessions
+  // TODO(estherkim): ensure tests are in a sandbox
+  // See https://w3c.github.io/webdriver/#sessions
+
+  // TODO(estherkim): create multiple drivers per 'config.browsers'
+  // const config = {
+  //   browsers: this.browsers_,
+  //   session: undefined,
+  // };
+
+  // TODO(estherkim): remove hardcoded chrome driver
+  const capabilities = Capabilities.chrome();
+  const chromeOptions = {
+    // TODO(cvializ,estherkim,sparhami):
+    // figure out why headless causes more flakes
+    // 'args': ['--headless']
+  };
+  capabilities.set('chromeOptions', chromeOptions);
+
+  const builder = new Builder().withCapabilities(capabilities);
+  const driver = await builder.build();
+  return driver;
 }
 
 /**
@@ -213,9 +237,6 @@ class AmpPageFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private @const */
-    this.driver_ = null;
   }
 
   /** @override */
@@ -225,40 +246,10 @@ class AmpPageFixture {
 
   /** @override */
   async setup(env) {
-    // TODO(estherkim): implement sessions
-    // TODO(estherkim): ensure tests are in a sandbox
-    // See https://w3c.github.io/webdriver/#sessions
-
-    // TODO(estherkim): create multiple drivers per 'config.browsers'
-    // const config = {
-    //   browsers: this.browsers_,
-    //   session: undefined,
-    // };
-
-    // TODO(estherkim): remove hardcoded chrome driver
-    // const capabilities = Capabilities.chrome();
-    // const chromeOptions = {
-    //   // TODO(cvializ,estherkim,sparhami):
-    //   //   figure out why headless causes more flakes
-    //   // 'args': ['--headless']
-    // };
-    // capabilities.set('chromeOptions', chromeOptions);
-
-    // const builder = new Builder().withCapabilities(capabilities);
-    // const driver = await builder.build();
-    // const controller = new SeleniumWebDriverController(driver);
-    const {browser} = await createPuppeteer();
-
-    const controller = new PuppeteerController(browser);
-    env.controller = controller;
-    env.ampDriver = new AmpDriver(controller);
-    this.driver_ = browser;
-
+    const controller = await getController();
     const ampDriver = new AmpDriver(controller);
-
     env.controller = controller;
     env.ampDriver = ampDriver;
-    // this.driver_ = driver;
 
     const {
       testUrl,
@@ -283,12 +274,27 @@ class AmpPageFixture {
     const {controller} = env;
     if (controller) {
       await controller.switchToParent();
+      await controller.dispose();
     }
-    if (this.driver_) {
-      await this.driver_.close();
-      // await this.driver_.quit();
-    }
-    this.driver_ = null;
+  }
+}
+
+/**
+ * Get the controller object for the configured engine.
+ */
+async function getController() {
+  const {
+    engine = 'selenium',
+  } = describesConfig;
+
+  if (engine == 'puppeteer') {
+    const {browser} = await createPuppeteer();
+    return new PuppeteerController(browser);
+  }
+
+  if (engine == 'selenium') {
+    const driver = await createSelenium();
+    return new SeleniumWebDriverController(driver);
   }
 }
 
@@ -311,7 +317,14 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   }
 }
 
+const describesConfig = {};
+
+function configure(config) {
+  Object.assign(describesConfig, config);
+}
+
 module.exports = {
   TestSpec,
   endtoend,
+  configure,
 };

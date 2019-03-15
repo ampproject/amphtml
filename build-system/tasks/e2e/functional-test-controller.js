@@ -140,18 +140,6 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {function():(!Promise|undefined)} unusedFn
-   * @return {!Promise}
-   */
-  async usingFrame(unusedHandle, unusedFn) {}
-
-  /**
-   * Selects the current top-level browsing context or a child browsing context
-   * of the current browsing context to use as the current browsing context for
-   * subsequent commands.
-   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
-   *
-   * @param {!ElementHandle} unusedHandle
    * @return {!Promise}
    */
   async switchToFrame(unusedHandle) {}
@@ -433,6 +421,12 @@ class FunctionalTestController {
    * @package
    */
   async evaluate(unusedFn, ...unusedArgs) {}
+
+  /**
+   * Cleanup any resources
+   * @return {!Promise}
+   */
+  async dispose() {}
 }
 
 
