@@ -862,6 +862,10 @@ amp-story .i-amphtml-loader {
   display: none !important;
 }
 
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
 /**
  * amp-autocomplete to avoid FOUC.
  */
