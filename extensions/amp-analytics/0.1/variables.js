@@ -166,6 +166,8 @@ export class VariableService {
     this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
     this.register_('$REPLACE', replaceMacro);
+    // TODO(ccordry): Make sure this stays a window level service when this
+    // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id));
   }

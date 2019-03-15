@@ -194,7 +194,7 @@ export class LinkerManager {
     return this.variableService_.expandTemplate(template, expansionOptions)
         .then(expanded => {
           const urlReplacements = Services.urlReplacementsForDoc(this.element_);
-          return urlReplacements.expandStringAsync(expanded, bindings);
+          return urlReplacements.expandUrlAsync(expanded, bindings);
         });
   }
 
