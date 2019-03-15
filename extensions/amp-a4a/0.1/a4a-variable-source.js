@@ -125,31 +125,6 @@ export class A4AVariableSource extends VariableSource {
       return getNavigationData(this.win_, 'redirectCount');
     });
 
-    // TODO: Remove once the migration to NAV_TIMING is done
-    this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataSync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataAsync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    });
-
-    this.set('AD_NAV_TYPE', () => {
-      return getNavigationData(this.win_, 'type');
-    });
-
-    this.set('AD_NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.win_, 'redirectCount');
-    });
-
     this.set('HTML_ATTR',
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
 

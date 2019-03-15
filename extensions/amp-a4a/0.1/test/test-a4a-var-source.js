@@ -53,21 +53,6 @@ describe('A4AVariableSource', () => {
         .to.equal('https://pinterest.com:8080/pin1');
   });
 
-  it('should replace AD_NAV_TIMING', () => {
-    expect(expandSync('AD_NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
-    return expandAsync('AD_NAV_TIMING', ['navigationStart']).then(val =>
-      expect(val).to.match(/\d+/)
-    );
-  });
-
-  it('should replace AD_NAV_TYPE', () => {
-    expect(expandSync('AD_NAV_TYPE')).to.match(/\d/);
-  });
-
-  it('should replace AD_NAV_REDIRECT_COUNT', () => {
-    expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
-  });
-
   it('should replace NAV_TIMING', () => {
     expect(expandSync('NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
     return expandAsync('NAV_TIMING', ['navigationStart']).then(val =>
