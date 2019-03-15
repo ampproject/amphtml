@@ -70,13 +70,12 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       yield browser.wait(100);
 
       sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
-      let terminated = false;
-      sandbox.stub(impl.workerDom_, 'terminate').callsFake(() => {
-        terminated = true;
-      });
       browser.click('button#hello');
+
+      // Give mutations time to apply.
+      yield browser.wait(100);
       yield poll('terminated', () => {
-        return element.classList.contains('i-amphtml-broken') && terminated;
+        return element.classList.contains('i-amphtml-broken');
       });
     });
   });
