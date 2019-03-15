@@ -46,6 +46,8 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
+const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
+/** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /** const {string} */
 const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
@@ -116,6 +118,10 @@ class AnimationRunner {
 
     /** @private @const */
     this.duration_ = animationDef.duration || this.presetDef_.duration || 0;
+
+    /** @private @const */
+    this.easing_ = animationDef.easing || this.presetDef_.easing ||
+        'cubic-bezier(0.4, 0.0, 0.2, 1)';
 
     /**
      * @private @const {!Promise<
@@ -191,7 +197,7 @@ class AnimationRunner {
       keyframes,
       target: this.target_,
       duration: `${this.duration_}ms`,
-      easing: this.presetDef_.easing,
+      easing: this.easing_,
       fill: 'forwards',
     }));
   }
@@ -545,6 +551,11 @@ export class AnimationManager {
 
       animationDef.startAfterId =
           el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
+    }
+
+    if (el.hasAttribute(ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME)) {
+      animationDef.easing =
+          el.getAttribute(ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME);
     }
 
     return animationDef;
