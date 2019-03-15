@@ -1,4 +1,4 @@
-/**
+/*e
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,14 @@
  */
 
 /**
- * Amp-form test for SSR enabled viewer.
+ * Amp-form test for standalone and in an SSR enabled viewer. Verifies that
+ * the rendered output is the same if the response from the REST endpoint is
+ * the same as from the SSR endpoint.
  */
 
 describes.endtoend('AMP form server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.ssr.html',
-  environments: ['viewer-demo'],
+  environments: ['single', 'viewer-demo'],
   experiments: ['layers'],
 }, async env => {
   let controller;
@@ -37,10 +39,10 @@ describes.endtoend('AMP form server side rendered templates', {
         await controller.findElement('#xhr-get input[type=submit]');
     await controller.click(submitForm);
 
-    const submitSuccess = await controller.findElement(
-        '#xhr-get div[submit-success]');
-    await expect(controller.getElementText(submitSuccess))
-        .to.equal('Server side rendered search result');
+    const renderedTemplate = await controller.findElement(
+        'div[i-amphtml-rendered]');
+    await expect(controller.getElementText(renderedTemplate)).to.equal(
+        'Here are the results for the search:\nResult 1\nResult 2\nResult 3');
 
     await controller.takeScreenshot('screenshots/amp-form-ssr.png');
   });

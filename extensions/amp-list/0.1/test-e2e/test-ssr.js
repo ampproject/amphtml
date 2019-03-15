@@ -15,12 +15,14 @@
  */
 
 /**
- * Amp-list test for SSR enabled viewer.
+ * Amp-list test for standalone and in an SSR enabled viewer. Verifies that
+ * the rendered output is the same if the response from the REST endpoint is
+ * the same as from the SSR endpoint.
  */
 
 describes.endtoend('AMP list server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.ssr.html',
-  environments: ['viewer-demo'],
+  environments: ['single', 'viewer-demo'],
   experiments: ['layers'],
 }, async env => {
   let controller;

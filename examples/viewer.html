@@ -485,14 +485,14 @@
       new Response
       return Promise.resolve({
         "html":
-        "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
-          + "<div [text]='data.fruit'' role='listitem''></div>"
-          + "<div class='product' role='listitem'>Apple</div>"
-          + "<div class='product' role='listitem'>Orange</div>"
-          + "<div class='product' role='listitem'>Pear</div>"
-          + "<div class='product' role='listitem'>Banana</div>"
-          + "<div class='product' role='listitem'>Watermelon</div>"
-        + "</div>",
+          "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
+            + "<div [text]='data.fruit'' role='listitem''></div>"
+            + "<div class='product' role='listitem'>Apple</div>"
+            + "<div class='product' role='listitem'>Orange</div>"
+            + "<div class='product' role='listitem'>Pear</div>"
+            + "<div class='product' role='listitem'>Banana</div>"
+            + "<div class='product' role='listitem'>Watermelon</div>"
+          + "</div>",
         "body" : "",
         "init" : {
           "headers": {
@@ -505,7 +505,13 @@
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
       // Mocked response.
       return Promise.resolve({
-        "html": "<div>Server side rendered search result</div>",
+        "html":
+          "<h1>Here are the results for the search:<h1>"
+            + "<ul>"
+            + "<li>Result 1</li>"
+            + "<li>Result 2</li>"
+            + "<li>Result 3</li>"
+            + "</ul>",
         "body": "",
         "init" : {
           "headers": {
