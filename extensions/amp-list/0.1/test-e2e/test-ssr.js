@@ -15,12 +15,12 @@
  */
 
 /**
- * Amp-list test for standalone and in an SSR enabled viewer. Verifies that
- * the rendered output is the same if the response from the REST endpoint is
- * the same as from the SSR endpoint.
+ * Amp-list test for standalone and SSR enabled viewer. Verifies that
+ * the rendered html is the same if the data from the REST endpoint and
+ * the template from the SSR endpoint will result in the same html template.
  */
 
-describes.endtoend.only('AMP list server side rendered templates', {
+describes.endtoend('AMP list server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.ssr.html',
   environments: ['single', 'viewer-demo'],
   experiments: ['layers'],
@@ -41,7 +41,8 @@ describes.endtoend.only('AMP list server side rendered templates', {
     const listItems = await controller.findElements('div[role=listitem]');
     await expect(listItems).to.have.length(6);
 
-    // Verify that bindings work in SSR.
+    // Verify that bindings work in SSR. For the non SSR case, this data
+    // comes from the REST end point.
     await expect(controller.getElementText(listItems[0])).to.equal('Pineapple');
 
     await controller.takeScreenshot('screenshots/amp-list-ssr.png');
