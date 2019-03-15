@@ -133,7 +133,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templateElement_ =
         this.templates_.findTemplate(this.element,
             'template, script[template]');
-      // Dummy render to verify existence of "vallue" attribute.
+      // Dummy render to verify existence of "value" attribute.
       this.templates_.renderTemplate(this.templateElement_, {}).then(
           renderedEl => {
             userAssert(renderedEl.hasAttribute('value'),
@@ -164,9 +164,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getInlineData_(scripts) {
     const jsonScripts = [];
-    scripts.forEach(script => { if (isJsonScriptTag(script)) {
-      jsonScripts.push(script);
-    } });
+    scripts.forEach(script => {
+      if (isJsonScriptTag(script)) {
+        jsonScripts.push(script);
+      }
+    });
     userAssert(jsonScripts.length,
         `${TAG} expected data in a <script type="application/json"> tag.`);
     const json = tryParseJson(jsonScripts[0].textContent,
@@ -403,7 +405,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Returns the nearest ancestor element that is a suggested item.
    * @param {?Element|?EventTarget} element
-   * @return {?Element}
+   * @return {?Element|?EventTarget}
    * @private
    */
   getItemElement_(element) {
@@ -411,7 +413,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return null;
     }
     if (element.classList.contains('i-amphtml-autocomplete-item')) {
-      return /**@type {!Element} */ (element);
+      return element;
     }
     return this.getItemElement_(element.parentElement);
   }
