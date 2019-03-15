@@ -228,49 +228,5 @@
             </template>
         </div>
     </form>
-
-    <h3>Rich Text, Script Child Template, Custom Value Property</h3>
-    <form method="get" action-xhr="/form/search-json/get" target="_blank">
-        <fieldset>
-            <label>
-                <span>Search for</span>
-                <amp-autocomplete filter="token-prefix" filter-value="city" min-characters="0">
-                    <input type="search" name="term" required>
-                    <script type="application/json">
-                        { "items" : [
-                            {
-                                "city" : "Albany",
-                                "state" : "New York", 
-                                "areaCode" : 518,
-                                "population" : 98251
-                            }, {
-                                "city" : "Annapolis",
-                                "state" : "Maryland",
-                                "areaCode" : 410,
-                                "population" : 39321
-                            }, {
-                                "city" : "Trenton",
-                                "state" : "New Jersey",
-                                "areaCode" : 609,
-                                "population" : 84964
-                            }
-                        ] }
-                    </script>
-                    <script type="text/plain" template="amp-mustache">
-                        <div class="city-item" value="{{city}}, {{state}}">
-                            <div>{{city}}, {{state}}</div>
-                            <div class="custom-population">Population: {{population}}</div>        
-                        </div>
-                    </script>
-                </amp-autocomplete>
-            </label>
-            <input type="submit" value="Search">
-        </fieldset>
-        <div submit-success>
-            <template type="amp-mustache">
-                <div>Here are the results for the search: {{term}}</div>
-            </template>
-        </div>
-    </form>
 </body>
 </html>

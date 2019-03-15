@@ -55,7 +55,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /**
      * The data extracted from the <script> tag optionally provided
      * as a child. For use with static data.
-     * @private {?Array<JsonObject|string>}
+     * @private {?Array<!JsonObject|string>}
      */
     this.inlineData_ = null;
 
@@ -130,6 +130,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templateElement_ =
         this.templates_.findTemplate(this.element,
             'template, script[template]');
+      // Dummy render to verify existence of "vallue" attribute.
+      this.templates_.renderTemplate(this.templateElement_, {}).then(
+        renderedEl => {
+          userAssert(renderedEl.hasAttribute('value'),
+        `${TAG} requires <template> tag to have "value" attribute.`);
+      });
     }
 
     this.filter_ = userAssert(this.element.getAttribute('filter'),
@@ -290,8 +296,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
         renderedChildren.map(child => {
-          userAssert(child.hasAttribute('value'),
-              `${TAG} requires <template value=""> tag`);
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
           this.container_.appendChild(child);
@@ -313,9 +317,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Apply the filter to the given data based on the given input.
-   * @param {!Array<JsonObject|string>} data
+   * @param {!Array<!JsonObject|string>} data
    * @param {string} input
-   * @return {!Array<JsonObject|string>}
+   * @return {!Array<!JsonObject|string>}
    * @private
    */
   filterData_(data, input) {
