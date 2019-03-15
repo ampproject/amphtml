@@ -20,7 +20,7 @@
  * the same as from the SSR endpoint.
  */
 
-describes.endtoend('AMP list server side rendered templates', {
+describes.endtoend.only('AMP list server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.ssr.html',
   environments: ['single', 'viewer-demo'],
   experiments: ['layers'],
@@ -34,7 +34,6 @@ describes.endtoend('AMP list server side rendered templates', {
   it('should render ssr rendered list', async function() {
     const container = await controller.findElement('div[role=list]');
     // Verify that container is present and has the right properties.
-    await expect(container).not.to.be.null;
     await expect(controller.getElementAttribute(container, 'class'))
         .to.equal('i-amphtml-fill-content i-amphtml-replaced-content');
 

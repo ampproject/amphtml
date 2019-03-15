@@ -20,7 +20,7 @@
  * the same as from the SSR endpoint.
  */
 
-describes.endtoend('AMP form server side rendered templates', {
+describes.endtoend.only('AMP form server side rendered templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.ssr.html',
   environments: ['single', 'viewer-demo'],
   experiments: ['layers'],
@@ -34,7 +34,7 @@ describes.endtoend('AMP form server side rendered templates', {
   it('should render server side render form response', async() => {
     const searchInput =
         await controller.findElement('#xhr-get  input[name=term]');
-    controller.type(searchInput, 'search term');
+    await controller.type(searchInput, 'search term');
     const submitForm =
         await controller.findElement('#xhr-get input[type=submit]');
     await controller.click(submitForm);
