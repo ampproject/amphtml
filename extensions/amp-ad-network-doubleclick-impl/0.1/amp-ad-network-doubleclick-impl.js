@@ -22,12 +22,7 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -48,6 +43,12 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   DUMMY_FLUID_SIZE,
@@ -379,6 +380,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         [FLEXIBLE_AD_SLOTS_EXP]: {
           isTrafficEligible: () => true,
           branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        },
+        [[ADX_ADY_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);

@@ -26,11 +26,8 @@ import {
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
 import {
+  ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -46,6 +43,10 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
@@ -281,6 +282,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
+        },
+        [[ADX_ADY_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
