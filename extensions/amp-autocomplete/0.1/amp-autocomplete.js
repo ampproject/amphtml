@@ -431,6 +431,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   clearAllItems_() {
+    this.fallbackDisplayed_ = false;
     removeChildren(dev().assertElement(this.container_));
   }
 
