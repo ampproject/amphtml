@@ -9,50 +9,6 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <style amp-custom>
-      input.user-invalid {
-          background-color: #dc4e41;
-      }
-
-      input.user-valid {
-          background-color: #4CAF50;
-      }
-
-      fieldset.user-invalid {
-          border: 3px solid #dc4e41;
-      }
-
-      fieldset.user-valid {
-          border: 3px solid #4CAF50;
-      }
-
-      form .form-message {
-          display: none;
-      }
-
-      form.user-invalid .invalid-message {
-          display: block;
-          color: #dc4e41;
-      }
-
-      form.user-valid .valid-message {
-          display: block;
-          color: #4CAF50;
-      }
-
-      form.amp-form-submitting .submitting-message {
-          display: block;
-          color: #919191;
-      }
-
-      form.amp-form-submit-success [submit-success] {
-          color: #0000ff;
-      }
-
-      form.amp-form-submit-error [submit-error] {
-          color: #dc4e41;
-      }
-  </style>
 </head>
 <body>
 
@@ -73,14 +29,6 @@
                 <h1>Here are the results for the search:</h1>
                 <ul>
                     {{#results}}<li>{{title}}</li>{{/results}}
-                </ul>
-            </template>
-        </div>
-        <div submit-error>
-            <template type="amp-mustache">
-                <h1>Failed</h1>
-                <ul>
-                    Search for {{search}} failed. Please try again later.
                 </ul>
             </template>
         </div>

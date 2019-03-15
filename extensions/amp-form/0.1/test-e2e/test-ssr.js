@@ -44,7 +44,7 @@ describes.endtoend('AMP form server side rendered templates', {
     await expect(controller.getElementText(renderedTemplate)).to.equal(
         'Here are the results for the search:\nResult 1\nResult 2\nResult 3');
 
-    await controller.takeScreenshot('screenshots/amp-form-ssr.png');
+    await controller.takeScreenshot('screenshots/amp-form-ssr-and-non-ssr.png');
   });
 
 });

@@ -41,11 +41,7 @@ describes.endtoend('AMP list server side rendered templates', {
     const listItems = await controller.findElements('div[role=listitem]');
     await expect(listItems).to.have.length(6);
 
-    // Verify that bindings work in SSR. For the non SSR case, this data
-    // comes from the REST end point.
-    await expect(controller.getElementText(listItems[0])).to.equal('Pineapple');
-
-    await controller.takeScreenshot('screenshots/amp-list-ssr.png');
+    await controller.takeScreenshot('screenshots/amp-list-ssr-and-non-ssr.png');
   });
 
 });
