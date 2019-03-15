@@ -19,7 +19,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag, childElementByAttr, isJsonScriptTag,
+import {childElementByAttr, childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {includes, startsWith} from '../../../src/string';
@@ -472,7 +472,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
   }
 
-  /** 
+  /**
    * If a fallback element is provided, displays it instead of suggestions.
    * Otherwise, throws given error. Must be called in a mutate context.
    * @param {error} error
@@ -480,7 +480,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   renderFallbackUI_(error) {
     this.clearAllItems_();
-    const fallback = childElementByAttr(this.element, "fallback");
+    const fallback = childElementByAttr(this.element, 'fallback');
     if (fallback) {
       this.fallbackDisplayed_ = true;
       // Expose the 'autocomplete-fallback' class.
