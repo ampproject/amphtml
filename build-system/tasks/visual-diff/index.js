@@ -452,9 +452,10 @@ async function snapshotWebpages(percy, browser, webpages) {
           .catch(testError => {
             log('travis', colors.red('○'));
             if (!isTravisBuild()) {
-              log('error', testError);
+              log('error', 'Error in test', colors.cyan(name));
+              log('error', 'Exception thrown:', testError);
             }
-            testErrors.push(testError);
+            testErrors.push({name, testError});
           })
           .then(async() => {
             await page.close();
@@ -469,8 +470,10 @@ async function snapshotWebpages(percy, browser, webpages) {
   }
   log('travis', '\n');
   if (isTravisBuild()) {
-    testErrors.forEach(testError => {
-      log('error', testError);
+    testErrors.forEach(testErrorObject => {
+      const {name, testError} = testErrorObject;
+      log('error', 'Error in test', colors.cyan(name));
+      log('error', 'Exception thrown:', testError);
     });
   }
   return testErrors.length == 0;
