@@ -370,16 +370,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should disallow name attribute on form for AMP4Email', () => {
-      html.setAttribute('amp4email', '');
-      allowConsoleError(() => {
-        expect(sanitizeHtml(
-            '<form name="form-name"></form>', /* diffing */ false, doc))
-            .to.equal('<form></form>');
-      });
-    });
-
-    it('should disallow type file and password for AMP4Email format', () => {
+    it('should disallow certain attributes on form for AMP4Email', () => {
       html.setAttribute('amp4email', '');
       allowConsoleError(() => {
         expect(sanitizeHtml(
@@ -387,6 +378,12 @@ function runSanitizerTests() {
             .to.equal('<input>');
         expect(sanitizeHtml('<input type="file">', /* diffing */false, doc))
             .to.equal('<input>');
+        expect(sanitizeHtml(
+            '<form name="form-name"></form>', /* diffing */ false, doc))
+            .to.equal('<form></form>');
+        expect(sanitizeHtml(
+            '<amp-anim controls></amp-anim>', /* diffing */ false, doc))
+            .to.equal('<amp-anim></amp-anim>');
       });
     });
   });

@@ -99,6 +99,24 @@ describes.repeated('amp-mustache 0.1', {
     });
   });
 
+  it('should pass document when sanitizing for AMP format type context', () => {
+    sandbox.spy(sanitizer, 'sanitizeHtml');
+    innerHtmlSetup('value = <a href="{{value}}">abc</a>');
+    template.compileCallback();
+    allowConsoleError(() => {
+      template.render({
+        value: 'https://www.site.org',
+      });
+      expect(sanitizer.sanitizeHtml).to.have.been.calledWith(
+          sinon.match.string,
+          false,
+          sinon.match(arg => {
+            return !!arg.documentElement;
+          })
+      );
+    });
+  });
+
   it('should sanitize templated tag names', () => {
     innerHtmlSetup(
         'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>');
