@@ -193,9 +193,9 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 
 /** @const {!Object<string, !Array<string>>} */
 const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
-/** @type {!JsonObject} */ Object.assign(
+/** @type {!JsonObject} */ (Object.assign(
       {'form': ['name'], 'amp-anim': ['controls']},
-      BLACKLISTED_TAG_SPECIFIC_ATTRS);
+      BLACKLISTED_TAG_SPECIFIC_ATTRS));
 
 /**
  * Test for invalid `style` attribute values.
