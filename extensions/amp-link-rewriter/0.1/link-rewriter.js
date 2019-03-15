@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
-export const
-    CTX_ATTR_NAME = 'shiftedctx',
-    CTX_ATTR_VALUE = () => {
-      return Date.now();
-    },
-    WL_ANCHOR_ATTR = [
-      'href',
-      'id',
-      'rel',
-      'rev',
-    ],
-    PREFIX_DATA_ATTR = /^vars(.+)/;
+const CTX_ATTR_NAME = 'shiftedctx';
+const CTX_ATTR_VALUE = () => {
+  return Date.now();
+};
+const WL_ANCHOR_ATTR = [
+  'href',
+  'id',
+  'rel',
+  'rev',
+];
+const PREFIX_DATA_ATTR = /^vars(.+)/;
+const REG_DOMAIN_URL = /^https?:\/\/(www\.)?([^\/:]*)(:\d+)?(\/.*)?$/;
 
 export class LinkRewriter {
   /**
    * @param {!AmpElement} ampElement
-   * @param {?../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    */
-  constructor(ampElement, viewer) {
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewer;
+  constructor(ampElement, ampDoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = ampDoc;
+
+    /** @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.ampDoc_);
 
     /** @private {?Event} */
     this.event_ = null;
@@ -51,14 +55,11 @@ export class LinkRewriter {
     /** @private {boolean|number|string} */
     this.ctxAttrValue_ = CTX_ATTR_VALUE().toString();
 
-    /** @private {?RegExp} */
-    this.regexDomainUrl_ = /^https?:\/\/(www\.)?([^\/:]*)(:\d+)?(\/.*)?$/;
-
     /** @private {Promise<Object>} */
     this.vars_ = this.viewer_.getReferrerUrl().then(referrerUrl => {
       const pageAttributes = {
         referrer: referrerUrl,
-        location: this.viewer_.getResolvedViewerUrl(),
+        location: Services.documentInfoForDoc(ampDoc).sourceUrl,
       };
 
       Object.assign(pageAttributes, this.configOpts_.vars);
@@ -70,23 +71,27 @@ export class LinkRewriter {
   /**
    * @param {!Event} event
    */
-  clickHandler(event) {
+  handleClick(event) {
     this.event_ = event;
 
     const htmlElement = this.event_.srcElement;
-
-    const trimmedDomain = this.viewer_.win.document.domain
-        .replace(/(www\.)?(.*)/, '$2');
+    const sourceTrimmedDomain = Services
+        .documentInfoForDoc(this.ampDoc_)
+        .sourceUrl.replace(/(www\.)?(.*)/, '$2');
+    const canonicalTrimmedDomain = Services
+        .documentInfoForDoc(this.ampDoc_)
+        .sourceUrl.replace(/(www\.)?(.*)/, '$2');
 
     if (!htmlElement) {
       return;
     }
 
-    if (this.wasShifted_(htmlElement)) {
+    if (this.isRewritten_(htmlElement)) {
       return;
     }
 
-    if (this.isInternalLink(htmlElement, trimmedDomain)) {
+    if (this.isInternalLink_(htmlElement, sourceTrimmedDomain)
+      || this.isInternalLink_(htmlElement, canonicalTrimmedDomain)) {
       return;
     }
 
@@ -99,10 +104,9 @@ export class LinkRewriter {
    * @return {boolean}
    * @private
    */
-  wasShifted_(htmlElement) {
-    const ctxAttrValue = this.ctxAttrValue_;
+  isRewritten_(htmlElement) {
     return (htmlElement[CTX_ATTR_NAME]) &&
-        (htmlElement[CTX_ATTR_NAME] === ctxAttrValue);
+        (htmlElement[CTX_ATTR_NAME] === this.ctxAttrValue_);
   }
 
   /**
@@ -111,10 +115,10 @@ export class LinkRewriter {
    * @param {?string} trimmedDomain
    * @return {boolean}
    */
-  isInternalLink(htmlElement, trimmedDomain) {
+  isInternalLink_(htmlElement, trimmedDomain) {
     const href = htmlElement.getAttribute('href');
 
-    return !(href && this.regexDomainUrl_.test(href) &&
+    return !(href && REG_DOMAIN_URL.test(href) &&
             RegExp.$2 !== trimmedDomain);
   }
 
@@ -127,7 +131,7 @@ export class LinkRewriter {
 
     return this.vars_.then(vars => {
       if (vars instanceof Object) {
-        htmlElement.href = this.replacePlaceHolders(htmlElement, vars);
+        htmlElement.href = this.replaceVars_(htmlElement, vars);
       }
 
       // If the link has been "activated" via contextmenu,
@@ -154,7 +158,7 @@ export class LinkRewriter {
    * @param {!Object} vars
    * @return {string}
    */
-  replacePlaceHolders(htmlElement, vars) {
+  replaceVars_(htmlElement, vars) {
     let {output} = this.configOpts_;
 
     /**
@@ -178,6 +182,9 @@ export class LinkRewriter {
         PREFIX_DATA_ATTR);
 
     Object.assign(vars, dataset);
+
+    /** add a random value to be use in the output pattern */
+    vars['random'] = Math.random().toString(32).substr(2);
 
     /**
      * Replace placeholders for properties of the document, anchor attributes

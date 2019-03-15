@@ -26,11 +26,8 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = null;
-
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = this.getAmpDoc();
 
     /** @private {?./link-rewriter.LinkRewriter} */
     this.rewriter_ = null;
@@ -44,10 +41,6 @@ export class AmpLinkRewriter extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
-    this.ampDoc_ = this.getAmpDoc();
-    this.viewer_ = Services.viewerForDoc(this.ampDoc_);
-
     this.configOpts_ = getConfigOpts(this.element);
 
     return this.ampDoc_.whenBodyAvailable()
@@ -60,7 +53,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   letsRockIt_() {
     this.rewriter_ = new LinkRewriter(
         this.element,
-        this.viewer_);
+        this.ampDoc_);
 
     this.attachClickEvent_();
   }
@@ -77,10 +70,8 @@ export class AmpLinkRewriter extends AMP.BaseElement {
 
       const navigation = Services.navigationForDoc(nodeElement);
       navigation.registerAnchorMutator((anchor, event) => {
-        this.rewriter_.clickHandler(event);
-      },
-      Priority.LINK_REWRITER_MANAGER);
-
+        this.rewriter_.handleClick(event);
+      }, Priority.LINK_REWRITER_MANAGER);
     });
 
     return true;

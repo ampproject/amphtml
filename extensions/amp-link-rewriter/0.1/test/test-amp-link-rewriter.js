@@ -16,7 +16,6 @@
 
 import {EVENTS} from '../../../amp-skimlinks/0.1/link-rewriter/constants';
 import {LinkRewriter} from '../link-rewriter';
-import {Services} from '../../../../src/services';
 import {getConfigOpts} from '../config-options';
 import {getScopeElements} from '../scope';
 import helpersMaker from './test-helpers';
@@ -64,10 +63,10 @@ describes.fakeWin('amp-link-rewriter', {
   });
 
   it('Should match the built url', done => {
-    const fakeViewer = Services.viewerForDoc(env.ampdoc),
-        linkRewriterElement = helpers.createLinkRewriterElement(config),
-        rewriter = new LinkRewriter(linkRewriterElement, fakeViewer),
-        anchorElement = document.createElement('a');
+    const linkRewriterElement = helpers.createLinkRewriterElement(config);
+    const rewriter = new LinkRewriter(linkRewriterElement, env.ampdoc);
+
+    const anchorElement = document.createElement('a');
 
     anchorElement.href = 'http://example.com';
     anchorElement.rel = '235';

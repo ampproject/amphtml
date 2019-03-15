@@ -122,7 +122,7 @@ The final code should look like:
 
 ##### output (required)
 
-The "output" property is the redirection url plus a query string of placeholders that will be shifted with values defined in the config JSON 'vars' property, or in the anchor itself as a data attribute.
+The "output" property has to be a string value with the redirection url plus a query string of placeholders that will be shifted with values defined in the config JSON 'vars' property, or in the anchor itself as a data attribute.
 
 Example:
 ```html
@@ -159,18 +159,18 @@ The resulting, rewritten URL would be:
 `https://visit.digidip.net?eid=231&cid=12345`
 ```
 
-Besides defined placeholders that match the data defined in the 'vars' property of the JSON configuration, or as a data attribute, there are other pre-defined placeholders that will be shifted with information such as anchor url, page location, referrer page, or anchor id. The following table shows the relationship between defined data and placeholders.
+Apart from vars defined in the *vars* property of the JSON configuration, or as a data attribute, there are other pre-defined *vars* that could be used for replacing values in the output pattern. Those *vars* are anchor href, page location, referrer URL or anchor ID. The following table shows the relationship between defined data and placeholders.
 
 | value          | source     |       example                                         |    placeholder       
 | -------------- | ---------- |-------------------------------------------------------|----------------------
-| location       | page       |    `https://www.pepper.com/`                          |  `${location}`        
-| referrer       | page       |    `https://google.de/`                               |  `${referrer}`        
-| rev            | anchor     |    `<a href="..." rev="author" />`                    |  `${rev}`             
-| id             | anchor     |    `<a href="..." id="link" />`                       |  `${id}`              
-| rev            | anchor     |    `<a href="..." rel="pass" />`                      |  `${rel}`             
-| href           | anchor     |    `<a href="https://amazon.com" />`                  |  `${href}`            
-| rev            | anchor     |    `<a href="..." rev="author" />`                    |  `${rev}`             
 | data-vars-*    | anchor     |    `<a href="..." data-vars-merchant-id="123" />`     |  `${merchantId}`
+| href           | anchor     |    `<a href="https://amazon.com" />`                  |  `${href}`            
+| id             | anchor     |    `<a href="..." id="link" />`                       |  `${id}`              
+| location       | page       |    `https://www.pepper.com/`                          |  `${location}`        
+| random         | page       |    `Math.random().toString(32).substr(2)`             |  `${random}`
+| referrer       | page       |    `https://google.de/`                               |  `${referrer}`        
+| rel            | anchor     |    `<a href="..." rel="pass" />`                      |  `${rel}`             
+| rev            | anchor     |    `<a href="..." rev="author" />`                    |  `${rev}`             
 | vars.*         | config     |    `{ "vars": { "publisherId": "123" } }`             |  `${publisherId}`
 
 
@@ -209,8 +209,8 @@ Example:
     }
 ```
 
-The anchors within the html area with id 'product-listing-1' will have to match the regex expression defined for the attribute href and id.
-In this example, it means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'   
+The anchors within the html area with id 'product-listing-1' will have to match the regex expression defined for the attribute href and class. The regex expression will be wrapped with ^ and $ for a full match.
+In this example, it means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'
 
 
 ## Validation

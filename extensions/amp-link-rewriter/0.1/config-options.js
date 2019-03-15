@@ -33,7 +33,11 @@ export function getConfigOpts(element) {
   return {
     output: config['output'].toString(),
     section: hasOwn(config, 'section') ? config['section'] : [],
-    attribute: hasOwn(config, 'attribute') ? config['attribute'] : {},
+
+    attribute: hasOwn(config, 'attribute') ?
+      parseAttribute(config['attribute']) :
+      {},
+
     vars: hasOwn(config, 'vars') ? config['vars'] : {},
   };
 }
@@ -49,4 +53,16 @@ function enforceConfigOpt(condition, message) {
   );
 }
 
+/**
+ * @param {!Object} attribute
+ * return {Object}
+ */
+function parseAttribute(attribute) {
+  const newAttr = {};
 
+  Object.keys(attribute).forEach(key => {
+    newAttr[key] = '^' + attribute[key] + '$';
+  });
+
+  return newAttr;
+}
