@@ -267,11 +267,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectHandler_(event) {
-    let item;
-    return this.measureMutateElement(() => {
-      item = this.getItemElement_(event.target);
-    }, () => {
-      this.selectItem_(item);
+    return this.mutateElement(() => {
+      this.selectItem_(this.getItemElement_(event.target));
     });
   }
 
