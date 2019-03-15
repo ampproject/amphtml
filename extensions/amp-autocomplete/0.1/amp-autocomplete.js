@@ -277,7 +277,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   selectHandler_(event) {
     return this.mutateElement(() => {
-      this.selectItem_(this.getItemElement_(event.target));
+      const element = dev().assertElement(event.target);
+      this.selectItem_(this.getItemElement_(element));
     });
   }
 
@@ -404,8 +405,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Returns the nearest ancestor element that is a suggested item.
-   * @param {?Element|?EventTarget} element
-   * @return {?Element|?EventTarget}
+   * @param {?Element} element
+   * @return {?Element}
    * @private
    */
   getItemElement_(element) {
@@ -420,7 +421,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Writes the selected value into the input field.
-   * @param {?Element|?EventTarget} element
+   * @param {?Element} element
    * @private
    */
   selectItem_(element) {
