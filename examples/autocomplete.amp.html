@@ -31,6 +31,9 @@
                     <script type="application/json">
                     { "items" : ["hello a", "hello b", "hello c"] }
                     </script>
+                    <div fallback>
+                      Sorry, we couldn't load suggestions.
+                    </div>
                 </amp-autocomplete>
             </label>
             <label>
@@ -40,6 +43,9 @@
                     <script type="application/json">
                         { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
                     </script>
+                    <div fallback>
+                      Sorry, we couldn't load suggestions.
+                    </div>
                 </amp-autocomplete>
             </label>
             <input name="submit-button" type="submit" value="Submit">
@@ -68,6 +74,9 @@
                 <amp-autocomplete filter="substring" min-characters="0"
                     src="autocomplete-cities.example.json">
                     <input type="text" name="city" required>
+                    <div fallback>
+                      Sorry, we couldn't load suggestions.
+                    </div>
                 </amp-autocomplete>
             </label>
             <input name="submit-button" type="submit" value="Submit">
@@ -90,6 +99,9 @@
                     <script type="application/json">
                         { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
                     </script>
+                    <div fallback>
+                      Sorry, we couldn't load suggestions.
+                    </div>
                 </amp-autocomplete>
             </label>
             <input type="submit" value="Search">

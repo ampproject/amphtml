@@ -460,11 +460,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return Promise.resolve();
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
-        let partialInputChild;
-        return this.measureMutateElement(() => {
-          partialInputChild = this.container_.lastChild;
-        }, () => {
-          this.selectItem_(partialInputChild);
+        return this.mutateElement(() => {
+          if (!this.fallbackDisplayed_) {
+            this.selectItem_(this.container_.lastChild);
+          }
           this.resetActiveElement_();
           this.toggleResults_(false);
         });
@@ -484,6 +483,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const fallback = childElementByAttr(this.element, "fallback");
     if (fallback) {
       this.fallbackDisplayed_ = true;
+      // Expose the 'autocomplete-fallback' class.
+      fallback.classList.add('autocomplete-fallback');
       this.container_.append(fallback);
     } else {
       throw error;
