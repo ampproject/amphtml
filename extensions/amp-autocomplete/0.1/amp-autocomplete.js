@@ -117,7 +117,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Experiment ${EXPERIMENT} is not turned on.`);
 
     if (!this.element.hasAttribute('src')) {
-      this.inlineData_ = this.getInlineData_();
+      const scripts = childElementsByTag(this.element, 'SCRIPT');
+      userAssert(scripts.length,
+          `${TAG} expected a <script> child or a URL specified in "src".`);
+      this.inlineData_ = this.getInlineData_(scripts);
     }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
@@ -132,10 +135,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
             'template, script[template]');
       // Dummy render to verify existence of "vallue" attribute.
       this.templates_.renderTemplate(this.templateElement_, {}).then(
-        renderedEl => {
-          userAssert(renderedEl.hasAttribute('value'),
-        `${TAG} requires <template> tag to have "value" attribute.`);
-      });
+          renderedEl => {
+            userAssert(renderedEl.hasAttribute('value'),
+                `${TAG} requires <template> tag to have "value" attribute.`);
+          });
     }
 
     this.filter_ = userAssert(this.element.getAttribute('filter'),
@@ -155,19 +158,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @return {!Array<string>}
+   * @param {!NodeList<!Element>} scripts
+   * @return {!Array<!JsonObject|string>}
    * @private
    */
-  getInlineData_() {
-    const scripts = childElementsByTag(this.element, 'SCRIPT');
-    userAssert(scripts.length,
-        `${TAG} should contain a <script> child or a URL specified in "src".`);
+  getInlineData_(scripts) {
     const jsonScripts = [];
     scripts.forEach(script => { if (isJsonScriptTag(script)) {
       jsonScripts.push(script);
     } });
-    userAssert(jsonScripts.length === 1,
-        `${TAG} expected one <script type="application/json"> child.`);
+    userAssert(jsonScripts.length,
+        `${TAG} expected data in a <script type="application/json"> tag.`);
     const json = tryParseJson(jsonScripts[0].textContent,
         error => {
           throw error;
