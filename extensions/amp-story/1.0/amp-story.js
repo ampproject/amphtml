@@ -1633,6 +1633,7 @@ export class AmpStory extends AMP.BaseElement {
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
       } else {
+        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
