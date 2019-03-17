@@ -114,6 +114,9 @@ describe.configure().skipSinglePass().run('amp-script', function() {
         return {height: 301};
       });
       browser.click('button#hello');
+
+      // Give mutations time to apply.
+      yield browser.wait(100);
       yield poll('terminated', () => {
         return element.classList.contains('i-amphtml-broken');
       });
