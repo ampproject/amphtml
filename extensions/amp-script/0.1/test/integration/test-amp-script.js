@@ -113,13 +113,9 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       sandbox.stub(impl, 'getLayoutBox').callsFake(() => {
         return {height: 301};
       });
-      let terminated = false;
-      sandbox.stub(impl.workerDom_, 'terminate').callsFake(() => {
-        terminated = true;
-      });
       browser.click('button#hello');
       yield poll('terminated', () => {
-        return element.classList.contains('i-amphtml-broken') && terminated;
+        return element.classList.contains('i-amphtml-broken');
       });
     });
   });
