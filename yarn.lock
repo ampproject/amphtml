@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.1.2.tgz#88b034c5f2a9a41d90722885966d2d67629ce522"
   integrity sha512-B+BgrRHJLnNr8pkSfZB3aOitHmtgZSZnioV3ixym3ZAr6VDpvUw4u7tzWgHwG3X03ohHQBdau843pnQOf2oXhA==
 
-"@ampproject/worker-dom@0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.18.tgz#2b9ebf912c4a9ef4c523786d4ad955c8e4c93b56"
-  integrity sha512-2Api6EDzFy9hEQcJk1AlAm9/UIZaILsDmIXHeQuPjwQtqBW/WwTem+ThB3rFWpkYfOdvLSV97GcIvjQmuDO5nQ==
+"@ampproject/worker-dom@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.3.0.tgz#3c48e6b9266844e2412cebb209587bcfc378cdaf"
+  integrity sha512-pPp1Utkbf9dvU76WSMmKLmnjmUruEYvA0iNggOGn6DqYqag3/Ag1XNVy/3CNlPrFhYLzwKiUu69D5vo1+kg0+Q==
   dependencies:
     dompurify "1.0.10"
 
