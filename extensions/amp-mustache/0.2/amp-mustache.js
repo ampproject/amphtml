@@ -59,6 +59,9 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private {!Array<string>} */
     this.delimiters_ = [];
 
+    /** @private {!Element} */
+    this.textArea_ = document.createElement('textarea');
+
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
@@ -72,23 +75,38 @@ export class AmpMustache extends AMP.BaseTemplate {
   initTemplateString_() {
     const {element} = this;
     const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+      const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+      devAssert(delimitersStr.split(',').length == 2,
+          'Beginning and ending delimiter is required: %s.', element);
+      this.delimiters_ = delimitersStr.split(',');
+    }
     if (element.tagName == 'TEMPLATE') {
       const content = templateContentClone(element);
       this.processNestedTemplates_(content);
       const container = element.ownerDocument.createElement('div');
       container.appendChild(content);
+      this.escapeHtmlEntitiesInDelimiter();
       return container./*OK*/innerHTML;
     } else if (element.tagName == 'SCRIPT') {
-      if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
-        const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
-        devAssert(delimitersStr.split(',').length == 2,
-            'Beginning and ending delimiter is required: %s.', element);
-        this.delimiters_ = delimitersStr.split(',');
-      }
       return element.textContent;
     }
 
     return '';
+  }
+
+
+  /**
+   * Escape any html entities that should be escaped in a delimiter.
+   * This is required as the template also escapes the delimiters when
+   * it is parsed.
+   */
+  escapeHtmlEntitiesInDelimiter() {
+    for (let i = 0; i < this.delimiters_.length; i++) {
+      const delimiter = this.delimiters_[i];
+      this.textArea_.textContent = delimiter;
+      this.delimiters_[i] = this.textArea_.innerHTML;
+    }
   }
 
   /**

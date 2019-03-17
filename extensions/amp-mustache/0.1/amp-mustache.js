@@ -77,10 +77,17 @@ export class AmpMustache extends AMP.BaseTemplate {
   initTemplateString_() {
     const {element} = this;
     const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+      const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+      devAssert(delimitersStr.split(',').length == 2,
+          'Beginning and ending delimiter is required: %s.', element);
+      this.delimiters_ = delimitersStr.split(',');
+    }
     if (this.element.tagName == 'TEMPLATE') {
       const content = templateContentClone(this.element);
       this.processNestedTemplates_(content);
       const container = this.element.ownerDocument.createElement('div');
+      this.escapeHtmlEntitiesInDelimiter();
       container.appendChild(content);
       return container./*OK*/innerHTML;
     } else if (this.element.tagName == 'SCRIPT') {
@@ -95,6 +102,18 @@ export class AmpMustache extends AMP.BaseTemplate {
     return '';
   }
 
+  /**
+   * Escape any html entities that should be escaped in a delimiter.
+   * This is required as the template also escapes the delimiters when
+   * it is parsed.
+   */
+  escapeHtmlEntitiesInDelimiter() {
+    for (let i = 0; i < this.delimiters_.length; i++) {
+      const delimiter = this.delimiters_[i];
+      this.textArea_.textContent = delimiter;
+      this.delimiters_[i] = this.textArea_.innerHTML;
+    }
+  }
   /**
    * Stores and replaces nested templates with custom triple-mustache pointers.
    *
