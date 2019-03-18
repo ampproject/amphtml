@@ -104,7 +104,7 @@ export class AmpMustache extends AMP.BaseTemplate {
         for (let i = 0; i < delimiters.length; i++) {
           const delimiter = delimiters[i];
           textArea.textContent = delimiter;
-          delimiters[i] = textArea.innerHTML;
+          delimiters[i] = textArea./*OK*/innerHTML;
         }
       }
     }
