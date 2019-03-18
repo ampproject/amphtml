@@ -22,12 +22,14 @@ import {htmlFor} from '../../../../../src/static-template';
 
 
 describes.realWin('UserActivationTracker', {}, env => {
+  let win;
   let root;
   let tracker;
   let clock;
 
   beforeEach(() => {
-    const doc = env.win.document;
+    win = env.win;
+    const doc = win.document;
     const html = htmlFor(doc);
 
     root = html`<root></root>`;
@@ -37,6 +39,12 @@ describes.realWin('UserActivationTracker', {}, env => {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
   });
+
+  function microTask() {
+    return new Promise(resolve => {
+      win.setTimeout(resolve, 0);
+    });
+  }
 
   it('should start as inactive', () => {
     expect(tracker.hasBeenActive()).to.be.false;
@@ -91,7 +99,7 @@ describes.realWin('UserActivationTracker', {}, env => {
 
       return promise.then(() => {
         // Skip microtask.
-        return Promise.resolve();
+        return microTask();
       }).then(() => {
         // The gesture window is expanded for an extra window.
         expect(tracker.isActive()).to.be.true;
@@ -122,7 +130,7 @@ describes.realWin('UserActivationTracker', {}, env => {
 
       return promise.catch(() => {}).then(() => {
         // Skip microtask.
-        return Promise.resolve();
+        return microTask();
       }).then(() => {
         // The gesture window is expanded for an extra window.
         expect(tracker.isActive()).to.be.true;

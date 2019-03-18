@@ -70,9 +70,9 @@ export class UserActivationTracker {
    * @return {boolean}
    */
   isActive() {
-    return this.lastActivationTime_ > 0
-        && Date.now() - this.lastActivationTime_ <= ACTIVATION_TIMEOUT
-        || this.inLongTask_;
+    return ((this.lastActivationTime_ > 0
+        && Date.now() - this.lastActivationTime_ <= ACTIVATION_TIMEOUT)
+        || this.inLongTask_);
   }
 
   /**
