@@ -28,14 +28,13 @@ document.getElementById('hello').addEventListener('click', () => {
 // Long task.
 if (document.getElementById('long')) {
   document.getElementById('long').addEventListener('click', () => {
-    longTask(new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-        const el = document.createElement('h1');
-        el.textContent = 'Hello (long) World!';
-        document.body.appendChild(el);
-      }, 6000);
-    }));
+    fetch('http://localhost:8000/examples/amp-script/hello-world-data.json')
+        .then(response => response.json())
+        .then(json => {
+          const el = document.createElement('h1');
+          el.textContent = 'Hello ' + json.year + ' World!';
+          document.body.appendChild(el);
+        });
   });
 }
 

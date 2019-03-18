@@ -205,14 +205,11 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       // Give event listeners in hydration a moment to attach.
       yield browser.wait(100);
 
-      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
-      let inLongTask = false;
-      sandbox.stub(impl.userActivation_, 'expandLongTask').callsFake(() => {
-        inLongTask = true;
-      });
+      const userActivation = impl.userActivation_;
+      sandbox.stub(userActivation, 'isActive').callsFake(() => true);
       browser.click('button#long');
       yield poll('long task started', () => {
-        return inLongTask;
+        return userActivation.isInLongTask();
       });
     });
   });

@@ -99,6 +99,13 @@ export class UserActivationTracker {
   }
 
   /**
+   * @return {boolean}
+   */
+  isInLongTask() {
+    return this.inLongTask_;
+  }
+
+  /**
    * @param {!Event} event
    * @private
    */
