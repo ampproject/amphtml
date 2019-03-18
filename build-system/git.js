@@ -20,6 +20,12 @@
  */
 
 const colors = require('ansi-colors');
+const {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  travisPullRequestBranch,
+  travisPullRequestSha,
+} = require('./travis');
 const {getStdout} = require('./exec');
 
 const commitLogMaxCount = 100;
@@ -30,9 +36,9 @@ const commitLogMaxCount = 100;
  * @return {string}
  */
 exports.gitMergeBaseMaster = function() {
-  if (process.env.TRAVIS) {
-    return getStdout(
-        `git merge-base master ${process.env.TRAVIS_PULL_REQUEST_SHA}`).trim();
+  if (isTravisBuild()) {
+    const traviPrSha = travisPullRequestSha();
+    return getStdout(`git merge-base master ${traviPrSha}`).trim();
   }
   return gitMergeBaseLocalMaster();
 };
@@ -120,13 +126,12 @@ exports.gitDiffColor = function() {
 };
 
 /**
- * Returns the name of the branch from which the PR originated. On Travis, this
- * is exposed via TRAVIS_PULL_REQUEST_BRANCH.
+ * Returns the name of the branch from which the PR originated.
  * @return {string}
  */
 exports.gitBranchName = function() {
-  return process.env.TRAVIS ?
-    process.env.TRAVIS_PULL_REQUEST_BRANCH :
+  return isTravisPullRequestBuild() ?
+    travisPullRequestBranch() :
     getStdout('git rev-parse --abbrev-ref HEAD').trim();
 };
 
@@ -135,8 +140,8 @@ exports.gitBranchName = function() {
  * @return {string}
  */
 exports.gitCommitHash = function() {
-  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
-    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  if (isTravisPullRequestBuild()) {
+    return travisPullRequestSha();
   }
   return getStdout('git rev-parse --verify HEAD').trim();
 };
@@ -182,7 +187,7 @@ function gitMergeBaseLocalMaster() {
  * @return {string}
  */
 function gitMasterBaseline() {
-  if (process.env.TRAVIS) {
+  if (isTravisBuild()) {
     return exports.gitTravisMasterBaseline();
   }
   return gitMergeBaseLocalMaster();

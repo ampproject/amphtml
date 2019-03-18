@@ -20,7 +20,8 @@ import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
-import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
+import {closestAncestorElementBySelector, isRTL, tryFocus}
+  from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -365,7 +366,7 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
     if (!el.hasAttribute('option')) {
-      el = closestBySelector(el, '[option]');
+      el = closestAncestorElementBySelector(el, '[option]');
     }
     if (el) {
       this.onOptionPicked_(el);
@@ -395,7 +396,10 @@ export class AmpSelector extends AMP.BaseElement {
     // There is a change of the `selected` attribute for the element
     if (selectedIndex !== index) {
       this.setSelection_(el);
-      this.clearSelection_(this.elements_[selectedIndex]);
+      const selectedEl = this.elements_[selectedIndex];
+      if (selectedEl) {
+        this.clearSelection_(selectedEl);
+      }
     } else {
       this.clearSelection_(el);
     }
@@ -430,11 +434,19 @@ export class AmpSelector extends AMP.BaseElement {
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
     const previousIndex = this.elements_.indexOf(this.selectedElements_[0]);
-    const index = previousIndex + delta;
+
+    // If previousIndex === -1 is true, then a negative delta will be offset
+    // one more than is wanted when looping back around in the options.
+    // This occurs when no options are selected and "selectUp" is called.
+    const selectUpWhenNoneSelected = previousIndex === -1 && delta < 0;
+    const index = selectUpWhenNoneSelected ? delta : previousIndex + delta;
     const normalizedIndex = mod(index, this.elements_.length);
 
     this.setSelection_(this.elements_[normalizedIndex]);
-    this.clearSelection_(this.elements_[previousIndex]);
+    const previousEl = this.elements_[previousIndex];
+    if (previousEl) {
+      this.clearSelection_(previousEl);
+    }
   }
 
   /**

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
@@ -55,10 +56,16 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
+    /**
+     * Used to encode html entities in delimiters.
+     * @private {!Element}
+     */
+    this.textArea_ = document.createElement('textarea');
+
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    mustache.parse(this.template_, /* tags */ this.getDelimiters_());
   }
 
   /**
@@ -66,18 +73,49 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @return {string}
    */
   initTemplateString_() {
-    if (this.element.tagName == 'TEMPLATE') {
-      const content = templateContentClone(this.element);
+    const {element} = this;
+    if (element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(element);
       this.processNestedTemplates_(content);
-      const container = this.element.ownerDocument.createElement('div');
+      const container = element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
-      return this.element.textContent;
+    } else if (element.tagName == 'SCRIPT') {
+      return element.textContent;
     }
 
     return '';
   }
+
+  /**
+   * Initialize the delimiters.
+   * @return {?Array<string>} delimiters or null. Null rather than empty array
+   *     so that default mustache delimiters are used.
+   * @private
+   */
+  getDelimiters_() {
+    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+    let delimiters = null;
+    const {element} = this;
+    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+      const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+      devAssert(delimitersStr.split(',').length == 2,
+          'Beginning and ending delimiter is required: %s.', element);
+      delimiters = delimitersStr.split(',');
+      // If using a template encode any html entities used in a delimiter.
+      // This is required as the template will also contain decoded delimiters
+      // prior to being parsed by mustache.
+      if (element.tagName == 'TEMPLATE') {
+        for (let i = 0; i < delimiters.length; i++) {
+          const delimiter = delimiters[i];
+          this.textArea_.textContent = delimiter;
+          delimiters[i] = this.textArea_.innerHTML;
+        }
+      }
+    }
+    return delimiters;
+  }
+
 
   /**
    * Stores and replaces nested templates with custom triple-mustache pointers.
@@ -87,6 +125,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    * restrictive sanitization rules of triple-mustache.
    *
    * @param {!DocumentFragment} content
+   * @private
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');

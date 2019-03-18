@@ -26,8 +26,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
-  closestByTag,
-  escapeCssSelectorIdent,
+  closestAncestorElementBySelector,
   isRTL,
   iterateCursor,
   scopedQuerySelector,
@@ -40,6 +39,7 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 
@@ -832,7 +832,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return existingField;
     }
 
-    const form = closestByTag(this.element, 'form');
+    const form = closestAncestorElementBySelector(this.element, 'form');
     if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';

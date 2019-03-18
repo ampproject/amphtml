@@ -726,7 +726,7 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
-      this.signals_.signal(CommonSignals.CHANGE_SIZE_END);
+      this.dispatchCustomEvent(AmpEvents.SIZE_CHANGED);
     }
 
     /**
@@ -744,7 +744,8 @@ function createBaseCustomElementClass(win) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+        this.isInTemplate_ =
+          !!dom.closestAncestorElementBySelector(this, 'template');
       }
       if (this.isInTemplate_) {
         return;
@@ -1280,7 +1281,6 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
-      this.signals_.reset(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
@@ -1597,9 +1597,10 @@ function createBaseCustomElementClass(win) {
         const doc = this.ownerDocument;
         devAssert(doc);
 
-        const container = htmlFor(doc)`
-            <div class="i-amphtml-loading-container i-amphtml-fill-content
-              amp-hidden"></div>`;
+        const html = htmlFor(doc);
+        const container =
+          html`<div class="i-amphtml-loading-container i-amphtml-fill-content
+            amp-hidden"></div>`;
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);

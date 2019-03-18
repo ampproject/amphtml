@@ -140,7 +140,9 @@ AMP ships with a local proxy for testing production AMP documents with the local
 
 For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
-You can access it with the local JS at
+You can access it with the local JS by using the form in
+[`http://localhost:8000`](http://localhost:8000) or by accessing the proxy URL
+directly:
 
 `http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
@@ -305,6 +307,8 @@ firebase deploy
 * When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 - "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
 - "What do you want to use as your public directory?" enter `firebase`.
+- "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
 - "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 
@@ -325,11 +329,15 @@ firebase deploy
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
 
+After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
+
+Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
+
 ## End-to-End Tests
 
-You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon. 
+You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
 
-Run all tests with: 
+Run all tests with:
 ```
 gulp e2e
 ```

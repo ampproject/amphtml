@@ -163,15 +163,13 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
+    child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
     mandatory_min_num_child_tags: 1
   }
 }
@@ -261,6 +259,22 @@ tags: {
   attrs: { name: "animate-in-duration" }
   attrs: { name: "grid-area" }
   attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
     name: "justify-content"
     value: "center"
     value: "end"
@@ -331,6 +345,22 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -396,7 +426,10 @@ tags: {  # amp-story-consent (json)
   mandatory_parent: "AMP-STORY-CONSENT"
   unique: true
   satisfies: "amp-story-consent extension .json script"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -417,10 +450,7 @@ tags: {  # <amp-story-consent>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
   requires: "amp-story-consent extension .json script"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
+  attr_lists: "mandatory-id-attr"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
@@ -467,6 +497,22 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
@@ -601,6 +647,163 @@ descendant_tag_list: {
   tag: "MARK"
   tag: "NAV"
   tag: "NOSCRIPT"
+  tag: "OL"
+  tag: "P"
+  tag: "PRE"
+  tag: "Q"
+  tag: "RP"
+  tag: "RT"
+  tag: "RTC"
+  tag: "RUBY"
+  tag: "S"
+  tag: "SAMP"
+  tag: "SECTION"
+  tag: "SMALL"
+  tag: "SOURCE"
+  tag: "SPAN"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "TABLE"
+  tag: "TBODY"
+  tag: "TD"
+  tag: "TFOOT"
+  tag: "TH"
+  tag: "THEAD"
+  tag: "TIME"
+  tag: "TR"
+  tag: "TRACK"
+  tag: "U"
+  tag: "UL"
+  tag: "VAR"
+  tag: "WBR"
+}
+tags: {  # <amp-story-page-attachment>
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-ATTACHMENT"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
+  mandatory_last_child: true
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+}
+descendant_tag_list {
+  # Whitelisting as many components as possible, unless they could result in a
+  # bad UX (ie: modal in a modal with amp-lightbox), or potential security
+  # issues (ie: amp-form).
+  name: "amp-story-page-attachment-allowed-descendants"
+  tag: "A"
+  tag: "ABBR"
+  tag: "ADDRESS"
+  tag: "AMP-3D-GLTF"
+  tag: "AMP-3Q-PLAYER"
+  tag: "AMP-ACCORDION"
+  tag: "AMP-AUDIO"
+  tag: "AMP-BEOPINION"
+  tag: "AMP-BODYMOVIN-ANIMATION"
+  tag: "AMP-BRID-PLAYER"
+  tag: "AMP-BRIGHTCOVE"
+  tag: "AMP-BYSIDE-CONTENT"
+  tag: "AMP-CALL-TRACKING"
+  tag: "AMP-CAROUSEL"
+  tag: "AMP-DAILYMOTION"
+  tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-EMBEDLY-CARD"
+  tag: "AMP-FACEBOOK"
+  tag: "AMP-FACEBOOK-COMMENTS"
+  tag: "AMP-FACEBOOK-LIKE"
+  tag: "AMP-FACEBOOK-PAGE"
+  tag: "AMP-FIT-TEXT"
+  tag: "AMP-FX-COLLECTION"
+  tag: "AMP-FX-FLYING-CARPET"
+  tag: "AMP-GFYCAT"
+  tag: "AMP-GFYCAT"
+  tag: "AMP-GIST"
+  tag: "AMP-GIST"
+  tag: "AMP-GOOGLE-DOCUMENT-EMBED"
+  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
+  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
+  tag: "AMP-HULU"
+  tag: "AMP-IMA-VIDEO"
+  tag: "AMP-IMAGE-SLIDER"
+  tag: "AMP-IMG"
+  tag: "AMP-IMGUR"
+  tag: "AMP-INSTAGRAM"
+  tag: "AMP-IZLESENE"
+  tag: "AMP-JWPLAYER"
+  tag: "AMP-KALTURA-PLAYER"
+  tag: "AMP-LIST"
+  tag: "AMP-LIST"
+  tag: "AMP-LIVE-LIST"
+  tag: "AMP-LIVE-LIST"
+  tag: "AMP-MATHML"
+  tag: "AMP-MOWPLAYER"
+  tag: "AMP-NEXXTV-PLAYER"
+  tag: "AMP-O2-PLAYER"
+  tag: "AMP-OOYALA-PLAYER"
+  tag: "AMP-PAN-ZOOM"
+  tag: "AMP-PINTEREST"
+  tag: "AMP-PLAYBUZZ"
+  tag: "AMP-POWR-PLAYER"
+  tag: "AMP-REACH-PLAYER"
+  tag: "AMP-REDDIT"
+  tag: "AMP-RIDDLE-QUIZ"
+  tag: "AMP-SOUNDCLOUD"
+  tag: "AMP-SPRINGBOARD-PLAYER"
+  tag: "AMP-TIMEAGO"
+  tag: "AMP-TWITTER"
+  tag: "AMP-VIDEO"
+  tag: "AMP-VIDEO-IFRAME"
+  tag: "AMP-VIMEO"
+  tag: "AMP-VINE"
+  tag: "AMP-VIQEO-PLAYER"
+  tag: "AMP-VK"
+  tag: "AMP-WISTIA-PLAYER"
+  tag: "AMP-YOTPO"
+  tag: "AMP-YOUTUBE"
+  tag: "ARTICLE"
+  tag: "ASIDE"
+  tag: "B"
+  tag: "BDI"
+  tag: "BDO"
+  tag: "BLOCKQUOTE"
+  tag: "BR"
+  tag: "BUTTON"
+  tag: "CAPTION"
+  tag: "CITE"
+  tag: "CODE"
+  tag: "COL"
+  tag: "COLGROUP"
+  tag: "DATA"
+  tag: "DD"
+  tag: "DEL"
+  tag: "DFN"
+  tag: "DIV"
+  tag: "DL"
+  tag: "DT"
+  tag: "EM"
+  tag: "FIGCAPTION"
+  tag: "FIGURE"
+  tag: "FOOTER"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "HEADER"
+  tag: "HGROUP"
+  tag: "HR"
+  tag: "I"
+  tag: "INS"
+  tag: "KBD"
+  tag: "LI"
+  tag: "MAIN"
+  tag: "MARK"
+  tag: "NAV"
   tag: "OL"
   tag: "P"
   tag: "PRE"

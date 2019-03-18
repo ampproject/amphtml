@@ -552,6 +552,11 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
     });
 
+    it('uses `data-poster` attr', () => {
+      const el = html`<amp-video data-poster=foo.png></amp-video>`;
+      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+    });
+
     it('uses `placeholder` amp-img', () => {
       const el = html`<amp-video>
           <amp-img src=foo.png placeholder></amp-img>

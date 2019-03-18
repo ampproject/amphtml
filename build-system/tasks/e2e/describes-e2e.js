@@ -16,7 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
-const {AmpDriver} = require('./amp-driver');
+const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
@@ -29,7 +29,9 @@ const TIMEOUT = 20000;
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
- *  fixtures: (!Array<string>|undefined),
+ *  environments: (!Array<!AmpdocEnvironment>|undefined),
+ *  testUrl: string,
+ *  initialRect: ({{width: number, height:number}}|undefined)
  * }}
  */
 let TestSpec;
@@ -41,6 +43,21 @@ const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
   // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
+
+/**
+ * Maps an environment enum value to a `describes.repeated` variant object.
+ */
+const EnvironmentVariantMap = {
+  [AmpdocEnvironment.SINGLE]:
+      {name: 'Standalone environment', value: {environment: 'single'}},
+  [AmpdocEnvironment.VIEWER_DEMO]:
+      {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
+};
+
+const defaultEnvironments = [
+  AmpdocEnvironment.SINGLE,
+  AmpdocEnvironment.VIEWER_DEMO,
+];
 
 /**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
@@ -62,8 +79,24 @@ function describeEnv(factory) {
         fixtures.push(fixture);
       }
     });
+
+    const environments = spec.environments || defaultEnvironments;
+    const variants = Object.create(null);
+    environments.forEach(environment => {
+      const o = EnvironmentVariantMap[environment];
+      variants[o.name] = o.value;
+    });
+
     return describeFunc(name, function() {
-      const env = Object.create(null);
+      for (const name in variants) {
+        describe(name ? ` ${name} ` : SUB, function() {
+          doTemplate.call(this, name, variants[name]);
+        });
+      }
+    });
+
+    function doTemplate(name, variant) {
+      const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(() => {
@@ -115,7 +148,7 @@ function describeEnv(factory) {
         }, this.timeout() - 1);
         fn.call(this, env);
       });
-    });
+    }
   };
 
   /**
@@ -170,9 +203,6 @@ class AmpPageFixture {
     /** @const */
     this.spec = spec;
 
-    // /** @private @const {!Array<string>} */
-    // this.browsers_ = this.spec.browsers || ['chrome'];
-
     /** @private @const */
     this.driver_ = null;
   }
@@ -183,7 +213,7 @@ class AmpPageFixture {
   }
 
   /** @override */
-  setup(env) {
+  async setup(env) {
     // TODO(estherkim): implement sessions
     // TODO(estherkim): ensure tests are in a sandbox
     // See https://w3c.github.io/webdriver/#sessions
@@ -196,24 +226,69 @@ class AmpPageFixture {
 
     // TODO(estherkim): remove hardcoded chrome driver
     const capabilities = Capabilities.chrome();
-    const chromeOptions = {'args': ['--headless']};
+    const chromeOptions = {
+      // TODO(cvializ,estherkim,sparhami):
+      //   figure out why headless causes more flakes
+      // 'args': ['--headless']
+    };
     capabilities.set('chromeOptions', chromeOptions);
 
     const builder = new Builder().withCapabilities(capabilities);
-    return builder.build().then(driver => {
-      const controller = new SeleniumWebDriverController(driver);
-      env.controller = controller;
-      env.ampDriver = new AmpDriver(controller);
-      this.driver_ = driver;
-    });
+    const driver = await builder.build();
+    const controller = new SeleniumWebDriverController(driver);
+    const ampDriver = new AmpDriver(controller);
+
+    env.controller = controller;
+    env.ampDriver = ampDriver;
+    this.driver_ = driver;
+
+    const {
+      testUrl,
+      experiments,
+      initialRect,
+    } = this.spec;
+    const {
+      environment,
+      // TODO(estherkim): browser
+    } = env;
+
+    if (Array.isArray(experiments)) {
+      await toggleExperiments(ampDriver, testUrl, experiments);
+    }
+
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
+    }
+
+    await ampDriver.navigateToEnvironment(environment, testUrl);
   }
 
   /** @override */
-  async teardown(unusedEnv) {
+  async teardown(env) {
+    const {controller} = env;
+    if (controller) {
+      await controller.switchToParent();
+    }
     if (this.driver_) {
       await this.driver_.quit();
     }
     this.driver_ = null;
+  }
+}
+
+/**
+ * Toggle the given experiments for the given test URL domain.
+ * @param {!AmpDriver} ampDriver
+ * @param {string} testUrl
+ * @param {!Array<string>} experiments
+ * @return {!Promise}
+ */
+async function toggleExperiments(ampDriver, testUrl, experiments) {
+  await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
+
+  for (const experiment of experiments) {
+    await ampDriver.toggleExperiment(experiment, true);
   }
 }
 

@@ -79,7 +79,9 @@ export function createFixtureIframe(
       [FormEvents.SERVICE_INIT]: 0,
     };
     const messages = [];
-    let html = __html__[fixture]; // eslint-disable-line no-undef
+    let html = __html__[fixture] // eslint-disable-line no-undef
+        .replace(/__TEST_SERVER_PORT__/g,
+            window.ampTestRuntimeConfig.testServerPort);
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }

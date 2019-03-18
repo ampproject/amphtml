@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Creates reusable actions.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,12 +17,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
- # <a name="amp-action-macro"></a> `amp-action-macro`
+ # amp-action-macro
+ Creates reusable actions.
  <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Creates reusable actions.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
@@ -31,31 +35,50 @@ limitations under the License.
 </table>
 
 [TOC]
- 
+
 ## Overview
 
 The `amp-action-macro` component allows for the creation of reusable actions.
 
 ## Example
- 
+
 ```html
 <amp-action-macro
     id="closeNavigations"
-    action="AMP.setState({nav1: 'close', nav2: 'close})"></amp-action-macro>
+    execute="AMP.setState({nav1: 'close', nav2: 'close})"></amp-action-macro>
 ```
 
 ```html
- <button on="tap:closeNavigations">Close all</button>
- <div on="tap:closeNavigations">Close all</div>
+ <button on="tap:closeNavigations.execute()">Close all</button>
+ <div on="tap:closeNavigations.execute()">Close all</div>
+```
+
+```html
+<!--
+  You can provide arguments in the macro.
+-->
+<amp-carousel id="carousel" ...>...</amp-carousel>
+
+<amp-action-macro
+    id="carousel-macro"
+    execute="carousel.goToSlide(index=foo), carousel.goToSlide(index=bar)"
+    arguments="foo, bar"></amp-action-macro>
+
+```
+
+```html
+ <button on="tap:carousel-macro.execute(foo=1, bar=2)">
+   Go to slide 1 then 2
+ </button>
 ```
 
 ## Attributes
- 
+
 ##### id
- 
-Used to uniquely identify the action. This is referenced in an action invokation.
- 
-##### action
+
+Used to uniquely identify the action. This is referenced in an action invocation.
+
+##### execute
 
 The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
@@ -63,10 +86,20 @@ e.g.
 
 ```html
  <amp-action-macro
-    id="action1"
+    id="navigate-action"
     action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
+
  <amp-action-macro
-    id="action1"
-    action="ampList.refresh()"></amp-action-macro>
+    id="refresh-amp-list"
+    execute="ampList.refresh()"></amp-action-macro>
  <amp-list id="ampList" src="...">...</amp-list>
+
+ <button on="tap:navigate-action"></button>
+
+ <button on="tap:refresh-amp-list"></button>
  ```
+
+##### arguments
+
+Used to define arguments that can be used in the called invocation and substituted
+in the amp action macro call.

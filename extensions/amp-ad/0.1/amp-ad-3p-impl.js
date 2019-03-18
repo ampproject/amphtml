@@ -16,7 +16,7 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
-  getMatchedContentResponsiveHeight,
+  getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
@@ -460,8 +460,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   getFullWidthHeight_(width, maxHeight) {
     // TODO(google a4a eng): remove this once adsense switches fully to
     // fast fetch.
-    if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
-      return getMatchedContentResponsiveHeight(width);
+    if (this.element.getAttribute('data-auto-format') === ADSENSE_MCRSPV_TAG) {
+      return getMatchedContentResponsiveHeightAndUpdatePubParams(
+          width, this.element);
     }
     return clamp(Math.round(width / this.config.fullWidthHeightRatio),
         MIN_FULL_WIDTH_HEIGHT, maxHeight);

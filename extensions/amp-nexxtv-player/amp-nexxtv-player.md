@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a media stream from the nexxOMNIA platform.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-nexxtv-player"></a> `amp-nexxtv-player`
+# amp-nexxtv-player
+
+Displays a media stream from the nexxOMNIA platform.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a media stream from the nexxOMNIA platform.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
@@ -53,49 +58,52 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Attributes
 
-##### data-mediaid (required)
-
-Represents the ID of the media you want to play.
-
-##### data-client (required)
-
-Your domain ID.
-
-##### data-streamtype (optional)
-
-Indicates the media streaming type, which can be one of the following:
-
-* `video` (default)
-* `audio`
-* `playlist`
-* `playlist-masked`: A playlist without the option to skip or choose video.
-* `live`
-* `album`: An audio playlist.
-
-
-##### data-seek-to (optional)
-
-Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
-
-##### data-mode (optional)
-
-Indicates the data mode, which can be `static` (default) or `api`.
-
-##### data-origin (optional)
-
-Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
-
-##### data-disable-ads (optional)
-
-Ads are enabled by default. Set value to 1 to disable.
-
-#### data-streaming-filter (optional)
-
-Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-mediaid (required)</strong></td>
+    <td>Represents the ID of the media you want to play.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-client (required)</strong></td>
+    <td>Your domain ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-streamtype (optional)</strong></td>
+    <td><p>Indicates the media streaming type, which can be one of the following:</p>
+<ul>
+  <li>`video` (default)</li>
+  <li>`audio`</li>
+  <li>`playlist`</li>
+  <li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
+  <li>`live`</li>
+  <li>`album`: An audio playlist.</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-seek-to (optional)</strong></td>
+    <td>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-mode (optional)</strong></td>
+    <td>Indicates the data mode, which can be <code>static</code> (default) or <code>api</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-origin (optional)</strong></td>
+    <td>Indicates the source from which the embedded domain media is played. By default this is set to <code>https://embed.nexx.cloud/</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-disable-ads (optional)</strong></td>
+    <td>Ads are enabled by default. Set value to 1 to disable.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-streaming-filter (optional)</strong></td>
+    <td>Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

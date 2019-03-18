@@ -16,10 +16,13 @@
 'use strict';
 
 const app = require('express').Router();
+const cors = require('./amp-cors');
 const minimist = require('minimist');
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
+const multer = require('multer');
 
+const upload = multer();
 
 /* eslint-disable max-len */
 
@@ -101,19 +104,23 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/:bid/deposit/:id/', (req, res) => {
-  if (!bank[req.params.bid]) {
-    bank[req.params.bid] = {};
-  }
-  const key = req.params.id;
-  log('SERVER-LOG [DEPOSIT]: ', key);
-  if (typeof bank[req.params.bid][key] === 'function') {
-    bank[req.params.bid][key](req);
-  } else {
-    bank[req.params.bid][key] = req;
-  }
-  res.end();
-});
+app.use(
+    '/request-bank/:bid/deposit/:id/',
+    upload.array(),
+    (req, res) => {
+      cors.enableCors(req, res);
+      if (!bank[req.params.bid]) {
+        bank[req.params.bid] = {};
+      }
+      const key = req.params.id;
+      log('SERVER-LOG [DEPOSIT]: ', key);
+      if (typeof bank[req.params.bid][key] === 'function') {
+        bank[req.params.bid][key](req);
+      } else {
+        bank[req.params.bid][key] = req;
+      }
+      res.end();
+    });
 
 /**
  * Withdraw a request. If the request of the given ID is already in the bank,
@@ -121,6 +128,7 @@ app.use('/request-bank/:bid/deposit/:id/', (req, res) => {
  * The same request cannot be withdrawn twice at the same time.
  */
 app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
+  cors.enableCors(req, res);
   if (!bank[req.params.bid]) {
     bank[req.params.bid] = {};
   }
@@ -197,9 +205,9 @@ app.get('/a4a/:bid', (req, res) => {
             "canonicalUrl": "\${canonicalUrl}",
             "cid": "\${clientId(a)}",
             "img": "\${htmlAttr(amp-img,src)}",
-            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
-            "adNavType": "\${adNavType}",
-            "adRedirectCount": "\${adRedirectCount}"
+            "navTiming": "\${navTiming(requestStart,requestStart)}",
+            "navType": "\${navType}",
+            "navRedirectCount": "\${navRedirectCount}"
           }
         }
       }

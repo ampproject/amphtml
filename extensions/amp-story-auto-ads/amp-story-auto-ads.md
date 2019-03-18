@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Dynamically inserts ads into a Story.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-story-auto-ads`"></a> `amp-story-auto-ads`
+# amp-story-auto-ads
+
+Dynamically inserts ads into a Story.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Dynamically inserts ads into a Story.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td>Experimental</td>
@@ -76,9 +81,6 @@ looks like the following:
 
 `ad-attributes` is a map of key-value pairs, which are the attributes of the
  `amp-ad` element to be inserted.
- If you wish to pass any additional data (e.g. targeting information) as
- attributes to the created `<amp-ad>` tag, simply add the additional key value
- pairs to the `ad-attributes` JSON object.
 
 The above example will insert the following `amp-ad` element, which represents
 a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md):
@@ -91,6 +93,48 @@ a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/am
 
 Unlike normal `amp-ad`, no `<fallback>` or `<placeholder>` needs to be specified
 here, as ads in stories will only be displayed once fully rendered.
+
+### Passing additional attributes (RTC, Targeting, etc.)
+
+If you wish to pass any additional data (e.g. targeting information) as
+attributes to the created `<amp-ad>` tag, simply add the additional key value
+pairs to the `ad-attributes` JSON object.
+
+A common use case is to pass targeting data or RTC configuration to the underlying `amp-ad` element. A more complex configuration may look something like this:
+
+ ```html
+<amp-story-auto-ads>
+  <script type="application/json">
+      {
+        "ad-attributes": {
+          "type": "doubleclick",
+          "data-slot": "/30497360/a4a/amp_story_dfp_example",
+          "rtc-config": {
+            "urls": ["https://rtcEndpoint.biz/"]
+          },
+          json: {
+            "targeting": {
+              "loc": "usa",
+              "animal": "cat"
+            },
+            "categoryExclusions": ["sports", "food", "fun"]
+          }
+        }
+      }
+  </script>
+</amp-story-auto-ads>
+```
+
+This would result in creation of the following `amp-ad` element.
+
+```html
+<amp-ad type="doubleclick"
+  data-slot="/30497360/a4a/amp_story_dfp_example"
+  rtc-config='{"urls": ["https://rtcEndpoint.biz/"}'
+  json='{"targeting":{"loc": "usa", "animal": "cat"}, "categoryExclusions":["sports", "food", "fun"]}'>
+</amp-ad>
+```
+
 
 ## Validation
 `amp-story-auto-ads` must be a direct child of `amp-story` element.

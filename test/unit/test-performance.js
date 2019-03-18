@@ -18,7 +18,7 @@ import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
-
+import {installRuntimeServices} from '../../src/runtime';
 
 describes.realWin('performance', {amp: true}, env => {
   let sandbox;
@@ -686,4 +686,456 @@ describes.realWin('performance with experiment', {amp: true}, env => {
           }));
     });
   });
+});
+
+describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
+  // A fake implementation of PerformanceObserver.
+  class PerformanceObserverImpl {
+    constructor(callback) {
+      this.options = {};
+      this.callback_ = callback;
+      this.isObserving = false;
+
+    }
+
+    observe(options) {
+      this.options = options;
+      this.isObserving = true;
+
+    }
+
+    disconnect() {
+      this.isObserving = false;
+    }
+
+    /**
+     * Trigger the Observer's callback.
+      * @param {!Array} entries
+      */
+    triggerCallback(entries) {
+      this.callback_(entries, this);
+    }
+  }
+
+  describe('should forward paint metrics for performance entries', () => {
+    // TODO(ericandrewlewis, 20721): Fails on Safari.
+    it.configure().skipSafari('created before performance service ' +
+        'registered', () => {
+      // Pretend that the PaintTiming API exists.
+      env.win.PerformancePaintTiming = true;
+
+      const entries = [{
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
+      }];
+      const getEntriesByType = env.sandbox.stub();
+      getEntriesByType.withArgs('paint').returns(entries);
+      getEntriesByType.returns([]);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fp',
+            delta: 11,
+          },
+          {
+            label: 'fcp',
+            delta: 15,
+          });
+
+      delete env.win.PerformancePaintTiming;
+    });
+
+    it('created after performance service registered', () => {
+      // Pretend that the PaintTiming API exists.
+      env.win.PerformancePaintTiming = true;
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      let performanceObserver;
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      const entries = [{
+        duration: 1,
+        entryType: 'paint',
+        name: 'first-paint',
+        startTime: 10,
+      },
+      {
+        duration: 5,
+        entryType: 'paint',
+        name: 'first-contentful-paint',
+        startTime: 10,
+      }];
+      const list = {
+        getEntries() {
+          return entries;
+        },
+      };
+      // Fake a triggering of the firstInput event.
+      performanceObserver.triggerCallback(list);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fp',
+            delta: 11,
+          },
+          {
+            label: 'fcp',
+            delta: 15,
+          });
+      delete env.win.PerformanceEventTiming;
+    });
+  });
+
+  describe('should forward first input metrics for performance entries', () => {
+    // TODO(ericandrewlewis, 20721): Fails on Safari.
+    it.configure().skipSafari('created before performance service ' +
+        'registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      const entries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const getEntriesByType = env.sandbox.stub();
+      getEntriesByType.withArgs('firstInput').returns(entries);
+      getEntriesByType.returns([]);
+      env.sandbox.stub(env.win.performance, 'getEntriesByType')
+          .callsFake(getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+
+      delete env.win.PerformanceEventTiming;
+    });
+
+    it('created after performance service registered', () => {
+      // Pretend that the EventTiming API exists.
+      env.win.PerformanceEventTiming = true;
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      let performanceObserver;
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      env.sandbox.stub(env.win, 'PerformanceObserver')
+          .callsFake(PerformanceObserverStub);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      const entries = [{
+        cancelable: true,
+        duration: 8,
+        entryType: 'firstInput',
+        name: 'mousedown',
+        processingEnd: 105,
+        processingStart: 103,
+        startTime: 100,
+      }];
+      const list = {
+        getEntries() {
+          return entries;
+        },
+      };
+      // Fake a triggering of the firstInput event.
+      performanceObserver.triggerCallback(list);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'fid',
+            delta: 3,
+          });
+      delete env.win.PerformanceEventTiming;
+    });
+  });
+
+  it('forwards first-input-delay polyfill metric', () => {
+    const previousPerfMetrics = env.win.perfMetrics;
+    // Fake window to pretend that the polyfill exists.
+    env.win.perfMetrics = env.win.perfMetrics || {};
+    const callbacks = [];
+    env.win.perfMetrics.onFirstInputDelay = env.sandbox.stub();
+    env.win.perfMetrics.onFirstInputDelay.callsFake(callback => {
+      callbacks.push(callback);
+    });
+
+    installPerformanceService(env.win);
+    const perf = Services.performanceFor(env.win);
+
+    // Send a fake first input event.
+    const delay = 30;
+    const evt = new Event('touchstart');
+    callbacks.forEach(callback => {
+      callback(delay, evt);
+    });
+
+    expect(perf.events_.length).to.equal(1);
+    expect(perf.events_[0])
+        .to.be.jsonEqual({
+          label: 'fid-polyfill',
+          delta: 30,
+        });
+
+    // Restore previous window value.
+    if (typeof previousPerfMetrics === 'undefined') {
+      delete env.win.perfMetrics;
+    } else {
+      env.win.perfMetrics = previousPerfMetrics;
+    }
+  });
+
+  describe('forwards layout jank metric', () => {
+    it('for browsers that support the visibilitychange event', () => {
+      // Fake the window object so we can trigger visibilitychange events on the
+      // document later on.
+      const fakeWin = {
+        Date: env.win.Date,
+        PerformanceLayoutJank: true,
+        PerformanceObserver: env.sandbox.stub(),
+        addEventListener: env.sandbox.stub(),
+        dispatchEvent: env.win.dispatchEvent,
+        document: {
+          addEventListener: env.sandbox.stub(),
+          hidden: false,
+          readyState: 'complete',
+          removeEventListener: env.sandbox.stub(),
+          visibilityState: 'visible',
+        },
+        location: env.win.location,
+        performance: {
+          getEntriesByType: env.sandbox.stub(),
+        },
+        removeEventListener: env.win.removeEventListener,
+      };
+
+      // Fake the document event bus, so we can trigger custom events.
+      const docEventListeners = {};
+      fakeWin.document.addEventListener.callsFake((eventType, handler) => {
+        if (!docEventListeners[eventType]) {
+          docEventListeners[eventType] = [];
+        }
+        docEventListeners[eventType].push(handler);
+      });
+
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      let performanceObserver;
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+
+      // Install services on fakeWin so some behaviors can be stubbed.
+      installRuntimeServices(fakeWin);
+
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Stub the visibilityState of the document, and control the value
+      // with isHidden.
+      let isHidden = false;
+      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
+          .callsFake(() => isHidden);
+
+      // Fake layoutJank that occured before the Performance service is started.
+      const entries = [{
+        entryType: 'layoutJank',
+        fraction: 0.25,
+      },
+      {
+        entryType: 'layoutJank',
+        fraction: 0.3,
+      },
+      ];
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
+          .returns(entries);
+      installPerformanceService(fakeWin);
+      const perf = Services.performanceFor(fakeWin);
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      isHidden = true;
+      const firstEvent = new Event('visibilitychange');
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(firstEvent));
+      }
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'lj',
+            delta: 0.55,
+          });
+
+      // The user returns to the tab, and more layout jank occurs.
+      isHidden = false;
+      const list = {
+        getEntries() {
+          return [{
+            entryType: 'layoutJank',
+            fraction: 1,
+          }, {
+            entryType: 'layoutJank',
+            fraction: 0.0001,
+          }];
+        },
+      };
+      performanceObserver.triggerCallback(list);
+
+      // The document has become hidden again.
+      isHidden = true;
+      const secondEvent = new Event('visibilitychange');
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(secondEvent));
+      }
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1])
+          .to.be.jsonEqual({
+            label: 'lj-2',
+            delta: 1.5501,
+          });
+
+      // Any more layout jank shouldn't be reported.
+      isHidden = false;
+      performanceObserver.triggerCallback(list);
+      isHidden = true;
+      const thirdEvent = new Event('visibilitychange');
+      if (docEventListeners['visibilitychange']) {
+        docEventListeners['visibilitychange']
+            .forEach(callback => callback(thirdEvent));
+      }
+      expect(perf.events_.length).to.equal(2);
+    });
+    it('for browsers that don\'t support the visibilitychange event', () => {
+      // Fake the window object so we can control the state
+      // of window.document.visibilityState later on.
+      const fakeWin = {
+        Date: env.win.Date,
+        PerformanceLayoutJank: true,
+        PerformanceObserver: env.sandbox.stub(),
+        addEventListener: env.sandbox.stub(),
+        removeEventListener: env.win.removeEventListener,
+        dispatchEvent: env.win.dispatchEvent,
+        document: {
+          addEventListener: env.sandbox.stub(),
+          hidden: false,
+          readyState: 'complete',
+          removeEventListener: env.sandbox.stub(),
+          visibilityState: 'visible',
+        },
+        location: env.win.location,
+        performance: {
+          getEntriesByType: env.sandbox.stub(),
+        },
+      };
+
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      let performanceObserver;
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+
+      // Fake addEventListener so we can trigger fake `beforeunload` events.
+      const windowEventListeners = {};
+      fakeWin.addEventListener.callsFake((eventType, handler) => {
+        if (!windowEventListeners[eventType]) {
+          windowEventListeners[eventType] = [];
+        }
+        windowEventListeners[eventType].push(handler);
+      });
+
+      // Install services on fakeWin so some behaviors can be stubbed.
+      installRuntimeServices(fakeWin);
+      // Specify an iPhone Safari user agent, which does not support
+      // the visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
+
+      // Stub the visibilityState of the document, and control the value
+      // with isHidden.
+      let isHidden = false;
+      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
+          .callsFake(() => isHidden);
+
+      // Fake layoutJank that occured before the Performance service is started.
+      const entries = [{
+        entryType: 'layoutJank',
+        fraction: 0.25,
+      },
+      {
+        entryType: 'layoutJank',
+        fraction: 0.3,
+      },
+      ];
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
+          .returns(entries);
+      installPerformanceService(fakeWin);
+      const perf = Services.performanceFor(fakeWin);
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      isHidden = true;
+      const firstEvent = new Event('beforeunload');
+      if (windowEventListeners['beforeunload']) {
+        windowEventListeners['beforeunload']
+            .forEach(callback => callback(firstEvent));
+      }
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({
+            label: 'lj',
+            delta: 0.55,
+          });
+    });
+  });
+
 });

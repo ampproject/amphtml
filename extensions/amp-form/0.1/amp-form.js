@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
@@ -36,7 +37,6 @@ import {
   ancestorElementsByTag,
   childElementByAttr,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
   tryFocus,
@@ -45,6 +45,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -527,11 +528,19 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(event);
+        /**
+         * If the submit was called with an event, then we shouldn't
+         * manually submit the form
+         */
+        const shouldSubmitFormElement = !event;
+
+        this.handleNonXhrGet_(shouldSubmitFormElement);
         return Promise.resolve();
       }
 
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+      }
     }
 
     // Set ourselves to the SUBMITTING State
@@ -548,7 +557,7 @@ export class AmpForm {
         presubmitPromises,
         SUBMIT_TIMEOUT
     ).then(
-        () => this.handlePresubmitSuccess_(trust, event),
+        () => this.handlePresubmitSuccess_(trust),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
@@ -566,16 +575,15 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
-   * @param {?Event} event
    * @return {!Promise}
    */
-  handlePresubmitSuccess_(trust, event) {
+  handlePresubmitSuccess_(trust) {
     if (this.xhrAction_) {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(event);
+      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
     }
 
     return Promise.resolve();
@@ -889,12 +897,14 @@ export class AmpForm {
 
   /**
    * Triggers Submit Analytics,
-   * and Form Element submit if not triggered by an event
-   * @param {?Event} event
+   * and Form Element submit if passed by param.
+   * shouldSubmitFormElement should ONLY be true
+   * If the submit event.preventDefault was called
+   * @param {boolean} shouldSubmitFormElement
    */
-  handleNonXhrGet_(event) {
+  handleNonXhrGet_(shouldSubmitFormElement) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    if (!event) {
+    if (shouldSubmitFormElement) {
       this.form_.submit();
     }
     this.setState_(FormState.INITIAL);
@@ -1288,9 +1298,11 @@ export class AmpFormService {
    */
   installHandlers_(ampdoc) {
     return ampdoc.whenReady().then(() => {
-      this.installSubmissionHandlers_(
-          ampdoc.getRootNode().querySelectorAll('form'));
-      this.installGlobalEventListener_(ampdoc.getRootNode());
+      const root = ampdoc.getRootNode();
+
+      this.installSubmissionHandlers_(root.querySelectorAll('form'));
+      AmpFormTextarea.install(ampdoc);
+      this.installGlobalEventListener_(root);
     });
   }
 

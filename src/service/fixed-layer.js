@@ -16,8 +16,8 @@
 
 import {Pass} from '../pass';
 import {Services} from '../services';
-import {closest, domOrderComparator, matches} from '../dom';
 import {
+  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -27,23 +27,45 @@ import {
   setStyles,
   toggle,
 } from '../style';
-import {dev, user} from '../log';
+import {
+  closest,
+  domOrderComparator,
+  matches,
+} from '../dom';
+import {dev, devAssert, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
+import {remove} from '../utils/array';
+import {toWin} from '../types';
 
 const TAG = 'FixedLayer';
 
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
+const LIGHTBOX_MODE_ATTR = 'i-amphtml-lightbox';
+const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
+
 /**
- * Passed to closest to determine if the fixed element is a lightbox, or a
- * descendant of one. If so, FixedLayer ignores the element. #19149
- *
  * @param {!Element} el
  */
-function lightboxOrDescendant(el) {
+function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
+}
+
+/**
+ * @param {string=} opt_initialTransform matrix string, 'none', '' or undefined.
+ * @param {string=} opt_addedTransform matrix string, 'none', '' or undefined.
+ * @return {string}
+ */
+function combineTransforms(opt_initialTransform, opt_addedTransform) {
+  if (!opt_addedTransform || opt_addedTransform == 'none') {
+    return opt_initialTransform || '';
+  }
+  if (!opt_initialTransform || opt_initialTransform == 'none') {
+    return opt_addedTransform;
+  }
+  return `${opt_initialTransform} ${opt_addedTransform}`;
 }
 
 /**
@@ -100,19 +122,57 @@ export class FixedLayer {
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
+
+    /** @private {!Array<string>} */
+    this.fixedSelectors_ = [];
+
+    /** @private {!Array<string>} */
+    this.stickySelectors_ = [];
   }
 
   /**
-   * @param {boolean} visible
+   * Informs FixedLayer that a lightbox was opened.
+   *
+   * - FixedLayer hides any transfer layer elements that may be overlayed on
+   *   top of the lightbox, which is confusing UX.
+   * - When `onComplete` resolves, FixedLayer scans and transfers any fixed
+   *   descendants of `lightbox`. This enables unjanky fixed elements in
+   *   lightboxes on iOS.
+   *
+   * @param {!Element=} opt_lightbox
+   * @param {!Promise=} opt_onComplete Promise that resolves when lightbox
+   *   UX completes e.g. open transition animation.
    */
-  setVisible(visible) {
-    if (this.transferLayer_) {
-      this.vsync_.mutate(() => {
-        setStyle(
-            this.transferLayer_.getRoot(),
-            'visibility',
-            visible ? 'visible' : 'hidden');
+  enterLightbox(opt_lightbox, opt_onComplete) {
+    const transferLayer = this.getTransferLayer_();
+    if (transferLayer) {
+      transferLayer.setLightboxMode(true);
+    }
+
+    if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')
+        && opt_lightbox && opt_onComplete) {
+      opt_onComplete.then(() => {
+        this.scanNode_(dev().assertElement(opt_lightbox),
+            /* lightboxMode */ true);
       });
+    }
+  }
+
+  /**
+   * Reverses the actions performed by `enterLightbox()`.
+   */
+  leaveLightbox() {
+    const transferLayer = this.getTransferLayer_();
+    if (transferLayer) {
+      transferLayer.setLightboxMode(false);
+    }
+
+    if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
+      const fes = remove(this.elements_, fe => !!fe.lightboxed);
+      this.returnFixedElements_(fes);
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
     }
   }
 
@@ -120,13 +180,15 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
-    const stylesheets = this.ampdoc.getRootNode().styleSheets;
+    const root = this.ampdoc.getRootNode();
+    const stylesheets = root.styleSheets;
     if (!stylesheets) {
       return;
     }
 
-    const fixedSelectors = [];
-    const stickySelectors = [];
+    this.fixedSelectors_.length = 0;
+    this.stickySelectors_.length = 0;
+
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
       // Rare but may happen if the document is being concurrently disposed.
@@ -134,23 +196,21 @@ export class FixedLayer {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
         return;
       }
-      const {ownerNode} = stylesheet;
-      if (stylesheet.disabled ||
-              !ownerNode ||
-              ownerNode.tagName != 'STYLE' ||
-              ownerNode.hasAttribute('amp-boilerplate') ||
-              ownerNode.hasAttribute('amp-runtime') ||
-              ownerNode.hasAttribute('amp-extension')) {
+      const {disabled, ownerNode} = stylesheet;
+      if (disabled ||
+          !ownerNode ||
+          ownerNode.tagName != 'STYLE' ||
+          ownerNode.hasAttribute('amp-boilerplate') ||
+          ownerNode.hasAttribute('amp-runtime') ||
+          ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      this.discoverSelectors_(
-          stylesheet.cssRules, fixedSelectors, stickySelectors);
+      // Don't dereference cssRules early to avoid "Cannot access rules"
+      // DOMException due to reading a CORS stylesheet e.g. font.
+      this.discoverSelectors_(stylesheet.cssRules);
     }
 
-    this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
-
-    // Sort tracked elements in document order.
-    this.sortInDomOrder_();
+    this.scanNode_(root);
 
     if (this.elements_.length > 0) {
       this.observeHiddenMutations();
@@ -162,6 +222,18 @@ export class FixedLayer {
           ' as Google\'s because the fixed or sticky positioning might have' +
           ' slightly different layout.');
     }
+  }
+
+  /**
+   * @param {!Node} node
+   * @param {boolean=} opt_lightboxMode
+   * @private
+   */
+  scanNode_(node, opt_lightboxMode) {
+    this.trySetupSelectorsNoInline(node, opt_lightboxMode);
+
+    // Sort tracked elements in document order.
+    this.sortInDomOrder_();
 
     this.update();
   }
@@ -249,37 +321,23 @@ export class FixedLayer {
   }
 
   /**
-   * Apply or reset transform style to fixed elements. The existing transition,
-   * if any, is disabled when custom transform is supplied.
-   * @param {?string} transform
+   * Apply transform style to all fixed elements.
+   * @param {string=} opt_transform undefined to reset.
    */
-  transformMutate(transform) {
-    // Unfortunately, we can't do anything with sticky elements here. Updating
-    // `top` in animation frames causes reflow on all platforms and we can't
-    // determine whether an element is currently docked to apply transform.
-    if (transform) {
-      // Apply transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyle(e.element, 'transition', 'none');
-          if (e.transform && e.transform != 'none') {
-            setStyle(e.element, 'transform', e.transform + ' ' + transform);
-          } else {
-            setStyle(e.element, 'transform', transform);
-          }
-        }
-      });
-    } else {
-      // Reset transform style to all fixed elements
-      this.elements_.forEach(e => {
-        if (e.fixedNow && e.top) {
-          setStyles(e.element, {
-            transform: '',
-            transition: '',
-          });
-        }
-      });
-    }
+  transformMutate(opt_transform) {
+    this.elements_.forEach(fe => {
+      // Unfortunately, we can't do anything with sticky elements here. Updating
+      // `top` in animation frames causes reflow on all platforms and we can't
+      // determine whether an element is currently docked to apply transform.
+      if (!fe.fixedNow || !fe.top) {
+        return;
+      }
+      const transform = opt_transform ?
+        combineTransforms(fe.transform, opt_transform) :
+        ''; // reset
+      const transition = opt_transform ? 'none' : '';
+      setStyles(fe.element, {transform, transition});
+    });
   }
 
   /**
@@ -309,21 +367,31 @@ export class FixedLayer {
   /**
    * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
+   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeElement(element) {
-    const removed = this.removeElement_(element);
-    if (removed.length > 0 && this.transferLayer_) {
+  removeElement(element, opt_onlyTearDown, opt_keepOffset) {
+    const fes = this.tearDownElement_(element, opt_keepOffset);
+    if (opt_onlyTearDown) {
+      return;
+    }
+    this.returnFixedElements_(fes);
+  }
+
+  /**
+   * Returns fixed elements from the transfer layer.
+   * @param {!Array<ElementDef>} fes
+   * @private
+   */
+  returnFixedElements_(fes) {
+    if (fes.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        for (let i = 0; i < removed.length; i++) {
-          const fe = removed[i];
+        fes.forEach(fe => {
           if (fe.position == 'fixed') {
             this.transferLayer_.returnFrom(fe);
           }
-        }
+        });
       });
-      if (!this.elements_.length) {
-        this.unobserveHiddenMutations_();
-      }
     }
   }
 
@@ -359,7 +427,7 @@ export class FixedLayer {
     /** @type {!Array<!ElementDef>} */
     const toRemove = this.elements_.filter(
         fe => !this.ampdoc.contains(fe.element));
-    toRemove.forEach(fe => this.removeElement_(fe.element));
+    toRemove.forEach(fe => this.tearDownElement_(fe.element));
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -375,7 +443,6 @@ export class FixedLayer {
     return this.vsync_.runPromise({
       measure: state => {
         const elements = this.elements_;
-        const autoTops = [];
         const {win} = this.ampdoc;
 
         // Notice that this code intentionally breaks vsync contract.
@@ -386,26 +453,25 @@ export class FixedLayer {
         // 1. Unset top from previous mutates and set bottom to an extremely
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
-        for (let i = 0; i < elements.length; i++) {
-          setImportantStyles(elements[i].element, {
+        elements.forEach(fe => {
+          setImportantStyles(fe.element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
           });
-        }
+        });
+
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
         // regardless of bottom.
-        for (let i = 0; i < elements.length; i++) {
-          autoTops.push(computedStyle(win, elements[i].element).top);
-        }
-        // 3. Cleanup the `style.bottom`.
-        for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
-        }
+        const autoTops = elements.map(fe => computedStyle(win, fe.element).top);
 
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        // 3. Cleanup the `style.bottom`.
+        elements.forEach(fe => {
+          setStyle(fe.element, 'bottom', '');
+        });
+
+        elements.forEach((fe, i) => {
           const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
@@ -433,7 +499,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            continue;
+            return;
           }
 
           if (top === 'auto' || autoTops[i] !== top) {
@@ -481,15 +547,13 @@ export class FixedLayer {
             zIndex,
             transform,
           };
-        }
+        });
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
           this.getTransferLayer_().update();
         }
-        const elements = this.elements_;
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        this.elements_.forEach((fe, i) => {
           const feState = state[fe.id];
 
           // Fix a bug with Safari. For some reason, you cannot unset
@@ -505,7 +569,7 @@ export class FixedLayer {
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        }
+        });
       },
     }, {}).catch(error => {
       // Fail silently.
@@ -519,13 +583,13 @@ export class FixedLayer {
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
    * from inlining the function.
-   * @param {!Array<string>} fixedSelectors
-   * @param {!Array<string>} stickySelectors
+   * @param {!Node} root
+   * @param {boolean=} opt_lightboxMode
    * @private
    */
-  trySetupSelectorsNoInline(fixedSelectors, stickySelectors) {
+  trySetupSelectorsNoInline(root, opt_lightboxMode) {
     try {
-      this.setupSelectors_(fixedSelectors, stickySelectors);
+      this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {
       // Fail quietly.
       dev().error(TAG, 'Failed to setup fixed elements:', e);
@@ -535,31 +599,42 @@ export class FixedLayer {
   /**
    * Calls `setupElement_` for up to 10 elements matching each selector
    * in `fixedSelectors` and for all selectors in `stickySelectors`.
-   * @param {!Array<string>} fixedSelectors
-   * @param {!Array<string>} stickySelectors
+   * @param {!Node} root
+   * @param {boolean=} opt_lightboxMode
    * @private
    */
-  setupSelectors_(fixedSelectors, stickySelectors) {
-    for (let i = 0; i < fixedSelectors.length; i++) {
-      const fixedSelector = fixedSelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          fixedSelector);
-      for (let j = 0; j < elements.length; j++) {
-        if (this.elements_.length > 10) {
-          // We shouldn't have too many of `fixed` elements.
-          break;
-        }
-        this.setupElement_(elements[j], fixedSelector, 'fixed');
+  setupSelectors_(root, opt_lightboxMode) {
+    const fixedLimit = 10;
+    this.setupSelectorsByType_(
+        root, this.fixedSelectors_, 'fixed', opt_lightboxMode, fixedLimit);
+
+    this.setupSelectorsByType_(
+        root, this.stickySelectors_, 'sticky', opt_lightboxMode);
+  }
+
+  /**
+   * @param {!Node} root
+   * @param {!Array<string>} selectors
+   * @param {string} position 'fixed' or 'sticky'
+   * @param {boolean=} opt_lightboxMode
+   * @param {number=} limit
+   * @private
+   */
+  setupSelectorsByType_(
+    root, selectors, position, opt_lightboxMode, limit = Infinity) {
+
+    devAssert(position == 'fixed' || position == 'sticky');
+
+    selectors.forEach(selector => {
+      const elements = root.querySelectorAll(selector);
+      for (
+        let i = 0;
+        i < elements.length && this.elements_.length <= limit;
+        i++) {
+        this.setupElement_(elements[i], selector, position,
+            /* opt_forceTransfer */ undefined, opt_lightboxMode);
       }
-    }
-    for (let i = 0; i < stickySelectors.length; i++) {
-      const stickySelector = stickySelectors[i];
-      const elements = this.ampdoc.getRootNode().querySelectorAll(
-          stickySelector);
-      for (let j = 0; j < elements.length; j++) {
-        this.setupElement_(elements[j], stickySelector, 'sticky');
-      }
-    }
+    });
   }
 
   /**
@@ -586,16 +661,25 @@ export class FixedLayer {
    * @param {!Element} element
    * @param {string} selector
    * @param {string} position
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the transfer layer.
+   * @param {boolean=} opt_forceTransfer If true, then the element will
+   *    be forcibly transferred to the transfer layer.
+   * @param {boolean=} opt_lightboxMode If true, then descendants of lightboxes
+   *    are allowed to be set up. Default is false.
    * @private
    */
-  setupElement_(element, selector, position, opt_forceTransfer) {
+  setupElement_(
+    element, selector, position, opt_forceTransfer, opt_lightboxMode
+  ) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
 
-    // TODO(jridgewell, #19149): This should be an official API.
-    if (closest(element, lightboxOrDescendant)) {
+    // Ignore lightboxes because FixedLayer can interfere with their
+    // opening/closing animations (#19149).
+    if (isLightbox(element)) {
+      return;
+    }
+    const isLightboxDescendant = closest(element, isLightbox);
+    if (!opt_lightboxMode && isLightboxDescendant) {
       return;
     }
 
@@ -629,6 +713,7 @@ export class FixedLayer {
         selectors: [selector],
         fixedNow: false,
         stickyNow: false,
+        lightboxed: !!isLightboxDescendant,
       };
       this.elements_.push(fe);
     }
@@ -637,23 +722,30 @@ export class FixedLayer {
   }
 
   /**
-   * Removes element from the fixed layer.
+   * Undoes set up by removing element record and and resets `top` style.
+   * Does _not_ return the element from the transfer layer.
    *
    * @param {!Element} element
+   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    * @return {!Array<!ElementDef>}
    * @private
    */
-  removeElement_(element) {
+  tearDownElement_(element, opt_keepOffset) {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
-      if (fe.element == element) {
-        this.vsync_.mutate(() => {
-          setStyle(element, 'top', '');
-        });
+      if (fe.element === element) {
+        if (!fe.lightboxed && !opt_keepOffset) {
+          this.vsync_.mutate(() => {
+            setStyle(element, 'top', '');
+          });
+        }
         this.elements_.splice(i, 1);
         removed.push(fe);
       }
+    }
+    if (!this.elements_.length) {
+      this.unobserveHiddenMutations_();
     }
     return removed;
   }
@@ -692,9 +784,9 @@ export class FixedLayer {
       this.transferLayer_.returnFrom(fe);
     }
 
-    // Update `top`. This is necessary to adjust position to the viewer's
-    // paddingTop.
-    if (state.top && (state.fixed || state.sticky)) {
+    // Update `top` to adjust position to the viewer's paddingTop. However,
+    // ignore lightboxed elements since lightboxes ignore the viewer header.
+    if (state.top && (state.fixed || state.sticky) && !fe.lightboxed) {
       if (state.fixed || !this.transfer_) {
         // Fixed positions always need top offsetting, as well as stickies on
         // non iOS Safari.
@@ -730,24 +822,22 @@ export class FixedLayer {
     const doc = this.ampdoc.win.document;
     this.transferLayer_ =
         doc.body.shadowRoot ?
-          new TransferLayerShadow(doc) :
-          new TransferLayerBody(doc);
+          new TransferLayerShadow(doc, this.vsync_) :
+          new TransferLayerBody(doc, this.vsync_);
     return this.transferLayer_;
   }
 
   /**
    * Find all `position:fixed` and `position:sticky` elements.
    * @param {!Array<CSSRule>} rules
-   * @param {!Array<string>} foundSelectors
-   * @param {!Array<string>} stickySelectors
    * @private
    */
-  discoverSelectors_(rules, foundSelectors, stickySelectors) {
+  discoverSelectors_(rules) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
       if (rule.type == /* CSSMediaRule */ 4 ||
           rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        this.discoverSelectors_(rule.cssRules);
         continue;
       }
 
@@ -758,9 +848,9 @@ export class FixedLayer {
           continue;
         }
         if (position === 'fixed') {
-          foundSelectors.push(selectorText);
+          this.fixedSelectors_.push(selectorText);
         } else if (endsWith(position, 'sticky')) {
-          stickySelectors.push(selectorText);
+          this.stickySelectors_.push(selectorText);
         }
       }
     }
@@ -780,6 +870,7 @@ export class FixedLayer {
  *   top: (string|undefined),
  *   transform: (string|undefined),
  *   forceTransfer: (boolean|undefined),
+ *   lightboxed: (boolean|undefined),
  * }}
  */
 let ElementDef;
@@ -814,6 +905,12 @@ class TransferLayerDef {
   update() {}
 
   /**
+   * Toggles internal state after entering or leaving lightbox mode.
+   * @param {boolean} unusedOn
+   */
+  setLightboxMode(unusedOn) {}
+
+  /**
    * Transfer the element from the body into the transfer layer.
    * @param {!ElementDef} unusedFe
    * @param {number} unusedIndex
@@ -837,15 +934,23 @@ class TransferLayerDef {
 class TransferLayerBody {
   /**
    * @param {!Document} doc
+   * @param {!./vsync-impl.Vsync} vsync
    */
-  constructor(doc) {
+  constructor(doc, vsync) {
     /** @private @const {!Document} */
     this.doc_ = doc;
+
+    /** @private @const {!./vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+
+    /** @private @const {boolean} */
+    this.isLightboxExperimentOn_ =
+        isExperimentOn(toWin(doc.defaultView), 'fixed-elements-in-lightbox');
 
     /** @private @const {!Element} */
     this.layer_ = doc.body.cloneNode(/* deep */ false);
     this.layer_.removeAttribute('style');
-    setStyles(this.layer_, {
+    const styles = {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -853,7 +958,6 @@ class TransferLayerBody {
       width: 0,
       pointerEvents: 'none',
       overflow: 'hidden',
-
       // Reset possible BODY styles.
       animation: 'none',
       background: 'none',
@@ -869,7 +973,13 @@ class TransferLayerBody {
       transform: 'none',
       transition: 'none',
       visibility: 'visible',
-    });
+    };
+    // This experiment uses a CSS rule for toggling transfer layer visibility,
+    // which has lower specificity than an inline style.
+    if (this.isLightboxExperimentOn_) {
+      delete styles.visibility;
+    }
+    setStyles(this.layer_, assertDoesNotContainDisplay(styles));
     setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
   }
@@ -877,6 +987,24 @@ class TransferLayerBody {
   /** @override */
   getRoot() {
     return this.layer_;
+  }
+
+  /** @override */
+  setLightboxMode(on) {
+    this.vsync_.mutate(() => {
+      const root = this.getRoot();
+      if (this.isLightboxExperimentOn_) {
+        if (on) {
+          root.setAttribute(LIGHTBOX_MODE_ATTR, '');
+        } else {
+          root.removeAttribute(LIGHTBOX_MODE_ATTR);
+        }
+      } else {
+        // Legacy behavior is to hide transfer layer when entering lightbox
+        // and unhide when exiting.
+        setStyle(root, 'visibility', on ? 'hidden' : 'visible');
+      }
+    });
   }
 
   /**
@@ -901,7 +1029,8 @@ class TransferLayerBody {
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (name === 'style' || body.hasAttribute(name)) {
+      if (name === 'style' || name === LIGHTBOX_MODE_ATTR
+          || body.hasAttribute(name)) {
         continue;
       }
       layer.removeAttribute(name);
@@ -933,6 +1062,12 @@ class TransferLayerBody {
     setStyle(element, 'zIndex',
         `calc(${10000 + index} + ${state.zIndex || 0})`);
 
+    // Identify lightboxed elements so they can be visible when the transfer
+    // layer is "hidden", and hidden with the transfer layer is "visible".
+    if (fe.lightboxed) {
+      element.classList.add(LIGHTBOX_ELEMENT_CLASS);
+    }
+
     element.parentElement.replaceChild(fe.placeholder, element);
     this.layer_.appendChild(element);
 
@@ -954,12 +1089,18 @@ class TransferLayerBody {
     if (!fe.placeholder || !this.doc_.contains(fe.placeholder)) {
       return;
     }
-    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (this.doc_.contains(fe.element)) {
+    const {element, placeholder} = fe;
+    dev().fine(TAG, 'return from fixed:', fe.id, element);
+
+    if (fe.lightboxed) {
+      element.classList.remove(LIGHTBOX_ELEMENT_CLASS);
+    }
+
+    if (this.doc_.contains(element)) {
       setStyle(fe.element, 'zIndex', '');
-      fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
+      placeholder.parentElement.replaceChild(element, placeholder);
     } else {
-      fe.placeholder.parentElement.removeChild(fe.placeholder);
+      placeholder.parentElement.removeChild(placeholder);
     }
   }
 
@@ -992,8 +1133,12 @@ const FIXED_LAYER_SLOT = 'i-amphtml-fixed';
 class TransferLayerShadow {
   /**
    * @param {!Document} doc
+   * @param {!./vsync-impl.Vsync} vsync
    */
-  constructor(doc) {
+  constructor(doc, vsync) {
+    /** @private @const {!./vsync-impl.Vsync} */
+    this.vsync_ = vsync;
+
     /** @private @const {!Element} */
     this.layer_ = doc.createElement('div');
     this.layer_.id = 'i-amphtml-fixed-layer';
@@ -1017,6 +1162,13 @@ class TransferLayerShadow {
   /** @override */
   getRoot() {
     return this.layer_;
+  }
+
+  /** @override */
+  setLightboxMode(on) {
+    this.vsync_.mutate(() => {
+      setStyle(this.getRoot(), 'visibility', on ? 'hidden' : 'visible');
+    });
   }
 
   /** @override */

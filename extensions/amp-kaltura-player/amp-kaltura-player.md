@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays the Kaltura Player as used in Kaltura's Video Platform.
+---
 <!---
 Copyright 2016 Kaltura. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-kaltura-player"></a> `amp-kaltura-player`
+# amp-kaltura-player
+
+An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js">&lt;/script></code></td>
@@ -55,29 +60,33 @@ Example:
 
 ## Attributes
 
-##### data-partner
+<table>
+  <tr>
+    <td width="40%"><strong>data-partner</strong></td>
+    <td>The Kaltura partner id. This attribute is mandatory.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-uiconf</strong></td>
+    <td>The Kaltura player id - uiconf id.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-entryid</strong></td>
+    <td>The Kaltura entry id.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-param-*</strong></td>
+    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.</p>
+<p>Keys and values will be URI encoded. Keys will be camel cased.</p>
+<ul>
+  <li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The Kaltura partner id. This attribute is mandatory.
-
-##### data-uiconf
-
-The Kaltura player id - uiconf id.
-
-##### data-entryid
-
-The Kaltura entry id.
-
-##### data-param-*
-
-All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
-
-Keys and values will be URI encoded. Keys will be camel cased.
-
-- `data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

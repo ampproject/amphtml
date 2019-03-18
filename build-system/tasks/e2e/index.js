@@ -86,7 +86,7 @@ async function e2e() {
 
   // specify tests to run
   if (argv.files) {
-    glob.sync(argv.path).forEach(file => {
+    glob.sync(argv.files).forEach(file => {
       mocha.addFile(file);
     });
   }

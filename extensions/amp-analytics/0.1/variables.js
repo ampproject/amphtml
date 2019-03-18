@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
@@ -26,6 +27,13 @@ const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
+
+const EXTERNAL_CONSENT_POLICY_STATE_STRING = {
+  1: 'sufficient',
+  2: 'insufficient',
+  3: 'not_required',
+  4: 'unknown',
+};
 
 /** @typedef {{name: string, argList: string}} */
 let FunctionNameArgsDef;
@@ -292,4 +300,18 @@ export function variableServiceFor(win) {
  */
 export function getNameArgsForTesting(key) {
   return getNameArgs(key);
+}
+
+/**
+ * Get the resolved consent state value to send with analytics request
+ * @param {!Element} element
+ * @return {!Promise<?string>}
+ */
+export function getConsentStateStr(element) {
+  return getConsentPolicyState(element).then(consent => {
+    if (!consent) {
+      return null;
+    }
+    return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
 }

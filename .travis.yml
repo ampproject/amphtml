@@ -1,6 +1,5 @@
 language: node_js
-sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
-dist: trusty
+dist: xenial
 node_js:
   - "lts/*"
 python:
@@ -14,47 +13,86 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome-stable
-  - export DISPLAY=:99.0
-  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
-  - sh -e /etc/init.d/xvfb start
-  - curl -o- -L https://yarnpkg.com/install.sh | bash
-  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-before_script:
-  - pip install --user protobuf
-script: node build-system/pr-check.js
-after_script:
-  - build-system/sauce_connect/stop_sauce_connect.sh
+  # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
+  - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+  - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 branches:
   only:
     - master
     - release
     - canary
     - /^amp-release-.*$/
+    - /^revert-.*$/
 addons:
-  chrome: stable
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-    # Requested by some tests because they need a valid font host,
-    # but should not resolve in tests.
-    - fonts.googleapis.com
   apt:
     packages:
       - protobuf-compiler
       - python-protobuf
-matrix:
+      - openssl
+      - google-cloud-sdk
+  chrome: stable
+  hosts:
+    - ads.localhost
+    - iframe.localhost
+    # CURLs amp subdomain for the amp-recaptcha-input integration test. The hash
+    # is the CURLS subdomain for localhost:9876
+    - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
+stages:
+  - build
+  - test
+jobs:
   include:
-    - env: BUILD_SHARD="unit_tests"
-    - env: BUILD_SHARD="integration_tests"
+    - stage: build
+      name: "Build"
+      script:
+        - node build-system/pr-check/build.js
+    - stage: build
+      name: "Checks"
+      script:
+        - node build-system/pr-check/checks.js
+    - stage: build
+      name: "Validator Tests"
+      script:
+        - node build-system/pr-check/validator-tests.js
+    - stage: build
+      name: "Dist"
+      if: type != pull_request
+      script:
+        - node build-system/pr-check/dist.js
+    - stage: test
+      name: "Dist, Bundle Size, Single Pass Tests"
+      script:
+        - node build-system/pr-check/dist-tests.js
+    - stage: test
+      name: "Visual Diff Tests"
+      script:
+        - node build-system/pr-check/visual-diff-tests.js
+    - stage: test
+      name: "Local Tests"
+      script:
+        - node build-system/pr-check/local-tests.js
+    - stage: test
+      name: "Remote (Sauce Labs) Tests"
+      script:
+        - node build-system/pr-check/remote-tests.js
+      after_script:
+        - build-system/sauce_connect/stop_sauce_connect.sh
+  fast_finish: true
+
+  # TODO(ampproject/wg-infra): remove when remote tests stabilize
+  allow_failures:
+    - script:
+      - node build-system/pr-check/remote-tests.js
 cache:
-  yarn: true
   directories:
-    - build-system/tasks/visual-diff/node_modules
     - node_modules
+    - build-system/tasks/visual-diff/node_modules
+    - sauce_connect
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - sauce_connect
-  pip: true
-  bundler: true
+    - $HOME/.cache/pip
+  yarn: true

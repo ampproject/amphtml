@@ -1,3 +1,13 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: A container to display an ad.
+---
+# amp-ad / amp-embed
+A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
+
 # <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
 [TOC]
@@ -64,41 +74,45 @@ The `<amp-ad>` requires width and height values to be specified according to the
 </div>
 
 ## Attributes
-
-##### type (required)
-
-Specifies an identifier for the [ad network](#supported-ad-networks). The `type`attribute selects the template to use for the ad tag.
-
-##### src (optional)
-
-Use this attribute to load a script tag for the specified ad network. This can be used for ad networks that require exactly a single script tag to be inserted in the page. The `src` value must have a prefix that is white-listed for the specified ad network, and the value must use `https` protocol.
-
-##### data-foo-bar
-
-Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
-
-##### data-vars-foo-bar
-
-Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
-
-##### json (optional)
-
-Use this attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
-
-##### data-consent-notification-id (optional)
-
-If provided, requires confirming the [amp-user-notification](https://www.ampproject.org/docs/reference/components/amp-user-notification.html) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.
-
-##### data-loading-strategy (optional)
-
-Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. Without the `data-loading-strategy` attribute, the number is 3 by default. You can specify a float value in the range of [0, 3] (If the value is not specified the value is set to 1.25). Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
-
-##### data-ad-container-id (optional)
-Informs the ad of the container component id in the case of attempting to collapse. The container component must be an `<amp-layout>` component that's parent of the ad. When the `data-ad-container-id` is specified, and such a `<amp-layout>` container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>type (required)</strong></td>
+    <td>Specifies an identifier for the <a href="#supported-ad-networks">ad network</a>. The <code>type</code>attribute selects the template to use for the ad tag.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>src (optional)</strong></td>
+    <td>Use this attribute to load a script tag for the specified ad network. This can be used for ad networks that require exactly a single script tag to be inserted in the page. The <code>src</code> value must have a prefix that is white-listed for the specified ad network, and the value must use <code>https</code> protocol.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-foo-bar</strong></td>
+    <td>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar". See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-vars-foo-bar</strong></td>
+    <td>Attributes starting with <code>data-vars-</code> are reserved for <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute"><code>amp-analytics</code> vars</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>json (optional)</strong></td>
+    <td>Use this attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-consent-notification-id (optional)</strong></td>
+    <td>If provided, requires confirming the <a href="https://www.ampproject.org/docs/reference/components/amp-user-notification.html">amp-user-notification</a> with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-loading-strategy (optional)</strong></td>
+    <td>Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. Without the <code>data-loading-strategy</code> attribute, the number is 3 by default. You can specify a float value in the range of [0, 3] (If the value is not specified the value is set to 1.25). Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions. Note, specifying <code>prefer-viewability-over-views</code> as the value also automatically optimizes viewability.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-ad-container-id (optional)</strong></td>
+    <td>Informs the ad of the container component id in the case of attempting to collapse. The container component must be an <code>&lt;amp-layout&gt;</code> component that's parent of the ad. When the <code>data-ad-container-id</code> is specified, and such a <code>&lt;amp-layout&gt;</code> container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
+</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Placeholder
 
@@ -313,6 +327,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [Pressboard](../../ads/pressboard.md)
+- [PromoteIQ](../../ads/promoteiq.md)
 - [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
@@ -328,6 +343,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [RUNative](../../ads/runative.md)
+- [SAS CI 360 Match](../../ads/sas.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
@@ -343,6 +359,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Swoop](../../ads/swoop.md)
 - [TcsEmotion](../../ads/tcsemotion.md)
 - [Teads](../../ads/teads.md)
+- [torimochi](../../ads/torimochi.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
@@ -351,6 +368,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
+- [ucfunnel](../../ads/ucfunnel.md)
 - [Unruly](../../ads/unruly.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
@@ -378,6 +396,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Epeex](../../ads/epeex.md)
+- [Jubna](../../ads/jubna.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
 - [PubExchange](../../ads/pubexchange.md)

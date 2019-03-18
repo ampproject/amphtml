@@ -52,8 +52,8 @@
   The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
   -->
   <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
-    <template type="amp-mustache" id="amp-template-id">
-      <div><a href="{{url}}">{{title}}</a></div>
+    <template type="amp-mustache" id="amp-template-id" data-custom-delimiters="<%,%>">
+      <div><a href="<%url%>"><%title%></a></div>
     </template>
   </amp-list>
 
@@ -71,6 +71,24 @@
             <td>{{content}}</td>
           </tr>
         {{/replies}}
+      </table>
+    </script>
+  </amp-list>
+
+  <!-- ## Using a script template with custom delimiters. -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
+    <script type="text/plain" template="amp-mustache" data-custom-delimiters="<%,%>">
+      <table>
+        <tr>
+          <td>Comment:</td>
+          <td><%content%></td>
+        </tr>
+        <%#replies%>
+          <tr>
+            <td>Reply:</td>
+            <td><%content%></td>
+          </tr>
+          <%/replies%>
       </table>
     </script>
   </amp-list>

@@ -58,6 +58,9 @@ const LOADING_ATTR = 'i-amphtml-loading';
 /** @const {string} */
 const NEXT_PAGE_NO_AD = 'next-page-no-ad';
 
+/** @const {string} */
+const IFRAME_BODY_VISIBLE_ATTR = 'amp-story-visible';
+
 /** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
@@ -180,7 +183,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPagesCreated_ = 0;
 
     /** @private {?Element} */
-    this.currentAdElement_ = null;
+    this.lastCreatedAdElement_ = null;
+
+    /** @private {?Element}} */
+    this.visibleAdBody_ = null;
 
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
@@ -362,7 +368,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     ampStoryAdPage.appendChild(gridLayer);
     ampStoryAdPage.appendChild(paneGridLayer);
 
-    this.currentAdElement_ = ampAd;
+    this.lastCreatedAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
 
     // set up listener for ad-loaded event
@@ -460,8 +466,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   maybeCreateCtaLayer_(adPageElement) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_URL);
-    const ctaType = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
+    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_URL);
+    const ctaType = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
       user().error(TAG, 'Both CTA Type & CTA Url ' +
@@ -559,7 +565,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.idOfAdShowing_) {
-      // We are transitioning away from an ad, so fire the exit event.
+      // We are transitioning away from an ad
+      this.removeVisibleAttribute_();
+      // Fire the exit event.
       this.analyticsEvent_(Events.AD_EXITED, {
         [Vars.AD_EXITED]: Date.now(),
         [Vars.AD_INDEX]: this.idOfAdShowing_,
@@ -568,9 +576,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.adPageIds_[pageId]) {
-      // We are switching to an ad, so fire the view event on the
-      // corresponding Ad.
+      // We are switching to an ad.
       const adIndex = this.adPageIds_[pageId];
+      // Tell the iframe that it is visible.
+      this.setVisibleAttribute_(this.adPageEls_[adIndex - 1]);
+      // Fire the view event on the corresponding Ad.
       this.analyticsEvent_(Events.AD_VIEWED, {
         [Vars.AD_VIEWED]: Date.now(),
         [Vars.AD_INDEX]: adIndex,
@@ -606,6 +616,34 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.startNextAdPage_(/* failure */ true);
       }
     }
+  }
+
+  /**
+   * Sets a `amp-story-visible` attribute on the fie body so that embedded ads
+   * can know when they are visible and do things like trigger animations.
+   * @param {Element} adElement
+   */
+  setVisibleAttribute_(adElement) {
+    const friendlyIframeEmbed = adElement.querySelector('iframe');
+    const frameDoc = friendlyIframeEmbed.contentDocument ||
+      friendlyIframeEmbed.win.document;
+    const {body} = frameDoc;
+    this.mutateElement(() => {
+      body.setAttribute(IFRAME_BODY_VISIBLE_ATTR, '');
+      this.visibleAdBody_ = body;
+    });
+  }
+
+  /**
+   *  Removes `amp-story-visible` attribute from the fie body.
+   */
+  removeVisibleAttribute_() {
+    this.mutateElement(() => {
+      if (this.visibleAdBody_) {
+        this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
+        this.visibleAdBody_ = null;
+      }
+    });
   }
 
   /**

@@ -28,16 +28,10 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
+  VideoServiceSignals,
+  userInteractedWith,
 } from '../video-interface';
 import {Services} from '../services';
-import {
-  VideoServiceInterface,
-  VideoServiceSignals,
-} from './video-service-interface';
-import {
-  VideoServiceSync,
-  setVideoComponentClassname,
-} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
@@ -73,22 +67,12 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
 
 
 /**
- * @param {!../video-interface.VideoOrBaseElementDef} video
- * @private
- */
-function userInteractedWith(video) {
-  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
-}
-
-
-/**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
  *
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
  *
- * @implements {VideoServiceInterface}
  * @implements {../service.Disposable}
  */
 export class VideoManager {
@@ -179,7 +163,7 @@ export class VideoManager {
     }
   }
 
-  /** @override */
+  /** @param {!../video-interface.VideoInterface} video */
   register(video) {
     devAssert(video);
 
@@ -197,7 +181,7 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
-    setVideoComponentClassname(element);
+    element.classList.add('i-amphtml-video-component');
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -318,7 +302,12 @@ export class VideoManager {
     return null;
   }
 
-  /** @override */
+  /**
+   * Gets the current analytics details for the given video.
+   * Fails silently if the video is not registered.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!VideoAnalyticsDetailsDef|undefined>}
+   */
   getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
@@ -791,7 +780,7 @@ class VideoEntry {
       return;
     }
 
-    const mask = renderInteractionOverlay(win, element);
+    const mask = renderInteractionOverlay(element);
 
     /** @param {boolean} display */
     const setMaskDisplay = display => {
@@ -948,11 +937,11 @@ export class AutoFullscreenManager {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!./video-service-interface.VideoServiceInterface} manager
+   * @param {!VideoManager} manager
    */
   constructor(ampdoc, manager) {
 
-    /** @private @const {!./video-service-interface.VideoServiceInterface} */
+    /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc} */
@@ -1126,9 +1115,6 @@ export class AutoFullscreenManager {
     const {element} = video;
     const viewport = this.getViewport_();
 
-    const duration = 300;
-    const curve = 'ease-in';
-
     return this.onceOrientationChanges_().then(() => {
       const {boundingClientRect} = element.getIntersectionChangeEntry();
       const {top, bottom} = boundingClientRect;
@@ -1139,7 +1125,7 @@ export class AutoFullscreenManager {
       }
       const pos = optPos ? dev().assertString(optPos) :
         bottom > vh ? 'bottom' : 'top';
-      return viewport.animateScrollIntoView(element, duration, curve, pos);
+      return viewport.animateScrollIntoView(element, pos);
     });
   }
 
@@ -1476,13 +1462,5 @@ function analyticsEvent(entry, eventType, opt_vars) {
 
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
 export function installVideoManagerForDoc(nodeOrDoc) {
-  // TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
-  // TODO(alanorozco, #13674): Rename to `video-service`
-  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
-    const {win} = ampdoc;
-    if (VideoServiceSync.shouldBeUsedIn(win)) {
-      return new VideoServiceSync(ampdoc);
-    }
-    return new VideoManager(ampdoc);
-  });
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
 }

@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Provides zooming and panning for arbitrary content.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-pan-zoom"></a> `amp-pan-zoom`
+# amp-pan-zoom
+
+Provides zooming and panning for arbitrary content.
 
 [TOC]
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides zooming and panning for arbitrary content.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
@@ -55,27 +60,32 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
 
 ## Attributes
 
-##### max-scale (optional)
-Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.
-
-##### initial-scale (optional)
-
-Specifies a default zoom scale, which should be a positive number from 1 - 9. The default value is 1.
-
-##### initial-x, initial-y (optional)
-
-Specifies default translation coordinates, otherwise both are set to 0. The value is expected to be a whole number.
-
-##### reset-on-resize (optional)
-
-Refers to the ability to center  the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.
-
-##### controls (optional)
-
-Shows default controls (zoom in / zoom out button) which can be customized via public CSS classes.
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>max-scale (optional)</strong></td>
+    <td>Specifies a max zoom scale, which should be a positive number from 1 - 9. The default value is 3.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>initial-scale (optional)</strong></td>
+    <td>Specifies a default zoom scale, which should be a positive number from 1 - 9. The default value is 1.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>initial-x, initial-y (optional)</strong></td>
+    <td>Specifies default translation coordinates, otherwise both are set to 0. The value is expected to be a whole number.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>reset-on-resize (optional)</strong></td>
+    <td>Refers to the ability to center the image and set the image's scale back to 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>controls (optional)</strong></td>
+    <td>Shows default controls (zoom in / zoom out button) which can be customized via public CSS classes.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Events and actions
 
