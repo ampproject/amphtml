@@ -258,7 +258,10 @@ tags: {
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
   attrs: { name: "animate-in-timing-function" }
-  attrs: { name: "interactive" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
   attrs: { name: "grid-area" }
   attrs: {
     name: "scale-end"
