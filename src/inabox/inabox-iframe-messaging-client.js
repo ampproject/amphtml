@@ -67,7 +67,8 @@ function createIframeMessagingClient(win) {
       hostWin = hostWin.parent;
       wins[j] = hostWin;
       iframeClient.setHostWindow(hostWin);
-      iframeClient./*OK*/sendMessage(MessageType.HOST_BROADCAST, dict({'id': j}));
+      iframeClient./*OK*/sendMessage(
+          MessageType.HOST_BROADCAST, dict({'id': j}));
       j++;
     } while (hostWin != win.top && j < 10);
   });
