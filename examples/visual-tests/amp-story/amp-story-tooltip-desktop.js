@@ -56,7 +56,7 @@ module.exports = {
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
-    await page.tap('button.i-amphtml-story-button-move');
+    await page.tap('.prev-container > button.i-amphtml-story-button-move');
     await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
   },
@@ -69,6 +69,17 @@ module.exports = {
     await page.tap('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  },
+  'tapping on dead embed should not show tooltip': async (page, name) => {
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
+    await page.waitFor('amp-story-page#page-3[active]');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('amp-twitter.blue');
+    await page.waitFor(150); // For animations to finish.
+    await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
   'tapping on closing button should exit expanded view': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
