@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const request = require('request');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../../git');
 const {isTravisPullRequestBuild} = require('../../travis');
 
@@ -49,9 +49,20 @@ function postReport(action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    request.post(postUrl).on('error', error => {
-      log(yellow('Warning:'), 'failed to report', cyan(action),
-          'to the test-status GitHub App:\n', error);
+    request.post(postUrl, (error, response, body) => {
+      if (error) {
+        log(yellow('Warning:'), 'failed to report', cyan(action),
+            'to the test-status GitHub App:\n', error);
+        return;
+      }
+
+      log(green('Info:', 'reported', cyan(action),
+          'to the test-status GitHub App. Response status code:',
+          cyan(response.statusCode), cyan(response.statusMessage)));
+      if (response.statusCode > 299) {
+        log(green('Warning:'), 'response from test-status was:\n',
+            body.substr(0, 100));
+      }
     });
   }
 }
