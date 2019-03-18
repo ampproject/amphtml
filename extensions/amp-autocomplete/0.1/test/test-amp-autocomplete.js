@@ -314,4 +314,24 @@ describes.realWin('amp-autocomplete unit tests', {
       });
     });
   });
+
+  it('should error on error when fallback is not provided', () => {
+    const expectedError = new Error('error for test');
+    sandbox.stub(impl, 'renderResults_').throws(expectedError);
+    return expect(element.layoutCallback()).to.be.rejectedWith(expectedError);
+  });
+
+  it('should display fallback on error when fallback is provided', () => {
+    const fallbackSpy = sandbox.spy(impl, 'renderFallbackUI_');
+    const clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+    const expectedError = new Error('error for test');
+    sandbox.stub(impl, 'renderResults_').throws(expectedError);
+    const fallback = win.document.createElement('div');
+    fallback.setAttribute('fallback', '');
+    element.appendChild(fallback);
+    return element.layoutCallback().then(() => {
+      expect(fallbackSpy).to.have.been.calledWith(expectedError);
+      expect(clearAllSpy).to.have.been.calledOnce;
+    });
+  });
 });

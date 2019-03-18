@@ -476,7 +476,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * If a fallback element is provided, displays it instead of suggestions.
    * Otherwise, throws given error. Must be called in a mutate context.
-   * @param {error} error
+   * @param {*=} error
+   * @throws {!Error} If fallback element is not present.
    * @private
    */
   renderFallbackUI_(error) {
@@ -486,7 +487,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.fallbackDisplayed_ = true;
       // Expose the 'autocomplete-fallback' class.
       fallback.classList.add('autocomplete-fallback');
-      this.container_.append(fallback);
+      this.container_.appendChild(fallback);
     } else {
       throw error;
     }
