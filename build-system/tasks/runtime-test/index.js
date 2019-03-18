@@ -502,6 +502,7 @@ async function runTests() {
       // Prevent cases where Karma detects zero tests and still passes. #16851.
       if (result.total == 0) {
         log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+        reportTestErrored();
         if (!argv.watch) {
           process.exit(1);
         }
